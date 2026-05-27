@@ -346,6 +346,66 @@ public class LoginHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
     }
 
+    // ── DI constructor seam ──────────────────────────────────────────────────────
+
+    @Test
+    public void noArgConstructor_resolvesLimiterFromDI_rateLimitFiresWhenBucketLocked() throws Exception {
+        // A handler built with new LoginHandler() must resolve its limiter from DI via
+        // ComponentUtil.getLoginRateLimiter().  We register a pre-saturated limiter, build
+        // the no-arg handler, and assert it returns 429 — which can only happen if the
+        // DI-registered limiter was consulted (an unregistered or fresh limiter would not
+        // block the request at this gate).
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        rl.lockOut(LoginRateLimiter.Scope.IP, "5.6.7.8", 60);
+        org.codelibs.fess.util.ComponentUtil.register(rl, "loginRateLimiter");
+        final LoginHandler handler = new LoginHandler(); // no-arg: resolves via DI
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}")
+                .withRemoteAddr("5.6.7.8"), res);
+        assertEquals(429, res.status,
+                "no-arg handler must use the DI-registered limiter; expected 429 because the IP bucket was pre-locked: " + res.body());
+        assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+    }
+
+    @Test
+    public void nullInjectedConstructor_behavesLikeNoArgConstructor_resolvesFromDI() throws Exception {
+        // new LoginHandler(null) is equivalent to new LoginHandler() — both resolve via DI.
+        // Register a pre-saturated limiter and drive a request through the null-injected
+        // handler; the result must be 429/rate_limited, proving the DI path was used.
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        rl.lockOut(LoginRateLimiter.Scope.IP, "6.7.8.9", 60);
+        org.codelibs.fess.util.ComponentUtil.register(rl, "loginRateLimiter");
+        final LoginHandler handler = new LoginHandler(null); // explicit null == DI path
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}")
+                .withRemoteAddr("6.7.8.9"), res);
+        assertEquals(429, res.status,
+                "LoginHandler(null) must resolve limiter from DI; expected 429 because the IP bucket was pre-locked: " + res.body());
+        assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+    }
+
+    @Test
+    public void injectedLimiter_takesPreferenceOverDI() throws Exception {
+        // When a non-null limiter is injected, it must be used instead of the DI component.
+        // Register a different limiter in DI with the same IP locked; inject a fresh (unlocked)
+        // limiter into the handler. The request must NOT return 429 for the IP gate — if the
+        // handler mistakenly fell through to the DI limiter, the IP gate would fire.
+        // Instead it exits via the username-blank gate (400).
+        final LoginRateLimiter diLimiter = new LoginRateLimiter();
+        diLimiter.lockOut(LoginRateLimiter.Scope.IP, "7.8.9.1", 60);
+        org.codelibs.fess.util.ComponentUtil.register(diLimiter, "loginRateLimiter");
+        // Injected limiter is FRESH (not locked for 7.8.9.1).
+        final LoginRateLimiter injected = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(injected);
+        final CapturingResponse res = new CapturingResponse();
+        // Missing username: handler reaches the body-parse gate and returns 400/invalid_request
+        // instead of 429/rate_limited — which proves the injected limiter was used.
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"password\":\"p\"}").withRemoteAddr("7.8.9.1"), res);
+        org.junit.jupiter.api.Assertions.assertNotEquals(429, res.status,
+                "handler with injected limiter must NOT use the DI limiter (which had 7.8.9.1 locked): " + res.body());
+        assertEquals(400, res.status, "expected 400/invalid_request from username-blank gate: " + res.body());
+    }
+
     // ── MJ-5: limiter.clear() called on successful login ────────────────────────
 
     @Test

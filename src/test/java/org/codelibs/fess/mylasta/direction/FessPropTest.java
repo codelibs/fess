@@ -647,4 +647,41 @@ public class FessPropTest extends UnitFessTestCase {
         // Asterisk injection attempt
         assertEquals("cn=dev\\2a,ou=groups,dc=example,dc=com", fessConfig.getLdapAdminGroupSecurityPrincipal("dev*"));
     }
+
+    @Test
+    public void test_getChatRateLimitPerMinute_defaultValue() {
+        // When the system property is not set, default is 30
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        assertEquals(30, fessConfig.getChatRateLimitPerMinute());
+    }
+
+    @Test
+    public void test_getChatRateLimitPerMinute_zeroDisablesLimit() {
+        // A return value <= 0 signals "disabled"
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                if ("api.v2.chat.rate.limit.per.user.per.minute".equals(key)) {
+                    return "0";
+                }
+                return defaultValue;
+            }
+        };
+        assertTrue(fessConfig.getChatRateLimitPerMinute() <= 0);
+    }
+
+    @Test
+    public void test_getChatRateLimitPerMinute_invalidValue_returnsDefault() {
+        // Non-numeric config value -> NumberFormatException -> fallback 30
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                if ("api.v2.chat.rate.limit.per.user.per.minute".equals(key)) {
+                    return "bad-value";
+                }
+                return defaultValue;
+            }
+        };
+        assertEquals(30, fessConfig.getChatRateLimitPerMinute());
+    }
 }

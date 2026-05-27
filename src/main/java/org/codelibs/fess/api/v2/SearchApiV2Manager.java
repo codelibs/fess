@@ -49,7 +49,6 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -58,6 +57,7 @@ import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -79,65 +79,67 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(SearchApiV2Manager.class);
 
-    // SearchHandler is stateless — a single shared instance avoids per-request allocation
-    // and keeps the manager small as more handler classes are extracted in later batches.
-    private final SearchHandler searchHandler = new SearchHandler();
+    // v2 handlers are DI singletons (registered in fess_api.xml) injected by field name.
+    // All handlers are stateless and safe to share across concurrent requests; they resolve
+    // their per-request collaborators via ComponentUtil. The container injects these fields
+    // after construction; unit tests that instantiate this manager directly (e.g.
+    // {@code new SearchApiV2Manager()}) must set the handler fields they exercise.
 
-    // ScrollSearchHandler is stateless aside from the per-request Jackson mapper it
-    // allocates internally; safe to share a single instance across concurrent requests.
-    private final ScrollSearchHandler scrollSearchHandler = new ScrollSearchHandler();
+    /** Handles {@code POST /api/v2/search}. */
+    @Resource
+    protected SearchHandler searchHandler;
 
-    // FavoriteGetHandler is stateless — same singleton pattern as the other v2 handlers.
-    private final FavoriteGetHandler favoriteGetHandler = new FavoriteGetHandler();
+    /** Handles {@code GET /api/v2/documents/all} (scroll over all matching documents). */
+    @Resource
+    protected ScrollSearchHandler scrollSearchHandler;
 
-    // FavoritePostHandler is stateless — shared single instance is safe across concurrent requests.
-    private final FavoritePostHandler favoritePostHandler = new FavoritePostHandler();
+    /** Handles {@code GET /api/v2/documents/{id}/favorite} (read favorite state). */
+    @Resource
+    protected FavoriteGetHandler favoriteGetHandler;
 
-    // MeHandler is stateless — shared single instance is safe across concurrent requests.
-    private final MeHandler meHandler = new MeHandler();
+    /** Handles {@code POST /api/v2/documents/{id}/favorite} (toggle favorite state). */
+    @Resource
+    protected FavoritePostHandler favoritePostHandler;
 
-    // LogoutHandler is stateless — shared single instance is safe across concurrent requests.
-    private final LogoutHandler logoutHandler = new LogoutHandler();
+    /** Handles {@code GET /api/v2/auth/me} (current authenticated user). */
+    @Resource
+    protected MeHandler meHandler;
 
-    // PasswordChangeHandler is stateless — shared single instance is safe across concurrent requests.
-    private final PasswordChangeHandler passwordChangeHandler = new PasswordChangeHandler();
+    /** Handles {@code POST /api/v2/auth/logout}. */
+    @Resource
+    protected LogoutHandler logoutHandler;
 
-    // UiConfigHandler is stateless — shared single instance is safe across concurrent requests.
-    private final UiConfigHandler uiConfigHandler = new UiConfigHandler();
+    /** Handles {@code POST /api/v2/auth/password} (change the current user's password). */
+    @Resource
+    protected PasswordChangeHandler passwordChangeHandler;
 
-    // ClickHandler is stateless — shared single instance is safe across concurrent requests.
-    private final ClickHandler clickHandler = new ClickHandler();
+    /** Handles {@code GET /api/v2/ui/config} (SPA bootstrap configuration). */
+    @Resource
+    protected UiConfigHandler uiConfigHandler;
 
-    // ChatHandler is stateless — delegates to ComponentUtil.getChatClient() per request.
-    private final ChatHandler chatHandler = new ChatHandler();
+    /** Handles {@code POST /api/v2/click} (click-through logging). */
+    @Resource
+    protected ClickHandler clickHandler;
 
-    // ChatStreamHandler is stateless — the per-request PrintWriter and SSE callback
-    // are scoped to the handle() invocation, so a single shared instance is safe.
-    private final ChatStreamHandler chatStreamHandler = new ChatStreamHandler();
+    /** Handles {@code POST /api/v2/chat} (single-shot chat completion). */
+    @Resource
+    protected ChatHandler chatHandler;
 
-    // ChatSessionClearHandler is stateless — shared single instance is safe across concurrent requests.
-    private final ChatSessionClearHandler chatSessionClearHandler = new ChatSessionClearHandler();
+    /** Handles {@code POST /api/v2/chat/stream} (server-sent-event chat stream). */
+    @Resource
+    protected ChatStreamHandler chatStreamHandler;
 
-    // CacheHandler is stateless — shared single instance is safe across concurrent requests.
-    private final CacheHandler cacheHandler = new CacheHandler();
+    /** Handles {@code DELETE /api/v2/chat/sessions/{session_id}} (clear a chat session). */
+    @Resource
+    protected ChatSessionClearHandler chatSessionClearHandler;
 
-    // LoginHandler depends on the DI-managed LoginRateLimiter, which is not yet available
-    // at field-init time. Lazy-init through loginHandler() defers the lookup to first request.
-    private volatile LoginHandler loginHandler;
+    /** Handles {@code GET /api/v2/cache/{id}} (cached document content). */
+    @Resource
+    protected CacheHandler cacheHandler;
 
-    private LoginHandler loginHandler() {
-        LoginHandler h = loginHandler;
-        if (h == null) {
-            synchronized (this) {
-                h = loginHandler;
-                if (h == null) {
-                    h = new LoginHandler(ComponentUtil.getLoginRateLimiter());
-                    loginHandler = h;
-                }
-            }
-        }
-        return h;
-    }
+    /** Handles {@code POST /api/v2/auth/login}. */
+    @Resource
+    protected LoginHandler loginHandler;
 
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
@@ -231,7 +233,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/labels" -> handleLabels(request, response);
             case "/popular-words" -> handlePopularWords(request, response);
             case "/auth/me" -> meHandler.handle(request, response);
-            case "/auth/login" -> loginHandler().handle(request, response);
+            case "/auth/login" -> loginHandler.handle(request, response);
             case "/auth/logout" -> logoutHandler.handle(request, response);
             case "/auth/password" -> passwordChangeHandler.handle(request, response);
             case "/ui/config" -> uiConfigHandler.handle(request, response);

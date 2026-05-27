@@ -28,7 +28,7 @@ import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -75,19 +75,40 @@ public class LoginHandler {
      */
     private static final Pattern SAFE_RETURN_TO = Pattern.compile("^/[A-Za-z0-9_\\-/.?&=%:@+~#*!,;]*$");
 
-    private final LoginRateLimiter limiter;
+    private final LoginRateLimiter injectedLimiter;
 
     /**
-     * Creates a handler bound to the given rate limiter.
+     * Default constructor used by the DI container. The handler resolves the
+     * shared {@link LoginRateLimiter} lazily via {@link #limiter()} so DI
+     * bootstrap order is not constrained. The handler holds no per-request
+     * state and is safe to share across concurrent requests.
+     */
+    public LoginHandler() {
+        this(null);
+    }
+
+    /**
+     * Test-friendly constructor allowing the caller to inject a specific
+     * {@link LoginRateLimiter} instance (e.g. with a controllable clock).
+     * Passing {@code null} causes the handler to resolve the DI-managed
+     * singleton via {@link ComponentUtil#getLoginRateLimiter()} on first use.
      *
-     * <p>Production wires the DI-managed singleton via
-     * {@link ComponentUtil#getLoginRateLimiter()}; tests pass a fresh instance
-     * with a controllable clock.</p>
-     *
-     * @param limiter the rate limiter used for IP- and user-scope checks
+     * @param limiter the rate limiter to use, or {@code null} to resolve via DI
      */
     public LoginHandler(final LoginRateLimiter limiter) {
-        this.limiter = limiter;
+        this.injectedLimiter = limiter;
+    }
+
+    /**
+     * Resolves the rate limiter: the constructor-injected instance when present
+     * (tests), otherwise the DI-managed singleton. Login rate limiting is
+     * security-critical, so an unavailable limiter is surfaced (not silently
+     * skipped) by {@link ComponentUtil#getLoginRateLimiter()}.
+     *
+     * @return the rate limiter to use for this request
+     */
+    private LoginRateLimiter limiter() {
+        return injectedLimiter != null ? injectedLimiter : ComponentUtil.getLoginRateLimiter();
     }
 
     /**
@@ -111,6 +132,7 @@ public class LoginHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
+        final LoginRateLimiter limiter = limiter();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int ipLimit = fessConfig.getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
         final int userLimit = fessConfig.getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();

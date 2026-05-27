@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -116,8 +117,12 @@ public class ChatSessionClearHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
-        final int chatLimit = ComponentUtil.getChatApiHelper().getChatRateLimitPerMinute(fessConfig);
-        if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+        final int chatLimit = fessConfig.getChatRateLimitPerMinute();
+        // Skip the per-user throttle for anonymous callers with no resolvable user id
+        // (e.g. a guest whose session is not yet established): a null/blank key would
+        // otherwise hit the limiter's null-key deny path and 429 the first request.
+        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
+                && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;

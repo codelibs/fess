@@ -44,7 +44,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_matches_acceptsV2Path() {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         // web.api.json defaults to true in fess_config.properties, so matches() should
         // only depend on the request path.
         assertTrue(m.matches(new StubRequest("/api/v2/health")));
@@ -53,7 +53,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_matches_rejectsV1Path() {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         assertFalse(m.matches(new StubRequest("/api/v1/search")));
         assertFalse(m.matches(new StubRequest("/admin/dashboard")));
     }
@@ -62,7 +62,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     public void test_matches_rejectsPrefixWithoutSlash() {
         // MJ-19: /api/v2foo starts with /api/v2 but is not a v2 path.
         // The boundary check must require the prefix to be followed by '/' or be exact.
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         assertFalse(m.matches(new StubRequest("/api/v2foo")), "/api/v2foo must not match the /api/v2 prefix");
         assertFalse(m.matches(new StubRequest("/api/v2x/search")), "/api/v2x/search must not match the /api/v2 prefix");
         // Exact match (without trailing slash) must still work.
@@ -71,7 +71,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_subPath_extractsAfterPrefix() {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         assertEquals("/health", m.subPath(new StubRequest("/api/v2/health")));
         assertEquals("/foo/bar", m.subPath(new StubRequest("/api/v2/foo/bar")));
         assertEquals("", m.subPath(new StubRequest("/api/v2")));
@@ -79,7 +79,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_unknownSubPathReturnsNotFoundEnvelope() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/does-not-exist"), res, new NopChain());
         assertEquals(404, res.status);
@@ -91,7 +91,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_suggestWordsReturnsEnvelopeShape() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final Map<String, String[]> params = new HashMap<>();
         params.put("q", new String[] { "test" });
@@ -116,7 +116,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_labelsReturnsEnvelopeShape() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/labels"), res, new NopChain());
         final String body = res.body();
@@ -135,7 +135,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_popularWordsReturnsEnvelopeShape() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/popular-words"), res, new NopChain());
         final String body = res.body();
@@ -153,7 +153,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_searchEndpointDispatchesToHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final Map<String, String[]> params = new HashMap<>();
         params.put("q", new String[] { "test" });
@@ -174,7 +174,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_documentsAllDispatchesToScrollHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final Map<String, String[]> params = new HashMap<>();
         params.put("q", new String[] { "*" });
@@ -195,7 +195,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_documentsFavoriteDispatchesToFavoriteHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/documents/abc123/favorite"), res, new NopChain());
         final String body = res.body();
@@ -210,7 +210,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_documentsFavoriteRejectsMalformedDocId() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/documents/has spaces/favorite"), res, new NopChain());
         assertEquals(400, res.status);
@@ -231,11 +231,11 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // Note: sessionCsrfTokenManager is NOT registered in this test class, so we
         // must register it here to allow the CSRF check to complete (without a token, the
         // gate returns 403 before any ComponentNotFoundException is thrown).
-        final org.codelibs.fess.helper.SessionCsrfTokenManager csrfManager = new org.codelibs.fess.helper.SessionCsrfTokenManager();
+        final org.codelibs.fess.api.v2.SessionCsrfTokenManager csrfManager = new org.codelibs.fess.api.v2.SessionCsrfTokenManager();
         org.codelibs.fess.util.ComponentUtil.register(csrfManager, "sessionCsrfTokenManager");
         org.codelibs.fess.util.ComponentUtil.register(csrfManager,
-                org.codelibs.fess.helper.SessionCsrfTokenManager.class.getCanonicalName());
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+                org.codelibs.fess.api.v2.SessionCsrfTokenManager.class.getCanonicalName());
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/labels").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -263,7 +263,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_healthDispatchesToHealthHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/health"), res, new NopChain());
         // The /health route writes its envelope through handleHealth(). The engine may or
@@ -310,7 +310,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_authMeRoutesToMeHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/auth/me"), res, new NopChain());
         // MeHandler always emits a v2 success envelope (anonymous becomes
@@ -325,7 +325,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_uiConfigRoutesToUiConfigHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         // The handler calls req.getSession(true); the existing StubRequest.getSession returns
         // null, which makes the handler's downstream csrf.issue(session) path fall over —
@@ -348,7 +348,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_cachePathRoutesToCacheHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/cache/abc123"), res, new NopChain());
         final String body = res.body();
@@ -371,7 +371,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // and returned the generic "endpoint not found" message. The dedicated prefix
         // branch must surface a clearer "unknown action on document: ..." message while
         // still preserving the v2 not_found wire code.
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/documents/abc/unknownAction"), res, new NopChain());
         assertEquals(404, res.status);
@@ -390,7 +390,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // then throws an IOException (client disconnect mid-write), the outer catch
         // must NOT attempt a second envelope write. The IOException is re-thrown so the
         // container handles it; the in-flight body stays intact.
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         // Capturing response that reports already-committed so the catch block takes the
         // "skip second write" branch. We dispatch to /chat/stream which will try to look
         // up the chat client — but isCommitted() short-circuits the failure path.
@@ -421,7 +421,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_process_unknownPathReturnsNotFound() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/this/path/does/not/exist"), res, new NopChain());
         // Deeper unknown path still resolves to the default arm rather than crashing on
@@ -435,12 +435,42 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_loginHandlerField_isConsultedByDispatch() throws Exception {
+        // The old double-checked-locking loginHandler() method was removed; dispatch now
+        // accesses the `loginHandler` field directly. Inject a stub into the protected field
+        // and confirm that a POST to /auth/login routes to the stub rather than the default.
+        //
+        // The stub records whether handle() was called and writes a sentinel body so we can
+        // distinguish it from any other handler's output.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        // Track whether the stub's handle() was invoked.
+        final boolean[] called = { false };
+        final org.codelibs.fess.api.v2.handlers.LoginHandler stub =
+                new org.codelibs.fess.api.v2.handlers.LoginHandler(new org.codelibs.fess.api.v2.handlers.LoginRateLimiter()) {
+                    @Override
+                    public void handle(final jakarta.servlet.http.HttpServletRequest req,
+                            final jakarta.servlet.http.HttpServletResponse res) throws java.io.IOException {
+                        called[0] = true;
+                        res.setContentType("application/json");
+                        res.setStatus(200);
+                        res.getWriter().write("{\"stub\":\"login_handler_called\"}");
+                    }
+                };
+        // Set the protected field directly (same package: org.codelibs.fess.api.v2).
+        m.loginHandler = stub;
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/auth/login").withMethod("POST"), res, new NopChain());
+        assertTrue(called[0], "dispatch must route POST /auth/login to the loginHandler field");
+        assertTrue(res.body().contains("\"stub\":\"login_handler_called\""), "expected stub sentinel in response: " + res.body());
+    }
+
+    @Test
     public void test_writeHeaders_appliesConfiguredHeaders() {
         // F1: v2 must apply the same `api.json.response.headers` (default:
         // Referrer-Policy: strict-origin-when-cross-origin) as v1 so the security baseline
         // is uniform across both surfaces. Without this, every /api/v2 response was leaking
         // the Referrer-Policy header.
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.writeHeaders(res);
         assertEquals("Referrer-Policy from api.json.response.headers must be applied on v2 responses", "strict-origin-when-cross-origin",
@@ -452,7 +482,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // F1: confirm the writeHeaders call is wired into the process(...) dispatch path so
         // every v2 response (including error envelopes from unknown paths) carries the
         // configured baseline headers.
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/does-not-exist"), res, new NopChain());
         assertEquals("v2 dispatch must apply api.json.response.headers before writing the envelope", "strict-origin-when-cross-origin",

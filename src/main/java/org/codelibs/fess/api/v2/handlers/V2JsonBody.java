@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadConstraints;
@@ -99,13 +101,21 @@ public final class V2JsonBody {
             throw new UnsupportedMediaTypeException("content-type must be application/json");
         }
         // Validate charset parameter if present; reject anything that is not utf-8.
-        final int charsetIdx = ctLower.indexOf("charset=");
-        if (charsetIdx >= 0) {
-            final String charsetValue = ctLower.substring(charsetIdx + "charset=".length()).trim();
-            // Strip optional surrounding quotes and trailing parameters (e.g. "; boundary=...")
-            final String bareCharset = charsetValue.split("[;,\\s]")[0].replace("\"", "").trim();
-            if (!"utf-8".equals(bareCharset)) {
-                throw new UnsupportedMediaTypeException("charset must be utf-8; received: " + bareCharset);
+        // Parse Content-Type parameters precisely (split on ';' and match the parameter
+        // name exactly) so a "charset" substring inside another parameter name/value
+        // (e.g. "x-charset=utf-16") does not falsely match or bypass this check.
+        final String[] ctParts = ctLower.split(";");
+        for (int i = 1; i < ctParts.length; i++) {
+            final String part = ctParts[i].trim();
+            final int eq = part.indexOf('=');
+            if (eq < 0) {
+                continue;
+            }
+            if ("charset".equals(part.substring(0, eq).trim())) {
+                final String bareCharset = part.substring(eq + 1).trim().replace("\"", "");
+                if (!Constants.UTF_8.equalsIgnoreCase(bareCharset)) {
+                    throw new UnsupportedMediaTypeException("charset must be " + Constants.UTF_8 + "; received: " + bareCharset);
+                }
             }
         }
         final byte[] buf = req.getInputStream().readNBytes(maxBytes + 1);

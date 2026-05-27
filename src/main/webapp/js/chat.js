@@ -383,7 +383,16 @@ var FessChat = (function() {
      * Stream chat using fetch + ReadableStream SSE (POST JSON body).
      * EventSource is not used because it only supports GET.
      */
-    function streamChat(message, thinkingId) {
+    function streamChat(message, thinkingId, csrfRetried) {
+        // If the message is sent before the async CSRF token fetch in init() has
+        // completed, fetch it once first so the gated POST is not rejected with 403.
+        if (!state.csrfToken && !csrfRetried) {
+            fetchCsrfToken().then(function() {
+                streamChat(message, thinkingId, true);
+            });
+            return;
+        }
+
         var requestBody = { message: message };
         if (state.sessionId) {
             requestBody.session_id = state.sessionId;
@@ -402,12 +411,37 @@ var FessChat = (function() {
         state.errorHandled = false;
         var responseContent = '';
         var messageElement = null;
+        // Throttle markdown rendering: re-parsing the full accumulated content on every
+        // SSE chunk is O(n^2) for long answers. Coalesce chunk renders to ~1 per 80ms and
+        // always do a final synchronous render on done/EOF so no content is lost.
+        var renderTimer = null;
+        function renderResponseNow() {
+            if (renderTimer !== null) {
+                clearTimeout(renderTimer);
+                renderTimer = null;
+            }
+            if (messageElement) {
+                messageElement.find('.message-text').html(renderMarkdown(responseContent));
+                scrollToBottom();
+            }
+        }
+        function scheduleResponseRender() {
+            if (renderTimer === null) {
+                renderTimer = setTimeout(renderResponseNow, 80);
+            }
+        }
+        function cancelResponseRender() {
+            if (renderTimer !== null) {
+                clearTimeout(renderTimer);
+                renderTimer = null;
+            }
+        }
 
         // Remove thinking indicator and create message element
         $('#' + thinkingId).remove();
         messageElement = addMessage('assistant', config.labels.waiting, true);
 
-        fetch(config.streamUrl, {
+        fetch(withContextPath(config.streamUrl), {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -480,10 +514,7 @@ var FessChat = (function() {
                 } else if (type === 'chunk') {
                     if (data.content) {
                         responseContent += data.content;
-                        if (messageElement) {
-                            messageElement.find('.message-text').html(renderMarkdown(responseContent));
-                            scrollToBottom();
-                        }
+                        scheduleResponseRender();
                     }
                 } else if (type === 'sources') {
                     if (data.sources && data.sources.length > 0 && messageElement) {
@@ -491,8 +522,16 @@ var FessChat = (function() {
                     }
                 } else if (type === 'done') {
                     state.sessionId = data.session_id || null;
+                    cancelResponseRender();
                     if (data.html_content && messageElement) {
-                        messageElement.find('.message-text').html(data.html_content);
+                        // Mirror the streamed-chunk path: sanitize server HTML client-side too.
+                        var safeHtml = (typeof DOMPurify !== 'undefined')
+                            ? DOMPurify.sanitize(data.html_content, markdownSanitizeConfig)
+                            : data.html_content;
+                        messageElement.find('.message-text').html(safeHtml);
+                    } else if (messageElement) {
+                        // Final render of accumulated markdown (flush any throttled chunk render).
+                        messageElement.find('.message-text').html(renderMarkdown(responseContent));
                     }
                     if (messageElement) {
                         addMessageActions(messageElement);
@@ -507,6 +546,7 @@ var FessChat = (function() {
                     elements.chatInput.focus();
                 } else if (type === 'error') {
                     state.errorHandled = true;
+                    cancelResponseRender();
                     var errorMessage = config.labels.error;
                     if (data.error_code && config.labels.errors && config.labels.errors[data.error_code]) {
                         errorMessage = config.labels.errors[data.error_code];
@@ -518,8 +558,8 @@ var FessChat = (function() {
                     try {
                         var seconds = Math.max(1, Math.round((data.sleep_ms || 0) / 1000));
                         var retryMsg = (config.labels.retrying || 'Retrying... ({attempt}/{max}, next attempt in {seconds}s)')
-                            .replace('{attempt}', data.attempt)
-                            .replace('{max}', data.max_attempts)
+                            .replace('{attempt}', data.attempt != null ? data.attempt : '?')
+                            .replace('{max}', data.max_attempts != null ? data.max_attempts : '?')
                             .replace('{seconds}', seconds);
                         updateProgressMessage(retryMsg);
                         if (messageElement) {
@@ -556,6 +596,26 @@ var FessChat = (function() {
                     if (result.done) {
                         buffer += decoder.decode();
                         if (buffer.trim()) processFrame(buffer);
+                        // Stream ended without an explicit 'done'/'error' event (premature
+                        // server close, proxy idle-timeout, network EOF): unblock the UI so
+                        // state.isProcessing does not stay stuck true forever.
+                        if (state.isProcessing && !state.errorHandled) {
+                            if (responseContent) {
+                                // Flush any throttled chunk render before finalizing.
+                                renderResponseNow();
+                                if (messageElement) {
+                                    addMessageActions(messageElement);
+                                }
+                                state.isProcessing = false;
+                                state.streamController = null;
+                                updateUI();
+                                showStatus('ready');
+                                hideProgressIndicator();
+                            } else {
+                                cancelResponseRender();
+                                handleError(thinkingId, messageElement, config.labels.error);
+                            }
+                        }
                         return;
                     }
                     buffer += decoder.decode(result.value, { stream: true });
@@ -571,6 +631,7 @@ var FessChat = (function() {
 
             return pump();
         }).catch(function(err) {
+            cancelResponseRender();
             if (err && err.name === 'AbortError') return;
             if (!state.errorHandled) {
                 handleError(thinkingId, messageElement, config.labels.error);

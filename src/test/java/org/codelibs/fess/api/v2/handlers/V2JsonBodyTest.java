@@ -124,6 +124,82 @@ public class V2JsonBodyTest {
         assertEquals(Boolean.TRUE, body.get("bom"));
     }
 
+    // ── Precise Content-Type charset parameter parsing ───────────────────────────
+
+    @Test
+    public void test_acceptsJsonWithUtf8Charset() throws Exception {
+        // application/json; charset=utf-8 → accepted (the standard case).
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=utf-8");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_rejectsUtf16Charset() {
+        // application/json; charset=utf-16 → rejected (non-UTF-8 charset).
+        final HttpServletRequest req = stub("{\"k\":1}", "application/json; charset=utf-16");
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+    }
+
+    @Test
+    public void test_rejectsIso88591Charset() {
+        // application/json; charset=iso-8859-1 → rejected.
+        final HttpServletRequest req = stub("{\"k\":1}", "application/json; charset=iso-8859-1");
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+    }
+
+    @Test
+    public void test_acceptsXcharsetParamThatContainsCharsetSubstring() throws Exception {
+        // The fix regression test: a parameter whose NAME is "x-charset" (not "charset")
+        // must NOT trigger the charset validation — only an exact name match on "charset"
+        // should do so. The old indexOf("charset=") scan would falsely reject this.
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; x-charset=utf-16");
+        // Must NOT throw UnsupportedMediaTypeException — "x-charset" is a different param.
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_acceptsQuotedUtf8Charset() throws Exception {
+        // charset="utf-8" (quoted value) is acceptable; the parser strips quotes.
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=\"utf-8\"");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_acceptsUppercaseCharsetUtf8() throws Exception {
+        // charset=UTF-8 (uppercase) must be accepted because the code lower-cases the
+        // full Content-Type before splitting on ';'.
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=UTF-8");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_paramWithoutEqualsSign_doesNotCrashAndDoesNotReject() throws Exception {
+        // A parameter with no '=' (e.g. "something") must be silently skipped —
+        // no crash, no false rejection.
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; something");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_multipleParamsIncludingCharset_accepted() throws Exception {
+        // Multi-param ordering: charset appears after another param — must still be found.
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; boundary=x; charset=utf-8");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_multipleParamsIncludingCharset_rejected() {
+        // Multi-param ordering: non-UTF-8 charset after another param — must be rejected.
+        final HttpServletRequest req = stub("{\"k\":1}", "application/json; boundary=x; charset=utf-16");
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+    }
+
     @Test
     public void test_rejectsDeeplyNestedJson() {
         // A 33-deep nesting exceeds the maxNestingDepth(32) constraint in the MAPPER.

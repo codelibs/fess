@@ -36,7 +36,10 @@ import org.junit.jupiter.api.TestInfo;
  * Unit tests for {@link ChatApiManager}.
  * Tests the RAG chat API endpoints including SSE streaming.
  */
-@SuppressWarnings("deprecation")
+// ChatApiManager is @Deprecated(forRemoval = true); these tests exercise it intentionally until
+// removal. forRemoval deprecations are reported under the "removal" lint category (not
+// "deprecation"), so "removal" is the token that silences the compile-time warnings here.
+@SuppressWarnings("removal")
 public class ChatApiManagerTest extends UnitFessTestCase {
 
     private ChatApiManager chatApiManager;

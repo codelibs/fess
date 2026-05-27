@@ -26,6 +26,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -136,8 +137,12 @@ public class ChatHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
-        final int chatLimit = ComponentUtil.getChatApiHelper().getChatRateLimitPerMinute(fessConfig);
-        if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+        final int chatLimit = fessConfig.getChatRateLimitPerMinute();
+        // Skip the per-user throttle for anonymous callers with no resolvable user id
+        // (e.g. a guest whose session is not yet established): a null/blank key would
+        // otherwise hit the limiter's null-key deny path and 429 the first request.
+        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
+                && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
@@ -148,10 +153,11 @@ public class ChatHandler {
 
         try {
             final ChatResult result;
+            final ChatClient chatClient = getChatClient();
             if (body.fields().isEmpty() && body.extraQueries().length == 0) {
-                result = ComponentUtil.getChatClient().chat(body.sessionId(), body.message(), userId);
+                result = chatClient.chat(body.sessionId(), body.message(), userId);
             } else {
-                result = ComponentUtil.getChatClient().chat(body.sessionId(), body.message(), userId, body.fields(), body.extraQueries());
+                result = chatClient.chat(body.sessionId(), body.message(), userId, body.fields(), body.extraQueries());
             }
 
             final Map<String, Object> payload = new LinkedHashMap<>();
@@ -179,6 +185,18 @@ public class ChatHandler {
      */
     protected String getUserId(final HttpServletRequest req) {
         return ComponentUtil.getChatApiHelper().getUserId(req);
+    }
+
+    /**
+     * Resolves the RAG {@link ChatClient}. Exposed as a seam so unit tests can substitute a stub by
+     * overriding this method rather than registering into the DI container — {@code chatClient} is
+     * a named/smart-deploy component whose {@code ComponentUtil.register} fallback is order-sensitive
+     * across the shared test container (same rationale as {@link #getUserId}).
+     *
+     * @return the chat client component (never null in production)
+     */
+    protected ChatClient getChatClient() {
+        return ComponentUtil.getChatClient();
     }
 
     /**

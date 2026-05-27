@@ -203,6 +203,116 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_anonymousUser_nullUserId_notRateLimited() throws Exception {
+        // When getUserId returns null, StringUtil.isNotBlank(null) is false, so the per-user
+        // throttle is skipped entirely — even with a saturated limiter and a positive chat limit.
+        // Register a ChatSessionManager that clears successfully so the handler reaches 200,
+        // proving the rate-limit gate was bypassed (not rejected with 429).
+        enableRagChat();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 30; i++) {
+            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+        }
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+        final org.codelibs.fess.chat.ChatSessionManager okManager = new org.codelibs.fess.chat.ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                return true;
+            }
+        };
+        ComponentUtil.register(okManager, "chatSessionManager");
+        ComponentUtil.register(okManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatSessionClearHandler handler = new ChatSessionClearHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return null;
+                }
+            };
+            handler.handle(new StubRequest("DELETE"), res, "valid-session-1");
+            assertFalse("anonymous null userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
+            assertTrue("anonymous null userId must not yield 429 status, was: " + res.status, res.status != 429);
+        } finally {
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void test_anonymousUser_blankUserId_notRateLimited() throws Exception {
+        // When getUserId returns a blank string, StringUtil.isNotBlank is false,
+        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
+        enableRagChat();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 30; i++) {
+            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+        }
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+        final org.codelibs.fess.chat.ChatSessionManager okManager = new org.codelibs.fess.chat.ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                return true;
+            }
+        };
+        ComponentUtil.register(okManager, "chatSessionManager");
+        ComponentUtil.register(okManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatSessionClearHandler handler = new ChatSessionClearHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return "   ";
+                }
+            };
+            handler.handle(new StubRequest("DELETE"), res, "valid-session-1");
+            assertFalse("anonymous blank userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
+            assertTrue("anonymous blank userId must not yield 429 status, was: " + res.status, res.status != 429);
+        } finally {
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void test_anonymousUser_emptyStringUserId_notRateLimited() throws Exception {
+        // When getUserId returns an empty string, StringUtil.isNotBlank("") is false,
+        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
+        enableRagChat();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 30; i++) {
+            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+        }
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+        final org.codelibs.fess.chat.ChatSessionManager okManager = new org.codelibs.fess.chat.ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                return true;
+            }
+        };
+        ComponentUtil.register(okManager, "chatSessionManager");
+        ComponentUtil.register(okManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatSessionClearHandler handler = new ChatSessionClearHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return "";
+                }
+            };
+            handler.handle(new StubRequest("DELETE"), res, "valid-session-1");
+            assertFalse("anonymous empty userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
+            assertTrue("anonymous empty userId must not yield 429 status, was: " + res.status, res.status != 429);
+        } finally {
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
+    }
+
     // ── Session not found (404) ───────────────────────────────────────────────────
 
     @Test

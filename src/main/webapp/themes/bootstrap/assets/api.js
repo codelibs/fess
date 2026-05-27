@@ -69,6 +69,7 @@ export async function get(path, params, options) {
   try {
     resp = await fetch(BASE + path + qs(params), fetchOpts);
   } catch (e) {
+    if (e && e.name === "AbortError") throw e; // preserve abort so callers can silently ignore superseded requests
     throw new NetworkError(e);
   }
   return unwrap(resp);

@@ -25,7 +25,10 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-@SuppressWarnings("deprecation")
+// SearchApiManager is @Deprecated(forRemoval = true); these tests exercise it intentionally until
+// removal. forRemoval deprecations are reported under the "removal" lint category (not
+// "deprecation"), so "removal" is the token that silences the compile-time warnings here.
+@SuppressWarnings("removal")
 public class SearchApiManagerTest extends UnitFessTestCase {
 
     @Override

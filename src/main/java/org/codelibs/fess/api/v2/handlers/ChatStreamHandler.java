@@ -249,8 +249,12 @@ public class ChatStreamHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
-        final int chatLimit = ComponentUtil.getChatApiHelper().getChatRateLimitPerMinute(fessConfig);
-        if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+        final int chatLimit = fessConfig.getChatRateLimitPerMinute();
+        // Skip the per-user throttle for anonymous callers with no resolvable user id
+        // (e.g. a guest whose session is not yet established): a null/blank key would
+        // otherwise hit the limiter's null-key deny path and 429 the first request.
+        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
+                && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
@@ -397,7 +401,10 @@ public class ChatStreamHandler {
             logger.debug("ChatStreamHandler: keepalive pool unavailable; pinger disabled for this request");
             return null;
         }
-        final ScheduledFuture<?> future = pool.scheduleAtFixedRate(() -> {
+        // Use fixed-delay (not fixed-rate) scheduling: a heartbeat needs no catch-up
+        // semantics, and fixed-rate would queue burst pings if a write is delayed by
+        // writeLock contention during a long chunk flush.
+        final ScheduledFuture<?> future = pool.scheduleWithFixedDelay(() -> {
             try {
                 synchronized (writeLock) {
                     writer.write(": keepalive\n\n");
@@ -409,7 +416,7 @@ public class ChatStreamHandler {
                 logger.debug("SSE keep-alive write failed", e);
             }
         }, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
-        assert future != null;
+        // scheduleWithFixedDelay never returns null, so no null-check/assert is needed here.
         return future;
     }
 

@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +77,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postLogoutWithoutTokenReturnsForbidden() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/auth/logout").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -88,7 +87,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postLogoutWithWrongTokenReturnsForbidden() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final StubSession session = new StubSession();
         session.setAttribute(SessionCsrfTokenManager.SESSION_ATTR, "the-valid-token");
@@ -101,7 +100,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postLogoutWithValidTokenPassesGate() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final StubSession session = new StubSession();
         session.setAttribute(SessionCsrfTokenManager.SESSION_ATTR, "the-valid-token");
@@ -118,7 +117,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postLoginWithoutTokenIsExempt() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/auth/login").withMethod("POST"), res, new NopChain());
         // Login is the only way to obtain a token, so it is CSRF-exempt. The handler is not
@@ -129,7 +128,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postClickRejectedWithoutCsrfToken_returns403() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/click").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -139,7 +138,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postFavoriteRejectedWithoutCsrfToken_returns403() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/documents/abc123/favorite").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -149,7 +148,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postChatRejectedWithoutCsrfToken_returns403() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/chat").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -159,7 +158,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_postChatStreamRejectedWithoutCsrfToken_returns403() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/chat/stream").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -169,7 +168,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
     @Test
     public void test_getAuthMeWithoutTokenIsExempt() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/auth/me"), res, new NopChain());
         // GETs are always CSRF-exempt regardless of subpath. /auth/me is not yet wired,

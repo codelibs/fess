@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +69,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
 
     @Test
     public void test_chatPostWithoutCsrf_returns403() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/chat").withMethod("POST"), res, new NopChain());
         assertEquals(403, res.status);
@@ -82,7 +81,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         // GETs are CSRF-exempt regardless of subpath. /chat GET will then be
         // rejected by ChatHandler with invalid_request (method not allowed), but
         // we only assert the manager does NOT 403 here.
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/chat"), res, new NopChain());
         assertNotEquals(403, res.status, res.body());
@@ -90,7 +89,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
 
     @Test
     public void test_chatStreamPostWithoutCsrf_returns403() throws Exception {
-        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         manager.process(new StubRequest("POST", "/api/v2/chat/stream"), res, null);
         assertEquals(403, res.status);
@@ -100,7 +99,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
     @Test
     public void test_chatStreamGetIsExemptFromCsrf() throws Exception {
         // GET /api/v2/chat/stream passes the CSRF gate (then handler rejects via SSE error event).
-        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         manager.process(new StubRequest("GET", "/api/v2/chat/stream"), res, null);
         assertNotEquals(403, res.status);
@@ -111,7 +110,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         // DELETE /api/v2/chat/sessions/{id} is CSRF-gated like POST /chat and POST /chat/stream.
         // A request without a valid token must be rejected at the CSRF gate before reaching
         // the handler.
-        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         manager.process(new StubRequest("DELETE", "/api/v2/chat/sessions/sess-abc"), res, null);
         assertEquals(403, res.status);
@@ -123,7 +122,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         // DELETE /api/v2/chat/sessions/{id} with a valid CSRF token must pass the gate
         // and reach ChatSessionClearHandler. With RAG chat disabled (default), the handler
         // returns 400/invalid_request — proving routing succeeded (would be 403 if blocked).
-        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final StubRequest req =
                 new StubRequest("DELETE", "/api/v2/chat/sessions/sess-abc").withSession(newSessionWithCsrfToken("the-valid-token"))
@@ -139,7 +138,7 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         // Path components with invalid characters (e.g. spaces) are URL-decoded by the
         // servlet container; the resulting raw path may not match the dispatch prefix
         // exactly. The key invariant: with a valid CSRF token, the request is NOT 403.
-        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         final StubRequest req = new StubRequest("DELETE", "/api/v2/chat/sessions/invalid-but-pattern-ok")
                 .withSession(newSessionWithCsrfToken("the-valid-token"))

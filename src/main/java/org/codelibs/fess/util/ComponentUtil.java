@@ -74,7 +74,7 @@ import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ThemeHelper;

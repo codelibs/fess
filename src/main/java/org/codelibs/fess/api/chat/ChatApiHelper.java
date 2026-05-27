@@ -249,19 +249,4 @@ public class ChatApiHelper {
         }
     }
 
-    /**
-     * Resolves {@code api.v2.chat.rate.limit.per.user.per.minute} from fess_config system
-     * properties, defaulting to {@code 30} on parse failure. A return value &le; 0
-     * disables the rate limit entirely.
-     *
-     * @param fessConfig active Fess config
-     * @return max chat requests per minute per user, or {@code <= 0} to disable
-     */
-    public int getChatRateLimitPerMinute(final FessConfig fessConfig) {
-        try {
-            return Integer.parseInt(fessConfig.getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
-        } catch (final NumberFormatException e) {
-            return 30;
-        }
-    }
 }

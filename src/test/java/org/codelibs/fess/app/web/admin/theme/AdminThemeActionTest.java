@@ -24,7 +24,6 @@ import org.codelibs.fess.theme.ThemeManifestException;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
@@ -468,31 +467,180 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         assertFalse("null".equals(fileName), "fileName must not equal the string literal \"null\"");
     }
 
-    // ---- Tests requiring full LastaFlute context — deferred ----
+    // ---- Tests exercising the full UTFlute/LastaFlute harness ----
 
-    @Test
-    @Disabled("Requires full LastaFlute test harness (validate/verifyToken/saveToken/asHtml/redirect): "
-            + "direct invocation needs a live ActionRuntime, session-managed token, and renderable HTML response. "
-            + "Deferred to Plan 6 integration tests.")
-    public void test_index_savesTokenAndRendersList() {
+    /**
+     * Injects framework-level fields (requestManager, sessionManager, etc.) into
+     * the action via UTFlute's {@code inject()}, suppressing
+     * {@link org.codelibs.fess.app.web.base.login.FessLoginAssist} which would
+     * transitively require an OpenSearch {@code UserBhv} absent from the unit DI
+     * container. Fields absent from the test container ({@code systemHelper},
+     * {@code themeRegistry}) are wired directly so that {@code validate()}/
+     * {@code saveToken()}/etc. all have their required collaborators.
+     */
+    private AdminThemeAction createInjectedAction(final ThemeRegistry registry) throws Exception {
+        suppressBindingOf(org.codelibs.fess.app.web.base.login.FessLoginAssist.class);
+        final AdminThemeAction action = new AdminThemeAction();
+        inject(action); // wires framework fields; skips FessLoginAssist; leaves absent fields null
+
+        // systemHelper is defined in fess.xml which is NOT loaded by the unit test container
+        // (test_app.xml only includes convention.xml + lastaflute.xml). Wire it directly so
+        // that FessBaseAction#createValidator() can call systemHelper.createValidator(...).
+        final java.lang.reflect.Field sysField = org.codelibs.fess.app.web.base.FessBaseAction.class.getDeclaredField("systemHelper");
+        sysField.setAccessible(true);
+        if (sysField.get(action) == null) {
+            sysField.set(action, new org.codelibs.fess.helper.SystemHelper());
+        }
+
+        // themeRegistry and staticThemeInstaller are absent from the test DI container.
+        final java.lang.reflect.Field regField = AdminThemeAction.class.getDeclaredField("themeRegistry");
+        regField.setAccessible(true);
+        regField.set(action, registry);
+
+        return action;
     }
 
+    /**
+     * Production path covered: {@code AdminThemeAction#index} calls {@code saveToken()},
+     * then renders the list JSP via {@code asListHtml()} which registers {@code themeItems}
+     * and {@code currentDefault} into the render data.
+     */
     @Test
-    @Disabled("Requires full LastaFlute test harness: driving #upload requires a MultipartFormFile fixture "
-            + "and the validate()/verifyToken() pipeline. Deferred to Plan 6 integration tests.")
-    public void test_upload_rejectsNonZipFileExtension() {
+    public void test_index_savesTokenAndRendersList() throws Exception {
+        // ## Arrange ##
+        // A fresh ThemeRegistry (no @PostConstruct, no filesystem scan) returns an empty map —
+        // that is fine for this test which only needs the keys to be present in render data.
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        final ThemeListForm form = new ThemeListForm();
+
+        // ## Act ##
+        final org.lastaflute.web.response.HtmlResponse response = action.index(form);
+
+        // ## Assert ##
+        // saveToken() must have stored a token in the session for this action's class
+        assertTokenSaved(action.getClass());
+        // The response renders the list JSP; validateHtmlData confirms render data keys exist
+        final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(response);
+        // themeItems and currentDefault are always registered by asListHtml()
+        // (list may be empty in unit environment but the key must be present)
+        assertNotNull(htmlData.getDataMap().get("themeItems"), "themeItems must be registered in render data");
+        assertTrue(htmlData.getDataMap().containsKey("currentDefault"), "currentDefault must be registered in render data");
     }
 
+    /**
+     * Production path covered: {@code AdminThemeAction#upload} calls {@code verifyToken()},
+     * then {@code validate()}, then detects a non-zip extension via {@code hasZipExtension()}
+     * and calls {@code throwValidationError(addErrorsFileIsNotSupported)} before reading any
+     * stream — confirming the pre-flight extension guard fires for a {@code .txt} file.
+     */
     @Test
-    @Disabled("Requires full LastaFlute test harness: the themeRegistry.getTheme(name).isEmpty() branch "
-            + "in #setdefault produces a throwValidationError that needs the LastaFlute message pipeline. "
-            + "Deferred to Plan 6 integration tests.")
-    public void test_setdefault_throwsValidationErrorWhenThemeMissing() {
+    public void test_upload_rejectsNonZipFileExtension() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        mockTokenRequested(action.getClass());
+
+        final ThemeUploadForm form = new ThemeUploadForm();
+        // Stub a MultipartFormFile whose getFileName() returns a non-.zip name so
+        // @Required passes (file is non-null) but hasZipExtension() returns false.
+        form.themeFile = new MultipartFormFile() {
+            @Override
+            public String getFileName() {
+                return "theme.txt";
+            }
+
+            @Override
+            public int getFileSize() {
+                return 10; // non-zero; the size guard uses long comparison after @Required
+            }
+
+            @Override
+            public String getContentType() {
+                return "text/plain";
+            }
+
+            @Override
+            public byte[] getFileData() throws java.io.IOException {
+                return new byte[10];
+            }
+
+            @Override
+            public java.io.InputStream getInputStream() throws java.io.IOException {
+                return new java.io.ByteArrayInputStream(new byte[10]);
+            }
+
+            @Override
+            public void destroy() {
+            }
+        };
+
+        // ## Act & Assert ##
+        // throwValidationError(addErrorsFileIsNotSupported) must be raised;
+        // assertValidationError fails the test if no ValidationErrorException is thrown.
+        assertValidationError(() -> action.upload(form)).handle(data -> {
+            // The message key registered by addErrorsFileIsNotSupported must be present.
+            data.requiredMessageOf("_global", "errors.file_is_not_supported");
+        });
+        // verifyToken() was called (and consumed the token we planted)
+        assertTokenVerified();
     }
 
+    /**
+     * Production path covered: {@code AdminThemeAction#setdefault} calls {@code verifyToken()},
+     * then {@code validate()}, then checks {@code themeRegistry.getTheme(name).isEmpty()} for a
+     * non-empty name and calls {@code throwValidationError(addErrorsThemeNotFound)} when the
+     * registry returns empty — which it does for any name not actually installed.
+     */
     @Test
-    @Disabled("Requires full LastaFlute test harness: #reload calls verifyToken(), saveInfo(), "
-            + "and redirect(getClass()) — all require the full LastaFlute container. " + "Deferred to Plan 6 integration tests.")
-    public void test_reload_redirectsAfterRegistryReload() {
+    public void test_setdefault_throwsValidationErrorWhenThemeMissing() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        mockTokenRequested(action.getClass());
+
+        final ThemeListForm form = new ThemeListForm();
+        // A syntactically valid name that passes the @Pattern but is absent from
+        // the fresh ThemeRegistry (snapshot is empty — no themes scanned in unit env).
+        form.defaultTheme = "definitely-not-installed";
+
+        // ## Act & Assert ##
+        assertValidationError(() -> action.setdefault(form)).handle(data -> {
+            // The message key registered by addErrorsThemeNotFound must be present.
+            data.requiredMessageOf("_global", "errors.theme_not_found");
+        });
+        assertTokenVerified();
+    }
+
+    /**
+     * Production path covered: {@code AdminThemeAction#reload} calls {@code verifyToken()},
+     * then {@code themeRegistry.reload()}, then {@code saveInfo(addSuccessReloadTheme)},
+     * then {@code redirect(getClass())} — the full success flow exercised end-to-end.
+     * A no-op {@code ThemeRegistry} subclass is used so the reload does not require the
+     * filesystem/search-engine, mirroring the ThemeViewActionTest injection style.
+     */
+    @Test
+    public void test_reload_redirectsAfterRegistryReload() throws Exception {
+        // ## Arrange ##
+        final boolean[] reloadCalled = { false };
+        // Override reload() to be a no-op so the action's control flow
+        // (verifyToken → reload → saveInfo → redirect) is exercised without
+        // the filesystem / servlet-context dependencies that are absent in tests.
+        final ThemeRegistry noopRegistry = new ThemeRegistry() {
+            @Override
+            public synchronized void reload() {
+                reloadCalled[0] = true;
+            }
+        };
+        final AdminThemeAction action = createInjectedAction(noopRegistry);
+        mockTokenRequested(action.getClass());
+        final ThemeListForm form = new ThemeListForm();
+
+        // ## Act ##
+        final org.lastaflute.web.response.HtmlResponse response = action.reload(form);
+
+        // ## Assert ##
+        assertTrue(reloadCalled[0], "themeRegistry.reload() must have been called");
+        assertTokenVerified();
+        // The response must be a redirect back to AdminThemeAction (redirect(getClass()))
+        final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(response);
+        htmlData.assertRedirect(AdminThemeAction.class);
     }
 }

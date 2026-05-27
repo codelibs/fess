@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.BeforeEach;

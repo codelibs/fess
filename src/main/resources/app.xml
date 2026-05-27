@@ -65,7 +65,7 @@
 	</component>
 	<component name="staticThemeInstaller" class="org.codelibs.fess.theme.StaticThemeInstaller">
 	</component>
-	<component name="sessionCsrfTokenManager" class="org.codelibs.fess.helper.SessionCsrfTokenManager">
+	<component name="sessionCsrfTokenManager" class="org.codelibs.fess.api.v2.SessionCsrfTokenManager">
 	</component>
 	<component name="loginRateLimiter" class="org.codelibs.fess.api.v2.handlers.LoginRateLimiter">
 	</component>

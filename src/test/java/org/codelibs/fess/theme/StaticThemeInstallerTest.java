@@ -585,6 +585,91 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
         }
     }
 
+    // ── Compression-ratio guard for entries with getCompressedSize() == -1 ────────
+    //
+    // Empirically verified: ZipOutputStream writes DEFLATED entries with a data
+    // descriptor (trailing CRC/size fields), so ZipInputStream.getNextEntry() returns
+    // getCompressedSize() == -1 for every DEFLATED entry.  The STORED method reports
+    // the actual size because it is written in the local header.  Therefore, every
+    // DEFLATED entry produced by the standard putEntry() helper already exercises the
+    // -1 code path in extract(), and the tests below confirm that the estimation path
+    // (Math.max(1L, rawNow - lastRawCount)) fires the ratio guard rather than skipping.
+
+    @Test
+    public void test_install_rejectsRatioLimit_whenCompressedSizeIsMinusOne() throws Exception {
+        // Verifies that the per-entry ratio guard fires for DEFLATED entries whose
+        // getCompressedSize() returns -1 at getNextEntry() time.  Without the
+        // CountingInputStream estimation, the old code would treat compressed == -1 as
+        // <= 0 and skip the ratio check, allowing a bomb to slip through.
+        //
+        // Construction: a single DEFLATED entry of 1 MB of zero bytes compresses to
+        // ~1 KB (ratio ~ 1000:1).  We set maxCompressionRatio = 10 and raise the
+        // cumulative threshold to MaxValue so only the per-entry RATIO_LIMIT fires.
+        final Path themesDir = Files.createTempDirectory("themes-installer-ratio-minus1-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            installer.setMaxExtractedSize(64L * 1024L * 1024L);
+            installer.setMaxCompressionRatio(10);
+            // Disable the cumulative guard so the per-entry guard is the only one that fires.
+            installer.setZipRatioMax(Integer.MAX_VALUE);
+            installer.setZipRatioCheckThresholdBytes(Long.MAX_VALUE);
+
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                // Default method is DEFLATED — ZipInputStream will return -1 for
+                // getCompressedSize() on this entry, exercising the estimation branch.
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: bombminus1",
+                        "displayName: \"bombminus1\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                // 1 MB of zeros compresses extremely well: ratio >> 10.
+                putEntry(zos, "bomb.bin", new byte[1024 * 1024]);
+            }
+
+            final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
+            assertEquals(StaticThemeInstaller.InstallException.Code.RATIO_LIMIT, ex.code());
+            assertFalse(Files.exists(themesDir.resolve("bombminus1")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_allowsBenignEntry_whenCompressedSizeIsMinusOne() throws Exception {
+        // Negative / false-positive guard: a DEFLATED entry whose uncompressed content
+        // is incompressible (pseudo-random bytes, ratio ~ 1:1) must NOT be rejected by
+        // the estimation path.  Confirms the CountingInputStream estimation does not
+        // produce false positives for legitimate non-compressible assets.
+        final Path themesDir = Files.createTempDirectory("themes-installer-ratio-minus1-ok-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            installer.setMaxExtractedSize(64L * 1024L * 1024L);
+            installer.setMaxCompressionRatio(10);
+            // Keep the cumulative guard disabled so only the per-entry guard is relevant.
+            installer.setZipRatioMax(Integer.MAX_VALUE);
+            installer.setZipRatioCheckThresholdBytes(Long.MAX_VALUE);
+
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: benignminus1",
+                        "displayName: \"benignminus1\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                // 64 KB of pseudo-random bytes compresses to roughly the same size
+                // (ratio ~ 1.0:1 which is well below the 10:1 limit).
+                final byte[] random = new byte[64 * 1024];
+                new java.util.Random(0x1234abcdL).nextBytes(random);
+                putEntry(zos, "data.bin", random);
+                putEntry(zos, "index.html", "<html/>".getBytes(StandardCharsets.UTF_8));
+            }
+
+            // Must complete without throwing.
+            installer.installZip(new ByteArrayInputStream(bao.toByteArray()));
+            assertTrue(Files.exists(themesDir.resolve("benignminus1/theme.yml")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
     private static StaticThemeInstaller newInstaller(final Path themesDir) {
         final StaticThemeInstaller installer = new StaticThemeInstaller();
         installer.setThemesDirOverride(themesDir);

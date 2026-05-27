@@ -121,7 +121,11 @@ public class ThemeViewAction extends FessSearchAction {
         }
         final String entry = theme.getManifest().map(m -> m.getEntry()).orElse("index.html");
         final Path indexFile = theme.getBasePath().resolve(entry).normalize();
-        if (!indexFile.startsWith(theme.getBasePath()) || !Files.isRegularFile(indexFile)) {
+        // Apply the same filename denylist as resolveAsset: manifest validation rejects
+        // traversal but not dotfiles/theme.yml/etc., so a malicious manifest entry must
+        // not be able to serve internal files (e.g. entry: theme.yml or .env) as HTML.
+        if (!indexFile.startsWith(theme.getBasePath()) || isBlockedFilename(indexFile.getFileName().toString())
+                || !Files.isRegularFile(indexFile)) {
             return notFound();
         }
         // TOCTOU note: isRegularFile() and Files.size() are separate syscalls.

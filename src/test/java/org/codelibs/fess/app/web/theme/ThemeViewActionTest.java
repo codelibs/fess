@@ -487,6 +487,156 @@ public class ThemeViewActionTest extends UnitFessTestCase {
         }
     }
 
+    // ── serveIndex blocked-manifest-entry tests ──────────────────────────────────
+
+    @Test
+    public void test_serveIndex_returnsNotFound_whenManifestEntryIsThemeYml() throws Exception {
+        // theme.yml must not be served as the HTML entry even when (a) the manifest's
+        // entry field passes ThemeManifest validation (isUnsafeEntry does not block it)
+        // and (b) the file exists on disk as a regular file.
+        // The ONLY reason for notFound() is the isBlockedFilename guard added to serveIndex().
+        final Path tmp = Files.createTempDirectory("tva-blocked-yml-");
+        try {
+            // Write theme.yml as a real regular file so !isRegularFile cannot be the
+            // reason for notFound — it would otherwise pass silently for the wrong reason.
+            final String ymlContent = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0", //
+                    "entry: theme.yml");
+            Files.writeString(tmp.resolve("theme.yml"), ymlContent);
+            // Also create a valid index.html so we can confirm the positive path later.
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
+            // Confirm manifest parsing accepted entry: "theme.yml" (it is not traversal/absolute,
+            // so isUnsafeEntry allows it — proving the threat is real without the new guard).
+            assertEquals("theme.yml", manifest.getEntry());
+
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            // isBlockedFilename("theme.yml") must have fired and returned notFound().
+            assertEquals(404, (int) sr.getHttpStatus().get(),
+                    "serveIndex with entry=theme.yml must return 404 (blocked by isBlockedFilename)");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_returnsNotFound_whenManifestEntryIsDotfile() throws Exception {
+        // A dotfile entry (e.g. .env) in the manifest must be blocked by isBlockedFilename
+        // even when the dotfile exists on disk as a regular file.
+        final Path tmp = Files.createTempDirectory("tva-blocked-dot-");
+        try {
+            // Write the target dotfile so !isRegularFile is NOT the reason for notFound.
+            Files.writeString(tmp.resolve(".env"), "SECRET=hunter2");
+
+            final String ymlContent = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0", //
+                    "entry: .env");
+            // Confirm ThemeManifest accepts ".env" as entry (it is not traversal/absolute).
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
+            assertEquals(".env", manifest.getEntry());
+
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            assertEquals(404, (int) sr.getHttpStatus().get(), "serveIndex with entry=.env must return 404 (blocked by isBlockedFilename)");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_returnsNotFound_whenManifestEntryIsReadmeMd() throws Exception {
+        // README.md is in the blocked list; verify serveIndex rejects it when it exists on disk.
+        final Path tmp = Files.createTempDirectory("tva-blocked-readme-");
+        try {
+            Files.writeString(tmp.resolve("README.md"), "# My Theme");
+
+            final String ymlContent = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0", //
+                    "entry: README.md");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
+            assertEquals("README.md", manifest.getEntry());
+
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            assertEquals(404, (int) sr.getHttpStatus().get(),
+                    "serveIndex with entry=README.md must return 404 (blocked by isBlockedFilename)");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_servesFile_whenManifestEntryIsNormalHtml() throws Exception {
+        // Positive/sanity: a normal entry (index.html) that exists must be served (200).
+        // If the test above were to accidentally remove the isBlockedFilename guard from
+        // production code, this test would still pass — it's here to confirm the positive
+        // path is intact and the blocked tests fail for the RIGHT reason.
+        final Path tmp = Files.createTempDirectory("tva-normal-entry-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+
+            final String ymlContent = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
+            // Default entry is index.html
+            assertEquals("index.html", manifest.getEntry());
+
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            // A StreamResponse without an explicit httpStatus defaults to 200.
+            final StreamResponse sr = (StreamResponse) resp;
+            assertFalse(sr.getHttpStatus().isPresent() && sr.getHttpStatus().get() == 404,
+                    "serveIndex with default entry=index.html must NOT return 404");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
     private static ThemeViewAction newActionWith(final Theme theme) {
         final ThemeViewAction action = new ThemeViewAction();
         action.themeRegistry = new ThemeRegistry() {

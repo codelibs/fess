@@ -23,8 +23,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.chat.ChatClient;
+import org.codelibs.fess.chat.ChatClient.ChatResult;
+import org.codelibs.fess.entity.ChatMessage;
+import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -49,8 +54,8 @@ import jakarta.servlet.http.Part;
  * <p>The handler relies on the production {@code fess_config.properties} default
  * {@code rag.chat.enabled=false}; under that default every POST falls into the
  * "chat is not enabled" branch and we observe the v2 envelope shape. The
- * happy-path test is intentionally {@code @Disabled} pending the DI override
- * scaffolding planned for the Plan 6 integration tests.</p>
+ * happy-path test enables RAG via {@link #enableRagChat()} and registers a stub
+ * {@code chatClient} into the DI container to drive the success envelope.</p>
  */
 public class ChatHandlerTest extends UnitFessTestCase {
 
@@ -182,10 +187,63 @@ public class ChatHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    @org.junit.jupiter.api.Disabled("TODO: needs DI container override for ChatClient stub — covered by Plan 6 integration tests")
     public void test_happyPath_returnsSessionIdContentAndSources() throws Exception {
-        // Future implementation: stub ChatClient via FessTestContainerInitializer,
-        // invoke handler with valid POST, assert payload keys session_id, content, sources.
+        // Full success path: enable RAG, register a fresh (empty) rate limiter so the first call
+        // is allowed, and override the getChatClient seam to return a fixed ChatResult. The handler
+        // must emit a v2 success envelope whose payload carries session_id, content, and
+        // snake_case-mapped sources. (Previously @Disabled — the getChatClient seam is exactly the
+        // scaffolding that rationale waited on; overriding it avoids the order-sensitive
+        // ComponentUtil.register chatClient fallback.)
+        enableRagChat();
+
+        final ChatSource source = new ChatSource();
+        source.setIndex(1);
+        source.setTitle("Doc Title");
+        source.setUrl("https://example.com/doc");
+        source.setDocId("doc-1");
+        final ChatMessage assistant = new ChatMessage("assistant", "hello from rag");
+        // The handler reads sources from result.getMessage().getSources(), not the third
+        // ChatResult arg — so set them on the ChatMessage and pass an empty list below.
+        assistant.setSources(List.of(source));
+        final ChatResult result = new ChatResult("sess-123", assistant, Collections.emptyList());
+        final ChatClient stubClient = new ChatClient() {
+            @Override
+            public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
+                return result;
+            }
+        };
+
+        // A fresh limiter with an empty CHAT bucket allows the first request for any user id.
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatHandler handler = new ChatHandler() {
+                @Override
+                protected String getUserId(final HttpServletRequest req) {
+                    return "happy-user";
+                }
+
+                @Override
+                protected ChatClient getChatClient() {
+                    return stubClient;
+                }
+            };
+            handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+
+            assertEquals(200, res.status);
+            final String body = res.body();
+            assertTrue(body.startsWith("{\"response\":{"), body);
+            assertTrue(body.contains("\"session_id\":\"sess-123\""), body);
+            assertTrue(body.contains("\"content\":\"hello from rag\""), body);
+            assertTrue(body.contains("\"sources\":["), body);
+            assertTrue(body.contains("\"rank\":1"), body);
+            assertTrue(body.contains("\"doc_id\":\"doc-1\""), body);
+            assertTrue(body.contains("\"title\":\"Doc Title\""), body);
+        } finally {
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
     }
 
     @Test
@@ -223,6 +281,95 @@ public class ChatHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("too many chat requests"), res.body());
         } finally {
             // Reset to a fresh limiter so neighbors don't see our saturated bucket.
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void chat_anonymousUser_nullUserId_notRateLimited() throws Exception {
+        // When getUserId returns null, StringUtil.isNotBlank(null) is false, so the per-user
+        // throttle is skipped entirely — even with a saturated limiter and a positive chat limit.
+        // The handler must NOT return 429/rate_limited; it proceeds past the rate-limit gate.
+        // Without a real ChatClient the subsequent chat() call fails with INTERNAL_ERROR (500),
+        // which proves the rate-limit branch was bypassed.
+        enableRagChat();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        // Saturate the null-key bucket — this would 429 if null reached the limiter.
+        for (int i = 0; i < 30; i++) {
+            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+        }
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatHandler handler = new ChatHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return null;
+                }
+            };
+            handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+            // Must NOT be a 429 rate_limited response — the anonymous bypass must apply.
+            assertFalse("anonymous null userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
+            assertTrue("anonymous null userId must not yield 429 status, was: " + res.status, res.status != 429);
+        } finally {
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void chat_anonymousUser_blankUserId_notRateLimited() throws Exception {
+        // When getUserId returns a blank string ("" or whitespace), StringUtil.isNotBlank is false,
+        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
+        enableRagChat();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 30; i++) {
+            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+        }
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatHandler handler = new ChatHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return "   ";
+                }
+            };
+            handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+            assertFalse("anonymous blank userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
+            assertTrue("anonymous blank userId must not yield 429 status, was: " + res.status, res.status != 429);
+        } finally {
+            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void chat_anonymousUser_emptyStringUserId_notRateLimited() throws Exception {
+        // When getUserId returns an empty string, StringUtil.isNotBlank("") is false,
+        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
+        enableRagChat();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 30; i++) {
+            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+        }
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final ChatHandler handler = new ChatHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return "";
+                }
+            };
+            handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+            assertFalse("anonymous empty userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
+            assertTrue("anonymous empty userId must not yield 429 status, was: " + res.status, res.status != 429);
+        } finally {
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
             ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
         }

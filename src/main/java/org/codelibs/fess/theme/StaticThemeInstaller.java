@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.theme;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -399,12 +400,17 @@ public class StaticThemeInstaller {
     }
 
     private void extract(final InputStream in, final Path target) throws IOException {
-        try (ZipInputStream zis = new ZipInputStream(in)) {
+        // Count raw bytes consumed from the underlying stream so the compression-ratio
+        // guards still work for entries that omit compressed-size metadata (-1, as seen
+        // with streamed/data-descriptor ZIPs); see the per-entry handling below.
+        final CountingInputStream counting = new CountingInputStream(in);
+        try (ZipInputStream zis = new ZipInputStream(counting)) {
             ZipEntry entry;
             int entries = 0;
             long total = 0;
             long cumulativeCompressed = 0L;
             long cumulativeUncompressed = 0L;
+            long lastRawCount = 0L;
             final byte[] buffer = new byte[8192];
             while ((entry = zis.getNextEntry()) != null) {
                 if (++entries > maxEntries) {
@@ -449,17 +455,20 @@ public class StaticThemeInstaller {
                         os.write(buffer, 0, read);
                     }
                 }
-                final long compressed = entry.getCompressedSize();
-                if (compressed > 0 && entrySize > 0) {
-                    final long ratio = entrySize / Math.max(compressed, 1);
+                final long rawNow = counting.getCount();
+                final long declaredCompressed = entry.getCompressedSize();
+                // When an entry lacks compressed-size metadata (-1, e.g. streamed/data-descriptor
+                // ZIPs), estimate it from the raw bytes consumed since the previous entry so the
+                // ratio guards still engage instead of being silently skipped.
+                final long compressed = declaredCompressed > 0 ? declaredCompressed : Math.max(1L, rawNow - lastRawCount);
+                lastRawCount = rawNow;
+                if (entrySize > 0) {
+                    final long ratio = entrySize / Math.max(compressed, 1L);
                     if (ratio > maxCompressionRatio) {
                         throw new InstallException(InstallException.Code.RATIO_LIMIT, "Compression ratio for " + name + " exceeds limit");
                     }
                     // Accumulate for incremental zip-bomb ratio check.
                     cumulativeCompressed += compressed;
-                    cumulativeUncompressed += entrySize;
-                } else if (entrySize > 0) {
-                    // compressedSize unavailable (-1); accumulate uncompressed only so threshold can still fire.
                     cumulativeUncompressed += entrySize;
                 }
                 // Incremental zip-bomb guard: once enough compressed bytes have been seen,
@@ -657,5 +666,40 @@ public class StaticThemeInstaller {
      */
     void runCleanupOldAtticDirsForTest() {
         cleanupOldAtticDirs(resolveThemesDir());
+    }
+
+    /**
+     * Counts the number of bytes read from the wrapped stream. Used to estimate
+     * per-entry compressed size during ZIP extraction when the entry omits its
+     * compressed-size metadata, so the compression-ratio bomb guards still apply.
+     */
+    private static final class CountingInputStream extends FilterInputStream {
+        private long count;
+
+        CountingInputStream(final InputStream in) {
+            super(in);
+        }
+
+        long getCount() {
+            return count;
+        }
+
+        @Override
+        public int read() throws IOException {
+            final int b = super.read();
+            if (b != -1) {
+                count++;
+            }
+            return b;
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            final int n = super.read(b, off, len);
+            if (n > 0) {
+                count += n;
+            }
+            return n;
+        }
     }
 }
