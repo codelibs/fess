@@ -23,20 +23,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link ChatApiHelper}.
  *
- * <p>All methods are static utilities. Tests use {@code ComponentUtil.register}
- * to stub external helpers (SystemHelper, UserInfoHelper, FessConfig) that
- * ChatApiHelper delegates to, following the same pattern as other v2 handler
- * tests in this project.</p>
+ * <p>All methods are static utilities. The pure parsing/branching logic
+ * ({@code parseFieldFilters}, {@code parseExtraQueries}, {@code resolveUserId}, message-length
+ * and rate-limit accessors) is tested directly with plain inputs or {@code FessConfig.SimpleImpl}.
+ * The user-id helpers ({@code SystemHelper}/{@code UserInfoHelper}) are intentionally NOT stubbed
+ * via {@code ComponentUtil.register}: they are smart-deploy components the shared test container
+ * can resolve for real, so a registered stub is not reliably honored. {@link ChatApiHelper#getUserId}
+ * is therefore tested through its pure seam {@code resolveUserId}.</p>
  *
  * <p>LabelTypeHelper and ViewHelper are intentionally NOT registered in most
  * tests: when they are absent the helpers degrade to an empty allowlist, so all
@@ -44,12 +44,15 @@ import org.junit.jupiter.api.Test;
  */
 public class ChatApiHelperTest extends UnitFessTestCase {
 
+    /** Stateless helper under test; instantiated directly since its pure methods need no DI. */
+    private final ChatApiHelper chatApiHelper = new ChatApiHelper();
+
     // ── parseFieldFilters ─────────────────────────────────────────────────────
 
     @Test
     public void test_parseFieldFilters_nullInput_returnsEmptyMap() {
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> result = ChatApiHelper.parseFieldFilters(null != null ? null : Collections.emptyMap(), warnings);
+        final Map<String, String[]> result = chatApiHelper.parseFieldFilters(null != null ? null : Collections.emptyMap(), warnings);
         assertTrue(result.isEmpty(), "null/empty raw input must return empty map");
         assertTrue(warnings.isEmpty(), "no warnings for empty input");
     }
@@ -57,7 +60,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     @Test
     public void test_parseFieldFilters_emptyRaw_returnsEmptyMap() {
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> result = ChatApiHelper.parseFieldFilters(Collections.emptyMap(), warnings);
+        final Map<String, String[]> result = chatApiHelper.parseFieldFilters(Collections.emptyMap(), warnings);
         assertTrue(result.isEmpty(), "empty raw map must return empty map");
         assertTrue(warnings.isEmpty(), "no warnings for empty raw map");
     }
@@ -68,7 +71,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         final Map<String, Object> raw = new HashMap<>();
         raw.put("fields", "not-a-map");
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> result = ChatApiHelper.parseFieldFilters(raw, warnings);
+        final Map<String, String[]> result = chatApiHelper.parseFieldFilters(raw, warnings);
         // No labelsRaw resolved; result must be empty
         assertTrue(result.isEmpty(), "scalar fields value must not produce filters");
     }
@@ -83,7 +86,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         raw.put("fields", fieldsMap);
 
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> result = ChatApiHelper.parseFieldFilters(raw, warnings);
+        final Map<String, String[]> result = chatApiHelper.parseFieldFilters(raw, warnings);
 
         assertTrue(result.isEmpty(), "rejected label must not appear in result");
         assertTrue(warnings.containsKey("fields.label"), "rejected label must be reported in warnings");
@@ -100,7 +103,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         raw.put("fields", fieldsMap);
 
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> result = ChatApiHelper.parseFieldFilters(raw, warnings);
+        final Map<String, String[]> result = chatApiHelper.parseFieldFilters(raw, warnings);
 
         assertTrue(result.isEmpty(), "all rejected labels must produce empty result");
         assertTrue(warnings.containsKey("fields.label"), "all rejected values must be in warnings");
@@ -117,7 +120,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         raw.put("fields.label", labelList);
 
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> result = ChatApiHelper.parseFieldFilters(raw, warnings);
+        final Map<String, String[]> result = chatApiHelper.parseFieldFilters(raw, warnings);
 
         assertTrue(result.isEmpty(), "rejected legacy label must not appear in result");
         assertTrue(warnings.containsKey("fields.label"), "rejected dotted-key label must be in warnings");
@@ -136,7 +139,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
 
         final Map<String, List<String>> warnings = new HashMap<>();
         // LabelTypeHelper absent → "valid" is rejected but null is not in warnings
-        ChatApiHelper.parseFieldFilters(raw, warnings);
+        chatApiHelper.parseFieldFilters(raw, warnings);
 
         if (warnings.containsKey("fields.label")) {
             assertFalse(warnings.get("fields.label").contains(null), "null element must not appear in warnings list");
@@ -153,7 +156,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         raw.put("fields", fieldsMap);
 
         final Map<String, List<String>> warnings = new HashMap<>();
-        ChatApiHelper.parseFieldFilters(raw, warnings);
+        chatApiHelper.parseFieldFilters(raw, warnings);
 
         // Whether or not LabelTypeHelper is available, the key must be "fields.label"
         // When LabelTypeHelper is absent, all values are rejected → key exists
@@ -170,7 +173,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         // No "extra_queries" key in raw → empty array, no warnings
         final Map<String, Object> raw = new HashMap<>();
         final Map<String, List<String>> warnings = new HashMap<>();
-        final String[] result = ChatApiHelper.parseExtraQueries(raw, warnings);
+        final String[] result = chatApiHelper.parseExtraQueries(raw, warnings);
         assertEquals(0, result.length);
         assertTrue(warnings.isEmpty(), "no warnings when key absent");
     }
@@ -181,7 +184,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         final Map<String, Object> raw = new HashMap<>();
         raw.put("extra_queries", "query-a");
         final Map<String, List<String>> warnings = new HashMap<>();
-        final String[] result = ChatApiHelper.parseExtraQueries(raw, warnings);
+        final String[] result = chatApiHelper.parseExtraQueries(raw, warnings);
 
         // Rejected — ViewHelper returns empty allowlist
         assertEquals(0, result.length);
@@ -194,7 +197,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         final Map<String, Object> raw = new HashMap<>();
         raw.put("extra_queries", new ArrayList<>(Arrays.asList("q1", "q2")));
         final Map<String, List<String>> warnings = new HashMap<>();
-        final String[] result = ChatApiHelper.parseExtraQueries(raw, warnings);
+        final String[] result = chatApiHelper.parseExtraQueries(raw, warnings);
 
         assertEquals(0, result.length);
         assertTrue(warnings.containsKey("extra_queries"), "rejected array items must be in warnings");
@@ -207,7 +210,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         final Map<String, Object> raw = new HashMap<>();
         raw.put("extra_queries", "any-value");
         final Map<String, List<String>> warnings = new HashMap<>();
-        ChatApiHelper.parseExtraQueries(raw, warnings);
+        chatApiHelper.parseExtraQueries(raw, warnings);
 
         if (!warnings.isEmpty()) {
             assertTrue(warnings.containsKey("extra_queries"), "warnings key must be 'extra_queries' (snake_case)");
@@ -219,42 +222,20 @@ public class ChatApiHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_getUserId_authenticatedUser_returnsUsername() {
-        // SystemHelper.getUsername returns a non-guest name → that name is the userId
-        final SystemHelper systemHelper = new SystemHelper() {
-            @Override
-            public String getUsername() {
-                return "alice";
-            }
-        };
-        ComponentUtil.register(systemHelper, "systemHelper");
-        ComponentUtil.register(systemHelper, SystemHelper.class.getCanonicalName());
-
-        final String userId = ChatApiHelper.getUserId(new MinimalRequest());
+        // A non-guest username is used directly as the userId; the guest fallback supplier must
+        // NOT be consulted. Tests the pure branching logic without the DI container — stubbing
+        // SystemHelper/UserInfoHelper via ComponentUtil.register is unreliable because both are
+        // smart-deploy components that the shared test container can resolve for real.
+        final String userId = chatApiHelper.resolveUserId("alice", () -> {
+            throw new AssertionError("guest fallback must not be used for an authenticated user");
+        });
         assertEquals("alice", userId);
     }
 
     @Test
     public void test_getUserId_guestUser_fallsBackToUserCode() {
-        // SystemHelper.getUsername returns Constants.GUEST_USER → fall back to getUserCode
-        final SystemHelper systemHelper = new SystemHelper() {
-            @Override
-            public String getUsername() {
-                return Constants.GUEST_USER;
-            }
-        };
-        ComponentUtil.register(systemHelper, "systemHelper");
-        ComponentUtil.register(systemHelper, SystemHelper.class.getCanonicalName());
-
-        final UserInfoHelper userInfoHelper = new UserInfoHelper() {
-            @Override
-            public String getUserCode() {
-                return "cookie-code-xyz";
-            }
-        };
-        ComponentUtil.register(userInfoHelper, "userInfoHelper");
-        ComponentUtil.register(userInfoHelper, UserInfoHelper.class.getCanonicalName());
-
-        final String userId = ChatApiHelper.getUserId(new MinimalRequest());
+        // GUEST_USER falls back to the supplied cookie-bound user-code.
+        final String userId = chatApiHelper.resolveUserId(Constants.GUEST_USER, () -> "cookie-code-xyz");
         assertEquals("cookie-code-xyz", userId);
     }
 
@@ -268,7 +249,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
             // getSystemProperty delegates to ComponentUtil.getSystemProperties
             // which is wired in test_app.xml; no override needed to get default
         };
-        final int len = ChatApiHelper.getMaxMessageLength(cfg);
+        final int len = chatApiHelper.getMaxMessageLength(cfg);
         assertEquals(4000, len);
     }
 
@@ -286,7 +267,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 return defaultValue;
             }
         };
-        final int len = ChatApiHelper.getMaxMessageLength(cfg);
+        final int len = chatApiHelper.getMaxMessageLength(cfg);
         assertEquals(2000, len);
     }
 
@@ -304,7 +285,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 return defaultValue;
             }
         };
-        final int len = ChatApiHelper.getMaxMessageLength(cfg);
+        final int len = chatApiHelper.getMaxMessageLength(cfg);
         assertEquals(4000, len);
     }
 
@@ -316,7 +297,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         final FessConfig cfg = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
         };
-        final int limit = ChatApiHelper.getChatRateLimitPerMinute(cfg);
+        final int limit = chatApiHelper.getChatRateLimitPerMinute(cfg);
         assertEquals(30, limit);
     }
 
@@ -334,7 +315,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 return defaultValue;
             }
         };
-        final int limit = ChatApiHelper.getChatRateLimitPerMinute(cfg);
+        final int limit = chatApiHelper.getChatRateLimitPerMinute(cfg);
         assertTrue(limit <= 0, "value 0 must signal disabled (<=0), got: " + limit);
     }
 
@@ -352,362 +333,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 return defaultValue;
             }
         };
-        final int limit = ChatApiHelper.getChatRateLimitPerMinute(cfg);
+        final int limit = chatApiHelper.getChatRateLimitPerMinute(cfg);
         assertEquals(30, limit);
-    }
-
-    // ── Minimal HttpServletRequest stub ───────────────────────────────────────
-
-    /**
-     * Minimal HttpServletRequest stub that satisfies ChatApiHelper.getUserId's
-     * only requirement: the request object is passed to the method but is not
-     * directly accessed — SystemHelper and UserInfoHelper are resolved via
-     * ComponentUtil.
-     */
-    private static class MinimalRequest implements jakarta.servlet.http.HttpServletRequest {
-        @Override
-        public String getMethod() {
-            return "POST";
-        }
-
-        @Override
-        public String getServletPath() {
-            return "/api/v2/chat";
-        }
-
-        @Override
-        public String getRequestURI() {
-            return "/api/v2/chat";
-        }
-
-        @Override
-        public String getContextPath() {
-            return "";
-        }
-
-        @Override
-        public Object getAttribute(final String n) {
-            return null;
-        }
-
-        @Override
-        public void setAttribute(final String n, final Object v) {
-        }
-
-        @Override
-        public void removeAttribute(final String n) {
-        }
-
-        @Override
-        public java.util.Enumeration<String> getAttributeNames() {
-            return java.util.Collections.emptyEnumeration();
-        }
-
-        @Override
-        public jakarta.servlet.RequestDispatcher getRequestDispatcher(final String p) {
-            return null;
-        }
-
-        @Override
-        public String getAuthType() {
-            return null;
-        }
-
-        @Override
-        public jakarta.servlet.http.Cookie[] getCookies() {
-            return null;
-        }
-
-        @Override
-        public long getDateHeader(final String n) {
-            return -1;
-        }
-
-        @Override
-        public String getHeader(final String n) {
-            return null;
-        }
-
-        @Override
-        public java.util.Enumeration<String> getHeaders(final String n) {
-            return java.util.Collections.emptyEnumeration();
-        }
-
-        @Override
-        public java.util.Enumeration<String> getHeaderNames() {
-            return java.util.Collections.emptyEnumeration();
-        }
-
-        @Override
-        public int getIntHeader(final String n) {
-            return -1;
-        }
-
-        @Override
-        public String getPathInfo() {
-            return null;
-        }
-
-        @Override
-        public String getPathTranslated() {
-            return null;
-        }
-
-        @Override
-        public String getQueryString() {
-            return null;
-        }
-
-        @Override
-        public String getRemoteUser() {
-            return null;
-        }
-
-        @Override
-        public boolean isUserInRole(final String r) {
-            return false;
-        }
-
-        @Override
-        public java.security.Principal getUserPrincipal() {
-            return null;
-        }
-
-        @Override
-        public String getRequestedSessionId() {
-            return null;
-        }
-
-        @Override
-        public StringBuffer getRequestURL() {
-            return new StringBuffer(getRequestURI());
-        }
-
-        @Override
-        public jakarta.servlet.http.HttpSession getSession(final boolean c) {
-            return null;
-        }
-
-        @Override
-        public jakarta.servlet.http.HttpSession getSession() {
-            return null;
-        }
-
-        @Override
-        public String changeSessionId() {
-            return null;
-        }
-
-        @Override
-        public boolean isRequestedSessionIdValid() {
-            return false;
-        }
-
-        @Override
-        public boolean isRequestedSessionIdFromCookie() {
-            return false;
-        }
-
-        @Override
-        public boolean isRequestedSessionIdFromURL() {
-            return false;
-        }
-
-        @Override
-        public boolean authenticate(final jakarta.servlet.http.HttpServletResponse r) {
-            return false;
-        }
-
-        @Override
-        public void login(final String u, final String p) {
-        }
-
-        @Override
-        public void logout() {
-        }
-
-        @Override
-        public java.util.Collection<jakarta.servlet.http.Part> getParts() {
-            return java.util.Collections.emptyList();
-        }
-
-        @Override
-        public jakarta.servlet.http.Part getPart(final String n) {
-            return null;
-        }
-
-        @Override
-        public <T extends jakarta.servlet.http.HttpUpgradeHandler> T upgrade(final Class<T> h) {
-            return null;
-        }
-
-        @Override
-        public String getCharacterEncoding() {
-            return null;
-        }
-
-        @Override
-        public void setCharacterEncoding(final String e) {
-        }
-
-        @Override
-        public int getContentLength() {
-            return 0;
-        }
-
-        @Override
-        public long getContentLengthLong() {
-            return 0;
-        }
-
-        @Override
-        public String getContentType() {
-            return null;
-        }
-
-        @Override
-        public jakarta.servlet.ServletInputStream getInputStream() {
-            return null;
-        }
-
-        @Override
-        public String getParameter(final String n) {
-            return null;
-        }
-
-        @Override
-        public java.util.Enumeration<String> getParameterNames() {
-            return java.util.Collections.emptyEnumeration();
-        }
-
-        @Override
-        public String[] getParameterValues(final String n) {
-            return null;
-        }
-
-        @Override
-        public java.util.Map<String, String[]> getParameterMap() {
-            return java.util.Collections.emptyMap();
-        }
-
-        @Override
-        public String getProtocol() {
-            return "HTTP/1.1";
-        }
-
-        @Override
-        public String getScheme() {
-            return "http";
-        }
-
-        @Override
-        public String getServerName() {
-            return "localhost";
-        }
-
-        @Override
-        public int getServerPort() {
-            return 8080;
-        }
-
-        @Override
-        public java.io.BufferedReader getReader() {
-            return null;
-        }
-
-        @Override
-        public String getRemoteAddr() {
-            return "127.0.0.1";
-        }
-
-        @Override
-        public String getRemoteHost() {
-            return "localhost";
-        }
-
-        @Override
-        public java.util.Locale getLocale() {
-            return java.util.Locale.ROOT;
-        }
-
-        @Override
-        public java.util.Enumeration<java.util.Locale> getLocales() {
-            return java.util.Collections.enumeration(java.util.Collections.singleton(java.util.Locale.ROOT));
-        }
-
-        @Override
-        public boolean isSecure() {
-            return false;
-        }
-
-        @Override
-        public int getRemotePort() {
-            return 0;
-        }
-
-        @Override
-        public String getLocalName() {
-            return "localhost";
-        }
-
-        @Override
-        public String getLocalAddr() {
-            return "127.0.0.1";
-        }
-
-        @Override
-        public int getLocalPort() {
-            return 8080;
-        }
-
-        @Override
-        public jakarta.servlet.ServletContext getServletContext() {
-            return null;
-        }
-
-        @Override
-        public jakarta.servlet.AsyncContext startAsync() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public jakarta.servlet.AsyncContext startAsync(final jakarta.servlet.ServletRequest rq, final jakarta.servlet.ServletResponse rs) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean isAsyncStarted() {
-            return false;
-        }
-
-        @Override
-        public boolean isAsyncSupported() {
-            return false;
-        }
-
-        @Override
-        public jakarta.servlet.AsyncContext getAsyncContext() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public jakarta.servlet.DispatcherType getDispatcherType() {
-            return jakarta.servlet.DispatcherType.REQUEST;
-        }
-
-        @Override
-        public String getRequestId() {
-            return "";
-        }
-
-        @Override
-        public String getProtocolRequestId() {
-            return "";
-        }
-
-        @Override
-        public jakarta.servlet.ServletConnection getServletConnection() {
-            return null;
-        }
     }
 }

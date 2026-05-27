@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.api.chat.ChatApiHelper;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.chat.ChatClient;
@@ -254,6 +255,8 @@ public final class ComponentUtil {
     private static final String CHAT_SESSION_MANAGER = "chatSessionManager";
 
     private static final String CHAT_CLIENT = "chatClient";
+
+    private static final String CHAT_API_HELPER = "chatApiHelper";
 
     private static final String MARKDOWN_RENDERER = "markdownRenderer";
 
@@ -914,6 +917,14 @@ public final class ComponentUtil {
      */
     public static ChatSessionManager getChatSessionManager() {
         return getComponent(CHAT_SESSION_MANAGER);
+    }
+
+    /**
+     * Gets the chat API helper component.
+     * @return The chat API helper.
+     */
+    public static ChatApiHelper getChatApiHelper() {
+        return getComponent(CHAT_API_HELPER);
     }
 
     /**

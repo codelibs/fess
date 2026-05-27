@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.api.chat.ChatApiHelper;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Parsed view of a chat request body shared by {@link ChatHandler} and
@@ -38,8 +39,8 @@ import org.codelibs.fess.api.chat.ChatApiHelper;
  * <p>Length is enforced inside {@link #from(Map, int)} so the caller does not need
  * a separate guard. Label and {@code extra_queries} validation uses the same allowlist
  * helpers v1 calls — {@code LabelTypeHelper} for labels and {@code ViewHelper}
- * for facet queries — to prevent query injection, delegated to
- * {@link ChatApiHelper}.</p>
+ * for facet queries — to prevent query injection, delegated to the
+ * {@code chatApiHelper} component (obtained via {@code ComponentUtil.getChatApiHelper()}).</p>
  *
  * <p>MJ-29: Filter values that fail validation ({@code fields.label},
  * {@code extra_queries}) are dropped silently from the resolved request. Rejected
@@ -148,8 +149,9 @@ public final class ChatRequestBody {
             throw new MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
         }
         final Map<String, List<String>> warnings = new HashMap<>();
-        final Map<String, String[]> fields = ChatApiHelper.parseFieldFilters(raw, warnings);
-        final String[] extraQueries = ChatApiHelper.parseExtraQueries(raw, warnings);
+        final ChatApiHelper chatApiHelper = ComponentUtil.getChatApiHelper();
+        final Map<String, String[]> fields = chatApiHelper.parseFieldFilters(raw, warnings);
+        final String[] extraQueries = chatApiHelper.parseExtraQueries(raw, warnings);
         return new ChatRequestBody(message, sessionId, fields, extraQueries, warnings);
     }
 

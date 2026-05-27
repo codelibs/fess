@@ -7,4 +7,8 @@
 	
 	<!-- Register systemProperties for test environment -->
 	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
+
+	<!-- Stateless helper used by v2 chat API handlers/tests (its getUserId DI path is exercised
+	     only in production; handler tests override the handler getUserId seam). -->
+	<component name="chatApiHelper" class="org.codelibs.fess.api.chat.ChatApiHelper" />
 </components>

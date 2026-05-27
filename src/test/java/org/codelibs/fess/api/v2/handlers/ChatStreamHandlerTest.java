@@ -183,44 +183,34 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         // ChatStreamHandler under the test harness, then assert the next request returns
         // the 429 JSON envelope.
         enableRagChat();
-        // SystemHelper is not registered in test_app.xml — register a stub whose
-        // getUsername() returns "guest". UserInfoHelper.getUserCode returns empty so the
-        // bucket key matches our pre-saturated empty-string key.
-        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
-            @Override
-            public String getUsername() {
-                return org.codelibs.fess.Constants.GUEST_USER;
-            }
-        };
-        ComponentUtil.register(systemHelper, "systemHelper");
-        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
-        final org.codelibs.fess.helper.UserInfoHelper userInfoHelper = new org.codelibs.fess.helper.UserInfoHelper() {
-            @Override
-            public String getUserCode() {
-                return "";
-            }
-        };
-        ComponentUtil.register(userInfoHelper, "userInfoHelper");
-        ComponentUtil.register(userInfoHelper, org.codelibs.fess.helper.UserInfoHelper.class.getCanonicalName());
+        // Fix the user id via the getUserId seam instead of stubbing SystemHelper/UserInfoHelper
+        // (smart-deploy components whose ComponentUtil.register stubs are not reliably honored once
+        // the shared test container has resolved the real ones across the full suite).
+        final String userId = "rate-limited-user";
         final LoginRateLimiter rl = new LoginRateLimiter();
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "", 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, userId, 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
         try {
             final CapturingResponse res = new CapturingResponse();
-            new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
+            final ChatStreamHandler handler = new ChatStreamHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return userId;
+                }
+            };
+            handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
             final String body = res.body();
-            // The handler may resolve a non-empty userId depending on harness state; pin the
-            // empty-userId scenario where the rate-limited path triggers.
-            if (body.contains("\"code\":\"rate_limited\"")) {
-                assertEquals(429, res.status);
-                assertEquals("application/json", contentTypeMimeOnly(res));
-                assertTrue(body.contains("too many chat requests"), body);
-                // Must NOT be SSE framing
-                assertFalse(body.contains("event: error"), body);
-            }
+            // The bucket for userId is pre-saturated (30/30), so this request is the 31st and must
+            // be rejected with the 429 JSON envelope — NOT an SSE event.
+            assertEquals(429, res.status);
+            assertEquals("application/json", contentTypeMimeOnly(res));
+            assertTrue(body.contains("\"code\":\"rate_limited\""), body);
+            assertTrue(body.contains("too many chat requests"), body);
+            // Must NOT be SSE framing
+            assertFalse(body.contains("event: error"), body);
         } finally {
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
             ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());

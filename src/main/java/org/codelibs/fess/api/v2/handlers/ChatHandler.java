@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.api.chat.ChatApiHelper;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
@@ -110,7 +109,7 @@ public class ChatHandler {
             return;
         }
 
-        final int maxLen = ChatApiHelper.getMaxMessageLength(fessConfig);
+        final int maxLen = ComponentUtil.getChatApiHelper().getMaxMessageLength(fessConfig);
         final ChatRequestBody body;
         try {
             body = ChatRequestBody.from(raw, maxLen);
@@ -124,7 +123,7 @@ public class ChatHandler {
             return;
         }
 
-        final String userId = ChatApiHelper.getUserId(req);
+        final String userId = getUserId(req);
         // Per-user chat rate limit. Pre-stream failure returns a proper 500 JSON envelope —
         // skipping rate limiting silently would be a security-affecting behavior, so we
         // match ChatStreamHandler and surface DI failures as INTERNAL_ERROR.
@@ -137,7 +136,7 @@ public class ChatHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
-        final int chatLimit = ChatApiHelper.getChatRateLimitPerMinute(fessConfig);
+        final int chatLimit = ComponentUtil.getChatApiHelper().getChatRateLimitPerMinute(fessConfig);
         if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
@@ -167,6 +166,19 @@ public class ChatHandler {
             logger.warn("[RAG] /api/v2/chat failed. error={}", e.getMessage(), e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "chat failed");
         }
+    }
+
+    /**
+     * Resolves the effective chat user id. Exposed as a seam so unit tests can override the user
+     * identity directly. {@code SystemHelper}/{@code UserInfoHelper} are smart-deploy components,
+     * so stubbing them via {@code ComponentUtil.register} is not reliable once the shared test
+     * container has resolved the real ones; overriding this method avoids that fragility.
+     *
+     * @param req the incoming HTTP request
+     * @return the user identifier (never null)
+     */
+    protected String getUserId(final HttpServletRequest req) {
+        return ComponentUtil.getChatApiHelper().getUserId(req);
     }
 
     /**

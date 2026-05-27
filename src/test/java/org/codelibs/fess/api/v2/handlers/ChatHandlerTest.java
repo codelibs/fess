@@ -196,55 +196,31 @@ public class ChatHandlerTest extends UnitFessTestCase {
         // of the eventual ChatClient state — the handler must short-circuit before any
         // ChatClient dispatch.
         enableRagChat();
-        // Register a SystemHelper stub whose getUsername() returns the literal "guest" rather
-        // than calling getRequestManager() (which has no DI binding in this harness). The
-        // chat handler then falls back to UserInfoHelper for the user code.
-        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
-            @Override
-            public String getUsername() {
-                return org.codelibs.fess.Constants.GUEST_USER;
-            }
-        };
-        ComponentUtil.register(systemHelper, "systemHelper");
-        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
-        // UserInfoHelper's getUserCode() returns "" or a session-bound code; the slim test
-        // harness has no session so a stub returning empty is sufficient.
-        final org.codelibs.fess.helper.UserInfoHelper userInfoHelper = new org.codelibs.fess.helper.UserInfoHelper() {
-            @Override
-            public String getUserCode() {
-                return "";
-            }
-        };
-        ComponentUtil.register(userInfoHelper, "userInfoHelper");
-        ComponentUtil.register(userInfoHelper, org.codelibs.fess.helper.UserInfoHelper.class.getCanonicalName());
+        // Fix the user id via the getUserId seam instead of stubbing SystemHelper/UserInfoHelper
+        // (smart-deploy components whose ComponentUtil.register stubs are not reliably honored once
+        // the shared test container has resolved the real ones across the full suite).
+        final String userId = "rate-limited-user";
         final LoginRateLimiter rl = new LoginRateLimiter();
-        // Pre-saturate the CHAT bucket for the guest user-code resolved by ChatHandler.
-        // The handler falls back to userCode for guests; since the test harness has no
-        // bound user, we burn through 30 slots for an arbitrary placeholder, then assert
-        // the next request (using the same placeholder) is rejected. The handler resolves
-        // its limit via the DI-managed LoginRateLimiter so we register our pre-saturated
-        // one under the canonical class name.
-        // The handler's getUserId() returns the empty/anon userCode under the test harness,
-        // so saturate the bucket for that key (an empty string) directly.
+        // Saturate the CHAT bucket for the fixed user id the handler will resolve.
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "", 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, userId, 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
         try {
             final CapturingResponse res = new CapturingResponse();
-            new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
-            // The handler may resolve a non-empty userId via UserInfoHelper, in which case the
-            // pre-saturated empty-key bucket is irrelevant. Accept either: 429 (limit hit on
-            // the resolved userId, exercising the new code path) OR a different-than-429 if
-            // the resolved userId got its own fresh bucket. Pin the EXPECTED case here with
-            // an explicit empty-userId scenario to make the failure mode legible.
-            assertTrue(res.status == 429 || res.status == 200 || res.status == 500,
-                    "unexpected status: " + res.status + " body=" + res.body());
-            if (res.status == 429) {
-                assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
-                assertTrue(res.body().contains("too many chat requests"), res.body());
-            }
+            final ChatHandler handler = new ChatHandler() {
+                @Override
+                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                    return userId;
+                }
+            };
+            handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+            // The bucket for userId is pre-saturated (30/30), so this request is the 31st and must
+            // be rejected deterministically before any ChatClient dispatch.
+            assertEquals(429, res.status);
+            assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+            assertTrue(res.body().contains("too many chat requests"), res.body());
         } finally {
             // Reset to a fresh limiter so neighbors don't see our saturated bucket.
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");

@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.api.chat.ChatApiHelper;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -105,7 +104,7 @@ public class ChatSessionClearHandler {
             return;
         }
 
-        final String userId = ChatApiHelper.getUserId(req);
+        final String userId = getUserId(req);
 
         // Apply the same rate-limit as POST /api/v2/chat — clearing a session still
         // touches backend state and should be subject to abuse protection.
@@ -117,7 +116,7 @@ public class ChatSessionClearHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
-        final int chatLimit = ChatApiHelper.getChatRateLimitPerMinute(fessConfig);
+        final int chatLimit = ComponentUtil.getChatApiHelper().getChatRateLimitPerMinute(fessConfig);
         if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
@@ -138,5 +137,18 @@ public class ChatSessionClearHandler {
             logger.warn("[RAG] DELETE /api/v2/chat/sessions/{} failed. error={}", sessionId, e.getMessage(), e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
         }
+    }
+
+    /**
+     * Resolves the effective chat user id. Exposed as a seam so unit tests can override the user
+     * identity directly. {@code SystemHelper}/{@code UserInfoHelper} are smart-deploy components,
+     * so stubbing them via {@code ComponentUtil.register} is not reliable once the shared test
+     * container has resolved the real ones; overriding this method avoids that fragility.
+     *
+     * @param req the incoming HTTP request
+     * @return the user identifier (never null)
+     */
+    protected String getUserId(final HttpServletRequest req) {
+        return ComponentUtil.getChatApiHelper().getUserId(req);
     }
 }

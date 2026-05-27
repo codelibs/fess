@@ -45,14 +45,20 @@ import jakarta.servlet.http.HttpServletRequest;
  * methods live here and only the v2 handlers call them. v1 refactoring is a
  * separate task.</p>
  *
- * <p>All methods are static utility methods; no DI registration is required.</p>
+ * <p>This is a DI-managed singleton helper (registered as {@code chatApiHelper}); obtain it via
+ * {@link org.codelibs.fess.util.ComponentUtil#getChatApiHelper()} and call the instance methods.
+ * Helpers in Fess are singletons accessed through {@code ComponentUtil}, not static utility
+ * classes.</p>
  */
-public final class ChatApiHelper {
+public class ChatApiHelper {
 
     private static final Logger logger = LogManager.getLogger(ChatApiHelper.class);
 
-    private ChatApiHelper() {
-        // Utility class — no instances.
+    /**
+     * Default constructor for ChatApiHelper.
+     */
+    public ChatApiHelper() {
+        // Default constructor
     }
 
     /**
@@ -74,7 +80,7 @@ public final class ChatApiHelper {
      * @return a map of validated field filters, or an empty map when none are present
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
+    public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
         // Support nested fields object: {"fields": {"label": ... }}
         Object labelsRaw = null;
         final Object fieldsObj = raw.get("fields");
@@ -150,7 +156,7 @@ public final class ChatApiHelper {
      * @return array of validated extra query strings; empty array when none present
      */
     @SuppressWarnings("unchecked")
-    public static String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
+    public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
         final Object exqRaw = raw.get("extra_queries");
         if (exqRaw == null) {
             return new String[0];
@@ -206,13 +212,26 @@ public final class ChatApiHelper {
      * @param req the incoming HTTP request
      * @return the user identifier (never null)
      */
-    public static String getUserId(final HttpServletRequest req) {
+    public String getUserId(final HttpServletRequest req) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final String username = systemHelper.getUsername();
+        return resolveUserId(systemHelper.getUsername(), () -> ComponentUtil.getUserInfoHelper().getUserCode());
+    }
+
+    /**
+     * Pure resolution logic behind {@link #getUserId(HttpServletRequest)}, separated so the
+     * branching can be unit-tested without the DI container. Prefers a non-guest username;
+     * otherwise falls back to the guest user-code provided by the supplier (evaluated lazily so
+     * the cookie-bound code is only resolved for guest visitors).
+     *
+     * @param username the authenticated username (may be {@link Constants#GUEST_USER})
+     * @param guestUserCodeSupplier supplies the fallback user-code for guest visitors
+     * @return the effective user identifier (never null)
+     */
+    String resolveUserId(final String username, final java.util.function.Supplier<String> guestUserCodeSupplier) {
         if (!Constants.GUEST_USER.equals(username)) {
             return username;
         }
-        return ComponentUtil.getUserInfoHelper().getUserCode();
+        return guestUserCodeSupplier.get();
     }
 
     /**
@@ -222,7 +241,7 @@ public final class ChatApiHelper {
      * @param fessConfig active Fess config
      * @return max chat message length in characters
      */
-    public static int getMaxMessageLength(final FessConfig fessConfig) {
+    public int getMaxMessageLength(final FessConfig fessConfig) {
         try {
             return Integer.parseInt(fessConfig.getSystemProperty("rag.chat.message.max.length", "4000"));
         } catch (final NumberFormatException e) {
@@ -238,7 +257,7 @@ public final class ChatApiHelper {
      * @param fessConfig active Fess config
      * @return max chat requests per minute per user, or {@code <= 0} to disable
      */
-    public static int getChatRateLimitPerMinute(final FessConfig fessConfig) {
+    public int getChatRateLimitPerMinute(final FessConfig fessConfig) {
         try {
             return Integer.parseInt(fessConfig.getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
         } catch (final NumberFormatException e) {

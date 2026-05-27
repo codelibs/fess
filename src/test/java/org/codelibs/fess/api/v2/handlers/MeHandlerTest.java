@@ -23,11 +23,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
@@ -75,41 +73,26 @@ public class MeHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_authenticatedUser_rolesGroupsPermissionsAreAlwaysArrays() throws Exception {
-        // MJ-28: register a stub login assist that returns a user with null arrays for
-        // roles/groups/permissions. MeHandler must still emit JSON arrays (not null).
-        final StubFessLoginAssist stub = new StubFessLoginAssist("eve");
-        ComponentUtil.register(stub, "fessLoginAssist");
-        ComponentUtil.register(stub, FessLoginAssist.class.getCanonicalName());
-        try {
-            final CapturingResponse res = new CapturingResponse();
-            new MeHandler().handle(new StubRequest("GET", "/api/v2/auth/me"), res);
-            assertEquals(res.body(), 200, res.status);
-            assertTrue(res.body(), res.body().contains("\"authenticated\":true"));
-            // The user shape must include roles/groups/permissions as JSON arrays.
-            assertTrue("roles must be [] not null: " + res.body(), res.body().contains("\"roles\":[]"));
-            assertTrue("groups must be [] not null: " + res.body(), res.body().contains("\"groups\":[]"));
-            assertTrue("permissions must be [] not null: " + res.body(), res.body().contains("\"permissions\":[]"));
-            // Sanity: null literal must not appear for these fields.
-            assertFalse(res.body(), res.body().contains("\"roles\":null"));
-        } finally {
-            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
-        }
-    }
-
-    /** Stub FessLoginAssist that pretends a named user is logged in with null arrays. */
-    private static class StubFessLoginAssist extends FessLoginAssist {
-        private static final long serialVersionUID = 1L;
-        private final String userId;
-
-        StubFessLoginAssist(final String userId) {
-            this.userId = userId;
-        }
-
-        @Override
-        public OptionalThing<FessUserBean> getSavedUserBean() {
-            return OptionalThing.of(new FessUserBean(new StubFessUser(userId)));
-        }
+        // MJ-28: a logged-in user whose roles/groups/permissions arrays are null. MeHandler must
+        // still emit JSON arrays (not null). The user is supplied by overriding the getSavedUserBean
+        // seam rather than registering a FessLoginAssist stub via ComponentUtil.register (which is
+        // not reliably honored once the shared test container can resolve the real component).
+        final CapturingResponse res = new CapturingResponse();
+        final MeHandler handler = new MeHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser("eve")));
+            }
+        };
+        handler.handle(new StubRequest("GET", "/api/v2/auth/me"), res);
+        assertEquals(res.body(), 200, res.status);
+        assertTrue(res.body(), res.body().contains("\"authenticated\":true"));
+        // The user shape must include roles/groups/permissions as JSON arrays.
+        assertTrue("roles must be [] not null: " + res.body(), res.body().contains("\"roles\":[]"));
+        assertTrue("groups must be [] not null: " + res.body(), res.body().contains("\"groups\":[]"));
+        assertTrue("permissions must be [] not null: " + res.body(), res.body().contains("\"permissions\":[]"));
+        // Sanity: null literal must not appear for these fields.
+        assertFalse(res.body(), res.body().contains("\"roles\":null"));
     }
 
     /** Minimal FessUser with null role/group/permission arrays. */

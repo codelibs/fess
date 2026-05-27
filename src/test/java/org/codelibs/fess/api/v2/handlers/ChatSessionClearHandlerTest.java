@@ -159,10 +159,9 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         // the limiter DI is absent, so we expect INTERNAL_ERROR (500) — confirming
         // the session_id was accepted and processing continued past the pattern check.
         enableRagChat();
-        enableSystemHelpers();
         final String maxId = "a".repeat(128);
         final CapturingResponse res = new CapturingResponse();
-        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, maxId);
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, maxId);
         // Must NOT be a 400 invalid_request from the pattern guard
         assertFalse(res.body().contains("invalid session_id"), "128-char session_id must pass pattern validation, got: " + res.body());
     }
@@ -171,9 +170,8 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     public void test_validSessionIdWithDotAndHyphen_accepted() throws Exception {
         // Dots and hyphens are valid per the pattern.
         enableRagChat();
-        enableSystemHelpers();
         final CapturingResponse res = new CapturingResponse();
-        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "sess.ion-id_01");
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, "sess.ion-id_01");
         assertFalse(res.body().contains("invalid session_id"),
                 "session_id with dot/hyphen/underscore must pass pattern, got: " + res.body());
     }
@@ -183,11 +181,10 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     @Test
     public void test_rateLimited_returns429() throws Exception {
         enableRagChat();
-        enableSystemHelpers();
         final LoginRateLimiter rl = new LoginRateLimiter();
-        // Pre-saturate the CHAT bucket for the "test-user" userId resolved by enableSystemHelpers().
+        // Pre-saturate the CHAT bucket for the "test-user" userId returned by handlerForUser(...).
         // LoginRateLimiter.allow() denies empty/null keys (MJ-6), so the bucket key must match
-        // the non-empty userCode returned by the stub UserInfoHelper.
+        // the non-empty user id the handler resolves.
         for (int i = 0; i < 30; i++) {
             rl.allow(LoginRateLimiter.Scope.CHAT, "test-user", 30, 60);
         }
@@ -195,7 +192,7 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
         try {
             final CapturingResponse res = new CapturingResponse();
-            new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "valid-session-1");
+            handlerForUser("test-user").handle(new StubRequest("DELETE"), res, "valid-session-1");
             assertEquals(429, res.status);
             assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
             assertTrue(res.body().contains("too many chat requests"), res.body());
@@ -211,7 +208,6 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     @Test
     public void test_sessionNotFound_returns404() throws Exception {
         enableRagChat();
-        enableSystemHelpers();
         registerLimiter();
         // Register a ChatSessionManager that always returns false from clearSession
         final ChatSessionManager notFoundManager = new ChatSessionManager() {
@@ -224,7 +220,7 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(notFoundManager, ChatSessionManager.class.getCanonicalName());
 
         final CapturingResponse res = new CapturingResponse();
-        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "nonexistent-session");
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, "nonexistent-session");
         assertEquals(res.body(), 404, res.status);
         assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
         assertTrue(res.body().contains("session not found"), res.body());
@@ -235,7 +231,6 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     @Test
     public void test_successPath_returnsEnvelopeWithClearedTrue() throws Exception {
         enableRagChat();
-        enableSystemHelpers();
         registerLimiter();
         // Register a ChatSessionManager that always clears successfully
         final ChatSessionManager mockManager = new ChatSessionManager() {
@@ -248,7 +243,7 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(mockManager, ChatSessionManager.class.getCanonicalName());
 
         final CapturingResponse res = new CapturingResponse();
-        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "sess-001");
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, "sess-001");
         assertEquals(res.body(), 200, res.status);
         final String body = res.body();
         // v2 envelope structure
@@ -263,7 +258,6 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     @Test
     public void test_successPath_sessionIdEchoedBack() throws Exception {
         enableRagChat();
-        enableSystemHelpers();
         registerLimiter();
         final ChatSessionManager mockManager = new ChatSessionManager() {
             @Override
@@ -276,7 +270,7 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
 
         final String sid = "my.session-id_42";
         final CapturingResponse res = new CapturingResponse();
-        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, sid);
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, sid);
         assertEquals(res.body(), 200, res.status);
         assertTrue(res.body(), res.body().contains("\"session_id\":\"" + sid + "\""));
     }
@@ -298,7 +292,6 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         // When ChatSessionManager.clearSession throws an unexpected RuntimeException,
         // the handler must return HTTP 500 with error code "internal_error".
         enableRagChat();
-        enableSystemHelpers();
         registerLimiter();
         final org.codelibs.fess.chat.ChatSessionManager throwingManager = new org.codelibs.fess.chat.ChatSessionManager() {
             @Override
@@ -310,7 +303,7 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(throwingManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
 
         final CapturingResponse res = new CapturingResponse();
-        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "sess-err-001");
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, "sess-err-001");
         assertEquals(res.body(), 500, res.status);
         final String body = res.body();
         assertTrue(body.contains("\"code\":\"internal_error\""), "must return internal_error code, got: " + body);
@@ -347,26 +340,21 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         });
     }
 
-    private static void enableSystemHelpers() {
-        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+    /**
+     * Creates a handler whose effective user id is fixed by overriding the {@code getUserId} seam.
+     * This keeps the test off the real {@code SystemHelper}/{@code UserInfoHelper} DI path: both are
+     * smart-deploy components that the shared test container resolves for real once warmed by an
+     * earlier test, so stubbing them via {@code ComponentUtil.register} is not reliable across the
+     * full {@code mvn test} suite (the stub is only honored while the container cannot resolve the
+     * real component). The non-empty id also satisfies LoginRateLimiter's empty-key guard (MJ-6).
+     */
+    private static ChatSessionClearHandler handlerForUser(final String userId) {
+        return new ChatSessionClearHandler() {
             @Override
-            public String getUsername() {
-                return org.codelibs.fess.Constants.GUEST_USER;
+            protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
+                return userId;
             }
         };
-        ComponentUtil.register(systemHelper, "systemHelper");
-        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
-
-        final org.codelibs.fess.helper.UserInfoHelper userInfoHelper = new org.codelibs.fess.helper.UserInfoHelper() {
-            @Override
-            public String getUserCode() {
-                // Return a non-empty code so LoginRateLimiter.allow() does not deny
-                // on the empty-key guard (MJ-6: empty key → always deny).
-                return "test-user";
-            }
-        };
-        ComponentUtil.register(userInfoHelper, "userInfoHelper");
-        ComponentUtil.register(userInfoHelper, org.codelibs.fess.helper.UserInfoHelper.class.getCanonicalName());
     }
 
     private static void registerLimiter() {

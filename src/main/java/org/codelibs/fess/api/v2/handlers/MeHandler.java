@@ -82,7 +82,7 @@ public class MeHandler {
         }
         OptionalThing<FessUserBean> userBean;
         try {
-            userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+            userBean = getSavedUserBean();
         } catch (final Exception e) {
             // In environments where the login subsystem is not fully wired (e.g. null session
             // bean) treat the caller as anonymous. Log WARN for unexpected errors so ops can
@@ -101,5 +101,16 @@ public class MeHandler {
             payload.put("authenticated", false);
         }
         V2EnvelopeWriter.writeSuccess(res, payload);
+    }
+
+    /**
+     * Resolves the saved login user bean. Exposed as a seam so unit tests can supply a stub user
+     * (or an empty/anonymous result) by overriding this method, instead of registering a
+     * {@code FessLoginAssist} stub via {@code ComponentUtil.register}.
+     *
+     * @return the saved user bean, or empty when no user is logged in
+     */
+    protected OptionalThing<FessUserBean> getSavedUserBean() {
+        return ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
     }
 }
