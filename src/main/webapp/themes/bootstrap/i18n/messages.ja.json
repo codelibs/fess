@@ -124,5 +124,11 @@
   "facet.active_filters": "選択中のフィルター",
   "facet.remove": "解除",
   "help.title": "ヘルプ",
-  "nav.help": "ヘルプ"
+  "nav.help": "ヘルプ",
+  "nav.profile": "プロファイル",
+  "nav.administration": "管理",
+  "nav.eol_warning": "このプロダクトはサポート終了しています",
+  "nav.dev_mode_warning": "開発モードで動作中",
+  "footer.copyright": "Powered by Fess",
+  "footer.back_to_top": "トップに戻る"
 }

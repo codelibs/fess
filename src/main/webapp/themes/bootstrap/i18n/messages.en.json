@@ -124,5 +124,11 @@
   "facet.active_filters": "Active filters",
   "facet.remove": "Remove",
   "help.title": "Help",
-  "nav.help": "Help"
+  "nav.help": "Help",
+  "nav.profile": "Profile",
+  "nav.administration": "Administration",
+  "nav.eol_warning": "This product has reached end-of-life",
+  "nav.dev_mode_warning": "Development mode active",
+  "footer.copyright": "Powered by Fess",
+  "footer.back_to_top": "Back to top"
 }
