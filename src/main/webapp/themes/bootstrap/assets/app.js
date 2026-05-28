@@ -6,6 +6,7 @@ import * as chat from "./chat.js";
 import * as router from "./router.js";
 import * as errorView from "./error.js";
 import * as profile from "./profile.js";
+import * as help from "./help.js";
 
 /** Show one SPA view section and hide the rest. */
 function showView(id) {
@@ -54,12 +55,13 @@ function registerRoutes() {
     }
   );
 
-  // Help view placeholder.
+  // Help view.
   router.register(
     path => path === "/help",
     () => {
       setSearchFormVisible(false);
       showView("help-view");
+      help.attach();
     }
   );
 
