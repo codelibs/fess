@@ -93,6 +93,10 @@ public class MeHandlerTest extends UnitFessTestCase {
         assertTrue("permissions must be [] not null: " + res.body(), res.body().contains("\"permissions\":[]"));
         // Sanity: null literal must not appear for these fields.
         assertFalse(res.body(), res.body().contains("\"roles\":null"));
+        // MJ-35: username, name, and admin fields must be present.
+        assertTrue("username must be present: " + res.body(), res.body().contains("\"username\":"));
+        assertTrue("name must be present: " + res.body(), res.body().contains("\"name\":"));
+        assertTrue("admin must be present: " + res.body(), res.body().contains("\"admin\":"));
     }
 
     /** Minimal FessUser with null role/group/permission arrays. */

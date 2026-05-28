@@ -55,11 +55,22 @@ public final class UserPayloads {
      */
     public static Map<String, Object> toJson(final FessUserBean u) {
         final Map<String, Object> userMap = new LinkedHashMap<>();
-        userMap.put("user_id", u.getUserId());
+        final String userId = u.getUserId();
+        userMap.put("user_id", userId);
+        // MJ-35: expose display-friendly name and username for the SPA dropdown.
+        // user_id is the canonical identifier (= getName()); expose it as "username"
+        // for UI use.  A separate "name" alias is the same value for now — future
+        // backends can supply a display name independently without a wire break.
+        userMap.put("username", userId);
+        userMap.put("name", userId);
         userMap.put("roles", arrayOrEmpty(u.getRoles()));
         userMap.put("groups", arrayOrEmpty(u.getGroups()));
         userMap.put("permissions", arrayOrEmpty(u.getPermissions()));
         userMap.put("editable", u.isEditable());
+        // MJ-35: derive admin flag from roles so the SPA can conditionally show the
+        // Administration link without a separate API call.  The "admin" role name is
+        // the canonical Fess admin role (same constant used by FessAdminAction).
+        userMap.put("admin", u.hasRole("admin"));
         return userMap;
     }
 
