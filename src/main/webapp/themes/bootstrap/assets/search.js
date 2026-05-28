@@ -133,6 +133,19 @@ function buildGoUrl(originalUrl, docId, queryId, order, rt) {
   return goUrl;
 }
 
+/**
+ * Return the plain-text title for a result document, stripping any
+ * server-injected highlight markup (<strong>/<em>) from content_title.
+ * Safe to use in aria-label and other text-only contexts.
+ *
+ * @param {Object} d - result document object
+ * @returns {string}
+ */
+function plainTitle(d) {
+  const raw = d.content_title || d.title || d.url || "";
+  return String(raw).replace(/<\/?(?:strong|em)>/g, "");
+}
+
 function buildResultCard(d, queryId, order) {
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
@@ -167,7 +180,6 @@ function buildResultCard(d, queryId, order) {
 
   const h2 = el("h2");
   const a = el("a", {
-    text: d.title || d.url || "",
     attrs: {
       href: goHref,
       // Keep the real URL visible on hover for usability / accessibility.
@@ -175,6 +187,11 @@ function buildResultCard(d, queryId, order) {
     },
     dataset: { resultLink: "1" }
   });
+  if (d.content_title) {
+    a.innerHTML = renderHighlightedSnippet(d.content_title);
+  } else {
+    a.textContent = d.title || d.url || "";
+  }
   h2.appendChild(a);
   body.appendChild(h2);
 
@@ -207,7 +224,10 @@ function buildResultCard(d, queryId, order) {
   const moreLink = el("a", {
     className: "result-more",
     text: t("labels.search_result_more"),
-    attrs: { href: "#result-" + (order - 1) }
+    attrs: {
+      href: "#result-" + (order - 1),
+      "aria-label": t("labels.search_result_more") + " - " + plainTitle(d)
+    }
   });
   body.appendChild(moreLink);
 
