@@ -1,5 +1,6 @@
 import * as api from "./api.js";
 import * as i18n from "./i18n.js";
+import { t } from "./i18n.js";
 import * as auth from "./auth.js";
 import * as search from "./search.js";
 import * as chat from "./chat.js";
@@ -10,7 +11,7 @@ import * as help from "./help.js";
 
 /** Show one SPA view section and hide the rest. */
 function showView(id) {
-  const viewIds = ["results-view", "error-view", "profile-view", "help-view"];
+  const viewIds = ["home-view", "results-view", "error-view", "profile-view", "help-view"];
   for (const vid of viewIds) {
     const el = document.getElementById(vid);
     if (!el) continue;
@@ -33,8 +34,124 @@ function setSearchFormVisible(visible) {
   }
 }
 
+/**
+ * Render EOL / development-mode warning indicators in #warning-indicators.
+ * Called once after api.init() so getConfig() is populated.
+ */
+function renderWarnings() {
+  const host = document.getElementById("warning-indicators");
+  if (!host) return;
+  while (host.firstChild) host.removeChild(host.firstChild);
+  const features = api.getConfig()?.features || {};
+
+  if (features.eoled) {
+    const span = document.createElement("span");
+    span.className = "text-warning ms-2";
+    span.title = t("nav.eol_warning");
+    span.setAttribute("aria-label", t("nav.eol_warning"));
+    const icon = document.createElement("i");
+    icon.className = "fa fa-exclamation-triangle";
+    icon.setAttribute("aria-hidden", "true");
+    span.appendChild(icon);
+    host.appendChild(span);
+  }
+
+  if (features.development_mode) {
+    const span = document.createElement("span");
+    span.className = "text-info ms-2";
+    span.title = t("nav.dev_mode_warning");
+    span.setAttribute("aria-label", t("nav.dev_mode_warning"));
+    const icon = document.createElement("i");
+    icon.className = "fa fa-flask";
+    icon.setAttribute("aria-hidden", "true");
+    span.appendChild(icon);
+    host.appendChild(span);
+  }
+}
+
+/**
+ * Fetch popular words from /api/v2/popular-words and render them in #home-popular-words.
+ */
+async function renderHomePopularWords() {
+  const host = document.getElementById("home-popular-words");
+  if (!host) return;
+  try {
+    const data = await api.get("/popular-words");
+    const words = data?.popular_words || data?.words || [];
+    while (host.firstChild) host.removeChild(host.firstChild);
+    if (words.length === 0) return;
+    const label = document.createElement("span");
+    label.className = "me-2";
+    label.textContent = t("search.popular_searches") + ":";
+    host.appendChild(label);
+    words.slice(0, 5).forEach((w, i) => {
+      if (i > 0) host.appendChild(document.createTextNode(" "));
+      const a = document.createElement("a");
+      a.href = "/search?q=" + encodeURIComponent(w);
+      a.setAttribute("data-spa", "");
+      a.textContent = w;
+      host.appendChild(a);
+    });
+  } catch { /* popular words are optional — fail silently */ }
+}
+
+/** Attach the home view search form submit handler and render popular words. */
+function attachHomeView() {
+  const form = document.getElementById("home-search-form");
+  if (form && !form.dataset.attached) {
+    form.dataset.attached = "1";
+    form.addEventListener("submit", ev => {
+      ev.preventDefault();
+      const input = document.getElementById("home-search-input");
+      const q = input ? input.value.trim() : "";
+      if (q) {
+        router.navigate("/search?q=" + encodeURIComponent(q));
+      }
+    });
+  }
+  // Apply i18n placeholder manually (data-i18n-placeholder is applied by i18n.js
+  // on load, but the element may not have existed at that point).
+  const input = document.getElementById("home-search-input");
+  if (input && !input.placeholder) {
+    input.placeholder = t("search.placeholder");
+  }
+  // Apply button text
+  const btn = document.querySelector("#home-search-form [data-i18n='search.button']");
+  if (btn && !btn.textContent.trim()) {
+    btn.textContent = t("search.button");
+  }
+  renderHomePopularWords();
+}
+
+/** Attach back-to-top button behaviour. */
+function attachBackToTop() {
+  const btn = document.getElementById("back-to-top");
+  if (!btn) return;
+  window.addEventListener("scroll", () => {
+    btn.style.display = window.scrollY > 200 ? "block" : "none";
+  });
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+/** Returns true when the current URL contains a non-empty q= parameter. */
+function hasSearchQuery() {
+  return new URLSearchParams(location.search).get("q")?.trim().length > 0;
+}
+
 function registerRoutes() {
-  // Search / home routes — show results view and run search.
+  // Home route — "/" with no q= parameter shows the centered home view.
+  router.register(
+    path => (path === "/" || path === "/index" || path === "/index.html") && !hasSearchQuery(),
+    () => {
+      setSearchFormVisible(false);
+      showView("home-view");
+      attachHomeView();
+    }
+  );
+
+  // Search / results routes — show results view and run search.
   router.register(
     path => path === "/" || path === "/search" || path === "/index" || path === "/index.html",
     () => {
@@ -93,12 +210,17 @@ async function main() {
     console.error("Fess /ui/config failed:", e);
   }
   await i18n.init();
+  // Render warning indicators after config is loaded.
+  renderWarnings();
   await auth.attach();
   search.attach();
   chat.attach(); // no-op when rag_chat_enabled is false
   // After login, refresh results without re-attaching event listeners.
   // search.attach() is idempotent but search.refresh() is semantically cleaner.
   document.addEventListener("fess:auth:login", () => search.refresh());
+
+  // Wire back-to-top button.
+  attachBackToTop();
 
   // Client-side routing: register routes then attach listeners and dispatch.
   registerRoutes();
