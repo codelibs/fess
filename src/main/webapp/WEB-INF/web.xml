@@ -144,7 +144,7 @@
     rateLimitFilter, loadControlFilter, and corsFilter on the REQUEST dispatch.
 
     staticThemeFilter intercepts GET requests and RequestDispatcher.forward()s them
-    to /theme-view. Filters mapped later in the chain that only declare
+    to /theme/view/. Filters mapped later in the chain that only declare
     <dispatcher>REQUEST</dispatcher> will NOT run on the forwarded request, so any
     filter required to apply to static-theme asset/index responses must be ordered
     before this mapping. Reordering — rather than adding FORWARD dispatcher scopes
@@ -181,7 +181,7 @@
 
   <filter-mapping>
     <filter-name>lastaToActionFilter</filter-name>
-    <url-pattern>/theme-view</url-pattern>
+    <url-pattern>/theme/view/</url-pattern>
     <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
