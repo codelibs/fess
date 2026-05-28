@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Shared helper that produces the canonical v2 user JSON shape.
@@ -67,10 +68,11 @@ public final class UserPayloads {
         userMap.put("groups", arrayOrEmpty(u.getGroups()));
         userMap.put("permissions", arrayOrEmpty(u.getPermissions()));
         userMap.put("editable", u.isEditable());
-        // MJ-35: derive admin flag from roles so the SPA can conditionally show the
-        // Administration link without a separate API call.  The "admin" role name is
-        // the canonical Fess admin role (same constant used by FessAdminAction).
-        userMap.put("admin", u.hasRole("admin"));
+        // MJ-35: derive admin flag the same way FessAdminAction does, honoring the
+        // configured authentication.admin.roles list (defaults to "admin" but can be
+        // customised per deployment). Ensures the SPA dropdown's "Administration"
+        // visibility stays in lock-step with the actual authorization check.
+        userMap.put("admin", u.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray()));
         return userMap;
     }
 
