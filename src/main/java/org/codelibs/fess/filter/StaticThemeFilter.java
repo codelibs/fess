@@ -58,13 +58,43 @@ public class StaticThemeFilter implements Filter {
 
     private static final Logger logger = LogManager.getLogger(StaticThemeFilter.class);
 
-    /** Forwarded URL. Must NOT itself be intercepted to avoid infinite recursion. */
-    static final String THEME_VIEW_PATH = "/theme-view";
+    /**
+     * Forwarded URL. The trailing slash is required so LastaFlute's
+     * {@code RequestRoutingFilter} does not 301-redirect to the canonical form
+     * (which would leak {@code /theme/view/} into the browser address bar).
+     * Must NOT itself be intercepted to avoid infinite recursion.
+     */
+    static final String THEME_VIEW_PATH = "/theme/view/";
 
-    /** URI prefixes that bypass the filter even when a static theme is active. */
+    /**
+     * URI prefixes that bypass the filter even when a static theme is active.
+     *
+     * <p>Each entry that does NOT end with {@code "/"} matches both the bare path and
+     * any sub-path (see {@link #isPassThrough(String)}). The list intentionally covers:
+     * <ul>
+     *   <li>Admin/API/SSO infrastructure that the SPA cannot replace
+     *       ({@code /admin}, {@code /api}, {@code /sso}, {@code /logout}).</li>
+     *   <li>Account flows that depend on Fess JSP forms
+     *       ({@code /login} — required for the JSP login form invoked by
+     *       {@code FessAdminAction} redirect targets).
+     *       Note: {@code /profile} is intentionally <em>not</em> in this list so that
+     *       the static SPA theme can handle the profile page.</li>
+     *   <li>Error routes ({@code /error}) are intentionally <em>not</em> in this list;
+     *       when a static theme is active the SPA handles error display.
+     *       {@link org.codelibs.fess.app.web.theme.ThemeViewAction} detects the
+     *       {@code /error} prefix and sets appropriate HTTP status and diagnostic
+     *       response headers before serving the SPA entry.</li>
+     *   <li>Static legacy theme assets ({@code /css}, {@code /js}, {@code /images}).</li>
+     *   <li>Crawler/system endpoints ({@code /go}, {@code /thumbnail}, {@code /osdd},
+     *       {@code /cache}, {@code /favicon.ico}, {@code /robots.txt},
+     *       {@code /sitemap.xml}, {@code /manifest.webmanifest}, {@code /.well-known}).</li>
+     *   <li>The forward target itself ({@link #THEME_VIEW_PATH}) to prevent recursion.</li>
+     * </ul>
+     */
     private static final List<String> PASS_THROUGH_PREFIXES = List.of(//
             "/admin/", "/admin", //
             "/api/", //
+            "/login", //
             "/css/", "/js/", "/images/", //
             "/go", "/thumbnail", "/osdd", //
             "/sso/", "/logout", "/cache", //

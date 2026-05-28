@@ -109,7 +109,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubRequest req = new StubRequest("GET", "/search");
         final StubChain chain = new StubChain();
         f.doFilter(req, new StubResponse(), chain);
-        assertEquals("/theme-view", req.forwardedTo);
+        assertEquals("/theme/view/", req.forwardedTo);
         assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
         // chain should NOT have been called
         assertEquals(false, chain.called);
@@ -124,7 +124,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubRequest req = new StubRequest("GET", "/themes/alpha/assets/app.js");
         final StubChain chain = new StubChain();
         f.doFilter(req, new StubResponse(), chain);
-        assertEquals("/theme-view", req.forwardedTo);
+        assertEquals("/theme/view/", req.forwardedTo);
         assertEquals("ASSET", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
         assertEquals("assets/app.js", req.getAttribute(ThemeViewAction.REQ_ATTR_ASSET_PATH));
         assertEquals(false, chain.called);
@@ -156,6 +156,77 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
             f.doFilter(req, new StubResponse(), chain);
             assertTrue(chain.called, "Expected pass-through for " + uri);
         }
+    }
+
+    @Test
+    public void test_passesThroughForJspAccountAndErrorPaths() throws Exception {
+        // /login still relies on Fess JSP forms and must always pass through.
+        // /error and /profile are now forwarded to the SPA when a static theme is
+        // active (see test_forwardsIndexForErrorAndProfilePaths below).
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        for (final String uri : new String[] { //
+                "/login", "/login/", "/login/login" }) {
+            final StubRequest req = new StubRequest("GET", uri);
+            final StubChain chain = new StubChain();
+            f.doFilter(req, new StubResponse(), chain);
+            assertTrue(chain.called, "Expected pass-through for " + uri);
+            assertNull(req.forwardedTo, "Must not forward to theme view: " + uri);
+        }
+    }
+
+    @Test
+    public void test_forwardsIndexForErrorAndProfilePaths() throws Exception {
+        // /error/* and /profile are SPA routes when a static theme is active.
+        // The SPA reads the pathname and renders the appropriate error or profile page.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        for (final String uri : new String[] { //
+                "/error/notFound", "/profile" }) {
+            final StubRequest req = new StubRequest("GET", uri);
+            final StubChain chain = new StubChain();
+            f.doFilter(req, new StubResponse(), chain);
+            org.junit.jupiter.api.Assertions.assertEquals("/theme/view/", req.forwardedTo, "Expected forward to theme view for " + uri);
+            org.junit.jupiter.api.Assertions.assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE),
+                    "Expected INDEX mode for " + uri);
+            assertFalse(chain.called, "Chain must not be called for SPA route: " + uri);
+        }
+    }
+
+    @Test
+    public void test_forwardsIndexForErrorPath_withQueryString() throws Exception {
+        // Query strings (e.g. /error/notFound?url=...) must not affect routing:
+        // getRequestURI() strips the query string per the Servlet spec, so a request
+        // to /error/notFound?url=... still routes to the SPA index.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        final StubRequest req = new StubRequest("GET", "/error/notFound");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+        assertEquals("/theme/view/", req.forwardedTo);
+        assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
+        assertFalse(chain.called);
+    }
+
+    @Test
+    public void test_passesThroughForThemeViewPath_toPreventRecursion() throws Exception {
+        // /theme/view/ is the forward target itself; it must always pass through
+        // to prevent infinite recursion when StaticThemeFilter intercepts the forward.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        final StubRequest req = new StubRequest("GET", "/theme/view/");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+        assertTrue(chain.called, "Expected pass-through for /theme/view/ to prevent recursion");
+        assertNull(req.forwardedTo, "Must not forward to theme view for /theme/view/");
     }
 
     @Test
@@ -259,9 +330,9 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubChain chain = new StubChain();
         f.doFilter(req, new StubResponse(), chain);
 
-        // Must pass through — not forwarded to /theme-view.
+        // Must pass through — not forwarded to /theme/view/.
         assertTrue(chain.called, "spaFallback=false must pass non-asset requests through to original routes");
-        assertNull(req.forwardedTo, "spaFallback=false must not forward to /theme-view for non-asset requests");
+        assertNull(req.forwardedTo, "spaFallback=false must not forward to /theme/view/ for non-asset requests");
     }
 
     @Test
@@ -278,16 +349,16 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubChain chain = new StubChain();
         f.doFilter(req, new StubResponse(), chain);
 
-        // Must forward to /theme-view with INDEX mode.
+        // Must forward to /theme/view/ with INDEX mode.
         assertFalse(chain.called, "spaFallback=true must not pass through non-asset requests");
-        org.junit.jupiter.api.Assertions.assertEquals("/theme-view", req.forwardedTo, "spaFallback=true must forward to /theme-view");
+        org.junit.jupiter.api.Assertions.assertEquals("/theme/view/", req.forwardedTo, "spaFallback=true must forward to /theme/view/");
         assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
     }
 
     @Test
     public void test_spaFallbackFalse_assetPathStillForwardsToThemeView() throws Exception {
         // Even when spaFallback=false, asset paths (/themes/{name}/...) must still
-        // be forwarded to /theme-view with ASSET mode — the spaFallback flag only
+        // be forwarded to /theme/view/ with ASSET mode — the spaFallback flag only
         // governs non-asset SPA routing, not static asset delivery.
         final ThemeManifest manifest = buildManifest(false);
         final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
@@ -300,8 +371,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         f.doFilter(req, new StubResponse(), chain);
 
         // Asset path must be forwarded regardless of spaFallback setting.
-        org.junit.jupiter.api.Assertions.assertEquals("/theme-view", req.forwardedTo,
-                "asset paths must forward to /theme-view even when spaFallback=false");
+        org.junit.jupiter.api.Assertions.assertEquals("/theme/view/", req.forwardedTo,
+                "asset paths must forward to /theme/view/ even when spaFallback=false");
         assertEquals("ASSET", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
         assertFalse(chain.called, "asset path must not pass through when active theme matches");
     }
@@ -320,8 +391,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         f.doFilter(req, new StubResponse(), chain);
 
         // Null manifest → orElse(true) → spaFallback=true → forward to index.
-        org.junit.jupiter.api.Assertions.assertEquals("/theme-view", req.forwardedTo,
-                "null manifest must default spaFallback=true and forward to /theme-view");
+        org.junit.jupiter.api.Assertions.assertEquals("/theme/view/", req.forwardedTo,
+                "null manifest must default spaFallback=true and forward to /theme/view/");
         assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
         assertFalse(chain.called);
     }
