@@ -1,6 +1,6 @@
 import * as api from "./api.js";
 import { t } from "./i18n.js";
-import { formatFileSize, formatDate, renderHighlightedSnippet } from "./format.js";
+import { formatFileSize, formatDate, renderHighlightedSnippet, sanitizeHtml } from "./format.js";
 
 /** Guard: prevent duplicate event-listener registration on hot-reload. */
 let attached = false;
@@ -8,17 +8,21 @@ let attached = false;
 /** AbortController for the most-recent in-flight search; null when idle. */
 let currentSearchAbort = null;
 
+/** AbortController for in-flight related-queries/content requests; null when idle. */
+let currentRelatedAbort = null;
+
 const state = {
   q: "",
   start: 0,
   num: 10,
   sort: "",
-  lang: "",
+  lang: [],             // string[] — zero or more language codes; serialised as repeated lang= params
   sdh: "",              // similar_docs_hash for similarity search
   facets: {},           // field -> [values]
   fields: {},           // extra field filters (e.g. label)
   timestampRange: "",   // one of: 1day, 1week, 1month, 3month, 6month, 1year, 2year, 3year
-  sizeRange: ""         // one of: 0, 1, 2, 3, 4 (index into SIZE_RANGES)
+  sizeRange: "",        // one of: 0, 1, 2, 3, 4 (index into SIZE_RANGES)
+  requestedTime: 0      // epoch ms of the most-recent search; used in /go/ click-log URL
 };
 
 // ─── Range facet definitions ──────────────────────────────────────────────────
@@ -87,7 +91,49 @@ function el(tag, opts) {
   return node;
 }
 
-function buildResultCard(d, queryId) {
+/**
+ * Build the /go/ click-tracking URL for a result link.
+ *
+ * Mirrors the JSP mousedown handler in src/main/webapp/js/search.js:111-127.
+ * Returns "#" when the original URL is not in the http/https/ftp/ftps allowlist
+ * so that safeHref semantics are preserved — the /go/ redirect would fail anyway
+ * for unsafe schemes.
+ *
+ * @param {string} originalUrl - the document's url_link / url value
+ * @param {string} docId       - document identifier
+ * @param {string} queryId     - query identifier from the search response
+ * @param {number} order       - 1-based rank of the result
+ * @param {number} rt          - requestedTime in epoch ms
+ * @returns {string} the /go/ redirect URL, or "#" for unsafe schemes
+ */
+function buildGoUrl(originalUrl, docId, queryId, order, rt) {
+  // Validate scheme — same rules as safeHref; only build /go/ for safe schemes.
+  if (!originalUrl || typeof originalUrl !== "string") return "#";
+  try {
+    const u = new URL(originalUrl, location.href);
+    if (u.protocol !== "https:" && u.protocol !== "http:" &&
+        u.protocol !== "ftp:" && u.protocol !== "ftps:") {
+      return "#";
+    }
+  } catch (e) {
+    return "#";
+  }
+
+  let goUrl = "/go/?rt=" + encodeURIComponent(rt) +
+              "&docId=" + encodeURIComponent(docId || "") +
+              "&queryId=" + encodeURIComponent(queryId || "") +
+              "&order=" + encodeURIComponent(order || 0);
+
+  // Preserve the fragment from the original URL (e.g. /doc.html#section-2)
+  const hashIndex = originalUrl.indexOf("#");
+  if (hashIndex >= 0) {
+    goUrl += "&hash=" + encodeURIComponent(originalUrl.substring(hashIndex));
+  }
+
+  return goUrl;
+}
+
+function buildResultCard(d, queryId, order) {
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
 
@@ -107,8 +153,22 @@ function buildResultCard(d, queryId) {
   // --- card body (right side) ---
   const body = el("div", { className: "result-card-body" });
 
+  // Build /go/ URL so all click types (left, middle, right→open-in-tab) are
+  // routed through GoAction for click-log recording and server-side redirect
+  // (including file-proxy).  Falls back to "#" for unsafe schemes.
+  const originalUrl = d.url_link || d.url || "";
+  const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, order, state.requestedTime);
+
   const h2 = el("h2");
-  const a = el("a", { text: d.title || d.url || "", attrs: { href: safeHref(d.url_link || d.url) }, dataset: { resultLink: "1" } });
+  const a = el("a", {
+    text: d.title || d.url || "",
+    attrs: {
+      href: goHref,
+      // Keep the real URL visible on hover for usability / accessibility.
+      title: safeHref(originalUrl) !== "#" ? originalUrl : ""
+    },
+    dataset: { resultLink: "1" }
+  });
   h2.appendChild(a);
   body.appendChild(h2);
 
@@ -135,14 +195,42 @@ function buildResultCard(d, queryId) {
   // --- result-meta row: cache link, similar docs, host, favorite ---
   const meta = el("div", { className: "result-meta" });
 
-  meta.appendChild(el("span", { className: "text-muted", text: d.host || "" }));
+  // --- site/URL row with optional Copy URL button ---
+  const siteRow = el("div", { className: "result-site-row" });
+  siteRow.appendChild(el("span", { className: "text-muted result-host", text: d.host || "" }));
+
+  if (features.clipboard_copy_icon) {
+    const rawUrl = d.url_link || d.url || "";
+    const copyBtn = el("button", {
+      className: "btn btn-link btn-sm copy-url-btn p-0 ms-1",
+      attrs: {
+        type: "button",
+        "aria-label": t("result.copy_url") + ": " + rawUrl
+      }
+    });
+    const copyIcon = el("i", { className: "far fa-copy", attrs: { "aria-hidden": "true" } });
+    copyBtn.appendChild(copyIcon);
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(rawUrl).then(() => {
+        copyIcon.className = "fa fa-check";
+        copyBtn.setAttribute("aria-label", t("result.copied"));
+        setTimeout(() => {
+          copyIcon.className = "far fa-copy";
+          copyBtn.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
+        }, 2000);
+      }).catch(() => { /* clipboard not available */ });
+    });
+    siteRow.appendChild(copyBtn);
+  }
+  meta.appendChild(siteRow);
 
   // --- Task 2.4: cache link — only when has_cache is truthy ---
   if (d.has_cache === "true" || d.has_cache === true) {
+    const hlParam = "&hl.q=" + encodeURIComponent(state.q || "");
     const cacheLink = el("a", {
       className: "text-muted",
       text: t("result.cache"),
-      attrs: { href: "/api/v2/cache/" + encodeURIComponent(d.doc_id || ""), target: "_blank", rel: "noopener" }
+      attrs: { href: "/cache/?docId=" + encodeURIComponent(d.doc_id || "") + hlParam, target: "_blank", rel: "noopener" }
     });
     meta.appendChild(cacheLink);
   }
@@ -186,22 +274,29 @@ function renderResults(env) {
   if (data.length === 0) {
     empty.classList.remove("d-none");
     meta.textContent = "";
+    renderRelatedQueries([]);
+    renderRelatedContent("");
     return;
   }
   empty.classList.add("d-none");
-  meta.textContent = `${env.record_count} (${env.exec_time}ms)`;
-  for (const d of data) list.appendChild(buildResultCard(d, env.query_id));
-  list.querySelectorAll("li.result-card").forEach((li, idx) => {
-    const link = li.querySelector("a[data-result-link]");
-    if (link) link.addEventListener("click", () => logClick(li.dataset.docId, li.dataset.queryId, idx + 1));
-  });
+  // exec_time from the API is in seconds (float). Format to two decimal places
+  // matching the JSP labels.search_result_time pattern (e.g. "0.12 sec").
+  const execSec = typeof env.exec_time === "number"
+    ? env.exec_time.toFixed(2)
+    : (typeof env.query_time === "number" ? (env.query_time / 1000).toFixed(2) : null);
+  meta.textContent = execSec !== null
+    ? `${env.record_count} · ${t("search.exec_time", { n: execSec })}`
+    : String(env.record_count);
+  // Pass 1-based order so buildResultCard can embed it in the /go/ URL.
+  data.forEach((d, idx) => list.appendChild(buildResultCard(d, env.query_id, idx + 1)));
   list.querySelectorAll("li.result-card").forEach(li => {
     const btn = li.querySelector(".favorite-btn");
     const docId = li.dataset.docId;
     if (!btn || !docId) return;
-    refreshFavorite(docId, btn);
     btn.addEventListener("click", () => toggleFavorite(docId, btn));
   });
+  // Bulk-sync favorites for all result cards in one request (Feature 5).
+  if (env.query_id) syncFavorites(env.query_id);
 }
 
 async function runSearch() {
@@ -209,10 +304,19 @@ async function runSearch() {
   if (currentSearchAbort) currentSearchAbort.abort();
   currentSearchAbort = new AbortController();
   const signal = currentSearchAbort.signal;
+  // Cancel any in-flight related queries/content requests.
+  if (currentRelatedAbort) currentRelatedAbort.abort();
+  currentRelatedAbort = new AbortController();
+  // Record the request time before the call so /go/ URLs embedded in result
+  // cards carry the correct rt parameter (mirrors JSP #rt hidden field).
+  state.requestedTime = Date.now();
   try {
     const params = { q: state.q, start: state.start, num: state.num };
     if (state.sort) params.sort = state.sort;
-    if (state.lang) params.lang = state.lang;
+    // state.lang is string[] — send as repeated lang= params (empty array → omit).
+    if (Array.isArray(state.lang) && state.lang.length > 0) {
+      params.lang = state.lang;
+    }
     if (state.sdh) params.sdh = state.sdh;
     // facet-based field filters
     for (const [field, values] of Object.entries(state.facets)) {
@@ -243,11 +347,15 @@ async function runSearch() {
       }
     }
     const env = await api.get("/search", params, { signal });
+    // Prefer the server-supplied requested_time when available (more accurate).
+    if (env.requested_time) state.requestedTime = env.requested_time;
     renderResults(env);
     renderPagination(env);
     const labels = await loadLabels();
     renderFacets(env, labels);
     renderActiveChips();
+    // Fetch related queries and content concurrently (abortable on next search).
+    loadRelated(state.q, currentRelatedAbort.signal);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
     if (e && e.name === "AbortError") return; // request superseded — silently ignore
@@ -288,7 +396,7 @@ async function showSuggest(q) {
     return;
   }
   try {
-    const env = await api.get("/suggest-words", { q, num: 8 });
+    const env = await api.get("/suggest-words", { q, num: 10, fn: ["_default", "content", "title"] });
     const items = env.suggest_words || [];
     if (items.length === 0) {
       dropdown.classList.add("d-none");
@@ -354,30 +462,43 @@ function renderNumOptions() {
 }
 
 /**
- * Task 3.3 — Populate the lang <select> from api config lang_options.
+ * Task 3.3 — Populate the lang <select multiple> from api config lang_options.
+ * Parity with JSP: the lang select is multi-select so users can choose several
+ * languages simultaneously. state.lang is string[] and is serialised as repeated
+ * lang= query parameters.
  */
 function renderLangOptions() {
   const sel = document.getElementById("lang-select");
   if (!sel) return;
   while (sel.firstChild) sel.removeChild(sel.firstChild);
+
+  // Promote to multi-select with a visible size.
+  sel.setAttribute("multiple", "");
+  sel.setAttribute("size", "4");
+
   const cfg = api.getConfig() || {};
   const langs = cfg.lang_options || [];
 
-  // "All languages" option always first
+  // "All languages" option always first — selecting this clears other selections.
   const allOpt = document.createElement("option");
   allOpt.value = "";
   allOpt.textContent = t("labels.searchoptions_all_langs");
   sel.appendChild(allOpt);
 
+  const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
   for (const lang of langs) {
     const opt = document.createElement("option");
     opt.value = lang.value != null ? lang.value : "";
     // Try fess_label-compatible key first, fall back to raw value
     const labelKey = lang.label_key || ("labels.lang_" + lang.value);
     opt.textContent = t(labelKey) !== labelKey ? t(labelKey) : (lang.label || lang.value || "");
+    opt.selected = selected.includes(opt.value);
     sel.appendChild(opt);
   }
-  sel.value = state.lang || "";
+  // Select "All" when nothing is chosen
+  if (selected.length === 0) {
+    allOpt.selected = true;
+  }
 }
 
 /**
@@ -527,6 +648,18 @@ export function attach() {
     state.fields = {};
     state.timestampRange = "";
     state.sizeRange = "";
+    // Reset selects: label multi-select deselects all (selectedIndex = -1);
+    // sort and num return to their "all / default" first option (selectedIndex = 0).
+    const sortSel = document.getElementById("sort-select");
+    if (sortSel) { sortSel.selectedIndex = 0; state.sort = sortSel.value || ""; }
+    const numSel = document.getElementById("num-select");
+    if (numSel) { numSel.selectedIndex = 0; state.num = Number(numSel.value) || 10; }
+    const langSel = document.getElementById("lang-select");
+    if (langSel) { langSel.selectedIndex = -1; state.lang = []; }
+    const labelMenu = document.getElementById("label-dropdown-menu");
+    if (labelMenu) {
+      labelMenu.querySelectorAll("input[type=checkbox]").forEach(cb => { cb.checked = false; });
+    }
     runSearch();
   });
 
@@ -546,10 +679,12 @@ export function attach() {
     runSearch();
   });
 
-  // Lang select
+  // Lang multi-select: collect all selected option values; when "All" (value="")
+  // is selected or nothing is selected, reset to empty array.
   const langSelect = document.getElementById("lang-select");
   if (langSelect) langSelect.addEventListener("change", () => {
-    state.lang = langSelect.value || "";
+    const selected = Array.from(langSelect.selectedOptions).map(o => o.value).filter(v => v !== "");
+    state.lang = selected;
     state.start = 0;
     runSearch();
   });
@@ -847,6 +982,115 @@ async function loadPopularWords() {
   } catch { /* best-effort */ }
 }
 
+/**
+ * Render related query buttons above the results list (Feature 1).
+ * Queries come from /api/v2/related-query (key: `queries`).
+ *
+ * @param {string[]} queries
+ */
+function renderRelatedQueries(queries) {
+  const container = document.getElementById("related-queries");
+  if (!container) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+  if (!queries || queries.length === 0) {
+    container.classList.add("d-none");
+    return;
+  }
+  container.classList.remove("d-none");
+  const label = el("span", { className: "related-queries-label text-muted small me-2", text: t("search.related_queries") + ":" });
+  container.appendChild(label);
+  queries.forEach(q => {
+    const btn = el("a", {
+      className: "btn btn-sm btn-outline-secondary me-1 mb-1",
+      text: q,
+      attrs: { href: "?q=" + encodeURIComponent(q) }
+    });
+    btn.addEventListener("click", ev => {
+      ev.preventDefault();
+      const input = document.getElementById("search-input");
+      if (input) input.value = q;
+      state.q = q;
+      state.start = 0;
+      runSearch();
+    });
+    container.appendChild(btn);
+  });
+}
+
+/**
+ * Render related content HTML above the active-chips row (Feature 2).
+ * Content comes from /api/v2/related-content (key: `content`).
+ * The HTML string is passed through the whitelist sanitizer from format.js.
+ *
+ * @param {string} html
+ */
+function renderRelatedContent(html) {
+  const container = document.getElementById("related-content");
+  if (!container) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+  if (!html || !html.trim()) {
+    container.classList.add("d-none");
+    return;
+  }
+  container.classList.remove("d-none");
+  container.appendChild(sanitizeHtml(html));
+}
+
+/**
+ * Fetch related queries and content concurrently for the given query string.
+ * Aborts on the provided signal so superseded requests are discarded cleanly.
+ *
+ * @param {string} q - current search query
+ * @param {AbortSignal} signal
+ */
+async function loadRelated(q, signal) {
+  if (!q) {
+    renderRelatedQueries([]);
+    renderRelatedContent("");
+    return;
+  }
+  try {
+    const [qEnv, cEnv] = await Promise.all([
+      api.get("/related-query", { q }, { signal }),
+      api.get("/related-content", { q }, { signal })
+    ]);
+    renderRelatedQueries(qEnv.queries || []);
+    renderRelatedContent(cEnv.content || "");
+  } catch (e) {
+    if (e && e.name === "AbortError") return; // superseded — ignore
+    // best-effort: hide both sections on error
+    renderRelatedQueries([]);
+    renderRelatedContent("");
+  }
+}
+
+/**
+ * Bulk-sync favorite state for all result cards in a single request (Feature 5).
+ * Calls GET /api/v2/favorites?query_id=<queryId> and updates each card's button.
+ * On 401/AUTH_REQUIRED (unauthenticated) the function exits silently.
+ *
+ * @param {string} queryId
+ */
+async function syncFavorites(queryId) {
+  if (!queryId) return;
+  try {
+    const env = await api.get("/favorites", { query_id: queryId });
+    const favoriteSet = new Set((env.data || []).map(item => String(item.doc_id || item)));
+    const list = document.getElementById("results");
+    if (!list) return;
+    list.querySelectorAll("li.result-card").forEach(li => {
+      const btn = li.querySelector(".favorite-btn");
+      if (!btn) return;
+      const docId = li.dataset.docId;
+      if (!docId) return;
+      setFavoriteUi(btn, favoriteSet.has(docId), Number(btn.dataset.count) || 0);
+    });
+  } catch (e) {
+    if (e && (e.code === "AUTH_REQUIRED" || e.httpStatus === 401)) return; // unauthenticated — silent
+    // other errors: ignore, favorites are best-effort
+  }
+}
+
 function renderPagination(env) {
   const nav = document.getElementById("pagination-nav");
   const ul = document.getElementById("pagination");
@@ -878,12 +1122,6 @@ function renderPagination(env) {
   }));
 }
 
-async function logClick(docId, queryId, rank) {
-  if (!docId) return;
-  try { await api.post("/click", { doc_id: docId, query_id: queryId || "", rank: rank || 0 }); }
-  catch { /* fire-and-forget */ }
-}
-
 async function refreshFavorite(docId, btn) {
   try {
     const env = await api.get("/documents/" + encodeURIComponent(docId) + "/favorite");
@@ -899,6 +1137,17 @@ function setFavoriteUi(btn, on, count) {
   const icon = btn.querySelector("i");
   if (icon) icon.className = on ? "fa fa-star" : "fa fa-star-o";
   btn.dataset.count = String(count);
+  // Show or hide the count badge next to the star icon
+  let countEl = btn.querySelector(".favorite-count");
+  if (count > 0) {
+    if (!countEl) {
+      countEl = el("span", { className: "favorite-count" });
+      btn.appendChild(countEl);
+    }
+    countEl.textContent = String(count);
+  } else if (countEl) {
+    btn.removeChild(countEl);
+  }
 }
 
 async function toggleFavorite(docId, btn) {
@@ -918,4 +1167,4 @@ async function toggleFavorite(docId, btn) {
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
 export const _state = state;
-export { runSearch, el, buildResultCard, refresh, renderSearchOptions };
+export { runSearch, el, buildResultCard, buildGoUrl, refresh, renderSearchOptions };

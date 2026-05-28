@@ -10,9 +10,45 @@ $(function() {
   var AJAX_TIMEOUT = 10000;
   var FADE_DURATION = 1000;
 
+  // CSRF token cache for v2 state-changing endpoints. Populated lazily from
+  // GET /api/v2/ui/config, refreshed on demand (e.g. after a 403). When the
+  // server reports csrf_required=false, the token stays empty and the request
+  // header below carries an empty string — which the server accepts because
+  // the gate short-circuits on the global toggle.
+  var csrfTokenCache = null;
+  var csrfTokenPromise = null;
+  function fetchCsrfToken(force) {
+    if (!force && csrfTokenCache !== null) {
+      return $.Deferred().resolve(csrfTokenCache).promise();
+    }
+    if (csrfTokenPromise) {
+      return csrfTokenPromise;
+    }
+    csrfTokenPromise = $.ajax({
+      dataType: "json",
+      cache: false,
+      type: "get",
+      timeout: AJAX_TIMEOUT,
+      url: contextPath + "/api/v2/ui/config"
+    }).then(function(data) {
+      var resp = (data && data.response) || {};
+      csrfTokenCache = typeof resp.csrf_token === "string" ? resp.csrf_token : "";
+      return csrfTokenCache;
+    }, function() {
+      // On failure, fall back to an empty token so the caller can still
+      // attempt the POST; the server will reject with 403 if a token was
+      // actually required, and the UI will surface the error.
+      csrfTokenCache = "";
+      return csrfTokenCache;
+    }).always(function() {
+      csrfTokenPromise = null;
+    });
+    return csrfTokenPromise;
+  }
+
   var SUGGESTOR_CONFIG = {
     ajaxinfo: {
-      url: contextPath + "/api/v1/suggest-words",
+      url: contextPath + "/api/v2/suggest-words",
       fn: ["_default", "content", "title"],
       num: 10,
       lang: $("#langSearchOption").val()
@@ -97,32 +133,48 @@ $(function() {
 
     if (values.length === 2 && $queryId.length > 0) {
       var docId = values[1];
-      var actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
+      var actionUrl = contextPath + "/api/v2/documents/" + docId + "/favorite";
+      var requestBody = JSON.stringify({ query_id: $queryId.val() });
 
-      $.ajax({
-        dataType: "json",
-        cache: false,
-        type: "post",
-        timeout: AJAX_TIMEOUT,
-        url: actionUrl,
-        data: {
-          queryId: $queryId.val()
-        }
-      })
-        .done(function(data) {
-          if (data.result === "created") {
-            var $favorited = $favorite.siblings(".favorited");
-            var $favoritedCount = $(".favorited-count", $favorited);
-            $favoritedCount.hide();
-            $favorite.fadeOut(FADE_DURATION, function() {
-              $favorited.fadeIn(FADE_DURATION);
-            });
-          }
+      var postFavorite = function(token, allowRetry) {
+        return $.ajax({
+          dataType: "json",
+          cache: false,
+          type: "post",
+          timeout: AJAX_TIMEOUT,
+          url: actionUrl,
+          contentType: "application/json",
+          headers: { "X-Fess-CSRF-Token": token || "" },
+          data: requestBody
         })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-          $favorite.attr("href", "#" + docId);
-          console.error("Failed to add favorite:", textStatus, errorThrown);
-        });
+          .done(function(data) {
+            var resp = (data && data.response) || {};
+            if (resp.status === 0 && resp.ok === true) {
+              var $favorited = $favorite.siblings(".favorited");
+              var $favoritedCount = $(".favorited-count", $favorited);
+              $favoritedCount.hide();
+              $favorite.fadeOut(FADE_DURATION, function() {
+                $favorited.fadeIn(FADE_DURATION);
+              });
+            }
+          })
+          .fail(function(jqXHR, textStatus, errorThrown) {
+            // 403 typically means a stale/missing CSRF token. Refresh once
+            // and retry transparently before giving up.
+            if (allowRetry && jqXHR && jqXHR.status === 403) {
+              fetchCsrfToken(true).then(function(freshToken) {
+                postFavorite(freshToken, false);
+              });
+              return;
+            }
+            $favorite.attr("href", "#" + docId);
+            console.error("Failed to add favorite:", textStatus, errorThrown);
+          });
+      };
+
+      fetchCsrfToken(false).then(function(token) {
+        postFavorite(token, true);
+      });
     }
     $favorite.attr("href", "#");
     return false;
@@ -134,17 +186,19 @@ $(function() {
       cache: false,
       type: "get",
       timeout: AJAX_TIMEOUT,
-      url: contextPath + "/api/v1/favorites",
+      url: contextPath + "/api/v2/favorites",
       data: {
-        queryId: $queryId.val()
+        query_id: $queryId.val()
       }
     })
       .done(function(data) {
-        if (data.record_count > 0) {
+        var resp = (data && data.response) || {};
+        var items = resp.data || [];
+        if (resp.record_count > 0 && items.length > 0) {
           var docIdsLookup = {};
           var i;
-          for (i = 0; i < data.data.length; i++) {
-            docIdsLookup["#" + data.data[i].doc_id] = true;
+          for (i = 0; i < items.length; i++) {
+            docIdsLookup["#" + items[i].doc_id] = true;
           }
 
           $favorites.each(function() {

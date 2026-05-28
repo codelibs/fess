@@ -38,10 +38,10 @@ import org.codelibs.fess.util.ComponentUtil;
  *
  * <p>Extracted common logic from {@link org.codelibs.fess.api.v2.handlers.ChatHandler}
  * and {@link org.codelibs.fess.api.v2.handlers.ChatStreamHandler} so it can be reused
- * across chat-related handlers without duplication. The v1
- * {@link ChatApiManager} is not modified by this class — the common utility
- * methods live here and only the v2 handlers call them. v1 refactoring is a
- * separate task.</p>
+ * across chat-related handlers without duplication. (Historically these utilities
+ * were also used to mirror the v1 {@code ChatApiManager} behavior; the v1
+ * implementation has since been extracted into the {@code fess-webapp-v1-api}
+ * plugin.)</p>
  *
  * <p>This is a DI-managed singleton helper (registered as {@code chatApiHelper}); obtain it via
  * {@link org.codelibs.fess.util.ComponentUtil#getChatApiHelper()} and call the instance methods.

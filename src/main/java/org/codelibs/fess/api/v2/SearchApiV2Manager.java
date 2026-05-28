@@ -37,6 +37,7 @@ import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
+import org.codelibs.fess.api.v2.handlers.FavoritesListHandler;
 import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
@@ -102,6 +103,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code POST /api/v2/documents/{id}/favorite} (toggle favorite state). */
     @Resource
     protected FavoritePostHandler favoritePostHandler;
+
+    /** Handles {@code GET /api/v2/favorites} (list favorited doc ids in a previously issued search result). */
+    @Resource
+    protected FavoritesListHandler favoritesListHandler;
 
     /** Handles {@code GET /api/v2/auth/me} (current authenticated user). */
     @Resource
@@ -239,6 +244,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             switch (sub) {
             case "/health" -> handleHealth(request, response);
             case "/search" -> searchHandler.handle(request, response);
+            case "/favorites" -> favoritesListHandler.handle(request, response);
             case "/suggest-words" -> handleSuggestWords(request, response);
             case "/labels" -> handleLabels(request, response);
             case "/popular-words" -> handlePopularWords(request, response);

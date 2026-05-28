@@ -646,6 +646,39 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
+  /favorites:
+    get:
+      tags: [favorite]
+      summary: List favorited documents within a search result
+      description: |-
+        Returns the document ids in the search result identified by
+        `query_id` that the calling user has previously favorited.
+        The `query_id` is the opaque identifier echoed by `POST /search`.
+
+        Anonymous callers (no session-bound user code) receive
+        `auth_required` (401). When the `user.favorite` feature is
+        disabled, the endpoint responds with `invalid_request` (400).
+        When `query_id` matches no cached result set in the session,
+        the endpoint responds with `200` and an empty `data` array.
+      operationId: favoritesListV2
+      parameters:
+        - name: query_id
+          in: query
+          description: Opaque `query_id` echoed by `/search`.
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Favorited document ids returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoritesListResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
   /documents/{docId}/favorite:
     parameters:
       - { $ref: '#/components/parameters/DocId' }
@@ -1289,6 +1322,30 @@ components:
                   description: Always `true` when the session was found and cleared.
 
     # --- Favorite ----------------------------------------------------
+    FavoritesListResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [record_count, data]
+              properties:
+                record_count:
+                  type: integer
+                  description: Number of favorited documents returned in `data`.
+                data:
+                  type: array
+                  description: |
+                    Favorited documents from the queried result set, preserving
+                    the search result ordering.
+                  items:
+                    type: object
+                    required: [doc_id]
+                    properties:
+                      doc_id: { type: string }
+
     FavoriteGetResponse:
       type: object
       required: [response]
@@ -1319,15 +1376,28 @@ components:
           allOf:
             - $ref: '#/components/schemas/EnvelopeMeta'
             - type: object
-              required: [doc_id, ok]
+              required: [doc_id, ok, favorite, count]
               properties:
                 doc_id: { type: string }
                 ok: { type: boolean, enum: [true] }
+                favorite:
+                  type: boolean
+                  enum: [true]
+                  description: |
+                    Always `true` — the document is now marked as a favorite for the
+                    calling user (whether freshly added or previously recorded).
+                count:
+                  type: integer
+                  format: int64
+                  description: |
+                    Current favorite count for the document after the operation.
+                    For a fresh add this is the pre-update count plus one (optimistic).
+                    For an idempotent re-POST this reflects the stored count.
                 already_existed:
                   type: boolean
                   description: |
                     True when the favorite was previously recorded (idempotent re-POST).
-                    Absent or false on the first POST that newly records the favorite.
+                    Absent on the first POST that newly records the favorite.
 
     # --- Cache -------------------------------------------------------
     CacheResponse:

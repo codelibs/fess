@@ -11,27 +11,41 @@ import { t } from "./i18n.js";
 const PATH_TO_CODE = {
   "400": "400",
   "bad_request": "400",
+  "badrequest": "400",
   "404": "404",
   "not_found": "404",
+  "notfound": "404",
   "500": "500",
   "internal_server_error": "500",
+  "internalservererror": "500",
+  "system": "500",
+  "error": "500",
   "503": "503",
-  "service_unavailable": "503"
+  "service_unavailable": "503",
+  "serviceunavailable": "503",
+  "busy": "503"
 };
 
 /**
  * Derive an error code from the current pathname.
  * Checks each segment (in reverse order) against PATH_TO_CODE.
+ * camelCase segments (e.g. "notFound", "badRequest") are normalised to
+ * all-lowercase before the lookup so both snake_case and camelCase paths match.
  * Returns "404" as the default when no segment matches.
  *
- * @param {string} pathname - e.g. "/error/404" or "/error/not_found"
+ * @param {string} pathname - e.g. "/error/404", "/error/not_found", "/error/notFound"
  * @returns {string} - one of "400", "404", "500", "503"
  */
 function codeFromPath(pathname) {
   const segments = pathname.split("/").filter(Boolean);
   for (let i = segments.length - 1; i >= 0; i--) {
-    const seg = segments[i].toLowerCase();
+    // Normalise: lowercase and remove underscores so snake_case and camelCase
+    // collapse to the same key (e.g. "notFound" → "notfound", "not_found" → "notfound").
+    const seg = segments[i].toLowerCase().replace(/_/g, "");
     if (PATH_TO_CODE[seg]) return PATH_TO_CODE[seg];
+    // Also try the raw lowercase (for plain numeric keys like "400").
+    const raw = segments[i].toLowerCase();
+    if (PATH_TO_CODE[raw]) return PATH_TO_CODE[raw];
   }
   return "404";
 }

@@ -6,10 +6,17 @@ This directory holds the OpenAPI 3.0 definitions for the user-facing Web API.
 src/main/config/openapi/
 ├── README.md           — this file
 ├── v1/
-│   └── openapi-user.yaml  — /api/v1/* (legacy flat responses)
+│   └── openapi-user.yaml  — /api/v1/* (legacy flat responses; now shipped by the
+│                            `fess-webapp-v1-api` plugin, not by fess core)
 └── v2/
     └── openapi-user.yaml  — /api/v2/* (uniform envelope: { response: { status, ... } })
 ```
+
+> **Note.** The `/api/v1/*` endpoints are no longer hosted by the core fess
+> webapp — the implementation has been extracted into the
+> [`fess-webapp-v1-api`](https://github.com/codelibs/fess-webapp-v1-api)
+> plugin. Install that plugin alongside fess to keep v1 clients working. New
+> integrations should target `/api/v2/*`.
 
 Each version is a **self-contained document**. We deliberately do not share
 `components/` between v1 and v2 because:

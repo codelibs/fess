@@ -67,6 +67,7 @@
   "result.similar": "類似結果 ({count})",
   "search.num": "表示件数",
   "search.num_format": "{num} 件表示",
+  "search.exec_time": "{n} 秒",
   "search.lang": "言語",
   "search.labels": "ラベル",
   "labels.search_result_sort_score_desc": "スコア順",
@@ -144,5 +145,8 @@
   "advance.submit": "検索",
   "advance.link": "詳細検索",
   "advance.any_filetype": "すべての種別",
-  "facet.any_time": "すべての期間"
+  "facet.any_time": "すべての期間",
+  "search.related_queries": "関連する検索",
+  "result.copy_url": "URL をコピー",
+  "result.copied": "コピーしました"
 }

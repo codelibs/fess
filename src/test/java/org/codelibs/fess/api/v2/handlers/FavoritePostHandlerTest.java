@@ -300,9 +300,110 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             assertTrue(second.body().contains("\"doc_id\":\"abc\""), second.body());
             assertTrue(second.body().contains("\"already_existed\":true"),
                     "duplicate POST must carry already_existed:true: " + second.body());
+            assertTrue(second.body().contains("\"favorite\":true"), "duplicate POST must carry favorite:true: " + second.body());
+            assertTrue(second.body().contains("\"count\":"), "duplicate POST must carry count: " + second.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /**
+     * Fresh add: when addUrl returns true and searchHelper.update succeeds (stub),
+     * the response must contain favorite:true and count (optimistic +1 over the
+     * stored value). Uses a no-op update stub to avoid needing LanguageHelper.
+     */
+    @Test
+    public void favoritePost_freshAdd_returnsFavoriteAndCount() throws Exception {
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("bob"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "bob-code";
+            }
+
+            @Override
+            public String[] getResultDocIds(final String queryId) {
+                return new String[] { "doc1" };
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+
+        // Document has a stored favorite_count of 5.
+        final SearchHelper searchHelperStub = new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> ub) {
+                final Map<String, Object> doc = new java.util.HashMap<>();
+                doc.put("url", "http://example.com/doc1");
+                doc.put("_id", "doc1-id");
+                doc.put("favorite_count", 5L);
+                return OptionalEntity.of(doc);
+            }
+
+            @Override
+            public boolean update(final String id,
+                    final java.util.function.Consumer<org.opensearch.action.update.UpdateRequestBuilder> builderConsumer) {
+                // no-op: skip real OpenSearch update in unit test
+                return true;
+            }
+        };
+        ComponentUtil.register(searchHelperStub, "searchHelper");
+        ComponentUtil.register(searchHelperStub, SearchHelper.class.getCanonicalName());
+
+        // addUrl always succeeds (fresh add).
+        final FavoriteLogService favLogStub = new FavoriteLogService() {
+            @Override
+            public boolean addUrl(final String userCode,
+                    final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
+                return true;
+            }
+        };
+        ComponentUtil.register(favLogStub, "favoriteLogService");
+        ComponentUtil.register(favLogStub, FavoriteLogService.class.getCanonicalName());
+
+        final org.codelibs.fess.helper.SystemHelper systemHelperStub = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public java.time.LocalDateTime getCurrentTimeAsLocalDateTime() {
+                return java.time.LocalDateTime.now();
+            }
+        };
+        ComponentUtil.register(systemHelperStub, "systemHelper");
+        ComponentUtil.register(systemHelperStub, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new FavoritePostHandler()
+                    .handle(new StubRequest("POST", "/api/v2/documents/doc1/favorite").withJsonBody("{\"query_id\":\"q2\"}"), res, "doc1");
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            assertTrue(res.body().contains("\"doc_id\":\"doc1\""), res.body());
+            assertTrue(res.body().contains("\"favorite\":true"), "fresh add must carry favorite:true: " + res.body());
+            // count should be stored(5) + 1 = 6
+            assertTrue(res.body().contains("\"count\":6"), "fresh add must carry count=6 (5+1): " + res.body());
+            assertFalse(res.body().contains("\"already_existed\""), "fresh add must NOT carry already_existed: " + res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+            ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
         }
     }
 

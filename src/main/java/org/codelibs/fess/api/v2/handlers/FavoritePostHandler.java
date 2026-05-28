@@ -236,13 +236,23 @@ public class FavoritePostHandler {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
 
+        // Holds the favorite count read from the document inside the lambda so
+        // the outer scope can include it in the success envelope.
+        final long[] favoriteCountHolder = { 0L };
+
         try {
-            searchHelper.getDocumentByDocId(docId, new String[] { cfg.getIndexFieldUrl(), cfg.getIndexFieldLang() }, OptionalThing.empty())
+            searchHelper
+                    .getDocumentByDocId(docId,
+                            new String[] { cfg.getIndexFieldUrl(), cfg.getIndexFieldLang(), cfg.getIndexFieldFavoriteCount() },
+                            OptionalThing.empty())
                     .ifPresent(doc -> {
                         final String favoriteUrl = DocumentUtil.getValue(doc, cfg.getIndexFieldUrl(), String.class);
                         if (StringUtil.isBlank(favoriteUrl)) {
                             throw new FavoriteAddFailedException("URL is null");
                         }
+                        final Long existingCount = DocumentUtil.getValue(doc, cfg.getIndexFieldFavoriteCount(), Long.class);
+                        favoriteCountHolder[0] = existingCount == null ? 0L : existingCount.longValue();
+
                         // M-9: addUrl returns false when the (user, url) pair already exists
                         // (or the user info cannot be resolved). Treat the duplicate case as
                         // an idempotent no-op success — re-POSTing the same favorite should
@@ -258,6 +268,8 @@ public class FavoritePostHandler {
                         })) {
                             throw new AlreadyFavoritedException();
                         }
+                        // Optimistically bump the count for the fresh-add case.
+                        favoriteCountHolder[0] = favoriteCountHolder[0] + 1L;
                         final String id = DocumentUtil.getValue(doc, cfg.getIndexFieldId(), String.class);
                         searchHelper.update(id, builder -> {
                             final Script script = ComponentUtil.getLanguageHelper()
@@ -277,16 +289,17 @@ public class FavoritePostHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
             return;
         } catch (final AlreadyFavoritedException e) {
-            // M-9: idempotent re-POST — return 200 with the same payload shape plus an
-            // optional already_existed:true marker so clients can distinguish "freshly
-            // marked" from "already marked" without breaking the documented schema (the
-            // OpenAPI FavoritePostResponse does not declare additionalProperties:false).
+            // M-9: idempotent re-POST — return 200 with the full payload shape so the
+            // SPA receives favorite:true and the current count regardless of whether
+            // this was a fresh add or a duplicate.
             if (logger.isDebugEnabled()) {
                 logger.debug("/api/v2/documents/{}/favorite POST: already favorited (idempotent no-op)", docId);
             }
             final Map<String, Object> idempotentPayload = new java.util.LinkedHashMap<>();
             idempotentPayload.put("doc_id", docId);
             idempotentPayload.put("ok", true);
+            idempotentPayload.put("favorite", true);
+            idempotentPayload.put("count", favoriteCountHolder[0]);
             idempotentPayload.put("already_existed", true);
             V2EnvelopeWriter.writeSuccess(res, idempotentPayload);
             return;
@@ -299,6 +312,11 @@ public class FavoritePostHandler {
             return;
         }
 
-        V2EnvelopeWriter.writeSuccess(res, Map.of("doc_id", docId, "ok", true));
+        final Map<String, Object> successPayload = new java.util.LinkedHashMap<>();
+        successPayload.put("doc_id", docId);
+        successPayload.put("ok", true);
+        successPayload.put("favorite", true);
+        successPayload.put("count", favoriteCountHolder[0]);
+        V2EnvelopeWriter.writeSuccess(res, successPayload);
     }
 }

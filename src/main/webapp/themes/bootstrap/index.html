@@ -53,6 +53,9 @@
   <main class="container-fluid py-3" role="main" id="page-root">
     <!-- Home view: centered logo + large search box + popular words -->
     <section id="home-view" hidden class="container my-5">
+      <!-- Notification banner for home/search-top view — rendered by app.js when
+           notifications.search_top is non-empty in /api/v2/ui/config. -->
+      <div id="home-notification" class="d-none" role="status" aria-live="polite"></div>
       <div class="text-center">
         <h2 class="display-4 mb-4">Fess</h2>
         <form id="home-search-form" class="d-flex justify-content-center mb-4" role="search" aria-label="Home search">
@@ -68,6 +71,9 @@
     </section>
 
     <section id="results-view">
+      <!-- Notification banner for results view — rendered by app.js when
+           notifications.search_top is non-empty in /api/v2/ui/config. -->
+      <div id="results-notification" class="d-none mb-2" role="status" aria-live="polite"></div>
       <div class="row">
         <aside class="col-lg-3 col-md-4 mb-3" role="complementary" aria-label="Facets">
           <div class="card shadow-sm">
@@ -98,6 +104,8 @@
               <ul class="dropdown-menu label-dropdown-menu" id="label-dropdown-menu" aria-labelledby="label-dropdown-btn"></ul>
             </div>
           </div>
+          <div class="d-none mb-2" id="related-queries" aria-live="polite" aria-label="Related searches"></div>
+          <div class="d-none mb-2" id="related-content" aria-live="polite"></div>
           <div class="d-none mb-2" id="active-chips" aria-live="polite" aria-atomic="true" aria-label="Active filters"></div>
           <ol class="list-unstyled" id="results" role="list"></ol>
           <nav aria-label="Pagination" class="d-none" id="pagination-nav">
@@ -113,7 +121,11 @@
       </div>
     </section>
 
-    <section id="advance-view" hidden class="container my-4"></section>
+    <section id="advance-view" hidden class="container my-4">
+      <!-- Notification banner for advance search view — rendered by app.js when
+           notifications.advance_search is non-empty in /api/v2/ui/config. -->
+      <div id="advance-notification" class="d-none" role="status" aria-live="polite"></div>
+    </section>
     <section id="error-view" hidden class="container my-4"></section>
     <section id="profile-view" hidden class="container my-4"></section>
     <section id="help-view" hidden class="container my-4"></section>

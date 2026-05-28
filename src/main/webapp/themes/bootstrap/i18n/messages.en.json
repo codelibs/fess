@@ -67,6 +67,7 @@
   "result.similar": "Similar Results ({count})",
   "search.num": "Per page",
   "search.num_format": "{num} per page",
+  "search.exec_time": "{n} sec",
   "search.lang": "Language",
   "search.labels": "Labels",
   "labels.search_result_sort_score_desc": "by Score",
@@ -144,5 +145,8 @@
   "advance.submit": "Search",
   "advance.link": "Advanced",
   "advance.any_filetype": "Any file type",
-  "facet.any_time": "Any time"
+  "facet.any_time": "Any time",
+  "search.related_queries": "Related searches",
+  "result.copy_url": "Copy URL",
+  "result.copied": "Copied"
 }

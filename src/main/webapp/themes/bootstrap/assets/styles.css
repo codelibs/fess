@@ -45,3 +45,15 @@
 .help-section code { background: #f8f9fa; padding: 0.125rem 0.25rem; border-radius: 3px; }
 #advance-view form { max-width: 640px; }
 .advance-form .form-label { font-weight: 500; }
+/* Related queries */
+#related-queries { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.related-queries-label { white-space: nowrap; }
+/* Related content */
+#related-content { border-left: 3px solid var(--bs-primary); padding: .5rem .75rem; background: var(--bs-tertiary-bg); border-radius: 0 var(--fess-card-radius) var(--fess-card-radius) 0; }
+/* Copy URL button */
+.copy-url-btn { color: var(--bs-tertiary-color); line-height: 1; vertical-align: middle; }
+.copy-url-btn:hover { color: var(--bs-primary); }
+/* Result site row */
+.result-site-row { display: inline-flex; align-items: center; gap: .25rem; }
+/* Favorite count */
+.favorite-count { font-size: .75rem; color: var(--bs-tertiary-color); margin-left: .2rem; vertical-align: middle; }

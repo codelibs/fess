@@ -79,7 +79,7 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         if (res.status == 200) {
             final String body = res.body();
             for (final String key : new String[] { "\"site_name\"", "\"login_required\"", "\"locales\"", "\"theme\"", "\"features\"",
-                    "\"csrf_required\"", "\"csrf_token\"", "\"page_size_default\"", "\"page_size_max\"" }) {
+                    "\"csrf_required\"", "\"csrf_token\"", "\"page_size_default\"", "\"page_size_max\"", "\"notifications\"" }) {
                 assertTrue(body.contains(key), "missing key: " + key + " in " + body);
             }
         } else {
@@ -225,6 +225,37 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             assertTrue(body.contains("\"search_log_enabled\":"), "search_log_enabled flag missing in " + body);
             assertTrue(body.contains("\"thumbnail_enabled\":"), "thumbnail_enabled flag missing in " + body);
             assertTrue(body.contains("\"display_label_type\":"), "display_label_type flag missing in " + body);
+            // Notifications block must be present (Task 3).
+            assertTrue(body.contains("\"notifications\""), "notifications block missing in " + body);
+            assertTrue(body.contains("\"search_top\""), "notifications.search_top missing in " + body);
+            assertTrue(body.contains("\"advance_search\""), "notifications.advance_search missing in " + body);
+        }
+    }
+
+    /**
+     * Task 3 (Notification): the {@code notifications} object must be present
+     * in the wire response and contain {@code search_top} and {@code advance_search}
+     * string fields (empty strings when no notifications are configured).
+     */
+    @Test
+    public void test_notifications_presentInSuccessPayload() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            assertTrue(body.contains("\"notifications\""), "notifications object missing in " + body);
+            // search_top and advance_search must both be present (as strings, may be empty).
+            assertTrue(body.contains("\"search_top\""), "notifications.search_top missing in " + body);
+            assertTrue(body.contains("\"advance_search\""), "notifications.advance_search missing in " + body);
         }
     }
 

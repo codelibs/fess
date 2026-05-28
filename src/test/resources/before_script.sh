@@ -11,7 +11,7 @@ temp_json_file=/tmp/fess-log.$$
 touch ${temp_json_file}
 error_count=0
 while true ; do
-  status=$(curl -w '%{http_code}\n' -s -o ${temp_json_file} "http://localhost:8080/api/v1/health")
+  status=$(curl -w '%{http_code}\n' -s -o ${temp_json_file} "http://localhost:8080/api/v2/health")
   cat ${temp_json_file}
   if [[ x"${status}" = x200 ]] ; then
     break

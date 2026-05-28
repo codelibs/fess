@@ -68,7 +68,7 @@ public class CsrfRequirementCompleteCoverageTest {
      * Must equal {@code ENDPOINT_DECISIONS.size()}. Increment when adding a new endpoint
      * so that the mismatch causes a deliberate compile-time / test-time notice.
      */
-    private static final int EXPECTED_ENTRY_COUNT = 16;
+    private static final int EXPECTED_ENTRY_COUNT = 17;
 
     static {
         // LinkedHashMap preserves insertion order for readable failure messages.
@@ -98,6 +98,7 @@ public class CsrfRequirementCompleteCoverageTest {
         m.put("/click", true); // POST, CSRF required
         // /documents/{id}/favorite is a pattern — tested via representative docId
         m.put("/documents/abc123/favorite", true); // POST, CSRF required
+        m.put("/favorites", true); // GET only — secure default (CSRF required if called via POST)
 
         // --- CHAT endpoints ---
         m.put("/chat", true); // POST, CSRF required

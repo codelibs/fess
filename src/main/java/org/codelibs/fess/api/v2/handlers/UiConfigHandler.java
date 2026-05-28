@@ -261,6 +261,13 @@ public class UiConfigHandler {
                 }
             }
 
+            // notifications: HTML snippets shown at the top of specific views.
+            // Values come from the system-property store (configurable via admin UI).
+            // Empty string means "no notification for this view".
+            final Map<String, Object> notifications = new LinkedHashMap<>();
+            notifications.put("search_top", cfg.getNotificationSearchTop());
+            notifications.put("advance_search", cfg.getNotificationAdvanceSearch());
+
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("site_name", siteName);
             payload.put("login_required", cfg.isLoginRequired());
@@ -273,6 +280,7 @@ public class UiConfigHandler {
             payload.put("num_options", numOptions);
             payload.put("lang_options", langOptions);
             payload.put("label_options", labelOptions);
+            payload.put("notifications", notifications);
             payload.put("csrf_required", csrfRequired);
             payload.put("csrf_token", csrfToken);
             V2EnvelopeWriter.writeSuccess(res, payload);

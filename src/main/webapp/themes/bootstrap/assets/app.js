@@ -1,6 +1,7 @@
 import * as api from "./api.js";
 import * as i18n from "./i18n.js";
 import { t } from "./i18n.js";
+import { sanitizeHtml } from "./format.js";
 import * as auth from "./auth.js";
 import * as search from "./search.js";
 import * as chat from "./chat.js";
@@ -68,6 +69,39 @@ function renderWarnings() {
     span.appendChild(icon);
     host.appendChild(span);
   }
+}
+
+/**
+ * Render notification banners in the #home-notification, #results-notification,
+ * and #advance-notification slots from api config notifications.
+ *
+ * Notification HTML is sanitized through the whitelist sanitizer from format.js
+ * before being appended — no raw innerHTML on live DOM nodes.
+ * Slots with empty or absent notification values are hidden with d-none.
+ *
+ * Called once after api.init() so getConfig() is populated.
+ */
+function renderNotifications() {
+  const cfg = api.getConfig() || {};
+  const notifications = cfg.notifications || {};
+
+  /** @param {string} elId - banner element id */
+  /** @param {string} html - notification HTML from config */
+  function applyNotification(elId, html) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    if (!html || typeof html !== "string" || html.trim() === "") {
+      el.classList.add("d-none");
+      return;
+    }
+    el.classList.remove("d-none");
+    el.appendChild(sanitizeHtml(html));
+  }
+
+  applyNotification("home-notification", notifications.search_top || "");
+  applyNotification("results-notification", notifications.search_top || "");
+  applyNotification("advance-notification", notifications.advance_search || "");
 }
 
 /**
@@ -223,6 +257,8 @@ async function main() {
   await i18n.init();
   // Render warning indicators after config is loaded.
   renderWarnings();
+  // Render notification banners from config.notifications.
+  renderNotifications();
   await auth.attach();
   search.attach();
   chat.attach(); // no-op when rag_chat_enabled is false
