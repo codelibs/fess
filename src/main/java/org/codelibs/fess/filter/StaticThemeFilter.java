@@ -86,8 +86,13 @@ public class StaticThemeFilter implements Filter {
      *       response headers before serving the SPA entry.</li>
      *   <li>Static legacy theme assets ({@code /css}, {@code /js}, {@code /images}).</li>
      *   <li>Crawler/system endpoints ({@code /go}, {@code /thumbnail}, {@code /osdd},
-     *       {@code /cache}, {@code /favicon.ico}, {@code /robots.txt},
-     *       {@code /sitemap.xml}, {@code /manifest.webmanifest}, {@code /.well-known}).</li>
+     *       {@code /favicon.ico}, {@code /robots.txt},
+     *       {@code /sitemap.xml}, {@code /manifest.webmanifest}, {@code /.well-known}).
+     *       Note: {@code /cache} is intentionally <em>not</em> in this list; when a
+     *       static theme is active the SPA cache viewer handles
+     *       {@code /cache/?docId=...} navigation. The underlying
+     *       {@code /api/v2/cache/{docId}} endpoint is still accessible because
+     *       {@code /api/} is already passed through above.</li>
      *   <li>The forward target itself ({@link #THEME_VIEW_PATH}) to prevent recursion.</li>
      * </ul>
      */
@@ -97,7 +102,7 @@ public class StaticThemeFilter implements Filter {
             "/login", //
             "/css/", "/js/", "/images/", //
             "/go", "/thumbnail", "/osdd", //
-            "/sso/", "/logout", "/cache", //
+            "/sso/", "/logout", //
             "/favicon.ico", //
             "/robots.txt", //
             "/sitemap.xml", //

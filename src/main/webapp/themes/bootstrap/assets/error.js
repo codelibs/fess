@@ -23,7 +23,7 @@ const PATH_TO_CODE = {
   "503": "503",
   "service_unavailable": "503",
   "serviceunavailable": "503",
-  "busy": "503"
+  "busy": "429"
 };
 
 /**
@@ -67,14 +67,26 @@ function appendDtDd(dl, label, value) {
 }
 
 /**
+ * Read the error detail key injected by ThemeViewAction (F.9).
+ * Returns the message key string (e.g. "errors.docid_not_found") or null.
+ *
+ * @returns {string|null}
+ */
+function readErrorDetailKey() {
+  const meta = document.querySelector('meta[name="x-fess-error-detail-key"]');
+  return meta ? meta.getAttribute("content") : null;
+}
+
+/**
  * Render the error page into the given container element.
  * Clears any previous content first.
  *
  * @param {HTMLElement} container
  * @param {string} code - "400" | "404" | "500" | "503"
  * @param {string|null} requestedUrl - optional URL that was requested
+ * @param {string|null} errorDetailKey - optional i18n key for additional detail (F.9)
  */
-function render(container, code, requestedUrl) {
+function render(container, code, requestedUrl, errorDetailKey) {
   // Clear previous content without innerHTML assignment.
   while (container.firstChild) container.removeChild(container.firstChild);
 
@@ -89,6 +101,22 @@ function render(container, code, requestedUrl) {
   p.className = "error-body";
   p.textContent = t("error.body_" + code);
   container.appendChild(p);
+
+  // F.9: Additional error detail from server-injected meta tag.
+  if (errorDetailKey) {
+    // Convert the server-side key (e.g. "errors.docid_not_found") to the
+    // client-side i18n key convention (e.g. "error.detail_docid_not_found").
+    const clientKey = "error.detail_" + errorDetailKey.replace(/^errors\./, "");
+    const detailText = t(clientKey);
+    // Only render if the i18n bundle has an entry; t() returns the key itself as
+    // fallback — skip generic fallback keys to avoid showing raw key strings.
+    if (detailText && detailText !== clientKey) {
+      const detail = document.createElement("p");
+      detail.className = "error-detail-additional text-muted";
+      detail.textContent = detailText;
+      container.appendChild(detail);
+    }
+  }
 
   // Requested URL block (optional)
   if (requestedUrl) {
@@ -124,6 +152,7 @@ function render(container, code, requestedUrl) {
 /**
  * Attach the error view to the #error-view container.
  * Reads the current pathname and optional ?url search parameter.
+ * Also reads the x-fess-error-detail-key meta tag injected by ThemeViewAction (F.9).
  * Safe to call multiple times — re-renders from scratch each time.
  */
 export function attach() {
@@ -138,5 +167,8 @@ export function attach() {
     requestedUrl = new URL(location.href).searchParams.get("url");
   } catch { /* ignore — URL constructor should never throw for location.href */ }
 
-  render(container, code, requestedUrl);
+  // F.9: Read server-injected error detail key from <meta> tag in document head.
+  const errorDetailKey = readErrorDetailKey();
+
+  render(container, code, requestedUrl, errorDetailKey);
 }

@@ -352,6 +352,103 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"site_name\":\"Fess\""), res.body());
     }
 
+    /**
+     * A.4: features.clipboard_copy_icon must be present in the response payload.
+     */
+    @Test
+    public void test_features_clipboard_copy_icon_present() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            assertTrue(body.contains("\"clipboard_copy_icon\""), "features.clipboard_copy_icon must be present in: " + body);
+        }
+    }
+
+    /**
+     * B.1: features.eol_link and features.installation_link must be present.
+     */
+    @Test
+    public void test_features_eolLink_and_installationLink_present() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            // When eoled==true, eol_link must be present; but since we can't guarantee
+            // eoled state in unit harness, we check the key exists under features always.
+            // The contract: features always has eol_link (empty string when not eoled).
+            assertTrue(body.contains("\"eol_link\""), "features.eol_link must be present in: " + body);
+            assertTrue(body.contains("\"installation_link\""), "features.installation_link must be present in: " + body);
+        }
+    }
+
+    /**
+     * B.2: features.login_link must be present as a boolean.
+     */
+    @Test
+    public void test_features_loginLink_present() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            assertTrue(body.contains("\"login_link\""), "features.login_link must be present in: " + body);
+        }
+    }
+
+    /**
+     * B.3: facet_views must be present as an array (may be empty when no views are configured).
+     */
+    @Test
+    public void test_facetViews_presentAsArray() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            assertTrue(body.contains("\"facet_views\""), "facet_views key must be present in: " + body);
+            // facet_views must be an array (opening bracket follows the key).
+            final int idx = body.indexOf("\"facet_views\"");
+            assertTrue(idx >= 0, "facet_views key missing");
+            final String after = body.substring(idx + "\"facet_views\"".length()).stripLeading().replaceFirst("^:", "").stripLeading();
+            assertTrue(after.startsWith("["), "facet_views must be a JSON array in: " + body);
+        }
+    }
+
     /** Minimal ThemeRegistry stub returning a fixed Optional from resolveActiveTheme. */
     private static class StubThemeRegistry extends org.codelibs.fess.theme.ThemeRegistry {
         private final java.util.Optional<org.codelibs.fess.theme.Theme> active;

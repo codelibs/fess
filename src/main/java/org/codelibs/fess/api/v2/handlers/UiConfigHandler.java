@@ -30,9 +30,11 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.Theme;
@@ -201,6 +203,41 @@ public class UiConfigHandler {
                 // LabelTypeHelper not wired — return empty list.
             }
 
+            // eol_link / installation_link — surfaced as resolved URLs. Derivation mirrors
+            // JSP runtime data registered by SystemHelper. Uses getHelpLink(name) for the
+            // installation URL (same base-link pattern); for eol_link, uses the raw config
+            // value since it is a full template URL rather than a guide-page name.
+            // Falls back to empty string when SystemHelper / RequestManager are unavailable.
+            String eolLink = "";
+            String installationLink = "";
+            try {
+                final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+                if (systemHelper != null) {
+                    try {
+                        installationLink = systemHelper.getHelpLink("installation");
+                    } catch (final Exception ignored) {
+                        // RequestManager not bound in unit harness — leave empty.
+                    }
+                    if (eoled) {
+                        try {
+                            eolLink = systemHelper.getHelpLink("eol");
+                        } catch (final Exception ignored) {
+                            // RequestManager not bound in unit harness — leave empty.
+                        }
+                    }
+                }
+            } catch (final Exception ignored) {
+                // SystemHelper not wired in unit harness — default to empty strings.
+            }
+
+            // login_link: mirrors fessConfig.isLoginLinkEnabled() used by JSP pageLoginLink.
+            boolean loginLinkEnabled = true;
+            try {
+                loginLinkEnabled = cfg.isLoginLinkEnabled();
+            } catch (final Exception ignored) {
+                // FessProp system-property store not accessible — default to true.
+            }
+
             final Map<String, Object> features = new LinkedHashMap<>();
             features.put("user_favorite", userFavoriteEnabled);
             features.put("popular_word", cfg.isWebApiPopularWord());
@@ -212,6 +249,13 @@ public class UiConfigHandler {
             features.put("search_log_enabled", searchLogEnabled);
             features.put("thumbnail_enabled", thumbnailEnabled);
             features.put("display_label_type", !labelOptions.isEmpty());
+            // A.4: clipboard copy icon toggle (mirrors view.copy.icon.enabled / clipboard.copy.icon.enabled).
+            features.put("clipboard_copy_icon", cfg.isClipboardCopyIconEnabled());
+            // B.1: EOL and installation links (may be empty strings when not applicable).
+            features.put("eol_link", eolLink);
+            features.put("installation_link", installationLink);
+            // B.2: login link availability flag.
+            features.put("login_link", loginLinkEnabled);
 
             // Server-wide supported language list, surfaced as plain JSON array of codes.
             final String[] langs = cfg.getSupportedLanguagesAsArray();
@@ -268,6 +312,33 @@ public class UiConfigHandler {
             notifications.put("search_top", cfg.getNotificationSearchTop());
             notifications.put("advance_search", cfg.getNotificationAdvanceSearch());
 
+            // B.3: facet_views — ordered list of FacetQueryView group descriptors from ViewHelper.
+            // Each entry: {group_name: String, queries: [{label_key: String, value: String}]}
+            // Falls back to an empty list when ViewHelper is not wired (unit harness / stripped env).
+            final List<Map<String, Object>> facetViews = new ArrayList<>();
+            try {
+                final ViewHelper viewHelper = ComponentUtil.getViewHelper();
+                if (viewHelper != null) {
+                    for (final FacetQueryView fqv : viewHelper.getFacetQueryViewList()) {
+                        final Map<String, Object> group = new LinkedHashMap<>();
+                        group.put("group_name", fqv.getTitle() != null ? fqv.getTitle() : "");
+                        final List<Map<String, Object>> queries = new ArrayList<>();
+                        if (fqv.getQueryMap() != null) {
+                            fqv.getQueryMap().forEach((labelKey, queryValue) -> {
+                                final Map<String, Object> q = new LinkedHashMap<>();
+                                q.put("label_key", labelKey);
+                                q.put("value", queryValue);
+                                queries.add(q);
+                            });
+                        }
+                        group.put("queries", queries);
+                        facetViews.add(group);
+                    }
+                }
+            } catch (final Exception ignored) {
+                // ViewHelper not wired in stripped unit harness — emit empty list.
+            }
+
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("site_name", siteName);
             payload.put("login_required", cfg.isLoginRequired());
@@ -281,6 +352,7 @@ public class UiConfigHandler {
             payload.put("lang_options", langOptions);
             payload.put("label_options", labelOptions);
             payload.put("notifications", notifications);
+            payload.put("facet_views", facetViews);
             payload.put("csrf_required", csrfRequired);
             payload.put("csrf_token", csrfToken);
             V2EnvelopeWriter.writeSuccess(res, payload);

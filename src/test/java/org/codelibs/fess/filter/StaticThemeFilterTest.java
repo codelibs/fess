@@ -378,6 +378,27 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_forwardsIndexForCachePath() throws Exception {
+        // /cache/?docId=abc is now an SPA route when a static theme is active.
+        // It must be forwarded to THEME_VIEW_PATH with INDEX mode, not passed through
+        // to the legacy CacheAction. The /api/v2/cache/ REST endpoint is unaffected
+        // because /api/ is still in PASS_THROUGH_PREFIXES.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        for (final String uri : new String[] { "/cache/", "/cache" }) {
+            final StubRequest req = new StubRequest("GET", uri);
+            final StubChain chain = new StubChain();
+            f.doFilter(req, new StubResponse(), chain);
+            org.junit.jupiter.api.Assertions.assertEquals("/theme/view/", req.forwardedTo, "Expected forward to theme view for " + uri);
+            org.junit.jupiter.api.Assertions.assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE),
+                    "Expected INDEX mode for " + uri);
+            assertFalse(chain.called, "Chain must not be called for SPA cache route: " + uri);
+        }
+    }
+
+    @Test
     public void test_spaFallbackDefault_isTrue_whenManifestIsNull() throws Exception {
         // Theme with null manifest (stub with no manifest) falls back to the
         // default spaFallback=true behavior via orElse(true) in the filter.

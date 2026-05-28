@@ -539,6 +539,109 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * B.4: contract-lock — the success envelope for a fresh favorite POST must contain
+     * the {@code favorite} (boolean) and {@code count} (number) keys that the SPA reads
+     * (themes/bootstrap/assets/search.js:1156). Verified via the existing fresh-add
+     * full-stub path which exercises the success envelope builder end-to-end.
+     *
+     * <p>This test complements {@link #favoritePost_freshAdd_returnsFavoriteAndCount} by
+     * asserting the contract at the JSON level without caring about the numeric value.</p>
+     */
+    @Test
+    public void test_successEnvelope_containsFavoriteAndCount_keys() throws Exception {
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("carol"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "carol-code";
+            }
+
+            @Override
+            public String[] getResultDocIds(final String queryId) {
+                return new String[] { "docX" };
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+
+        final SearchHelper searchHelperStub = new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> ub) {
+                final Map<String, Object> doc = new java.util.HashMap<>();
+                doc.put("url", "http://example.com/docX");
+                doc.put("_id", "docX-id");
+                doc.put("favorite_count", 2L);
+                return OptionalEntity.of(doc);
+            }
+
+            @Override
+            public boolean update(final String id,
+                    final java.util.function.Consumer<org.opensearch.action.update.UpdateRequestBuilder> builderConsumer) {
+                return true;
+            }
+        };
+        ComponentUtil.register(searchHelperStub, "searchHelper");
+        ComponentUtil.register(searchHelperStub, SearchHelper.class.getCanonicalName());
+
+        final FavoriteLogService favLogStub = new FavoriteLogService() {
+            @Override
+            public boolean addUrl(final String userCode,
+                    final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
+                return true;
+            }
+        };
+        ComponentUtil.register(favLogStub, "favoriteLogService");
+        ComponentUtil.register(favLogStub, FavoriteLogService.class.getCanonicalName());
+
+        final org.codelibs.fess.helper.SystemHelper systemHelperStub = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public java.time.LocalDateTime getCurrentTimeAsLocalDateTime() {
+                return java.time.LocalDateTime.now();
+            }
+        };
+        ComponentUtil.register(systemHelperStub, "systemHelper");
+        ComponentUtil.register(systemHelperStub, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new FavoritePostHandler()
+                    .handle(new StubRequest("POST", "/api/v2/documents/docX/favorite").withJsonBody("{\"query_id\":\"q99\"}"), res, "docX");
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            final String body = res.body();
+            // Contract: envelope data must contain 'favorite' (boolean) and 'count' (number).
+            assertTrue(body.contains("\"favorite\":true"), "envelope must contain favorite:true in: " + body);
+            assertTrue(body.contains("\"count\":"), "envelope must contain count key in: " + body);
+            // Verify count is a number (not a string): the value after "count": must be a digit.
+            final int countIdx = body.indexOf("\"count\":");
+            assertTrue(countIdx >= 0, "count key missing in: " + body);
+            final char nextChar = body.substring(countIdx + "\"count\":".length()).trim().charAt(0);
+            assertTrue(Character.isDigit(nextChar), "count value must be a JSON number (got '" + nextChar + "') in: " + body);
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+            ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
+        }
+    }
+
+    /**
      * Minimal {@link FessConfig} stub that enables the favorite feature and supplies the
      * index-field names the handler accesses. Everything else delegates to {@code SimpleImpl}.
      */

@@ -91,7 +91,8 @@ const ALLOWED_TAGS = new Set([
   "STRONG", "EM",
   "H2", "H3", "H4",
   "A",
-  "DIV", "SPAN", "BLOCKQUOTE"
+  "DIV", "SPAN", "BLOCKQUOTE",
+  "DL", "DT", "DD"
 ]);
 
 /**
