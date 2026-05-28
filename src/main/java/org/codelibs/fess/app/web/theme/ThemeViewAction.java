@@ -38,7 +38,7 @@ import jakarta.annotation.Resource;
  *
  * <p>HTTP routing is performed by {@code StaticThemeFilter}, which inspects the request URI
  * and (when the request targets a theme) sets request attributes describing how this action
- * should respond before forwarding to {@code /theme-view}:
+ * should respond before forwarding to {@code /theme/view/}:
  * <ul>
  *   <li>{@link #REQ_ATTR_MODE} — {@code "INDEX"} (serve entry HTML) or {@code "ASSET"} (serve a static asset).</li>
  *   <li>{@link #REQ_ATTR_ASSET_PATH} — theme-relative asset path, used only when mode is {@code "ASSET"}.</li>
@@ -49,8 +49,6 @@ import jakarta.annotation.Resource;
  * is still under the theme base directory.</p>
  */
 public class ThemeViewAction extends FessSearchAction {
-
-    private static final long serialVersionUID = 1L;
 
     /** Request attribute key for the view mode set by the filter: {@code "INDEX"} or {@code "ASSET"}. */
     public static final String REQ_ATTR_MODE = "fess.theme.view.mode";
@@ -80,6 +78,12 @@ public class ThemeViewAction extends FessSearchAction {
     /** Helper used to derive the virtual-host key for theme resolution. */
     @Resource
     protected VirtualHostHelper virtualHostHelper;
+
+    /**
+     * Overridable request URI for testing purposes.
+     * In production this field is {@code null} and the URI is read from {@code requestManager}.
+     */
+    String currentRequestUri;
 
     // requestManager is inherited from FessBaseAction (promoted to protected).
     // LastaFlute guarantees DI injection before any @Execute invocation,
@@ -112,6 +116,15 @@ public class ThemeViewAction extends FessSearchAction {
     /**
      * Streams the entry HTML file of the active theme with {@code no-cache} semantics.
      *
+     * <p>When the request URI starts with {@code /error}, the response also carries:
+     * <ul>
+     *   <li>{@code X-Fess-Route: error} — signals to the SPA that this is an error route.</li>
+     *   <li>{@code X-Fess-Error-Code: <status>} — the HTTP status code derived from the URI
+     *       (e.g. {@code 404} for {@code /error/notFound}). The HTTP response itself remains
+     *       200 so the SPA can render appropriately; the SPA reads the header to display the
+     *       correct error page.</li>
+     * </ul>
+     *
      * @return stream response for the entry file, or a 404 response if no theme/entry is available
      */
     ActionResponse serveIndex() {
@@ -142,16 +155,101 @@ public class ThemeViewAction extends FessSearchAction {
             return notFound();
         }
         // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
-        return new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
+        // LastaFlute defaults Content-Disposition to "attachment" when unset, which would
+        // force the browser to download index.html instead of rendering it; use inline.
+        final StreamResponse resp = new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
+                .headerContentDispositionInline()
                 .header("Cache-Control", "no-store")
                 .header("Content-Security-Policy", INDEX_CSP)
                 .header("Referrer-Policy", "same-origin")
-                .header("Content-Length", String.valueOf(fileSize))
-                .stream(out -> {
-                    try (InputStream in = Files.newInputStream(indexFile)) {
-                        in.transferTo(out.stream());
-                    }
-                });
+                .header("Content-Length", String.valueOf(fileSize));
+
+        // Attach error diagnostic headers when the request targets an /error route.
+        final String uri = resolveCurrentRequestUri();
+        if (uri != null && (uri.equals("/error") || uri.startsWith("/error/"))) {
+            final int status = computeErrorStatus(uri);
+            resp.header("X-Fess-Route", "error");
+            resp.header("X-Fess-Error-Code", String.valueOf(status));
+        }
+
+        return resp.stream(out -> {
+            try (InputStream in = Files.newInputStream(indexFile)) {
+                in.transferTo(out.stream());
+            }
+        });
+    }
+
+    /**
+     * Derives the HTTP status code corresponding to an {@code /error/...} URI.
+     *
+     * <p>Mapping:
+     * <ul>
+     *   <li>{@code /error}, {@code /error/error}, {@code /error/system} → 500</li>
+     *   <li>{@code /error/badRequest} or {@code /error/badrequest} → 400</li>
+     *   <li>{@code /error/notFound} or {@code /error/notfound} → 404</li>
+     *   <li>{@code /error/busy} → 503</li>
+     *   <li>Any other {@code /error/*} path → 500</li>
+     * </ul>
+     *
+     * @param uri the request URI (context-path-stripped); must start with {@code /error}
+     * @return the HTTP status code to report in the {@code X-Fess-Error-Code} header
+     */
+    static int computeErrorStatus(final String uri) {
+        if (uri == null) {
+            return 500;
+        }
+        // Extract the kind segment after "/error/"
+        final String kind;
+        if (uri.equals("/error")) {
+            kind = "";
+        } else if (uri.startsWith("/error/")) {
+            // Take only the first path segment after /error/ (ignore trailing /...),
+            // and normalise to lower-case for case-insensitive matching.
+            final String rest = uri.substring("/error/".length());
+            final int slash = rest.indexOf('/');
+            kind = (slash < 0 ? rest : rest.substring(0, slash)).toLowerCase(Locale.ROOT);
+        } else {
+            kind = "";
+        }
+        switch (kind) {
+        case "":
+        case "error":
+        case "system":
+            return 500;
+        case "badrequest":
+            return 400;
+        case "notfound":
+            return 404;
+        case "busy":
+            return 503;
+        default:
+            return 500;
+        }
+    }
+
+    /**
+     * Returns the request URI (context-path-stripped) for the current request.
+     * Uses {@link #currentRequestUri} when set (test seam); otherwise reads from
+     * {@code requestManager}.
+     */
+    private String resolveCurrentRequestUri() {
+        if (currentRequestUri != null) {
+            return currentRequestUri;
+        }
+        if (requestManager == null) {
+            return null;
+        }
+        // requestManager.getRequest() returns OptionalThing<HttpServletRequest> in LastaFlute.
+        // We need the raw URI to detect /error prefixes.
+        try {
+            final jakarta.servlet.http.HttpServletRequest httpReq = requestManager.getRequest();
+            if (httpReq == null) {
+                return null;
+            }
+            return httpReq.getRequestURI();
+        } catch (final Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -296,6 +394,13 @@ public class ThemeViewAction extends FessSearchAction {
         }
 
         // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
+        // LastaFlute defaults Content-Disposition to "attachment" when unset; assets must
+        // load inline so <link>/<script>/<img> references in index.html behave normally.
+        // HTML asset files are forced to "attachment" to prevent same-origin XSS via a
+        // malicious theme dropping an executable HTML page next to the SPA entry — only
+        // index.html (served by serveIndex() with INDEX_CSP) should render as HTML.
+        // SVG keeps inline because SVG_CSP below blocks script execution.
+        final boolean isHtml = "text/html; charset=UTF-8".equals(contentType);
         final StreamResponse resp = new StreamResponse(name).contentType(contentType)
                 .header("Cache-Control", "public, max-age=86400")
                 .header("Vary", "Accept-Encoding")
@@ -303,6 +408,11 @@ public class ThemeViewAction extends FessSearchAction {
                 .header("ETag", etag)
                 .header("Last-Modified", lastModified)
                 .header("Content-Length", String.valueOf(size));
+        if (isHtml) {
+            resp.headerContentDispositionAttachment();
+        } else {
+            resp.headerContentDispositionInline();
+        }
         if (isSvg) {
             resp.header("Content-Security-Policy", SVG_CSP);
         }

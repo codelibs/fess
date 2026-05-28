@@ -636,7 +636,105 @@ public class ThemeViewActionTest extends UnitFessTestCase {
         }
     }
 
+    // ── computeErrorStatus unit tests ──────────────────────────────────────────
+
+    @Test
+    public void test_computeErrorStatus_notFound() {
+        assertEquals(404, ThemeViewAction.computeErrorStatus("/error/notFound"));
+        assertEquals(404, ThemeViewAction.computeErrorStatus("/error/notfound"));
+    }
+
+    @Test
+    public void test_computeErrorStatus_badRequest() {
+        assertEquals(400, ThemeViewAction.computeErrorStatus("/error/badRequest"));
+        assertEquals(400, ThemeViewAction.computeErrorStatus("/error/badrequest"));
+    }
+
+    @Test
+    public void test_computeErrorStatus_system_and_error() {
+        assertEquals(500, ThemeViewAction.computeErrorStatus("/error/system"));
+        assertEquals(500, ThemeViewAction.computeErrorStatus("/error/error"));
+        assertEquals(500, ThemeViewAction.computeErrorStatus("/error"));
+    }
+
+    @Test
+    public void test_computeErrorStatus_busy() {
+        assertEquals(503, ThemeViewAction.computeErrorStatus("/error/busy"));
+    }
+
+    @Test
+    public void test_computeErrorStatus_unknownPathDefaultsTo500() {
+        assertEquals(500, ThemeViewAction.computeErrorStatus("/error/anything_else"));
+        assertEquals(500, ThemeViewAction.computeErrorStatus("/error/unknown"));
+    }
+
+    @Test
+    public void test_serveIndex_setsErrorHeaders_forErrorRoute() throws Exception {
+        // When the request URI starts with /error, serveIndex must set
+        // X-Fess-Route: error and X-Fess-Error-Code: <status> response headers,
+        // while still serving the normal index.html (SPA handles rendering).
+        final Path tmp = Files.createTempDirectory("tva-error-headers-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/notFound");
+
+            final ActionResponse resp = action.serveIndex();
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertNotNull(headers.get("X-Fess-Route"), "X-Fess-Route header must be set for /error route");
+            assertEquals("error", headers.get("X-Fess-Route")[0]);
+            assertNotNull(headers.get("X-Fess-Error-Code"), "X-Fess-Error-Code header must be set for /error route");
+            assertEquals("404", headers.get("X-Fess-Error-Code")[0]);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_noErrorHeaders_forNonErrorRoute() throws Exception {
+        // Non-error routes (e.g. /search) must not have error diagnostic headers.
+        final Path tmp = Files.createTempDirectory("tva-no-error-headers-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/search");
+
+            final ActionResponse resp = action.serveIndex();
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertNull(headers.get("X-Fess-Route"), "X-Fess-Route must not be set for non-error routes");
+            assertNull(headers.get("X-Fess-Error-Code"), "X-Fess-Error-Code must not be set for non-error routes");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
     private static ThemeViewAction newActionWith(final Theme theme) {
+        return newActionWithRequestUri(theme, "/");
+    }
+
+    private static ThemeViewAction newActionWithRequestUri(final Theme theme, final String requestUri) {
         final ThemeViewAction action = new ThemeViewAction();
         action.themeRegistry = new ThemeRegistry() {
             @Override
@@ -650,6 +748,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                 return null;
             }
         };
+        action.currentRequestUri = requestUri;
         return action;
     }
 
