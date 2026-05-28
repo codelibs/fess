@@ -1,5 +1,6 @@
 import * as api from "./api.js";
 import { t } from "./i18n.js";
+import { formatFileSize, formatDate, renderHighlightedSnippet } from "./format.js";
 
 /** Guard: prevent duplicate event-listener registration on hot-reload. */
 let attached = false;
@@ -12,7 +13,10 @@ const state = {
   start: 0,
   num: 10,
   sort: "",
-  facets: {} // field -> [values]
+  lang: "",
+  sdh: "",           // similar_docs_hash for similarity search
+  facets: {},        // field -> [values]
+  fields: {}         // extra field filters (e.g. label)
 };
 
 // XSS-safety: this module builds every result-card DOM node with
@@ -50,25 +54,82 @@ function el(tag, opts) {
 }
 
 function buildResultCard(d, queryId) {
+  const cfg = api.getConfig() || {};
+  const features = cfg.features || {};
+
   const li = el("li", { className: "result-card", dataset: { docId: d.doc_id || "", queryId: queryId || "" } });
+
+  // --- Task 2.2: thumbnail (left side) ---
+  if (d.thumbnail && features.thumbnail_enabled) {
+    const img = document.createElement("img");
+    img.className = "result-thumbnail";
+    img.setAttribute("loading", "lazy");
+    img.setAttribute("alt", "");
+    img.setAttribute("src", safeHref(d.thumbnail));
+    img.addEventListener("error", () => { img.style.display = "none"; });
+    li.appendChild(img);
+  }
+
+  // --- card body (right side) ---
+  const body = el("div", { className: "result-card-body" });
 
   const h2 = el("h2");
   const a = el("a", { text: d.title || d.url || "", attrs: { href: safeHref(d.url_link || d.url) }, dataset: { resultLink: "1" } });
   h2.appendChild(a);
-  li.appendChild(h2);
+  body.appendChild(h2);
 
-  li.appendChild(el("div", { className: "result-url", text: d.site || d.url || "" }));
-  li.appendChild(el("div", { className: "result-snippet", text: d.content_description || d.digest || "" }));
+  body.appendChild(el("div", { className: "result-url", text: d.site || d.url || "" }));
 
+  // --- Task 2.3: info meta (size · date · click_count) ---
+  const infoParts = [];
+  const sizeStr = formatFileSize(d.content_length);
+  if (sizeStr) infoParts.push(sizeStr);
+  const dateStr = formatDate(d.last_modified || d.created);
+  if (dateStr) infoParts.push(dateStr);
+  if (features.search_log_enabled && d.click_count > 0) {
+    infoParts.push(t("result.click_views", { count: d.click_count }));
+  }
+  if (infoParts.length > 0) {
+    body.appendChild(el("div", { className: "result-info-meta text-muted small", text: infoParts.join(" · ") }));
+  }
+
+  // --- Task 2.6: highlighted snippet via renderHighlightedSnippet ---
+  const snippetEl = el("div", { className: "result-snippet" });
+  snippetEl.innerHTML = renderHighlightedSnippet(d.content_description || d.digest || "");
+  body.appendChild(snippetEl);
+
+  // --- result-meta row: cache link, similar docs, host, favorite ---
   const meta = el("div", { className: "result-meta" });
+
   meta.appendChild(el("span", { className: "text-muted", text: d.host || "" }));
-  meta.appendChild(el("span", { className: "text-muted", text: d.last_modified || "" }));
-  const cacheLink = el("a", {
-    className: "text-muted",
-    text: t("result.cache"),
-    attrs: { href: "/api/v2/cache/" + encodeURIComponent(d.doc_id || ""), target: "_blank", rel: "noopener" }
-  });
-  meta.appendChild(cacheLink);
+
+  // --- Task 2.4: cache link — only when has_cache is truthy ---
+  if (d.has_cache === "true" || d.has_cache === true) {
+    const cacheLink = el("a", {
+      className: "text-muted",
+      text: t("result.cache"),
+      attrs: { href: "/api/v2/cache/" + encodeURIComponent(d.doc_id || ""), target: "_blank", rel: "noopener" }
+    });
+    meta.appendChild(cacheLink);
+  }
+
+  // --- Task 2.5: similar docs link ---
+  const simCount = Number(d.similar_docs_count);
+  if (simCount > 1) {
+    const simLink = el("a", {
+      className: "text-muted",
+      text: t("result.similar", { count: simCount }),
+      attrs: { href: "#" }
+    });
+    simLink.addEventListener("click", ev => {
+      ev.preventDefault();
+      state.sdh = d.similar_docs_hash || d.doc_id || "";
+      state.start = 0;
+      runSearch();
+    });
+    meta.appendChild(simLink);
+  }
+
   const favBtn = el("button", {
     className: "btn btn-link btn-sm favorite-btn p-0",
     attrs: { type: "button", "aria-pressed": "false", "aria-label": t("result.favorite_add") }
@@ -77,7 +138,8 @@ function buildResultCard(d, queryId) {
   favBtn.appendChild(favIcon);
   meta.appendChild(favBtn);
 
-  li.appendChild(meta);
+  body.appendChild(meta);
+  li.appendChild(body);
   return li;
 }
 
@@ -116,8 +178,17 @@ async function runSearch() {
   try {
     const params = { q: state.q, start: state.start, num: state.num };
     if (state.sort) params.sort = state.sort;
+    if (state.lang) params.lang = state.lang;
+    if (state.sdh) params.sdh = state.sdh;
+    // facet-based field filters
     for (const [field, values] of Object.entries(state.facets)) {
       values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
+    }
+    // explicit field filters (e.g. label dropdown)
+    for (const [field, values] of Object.entries(state.fields)) {
+      if (Array.isArray(values)) {
+        values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
+      }
     }
     const env = await api.get("/search", params, { signal });
     renderResults(env);
@@ -185,6 +256,146 @@ function hideSuggest() {
   if (inp) { inp.setAttribute("aria-expanded", "false"); inp.removeAttribute("aria-activedescendant"); }
   suggestIndex = -1;
 }
+
+// ─── Phase 3: Search option selects ──────────────────────────────────────────
+
+/**
+ * Task 3.1 — Populate the sort <select> from api config sort_options.
+ * Uses fess_label-compatible keys directly as i18n keys (no mapping needed).
+ */
+function renderSortOptions() {
+  const sel = document.getElementById("sort-select");
+  if (!sel) return;
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  const cfg = api.getConfig() || {};
+  const opts = cfg.sort_options && cfg.sort_options.length > 0
+    ? cfg.sort_options
+    : [{ value: "", label_key: "labels.search_result_sort_score_desc" }];
+  for (const o of opts) {
+    const opt = document.createElement("option");
+    opt.value = o.value != null ? o.value : "";
+    opt.textContent = t(o.label_key || o.value || "");
+    sel.appendChild(opt);
+  }
+  sel.value = state.sort || "";
+}
+
+/**
+ * Task 3.2 — Populate the num <select> from api config num_options.
+ */
+function renderNumOptions() {
+  const sel = document.getElementById("num-select");
+  if (!sel) return;
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  const cfg = api.getConfig() || {};
+  const nums = cfg.num_options && cfg.num_options.length > 0
+    ? cfg.num_options
+    : [10, 20, 50];
+  for (const n of nums) {
+    const opt = document.createElement("option");
+    opt.value = String(n);
+    opt.textContent = t("search.num_format", { num: n });
+    sel.appendChild(opt);
+  }
+  sel.value = String(state.num || 10);
+}
+
+/**
+ * Task 3.3 — Populate the lang <select> from api config lang_options.
+ */
+function renderLangOptions() {
+  const sel = document.getElementById("lang-select");
+  if (!sel) return;
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  const cfg = api.getConfig() || {};
+  const langs = cfg.lang_options || [];
+
+  // "All languages" option always first
+  const allOpt = document.createElement("option");
+  allOpt.value = "";
+  allOpt.textContent = t("labels.searchoptions_all_langs");
+  sel.appendChild(allOpt);
+
+  for (const lang of langs) {
+    const opt = document.createElement("option");
+    opt.value = lang.value != null ? lang.value : "";
+    // Try fess_label-compatible key first, fall back to raw value
+    const labelKey = lang.label_key || ("labels.lang_" + lang.value);
+    opt.textContent = t(labelKey) !== labelKey ? t(labelKey) : (lang.label || lang.value || "");
+    sel.appendChild(opt);
+  }
+  sel.value = state.lang || "";
+}
+
+/**
+ * Task 3.4 — Build the label filter dropdown (checkbox list) using createElement only.
+ * label_options: [{ value, label }] from api config.
+ */
+function renderLabelOptions() {
+  const wrap = document.getElementById("label-dropdown-wrap");
+  const menu = document.getElementById("label-dropdown-menu");
+  if (!wrap || !menu) return;
+  const cfg = api.getConfig() || {};
+  const labelOpts = cfg.label_options || [];
+
+  if (labelOpts.length === 0) {
+    wrap.classList.add("d-none");
+    return;
+  }
+  wrap.classList.remove("d-none");
+
+  while (menu.firstChild) menu.removeChild(menu.firstChild);
+
+  const selected = (state.fields.label || []);
+  for (const lo of labelOpts) {
+    const li = document.createElement("li");
+    li.className = "dropdown-item";
+
+    const label = document.createElement("label");
+    label.className = "d-flex align-items-center gap-2 mb-0";
+    label.style.cursor = "pointer";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = lo.value != null ? lo.value : "";
+    cb.checked = selected.includes(cb.value);
+
+    const span = document.createElement("span");
+    span.textContent = lo.label || lo.value || "";
+
+    label.appendChild(cb);
+    label.appendChild(span);
+    li.appendChild(label);
+
+    cb.addEventListener("change", () => {
+      const arr = state.fields.label ? [...state.fields.label] : [];
+      if (cb.checked) {
+        if (!arr.includes(cb.value)) arr.push(cb.value);
+      } else {
+        const i = arr.indexOf(cb.value);
+        if (i >= 0) arr.splice(i, 1);
+      }
+      state.fields.label = arr;
+      state.start = 0;
+      runSearch();
+    });
+
+    menu.appendChild(li);
+  }
+}
+
+/**
+ * (Re-)initialise all search option selects from config. Safe to call multiple times.
+ * Listeners are attached once in attach(); this only repopulates the options.
+ */
+function renderSearchOptions() {
+  renderSortOptions();
+  renderNumOptions();
+  renderLangOptions();
+  renderLabelOptions();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Trigger a fresh search with the current state without registering additional
@@ -258,16 +469,50 @@ export function attach() {
     });
   }
   const clearBtn = document.getElementById("facet-clear");
-  if (clearBtn) clearBtn.addEventListener("click", () => { state.facets = {}; runSearch(); });
+  if (clearBtn) clearBtn.addEventListener("click", () => { state.facets = {}; state.fields = {}; runSearch(); });
+
+  // Sort select — options are populated by renderSortOptions() after config loads
   const sortSelect = document.getElementById("sort-select");
   if (sortSelect) sortSelect.addEventListener("change", () => {
     state.sort = sortSelect.value || "";
     state.start = 0;
     runSearch();
   });
+
+  // Num select
+  const numSelect = document.getElementById("num-select");
+  if (numSelect) numSelect.addEventListener("change", () => {
+    state.num = Number(numSelect.value) || 10;
+    state.start = 0;
+    runSearch();
+  });
+
+  // Lang select
+  const langSelect = document.getElementById("lang-select");
+  if (langSelect) langSelect.addEventListener("change", () => {
+    state.lang = langSelect.value || "";
+    state.start = 0;
+    runSearch();
+  });
+
+  // Populate search option selects once config is available.
+  // api.init() is awaited by app.js before attach() is called, so getConfig()
+  // should already be populated, but guard against timing edge cases.
+  if (api.getConfig()) {
+    renderSearchOptions();
+  }
+
   const urlQ = new URLSearchParams(location.search).get("q");
   if (urlQ && input) { input.value = urlQ; state.q = urlQ; runSearch(); }
   if (!urlQ) loadPopularWords();
+}
+
+/**
+ * (Re-)render search option dropdowns. Call this after api.init() completes
+ * if attach() ran before config was available.
+ */
+export function initSearchOptions() {
+  renderSearchOptions();
 }
 
 async function loadLabels() {
@@ -416,4 +661,4 @@ async function toggleFavorite(docId, btn) {
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
 export const _state = state;
-export { runSearch, el, buildResultCard, refresh };
+export { runSearch, el, buildResultCard, refresh, renderSearchOptions };
