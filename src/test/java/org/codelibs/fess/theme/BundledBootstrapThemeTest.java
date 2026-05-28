@@ -168,4 +168,11 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("renderHighlightedSnippet(d.content_title)"));
         assertTrue(js.contains("a.textContent = d.title || d.url"));
     }
+
+    @Test
+    public void test_searchJs_labelFacetFromResponseWithZeroSuppress() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("f.name === \"label\""));
+        assertTrue(js.contains("Number(r.count) > 0"));
+    }
 }

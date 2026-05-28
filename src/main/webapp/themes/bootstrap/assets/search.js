@@ -1083,16 +1083,24 @@ function renderFacets(env, labels) {
   // Clear existing children without innerHTML = ""
   while (body.firstChild) body.removeChild(body.firstChild);
 
-  // 1. Label facet (from /labels endpoint)
-  if (labels.length > 0) {
-    const entries = labels.map(l => ({ labelText: l.label, value: l.value }));
-    body.appendChild(buildFacetGroup(t("labels.facet_label_title"), entries, "label"));
+  // 1. Label facet — built from env.facet_field where name === "label" with per-label counts,
+  //    zero-count suppressed, de-duplicated against the /labels list (SRCH-3).
+  const facetField = env.facet_field || [];
+  const labelValueSet = new Set((labels || []).map(l => l.value));
+  const labelTitleByValue = new Map((labels || []).map(l => [l.value, l.label]));
+  const labelField = facetField.find(f => f.name === "label");
+  if (labelField) {
+    const entries = (labelField.result || [])
+      .filter(r => Number(r.count) > 0 && labelValueSet.has(r.value))
+      .map(r => ({ labelText: labelTitleByValue.get(r.value) || r.value, value: r.value, count: r.count }));
+    if (entries.length > 0) {
+      body.appendChild(buildFacetGroup(t("labels.facet_label_title"), entries, "label"));
+    }
   }
 
-  // 2. Dynamic facet fields from API (excluding filetype — handled separately below)
-  const facetField = env.facet_field || [];
+  // 2. Dynamic facet fields from API (excluding filetype and label — rendered separately)
   for (const field of facetField) {
-    if (field.name === "filetype") continue; // rendered in step 4
+    if (field.name === "filetype" || field.name === "label") continue;
     const entries = (field.result || []).map(r => ({ labelText: r.value, value: r.value, count: r.count }));
     if (entries.length > 0) {
       body.appendChild(buildFacetGroup(field.name, entries, field.name));
