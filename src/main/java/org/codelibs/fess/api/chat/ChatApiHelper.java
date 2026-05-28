@@ -33,8 +33,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 /**
  * Shared utilities for v2 chat API handlers.
  *
@@ -209,16 +207,15 @@ public class ChatApiHelper {
      * authenticated username, fall back to the cookie-bound userCode for guests.
      * This keeps chat usable for anonymous SPA visitors when login is not required.</p>
      *
-     * @param req the incoming HTTP request
      * @return the user identifier (never null)
      */
-    public String getUserId(final HttpServletRequest req) {
+    public String getUserId() {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         return resolveUserId(systemHelper.getUsername(), () -> ComponentUtil.getUserInfoHelper().getUserCode());
     }
 
     /**
-     * Pure resolution logic behind {@link #getUserId(HttpServletRequest)}, separated so the
+     * Pure resolution logic behind {@link #getUserId()}, separated so the
      * branching can be unit-tested without the DI container. Prefers a non-guest username;
      * otherwise falls back to the guest user-code provided by the supplier (evaluated lazily so
      * the cookie-bound code is only resolved for guest visitors).

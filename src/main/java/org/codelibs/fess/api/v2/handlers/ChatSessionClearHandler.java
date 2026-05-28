@@ -154,6 +154,6 @@ public class ChatSessionClearHandler {
      * @return the user identifier (never null)
      */
     protected String getUserId(final HttpServletRequest req) {
-        return ComponentUtil.getChatApiHelper().getUserId(req);
+        return ComponentUtil.getChatApiHelper().getUserId();
     }
 }
