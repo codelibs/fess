@@ -20,42 +20,16 @@ const state = {
   sdh: "",              // similar_docs_hash for similarity search
   facets: {},           // field -> [values]
   fields: {},           // extra field filters (e.g. label)
-  timestampRange: "",   // one of: 1day, 1week, 1month, 3month, 6month, 1year, 2year, 3year
-  sizeRange: "",        // one of: 0, 1, 2, 3, 4 (index into SIZE_RANGES)
+  facetQueries: [],     // string[] — active ex_q clause strings from facet_views (SRCH-4)
   requestedTime: 0,     // epoch ms of the most-recent search; used in /go/ click-log URL
   highlightParams: ""   // server-supplied highlight_params string (e.g. "&hl.q=...&hl.fragsize=...")
 };
-
-// ─── Range facet definitions ──────────────────────────────────────────────────
-
-/** Timestamp range buckets, matching JSP facet queries. */
-const TIMESTAMP_RANGES = [
-  { key: "1day",   query: "timestamp:[now/d-1d TO *]",  labelKey: "labels.facet_timestamp_1day" },
-  { key: "1week",  query: "timestamp:[now/d-7d TO *]",  labelKey: "labels.facet_timestamp_1week" },
-  { key: "1month", query: "timestamp:[now/d-1M TO *]",  labelKey: "labels.facet_timestamp_1month" },
-  { key: "3month", query: "timestamp:[now/d-3M TO *]",  labelKey: "labels.facet_timestamp_3month" },
-  { key: "6month", query: "timestamp:[now/d-6M TO *]",  labelKey: "labels.facet_timestamp_6month" },
-  { key: "1year",  query: "timestamp:[now/d-1y TO *]",  labelKey: "labels.facet_timestamp_1year" },
-  { key: "2year",  query: "timestamp:[now/d-2y TO *]",  labelKey: "labels.facet_timestamp_2year" },
-  { key: "3year",  query: "timestamp:[now/d-3y TO *]",  labelKey: "labels.facet_timestamp_3year" }
-];
-
-/** Content-length (size) range buckets. Boundaries match JSP defaults. */
-const SIZE_RANGES = [
-  { key: "0", query: "content_length:[* TO 9999]",          labelKey: "labels.facet_contentLength_0" },
-  { key: "1", query: "content_length:[10000 TO 99999]",     labelKey: "labels.facet_contentLength_1" },
-  { key: "2", query: "content_length:[100000 TO 499999]",   labelKey: "labels.facet_contentLength_2" },
-  { key: "3", query: "content_length:[500000 TO 999999]",   labelKey: "labels.facet_contentLength_3" },
-  { key: "4", query: "content_length:[1000000 TO *]",       labelKey: "labels.facet_contentLength_4" }
-];
 
 /** Filetype values shown in the static filetype facet group. Matches query.facet.queries defaults. */
 const FILETYPE_VALUES = [
   "html", "word", "excel", "powerpoint",
   "odt", "ods", "odp", "pdf", "txt", "others"
 ];
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 // XSS-safety: this module builds every result-card DOM node with
 // document.createElement + textContent. No untrusted string is ever
@@ -494,23 +468,11 @@ async function runSearch() {
         values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
       }
     }
-    // timestamp range filter — passed as ex_q (API v2 accepts ex_q array)
-    if (state.timestampRange) {
-      const ts = TIMESTAMP_RANGES.find(r => r.key === state.timestampRange);
-      if (ts) {
-        params["ex_q"] = params["ex_q"] || [];
-        if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
-        params["ex_q"].push(ts.query);
-      }
-    }
-    // size range filter — passed as ex_q
-    if (state.sizeRange !== "") {
-      const sr = SIZE_RANGES.find(r => r.key === state.sizeRange);
-      if (sr) {
-        params["ex_q"] = params["ex_q"] || [];
-        if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
-        params["ex_q"].push(sr.query);
-      }
+    // facet query views — active ex_q clauses from server-driven facet_views (SRCH-4)
+    if (Array.isArray(state.facetQueries) && state.facetQueries.length > 0) {
+      params["ex_q"] = params["ex_q"] || [];
+      if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
+      state.facetQueries.forEach(v => params["ex_q"].push(v));
     }
     const env = await api.get("/search", params, { signal });
     // Prefer the server-supplied requested_time when available (more accurate).
@@ -901,8 +863,7 @@ export function attach() {
   if (clearBtn) clearBtn.addEventListener("click", () => {
     state.facets = {};
     state.fields = {};
-    state.timestampRange = "";
-    state.sizeRange = "";
+    state.facetQueries = [];
     // Reset selects: label multi-select deselects all (selectedIndex = -1);
     // sort and num return to their "all / default" first option (selectedIndex = 0).
     const sortSel = document.getElementById("sort-select");
@@ -1005,31 +966,46 @@ function buildFacetGroup(title, entries, fieldKey) {
 }
 
 /**
- * Build a single-select range facet group (timestamp or size).
- * Clicking the active item deselects; clicking another selects it.
+ * Render server-driven facet query views (SRCH-4).
+ * Consumes cfg.facet_views (group/query definitions) and env.facet_query (counts),
+ * zero-suppresses entries with no results, and toggles selections in state.facetQueries.
  *
- * @param {string} title - group heading text
- * @param {{ key: string, labelKey: string }[]} ranges - range definitions
- * @param {string} stateKey - "timestampRange" or "sizeRange"
+ * @param {Element} body - the facet-body container element
+ * @param {Object} env  - the search response envelope
  */
-function buildRangeFacetGroup(title, ranges, stateKey) {
-  const group = el("div", { className: "facet-group" });
-  group.appendChild(el("h3", { text: title }));
-  ranges.forEach(range => {
-    const active = state[stateKey] === range.key;
-    const item = el("button", {
-      className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
-      attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
+function renderFacetQueryViews(body, env) {
+  const cfg = api.getConfig() || {};
+  const views = cfg.facet_views || [];
+  const countByValue = {};
+  (env.facet_query || []).forEach(fq => { countByValue[fq.value] = fq.count; });
+  views.forEach(view => {
+    const groupTitleKey = view.group_name || "";
+    const title = groupTitleKey.startsWith("labels.") ? t(groupTitleKey) : groupTitleKey;
+    const queries = (view.queries || []).filter(qy => Number(countByValue[qy.value]) > 0);
+    if (queries.length === 0) return;
+    const group = el("div", { className: "facet-group" });
+    group.appendChild(el("h3", { text: title }));
+    queries.forEach(qy => {
+      const active = (state.facetQueries || []).includes(qy.value);
+      const item = el("button", {
+        className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
+        attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
+      });
+      const label = qy.label_key && qy.label_key.startsWith("labels.") ? t(qy.label_key) : (qy.label_key || qy.value);
+      item.appendChild(el("span", { text: label }));
+      item.appendChild(el("span", { className: "badge bg-secondary", text: String(countByValue[qy.value]) }));
+      item.addEventListener("click", () => {
+        const arr = state.facetQueries ? [...state.facetQueries] : [];
+        const i = arr.indexOf(qy.value);
+        if (i >= 0) arr.splice(i, 1); else arr.push(qy.value);
+        state.facetQueries = arr;
+        state.start = 0;
+        runSearch();
+      });
+      group.appendChild(item);
     });
-    item.appendChild(el("span", { text: t(range.labelKey) }));
-    item.addEventListener("click", () => {
-      state[stateKey] = state[stateKey] === range.key ? "" : range.key;
-      state.start = 0;
-      runSearch();
-    });
-    group.appendChild(item);
+    body.appendChild(group);
   });
-  return group;
 }
 
 /**
@@ -1107,21 +1083,17 @@ function renderFacets(env, labels) {
     }
   }
 
-  // 3. Timestamp range facet
-  body.appendChild(buildRangeFacetGroup(t("labels.facet_timestamp_title"), TIMESTAMP_RANGES, "timestampRange"));
+  // 3. Server-driven facet query views (timestamp ranges, size ranges, etc.) (SRCH-4)
+  renderFacetQueryViews(body, env);
 
-  // 4. Content-length (size) range facet
-  body.appendChild(buildRangeFacetGroup(t("labels.facet_contentLength_title"), SIZE_RANGES, "sizeRange"));
-
-  // 5. Filetype facet
+  // 4. Filetype facet
   body.appendChild(buildFiletypeFacetGroup(env));
 
   // Show clear button if any filter is active
   const anyActive =
     Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0) ||
     Object.values(state.fields).some(arr => Array.isArray(arr) && arr.length > 0) ||
-    state.timestampRange !== "" ||
-    state.sizeRange !== "";
+    (Array.isArray(state.facetQueries) && state.facetQueries.length > 0);
   clearBtn.classList.toggle("d-none", !anyActive);
 }
 
@@ -1182,22 +1154,31 @@ function renderActiveChips() {
     }));
   }
 
-  // Timestamp range chip
-  if (state.timestampRange) {
-    const ts = TIMESTAMP_RANGES.find(r => r.key === state.timestampRange);
-    if (ts) chips.push({
-      label: t("labels.facet_timestamp_title") + ": " + t(ts.labelKey),
-      remove: () => { state.timestampRange = ""; state.start = 0; runSearch(); }
+  // Facet query view chips (SRCH-4) — derive chip labels from cfg.facet_views value→label
+  if (Array.isArray(state.facetQueries) && state.facetQueries.length > 0) {
+    const cfg = api.getConfig() || {};
+    const views = cfg.facet_views || [];
+    // Build a flat value→label map from all facet_views queries
+    const facetQueryLabelByValue = new Map();
+    views.forEach(view => {
+      const groupTitleKey = view.group_name || "";
+      const groupTitle = groupTitleKey.startsWith("labels.") ? t(groupTitleKey) : groupTitleKey;
+      (view.queries || []).forEach(qy => {
+        const qLabel = qy.label_key && qy.label_key.startsWith("labels.") ? t(qy.label_key) : (qy.label_key || qy.value);
+        facetQueryLabelByValue.set(qy.value, groupTitle ? groupTitle + ": " + qLabel : qLabel);
+      });
     });
-  }
-
-  // Size range chip
-  if (state.sizeRange !== "") {
-    const sr = SIZE_RANGES.find(r => r.key === state.sizeRange);
-    if (sr) chips.push({
-      label: t("labels.facet_contentLength_title") + ": " + t(sr.labelKey),
-      remove: () => { state.sizeRange = ""; state.start = 0; runSearch(); }
-    });
+    state.facetQueries.forEach(v => chips.push({
+      label: facetQueryLabelByValue.get(v) || v,
+      remove: () => {
+        const arr = state.facetQueries ? [...state.facetQueries] : [];
+        const idx = arr.indexOf(v);
+        if (idx >= 0) arr.splice(idx, 1);
+        state.facetQueries = arr;
+        state.start = 0;
+        runSearch();
+      }
+    }));
   }
 
   if (chips.length === 0) {

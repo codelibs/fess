@@ -175,4 +175,13 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("f.name === \"label\""));
         assertTrue(js.contains("Number(r.count) > 0"));
     }
+
+    @Test
+    public void test_searchJs_facetViewsFromServerConfig() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("cfg.facet_views"));
+        assertTrue(js.contains("env.facet_query"));
+        assertFalse(js.contains("const TIMESTAMP_RANGES"));
+        assertFalse(js.contains("const SIZE_RANGES"));
+    }
 }
