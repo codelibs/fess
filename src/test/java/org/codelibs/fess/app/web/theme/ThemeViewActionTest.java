@@ -16,6 +16,9 @@
 package org.codelibs.fess.app.web.theme;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,6 +34,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
 public class ThemeViewActionTest extends UnitFessTestCase {
 
@@ -659,7 +663,8 @@ public class ThemeViewActionTest extends UnitFessTestCase {
 
     @Test
     public void test_computeErrorStatus_busy() {
-        assertEquals(503, ThemeViewAction.computeErrorStatus("/error/busy"));
+        // A.10: /error/busy maps to HTTP 429 (Too Many Requests) — changed from 503.
+        assertEquals(429, ThemeViewAction.computeErrorStatus("/error/busy"));
     }
 
     @Test
@@ -730,6 +735,252 @@ public class ThemeViewActionTest extends UnitFessTestCase {
         }
     }
 
+    // ── A.11: HTTP status code on error responses ─────────────────────────────
+
+    @Test
+    public void test_serveIndex_setsHttpStatus_forNotFoundError() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-status-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/notFound");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            // A.11: HTTP status must be 404 (not 200) for /error/notFound route.
+            assertTrue(sr.getHttpStatus().isPresent(), "HTTP status must be set for /error/notFound");
+            assertEquals(404, (int) sr.getHttpStatus().get(), "HTTP status must be 404 for /error/notFound");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_setsHttpStatus_forBadRequest() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-status-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/badRequest");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            assertTrue(sr.getHttpStatus().isPresent(), "HTTP status must be set for /error/badRequest");
+            assertEquals(400, (int) sr.getHttpStatus().get(), "HTTP status must be 400 for /error/badRequest");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_setsHttpStatus_forSystem() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-status-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/system");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            assertTrue(sr.getHttpStatus().isPresent(), "HTTP status must be set for /error/system");
+            assertEquals(500, (int) sr.getHttpStatus().get(), "HTTP status must be 500 for /error/system");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_setsHttpStatus_forBusy() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-status-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/busy");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            assertTrue(sr.getHttpStatus().isPresent(), "HTTP status must be set for /error/busy");
+            assertEquals(429, (int) sr.getHttpStatus().get(), "HTTP status must be 429 for /error/busy");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_noHttpStatusOverride_forNonErrorRoute() throws Exception {
+        // For non-error routes the HTTP status must NOT be set (SPA renders normally).
+        final Path tmp = Files.createTempDirectory("tva-status-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/search");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            // Non-error routes must not set an explicit http status (defaults to 200).
+            assertFalse(sr.getHttpStatus().isPresent() && sr.getHttpStatus().get() != 200,
+                    "Non-error route must not set an error status code, got: " + sr.getHttpStatus());
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    // ── F.9: error detail meta tag injection tests ────────────────────────────
+
+    @Test
+    public void test_errorPathWithMessageKey_injectsDetailMeta() throws Exception {
+        // When /error/notFound is served with ?message_key=errors.docid_not_found,
+        // the response body must contain the x-fess-error-detail-key meta tag.
+        final Path tmp = Files.createTempDirectory("tva-f9-inject-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUriAndMessageKey(theme, "/error/notFound", "errors.docid_not_found");
+
+            final ActionResponse resp = action.serveIndex();
+            // Capture body bytes via the stream callback.
+            final ByteArrayOutputStream bodyBuf = new ByteArrayOutputStream();
+            ((StreamResponse) resp).getStreamCall().callback(captureOut(bodyBuf));
+            final String body = bodyBuf.toString(StandardCharsets.UTF_8);
+            assertTrue(body.contains("x-fess-error-detail-key"), "Body must contain x-fess-error-detail-key meta tag");
+            assertTrue(body.contains("errors.docid_not_found"), "Body must contain the message key value");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_errorPathWithoutMessageKey_leavesIndexUnchanged() throws Exception {
+        // When /error/notFound is served WITHOUT ?message_key, the response body must NOT
+        // contain the injected meta tag — the index.html is streamed as-is.
+        final Path tmp = Files.createTempDirectory("tva-f9-noinject-");
+        try {
+            final String originalHtml = "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>";
+            Files.writeString(tmp.resolve("index.html"), originalHtml);
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            // No message key — use the standard helper.
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/notFound");
+
+            final ActionResponse resp = action.serveIndex();
+            final ByteArrayOutputStream bodyBuf = new ByteArrayOutputStream();
+            ((StreamResponse) resp).getStreamCall().callback(captureOut(bodyBuf));
+            final String body = bodyBuf.toString(StandardCharsets.UTF_8);
+            assertFalse(body.contains("x-fess-error-detail-key"),
+                    "Body must NOT contain error-detail meta tag when no message_key is provided");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    // ── F.9: injectErrorDetailMeta unit tests ─────────────────────────────────
+
+    @Test
+    public void test_injectErrorDetailMeta_insertsMetaBeforeHeadClose() {
+        final String html = "<html><head><title>T</title></head><body></body></html>";
+        final byte[] result = ThemeViewAction.injectErrorDetailMeta(html.getBytes(StandardCharsets.UTF_8), "errors.docid_not_found");
+        final String out = new String(result, StandardCharsets.UTF_8);
+        assertTrue(out.contains("<meta name=\"x-fess-error-detail-key\" content=\"errors.docid_not_found\">"), "Meta tag must be present");
+        // Meta tag must appear before </head>
+        final int metaIdx = out.indexOf("x-fess-error-detail-key");
+        final int headIdx = out.indexOf("</head>");
+        assertTrue(metaIdx < headIdx, "Meta tag must appear before </head>");
+    }
+
+    @Test
+    public void test_injectErrorDetailMeta_returnsOriginalWhenNoHeadClose() {
+        final String originalHtml = "<html><body>no head</body></html>";
+        final byte[] html = originalHtml.getBytes(StandardCharsets.UTF_8);
+        final byte[] result = ThemeViewAction.injectErrorDetailMeta(html, "errors.docid_not_found");
+        // No </head> found — original bytes returned unchanged.
+        final String resultStr = new String(result, StandardCharsets.UTF_8);
+        assertEquals(originalHtml, resultStr);
+        assertFalse(resultStr.contains("x-fess-error-detail-key"), "No meta tag must be injected when </head> is absent");
+    }
+
+    @Test
+    public void test_injectErrorDetailMeta_rejectsUnsafeKeyViaResolveMessageKey() {
+        // resolveMessageKey sanitises the key before injectErrorDetailMeta is called.
+        // Simulate via test seam: currentMessageKey set to unsafe value, expect null returned.
+        final ThemeViewAction action = new ThemeViewAction();
+        action.currentMessageKey = "<script>alert(1)</script>";
+        assertNull(action.resolveMessageKey(), "Unsafe message key must be rejected");
+    }
+
+    /**
+     * Creates a {@link WrittenStreamOut} that writes to the given buffer.
+     * Used to capture the stream body in unit tests without a live HTTP response.
+     */
+    private static WrittenStreamOut captureOut(final ByteArrayOutputStream buf) {
+        return new WrittenStreamOut() {
+            @Override
+            public OutputStream stream() {
+                return buf;
+            }
+
+            @Override
+            public void write(final InputStream in) throws java.io.IOException {
+                in.transferTo(buf);
+            }
+        };
+    }
+
     private static ThemeViewAction newActionWith(final Theme theme) {
         return newActionWithRequestUri(theme, "/");
     }
@@ -749,6 +1000,13 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             }
         };
         action.currentRequestUri = requestUri;
+        return action;
+    }
+
+    private static ThemeViewAction newActionWithRequestUriAndMessageKey(final Theme theme, final String requestUri,
+            final String messageKey) {
+        final ThemeViewAction action = newActionWithRequestUri(theme, requestUri);
+        action.currentMessageKey = messageKey;
         return action;
     }
 

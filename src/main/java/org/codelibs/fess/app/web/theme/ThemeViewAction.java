@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.theme;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -85,6 +86,12 @@ public class ThemeViewAction extends FessSearchAction {
      */
     String currentRequestUri;
 
+    /**
+     * Overridable message key for testing purposes (simulates the {@code ?message_key} query parameter).
+     * In production this field is {@code null} and the key is read from the request query string.
+     */
+    String currentMessageKey;
+
     // requestManager is inherited from FessBaseAction (promoted to protected).
     // LastaFlute guarantees DI injection before any @Execute invocation,
     // so no defensive null checks are needed in @Execute methods.
@@ -154,6 +161,42 @@ public class ThemeViewAction extends FessSearchAction {
         } catch (final java.io.IOException e) {
             return notFound();
         }
+        // Attach error diagnostic headers when the request targets an /error route.
+        // A.11: also set the HTTP status code on the response so proxies and CDNs see the
+        // correct status without parsing the X-Fess-Error-Code header.
+        // F.9: when a ?message_key query parameter is present, inject error detail meta tags
+        // into the index.html body so the SPA can surface the specific error message.
+        final String uri = resolveCurrentRequestUri();
+        final boolean isErrorRoute = uri != null && (uri.equals("/error") || uri.startsWith("/error/"));
+        final String messageKey = resolveMessageKey();
+
+        // F.9: For error routes with a message key, read the file upfront so we can inject
+        // meta tags and know the final byte length before building the StreamResponse.
+        // Content-Length must be set once, so we determine the body first.
+        if (isErrorRoute && messageKey != null && !messageKey.isEmpty()) {
+            final byte[] originalBytes;
+            try (InputStream in = Files.newInputStream(indexFile)) {
+                final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
+                in.transferTo(buf);
+                originalBytes = buf.toByteArray();
+            } catch (final java.io.IOException e) {
+                return notFound();
+            }
+            final byte[] modifiedBytes = injectErrorDetailMeta(originalBytes, messageKey);
+            final int status = computeErrorStatus(uri);
+            // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
+            final StreamResponse resp = new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
+                    .headerContentDispositionInline()
+                    .header("Cache-Control", "no-store")
+                    .header("Content-Security-Policy", INDEX_CSP)
+                    .header("Referrer-Policy", "same-origin")
+                    .header("Content-Length", String.valueOf(modifiedBytes.length))
+                    .header("X-Fess-Route", "error")
+                    .header("X-Fess-Error-Code", String.valueOf(status))
+                    .httpStatus(status);
+            return resp.stream(out -> out.stream().write(modifiedBytes));
+        }
+
         // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
         // LastaFlute defaults Content-Disposition to "attachment" when unset, which would
         // force the browser to download index.html instead of rendering it; use inline.
@@ -164,12 +207,11 @@ public class ThemeViewAction extends FessSearchAction {
                 .header("Referrer-Policy", "same-origin")
                 .header("Content-Length", String.valueOf(fileSize));
 
-        // Attach error diagnostic headers when the request targets an /error route.
-        final String uri = resolveCurrentRequestUri();
-        if (uri != null && (uri.equals("/error") || uri.startsWith("/error/"))) {
+        if (isErrorRoute) {
             final int status = computeErrorStatus(uri);
             resp.header("X-Fess-Route", "error");
             resp.header("X-Fess-Error-Code", String.valueOf(status));
+            resp.httpStatus(status);
         }
 
         return resp.stream(out -> {
@@ -221,7 +263,7 @@ public class ThemeViewAction extends FessSearchAction {
         case "notfound":
             return 404;
         case "busy":
-            return 503;
+            return 429;
         default:
             return 500;
         }
@@ -250,6 +292,76 @@ public class ThemeViewAction extends FessSearchAction {
         } catch (final Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Resolves the {@code message_key} query parameter for the current request.
+     * Uses {@link #currentMessageKey} when set (test seam); otherwise reads from
+     * the HTTP request query string.
+     *
+     * <p>The value is sanitised: only alphanumeric characters, dots, underscores and
+     * hyphens are allowed (matching the conventional key naming scheme such as
+     * {@code errors.docid_not_found}). Any other value is rejected and {@code null} returned.
+     *
+     * @return the sanitised message key, or {@code null} if absent/unsafe
+     */
+    String resolveMessageKey() {
+        final String raw;
+        if (currentMessageKey != null) {
+            raw = currentMessageKey;
+        } else {
+            if (requestManager == null) {
+                return null;
+            }
+            try {
+                final jakarta.servlet.http.HttpServletRequest httpReq = requestManager.getRequest();
+                if (httpReq == null) {
+                    return null;
+                }
+                raw = httpReq.getParameter("message_key");
+            } catch (final Exception e) {
+                return null;
+            }
+        }
+        if (raw == null || raw.isEmpty()) {
+            return null;
+        }
+        // Allowlist: letters, digits, dots, underscores, hyphens only.
+        if (!raw.matches("[A-Za-z0-9._\\-]+")) {
+            return null;
+        }
+        return raw;
+    }
+
+    /**
+     * Injects {@code <meta>} tags carrying an error detail key into the HTML bytes
+     * immediately before the closing {@code </head>} tag.
+     *
+     * <p>Two meta tags are inserted:
+     * <ul>
+     *   <li>{@code <meta name="x-fess-error-detail-key" content="...">} — the i18n key</li>
+     * </ul>
+     * If {@code </head>} is not found in the bytes the original bytes are returned unchanged.
+     *
+     * @param htmlBytes UTF-8 encoded HTML bytes
+     * @param messageKey validated, safe message key
+     * @return modified bytes with meta tags injected before {@code </head>}
+     */
+    static byte[] injectErrorDetailMeta(final byte[] htmlBytes, final String messageKey) {
+        if (htmlBytes == null || messageKey == null || messageKey.isEmpty()) {
+            return htmlBytes;
+        }
+        final String html = new String(htmlBytes, StandardCharsets.UTF_8);
+        final int headEndIdx = html.indexOf("</head>");
+        if (headEndIdx < 0) {
+            return htmlBytes;
+        }
+        // Escape the key to prevent injection — allowlist already guarantees the key
+        // contains only safe chars, but be explicit for defence in depth.
+        final String safeKey = messageKey.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;");
+        final String injection = "<meta name=\"x-fess-error-detail-key\" content=\"" + safeKey + "\">\n";
+        final String modified = html.substring(0, headEndIdx) + injection + html.substring(headEndIdx);
+        return modified.getBytes(StandardCharsets.UTF_8);
     }
 
     /**

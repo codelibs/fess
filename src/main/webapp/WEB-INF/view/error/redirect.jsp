@@ -1,4 +1,4 @@
-<% 
+<%
 Integer statusCode = (Integer)request.getAttribute("jakarta.servlet.error.status_code");
 String servletName = (String)request.getAttribute("jakarta.servlet.error.servlet_name");
 String requestUri = (String)request.getAttribute("jakarta.servlet.error.request_uri");
@@ -21,9 +21,15 @@ if("systemError".equals(type)) {
 } else if("busy".equals(type)) {
 	redirectPage.append("/error/busy/");
 	response.sendRedirect(redirectPage.toString());
-} else if(!"badAuth".equals(type)) {
+} else if("badAuth".equals(type)) {
+	// F.11: Redirect badAuth to the SPA error view so static-theme mode renders a proper
+	// error page instead of leaking this JSP's plain-text "Bad Authentication." output.
+	// The message_key parameter lets the SPA surface a localised error detail.
+	redirectPage.append("/error/system?message_key=errors.bad_authentication");
+	response.sendRedirect(redirectPage.toString());
+} else {
 	redirectPage.append("/error/notfound/?url=");
 	redirectPage.append(java.net.URLEncoder.encode(requestUri , "UTF-8"));
 	response.sendRedirect(redirectPage.toString());
 }
- %>Bad Authentication.
+ %>
