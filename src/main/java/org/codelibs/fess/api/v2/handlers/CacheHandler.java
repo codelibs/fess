@@ -28,8 +28,10 @@ import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 
@@ -150,13 +152,55 @@ public class CacheHandler {
                 V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "no cache for: " + docId);
                 return;
             }
-            final Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("doc_id", docId);
-            payload.put("mimetype", "text/html");
-            payload.put("content", content);
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            V2EnvelopeWriter.writeSuccess(res, buildCachePayload(docId, content, doc));
         } catch (final Exception e) {
             V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
         }
+    }
+
+    Map<String, Object> buildCachePayload(final String docId, final String content, final Map<String, Object> doc) {
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("doc_id", docId);
+        payload.put("mimetype", "text/html");
+        payload.put("content", content);
+        String urlFieldLink = "url_link";
+        String urlField = "url";
+        String createdField = "created";
+        String mimetypeField = "mimetype";
+        try {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            urlFieldLink = fessConfig.getResponseFieldUrlLink();
+            urlField = fessConfig.getIndexFieldUrl();
+            createdField = fessConfig.getIndexFieldCreated();
+            mimetypeField = fessConfig.getIndexFieldMimetype();
+        } catch (final RuntimeException e) {
+            logger.debug("FessConfig not available in buildCachePayload; using default field names", e);
+        }
+        final String urlLink = DocumentUtil.getValue(doc, urlFieldLink, String.class);
+        final String url = StringUtil.isNotBlank(urlLink) ? urlLink : DocumentUtil.getValue(doc, urlField, String.class);
+        if (StringUtil.isNotBlank(url)) {
+            payload.put("url", url);
+        }
+        final String created = DocumentUtil.getValue(doc, createdField, String.class);
+        if (StringUtil.isNotBlank(created)) {
+            payload.put("created", created);
+        }
+        payload.put("charset", parseCharset(DocumentUtil.getValue(doc, mimetypeField, String.class)));
+        return payload;
+    }
+
+    private static String parseCharset(final String mimetype) {
+        if (StringUtil.isNotBlank(mimetype)) {
+            final int idx = mimetype.toLowerCase(java.util.Locale.ROOT).indexOf("charset=");
+            if (idx >= 0) {
+                final String cs = mimetype.substring(idx + "charset=".length()).trim();
+                final int sc = cs.indexOf(';');
+                final String result = (sc >= 0 ? cs.substring(0, sc) : cs).trim();
+                if (StringUtil.isNotBlank(result)) {
+                    return result;
+                }
+            }
+        }
+        return "UTF-8";
     }
 }
