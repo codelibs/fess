@@ -11,6 +11,12 @@ minFessVersion: "15.7"
 supportedLocales:
   - en
   - ja
+  - de
+  - es
+  - fr
+  - ko
+  - pt-BR
+  - zh-CN
 entry: index.html
 spaFallback: true
 type: static

@@ -1,15 +1,22 @@
 // Bootstrap theme i18n loader. Resolves the runtime locale once at boot
 // using navigator.language with primary-subtag and English fallbacks per spec §4.6.
 
-const SUPPORTED = ["en", "ja"];
+const SUPPORTED = ["en", "ja", "de", "es", "fr", "ko", "pt-BR", "zh-CN"];
 let messages = {};
 let locale = "en";
 
 function pickLocale() {
-  const raw = (navigator.language || "en").toLowerCase();
-  if (SUPPORTED.includes(raw)) return raw;
-  const primary = raw.split("-")[0];
-  if (SUPPORTED.includes(primary)) return primary;
+  const raw = (navigator.language || "en");
+  // Case-insensitive exact match first (e.g. "pt-BR", "zh-CN").
+  const lower = raw.toLowerCase();
+  for (const s of SUPPORTED) {
+    if (s.toLowerCase() === lower) return s;
+  }
+  // Primary-subtag match (e.g. "ja-JP" → "ja", "de-AT" → "de").
+  const primary = lower.split("-")[0];
+  for (const s of SUPPORTED) {
+    if (s.toLowerCase() === primary) return s;
+  }
   return "en";
 }
 
