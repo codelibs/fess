@@ -21,8 +21,11 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -118,6 +121,47 @@ public class SearchHandlerTest extends UnitFessTestCase {
         }
         // When the search helper is not fully wired (400/500), the test is inconclusive —
         // allow pass so the test suite stays green in unit harnesses.
+    }
+
+    // ===== Task A2: GEO-1 backend contract =====
+
+    /**
+     * A valid geo point and distance produce a non-null GeoInfo whose query builder
+     * is populated — proving the backend can translate the wire params.
+     *
+     * <p>GeoInfo reads {@code query.geo.fields} (default "location") from
+     * ComponentUtil.getFessConfig(), which is wired by UnitFessTestCase. The default
+     * field list contains "location", so {@code geo.location.point} is recognised and
+     * the result query builder is non-null.</p>
+     */
+    @Test
+    public void test_geoInfo_validPoint_buildsGeoQuery() {
+        final Map<String, String[]> params = new LinkedHashMap<>();
+        params.put("geo.location.point", new String[] { "35.681,139.767" });
+        params.put("geo.location.distance", new String[] { "10km" });
+        final GeoInfo geo = new GeoInfo(new StubRequest("/api/v2/search", params));
+        assertNotNull(geo);
+        assertNotNull(geo.toQueryBuilder());
+    }
+
+    /**
+     * A malformed geo point (not lat,lon) must raise InvalidQueryException so the
+     * handler can return a structured 400 instead of a 500.
+     *
+     * <p>GeoInfo throws InvalidQueryException on parse failure — the handler's
+     * catch block maps this to {@code V2ErrorCode.INVALID_REQUEST}.</p>
+     */
+    @Test
+    public void test_geoInfo_malformedPoint_throwsInvalidQuery() {
+        final Map<String, String[]> params = new LinkedHashMap<>();
+        params.put("geo.location.point", new String[] { "not-a-point" });
+        params.put("geo.location.distance", new String[] { "10km" });
+        try {
+            new GeoInfo(new StubRequest("/api/v2/search", params));
+            fail("malformed geo point must raise InvalidQueryException");
+        } catch (final InvalidQueryException expected) {
+            // expected: malformed lat,lon string triggers InvalidQueryException
+        }
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
