@@ -29,6 +29,26 @@
       "id": "shortcuts",
       "title": "キーボードショートカット",
       "html": "<ul><li><code>/</code> &mdash; 検索ボックスにフォーカス</li><li><code>Esc</code> &mdash; サジェストまたはモーダルを閉じる</li><li><code>Enter</code> &mdash; 検索実行またはサジェスト選択</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "フィールド指定検索",
+      "html": "<p>フィールド名の後にコロン <code>:</code> を付け、検索語を指定することで任意のフィールドを検索できます。たとえば、タイトルに「Fess」を含むドキュメントを検索する場合:</p><pre>title:Fess</pre><p>標準で利用可能なフィールドは <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code>、<code>mimetype</code> です。設定で変更できます。</p>"
+    },
+    {
+      "id": "sort",
+      "title": "ソート",
+      "html": "<p><code>sort:</code> 演算子は指定したフィールド名でドキュメントをソートします。利用方法は <code>sort:&lt;field&gt;.&lt;order&gt;</code> で、<code>&lt;order&gt;</code> は <code>asc</code>（昇順）または <code>desc</code>（降順）です。たとえば、「Fess」を含むドキュメントをコンテンツサイズの降順にソートする場合:</p><pre>Fess sort:content_length.desc</pre><p>標準で利用可能なソートフィールドは <code>created</code>、<code>content_length</code>、<code>last_modified</code> です。設定で変更できます。</p>"
+    },
+    {
+      "id": "boost",
+      "title": "ブースト検索",
+      "html": "<p>ブースト検索は検索語の後に <code>^</code> を付け、ブースト係数（数値）を指定することで利用できます。係数が大きいほど、その検索語の関連スコアが高くなります。</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "あいまい検索",
+      "html": "<p>あいまい検索は検索語の後に <code>~</code> を付けることで利用できます。<code>~</code> の後に 0〜1 の値で類似度を指定できます。デフォルトは <code>0.5</code> です。</p><pre>Fess~0.5</pre>"
     }
   ]
 }
