@@ -14,10 +14,44 @@ const state = {
   num: 10,
   sort: "",
   lang: "",
-  sdh: "",           // similar_docs_hash for similarity search
-  facets: {},        // field -> [values]
-  fields: {}         // extra field filters (e.g. label)
+  sdh: "",              // similar_docs_hash for similarity search
+  facets: {},           // field -> [values]
+  fields: {},           // extra field filters (e.g. label)
+  timestampRange: "",   // one of: 1day, 1week, 1month, 3month, 6month, 1year, 2year, 3year
+  sizeRange: ""         // one of: 0, 1, 2, 3, 4 (index into SIZE_RANGES)
 };
+
+// ─── Range facet definitions ──────────────────────────────────────────────────
+
+/** Timestamp range buckets, matching JSP facet queries. */
+const TIMESTAMP_RANGES = [
+  { key: "1day",   query: "last_modified:[now/d-1d TO *]",  labelKey: "labels.facet_timestamp_1day" },
+  { key: "1week",  query: "last_modified:[now/d-7d TO *]",  labelKey: "labels.facet_timestamp_1week" },
+  { key: "1month", query: "last_modified:[now/d-1M TO *]",  labelKey: "labels.facet_timestamp_1month" },
+  { key: "3month", query: "last_modified:[now/d-3M TO *]",  labelKey: "labels.facet_timestamp_3month" },
+  { key: "6month", query: "last_modified:[now/d-6M TO *]",  labelKey: "labels.facet_timestamp_6month" },
+  { key: "1year",  query: "last_modified:[now/d-1y TO *]",  labelKey: "labels.facet_timestamp_1year" },
+  { key: "2year",  query: "last_modified:[now/d-2y TO *]",  labelKey: "labels.facet_timestamp_2year" },
+  { key: "3year",  query: "last_modified:[now/d-3y TO *]",  labelKey: "labels.facet_timestamp_3year" }
+];
+
+/** Content-length (size) range buckets. */
+const SIZE_RANGES = [
+  { key: "0", query: "content_length:[* TO 10240]",           labelKey: "labels.facet_contentLength_0" },
+  { key: "1", query: "content_length:[10240 TO 102400]",      labelKey: "labels.facet_contentLength_1" },
+  { key: "2", query: "content_length:[102400 TO 1048576]",    labelKey: "labels.facet_contentLength_2" },
+  { key: "3", query: "content_length:[1048576 TO 10485760]",  labelKey: "labels.facet_contentLength_3" },
+  { key: "4", query: "content_length:[10485760 TO *]",        labelKey: "labels.facet_contentLength_4" }
+];
+
+/** Filetype values shown in the static filetype facet group. */
+const FILETYPE_VALUES = [
+  "html", "msword", "msexcel", "mspowerpoint",
+  "odt", "ods", "odp", "pdf", "txt",
+  "image", "audio", "video", "archive", "others"
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 // XSS-safety: this module builds every result-card DOM node with
 // document.createElement + textContent. No untrusted string is ever
@@ -184,10 +218,28 @@ async function runSearch() {
     for (const [field, values] of Object.entries(state.facets)) {
       values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
     }
-    // explicit field filters (e.g. label dropdown)
+    // explicit field filters (e.g. label dropdown, filetype)
     for (const [field, values] of Object.entries(state.fields)) {
       if (Array.isArray(values)) {
         values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
+      }
+    }
+    // timestamp range filter — passed as ex_q (API v2 accepts ex_q array)
+    if (state.timestampRange) {
+      const ts = TIMESTAMP_RANGES.find(r => r.key === state.timestampRange);
+      if (ts) {
+        params["ex_q"] = params["ex_q"] || [];
+        if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
+        params["ex_q"].push(ts.query);
+      }
+    }
+    // size range filter — passed as ex_q
+    if (state.sizeRange !== "") {
+      const sr = SIZE_RANGES.find(r => r.key === state.sizeRange);
+      if (sr) {
+        params["ex_q"] = params["ex_q"] || [];
+        if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
+        params["ex_q"].push(sr.query);
       }
     }
     const env = await api.get("/search", params, { signal });
@@ -195,6 +247,7 @@ async function runSearch() {
     renderPagination(env);
     const labels = await loadLabels();
     renderFacets(env, labels);
+    renderActiveChips();
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
     if (e && e.name === "AbortError") return; // request superseded — silently ignore
@@ -469,7 +522,13 @@ export function attach() {
     });
   }
   const clearBtn = document.getElementById("facet-clear");
-  if (clearBtn) clearBtn.addEventListener("click", () => { state.facets = {}; state.fields = {}; runSearch(); });
+  if (clearBtn) clearBtn.addEventListener("click", () => {
+    state.facets = {};
+    state.fields = {};
+    state.timestampRange = "";
+    state.sizeRange = "";
+    runSearch();
+  });
 
   // Sort select — options are populated by renderSortOptions() after config loads
   const sortSelect = document.getElementById("sort-select");
@@ -522,6 +581,10 @@ async function loadLabels() {
   } catch { return []; }
 }
 
+/**
+ * Build a generic facet group for field-value facets (label, dynamic fields).
+ * Each entry click toggles the value in state.facets[fieldKey].
+ */
 function buildFacetGroup(title, entries, fieldKey) {
   const group = el("div", { className: "facet-group" });
   group.appendChild(el("h3", { text: title }));
@@ -538,6 +601,75 @@ function buildFacetGroup(title, entries, fieldKey) {
       const arr = state.facets[fieldKey];
       const idx = arr.indexOf(entry.value);
       if (idx >= 0) arr.splice(idx, 1); else arr.push(entry.value);
+      state.start = 0;
+      runSearch();
+    });
+    group.appendChild(item);
+  });
+  return group;
+}
+
+/**
+ * Build a single-select range facet group (timestamp or size).
+ * Clicking the active item deselects; clicking another selects it.
+ *
+ * @param {string} title - group heading text
+ * @param {{ key: string, labelKey: string }[]} ranges - range definitions
+ * @param {string} stateKey - "timestampRange" or "sizeRange"
+ */
+function buildRangeFacetGroup(title, ranges, stateKey) {
+  const group = el("div", { className: "facet-group" });
+  group.appendChild(el("h3", { text: title }));
+  ranges.forEach(range => {
+    const item = el("div", { className: "facet-item" });
+    if (state[stateKey] === range.key) item.classList.add("active");
+    item.appendChild(el("span", { text: t(range.labelKey) }));
+    item.addEventListener("click", () => {
+      state[stateKey] = state[stateKey] === range.key ? "" : range.key;
+      state.start = 0;
+      runSearch();
+    });
+    group.appendChild(item);
+  });
+  return group;
+}
+
+/**
+ * Build the filetype facet group.
+ * - If the API response contains a filetype facet field, use its counts.
+ * - Otherwise render the static list without counts.
+ * Clicking toggles the value in state.fields.filetype (multi-select).
+ */
+function buildFiletypeFacetGroup(env) {
+  const group = el("div", { className: "facet-group" });
+  group.appendChild(el("h3", { text: t("labels.facet_filetype_title") }));
+
+  // Try to find counts from API facet_field response
+  const facetField = env.facet_field || [];
+  const ftField = facetField.find(f => f.name === "filetype");
+  const countMap = {};
+  if (ftField) {
+    (ftField.result || []).forEach(r => { countMap[r.value] = r.count; });
+  }
+
+  const selected = state.fields.filetype || [];
+  FILETYPE_VALUES.forEach(ftValue => {
+    // skip if API returned counts for this field but this value has zero results
+    if (ftField && countMap[ftValue] == null) return;
+
+    const item = el("div", { className: "facet-item" });
+    if (selected.includes(ftValue)) item.classList.add("active");
+
+    item.appendChild(el("span", { text: t("labels.facet_filetype_" + ftValue) }));
+    if (countMap[ftValue] != null) {
+      item.appendChild(el("span", { className: "badge bg-secondary", text: String(countMap[ftValue]) }));
+    }
+    item.addEventListener("click", () => {
+      const arr = state.fields.filetype ? [...state.fields.filetype] : [];
+      const idx = arr.indexOf(ftValue);
+      if (idx >= 0) arr.splice(idx, 1); else arr.push(ftValue);
+      state.fields.filetype = arr;
+      state.start = 0;
       runSearch();
     });
     group.appendChild(item);
@@ -548,18 +680,143 @@ function buildFacetGroup(title, entries, fieldKey) {
 function renderFacets(env, labels) {
   const body = document.getElementById("facet-body");
   const clearBtn = document.getElementById("facet-clear");
-  body.innerHTML = "";
+  // Clear existing children without innerHTML = ""
+  while (body.firstChild) body.removeChild(body.firstChild);
+
+  // 1. Label facet (from /labels endpoint)
   if (labels.length > 0) {
     const entries = labels.map(l => ({ labelText: l.label, value: l.value }));
     body.appendChild(buildFacetGroup(t("facet.title"), entries, "label"));
   }
+
+  // 2. Dynamic facet fields from API (excluding filetype — handled separately below)
   const facetField = env.facet_field || [];
   for (const field of facetField) {
+    if (field.name === "filetype") continue; // rendered in step 4
     const entries = (field.result || []).map(r => ({ labelText: r.value, value: r.value, count: r.count }));
-    body.appendChild(buildFacetGroup(field.name, entries, field.name));
+    if (entries.length > 0) {
+      body.appendChild(buildFacetGroup(field.name, entries, field.name));
+    }
   }
-  const anyActive = Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0);
+
+  // 3. Timestamp range facet
+  body.appendChild(buildRangeFacetGroup(t("labels.facet_timestamp_title"), TIMESTAMP_RANGES, "timestampRange"));
+
+  // 4. Content-length (size) range facet
+  body.appendChild(buildRangeFacetGroup(t("labels.facet_contentLength_title"), SIZE_RANGES, "sizeRange"));
+
+  // 5. Filetype facet
+  body.appendChild(buildFiletypeFacetGroup(env));
+
+  // Show clear button if any filter is active
+  const anyActive =
+    Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0) ||
+    Object.values(state.fields).some(arr => Array.isArray(arr) && arr.length > 0) ||
+    state.timestampRange !== "" ||
+    state.sizeRange !== "";
   clearBtn.classList.toggle("d-none", !anyActive);
+}
+
+/**
+ * Render the "Active filters" chip row above the results list.
+ * Chips for: label facets, dynamic facets, filetype, timestampRange, sizeRange.
+ * Each chip has a remove button that clears that specific filter.
+ */
+function renderActiveChips() {
+  const container = document.getElementById("active-chips");
+  if (!container) return;
+
+  // Clear previous chips
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  const chips = [];
+
+  // Label / field-value facets from state.facets
+  for (const [field, values] of Object.entries(state.facets)) {
+    (values || []).forEach(v => chips.push({
+      label: field + ": " + v,
+      remove: () => {
+        const arr = state.facets[field] || [];
+        const idx = arr.indexOf(v);
+        if (idx >= 0) arr.splice(idx, 1);
+        state.start = 0;
+        runSearch();
+      }
+    }));
+  }
+
+  // Filetype chips from state.fields.filetype
+  (state.fields.filetype || []).forEach(v => chips.push({
+    label: t("labels.facet_filetype_title") + ": " + t("labels.facet_filetype_" + v),
+    remove: () => {
+      const arr = state.fields.filetype ? [...state.fields.filetype] : [];
+      const idx = arr.indexOf(v);
+      if (idx >= 0) arr.splice(idx, 1);
+      state.fields.filetype = arr;
+      state.start = 0;
+      runSearch();
+    }
+  }));
+
+  // Other field filters (label dropdown from state.fields.label)
+  for (const [field, values] of Object.entries(state.fields)) {
+    if (field === "filetype") continue; // already handled above
+    (values || []).forEach(v => chips.push({
+      label: field + ": " + v,
+      remove: () => {
+        const arr = state.fields[field] ? [...state.fields[field]] : [];
+        const idx = arr.indexOf(v);
+        if (idx >= 0) arr.splice(idx, 1);
+        state.fields[field] = arr;
+        state.start = 0;
+        runSearch();
+      }
+    }));
+  }
+
+  // Timestamp range chip
+  if (state.timestampRange) {
+    const ts = TIMESTAMP_RANGES.find(r => r.key === state.timestampRange);
+    if (ts) chips.push({
+      label: t("labels.facet_timestamp_title") + ": " + t(ts.labelKey),
+      remove: () => { state.timestampRange = ""; state.start = 0; runSearch(); }
+    });
+  }
+
+  // Size range chip
+  if (state.sizeRange !== "") {
+    const sr = SIZE_RANGES.find(r => r.key === state.sizeRange);
+    if (sr) chips.push({
+      label: t("labels.facet_contentLength_title") + ": " + t(sr.labelKey),
+      remove: () => { state.sizeRange = ""; state.start = 0; runSearch(); }
+    });
+  }
+
+  if (chips.length === 0) {
+    container.classList.add("d-none");
+    return;
+  }
+
+  container.classList.remove("d-none");
+
+  const label = el("span", { className: "active-chips-label text-muted small me-2", text: t("facet.active_filters") + ":" });
+  container.appendChild(label);
+
+  chips.forEach(chip => {
+    const badge = el("span", { className: "badge rounded-pill active-chip me-1" });
+    badge.appendChild(el("span", { text: chip.label }));
+
+    const btn = el("button", {
+      className: "btn-close btn-close-sm active-chip-remove",
+      attrs: {
+        type: "button",
+        "aria-label": t("facet.remove") + " " + chip.label
+      }
+    });
+    btn.addEventListener("click", chip.remove);
+    badge.appendChild(btn);
+    container.appendChild(badge);
+  });
 }
 
 async function loadPopularWords() {

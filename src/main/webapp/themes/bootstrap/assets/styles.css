@@ -35,3 +35,8 @@
 .error-detail { background: #f8f9fa; padding: 0.75rem 1rem; border-left: 3px solid #adb5bd; }
 .error-actions { margin: 1.5rem 0; }
 #profile-view form { max-width: 480px; }
+/* Active filter chips */
+#active-chips { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.active-chips-label { white-space: nowrap; }
+.active-chip { display: inline-flex; align-items: center; gap: .35rem; background: var(--bs-primary-bg-subtle); color: var(--bs-body-color); font-size: .8rem; font-weight: 400; padding: .25rem .5rem; }
+.active-chip-remove { width: .65em; height: .65em; margin: 0; padding: 0; background-size: .65em; flex-shrink: 0; }
