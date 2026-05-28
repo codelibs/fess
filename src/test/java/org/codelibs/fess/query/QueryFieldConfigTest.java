@@ -985,4 +985,17 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
     private static class TestFessConfig extends FessConfig.SimpleImpl {
         private static final long serialVersionUID = 1L;
     }
+
+    /**
+     * A.2: apiResponseFieldSet must contain click_count and favorite_count so the
+     * /api/v2/search endpoint can include those fields in document results.
+     */
+    @Test
+    public void test_apiResponseFieldSet_containsClickCountAndFavoriteCount() {
+        assertNotNull(queryFieldConfig.apiResponseFieldSet, "apiResponseFieldSet must not be null after init");
+        assertTrue(queryFieldConfig.apiResponseFieldSet.contains("click_count"),
+                "apiResponseFieldSet must contain click_count; actual set: " + queryFieldConfig.apiResponseFieldSet);
+        assertTrue(queryFieldConfig.apiResponseFieldSet.contains("favorite_count"),
+                "apiResponseFieldSet must contain favorite_count; actual set: " + queryFieldConfig.apiResponseFieldSet);
+    }
 }
