@@ -20,43 +20,29 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Immutable value object describing a registered theme.
+ * Immutable value object describing a registered static theme.
  *
- * <p>A {@code Theme} is either a {@link ThemeType#STATIC static theme} backed by
- * a {@code theme.yml} manifest under the configured themes directory, or a
- * legacy {@link ThemeType#JSP JSP theme} consisting of JSP fragments under
- * {@code WEB-INF/view/}. The {@link #getManifest() manifest} is present only
- * for static themes.</p>
+ * <p>A {@code Theme} is backed by a {@code theme.yml} manifest under the
+ * configured themes directory. The {@link #getManifest() manifest} may be
+ * absent when unit tests construct synthetic themes without a real bundle.</p>
  */
 public final class Theme {
 
-    private final ThemeType type;
     private final String name;
     private final Path basePath;
-    private final ThemeManifest manifest; // null for JSP themes
+    private final ThemeManifest manifest;
 
     /**
      * Constructs a new theme descriptor.
      *
-     * @param type theme type (static or JSP)
      * @param name theme directory name
      * @param basePath filesystem location of the theme bundle
-     * @param manifest parsed manifest for static themes, or {@code null} for JSP themes
+     * @param manifest parsed manifest, or {@code null} for test fixtures without one
      */
-    public Theme(final ThemeType type, final String name, final Path basePath, final ThemeManifest manifest) {
-        this.type = Objects.requireNonNull(type);
+    public Theme(final String name, final Path basePath, final ThemeManifest manifest) {
         this.name = Objects.requireNonNull(name);
         this.basePath = Objects.requireNonNull(basePath);
         this.manifest = manifest;
-    }
-
-    /**
-     * Returns the theme type.
-     *
-     * @return the theme type
-     */
-    public ThemeType getType() {
-        return type;
     }
 
     /**
@@ -78,20 +64,11 @@ public final class Theme {
     }
 
     /**
-     * Returns the parsed manifest, empty for JSP themes.
+     * Returns the parsed manifest, if any.
      *
      * @return the optional manifest
      */
     public Optional<ThemeManifest> getManifest() {
         return Optional.ofNullable(manifest);
-    }
-
-    /**
-     * Returns {@code true} when this theme is a static theme.
-     *
-     * @return {@code true} for static themes
-     */
-    public boolean isStatic() {
-        return type == ThemeType.STATIC;
     }
 }

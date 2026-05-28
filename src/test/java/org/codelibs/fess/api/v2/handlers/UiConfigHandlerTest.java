@@ -169,8 +169,8 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
                 "supportedLocales: [\"en\", \"ja\"]");
         final org.codelibs.fess.theme.ThemeManifest manifest = org.codelibs.fess.theme.ThemeManifest
                 .parse(new java.io.ByteArrayInputStream(yaml.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
-        final org.codelibs.fess.theme.Theme theme = new org.codelibs.fess.theme.Theme(org.codelibs.fess.theme.ThemeType.STATIC, "bootstrap",
-                java.nio.file.Paths.get("/tmp/bootstrap"), manifest);
+        final org.codelibs.fess.theme.Theme theme =
+                new org.codelibs.fess.theme.Theme("bootstrap", java.nio.file.Paths.get("/tmp/bootstrap"), manifest);
         final StubThemeRegistry stub = new StubThemeRegistry(java.util.Optional.of(theme));
         ComponentUtil.register(stub, org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
         // VirtualHostHelper is configured in fess.xml which test_app.xml does not include, so
@@ -191,7 +191,6 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             // The theme block now carries the manifest fields the handler is supposed to surface,
             // proving the active-theme branch of UiConfigHandler.handle ran.
             assertTrue(body.contains("\"name\":\"bootstrap\""), body);
-            assertTrue(body.contains("\"type\":\"static\""), body);
             assertTrue(body.contains("\"display_name\":\"Bootstrap Theme\""), body);
             assertTrue(body.contains("\"version\":\"1.2.3\""), body);
             // site_name should now reflect the manifest's display_name (handler line ~119).

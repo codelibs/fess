@@ -340,12 +340,11 @@ public class AdminThemeActionTest extends UnitFessTestCase {
     public void test_delete_allInstallExceptionCodes_haveLocalizedKeyMapping() {
         // Pin the mapping table: every StaticThemeInstaller.InstallException.Code that
         // the delete() switch handles must produce a non-empty FessMessages entry with a
-        // localized key (not the raw exception message). The four named codes plus the
+        // localized key (not the raw exception message). The three named codes plus the
         // default fallback for all remaining codes are each tested.
         //
         // Expected key mapping (mirrors AdminThemeAction#mapDeleteExceptionToMessage):
         //   ACTIVE_DEFAULT → errors.theme_is_active
-        //   JSP_TYPE       → errors.theme_is_jsp_type
         //   NOT_FOUND      → errors.theme_not_found
         //   INVALID_NAME   → errors.theme_name_invalid
         //   <all others>   → errors.failed_to_delete_theme (default)
@@ -356,7 +355,6 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // e.g. "errors.theme_is_active" not "{errors.theme_is_active}".
         final Object[][] namedCases = { //
                 { StaticThemeInstaller.InstallException.Code.ACTIVE_DEFAULT, "errors.theme_is_active" }, //
-                { StaticThemeInstaller.InstallException.Code.JSP_TYPE, "errors.theme_is_jsp_type" }, //
                 { StaticThemeInstaller.InstallException.Code.NOT_FOUND, "errors.theme_not_found" }, //
                 { StaticThemeInstaller.InstallException.Code.INVALID_NAME, "errors.theme_name_invalid" }, //
         };
@@ -380,8 +378,7 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // All remaining codes must fall back to errors.failed_to_delete_theme.
         final java.util.Set<StaticThemeInstaller.InstallException.Code> namedCodes =
                 new java.util.HashSet<>(java.util.Arrays.asList(StaticThemeInstaller.InstallException.Code.ACTIVE_DEFAULT,
-                        StaticThemeInstaller.InstallException.Code.JSP_TYPE, StaticThemeInstaller.InstallException.Code.NOT_FOUND,
-                        StaticThemeInstaller.InstallException.Code.INVALID_NAME));
+                        StaticThemeInstaller.InstallException.Code.NOT_FOUND, StaticThemeInstaller.InstallException.Code.INVALID_NAME));
 
         for (final StaticThemeInstaller.InstallException.Code code : StaticThemeInstaller.InstallException.Code.values()) {
             if (namedCodes.contains(code)) {

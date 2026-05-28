@@ -92,17 +92,6 @@ public class StaticThemeInstallerDeleteTest {
     }
 
     @Test
-    public void test_deleteRejectsWhenNameRefersToJspTheme() throws Exception {
-        // Simulate a JSP-typed entry in the registry under the same name,
-        // without a real directory under themesDir.
-        registry.injectThemeForTest(new Theme(ThemeType.JSP, "jsp-only", tempDir.resolve("jsp-only"), null));
-        installer.setActiveDefaultProbe(() -> null);
-        final InstallException ex = assertThrows(InstallException.class, () -> installer.delete("jsp-only"));
-        final String msg = ex.getMessage().toLowerCase();
-        assertTrue(msg.contains("jsp") || msg.contains("static"), "unexpected message: " + ex.getMessage());
-    }
-
-    @Test
     public void test_deleteThrowsWhenDirectoryAlreadyAbsent() {
         installer.setActiveDefaultProbe(() -> null);
         final InstallException ex = assertThrows(InstallException.class, () -> installer.delete("never-installed"));

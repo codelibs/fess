@@ -3795,9 +3795,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Theme List */
     public static final String LABELS_theme_list_name = "{labels.theme_list_name}";
 
-    /** The key of the message: Type */
-    public static final String LABELS_theme_type = "{labels.theme_type}";
-
     /** The key of the message: Name */
     public static final String LABELS_theme_name = "{labels.theme_name}";
 

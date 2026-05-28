@@ -99,7 +99,6 @@ ${fe:html(true)}
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.theme_thumbnail"/></th>
-                                                <th><la:message key="labels.theme_type"/></th>
                                                 <th><la:message key="labels.theme_name"/></th>
                                                 <th><la:message key="labels.theme_display_name"/></th>
                                                 <th><la:message key="labels.theme_version"/></th>
@@ -111,16 +110,10 @@ ${fe:html(true)}
                                             <c:forEach var="t" varStatus="s" items="${themeItems}">
                                                 <tr>
                                                     <td>
-                                                        <c:choose>
-                                                            <c:when test="${t.type=='Static'}">
-                                                                <img src="${fe:url('/themes/')}${f:h(t.name)}/thumbnail.png"
-                                                                     style="max-height:32px" onerror="this.style.display='none'"
-                                                                     alt="${f:h(t.displayName)}"/>
-                                                            </c:when>
-                                                            <c:otherwise><i class="fa fa-palette" aria-hidden="true"></i></c:otherwise>
-                                                        </c:choose>
+                                                        <img src="${fe:url('/themes/')}${f:h(t.name)}/thumbnail.png"
+                                                             style="max-height:32px" onerror="this.style.display='none'"
+                                                             alt="${f:h(t.displayName)}"/>
                                                     </td>
-                                                    <td>${f:h(t.type)}</td>
                                                     <td><la:link href="details?name=${f:u(t.name)}">${f:h(t.name)}</la:link></td>
                                                     <td>${f:h(t.displayName)}</td>
                                                     <td>${f:h(t.version)}</td>
@@ -130,7 +123,7 @@ ${fe:html(true)}
                                                         </c:if>
                                                     </td>
                                                     <td>
-                                                        <c:if test="${editable && t.type=='Static' && !t.isDefault}">
+                                                        <c:if test="${editable && !t.isDefault}">
                                                             <div class="text-center">
                                                                 <button type="button" class="btn btn-danger btn-xs"
                                                                         name="delete" data-toggle="modal"

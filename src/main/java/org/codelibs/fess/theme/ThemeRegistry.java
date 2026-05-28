@@ -32,19 +32,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 
 /**
- * Registry of themes available to the running Fess instance.
+ * Registry of static themes available to the running Fess instance.
  *
- * <p>Loads static themes from the directory configured via
- * {@code theme.directory.path} (default {@code themes/}) and complements the
- * snapshot with legacy JSP themes discovered under {@code WEB-INF/view/}.
- * Static themes take precedence over JSP themes that share the same name.</p>
+ * <p>Loads themes from the directory configured via
+ * {@code theme.directory.path} (default {@code themes/}). Legacy JSP themes
+ * installed as plugins are rendered via LastaFlute's view resolution and the
+ * {@link org.codelibs.fess.helper.VirtualHostHelper}; they are intentionally
+ * not tracked here.</p>
  *
  * <p>{@link #reload()} produces an immutable snapshot under a synchronized
  * lock; readers ({@link #getTheme(String)}, {@link #getAllThemes()},
@@ -83,7 +83,6 @@ public class ThemeRegistry {
 
     private volatile Snapshot snapshot = new Snapshot(Map.of(), null);
     private Path themesDirOverride; // test seam
-    private Path viewBaseOverride; // test seam
 
     /**
      * Latches on the first servlet-context lookup failure inside
@@ -117,13 +116,11 @@ public class ThemeRegistry {
     }
 
     /**
-     * Rescans the themes directory and the JSP view tree, replacing the
-     * in-memory snapshot atomically.
+     * Rescans the themes directory, replacing the in-memory snapshot atomically.
      */
     public synchronized void reload() {
         final Map<String, Theme> next = new HashMap<>();
         scanStatic(next);
-        scanJsp(next);
         final Map<String, Theme> immutable = Collections.unmodifiableMap(next);
         final String defaultThemeName = lookupDefaultThemeName();
         snapshot = new Snapshot(immutable, defaultThemeName);
@@ -155,53 +152,13 @@ public class ThemeRegistry {
                         logger.warn("Theme dir '{}' name mismatch with manifest '{}'; skipping", name, m.getName());
                         return;
                     }
-                    next.put(name, new Theme(ThemeType.STATIC, name, dir, m));
+                    next.put(name, new Theme(name, dir, m));
                 } catch (final Exception e) {
                     logger.warn("Skipping malformed theme at {}: {}", dir, e.getMessage(), e);
                 }
             });
         } catch (final Exception e) {
             logger.warn("Failed to scan static themes at {}", base, e);
-        }
-    }
-
-    private void scanJsp(final Map<String, Theme> next) {
-        final Path viewBase;
-        if (viewBaseOverride != null) {
-            viewBase = viewBaseOverride;
-        } else {
-            try {
-                viewBase = ResourceUtil.getViewTemplatePath();
-            } catch (final Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("View template path unavailable; skipping JSP theme scan", e);
-                }
-                return;
-            }
-        }
-        if (viewBase == null || !Files.isDirectory(viewBase)) {
-            return;
-        }
-        try (Stream<Path> entries = Files.list(viewBase)) {
-            entries.filter(Files::isDirectory).forEach(dir -> {
-                final String name = dir.getFileName().toString();
-                if (next.containsKey(name)) {
-                    return; // static takes precedence
-                }
-                if ("admin".equals(name) || "common".equals(name) || "error".equals(name)) {
-                    return;
-                }
-                // A JSP theme must provide its own search entry point. Without search.jsp
-                // the directory is just an MVC view folder (e.g. chat/, login/, profile/)
-                // and registering it as a theme would surface non-themes in the UI and
-                // break theme-switching when the resolver tries to render search.jsp.
-                if (!Files.isRegularFile(dir.resolve("search.jsp"))) {
-                    return;
-                }
-                next.put(name, new Theme(ThemeType.JSP, name, dir, null));
-            });
-        } catch (final Exception e) {
-            logger.warn("Failed to scan JSP themes", e);
         }
     }
 
@@ -315,15 +272,10 @@ public class ThemeRegistry {
         this.themesDirOverride = p;
     }
 
-    void setViewBaseOverride(final Path p) {
-        this.viewBaseOverride = p;
-    }
-
     /**
      * Inserts (or replaces) a single theme entry in the current snapshot
      * without scanning the filesystem. Intended for unit tests that need to
-     * exercise type-specific branches (e.g. JSP-vs-static deletion guards)
-     * without materialising real fixtures.
+     * populate the registry without materialising real fixtures.
      */
     synchronized void injectThemeForTest(final Theme theme) {
         final Map<String, Theme> next = new HashMap<>(snapshot.byName);

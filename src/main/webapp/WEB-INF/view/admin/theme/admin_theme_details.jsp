@@ -49,10 +49,6 @@ ${fe:html(true)}
                                     <td>${f:h(theme.displayName)}</td>
                                 </tr>
                                 <tr>
-                                    <th><la:message key="labels.theme_type"/></th>
-                                    <td>${f:h(theme.type)}</td>
-                                </tr>
-                                <tr>
                                     <th><la:message key="labels.theme_version"/></th>
                                     <td>${f:h(theme.version)}</td>
                                 </tr>

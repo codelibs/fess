@@ -34,7 +34,6 @@ import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeManifestException;
 import org.codelibs.fess.theme.ThemeRegistry;
-import org.codelibs.fess.theme.ThemeType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -47,7 +46,8 @@ import jakarta.annotation.Resource;
  * Admin action for theme management (spec §8).
  *
  * <p>Provides list, detail inspection, upload, deletion, default-theme
- * assignment, and registry-reload flows for both JSP and static themes.
+ * assignment, and registry-reload flows for static themes. JSP themes are
+ * managed via the plugin admin and are out of scope here.
  * Mutating endpoints require the {@code admin-theme} role; read-only
  * endpoints require {@code admin-theme-view}.</p>
  */
@@ -289,7 +289,7 @@ public class AdminThemeAction extends FessAdminAction {
 
     /**
      * Deletes a static theme via the installer. The installer enforces that
-     * the theme is not the active default and is not a JSP-typed theme.
+     * the theme is not the active default.
      *
      * @param form the delete form containing the theme name
      * @return redirect to the theme index
@@ -324,9 +324,6 @@ public class AdminThemeAction extends FessAdminAction {
         switch (ex.code()) {
         case ACTIVE_DEFAULT:
             messages.addErrorsThemeIsActive(GLOBAL, themeName);
-            break;
-        case JSP_TYPE:
-            messages.addErrorsThemeIsJspType(GLOBAL, themeName);
             break;
         case NOT_FOUND:
             messages.addErrorsThemeNotFound(GLOBAL, themeName);
@@ -407,7 +404,6 @@ public class AdminThemeAction extends FessAdminAction {
     private static Map<String, Object> asThemeRow(final Theme t, final String currentDefault) {
         final Map<String, Object> m = new HashMap<>();
         m.put("name", t.getName());
-        m.put("type", t.getType() == ThemeType.STATIC ? "Static" : "JSP");
         m.put("displayName", t.getManifest().map(ThemeManifest::getDisplayName).orElse(t.getName()));
         m.put("version", t.getManifest().map(ThemeManifest::getVersion).orElse(""));
         m.put("isDefault", t.getName().equals(currentDefault));

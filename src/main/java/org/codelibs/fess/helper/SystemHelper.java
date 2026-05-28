@@ -769,6 +769,7 @@ public class SystemHelper {
      */
     public void reloadConfiguration(final boolean resetJobs) {
         ComponentUtil.getSearchEngineClient().refresh();
+        ComponentUtil.getThemeRegistry().reload();
 
         ComponentUtil.getSuggestHelper().init();
         ComponentUtil.getPopularWordHelper().init();

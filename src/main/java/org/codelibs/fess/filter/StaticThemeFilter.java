@@ -19,13 +19,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.codelibs.fess.theme.ThemeManifest;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.theme.ThemeViewAction;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.theme.Theme;
+import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -144,7 +143,7 @@ public class StaticThemeFilter implements Filter {
         }
         final String hostKey = resolveHostKey();
         final Theme theme = reg.resolveActiveTheme(hostKey).orElse(null);
-        if (theme == null || !theme.isStatic()) {
+        if (theme == null) {
             chain.doFilter(request, response);
             return;
         }

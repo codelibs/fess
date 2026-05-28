@@ -176,8 +176,6 @@ public class StaticThemeInstaller {
             INVALID_NAME,
             /** Refused because the theme is the currently active default. */
             ACTIVE_DEFAULT,
-            /** Refused because the registry entry is a JSP theme. */
-            JSP_TYPE,
             /** Theme directory not found under the themes root. */
             NOT_FOUND,
             /** ZIP extraction failed (e.g. ZipSlip, denied segment). */
@@ -345,10 +343,8 @@ public class StaticThemeInstaller {
      * <p>Refuses when (a) the name fails the spec §4.2 regex
      * ({@code ^[a-z0-9][a-z0-9_-]{0,63}$}), (b) the theme is the currently
      * active default (per the configured probe or
-     * {@link ThemeRegistry#resolveActiveTheme(String)}), (c) the resolved
-     * registry entry is a {@link ThemeType#JSP JSP} theme (deletion only
-     * applies to static themes the installer owns), or (d) the directory does
-     * not exist under the themes root.</p>
+     * {@link ThemeRegistry#resolveActiveTheme(String)}), or (c) the directory
+     * does not exist under the themes root.</p>
      *
      * <p>Successful deletion atomically renames the directory to
      * {@code themes/.attic-<name>-<timestamp>/} — preserving the §4.4 7-day
@@ -366,12 +362,6 @@ public class StaticThemeInstaller {
                 : (themeRegistry == null ? null : themeRegistry.resolveActiveTheme(null).map(Theme::getName).orElse(null));
         if (name.equals(active)) {
             throw new InstallException(InstallException.Code.ACTIVE_DEFAULT, "Cannot delete active default theme: " + name);
-        }
-        if (themeRegistry != null) {
-            final Theme t = themeRegistry.getAllThemes().get(name);
-            if (t != null && t.getType() == ThemeType.JSP) {
-                throw new InstallException(InstallException.Code.JSP_TYPE, "Refusing to delete JSP theme via static installer: " + name);
-            }
         }
         final Path themesDir = resolveThemesDir();
         final Path target = themesDir.resolve(name);

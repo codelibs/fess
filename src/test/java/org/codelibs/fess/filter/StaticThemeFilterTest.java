@@ -34,7 +34,6 @@ import org.codelibs.fess.app.web.theme.ThemeViewAction;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
-import org.codelibs.fess.theme.ThemeType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -67,7 +66,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_passesThroughForAdminPath() throws Exception {
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -79,7 +78,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_passesThroughForApi() throws Exception {
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -91,7 +90,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_passesThroughPostRequests() throws Exception {
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -103,7 +102,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_forwardsIndexForUiPath() throws Exception {
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -118,7 +117,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_forwardsAssetForMatchingThemeAssetPath() throws Exception {
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), null);
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -134,7 +133,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     @Test
     public void test_passesThroughForNonMatchingThemeAssetPath() throws Exception {
         // Active theme is "alpha"; request is for "beta" assets — pass through
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), null);
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -147,7 +146,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_passesThroughForJspThemeAssetPaths() throws Exception {
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -164,7 +163,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         // Guard: non-HttpServletRequest must be forwarded to the chain without
         // triggering a ClassCastException. This exercises the defensive cast guard
         // added for cross-context or non-HTTP dispatch scenarios.
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -250,7 +249,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         // to the original Fess routes rather than being forwarded to the SPA index.
         // A regression here would silently break themes that opt out of SPA mode.
         final ThemeManifest manifest = buildManifest(false);
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), manifest);
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -270,7 +269,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         // Symmetric test: when manifest.spaFallback=true (explicit), non-asset UI
         // requests must be forwarded to the SPA index.
         final ThemeManifest manifest = buildManifest(true);
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), manifest);
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -291,7 +290,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         // be forwarded to /theme-view with ASSET mode — the spaFallback flag only
         // governs non-asset SPA routing, not static asset delivery.
         final ThemeManifest manifest = buildManifest(false);
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), manifest);
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
@@ -309,14 +308,9 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     @Test
     public void test_spaFallbackDefault_isTrue_whenManifestIsNull() throws Exception {
-        // Theme with null manifest (JSP or stub with no manifest) falls back to
-        // the default spaFallback=true behavior via orElse(true) in the filter.
-        // A Theme with null manifest is NOT static (ThemeType.STATIC + null manifest
-        // should still pass the isStatic() check) — verify that null-manifest themes
-        // with spaFallback not set still forward non-asset requests.
-        // (This is already covered by test_forwardsIndexForUiPath — this test
-        // documents the contract explicitly.)
-        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), null);
+        // Theme with null manifest (stub with no manifest) falls back to the
+        // default spaFallback=true behavior via orElse(true) in the filter.
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);

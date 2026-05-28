@@ -27,7 +27,6 @@ import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
-import org.codelibs.fess.theme.ThemeType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.ActionResponse;
@@ -49,7 +48,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
 
             final ThemeViewAction action = new ThemeViewAction();
 
@@ -107,7 +106,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = new ThemeViewAction();
             assertNull(action.resolveAsset(theme, "assets"));
             assertNull(action.resolveAsset(theme, "missing.txt"));
@@ -136,7 +135,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();
@@ -169,7 +168,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveAsset("assets/app.js");
@@ -218,7 +217,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();
@@ -249,7 +248,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();
@@ -279,7 +278,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             // First request — no If-None-Match; expect ETag header
@@ -314,7 +313,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                     "displayName: T", //
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveAsset("icon.svg");
@@ -341,7 +340,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = new ThemeViewAction();
 
             assertNull(action.resolveAsset(theme, ".env"), ".env must be rejected");
@@ -368,7 +367,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = new ThemeViewAction();
 
             assertNull(action.resolveAsset(theme, "theme.yml"), "theme.yml must be rejected");
@@ -402,7 +401,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = new ThemeViewAction();
 
             assertNull(action.resolveAsset(theme, "escape.txt"), "Symlink must be rejected");
@@ -471,7 +470,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
                     "version: 1.0.0");
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveAsset("assets/app.js");
@@ -515,7 +514,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             // so isUnsafeEntry allows it — proving the threat is real without the new guard).
             assertEquals("theme.yml", manifest.getEntry());
 
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();
@@ -552,7 +551,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
             assertEquals(".env", manifest.getEntry());
 
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();
@@ -584,7 +583,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
             assertEquals("README.md", manifest.getEntry());
 
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();
@@ -620,7 +619,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             // Default entry is index.html
             assertEquals("index.html", manifest.getEntry());
 
-            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final Theme theme = new Theme("t", tmp, manifest);
             final ThemeViewAction action = newActionWith(theme);
 
             final ActionResponse resp = action.serveIndex();

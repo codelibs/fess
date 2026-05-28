@@ -149,7 +149,6 @@ public class BundledBootstrapThemeTest {
         assertTrue(reg.getAllThemes().containsKey("bootstrap"),
                 "ThemeRegistry did not discover bundled bootstrap theme; got: " + reg.getAllThemes().keySet());
         final Theme t = reg.getAllThemes().get("bootstrap");
-        assertEquals(ThemeType.STATIC, t.getType());
         assertEquals("bootstrap", t.getName());
         assertTrue(t.getManifest().isPresent());
         assertEquals("Bootstrap", t.getManifest().map(ThemeManifest::getDisplayName).orElse(null));

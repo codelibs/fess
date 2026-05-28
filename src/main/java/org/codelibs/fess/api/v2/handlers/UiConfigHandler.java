@@ -23,9 +23,9 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
-import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.Theme;
@@ -100,7 +100,6 @@ public class UiConfigHandler {
                     activeTheme = registry.resolveActiveTheme(vhostKey);
                     activeTheme.ifPresent(t -> {
                         themePayload.put("name", t.getName());
-                        themePayload.put("type", t.getType().name().toLowerCase());
                         t.getManifest().ifPresent(m -> {
                             themePayload.put("display_name", m.getDisplayName());
                             themePayload.put("version", m.getVersion());
