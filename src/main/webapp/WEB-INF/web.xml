@@ -214,7 +214,7 @@
     reverse proxy (nginx, Caddy, ALB, etc.) and have the proxy add the Secure attribute,
     or set it at the Tomcat connector layer.
 
-    SameSite policy is configured via the `sameSiteCookies` key in tomcat_config.properties
+    SameSite policy is configured via the `tomcat.sameSiteCookies` key in tomcat_config.properties
     (default: lax; valid values: lax, strict, none). FessBoot applies it to all
     CookieProcessor instances at startup. Strict will break OAuth/OIDC redirect flows.
     See https://tomcat.apache.org/tomcat-10.1-doc/config/cookie-processor.html
