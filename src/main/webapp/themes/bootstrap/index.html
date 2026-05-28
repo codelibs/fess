@@ -62,14 +62,18 @@
         <section class="col-lg-6 col-md-8" id="results-column">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
-            <div>
-              <label for="sort-select" class="form-label me-2 mb-0 small" data-i18n="search.sort">Sort</label>
-              <select class="form-select form-select-sm d-inline-block w-auto" id="sort-select" aria-label="Sort order">
-                <option value="">—</option>
-                <option value="created.desc" data-i18n="search.sort.created_desc">Newest</option>
-                <option value="created.asc" data-i18n="search.sort.created_asc">Oldest</option>
-                <option value="content_length.desc" data-i18n="search.sort.length_desc">Length</option>
-              </select>
+          </div>
+          <div id="search-options" class="d-flex gap-2 flex-wrap align-items-center mb-3">
+            <label class="form-label me-1 mb-0 small" for="sort-select" data-i18n="search.sort">Sort</label>
+            <select id="sort-select" class="form-select form-select-sm" style="width: auto;" aria-label="Sort order"></select>
+            <label class="form-label me-1 mb-0 small" for="num-select" data-i18n="search.num">Per page</label>
+            <select id="num-select" class="form-select form-select-sm" style="width: auto;" aria-label="Results per page"></select>
+            <label class="form-label me-1 mb-0 small" for="lang-select" data-i18n="search.lang">Language</label>
+            <select id="lang-select" class="form-select form-select-sm" style="width: auto;" aria-label="Language filter"></select>
+            <div class="dropdown" id="label-dropdown-wrap">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="label-dropdown-btn"
+                data-bs-toggle="dropdown" aria-expanded="false" data-i18n="search.labels">Labels</button>
+              <ul class="dropdown-menu label-dropdown-menu" id="label-dropdown-menu" aria-labelledby="label-dropdown-btn"></ul>
             </div>
           </div>
           <ol class="list-unstyled" id="results" role="list"></ol>
