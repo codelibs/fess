@@ -41,6 +41,8 @@ import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
+import org.codelibs.fess.api.v2.handlers.RelatedContentHandler;
+import org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
@@ -141,6 +143,14 @@ public class SearchApiV2Manager extends BaseApiManager {
     @Resource
     protected LoginHandler loginHandler;
 
+    /** Handles {@code GET /api/v2/related-queries} (related query suggestions). */
+    @Resource
+    protected RelatedQueriesHandler relatedQueriesHandler;
+
+    /** Handles {@code GET /api/v2/related-content} (related HTML content). */
+    @Resource
+    protected RelatedContentHandler relatedContentHandler;
+
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
      */
@@ -240,6 +250,8 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/click" -> clickHandler.handle(request, response);
             case "/chat" -> chatHandler.handle(request, response);
             case "/chat/stream" -> chatStreamHandler.handle(request, response);
+            case "/related-queries" -> relatedQueriesHandler.handle(request, response);
+            case "/related-content" -> relatedContentHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }
         } catch (final IOException e) {
