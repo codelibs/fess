@@ -10,15 +10,23 @@ import * as errorView from "./error.js";
 import * as profile from "./profile.js";
 import * as help from "./help.js";
 import * as advance from "./advance.js";
+import * as cache from "./cache.js";
 
-/** Show one SPA view section and hide the rest. */
+/** Show one SPA view section and hide the rest. H.2: focus management on route change. */
 function showView(id) {
-  const viewIds = ["home-view", "results-view", "advance-view", "error-view", "profile-view", "help-view"];
+  const viewIds = ["home-view", "results-view", "advance-view", "error-view", "profile-view", "help-view", "chat-view", "cache-view"];
   for (const vid of viewIds) {
     const el = document.getElementById(vid);
     if (!el) continue;
     if (vid === id) {
       el.removeAttribute("hidden");
+      // H.2: move keyboard focus to the first heading or the section root so
+      // screen readers announce the new view after a client-side navigation.
+      const heading = el.querySelector("h1, h2, h3");
+      const target = heading || el;
+      if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      // Defer focus so the element is visible before receiving focus.
+      Promise.resolve().then(() => target.focus({ preventScroll: false }));
     } else {
       el.setAttribute("hidden", "");
     }
@@ -39,6 +47,8 @@ function setSearchFormVisible(visible) {
 /**
  * Render EOL / development-mode warning indicators in #warning-indicators.
  * Called once after api.init() so getConfig() is populated.
+ * D.5: EOL uses fa-times-circle text-danger with Bootstrap Tooltip and optional link.
+ * D.6: Dev-mode uses fa-exclamation-triangle text-warning with Bootstrap Tooltip and optional link.
  */
 function renderWarnings() {
   const host = document.getElementById("warning-indicators");
@@ -46,28 +56,58 @@ function renderWarnings() {
   while (host.firstChild) host.removeChild(host.firstChild);
   const features = api.getConfig()?.features || {};
 
+  // D.5: EOL warning
   if (features.eoled) {
-    const span = document.createElement("span");
-    span.className = "text-warning ms-2";
-    span.title = t("nav.eol_warning");
-    span.setAttribute("aria-label", t("nav.eol_warning"));
+    const tooltipText = t("labels.eol_error");
     const icon = document.createElement("i");
-    icon.className = "fa fa-exclamation-triangle";
+    icon.className = "fas fa-times-circle text-danger";
     icon.setAttribute("aria-hidden", "true");
-    span.appendChild(icon);
-    host.appendChild(span);
+
+    let el;
+    if (features.eol_link) {
+      el = document.createElement("a");
+      el.href = features.eol_link;
+      el.target = "_blank";
+      el.rel = "noopener noreferrer";
+      el.className = "ms-2";
+      el.setAttribute("aria-label", tooltipText);
+    } else {
+      el = document.createElement("span");
+      el.className = "ms-2";
+      el.setAttribute("aria-label", tooltipText);
+    }
+    el.setAttribute("data-bs-toggle", "tooltip");
+    el.setAttribute("data-bs-title", tooltipText);
+    el.appendChild(icon);
+    host.appendChild(el);
+    if (window.bootstrap?.Tooltip) new window.bootstrap.Tooltip(el);
   }
 
+  // D.6: Development mode warning
   if (features.development_mode) {
-    const span = document.createElement("span");
-    span.className = "text-info ms-2";
-    span.title = t("nav.dev_mode_warning");
-    span.setAttribute("aria-label", t("nav.dev_mode_warning"));
+    const tooltipText = t("labels.development_mode_warning");
     const icon = document.createElement("i");
-    icon.className = "fa fa-flask";
+    icon.className = "fas fa-exclamation-triangle text-warning";
     icon.setAttribute("aria-hidden", "true");
-    span.appendChild(icon);
-    host.appendChild(span);
+
+    let el;
+    if (features.installation_link) {
+      el = document.createElement("a");
+      el.href = features.installation_link;
+      el.target = "_blank";
+      el.rel = "noopener noreferrer";
+      el.className = "ms-2";
+      el.setAttribute("aria-label", tooltipText);
+    } else {
+      el = document.createElement("span");
+      el.className = "ms-2";
+      el.setAttribute("aria-label", tooltipText);
+    }
+    el.setAttribute("data-bs-toggle", "tooltip");
+    el.setAttribute("data-bs-title", tooltipText);
+    el.appendChild(icon);
+    host.appendChild(el);
+    if (window.bootstrap?.Tooltip) new window.bootstrap.Tooltip(el);
   }
 }
 
@@ -158,12 +198,57 @@ function attachHomeView() {
   renderHomePopularWords();
 }
 
+/**
+ * D.8: Render footer copyright via safe DOM construction (no innerHTML / no sanitizer needed
+ * because every node is constructed directly — no user-supplied strings are rendered as HTML).
+ */
+function renderFooterCopyright() {
+  const el = document.getElementById("footer-copyright");
+  if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+  el.appendChild(document.createTextNode("© " + new Date().getFullYear() + " "));
+  const a = document.createElement("a");
+  a.href = "https://github.com/codelibs";
+  a.rel = "noopener noreferrer";
+  a.target = "_blank";
+  a.textContent = "CodeLibs Project";
+  el.appendChild(a);
+  el.appendChild(document.createTextNode("."));
+}
+
+/**
+ * D.4: Conditionally insert a Chat nav link when rag_chat_enabled is true.
+ * The Phase E agent will add the <a> element to the markup; until then we
+ * create it dynamically next to the Help link so chat navigation works.
+ */
+function renderChatNavLink() {
+  const features = api.getConfig()?.features || {};
+  if (!features.rag_chat_enabled) return;
+  // If markup already has the chat link (added by Phase E agent), just show it.
+  const existing = document.getElementById("chat-nav-link");
+  if (existing) {
+    existing.classList.remove("d-none");
+    return;
+  }
+  // Otherwise create it and insert before the Help link.
+  const helpLink = document.querySelector("nav a[href='/help']");
+  if (!helpLink) return;
+  const chatLink = document.createElement("a");
+  chatLink.id = "chat-nav-link";
+  chatLink.className = "nav-link px-2";
+  chatLink.href = "/chat";
+  chatLink.setAttribute("data-spa", "");
+  chatLink.setAttribute("data-i18n", "nav.chat");
+  chatLink.textContent = t("nav.chat");
+  helpLink.parentNode.insertBefore(chatLink, helpLink);
+}
+
 /** Attach back-to-top button behaviour. */
 function attachBackToTop() {
   const btn = document.getElementById("back-to-top");
   if (!btn) return;
   window.addEventListener("scroll", () => {
-    btn.style.display = window.scrollY > 200 ? "block" : "none";
+    btn.classList.toggle("is-hidden", window.scrollY <= 200);
   });
   btn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -192,8 +277,10 @@ function registerRoutes() {
     () => {
       setSearchFormVisible(true);
       showView("results-view");
-      // search.attach() is idempotent; safe to call on each navigation.
+      // search.attach() is idempotent; wires DOM listeners once.
       search.attach();
+      // A.8: re-run search from URL on every dispatch (handles popstate / back-forward).
+      search.runFromUrl();
     }
   );
 
@@ -224,6 +311,28 @@ function registerRoutes() {
       setSearchFormVisible(false);
       showView("help-view");
       help.attach();
+    }
+  );
+
+  // Chat view — full-width standalone chat page.
+  router.register(
+    path => path === "/chat",
+    () => {
+      setSearchFormVisible(false);
+      showView("chat-view");
+      chat.attachStandalone();
+    }
+  );
+
+  // Cache viewer — /cache and /cache/* (e.g. /cache/?docId=...).
+  // Renders cached content inside a sandboxed iframe. The legacy CacheAction
+  // is bypassed; content is fetched from /api/v2/cache/{docId} instead.
+  router.register(
+    path => path === "/cache" || path.startsWith("/cache/"),
+    () => {
+      setSearchFormVisible(false);
+      showView("cache-view");
+      cache.attach();
     }
   );
 
@@ -259,6 +368,10 @@ async function main() {
   renderWarnings();
   // Render notification banners from config.notifications.
   renderNotifications();
+  // D.8: Render footer copyright with CodeLibs link.
+  renderFooterCopyright();
+  // D.4: Conditionally insert Chat nav link.
+  renderChatNavLink();
   await auth.attach();
   search.attach();
   chat.attach(); // no-op when rag_chat_enabled is false

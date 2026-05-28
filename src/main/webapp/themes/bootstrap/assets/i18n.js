@@ -46,19 +46,33 @@ export async function init() {
 /**
  * Translate a message key with optional parameter substitution.
  *
- * Substitution uses replaceAll so every occurrence of {key} is replaced.
+ * Substitution supports two modes:
+ *  - Named placeholders (Object): {name} is replaced by params.name.
+ *    e.g. t("result.click_count", { n: 42 }) → "Clicks: 42"
+ *  - Positional placeholders (Array): {0}, {1}, … are replaced by params[0], params[1], …
+ *    e.g. t("labels.search_result_status", [total, start, end, query])
+ *    → "Results 1 - 10 of 100 for foo"
+ *
+ * Both modes use the same {key} syntax (matching JSP MessageFormat style for
+ * positional indices). Numeric string keys in an Object are also treated as
+ * positional by the pattern, so { "0": "foo" } replaces {0}.
  *
  * WARNING: substituted values are treated as plain text and must not contain
  * curly-brace placeholder patterns themselves (e.g. "{n}"). If a value might
  * contain braces, escape it before passing: val.replace(/\{/g, "&#123;").
  *
  * @param {string} key
- * @param {object} [params] - key→value substitution map, e.g. { n: 42 }
+ * @param {Array|object} [params] - positional array or named key→value map
  * @returns {string}
  */
 export function t(key, params) {
   let s = messages[key] || key;
-  if (params) for (const [k, v] of Object.entries(params)) s = s.replaceAll("{" + k + "}", String(v));
+  if (params != null) {
+    s = s.replace(/\{([^{}]+)\}/g, (_, k) => {
+      const v = Array.isArray(params) ? params[Number(k)] : params[k];
+      return v == null ? "" : String(v);
+    });
+  }
   return s;
 }
 

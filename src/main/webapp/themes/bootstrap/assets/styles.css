@@ -17,9 +17,6 @@
 .label-dropdown-menu { min-width: 200px; max-height: 300px; overflow-y: auto; }
 .facet-group { margin-bottom: 1rem; }
 .facet-group h3 { font-size: .9rem; font-weight: 600; margin-bottom: .25rem; }
-.facet-item { display: flex; justify-content: space-between; padding: .15rem 0; font-size: .875rem; cursor: pointer; }
-.facet-item:hover { background: var(--bs-tertiary-bg); }
-.facet-item.active { font-weight: 600; }
 #suggest-dropdown .list-group-item { cursor: pointer; }
 #suggest-dropdown .list-group-item.active, #suggest-dropdown .list-group-item:hover { background: var(--bs-tertiary-bg); }
 #chat-column .chat-log { height: 60vh; overflow-y: auto; }
@@ -57,3 +54,95 @@
 .result-site-row { display: inline-flex; align-items: center; gap: .25rem; }
 /* Favorite count */
 .favorite-count { font-size: .75rem; color: var(--bs-tertiary-color); margin-left: .2rem; vertical-align: middle; }
+/* Brand logo (D.1) */
+.brand-logo { height: 24px; }
+/* Facet item keyboard accessibility (C.13) */
+.facet-item { display: flex; justify-content: space-between; padding: .15rem 0; font-size: .875rem; text-decoration: none; color: var(--bs-body-color); background: none; border: none; }
+.facet-item:hover { background: var(--bs-tertiary-bg); }
+.facet-item.active { font-weight: 600; }
+.facet-item:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+/* Result site path breadcrumb (C.5) */
+cite.result-site-path { color: var(--bs-success); font-size: .85rem; font-style: normal; word-break: break-all; display: block; }
+/* Result more link (C.4) */
+.result-more { font-size: .8rem; color: var(--bs-tertiary-color); }
+/* Current filters badge row (C.3) */
+#current-filters { margin: 0; padding: 0; }
+
+/* ---- Chat standalone view ---- */
+/* Messages area */
+.chat-messages { min-height: 300px; max-height: 65vh; overflow-y: auto; padding: 1rem; }
+/* Bubble wrappers */
+.chat-msg-wrap { display: flex; flex-direction: column; margin-bottom: 0.75rem; }
+.chat-msg-wrap.user { align-items: flex-end; }
+.chat-msg-wrap.assistant { align-items: flex-start; }
+/* Bubbles */
+.chat-msg { padding: 0.5rem 0.75rem; border-radius: 0.75rem; max-width: 85%; word-break: break-word; }
+.chat-msg.user { background: var(--bs-primary-bg-subtle); }
+.chat-msg.assistant { background: var(--bs-tertiary-bg); }
+/* Inline chat sidebar bubble (legacy) */
+#chat-column .chat-log { height: 60vh; overflow-y: auto; }
+#chat-column .chat-msg { padding: .5rem .75rem; border-radius: .5rem; margin-bottom: .5rem; max-width: 90%; }
+#chat-column .chat-msg.user { background: var(--bs-primary-bg-subtle); margin-left: auto; }
+#chat-column .chat-msg.assistant { background: var(--bs-tertiary-bg); }
+/* Bubble header (copy button row) */
+.chat-bubble-header { opacity: 0; transition: opacity 0.15s; min-height: 1.5rem; }
+.chat-msg-wrap:hover .chat-bubble-header,
+.chat-msg-wrap:focus-within .chat-bubble-header { opacity: 1; }
+.chat-copy-btn { font-size: 0.75rem; color: var(--bs-tertiary-color); line-height: 1; }
+.chat-copy-btn:hover { color: var(--bs-primary); }
+/* Sources details */
+.chat-sources { font-size: 0.85rem; margin-top: 0.5rem; max-width: 85%; }
+.chat-sources summary { cursor: pointer; color: var(--bs-secondary-color); }
+.chat-sources ul { padding-left: 1.25rem; margin: 0.25rem 0 0; }
+/* Phase strip */
+.chat-phase-strip { font-size: 0.8rem; }
+.chat-step { transition: background-color 0.2s; white-space: nowrap; }
+/* Status lozenge */
+.chat-status-lozenge { font-size: 0.8rem; }
+/* Error banner */
+.chat-error-banner { font-size: 0.9rem; }
+/* Progress wrap */
+.chat-progress-wrap { border-top: 1px solid var(--bs-border-color); background: var(--bs-tertiary-bg); }
+/* Welcome state */
+.chat-welcome { color: var(--bs-tertiary-color); }
+/* Input area */
+.input-wrapper .input-footer { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--bs-secondary-color); }
+.char-counter { white-space: nowrap; }
+/* Filter panel */
+.chat-filter-panel .card-body { max-height: 260px; overflow-y: auto; }
+/* Status line below bubble */
+.chat-status-line { font-size: 0.8rem; margin-top: 0.25rem; }
+/* Hit count badge inside phase strip */
+.chat-hit-count { font-size: 0.75em; }
+@media (prefers-reduced-motion: reduce) {
+  .chat-step { transition: none; }
+  .chat-bubble-header { transition: none; }
+}
+
+/* ---- I.1 inline-style replacements ---- */
+/* Home search input max-width (replaces style="max-width: 600px;" on #home-search-input) */
+.home-search-input { max-width: 600px; }
+/* Options selects auto-width (replaces style="width: auto;" on sort/num/lang selects) */
+.options-select { width: auto; }
+/* Back-to-top button fixed positioning (replaces inline bottom/right/z-index) */
+.back-to-top { bottom: 1.5rem; right: 1.5rem; z-index: 1050; }
+/* back-to-top hidden state (replaces inline display:none; toggled by app.js) */
+.back-to-top.is-hidden { display: none; }
+/* Cursor pointer for label dropdown items and label selects (replaces .style.cursor) */
+.cursor-pointer { cursor: pointer; }
+/* Clipboard copy fallback textarea (off-screen, invisible; replaces .style.position/.opacity) */
+.chat-clipboard-fallback { position: fixed; opacity: 0; }
+
+/* ---- Cache viewer ---- */
+.cache-frame {
+  width: 100%;
+  height: 70vh;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 4px;
+  background: var(--bs-body-bg);
+}
+.cache-meta {
+  font-size: .9rem;
+  color: var(--bs-secondary-color);
+}
+.cache-meta dt { font-weight: 600; }

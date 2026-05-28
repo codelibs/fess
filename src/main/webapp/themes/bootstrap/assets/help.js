@@ -35,6 +35,52 @@ async function fetchHelpContent(locale) {
 }
 
 /**
+ * Build a Table of Contents nav element linking to each section.
+ *
+ * @param {Array<{id:string, title:string}>} sections
+ * @returns {HTMLElement}
+ */
+function buildToc(sections) {
+  const nav = document.createElement("nav");
+  nav.id = "help-toc";
+  nav.className = "help-toc";
+  nav.setAttribute("aria-label", t("help.toc_title"));
+
+  const heading = document.createElement("p");
+  heading.className = "help-toc-title fw-bold";
+  heading.textContent = t("help.toc_title");
+  nav.appendChild(heading);
+
+  const ul = document.createElement("ul");
+  for (const section of sections) {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#help-" + section.id;
+    // textContent — never innerHTML — for section titles.
+    a.textContent = section.title;
+    li.appendChild(a);
+    ul.appendChild(li);
+  }
+  nav.appendChild(ul);
+  return nav;
+}
+
+/**
+ * Build a "back to top" paragraph element.
+ *
+ * @returns {HTMLParagraphElement}
+ */
+function buildBackToTop() {
+  const p = document.createElement("p");
+  p.className = "help-back-to-top";
+  const a = document.createElement("a");
+  a.href = "#help-toc";
+  a.textContent = "↑ " + t("help.back_to_top");
+  p.appendChild(a);
+  return p;
+}
+
+/**
  * Render a single help section into the container.
  *
  * @param {HTMLElement} container
@@ -52,6 +98,9 @@ function renderSection(container, section) {
 
   // Sanitize the HTML content before appending to the live DOM.
   sec.appendChild(sanitizeHtml(section.html));
+
+  // Append back-to-top link after section content.
+  sec.appendChild(buildBackToTop());
 
   container.appendChild(sec);
 }
@@ -94,6 +143,9 @@ export async function attach() {
   container.removeChild(loading);
 
   if (!data || !Array.isArray(data.sections)) return;
+
+  // Prepend Table of Contents before the sections.
+  container.appendChild(buildToc(data.sections));
 
   for (const section of data.sections) {
     renderSection(container, section);

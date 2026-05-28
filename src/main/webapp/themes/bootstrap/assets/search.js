@@ -22,37 +22,37 @@ const state = {
   fields: {},           // extra field filters (e.g. label)
   timestampRange: "",   // one of: 1day, 1week, 1month, 3month, 6month, 1year, 2year, 3year
   sizeRange: "",        // one of: 0, 1, 2, 3, 4 (index into SIZE_RANGES)
-  requestedTime: 0      // epoch ms of the most-recent search; used in /go/ click-log URL
+  requestedTime: 0,     // epoch ms of the most-recent search; used in /go/ click-log URL
+  highlightParams: ""   // server-supplied highlight_params string (e.g. "&hl.q=...&hl.fragsize=...")
 };
 
 // ─── Range facet definitions ──────────────────────────────────────────────────
 
 /** Timestamp range buckets, matching JSP facet queries. */
 const TIMESTAMP_RANGES = [
-  { key: "1day",   query: "last_modified:[now/d-1d TO *]",  labelKey: "labels.facet_timestamp_1day" },
-  { key: "1week",  query: "last_modified:[now/d-7d TO *]",  labelKey: "labels.facet_timestamp_1week" },
-  { key: "1month", query: "last_modified:[now/d-1M TO *]",  labelKey: "labels.facet_timestamp_1month" },
-  { key: "3month", query: "last_modified:[now/d-3M TO *]",  labelKey: "labels.facet_timestamp_3month" },
-  { key: "6month", query: "last_modified:[now/d-6M TO *]",  labelKey: "labels.facet_timestamp_6month" },
-  { key: "1year",  query: "last_modified:[now/d-1y TO *]",  labelKey: "labels.facet_timestamp_1year" },
-  { key: "2year",  query: "last_modified:[now/d-2y TO *]",  labelKey: "labels.facet_timestamp_2year" },
-  { key: "3year",  query: "last_modified:[now/d-3y TO *]",  labelKey: "labels.facet_timestamp_3year" }
+  { key: "1day",   query: "timestamp:[now/d-1d TO *]",  labelKey: "labels.facet_timestamp_1day" },
+  { key: "1week",  query: "timestamp:[now/d-7d TO *]",  labelKey: "labels.facet_timestamp_1week" },
+  { key: "1month", query: "timestamp:[now/d-1M TO *]",  labelKey: "labels.facet_timestamp_1month" },
+  { key: "3month", query: "timestamp:[now/d-3M TO *]",  labelKey: "labels.facet_timestamp_3month" },
+  { key: "6month", query: "timestamp:[now/d-6M TO *]",  labelKey: "labels.facet_timestamp_6month" },
+  { key: "1year",  query: "timestamp:[now/d-1y TO *]",  labelKey: "labels.facet_timestamp_1year" },
+  { key: "2year",  query: "timestamp:[now/d-2y TO *]",  labelKey: "labels.facet_timestamp_2year" },
+  { key: "3year",  query: "timestamp:[now/d-3y TO *]",  labelKey: "labels.facet_timestamp_3year" }
 ];
 
-/** Content-length (size) range buckets. */
+/** Content-length (size) range buckets. Boundaries match JSP defaults. */
 const SIZE_RANGES = [
-  { key: "0", query: "content_length:[* TO 10240]",           labelKey: "labels.facet_contentLength_0" },
-  { key: "1", query: "content_length:[10240 TO 102400]",      labelKey: "labels.facet_contentLength_1" },
-  { key: "2", query: "content_length:[102400 TO 1048576]",    labelKey: "labels.facet_contentLength_2" },
-  { key: "3", query: "content_length:[1048576 TO 10485760]",  labelKey: "labels.facet_contentLength_3" },
-  { key: "4", query: "content_length:[10485760 TO *]",        labelKey: "labels.facet_contentLength_4" }
+  { key: "0", query: "content_length:[* TO 9999]",          labelKey: "labels.facet_contentLength_0" },
+  { key: "1", query: "content_length:[10000 TO 99999]",     labelKey: "labels.facet_contentLength_1" },
+  { key: "2", query: "content_length:[100000 TO 499999]",   labelKey: "labels.facet_contentLength_2" },
+  { key: "3", query: "content_length:[500000 TO 999999]",   labelKey: "labels.facet_contentLength_3" },
+  { key: "4", query: "content_length:[1000000 TO *]",       labelKey: "labels.facet_contentLength_4" }
 ];
 
-/** Filetype values shown in the static filetype facet group. */
+/** Filetype values shown in the static filetype facet group. Matches query.facet.queries defaults. */
 const FILETYPE_VALUES = [
-  "html", "msword", "msexcel", "mspowerpoint",
-  "odt", "ods", "odp", "pdf", "txt",
-  "image", "audio", "video", "archive", "others"
+  "html", "word", "excel", "powerpoint",
+  "odt", "ods", "odp", "pdf", "txt", "others"
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -137,7 +137,11 @@ function buildResultCard(d, queryId, order) {
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
 
-  const li = el("li", { className: "result-card", dataset: { docId: d.doc_id || "", queryId: queryId || "" } });
+  const li = el("li", {
+    className: "result-card",
+    attrs: { id: "result-" + (order - 1) },
+    dataset: { docId: d.doc_id || "", queryId: queryId || "" }
+  });
 
   // --- Task 2.2: thumbnail (left side) ---
   if (d.thumbnail && features.thumbnail_enabled) {
@@ -146,7 +150,7 @@ function buildResultCard(d, queryId, order) {
     img.setAttribute("loading", "lazy");
     img.setAttribute("alt", "");
     img.setAttribute("src", safeHref(d.thumbnail));
-    img.addEventListener("error", () => { img.style.display = "none"; });
+    img.addEventListener("error", () => { img.classList.add("d-none"); });
     li.appendChild(img);
   }
 
@@ -172,7 +176,12 @@ function buildResultCard(d, queryId, order) {
   h2.appendChild(a);
   body.appendChild(h2);
 
-  body.appendChild(el("div", { className: "result-url", text: d.site || d.url || "" }));
+  // C.5: use site_path when present; fall back to host/url
+  if (d.site_path) {
+    body.appendChild(el("cite", { className: "result-url result-site-path", text: d.site_path }));
+  } else {
+    body.appendChild(el("div", { className: "result-url", text: d.site || d.url || "" }));
+  }
 
   // --- Task 2.3: info meta (size · date · click_count) ---
   const infoParts = [];
@@ -191,6 +200,14 @@ function buildResultCard(d, queryId, order) {
   const snippetEl = el("div", { className: "result-snippet" });
   snippetEl.innerHTML = renderHighlightedSnippet(d.content_description || d.digest || "");
   body.appendChild(snippetEl);
+
+  // C.4: "More.." anchor link — fragment targets the card's own id
+  const moreLink = el("a", {
+    className: "result-more",
+    text: t("labels.search_result_more"),
+    attrs: { href: "#result-" + (order - 1) }
+  });
+  body.appendChild(moreLink);
 
   // --- result-meta row: cache link, similar docs, host, favorite ---
   const meta = el("div", { className: "result-meta" });
@@ -224,13 +241,14 @@ function buildResultCard(d, queryId, order) {
   }
   meta.appendChild(siteRow);
 
-  // --- Task 2.4: cache link — only when has_cache is truthy ---
+  // --- Task 2.4 / A.5: cache link — only when has_cache is truthy ---
+  // Use server-supplied highlight_params when available; fall back to a minimal hl.q param.
   if (d.has_cache === "true" || d.has_cache === true) {
-    const hlParam = "&hl.q=" + encodeURIComponent(state.q || "");
+    const hlParam = state.highlightParams || ("&hl.q=" + encodeURIComponent(state.q || ""));
     const cacheLink = el("a", {
       className: "text-muted",
       text: t("result.cache"),
-      attrs: { href: "/cache/?docId=" + encodeURIComponent(d.doc_id || "") + hlParam, target: "_blank", rel: "noopener" }
+      attrs: { href: `/cache/?docId=${encodeURIComponent(d.doc_id || "")}${hlParam}`, target: "_blank", rel: "noopener" }
     });
     meta.appendChild(cacheLink);
   }
@@ -258,11 +276,132 @@ function buildResultCard(d, queryId, order) {
   });
   const favIcon = el("i", { className: "fa fa-star-o", attrs: { "aria-hidden": "true" } });
   favBtn.appendChild(favIcon);
+  // A.3: set initial count from server data so the badge shows before syncFavorites runs.
+  favBtn.dataset.count = String(d.favorite_count || 0);
+  setFavoriteUi(favBtn, false, d.favorite_count || 0);
   meta.appendChild(favBtn);
 
   body.appendChild(meta);
   li.appendChild(body);
   return li;
+}
+
+/**
+ * C.1: Populate the results-status banner.
+ * Uses _over variant when record_count_relation !== "EQUAL_TO".
+ */
+function renderResultsStatus(env) {
+  const statusEl = document.getElementById("results-status");
+  if (!statusEl) return;
+  const count = env.record_count || 0;
+  const start = env.start_record_number || 1;
+  const end   = env.end_record_number   || 0;
+  const q     = state.q || "";
+  const isOver = env.record_count_relation && env.record_count_relation !== "EQUAL_TO";
+  const statusKey = isOver ? "labels.search_result_status_over" : "labels.search_result_status";
+  // {0}=total, {1}=start, {2}=end, {3}=query
+  let text = t(statusKey)
+    .replace("{0}", String(count))
+    .replace("{1}", String(start))
+    .replace("{2}", String(end))
+    .replace("{3}", q);
+  if (env.exec_time != null) {
+    const execSec = typeof env.exec_time === "number"
+      ? env.exec_time.toFixed(2)
+      : (typeof env.query_time === "number" ? (env.query_time / 1000).toFixed(2) : null);
+    if (execSec !== null) {
+      text += " " + t("labels.search_result_time").replace("{0}", execSec);
+    }
+  }
+  statusEl.textContent = text;
+}
+
+/**
+ * C.2: Show/hide the similar-doc banner.
+ */
+function renderSimilarDocBanner() {
+  const banner = document.getElementById("similar-doc-banner");
+  if (!banner) return;
+  // Clear previous content
+  while (banner.firstChild) banner.removeChild(banner.firstChild);
+  if (!state.sdh) {
+    banner.classList.add("d-none");
+    banner.classList.remove("d-flex");
+    return;
+  }
+  banner.classList.remove("d-none");
+  banner.classList.add("d-flex");
+  banner.appendChild(el("span", { text: t("labels.similar_doc_result_status") }));
+  const closeBtn = el("button", {
+    className: "btn-close ms-2",
+    attrs: { type: "button", "aria-label": t("labels.similar_doc_result_status") }
+  });
+  closeBtn.addEventListener("click", () => {
+    state.sdh = "";
+    state.start = 0;
+    runSearch();
+  });
+  banner.appendChild(closeBtn);
+}
+
+/**
+ * C.3: Render current-selection badge row (sort / num / lang / label).
+ */
+function renderCurrentFilters() {
+  const ul = document.getElementById("current-filters");
+  if (!ul) return;
+  while (ul.firstChild) ul.removeChild(ul.firstChild);
+
+  const cfg = api.getConfig() || {};
+  const badges = [];
+
+  // Sort
+  if (state.sort) {
+    const opt = (cfg.sort_options || []).find(o => o.value === state.sort);
+    const name = opt ? t(opt.label_key || opt.value) : state.sort;
+    badges.push({ name, targetId: "sort-select" });
+  }
+
+  // Num (only show when non-default)
+  const defaultNum = cfg.num_options && cfg.num_options.length > 0 ? cfg.num_options[0] : 10;
+  if (state.num !== Number(defaultNum)) {
+    badges.push({ name: t("search.num_format", { num: state.num }), targetId: "num-select" });
+  }
+
+  // Lang
+  const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
+  selected.forEach(langVal => {
+    const opt = (cfg.lang_options || []).find(o => o.value === langVal);
+    const name = opt
+      ? (t(opt.label_key || "labels.lang_" + opt.value) || opt.label || langVal)
+      : langVal;
+    badges.push({ name, targetId: "lang-select" });
+  });
+
+  // Label field filter
+  (state.fields.label || []).forEach(val => {
+    const opt = (cfg.label_options || []).find(o => o.value === val);
+    const name = opt ? (opt.label || opt.value) : val;
+    badges.push({ name, targetId: "label-dropdown-btn" });
+  });
+
+  if (badges.length === 0) return;
+
+  badges.forEach(badge => {
+    const li = el("li", { className: "list-inline-item" });
+    const btn = el("button", {
+      className: "badge bg-secondary border-0",
+      text: badge.name,
+      attrs: { type: "button" }
+    });
+    btn.classList.add("cursor-pointer");
+    btn.addEventListener("click", () => {
+      const target = document.getElementById(badge.targetId);
+      if (target) target.focus();
+    });
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
 }
 
 function renderResults(env) {
@@ -271,16 +410,21 @@ function renderResults(env) {
   const empty = document.getElementById("empty-state");
   list.innerHTML = "";   // empty-string literal — clears children, no untrusted data
   const data = env.data || [];
+  // C.2: always refresh similar-doc banner (hides when state.sdh is cleared)
+  renderSimilarDocBanner();
   if (data.length === 0) {
     empty.classList.remove("d-none");
     meta.textContent = "";
+    const statusEl = document.getElementById("results-status");
+    if (statusEl) statusEl.textContent = "";
     renderRelatedQueries([]);
     renderRelatedContent("");
     return;
   }
   empty.classList.add("d-none");
-  // exec_time from the API is in seconds (float). Format to two decimal places
-  // matching the JSP labels.search_result_time pattern (e.g. "0.12 sec").
+  // C.1: populate the result-status banner
+  renderResultsStatus(env);
+  // exec_time legacy meta (keep for backward compat; status banner is primary)
   const execSec = typeof env.exec_time === "number"
     ? env.exec_time.toFixed(2)
     : (typeof env.query_time === "number" ? (env.query_time / 1000).toFixed(2) : null);
@@ -349,11 +493,24 @@ async function runSearch() {
     const env = await api.get("/search", params, { signal });
     // Prefer the server-supplied requested_time when available (more accurate).
     if (env.requested_time) state.requestedTime = env.requested_time;
+    // A.5: store server-supplied highlight params for cache link construction.
+    state.highlightParams = (typeof env.highlight_params === "string" && env.highlight_params) ? env.highlight_params : "";
+    // A.6: show/hide the partial-results warning banner.
+    const warningEl = document.getElementById("results-warning");
+    if (warningEl) {
+      if (env.partial) {
+        warningEl.textContent = t("labels.process_time_is_exceeded");
+        warningEl.classList.remove("d-none");
+      } else {
+        warningEl.classList.add("d-none");
+      }
+    }
     renderResults(env);
     renderPagination(env);
     const labels = await loadLabels();
     renderFacets(env, labels);
     renderActiveChips();
+    renderCurrentFilters();
     // Fetch related queries and content concurrently (abortable on next search).
     loadRelated(state.q, currentRelatedAbort.signal);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
@@ -370,6 +527,8 @@ async function runSearch() {
 
 let suggestTimer = null;
 let suggestIndex = -1;
+/** Guard: prevent duplicate fess:route:change listener registration. */
+let routeListenerAttached = false;
 
 function renderSuggestItems(items) {
   const dropdown = document.getElementById("suggest-dropdown");
@@ -416,6 +575,27 @@ function hideSuggest() {
   dropdown.classList.add("d-none");
   if (inp) { inp.setAttribute("aria-expanded", "false"); inp.removeAttribute("aria-activedescendant"); }
   suggestIndex = -1;
+}
+
+/**
+ * H.4: Subscribe once to the fess:route:change event so that navigating away
+ * from the search view (/, /search, /index) cancels any pending suggest timer
+ * and collapses the dropdown.  The guard prevents double-registration if
+ * attach() is ever called a second time (the `attached` flag above normally
+ * stops that, but the guard is cheap insurance).
+ */
+function ensureRouteListener() {
+  if (routeListenerAttached) return;
+  routeListenerAttached = true;
+  document.addEventListener("fess:route:change", (e) => {
+    const path = (e.detail?.path || "").replace(/\/+$/, "") || "/";
+    const inSearch = path === "/" || path === "/search" || path === "/index";
+    if (!inSearch) {
+      if (suggestTimer) { clearTimeout(suggestTimer); suggestTimer = null; }
+      const dropdown = document.getElementById("suggest-dropdown");
+      if (dropdown) dropdown.classList.add("d-none");
+    }
+  });
 }
 
 // ─── Phase 3: Search option selects ──────────────────────────────────────────
@@ -479,25 +659,36 @@ function renderLangOptions() {
   const cfg = api.getConfig() || {};
   const langs = cfg.lang_options || [];
 
-  // "All languages" option always first — selecting this clears other selections.
-  const allOpt = document.createElement("option");
-  allOpt.value = "";
-  allOpt.textContent = t("labels.searchoptions_all_langs");
-  sel.appendChild(allOpt);
-
   const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
-  for (const lang of langs) {
-    const opt = document.createElement("option");
-    opt.value = lang.value != null ? lang.value : "";
-    // Try fess_label-compatible key first, fall back to raw value
-    const labelKey = lang.label_key || ("labels.lang_" + lang.value);
-    opt.textContent = t(labelKey) !== labelKey ? t(labelKey) : (lang.label || lang.value || "");
-    opt.selected = selected.includes(opt.value);
-    sel.appendChild(opt);
+
+  // C.15: the server already prepends an "all" sentinel (value="all" or value="").
+  // Add our own "All Languages" option only when the server does NOT provide one.
+  const serverHasAll = langs.some(l => l.value === "all" || l.value === "" || l.value == null);
+  if (!serverHasAll) {
+    const allOpt = document.createElement("option");
+    allOpt.value = "";
+    allOpt.textContent = t("labels.searchoptions_all_langs");
+    allOpt.selected = selected.length === 0;
+    sel.appendChild(allOpt);
   }
-  // Select "All" when nothing is chosen
-  if (selected.length === 0) {
-    allOpt.selected = true;
+
+  for (const lang of langs) {
+    const rawVal = lang.value != null ? lang.value : "";
+    // Treat server's "all" sentinel as the empty-state — map to value="" so it
+    // behaves the same as our locally-added "All Languages" option.
+    const optVal = rawVal === "all" ? "" : rawVal;
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    if (rawVal === "all" || rawVal === "") {
+      opt.textContent = t("labels.searchoptions_all_langs");
+      opt.selected = selected.length === 0;
+    } else {
+      // Try fess_label-compatible key first, fall back to raw value
+      const labelKey = lang.label_key || ("labels.lang_" + rawVal);
+      opt.textContent = t(labelKey) !== labelKey ? t(labelKey) : (lang.label || rawVal || "");
+      opt.selected = selected.includes(optVal);
+    }
+    sel.appendChild(opt);
   }
 }
 
@@ -527,7 +718,7 @@ function renderLabelOptions() {
 
     const label = document.createElement("label");
     label.className = "d-flex align-items-center gap-2 mb-0";
-    label.style.cursor = "pointer";
+    label.classList.add("cursor-pointer");
 
     const cb = document.createElement("input");
     cb.type = "checkbox";
@@ -579,12 +770,44 @@ export function refresh() {
   runSearch();
 }
 
+/**
+ * C.16: Keep header and home search inputs in sync.
+ * Call with the new query value whenever a view transition changes the canonical query.
+ */
+function syncSearchInputs(q) {
+  const header = document.getElementById("search-input");
+  const home   = document.getElementById("home-search-input");
+  if (header) header.value = q;
+  if (home)   home.value   = q;
+}
+
+/**
+ * A.8: Read URL search parameters into state and run a fresh search.
+ * Called by app.js on every route dispatch (including popstate / back-forward)
+ * so the results always reflect the current URL.
+ */
+export function runFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const q = params.get("q");
+  // Only run a search when a query is present in the URL.
+  if (!q) return;
+  state.q = q;
+  state.start = Number(params.get("start")) || 0;
+  const numVal = Number(params.get("num"));
+  if (numVal > 0) state.num = numVal;
+  state.sort = params.get("sort") || "";
+  // C.16: sync both inputs to reflect the URL query.
+  syncSearchInputs(state.q);
+  runSearch();
+}
+
 export function attach() {
   if (attached) {
     console.warn("search already attached — skipping duplicate attach()");
     return;
   }
   attached = true;
+  ensureRouteListener(); // H.4: cancel suggest timer when navigating away
   const form = document.getElementById("search-form");
   const input = document.getElementById("search-input");
   const dropdown = document.getElementById("suggest-dropdown");
@@ -594,6 +817,8 @@ export function attach() {
       state.q = input.value.trim();
       state.start = 0;
       hideSuggest();
+      // C.16: keep home-search-input in sync when submitting from the header
+      syncSearchInputs(state.q);
       runSearch();
     });
   }
@@ -613,6 +838,14 @@ export function attach() {
         ev.preventDefault();
         suggestIndex = suggestIndex <= 0 ? items.length - 1 : suggestIndex - 1;
       } else if (ev.key === "Enter" && suggestIndex >= 0) {
+        ev.preventDefault();
+        input.value = items[suggestIndex].dataset.text;
+        hideSuggest();
+        form.dispatchEvent(new Event("submit"));
+        return;
+      } else if (ev.key === "Tab" && suggestIndex >= 0) {
+        // H.3: Google-style Tab-to-accept — commit the highlighted suggestion
+        // and prevent Tab from moving focus away.
         ev.preventDefault();
         input.value = items[suggestIndex].dataset.text;
         hideSuggest();
@@ -696,8 +929,11 @@ export function attach() {
     renderSearchOptions();
   }
 
+  // A.8: URL-driven search is handled by runFromUrl() called from app.js route
+  // handlers on every dispatch (including popstate). attach() only wires DOM
+  // listeners and populates the input once — it no longer triggers a search itself.
   const urlQ = new URLSearchParams(location.search).get("q");
-  if (urlQ && input) { input.value = urlQ; state.q = urlQ; runSearch(); }
+  if (urlQ && input) { input.value = urlQ; state.q = urlQ; }
   if (!urlQ) loadPopularWords();
 }
 
@@ -724,9 +960,11 @@ function buildFacetGroup(title, entries, fieldKey) {
   const group = el("div", { className: "facet-group" });
   group.appendChild(el("h3", { text: title }));
   entries.forEach(entry => {
-    const item = el("div", { className: "facet-item" });
     const active = (state.facets[fieldKey] || []).includes(entry.value);
-    if (active) item.classList.add("active");
+    const item = el("button", {
+      className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
+      attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
+    });
     item.appendChild(el("span", { text: entry.labelText }));
     if (entry.count != null) {
       item.appendChild(el("span", { className: "badge bg-secondary", text: String(entry.count) }));
@@ -756,8 +994,11 @@ function buildRangeFacetGroup(title, ranges, stateKey) {
   const group = el("div", { className: "facet-group" });
   group.appendChild(el("h3", { text: title }));
   ranges.forEach(range => {
-    const item = el("div", { className: "facet-item" });
-    if (state[stateKey] === range.key) item.classList.add("active");
+    const active = state[stateKey] === range.key;
+    const item = el("button", {
+      className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
+      attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
+    });
     item.appendChild(el("span", { text: t(range.labelKey) }));
     item.addEventListener("click", () => {
       state[stateKey] = state[stateKey] === range.key ? "" : range.key;
@@ -792,9 +1033,11 @@ function buildFiletypeFacetGroup(env) {
     // skip if API returned counts for this field but this value has zero results
     if (ftField && countMap[ftValue] == null) return;
 
-    const item = el("div", { className: "facet-item" });
-    if (selected.includes(ftValue)) item.classList.add("active");
-
+    const active = selected.includes(ftValue);
+    const item = el("button", {
+      className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
+      attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
+    });
     item.appendChild(el("span", { text: t("labels.facet_filetype_" + ftValue) }));
     if (countMap[ftValue] != null) {
       item.appendChild(el("span", { className: "badge bg-secondary", text: String(countMap[ftValue]) }));
@@ -821,7 +1064,7 @@ function renderFacets(env, labels) {
   // 1. Label facet (from /labels endpoint)
   if (labels.length > 0) {
     const entries = labels.map(l => ({ labelText: l.label, value: l.value }));
-    body.appendChild(buildFacetGroup(t("facet.title"), entries, "label"));
+    body.appendChild(buildFacetGroup(t("labels.facet_label_title"), entries, "label"));
   }
 
   // 2. Dynamic facet fields from API (excluding filetype — handled separately below)
@@ -1051,7 +1294,7 @@ async function loadRelated(q, signal) {
   }
   try {
     const [qEnv, cEnv] = await Promise.all([
-      api.get("/related-query", { q }, { signal }),
+      api.get("/related-queries", { q }, { signal }),
       api.get("/related-content", { q }, { signal })
     ]);
     renderRelatedQueries(qEnv.queries || []);
@@ -1095,11 +1338,13 @@ function renderPagination(env) {
   const nav = document.getElementById("pagination-nav");
   const ul = document.getElementById("pagination");
   ul.innerHTML = "";
-  if (!env.record_count || env.record_count <= state.num) { nav.classList.add("d-none"); return; }
+  // C.6: use prev_page / next_page flags — handles estimated counts correctly
+  if (!env.prev_page && !env.next_page) { nav.classList.add("d-none"); return; }
   nav.classList.remove("d-none");
 
   const buildPageItem = (label, opts) => {
-    const li = el("li", { className: "page-item" + (opts.disabled ? " disabled" : "") + (opts.active ? " active" : "") });
+    const extraClass = opts.extraClass ? " " + opts.extraClass : "";
+    const li = el("li", { className: "page-item" + (opts.disabled ? " disabled" : "") + (opts.active ? " active" : "") + extraClass });
     const btn = el("button", { className: "page-link", text: label, attrs: { type: "button" } });
     if (opts.onClick) btn.addEventListener("click", opts.onClick);
     li.appendChild(btn);
@@ -1111,8 +1356,11 @@ function renderPagination(env) {
     onClick: () => { if (env.prev_page) { state.start = Math.max(0, state.start - state.num); runSearch(); } }
   }));
   (env.page_numbers || []).forEach(n => {
+    // C.6: hide page numbers more than 2 away from current on small screens
+    const isFar = Math.abs(n - env.page_number) > 2;
     ul.appendChild(buildPageItem(String(n), {
       active: n === env.page_number,
+      extraClass: isFar ? "d-none d-sm-inline-block" : "",
       onClick: () => { state.start = (n - 1) * state.num; runSearch(); }
     }));
   });
@@ -1167,4 +1415,4 @@ async function toggleFavorite(docId, btn) {
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
 export const _state = state;
-export { runSearch, el, buildResultCard, buildGoUrl, refresh, renderSearchOptions };
+export { runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs };

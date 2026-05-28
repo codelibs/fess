@@ -1,6 +1,16 @@
 import * as api from "./api.js";
 import { t } from "./i18n.js";
 
+/**
+ * Returns true when the login link should be shown.
+ * The `login_link` feature flag (from /api/v2/ui/config) can be false to
+ * hide login UI entirely. Defaults to true when missing.
+ */
+function isLoginLinkEnabled() {
+  const features = api.getConfig()?.features || {};
+  return features.login_link !== false;
+}
+
 export async function probeMe() {
   try {
     const env = await api.get("/auth/me");
@@ -121,14 +131,12 @@ function setLoggedIn(user) {
   const controls = document.getElementById("auth-controls");
   if (!controls) return;
 
-  // Remove previous dynamic content (chip, old logout/login buttons),
+  // Remove previous dynamic content (old logout/login buttons),
   // leave the static login button as a reference point.
   const loginBtn = document.getElementById("login-btn");
   const logoutBtn = document.getElementById("logout-btn");
-  const chip = document.getElementById("user-chip");
   const existingDropdown = document.getElementById("user-dropdown");
 
-  if (chip) chip.classList.add("d-none");
   if (logoutBtn) logoutBtn.classList.add("d-none");
   if (loginBtn) loginBtn.classList.add("d-none");
   if (existingDropdown) existingDropdown.remove();
@@ -156,14 +164,19 @@ function setLoggedIn(user) {
 }
 
 function setLoggedOut() {
-  const chip = document.getElementById("user-chip");
   const loginBtn = document.getElementById("login-btn");
   const logoutBtn = document.getElementById("logout-btn");
   const existingDropdown = document.getElementById("user-dropdown");
 
-  if (chip) { chip.textContent = ""; chip.classList.add("d-none"); }
   if (logoutBtn) logoutBtn.classList.add("d-none");
-  if (loginBtn) loginBtn.classList.remove("d-none");
+  // Only show the login button when login_link feature is enabled (D.3).
+  if (loginBtn) {
+    if (isLoginLinkEnabled()) {
+      loginBtn.classList.remove("d-none");
+    } else {
+      loginBtn.classList.add("d-none");
+    }
+  }
   if (existingDropdown) existingDropdown.remove();
 }
 
@@ -193,6 +206,13 @@ async function rotateCsrf(logoutEnv) {
 }
 
 export function attach() {
+  // D.3: If login_link feature is disabled, immediately hide the login button
+  // so it never flashes visible before probeMe() settles.
+  if (!isLoginLinkEnabled()) {
+    const loginBtn = document.getElementById("login-btn");
+    if (loginBtn) loginBtn.classList.add("d-none");
+  }
+
   const form = document.getElementById("login-form");
   const err = document.getElementById("login-error");
   if (form) {

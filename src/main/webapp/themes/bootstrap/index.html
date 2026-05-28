@@ -2,7 +2,7 @@
 <html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fess</title>
@@ -14,11 +14,13 @@
         title="Fess" href="/osdd">
 </head>
 <body>
+  <a href="#page-root" class="visually-hidden-focusable position-absolute top-0 start-0 m-2" data-i18n="aria.skip_to_main">Skip to main content</a>
   <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. -->
   <h1 class="visually-hidden" data-i18n="page.heading">Fess Search</h1>
   <header class="navbar navbar-expand-lg bg-body-tertiary border-bottom" role="banner">
     <div class="container-fluid">
-      <a class="navbar-brand fw-semibold" href="/" id="brand-link">Fess</a>
+      <a class="navbar-brand fw-semibold d-flex align-items-center" href="/" id="brand-link"><img src="/images/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="brand-logo"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
       <form class="d-flex flex-grow-1 mx-3 position-relative" id="search-form" role="search" aria-label="Site search">
         <input
             id="search-input"
@@ -36,16 +38,18 @@
         <button class="btn btn-primary ms-2" type="submit" id="search-submit" data-i18n="search.button">Search</button>
         <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions"></ul>
       </form>
-      <nav class="d-flex align-items-center me-2" aria-label="Site navigation">
-        <a class="nav-link px-2" href="/advance" data-spa data-i18n="advance.link">Advanced</a>
-        <a class="nav-link px-2" href="/help" data-spa data-i18n="nav.help">Help</a>
-      </nav>
-      <!-- Warning indicators: EOL and development mode icons rendered by app.js -->
-      <div id="warning-indicators" class="d-flex align-items-center" aria-live="polite"></div>
-      <div class="d-flex align-items-center gap-2" id="auth-controls">
-        <span class="navbar-text d-none" id="user-chip" aria-live="polite"></span>
-        <button class="btn btn-outline-secondary btn-sm d-none" type="button" id="logout-btn" data-i18n="auth.logout">Logout</button>
-        <button class="btn btn-outline-primary btn-sm" type="button" id="login-btn" data-bs-toggle="modal" data-bs-target="#login-modal" data-i18n="auth.login">Login</button>
+      <div class="collapse navbar-collapse" id="main-nav">
+        <nav class="d-flex align-items-center me-2" aria-label="Site navigation">
+          <a class="nav-link px-2" href="/advance" data-spa data-i18n="advance.link">Advanced</a>
+          <a class="nav-link px-2 d-none" href="/chat" id="chat-nav-link" data-spa data-i18n="nav.chat">Chat</a>
+          <a class="nav-link px-2" href="/help" data-spa data-i18n="nav.help">Help</a>
+        </nav>
+        <!-- Warning indicators: EOL and development mode icons rendered by app.js -->
+        <div id="warning-indicators" class="d-flex align-items-center" aria-live="polite" data-i18n-aria-label="aria.warning_indicators"></div>
+        <div class="d-flex align-items-center gap-2" id="auth-controls" data-i18n-aria-label="aria.auth_controls">
+          <button class="btn btn-outline-secondary btn-sm d-none" type="button" id="logout-btn" data-i18n="auth.logout">Logout</button>
+          <button class="btn btn-outline-primary btn-sm" type="button" id="login-btn" data-bs-toggle="modal" data-bs-target="#login-modal" data-i18n="auth.login">Login</button>
+        </div>
       </div>
     </div>
   </header>
@@ -59,8 +63,7 @@
       <div class="text-center">
         <h2 class="display-4 mb-4">Fess</h2>
         <form id="home-search-form" class="d-flex justify-content-center mb-4" role="search" aria-label="Home search">
-          <input id="home-search-input" type="search" class="form-control form-control-lg"
-                 style="max-width: 600px;"
+          <input id="home-search-input" type="search" class="form-control form-control-lg home-search-input"
                  data-i18n-placeholder="search.placeholder"
                  aria-label="Search query">
           <button type="submit" class="btn btn-primary btn-lg ms-2"
@@ -91,13 +94,16 @@
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
           </div>
+          <p id="results-status" class="text-muted small mb-2" aria-live="polite" aria-atomic="true"></p>
+          <div id="similar-doc-banner" class="alert alert-info d-none align-items-center mb-2" role="status" aria-live="polite"></div>
+          <ul id="current-filters" class="list-inline mb-2"></ul>
           <div id="search-options" class="d-flex gap-2 flex-wrap align-items-center mb-3">
             <label class="form-label me-1 mb-0 small" for="sort-select" data-i18n="search.sort">Sort</label>
-            <select id="sort-select" class="form-select form-select-sm" style="width: auto;" aria-label="Sort order"></select>
+            <select id="sort-select" class="form-select form-select-sm options-select" aria-label="Sort order"></select>
             <label class="form-label me-1 mb-0 small" for="num-select" data-i18n="search.num">Per page</label>
-            <select id="num-select" class="form-select form-select-sm" style="width: auto;" aria-label="Results per page"></select>
+            <select id="num-select" class="form-select form-select-sm options-select" aria-label="Results per page"></select>
             <label class="form-label me-1 mb-0 small" for="lang-select" data-i18n="search.lang">Language</label>
-            <select id="lang-select" class="form-select form-select-sm" style="width: auto;" aria-label="Language filter"></select>
+            <select id="lang-select" class="form-select form-select-sm options-select" aria-label="Language filter"></select>
             <div class="dropdown" id="label-dropdown-wrap">
               <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="label-dropdown-btn"
                 data-bs-toggle="dropdown" aria-expanded="false" data-i18n="search.labels">Labels</button>
@@ -107,6 +113,7 @@
           <div class="d-none mb-2" id="related-queries" aria-live="polite" aria-label="Related searches"></div>
           <div class="d-none mb-2" id="related-content" aria-live="polite"></div>
           <div class="d-none mb-2" id="active-chips" aria-live="polite" aria-atomic="true" aria-label="Active filters"></div>
+          <div id="results-warning" class="alert alert-warning d-none mb-2" role="status" aria-live="polite"></div>
           <ol class="list-unstyled" id="results" role="list"></ol>
           <nav aria-label="Pagination" class="d-none" id="pagination-nav">
             <ul class="pagination" id="pagination"></ul>
@@ -129,16 +136,17 @@
     <section id="error-view" hidden class="container my-4"></section>
     <section id="profile-view" hidden class="container my-4"></section>
     <section id="help-view" hidden class="container my-4"></section>
+    <section id="chat-view" hidden class="container-fluid my-3"></section>
+    <section id="cache-view" hidden class="container my-3"></section>
   </main>
 
-  <footer class="container-fluid py-3 border-top text-center text-muted small">
-    <small data-i18n="footer.copyright">Powered by Fess</small>
+  <footer class="container-fluid py-3 border-top text-center text-muted small" role="contentinfo" data-i18n-aria-label="aria.footer">
+    <small id="footer-copyright"></small>
   </footer>
 
   <!-- Back to top button -->
   <button id="back-to-top"
-          class="btn btn-secondary position-fixed"
-          style="bottom: 1.5rem; right: 1.5rem; display: none; z-index: 1050;"
+          class="btn btn-secondary position-fixed back-to-top is-hidden"
           aria-label="Back to top"
           data-i18n-aria-label="footer.back_to_top">
     <i class="fa fa-arrow-up" aria-hidden="true"></i>

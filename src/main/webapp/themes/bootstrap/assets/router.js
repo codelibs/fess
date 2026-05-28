@@ -34,9 +34,14 @@ export function navigate(path, opts = {}) {
 /**
  * Inspect location.pathname and run the first matching route handler.
  * If no route matches, the last registered route (fallback) is used when present.
+ * Trailing slashes are normalised away before predicate evaluation so that
+ * "/search/" and "/search" both match the same route.
  */
 export function dispatch() {
-  const path = location.pathname;
+  // A.7: strip trailing slashes; fall back to "/" when the pathname is empty.
+  const path = (location.pathname.replace(/\/+$/, "") || "/");
+  // A.9: notify modules of the route change before running any handler.
+  document.dispatchEvent(new CustomEvent("fess:route:change", { detail: { path } }));
   for (const route of routes) {
     if (route.predicate(path)) {
       route.handler(path);

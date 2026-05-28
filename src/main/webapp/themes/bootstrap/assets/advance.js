@@ -42,9 +42,10 @@ function makeField(labelKey, inputId, type = "text") {
  * @param {string} labelKey    - i18n key for the label text
  * @param {string} selectId    - id attribute for the select element
  * @param {Array<{value:string, label:string}>} options
+ * @param {boolean} [multiple] - whether the select is multi-select
  * @returns {{ wrap: HTMLDivElement, input: HTMLSelectElement }}
  */
-function makeSelect(labelKey, selectId, options) {
+function makeSelect(labelKey, selectId, options, multiple = false) {
   const wrap = document.createElement("div");
   wrap.className = "mb-3";
 
@@ -56,6 +57,10 @@ function makeSelect(labelKey, selectId, options) {
   const select = document.createElement("select");
   select.id = selectId;
   select.className = "form-select";
+  if (multiple) {
+    select.multiple = true;
+    select.size = 4;
+  }
 
   for (const o of options) {
     const opt = document.createElement("option");
@@ -92,10 +97,45 @@ function quoteIfNeeded(s) {
 }
 
 /**
+ * Tokenize a string, treating "quoted phrases" as single tokens.
+ * Unquoted whitespace-separated words are individual tokens.
+ *
+ * @param {string} s
+ * @returns {string[]}
+ */
+function tokenize(s) {
+  const tokens = [];
+  const str = s.trim();
+  let i = 0;
+  while (i < str.length) {
+    // Skip whitespace
+    while (i < str.length && /\s/.test(str[i])) i++;
+    if (i >= str.length) break;
+
+    if (str[i] === '"') {
+      // Quoted token: consume until closing quote or end
+      let j = i + 1;
+      while (j < str.length && str[j] !== '"') j++;
+      // Include the closing quote if present
+      if (j < str.length) j++;
+      tokens.push(str.slice(i, j));
+      i = j;
+    } else {
+      // Unquoted word: consume until whitespace
+      let j = i;
+      while (j < str.length && !/\s/.test(str[j])) j++;
+      tokens.push(str.slice(i, j));
+      i = j;
+    }
+  }
+  return tokens;
+}
+
+/**
  * Compose a Fess/OpenSearch query string from individual advanced-search parts.
  *
  * @param {{ all?:string, exact?:string, any?:string, none?:string,
- *            site?:string, filetype?:string }} parts
+ *            site?:string, filetype?:string, occt?:string }} parts
  * @returns {string}
  */
 function compose(parts) {
@@ -121,8 +161,9 @@ function compose(parts) {
   }
 
   if (parts.none) {
-    const words = parts.none.trim().split(/\s+/).filter(Boolean);
-    out.push(...words.map(w => "-" + w));
+    // F.4: use quote-aware tokenizer so "foo bar" becomes -"foo bar"
+    const tokens = tokenize(parts.none);
+    out.push(...tokens.filter(Boolean).map(w => "-" + w));
   }
 
   if (parts.site) {
@@ -135,7 +176,16 @@ function compose(parts) {
     if (ft) out.push("filetype:" + ft);
   }
 
-  return out.filter(Boolean).join(" ");
+  let q = out.filter(Boolean).join(" ");
+
+  // F.3: prepend allintitle: or allinurl: prefix when occt is selected
+  if (parts.occt === "allintitle" && q) {
+    q = "allintitle:" + q;
+  } else if (parts.occt === "allinurl" && q) {
+    q = "allinurl:" + q;
+  }
+
+  return q;
 }
 
 // ---------------------------------------------------------------------------
@@ -222,8 +272,10 @@ export function attach() {
   }));
   const fFiletype = makeSelect("advance.filetype", "adv-filetype", filetypeOpts);
 
-  // Language select — built from server config when available
+  // Server config
   const serverConfig = getConfig() || {};
+
+  // F.2: Language multi-select — built from server config when available
   const langOpts = [{ value: "", label: t("labels.searchoptions_all_langs") }];
   for (const lo of (serverConfig.lang_options || [])) {
     const langLabel =
@@ -235,12 +287,78 @@ export function attach() {
       label: langLabel,
     });
   }
-  const fLang = makeSelect("advance.lang", "adv-lang", langOpts);
+  const fLang = makeSelect("advance.lang", "adv-lang", langOpts, true /* multiple */);
+
+  // F.2: Label checkbox group — shown only when label_options is non-empty
+  const labelOptions = serverConfig.label_options || [];
+  let fLabelWrap = null;
+  const labelCheckboxes = [];
+  if (labelOptions.length > 0) {
+    fLabelWrap = document.createElement("div");
+    fLabelWrap.className = "mb-3";
+
+    const labelHeading = document.createElement("label");
+    labelHeading.className = "form-label";
+    labelHeading.textContent = t("labels.advance_search_label");
+    fLabelWrap.appendChild(labelHeading);
+
+    for (const lo of labelOptions) {
+      const checkWrap = document.createElement("div");
+      checkWrap.className = "form-check";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = "adv-label-" + lo.value;
+      cb.value = lo.value != null ? lo.value : "";
+      cb.className = "form-check-input";
+      labelCheckboxes.push(cb);
+
+      const cbLabel = document.createElement("label");
+      cbLabel.htmlFor = cb.id;
+      cbLabel.className = "form-check-label";
+      cbLabel.textContent = lo.label || lo.value || "";
+
+      checkWrap.append(cb, cbLabel);
+      fLabelWrap.appendChild(checkWrap);
+    }
+  }
+
+  // F.3: Occurrence (search in) select
+  const occtOpts = [
+    { value: "",           label: t("labels.advance_search_occt_default") },
+    { value: "allintitle", label: t("labels.advance_search_occt_title") },
+    { value: "allinurl",   label: t("labels.advance_search_occt_url") },
+  ];
+  const fOcct = makeSelect("labels.advance_search_occt", "adv-occt", occtOpts);
 
   // Time range select
   const timeOpts = TIME_RANGES.map(r => ({ value: r.value, label: t(r.labelKey) }));
   const fTime = makeSelect("advance.time", "adv-time", timeOpts);
 
+  // F.1: num select — built from server config num_options
+  const numNums = serverConfig.num_options && serverConfig.num_options.length > 0
+    ? serverConfig.num_options
+    : [10, 20, 50, 100];
+  const numOpts = [
+    { value: "", label: t("labels.advance_search_num") },
+    ...numNums.map(n => ({ value: String(n), label: String(n) })),
+  ];
+  const fNum = makeSelect("labels.advance_search_num", "adv-num", numOpts);
+
+  // F.1: sort select — built from server config sort_options
+  const sortOptsRaw = serverConfig.sort_options && serverConfig.sort_options.length > 0
+    ? serverConfig.sort_options
+    : [];
+  const sortOpts = [
+    { value: "", label: t("labels.advance_search_sort_default") },
+    ...sortOptsRaw.map(o => ({
+      value: o.value != null ? o.value : "",
+      label: t(o.label_key || o.value || ""),
+    })),
+  ];
+  const fSort = makeSelect("labels.advance_search_sort", "adv-sort", sortOpts);
+
+  // Append all fields before the submit button
   form.append(
     fAll.wrap,
     fExact.wrap,
@@ -248,8 +366,14 @@ export function attach() {
     fNone.wrap,
     fSite.wrap,
     fFiletype.wrap,
+    fOcct.wrap,
     fLang.wrap,
+  );
+  if (fLabelWrap) form.appendChild(fLabelWrap);
+  form.append(
     fTime.wrap,
+    fNum.wrap,
+    fSort.wrap,
   );
 
   // Submit button
@@ -272,18 +396,38 @@ export function attach() {
       none:     fNone.input.value,
       site:     fSite.input.value,
       filetype: fFiletype.input.value,
+      occt:     fOcct.input.value,
     });
 
     const params = new URLSearchParams();
     if (q) params.set("q", q);
 
-    const lang = fLang.input.value;
-    if (lang) params.set("fields.lang", lang);
+    // F.2: collect all selected lang options (multi-select → repeated params)
+    const selectedLangs = Array.from(fLang.input.selectedOptions)
+      .map(o => o.value)
+      .filter(v => v !== "");
+    for (const lang of selectedLangs) {
+      params.append("lang", lang);
+    }
+
+    // F.2: collect all checked label checkboxes (repeated params)
+    for (const cb of labelCheckboxes) {
+      if (cb.checked && cb.value) {
+        params.append("fields.label", cb.value);
+      }
+    }
 
     const time = fTime.input.value;
     if (time && TIME_RANGE_QUERY[time]) {
       params.set("ex_q", TIME_RANGE_QUERY[time]);
     }
+
+    // F.1: num and sort
+    const numVal = fNum.input.value;
+    if (numVal) params.set("num", numVal);
+
+    const sortVal = fSort.input.value;
+    if (sortVal) params.set("sort", sortVal);
 
     navigate("/search?" + params.toString());
   });
