@@ -18,15 +18,18 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.FacetResponse;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -161,6 +164,142 @@ public class SearchHandlerTest extends UnitFessTestCase {
             fail("malformed geo point must raise InvalidQueryException");
         } catch (final InvalidQueryException expected) {
             // expected: malformed lat,lon string triggers InvalidQueryException
+        }
+    }
+
+    // ===== Task A3: facet response shape (Phase B dependency) =====
+
+    /**
+     * buildFacetField must emit {@code [{name, result:[{value, count}]}]}.
+     * This shape is a Phase B dependency: the SPA facet renderer reads it verbatim.
+     *
+     * <p>FacetResponse.Field only has a Terms-based constructor, so TestFacetField
+     * subclasses it and overrides getName()/getValueCountMap() while bypassing the
+     * constructor body via a minimal stub Terms implementation.</p>
+     */
+    @Test
+    public void test_buildFacetField_shape() {
+        final TestFacetField field = new TestFacetField("label");
+        field.overrideName = "label";
+        field.overrideValueCountMap.put("label1", 42L);
+
+        final TestFacetResponse fr = new TestFacetResponse();
+        fr.addField(field);
+
+        final List<Map<String, Object>> out = new SearchHandler().buildFacetField(fr);
+        assertEquals(1, out.size());
+        assertEquals("label", out.get(0).get("name"));
+        @SuppressWarnings("unchecked")
+        final List<Map<?, ?>> result = (List<Map<?, ?>>) out.get(0).get("result");
+        assertEquals(1, result.size());
+        assertEquals("label1", result.get(0).get("value"));
+        assertEquals(42L, result.get(0).get("count"));
+    }
+
+    /**
+     * buildFacetQuery must emit {@code [{value, count}]}.
+     * This shape is a Phase B dependency: the SPA facet renderer reads it verbatim.
+     */
+    @Test
+    public void test_buildFacetQuery_shape() {
+        final TestFacetResponse fr = new TestFacetResponse();
+        fr.addQuery("filetype:pdf", 17L);
+
+        final List<Map<String, Object>> out = new SearchHandler().buildFacetQuery(fr);
+        assertEquals(1, out.size());
+        assertEquals("filetype:pdf", out.get(0).get("value"));
+        assertEquals(17L, out.get(0).get("count"));
+    }
+
+    /**
+     * Test-only FacetResponse subclass: passes {@code null} Aggregations (→ no-op
+     * forEach in parent) and exposes the inherited protected fields directly so tests
+     * can populate them without going through OpenSearch aggregation objects.
+     */
+    private static class TestFacetResponse extends FacetResponse {
+        TestFacetResponse() {
+            super(null); // null Aggregations → forEach is skipped
+            // fieldList and queryCountMap are inherited protected fields; clear and reuse.
+            this.fieldList.clear();
+            this.queryCountMap.clear();
+        }
+
+        void addField(final FacetResponse.Field f) {
+            this.fieldList.add(f);
+        }
+
+        void addQuery(final String query, final long count) {
+            this.queryCountMap.put(query, count);
+        }
+    }
+
+    /**
+     * Test-only FacetResponse.Field: subclasses Field to override getName() and
+     * getValueCountMap(). The parent constructor needs a valid Terms object; we
+     * supply a minimal anonymous stub that returns a base64-encoded placeholder name
+     * and an empty bucket list so the parent constructor body completes without error.
+     * Tests then set the public override fields before calling buildFacetField.
+     */
+    private static class TestFacetField extends FacetResponse.Field {
+        String overrideName;
+        final Map<String, Long> overrideValueCountMap = new LinkedHashMap<>();
+
+        TestFacetField(final String label) {
+            // Feed a stub Terms whose getName() returns "field:" + base64(label) so the
+            // parent constructor decodes it without error; getBuckets() returns empty so
+            // valueCountMap starts empty. Tests set overrideValueCountMap afterward.
+            super(new org.opensearch.search.aggregations.bucket.terms.Terms() {
+                @Override
+                public String getName() {
+                    return "field:" + java.util.Base64.getEncoder().encodeToString(label.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                }
+
+                @Override
+                public java.util.List<? extends org.opensearch.search.aggregations.bucket.terms.Terms.Bucket> getBuckets() {
+                    return java.util.Collections.emptyList();
+                }
+
+                @Override
+                public org.opensearch.search.aggregations.bucket.terms.Terms.Bucket getBucketByKey(final String term) {
+                    return null;
+                }
+
+                @Override
+                public long getDocCountError() {
+                    return 0;
+                }
+
+                @Override
+                public long getSumOfOtherDocCounts() {
+                    return 0;
+                }
+
+                @Override
+                public org.opensearch.core.xcontent.XContentBuilder toXContent(final org.opensearch.core.xcontent.XContentBuilder builder,
+                        final org.opensearch.core.xcontent.ToXContent.Params params) throws java.io.IOException {
+                    return builder;
+                }
+
+                @Override
+                public java.util.Map<String, Object> getMetadata() {
+                    return java.util.Collections.emptyMap();
+                }
+
+                @Override
+                public String getType() {
+                    return "terms";
+                }
+            });
+        }
+
+        @Override
+        public String getName() {
+            return overrideName != null ? overrideName : super.getName();
+        }
+
+        @Override
+        public Map<String, Long> getValueCountMap() {
+            return overrideValueCountMap.isEmpty() ? super.getValueCountMap() : overrideValueCountMap;
         }
     }
 

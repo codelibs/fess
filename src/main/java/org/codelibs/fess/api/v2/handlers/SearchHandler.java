@@ -198,10 +198,13 @@ public class SearchHandler {
      * Builds the {@code facet_field} array — one entry per facet field with the
      * field name and the value/count pairs nested inside a {@code result} array.
      *
+     * <p>Package-private to allow shape assertions in {@code SearchHandlerTest}
+     * (Phase B dependency: the SPA facet renderer must not diverge from this contract).</p>
+     *
      * @param facetResponse the populated facet response (never {@code null})
      * @return a list of {@code {name, result:[{value, count}]}} maps
      */
-    private List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse) {
+    List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse) {
         final List<Field> fields = facetResponse.getFieldList();
         if (fields == null || fields.isEmpty()) {
             return new ArrayList<>(0);
@@ -227,10 +230,13 @@ public class SearchHandler {
      * Builds the {@code facet_query} array — a flat list of value/count pairs
      * for each configured facet query.
      *
+     * <p>Package-private to allow shape assertions in {@code SearchHandlerTest}
+     * (Phase B dependency: the SPA facet renderer must not diverge from this contract).</p>
+     *
      * @param facetResponse the populated facet response (never {@code null})
      * @return a list of {@code {value, count}} maps
      */
-    private List<Map<String, Object>> buildFacetQuery(final FacetResponse facetResponse) {
+    List<Map<String, Object>> buildFacetQuery(final FacetResponse facetResponse) {
         final Map<String, Long> qc = facetResponse.getQueryCountMap();
         if (qc == null || qc.isEmpty()) {
             return new ArrayList<>(0);
