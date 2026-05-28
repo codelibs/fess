@@ -54,5 +54,13 @@
   "error.body_503": "サーバーが混雑しています。しばらくしてからもう一度お試しください。",
   "error.requested_url": "要求された URL",
   "error.go_home": "トップに戻る",
-  "error.contact_admin": "問題が解決しない場合は管理者にお問い合わせください。"
+  "error.contact_admin": "問題が解決しない場合は管理者にお問い合わせください。",
+  "profile.title": "設定",
+  "profile.old_password": "現在のパスワード",
+  "profile.new_password": "新しいパスワード",
+  "profile.confirm_password": "新しいパスワード（確認）",
+  "profile.update": "更新",
+  "profile.success": "パスワードを更新しました。",
+  "profile.error_mismatch": "新しいパスワードと確認用パスワードが一致しません。",
+  "profile.back": "検索に戻る"
 }

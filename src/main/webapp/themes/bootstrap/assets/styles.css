@@ -26,3 +26,4 @@
 .error-body { color: var(--bs-secondary-color, #6c757d); }
 .error-detail { background: #f8f9fa; padding: 0.75rem 1rem; border-left: 3px solid #adb5bd; }
 .error-actions { margin: 1.5rem 0; }
+#profile-view form { max-width: 480px; }

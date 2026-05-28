@@ -54,5 +54,13 @@
   "error.body_503": "The server is currently busy. Please try again later.",
   "error.requested_url": "Requested URL",
   "error.go_home": "Go to top page",
-  "error.contact_admin": "Please contact your site administrator if this problem persists."
+  "error.contact_admin": "Please contact your site administrator if this problem persists.",
+  "profile.title": "Settings",
+  "profile.old_password": "Current password",
+  "profile.new_password": "New password",
+  "profile.confirm_password": "Confirm new password",
+  "profile.update": "Update",
+  "profile.success": "Your password has been updated successfully.",
+  "profile.error_mismatch": "New password and confirmation do not match.",
+  "profile.back": "Back to search"
 }

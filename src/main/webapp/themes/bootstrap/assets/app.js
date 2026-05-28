@@ -5,6 +5,7 @@ import * as search from "./search.js";
 import * as chat from "./chat.js";
 import * as router from "./router.js";
 import * as errorView from "./error.js";
+import * as profile from "./profile.js";
 
 /** Show one SPA view section and hide the rest. */
 function showView(id) {
@@ -43,12 +44,13 @@ function registerRoutes() {
     }
   );
 
-  // Profile view placeholder.
+  // Profile view — password change.
   router.register(
     path => path === "/profile",
     () => {
       setSearchFormVisible(false);
       showView("profile-view");
+      profile.attach();
     }
   );
 
