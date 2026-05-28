@@ -130,5 +130,19 @@
   "nav.eol_warning": "このプロダクトはサポート終了しています",
   "nav.dev_mode_warning": "開発モードで動作中",
   "footer.copyright": "Powered by Fess",
-  "footer.back_to_top": "トップに戻る"
+  "footer.back_to_top": "トップに戻る",
+  "advance.title": "高度な検索",
+  "advance.intro": "より詳細な検索条件を指定できます。",
+  "advance.all": "すべての単語を含む",
+  "advance.exact": "完全に一致する単語またはフレーズ",
+  "advance.any": "いずれかの単語を含む",
+  "advance.none": "除外する単語",
+  "advance.site": "サイトまたはドメイン",
+  "advance.filetype": "ファイル種別",
+  "advance.lang": "言語",
+  "advance.time": "時間範囲",
+  "advance.submit": "検索",
+  "advance.link": "詳細検索",
+  "advance.any_filetype": "すべての種別",
+  "facet.any_time": "すべての期間"
 }

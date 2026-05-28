@@ -8,10 +8,11 @@ import * as router from "./router.js";
 import * as errorView from "./error.js";
 import * as profile from "./profile.js";
 import * as help from "./help.js";
+import * as advance from "./advance.js";
 
 /** Show one SPA view section and hide the rest. */
 function showView(id) {
-  const viewIds = ["home-view", "results-view", "error-view", "profile-view", "help-view"];
+  const viewIds = ["home-view", "results-view", "advance-view", "error-view", "profile-view", "help-view"];
   for (const vid of viewIds) {
     const el = document.getElementById(vid);
     if (!el) continue;
@@ -169,6 +170,16 @@ function registerRoutes() {
       setSearchFormVisible(false);
       showView("profile-view");
       profile.attach();
+    }
+  );
+
+  // Advanced search view.
+  router.register(
+    path => path === "/advance",
+    () => {
+      setSearchFormVisible(false);
+      showView("advance-view");
+      advance.attach();
     }
   );
 

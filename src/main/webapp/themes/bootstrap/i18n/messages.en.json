@@ -130,5 +130,19 @@
   "nav.eol_warning": "This product has reached end-of-life",
   "nav.dev_mode_warning": "Development mode active",
   "footer.copyright": "Powered by Fess",
-  "footer.back_to_top": "Back to top"
+  "footer.back_to_top": "Back to top",
+  "advance.title": "Advanced Search",
+  "advance.intro": "Build a more specific search query.",
+  "advance.all": "All these words",
+  "advance.exact": "This exact word or phrase",
+  "advance.any": "Any of these words",
+  "advance.none": "None of these words",
+  "advance.site": "Site or domain",
+  "advance.filetype": "File type",
+  "advance.lang": "Language",
+  "advance.time": "Time period",
+  "advance.submit": "Search",
+  "advance.link": "Advanced",
+  "advance.any_filetype": "Any file type",
+  "facet.any_time": "Any time"
 }

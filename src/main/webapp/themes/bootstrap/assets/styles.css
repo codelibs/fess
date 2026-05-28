@@ -43,3 +43,5 @@
 .help-section { margin-bottom: 2rem; }
 .help-section h2 { border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; }
 .help-section code { background: #f8f9fa; padding: 0.125rem 0.25rem; border-radius: 3px; }
+#advance-view form { max-width: 640px; }
+.advance-form .form-label { font-weight: 500; }
