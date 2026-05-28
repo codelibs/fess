@@ -338,9 +338,9 @@ public class AdminThemeAction extends FessAdminAction {
     }
 
     /**
-     * Sets the default theme by writing to the {@link ThemeRegistry#SYSPROP_DEFAULT_THEME}
-     * system property. An empty value clears the default. The registry is
-     * reloaded synchronously so the new default takes effect immediately.
+     * Sets the default theme by writing it through {@link FessConfig#setDefaultTheme(String)}.
+     * An empty value clears the default. The registry is reloaded synchronously
+     * so the new default takes effect immediately.
      *
      * @param form the list form carrying the selected default theme name
      * @return redirect to the theme index
@@ -352,13 +352,13 @@ public class AdminThemeAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asListHtml(form));
         final String name = form.defaultTheme == null ? "" : form.defaultTheme.trim();
         if (!name.isEmpty()) {
-            // existence check — refuse to point theme.default at a missing theme
+            // existence check — refuse to point the default theme at a missing theme
             if (themeRegistry.getTheme(name).isEmpty()) {
                 throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, name), () -> asListHtml(form));
             }
         }
         try {
-            ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, name);
+            ComponentUtil.getFessConfig().setDefaultTheme(name);
             themeRegistry.reload(); // re-resolve in case the new default needs to take effect immediately
             if (name.isEmpty()) {
                 saveInfo(m -> m.addSuccessClearDefaultTheme(GLOBAL));
@@ -385,7 +385,7 @@ public class AdminThemeAction extends FessAdminAction {
     }
 
     private String currentDefault() {
-        return ComponentUtil.getFessConfig().getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+        return ComponentUtil.getFessConfig().getDefaultTheme();
     }
 
     /**

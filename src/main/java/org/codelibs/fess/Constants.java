@@ -223,6 +223,9 @@ public class Constants extends CoreLibConstants {
     /** Property key for virtual host value configuration. */
     public static final String VIRTUAL_HOST_VALUE_PROPERTY = "virtual.host.value";
 
+    /** Property key for the global default theme name. */
+    public static final String DEFAULT_THEME_PROPERTY = "theme.default";
+
     /** Property key for login requirement configuration. */
     public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
 

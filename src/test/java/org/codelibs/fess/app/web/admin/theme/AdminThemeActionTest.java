@@ -71,25 +71,25 @@ public class AdminThemeActionTest extends UnitFessTestCase {
 
     @Test
     public void test_setdefaultWritesSystemPropertyWithValidName() {
-        ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+        ComponentUtil.getFessConfig().setDefaultTheme("");
         final ThemeListForm f = new ThemeListForm();
         f.defaultTheme = "bootstrap";
         // direct unit: simulate the action's body
         if (!f.defaultTheme.isEmpty() && f.defaultTheme.matches("^[a-z0-9][a-z0-9_-]{0,63}$")) {
-            ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, f.defaultTheme);
+            ComponentUtil.getFessConfig().setDefaultTheme(f.defaultTheme);
         }
-        assertEquals("bootstrap", ComponentUtil.getFessConfig().getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, ""));
+        assertEquals("bootstrap", ComponentUtil.getFessConfig().getDefaultTheme());
     }
 
     @Test
     public void test_setdefaultClearsSystemPropertyWhenEmpty() {
-        ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "bootstrap");
+        ComponentUtil.getFessConfig().setDefaultTheme("bootstrap");
         final ThemeListForm f = new ThemeListForm();
         f.defaultTheme = "";
         if (f.defaultTheme == null || f.defaultTheme.isEmpty()) {
-            ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+            ComponentUtil.getFessConfig().setDefaultTheme("");
         }
-        assertEquals("", ComponentUtil.getFessConfig().getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, ""));
+        assertEquals("", ComponentUtil.getFessConfig().getDefaultTheme());
     }
 
     // ---- Task 5.15: end-to-end-ish action coverage ----
@@ -143,15 +143,15 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // Extend Task 5.8 with edge cases: pre-seed an existing default, ensure
         // a valid replacement overwrites it; reject empty/special chars at the
         // form-regex layer (compile-time check below).
-        ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "oldname");
+        ComponentUtil.getFessConfig().setDefaultTheme("oldname");
         final ThemeListForm f = new ThemeListForm();
         f.defaultTheme = "newtheme";
         final String regex = "^$|^[a-z0-9][a-z0-9_-]{0,63}$";
         // simulate the action body's regex gate + system property write
         if (f.defaultTheme != null && f.defaultTheme.matches(regex)) {
-            ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, f.defaultTheme);
+            ComponentUtil.getFessConfig().setDefaultTheme(f.defaultTheme);
         }
-        assertEquals("newtheme", ComponentUtil.getFessConfig().getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, ""));
+        assertEquals("newtheme", ComponentUtil.getFessConfig().getDefaultTheme());
 
         // special chars are rejected by the same regex used in @Pattern
         assertFalse("foo bar".matches(regex));

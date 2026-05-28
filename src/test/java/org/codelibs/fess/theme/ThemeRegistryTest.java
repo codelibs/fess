@@ -96,7 +96,7 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     public void test_resolveActiveTheme_systemPropertyOverridesBuiltinDefault() throws Exception {
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         final FessConfig cfg = ComponentUtil.getFessConfig();
-        final String before = cfg.getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+        final String before = cfg.getDefaultTheme();
         try {
             // Materialise a fixture theme on disk.
             final Path themeDir = tempThemesDir.resolve("alpha");
@@ -112,7 +112,7 @@ public class ThemeRegistryTest extends UnitFessTestCase {
             // the resolved default into its snapshot at reload time (so per-read does not
             // dip into FessConfig). Property changes therefore require a fresh reload to
             // take effect, mirroring how the admin UI calls reload() after setdefault.
-            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "alpha");
+            cfg.setDefaultTheme("alpha");
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
             reg.reload();
 
@@ -120,7 +120,7 @@ public class ThemeRegistryTest extends UnitFessTestCase {
             assertTrue(resolved.isPresent());
             assertEquals("alpha", resolved.get().getName());
         } finally {
-            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, before == null ? "" : before);
+            cfg.setDefaultTheme(before == null ? "" : before);
             deleteRecursively(tempThemesDir);
         }
     }
@@ -129,13 +129,13 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     public void test_resolveActiveTheme_unknownSystemPropertyFallsBackToBuiltin() throws Exception {
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         final FessConfig cfg = ComponentUtil.getFessConfig();
-        final String before = cfg.getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+        final String before = cfg.getDefaultTheme();
         try {
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
             reg.reload();
             // No themes on disk; resolving via an unknown system-property name must
             // yield empty (the registry has nothing to fall back to in this isolated test).
-            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "this-theme-does-not-exist");
+            cfg.setDefaultTheme("this-theme-does-not-exist");
             final Optional<Theme> resolved = reg.resolveActiveTheme(null);
             // Either the resolver returns empty (no fixture, no built-in default reachable
             // from a unit-test classpath) or, defensively, it returns a theme other than
@@ -147,7 +147,7 @@ public class ThemeRegistryTest extends UnitFessTestCase {
                 assertNull(reg.getTheme("this-theme-does-not-exist").orElse(null));
             }
         } finally {
-            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, before == null ? "" : before);
+            cfg.setDefaultTheme(before == null ? "" : before);
             deleteRecursively(tempThemesDir);
         }
     }

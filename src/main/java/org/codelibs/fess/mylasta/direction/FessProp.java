@@ -334,6 +334,14 @@ public interface FessProp {
         return getSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, getVirtualHostHeaders());
     }
 
+    default void setDefaultTheme(final String value) {
+        setSystemProperty(Constants.DEFAULT_THEME_PROPERTY, value);
+    }
+
+    default String getDefaultTheme() {
+        return getSystemProperty(Constants.DEFAULT_THEME_PROPERTY, StringUtil.EMPTY);
+    }
+
     default void setLoginRequired(final boolean value) {
         setSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, value);
     }

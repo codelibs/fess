@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.web.util.LaServletContextUtil;
 
@@ -62,9 +63,6 @@ public class ThemeRegistry {
     }
 
     private static final Logger logger = LogManager.getLogger(ThemeRegistry.class);
-
-    /** System property key for the global default theme name. */
-    public static final String SYSPROP_DEFAULT_THEME = "theme.default";
 
     /** Injected Fess configuration used to resolve the themes directory and default theme. */
     @Resource
@@ -218,7 +216,7 @@ public class ThemeRegistry {
      * <ol>
      *   <li>If {@code virtualHostKey} resolves to a known theme, use it.</li>
      *   <li>Otherwise fall back to the global default theme stored under the
-     *       {@code theme.default} system property.</li>
+     *       {@link Constants#DEFAULT_THEME_PROPERTY} system property.</li>
      *   <li>Return empty when neither lookup succeeds.</li>
      * </ol>
      *
@@ -253,15 +251,15 @@ public class ThemeRegistry {
             return null;
         }
         try {
-            return fessConfig.getSystemProperty(SYSPROP_DEFAULT_THEME, null);
+            return fessConfig.getDefaultTheme();
         } catch (final Exception e) {
             // System-property lookup can fail when the config layer is mid-init or
             // the system-properties index is unreachable. Warn once so the
             // condition is visible without spamming the log on every reload.
             if (defaultThemeFirstFailure.compareAndSet(false, true)) {
-                logger.warn("Failed to read default theme system property; key={}", SYSPROP_DEFAULT_THEME, e);
+                logger.warn("Failed to read default theme system property; key={}", Constants.DEFAULT_THEME_PROPERTY, e);
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to read default theme system property; key={}", SYSPROP_DEFAULT_THEME, e);
+                logger.debug("Failed to read default theme system property; key={}", Constants.DEFAULT_THEME_PROPERTY, e);
             }
             return null;
         }

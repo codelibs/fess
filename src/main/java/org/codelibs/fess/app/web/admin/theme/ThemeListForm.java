@@ -36,7 +36,7 @@ public class ThemeListForm {
     /**
      * Selected default theme name, or empty string when "no default" is chosen.
      * Validation matches the spec §4.2 manifest regex so an invalid value
-     * cannot reach {@code FessConfig.setSystemProperty("theme.default", ...)}.
+     * cannot reach {@code FessConfig.setDefaultTheme(...)}.
      */
     @Size(max = 64)
     @Pattern(regexp = "^$|^[a-z0-9][a-z0-9_-]{0,63}$")
