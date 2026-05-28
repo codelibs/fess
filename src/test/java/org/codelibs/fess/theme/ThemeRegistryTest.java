@@ -227,6 +227,58 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_scanJsp_registersDirectoryWithSearchJsp() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final Path tempViewDir = Files.createTempDirectory("view-test-");
+        try {
+            final Path themeDir = tempViewDir.resolve("classic");
+            Files.createDirectories(themeDir);
+            Files.writeString(themeDir.resolve("search.jsp"), "<%-- search --%>");
+
+            final ThemeRegistry reg = new ThemeRegistry();
+            reg.setThemesDirOverride(tempThemesDir);
+            reg.setViewBaseOverride(tempViewDir);
+            reg.reload();
+
+            final Optional<Theme> t = reg.getTheme("classic");
+            assertTrue(t.isPresent(), "Directory with search.jsp must be registered as JSP theme");
+            assertEquals(ThemeType.JSP, t.get().getType());
+            assertEquals("classic", t.get().getName());
+        } finally {
+            deleteRecursively(tempThemesDir);
+            deleteRecursively(tempViewDir);
+        }
+    }
+
+    @Test
+    public void test_scanJsp_skipsDirectoryWithoutSearchJsp() throws Exception {
+        // MVC view folders like chat/, login/, profile/ live next to JSP themes but
+        // do not provide search.jsp — they must not be exposed as themes.
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final Path tempViewDir = Files.createTempDirectory("view-test-");
+        try {
+            for (final String mvcDir : new String[] { "chat", "login", "profile", "stray" }) {
+                final Path d = tempViewDir.resolve(mvcDir);
+                Files.createDirectories(d);
+                Files.writeString(d.resolve("index.jsp"), "<%-- not a theme --%>");
+            }
+
+            final ThemeRegistry reg = new ThemeRegistry();
+            reg.setThemesDirOverride(tempThemesDir);
+            reg.setViewBaseOverride(tempViewDir);
+            reg.reload();
+
+            assertTrue(reg.getTheme("chat").isEmpty(), "chat/ must not be registered as a JSP theme");
+            assertTrue(reg.getTheme("login").isEmpty(), "login/ must not be registered as a JSP theme");
+            assertTrue(reg.getTheme("profile").isEmpty(), "profile/ must not be registered as a JSP theme");
+            assertTrue(reg.getTheme("stray").isEmpty(), "directories without search.jsp must not be registered");
+        } finally {
+            deleteRecursively(tempThemesDir);
+            deleteRecursively(tempViewDir);
+        }
+    }
+
+    @Test
     public void test_scan_doesNotFollowSymlinkedDirectory() throws Exception {
         // A symlinked directory inside the themes root must NOT be registered as a theme,
         // because following it could point outside the sandbox.

@@ -83,6 +83,7 @@ public class ThemeRegistry {
 
     private volatile Snapshot snapshot = new Snapshot(Map.of(), null);
     private Path themesDirOverride; // test seam
+    private Path viewBaseOverride; // test seam
 
     /**
      * Latches on the first servlet-context lookup failure inside
@@ -166,13 +167,17 @@ public class ThemeRegistry {
 
     private void scanJsp(final Map<String, Theme> next) {
         final Path viewBase;
-        try {
-            viewBase = ResourceUtil.getViewTemplatePath();
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("View template path unavailable; skipping JSP theme scan", e);
+        if (viewBaseOverride != null) {
+            viewBase = viewBaseOverride;
+        } else {
+            try {
+                viewBase = ResourceUtil.getViewTemplatePath();
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("View template path unavailable; skipping JSP theme scan", e);
+                }
+                return;
             }
-            return;
         }
         if (viewBase == null || !Files.isDirectory(viewBase)) {
             return;
@@ -184,6 +189,13 @@ public class ThemeRegistry {
                     return; // static takes precedence
                 }
                 if ("admin".equals(name) || "common".equals(name) || "error".equals(name)) {
+                    return;
+                }
+                // A JSP theme must provide its own search entry point. Without search.jsp
+                // the directory is just an MVC view folder (e.g. chat/, login/, profile/)
+                // and registering it as a theme would surface non-themes in the UI and
+                // break theme-switching when the resolver tries to render search.jsp.
+                if (!Files.isRegularFile(dir.resolve("search.jsp"))) {
                     return;
                 }
                 next.put(name, new Theme(ThemeType.JSP, name, dir, null));
@@ -301,6 +313,10 @@ public class ThemeRegistry {
     // ---- Test seams ----
     void setThemesDirOverride(final Path p) {
         this.themesDirOverride = p;
+    }
+
+    void setViewBaseOverride(final Path p) {
+        this.viewBaseOverride = p;
     }
 
     /**
