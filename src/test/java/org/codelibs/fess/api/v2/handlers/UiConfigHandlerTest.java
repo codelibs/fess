@@ -132,6 +132,103 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * Task 1.1: sort_options array must contain the baseline 10 entries
+     * (score×2, filename×2, created×2, content_length×2, last_modified×2).
+     * click_count and favorite_count entries are conditional on flags
+     * and are tested via {@link UiConfigHandler#buildSortOptions} directly.
+     */
+    @Test
+    public void test_sortOptions_baselineEntries() throws Exception {
+        final UiConfigHandler handler = new UiConfigHandler();
+        final java.util.List<Map<String, Object>> opts = handler.buildSortOptions(false, false);
+        // Baseline 10 entries without conditional ones.
+        assertEquals(10, opts.size());
+        final java.util.Set<String> values = new java.util.HashSet<>();
+        for (final Map<String, Object> opt : opts) {
+            values.add((String) opt.get("value"));
+            assertNotNull(opt.get("label_key"), "label_key must not be null");
+        }
+        assertTrue(values.contains("score.desc"), values.toString());
+        assertTrue(values.contains("filename.asc"), values.toString());
+        assertTrue(values.contains("filename.desc"), values.toString());
+        assertTrue(values.contains("created.asc"), values.toString());
+        assertTrue(values.contains("created.desc"), values.toString());
+        assertTrue(values.contains("content_length.asc"), values.toString());
+        assertTrue(values.contains("content_length.desc"), values.toString());
+        assertTrue(values.contains("last_modified.asc"), values.toString());
+        assertTrue(values.contains("last_modified.desc"), values.toString());
+    }
+
+    /** Task 1.1: click_count entries appear only when searchLogEnabled=true. */
+    @Test
+    public void test_sortOptions_clickCountConditional() throws Exception {
+        final UiConfigHandler handler = new UiConfigHandler();
+        final java.util.List<Map<String, Object>> withLog = handler.buildSortOptions(true, false);
+        final java.util.List<Map<String, Object>> withoutLog = handler.buildSortOptions(false, false);
+        assertEquals(12, withLog.size(), "expected 10 base + 2 click_count");
+        assertEquals(10, withoutLog.size(), "expected 10 base only");
+        final java.util.Set<String> vals = new java.util.HashSet<>();
+        for (final Map<String, Object> opt : withLog) {
+            vals.add((String) opt.get("value"));
+        }
+        assertTrue(vals.contains("click_count.asc"), vals.toString());
+        assertTrue(vals.contains("click_count.desc"), vals.toString());
+    }
+
+    /** Task 1.1: favorite_count entries appear only when userFavoriteEnabled=true. */
+    @Test
+    public void test_sortOptions_favoriteCountConditional() throws Exception {
+        final UiConfigHandler handler = new UiConfigHandler();
+        final java.util.List<Map<String, Object>> withFav = handler.buildSortOptions(false, true);
+        assertEquals(12, withFav.size(), "expected 10 base + 2 favorite_count");
+        final java.util.Set<String> vals = new java.util.HashSet<>();
+        for (final Map<String, Object> opt : withFav) {
+            vals.add((String) opt.get("value"));
+        }
+        assertTrue(vals.contains("favorite_count.asc"), vals.toString());
+        assertTrue(vals.contains("favorite_count.desc"), vals.toString());
+    }
+
+    /**
+     * Task 1.1: When the handler returns a 200 response, num_options, lang_options,
+     * label_options, and the new feature flags must be present in the payload.
+     */
+    @Test
+    public void test_newOptions_presentInSuccessPayload() throws Exception {
+        // Register required stubs for a successful response.
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            // New arrays must be present.
+            assertTrue(body.contains("\"sort_options\""), "sort_options missing in " + body);
+            assertTrue(body.contains("\"num_options\""), "num_options missing in " + body);
+            assertTrue(body.contains("\"lang_options\""), "lang_options missing in " + body);
+            assertTrue(body.contains("\"label_options\""), "label_options missing in " + body);
+            // num_options must contain at least 10 and 20.
+            assertTrue(body.contains("10"), "10 missing from num_options in " + body);
+            assertTrue(body.contains("20"), "20 missing from num_options in " + body);
+            // lang_options must contain the "all" sentinel.
+            assertTrue(body.contains("\"all\""), "all lang sentinel missing in " + body);
+            // New feature flags must be boolean fields.
+            assertTrue(body.contains("\"eoled\":"), "eoled flag missing in " + body);
+            assertTrue(body.contains("\"development_mode\":"), "development_mode flag missing in " + body);
+            assertTrue(body.contains("\"search_log_enabled\":"), "search_log_enabled flag missing in " + body);
+            assertTrue(body.contains("\"thumbnail_enabled\":"), "thumbnail_enabled flag missing in " + body);
+            assertTrue(body.contains("\"display_label_type\":"), "display_label_type flag missing in " + body);
+        }
+    }
+
+    /**
      * Covers the path where no theme is active in {@code ThemeRegistry}.
      *
      * <p>{@code UnitFessTestCase} typically has no theme registered, so this

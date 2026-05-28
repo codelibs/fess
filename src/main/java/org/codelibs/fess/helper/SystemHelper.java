@@ -693,7 +693,7 @@ public class SystemHelper {
      *
      * @return true if the application is EOL, false otherwise.
      */
-    protected boolean isEoled() {
+    public boolean isEoled() {
         return getCurrentTimeAsLong() > eolTime;
     }
 

@@ -16,16 +16,23 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.Theme;
@@ -61,6 +68,45 @@ public class UiConfigHandler {
      */
     public UiConfigHandler() {
         // no-op
+    }
+
+    /**
+     * Builds the sort_options array. Entries for click_count are only included when
+     * search logging is enabled; entries for favorite_count only when user favorites
+     * are enabled. The caller controls both flags so this method stays pure / testable.
+     *
+     * @param searchLogEnabled whether search logging is on
+     * @param userFavoriteEnabled whether user favorites are on
+     * @return ordered list of sort option descriptor maps
+     */
+    List<Map<String, Object>> buildSortOptions(final boolean searchLogEnabled, final boolean userFavoriteEnabled) {
+        final List<Map<String, Object>> list = new ArrayList<>();
+        addSortOption(list, "", "labels.search_result_sort_score_desc");
+        addSortOption(list, "score.desc", "labels.search_result_sort_score_desc");
+        addSortOption(list, "filename.asc", "labels.search_result_sort_filename_asc");
+        addSortOption(list, "filename.desc", "labels.search_result_sort_filename_desc");
+        addSortOption(list, "created.asc", "labels.search_result_sort_created_asc");
+        addSortOption(list, "created.desc", "labels.search_result_sort_created_desc");
+        addSortOption(list, "content_length.asc", "labels.search_result_sort_content_length_asc");
+        addSortOption(list, "content_length.desc", "labels.search_result_sort_content_length_desc");
+        addSortOption(list, "last_modified.asc", "labels.search_result_sort_last_modified_asc");
+        addSortOption(list, "last_modified.desc", "labels.search_result_sort_last_modified_desc");
+        if (searchLogEnabled) {
+            addSortOption(list, "click_count.asc", "labels.search_result_sort_click_count_asc");
+            addSortOption(list, "click_count.desc", "labels.search_result_sort_click_count_desc");
+        }
+        if (userFavoriteEnabled) {
+            addSortOption(list, "favorite_count.asc", "labels.search_result_sort_favorite_count_asc");
+            addSortOption(list, "favorite_count.desc", "labels.search_result_sort_favorite_count_desc");
+        }
+        return list;
+    }
+
+    private static void addSortOption(final List<Map<String, Object>> list, final String value, final String labelKey) {
+        final Map<String, Object> entry = new LinkedHashMap<>();
+        entry.put("value", value);
+        entry.put("label_key", labelKey);
+        list.add(entry);
     }
 
     /**
@@ -119,12 +165,53 @@ public class UiConfigHandler {
 
             // Feature flags mirror what the legacy JSPs branch on so the SPA can light up
             // the same set of UI affordances without round-tripping more endpoints.
+            final boolean searchLogEnabled = cfg.isSearchLog();
+            final boolean userFavoriteEnabled = cfg.isUserFavorite();
+            final boolean thumbnailEnabled = cfg.isThumbnailEnabled();
+
+            // eoled / development_mode come from SystemHelper (same source as the JSP runtime data).
+            boolean eoled = false;
+            boolean developmentMode = false;
+            try {
+                final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+                if (systemHelper != null) {
+                    eoled = systemHelper.isEoled();
+                    developmentMode = ComponentUtil.getSearchEngineClient().isEmbedded();
+                }
+            } catch (final Exception ignored) {
+                // SystemHelper or SearchEngineClient not wired in unit harness — default to false.
+            }
+
+            // label_options: built from LabelTypeHelper; empty list when no labels configured.
+            final List<Map<String, Object>> labelOptions = new ArrayList<>();
+            try {
+                final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
+                if (labelTypeHelper != null) {
+                    final List<Map<String, String>> items = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON, Locale.ROOT);
+                    if (items != null) {
+                        for (final Map<String, String> item : items) {
+                            final Map<String, Object> entry = new LinkedHashMap<>();
+                            entry.put("value", item.get(Constants.ITEM_VALUE));
+                            entry.put("name", item.get(Constants.ITEM_LABEL));
+                            labelOptions.add(entry);
+                        }
+                    }
+                }
+            } catch (final Exception ignored) {
+                // LabelTypeHelper not wired — return empty list.
+            }
+
             final Map<String, Object> features = new LinkedHashMap<>();
-            features.put("user_favorite", cfg.isUserFavorite());
+            features.put("user_favorite", userFavoriteEnabled);
             features.put("popular_word", cfg.isWebApiPopularWord());
             features.put("suggest_search_log", cfg.isSuggestSearchLog());
             features.put("suggest_documents", cfg.isSuggestDocuments());
             features.put("login_required", cfg.isLoginRequired());
+            features.put("eoled", eoled);
+            features.put("development_mode", developmentMode);
+            features.put("search_log_enabled", searchLogEnabled);
+            features.put("thumbnail_enabled", thumbnailEnabled);
+            features.put("display_label_type", !labelOptions.isEmpty());
 
             // Server-wide supported language list, surfaced as plain JSON array of codes.
             final String[] langs = cfg.getSupportedLanguagesAsArray();
@@ -145,6 +232,35 @@ public class UiConfigHandler {
                 csrfToken = csrf == null ? "" : csrf.issue(session);
             }
 
+            // sort_options: conditionally include click_count and favorite_count entries.
+            final List<Map<String, Object>> sortOptions = buildSortOptions(searchLogEnabled, userFavoriteEnabled);
+
+            // num_options: filter out values exceeding page_size_max.
+            final int pageMax = cfg.getPagingSearchPageMaxSizeAsInteger();
+            final List<Integer> numOptions = new ArrayList<>();
+            for (final int n : new int[] { 10, 20, 30, 40, 50, 100 }) {
+                if (n <= pageMax) {
+                    numOptions.add(n);
+                }
+            }
+
+            // lang_options: "all" sentinel + supported language codes.
+            final List<Map<String, Object>> langOptions = new ArrayList<>();
+            final Map<String, Object> allLang = new LinkedHashMap<>();
+            allLang.put("value", "all");
+            allLang.put("label_key", "labels.searchoptions_all_langs");
+            langOptions.add(allLang);
+            if (langs != null) {
+                for (final String lang : langs) {
+                    if (lang != null && !lang.isEmpty()) {
+                        final Map<String, Object> langEntry = new LinkedHashMap<>();
+                        langEntry.put("value", lang);
+                        langEntry.put("label_key", "labels.lang_" + lang);
+                        langOptions.add(langEntry);
+                    }
+                }
+            }
+
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("site_name", siteName);
             payload.put("login_required", cfg.isLoginRequired());
@@ -152,7 +268,11 @@ public class UiConfigHandler {
             payload.put("theme", themePayload);
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());
-            payload.put("page_size_max", cfg.getPagingSearchPageMaxSizeAsInteger());
+            payload.put("page_size_max", pageMax);
+            payload.put("sort_options", sortOptions);
+            payload.put("num_options", numOptions);
+            payload.put("lang_options", langOptions);
+            payload.put("label_options", labelOptions);
             payload.put("csrf_required", csrfRequired);
             payload.put("csrf_token", csrfToken);
             V2EnvelopeWriter.writeSuccess(res, payload);

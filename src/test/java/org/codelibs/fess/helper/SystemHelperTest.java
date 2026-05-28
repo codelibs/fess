@@ -676,7 +676,7 @@ public class SystemHelperTest extends UnitFessTestCase {
     public void test_setupAdminHtmlData() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
-            protected boolean isEoled() {
+            public boolean isEoled() {
                 return false;
             }
         };
@@ -695,7 +695,7 @@ public class SystemHelperTest extends UnitFessTestCase {
     public void test_setupAdminHtmlData_withEol() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
-            protected boolean isEoled() {
+            public boolean isEoled() {
                 return true;
             }
         };
@@ -714,7 +714,7 @@ public class SystemHelperTest extends UnitFessTestCase {
     public void test_setupSearchHtmlData() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
-            protected boolean isEoled() {
+            public boolean isEoled() {
                 return false;
             }
         };
@@ -733,7 +733,7 @@ public class SystemHelperTest extends UnitFessTestCase {
     public void test_setupSearchHtmlData_withEol() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
-            protected boolean isEoled() {
+            public boolean isEoled() {
                 return true;
             }
         };
