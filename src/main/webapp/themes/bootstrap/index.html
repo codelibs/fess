@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="/css/font-awesome.min.css">
   <link rel="stylesheet" href="/themes/bootstrap/assets/styles.css">
   <link rel="icon" href="/favicon.ico">
+  <link rel="search" type="application/opensearchdescription+xml"
+        title="Fess" href="/osdd">
 </head>
 <body>
   <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. -->
@@ -43,44 +45,50 @@
   </header>
 
   <main class="container-fluid py-3" role="main" id="page-root">
-    <div class="row">
-      <aside class="col-lg-3 col-md-4 mb-3" role="complementary" aria-label="Facets">
-        <div class="card shadow-sm">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <strong data-i18n="facet.title">Facets</strong>
-            <button class="btn btn-link btn-sm p-0 d-none" id="facet-clear" data-i18n="facet.clear">Clear</button>
+    <section id="results-view">
+      <div class="row">
+        <aside class="col-lg-3 col-md-4 mb-3" role="complementary" aria-label="Facets">
+          <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <strong data-i18n="facet.title">Facets</strong>
+              <button class="btn btn-link btn-sm p-0 d-none" id="facet-clear" data-i18n="facet.clear">Clear</button>
+            </div>
+            <div class="card-body" id="facet-body">
+              <p class="text-muted small mb-0" data-i18n="facet.empty">No facets yet — run a search.</p>
+            </div>
           </div>
-          <div class="card-body" id="facet-body">
-            <p class="text-muted small mb-0" data-i18n="facet.empty">No facets yet — run a search.</p>
-          </div>
-        </div>
-      </aside>
+        </aside>
 
-      <section class="col-lg-6 col-md-8" id="results-column">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
-          <div>
-            <label for="sort-select" class="form-label me-2 mb-0 small" data-i18n="search.sort">Sort</label>
-            <select class="form-select form-select-sm d-inline-block w-auto" id="sort-select" aria-label="Sort order">
-              <option value="">—</option>
-              <option value="created.desc" data-i18n="search.sort.created_desc">Newest</option>
-              <option value="created.asc" data-i18n="search.sort.created_asc">Oldest</option>
-              <option value="content_length.desc" data-i18n="search.sort.length_desc">Length</option>
-            </select>
+        <section class="col-lg-6 col-md-8" id="results-column">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
+            <div>
+              <label for="sort-select" class="form-label me-2 mb-0 small" data-i18n="search.sort">Sort</label>
+              <select class="form-select form-select-sm d-inline-block w-auto" id="sort-select" aria-label="Sort order">
+                <option value="">—</option>
+                <option value="created.desc" data-i18n="search.sort.created_desc">Newest</option>
+                <option value="created.asc" data-i18n="search.sort.created_asc">Oldest</option>
+                <option value="content_length.desc" data-i18n="search.sort.length_desc">Length</option>
+              </select>
+            </div>
           </div>
-        </div>
-        <ol class="list-unstyled" id="results" role="list"></ol>
-        <nav aria-label="Pagination" class="d-none" id="pagination-nav">
-          <ul class="pagination" id="pagination"></ul>
-        </nav>
-        <div class="text-center text-muted my-5 d-none" id="empty-state">
-          <p data-i18n="search.no_results">No results.</p>
-          <div id="popular-words"></div>
-        </div>
-      </section>
+          <ol class="list-unstyled" id="results" role="list"></ol>
+          <nav aria-label="Pagination" class="d-none" id="pagination-nav">
+            <ul class="pagination" id="pagination"></ul>
+          </nav>
+          <div class="text-center text-muted my-5 d-none" id="empty-state">
+            <p data-i18n="search.no_results">No results.</p>
+            <div id="popular-words"></div>
+          </div>
+        </section>
 
-      <aside class="col-lg-3 d-none" id="chat-column" role="complementary" aria-label="Chat"></aside>
-    </div>
+        <aside class="col-lg-3 d-none" id="chat-column" role="complementary" aria-label="Chat"></aside>
+      </div>
+    </section>
+
+    <section id="error-view" hidden class="container my-4"></section>
+    <section id="profile-view" hidden class="container my-4"></section>
+    <section id="help-view" hidden class="container my-4"></section>
   </main>
 
   <footer class="container-fluid py-3 border-top text-center text-muted small">
