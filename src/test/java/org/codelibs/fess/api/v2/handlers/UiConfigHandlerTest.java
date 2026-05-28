@@ -423,6 +423,44 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * ADV-1: buildFiletypeOptions must return exactly the 10 canonical file-type entries
+     * in the order matching index.filetype / labels.facet_filetype_* mappings, each with
+     * a non-null label_key.
+     */
+    @Test
+    public void test_filetypeOptions_canonicalValuesMatchIndexMapping() {
+        final java.util.List<Map<String, Object>> opts = new UiConfigHandler().buildFiletypeOptions();
+        final java.util.List<String> values = new java.util.ArrayList<>();
+        for (final Map<String, Object> o : opts) {
+            values.add((String) o.get("value"));
+            assertNotNull(o.get("label_key"));
+        }
+        assertEquals(java.util.List.of("html", "word", "excel", "powerpoint", "odt", "ods", "odp", "pdf", "txt", "others"), values);
+    }
+
+    /**
+     * ADV-1: the served /ui/config success payload must contain "filetype_options".
+     */
+    @Test
+    public void test_filetypeOptions_presentInSuccessPayload() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            assertTrue(body.contains("\"filetype_options\""), "filetype_options key must be present in: " + body);
+        }
+    }
+
+    /**
      * B.3: facet_views must be present as an array (may be empty when no views are configured).
      */
     @Test

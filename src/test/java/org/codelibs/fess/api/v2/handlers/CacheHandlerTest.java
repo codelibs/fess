@@ -166,12 +166,12 @@ public class CacheHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_buildCachePayload_includesUrlCreatedCharset() {
-        final java.util.Map<String, Object> doc = new java.util.HashMap<>();
+        final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "https://example.com/doc.html");
         doc.put("url_link", "https://example.com/doc.html");
         doc.put("created", "2026-05-29T10:15:30.000+0000");
         doc.put("mimetype", "text/html; charset=Shift_JIS");
-        final java.util.Map<String, Object> payload = new CacheHandler().buildCachePayload("abc123", "<html>cached</html>", doc);
+        final Map<String, Object> payload = new CacheHandler().buildCachePayload("abc123", "<html>cached</html>", doc);
         assertEquals("abc123", payload.get("doc_id"));
         assertEquals("text/html", payload.get("mimetype"));
         assertEquals("<html>cached</html>", payload.get("content"));
@@ -182,10 +182,10 @@ public class CacheHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_buildCachePayload_charsetDefaultsToUtf8WhenAbsent() {
-        final java.util.Map<String, Object> doc = new java.util.HashMap<>();
+        final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "https://example.com/a.pdf");
         doc.put("mimetype", "application/pdf");
-        final java.util.Map<String, Object> payload = new CacheHandler().buildCachePayload("d1", "x", doc);
+        final Map<String, Object> payload = new CacheHandler().buildCachePayload("d1", "x", doc);
         assertEquals("UTF-8", payload.get("charset"));
         assertEquals("https://example.com/a.pdf", payload.get("url"));
         assertNull(payload.get("created"));

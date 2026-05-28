@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -159,36 +160,27 @@ public class CacheHandler {
     }
 
     Map<String, Object> buildCachePayload(final String docId, final String content, final Map<String, Object> doc) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("doc_id", docId);
         payload.put("mimetype", "text/html");
         payload.put("content", content);
-        String urlFieldLink = "url_link";
-        String urlField = "url";
-        String createdField = "created";
-        String mimetypeField = "mimetype";
-        try {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            urlFieldLink = fessConfig.getResponseFieldUrlLink();
-            urlField = fessConfig.getIndexFieldUrl();
-            createdField = fessConfig.getIndexFieldCreated();
-            mimetypeField = fessConfig.getIndexFieldMimetype();
-        } catch (final RuntimeException e) {
-            logger.debug("FessConfig not available in buildCachePayload; using default field names", e);
-        }
-        final String urlLink = DocumentUtil.getValue(doc, urlFieldLink, String.class);
-        final String url = StringUtil.isNotBlank(urlLink) ? urlLink : DocumentUtil.getValue(doc, urlField, String.class);
+        final String urlLink = DocumentUtil.getValue(doc, fessConfig.getResponseFieldUrlLink(), String.class);
+        final String url =
+                StringUtil.isNotBlank(urlLink) ? urlLink : DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (StringUtil.isNotBlank(url)) {
             payload.put("url", url);
         }
-        final String created = DocumentUtil.getValue(doc, createdField, String.class);
+        final String created = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCreated(), String.class);
         if (StringUtil.isNotBlank(created)) {
             payload.put("created", created);
         }
-        payload.put("charset", parseCharset(DocumentUtil.getValue(doc, mimetypeField, String.class)));
+        payload.put("charset", parseCharset(DocumentUtil.getValue(doc, fessConfig.getIndexFieldMimetype(), String.class)));
         return payload;
     }
 
+    // Note: RFC2045-quoted charset values (e.g. charset="UTF-8") are not unquoted here. This is
+    // acceptable because crawler-indexed mimetypes store the charset unquoted (e.g. charset=UTF-8).
     private static String parseCharset(final String mimetype) {
         if (StringUtil.isNotBlank(mimetype)) {
             final int idx = mimetype.toLowerCase(java.util.Locale.ROOT).indexOf("charset=");
@@ -201,6 +193,6 @@ public class CacheHandler {
                 }
             }
         }
-        return "UTF-8";
+        return Constants.UTF_8;
     }
 }

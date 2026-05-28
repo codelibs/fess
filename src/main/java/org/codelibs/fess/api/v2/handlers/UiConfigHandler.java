@@ -104,6 +104,24 @@ public class UiConfigHandler {
         return list;
     }
 
+    /**
+     * Builds the filetype_options array. Values match the canonical {@code index.filetype}
+     * field values and the {@code labels.facet_filetype_*} i18n keys used in the advance
+     * search form (ADV-1 source).
+     *
+     * @return ordered list of filetype option descriptor maps, each with {@code value} and {@code label_key}
+     */
+    List<Map<String, Object>> buildFiletypeOptions() {
+        final List<Map<String, Object>> list = new ArrayList<>();
+        for (final String type : new String[] { "html", "word", "excel", "powerpoint", "odt", "ods", "odp", "pdf", "txt", "others" }) {
+            final Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("value", type);
+            entry.put("label_key", "labels.facet_filetype_" + type);
+            list.add(entry);
+        }
+        return list;
+    }
+
     private static void addSortOption(final List<Map<String, Object>> list, final String value, final String labelKey) {
         final Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("value", value);
@@ -353,6 +371,7 @@ public class UiConfigHandler {
             payload.put("label_options", labelOptions);
             payload.put("notifications", notifications);
             payload.put("facet_views", facetViews);
+            payload.put("filetype_options", buildFiletypeOptions());
             payload.put("csrf_required", csrfRequired);
             payload.put("csrf_token", csrfToken);
             V2EnvelopeWriter.writeSuccess(res, payload);
