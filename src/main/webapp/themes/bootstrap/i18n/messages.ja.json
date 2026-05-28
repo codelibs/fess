@@ -43,5 +43,16 @@
   "error.payload_too_large": "メッセージが長すぎます。",
   "error.internal_error": "内部エラーが発生しました。後ほど再試行してください。",
   "page.title": "Fess 検索",
-  "page.heading": "Fess 検索"
+  "page.heading": "Fess 検索",
+  "error.title_400": "不正なリクエスト",
+  "error.title_404": "ページが見つかりません",
+  "error.title_500": "システムエラー",
+  "error.title_503": "サービス利用不可",
+  "error.body_400": "リクエストの形式が正しくありません。",
+  "error.body_404": "お探しのページは見つかりませんでした。",
+  "error.body_500": "予期しないエラーが発生しました。しばらくしてからもう一度お試しください。",
+  "error.body_503": "サーバーが混雑しています。しばらくしてからもう一度お試しください。",
+  "error.requested_url": "要求された URL",
+  "error.go_home": "トップに戻る",
+  "error.contact_admin": "問題が解決しない場合は管理者にお問い合わせください。"
 }

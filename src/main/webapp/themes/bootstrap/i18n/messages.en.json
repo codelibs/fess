@@ -43,5 +43,16 @@
   "error.payload_too_large": "Your message is too long.",
   "error.internal_error": "An internal error occurred. Try again later.",
   "page.title": "Fess Search",
-  "page.heading": "Fess Search"
+  "page.heading": "Fess Search",
+  "error.title_400": "Bad Request",
+  "error.title_404": "Page Not Found",
+  "error.title_500": "System Error",
+  "error.title_503": "Service Unavailable",
+  "error.body_400": "The request format is invalid.",
+  "error.body_404": "The page you requested could not be found.",
+  "error.body_500": "An unexpected error occurred. Please try again later.",
+  "error.body_503": "The server is currently busy. Please try again later.",
+  "error.requested_url": "Requested URL",
+  "error.go_home": "Go to top page",
+  "error.contact_admin": "Please contact your site administrator if this problem persists."
 }
