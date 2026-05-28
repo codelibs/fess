@@ -149,7 +149,9 @@ function buildResultCard(d, queryId, order) {
     img.className = "result-thumbnail";
     img.setAttribute("loading", "lazy");
     img.setAttribute("alt", "");
-    img.setAttribute("src", safeHref(d.thumbnail));
+    img.setAttribute("src",
+      "/thumbnail/?docId=" + encodeURIComponent(d.doc_id || "") +
+      "&queryId=" + encodeURIComponent(queryId || ""));
     img.addEventListener("error", () => { img.classList.add("d-none"); });
     li.appendChild(img);
   }

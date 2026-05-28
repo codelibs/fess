@@ -153,4 +153,12 @@ public class BundledBootstrapThemeTest {
         assertTrue(t.getManifest().isPresent());
         assertEquals("Bootstrap", t.getManifest().map(ThemeManifest::getDisplayName).orElse(null));
     }
+
+    @Test
+    public void test_searchJs_thumbnailUsesThumbnailEndpoint() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("/thumbnail/?docId="));
+        assertTrue(js.contains("&queryId="));
+        assertFalse(js.contains("safeHref(d.thumbnail)"));
+    }
 }
