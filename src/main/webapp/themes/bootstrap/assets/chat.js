@@ -783,8 +783,7 @@ function submitQuestion(question, uiRefs) {
         } else {
           phaseStrip.advanceTo(phase);
           statusLozenge.setStatus("thinking");
-          // #7 phase narration: render per-phase status message into progress element.
-          // The search phase uses {0} for keywords; substitute the question text.
+          // #7 phase narration: render per-phase status message into the progress element.
           if (progressMessageEl) {
             progressMessageEl.classList.remove("d-none");
             // #6 (parity js/chat.js:496-500): only substitute {0} when the server sent
