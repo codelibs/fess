@@ -964,4 +964,12 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("progressMessageEl: inlineProgressMessageEl"),
                 "chat.js inline refs must pass progressMessageEl (parity #2)");
     }
+
+    @Test
+    public void test_chatJs_phaseKeywordScope() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("? t(\"labels.chat_phase_\" + phase, [data.keywords])"),
+                "phase narration must only substitute keywords when present (parity #6)");
+        assertFalse(js.contains("? data.keywords : question"), "phase narration must not fall back to the full question (parity #6)");
+    }
 }

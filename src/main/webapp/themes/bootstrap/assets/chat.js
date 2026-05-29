@@ -787,8 +787,11 @@ function submitQuestion(question, uiRefs) {
           // The search phase uses {0} for keywords; substitute the question text.
           if (progressMessageEl) {
             progressMessageEl.classList.remove("d-none");
-            const keywords = (data && data.keywords) ? data.keywords : question;
-            progressMessageEl.textContent = t("labels.chat_phase_" + phase, [keywords]);
+            // #6 (parity js/chat.js:496-500): only substitute {0} when the server sent
+            // data.keywords (search phase). Other phases render their label as-is.
+            progressMessageEl.textContent = (data && data.keywords)
+              ? t("labels.chat_phase_" + phase, [data.keywords])
+              : t("labels.chat_phase_" + phase);
           }
         }
       }
