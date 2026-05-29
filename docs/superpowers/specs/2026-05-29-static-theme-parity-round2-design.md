@@ -2,7 +2,7 @@
 
 - **Date:** 2026-05-29
 - **Branch:** `feature/static-theme`
-- **Status:** Design — awaiting approval
+- **Status:** Implemented & independently re-verified (2026-05-29)
 
 ## 1. Context & Goal
 
@@ -131,3 +131,31 @@ actual static-theme code and backend handlers). This spec records only the gaps 
 - **Item 9** is low value and touches 16 files + `chat.js`; the conservative scope (chat-only keys)
   limits blast radius. Re-run the parity test to confirm no key drift.
 - **Home options refactor** must not regress the results-view options (shared render logic).
+
+## 9. Closure Note (2026-05-29)
+
+All 9 items implemented via subagent-driven TDD (fresh implementer + spec review + code-quality
+review per task), then independently re-audited by a fresh agent against the JSP source and the
+modified static code (not trusting this doc). Result: **all 9 VERIFIED end-to-end**, no problems
+found. Theme + i18n test suite: **119/119 pass** (`BundledBootstrapThemeTest` 52,
+`theme/LabelMessageThemeParityTest` 5, `ThemeViewActionTest` 43, `StaticThemeFilterTest` 19);
+`node --check` clean on all `assets/*.js`; all 16 i18n bundles valid JSON with identical key sets.
+
+**Item #9 correction:** the original audit's premise was wrong. JSP uses two *distinct* chat key
+families — `labels.chat_step_*` (short progress-badge names, `chat.jsp:104-120`) and
+`labels.chat_phase_*` (longer phase *status* messages, `chat.jsp:181-185`). The static theme's
+badge already used `chat_step_*`, so it was *already* aligned. The initial rename was therefore
+reverted; #9 is correctly a no-op. No `chat_phase_*` reference exists in the theme.
+
+**Net change:** 3 new i18n keys added across all 16 bundles (`search.did_not_match`,
+`search.did_not_match_suggestion`, `search.options`; plus `facet.not_found`), no-result screen,
+home options panel + logo + input attrs, advanced-link query forwarding + prefill, facet
+"not found" message, and 3s submit-disable on all three forms.
+
+**Known minor (non-parity, deferred):** the legacy `search.no_results` key is now orphaned in the
+bundles (the no-result `<p>` was replaced by richer markup). Harmless; left in place to avoid
+16-file churn; can be swept in a later cleanup.
+
+**Commits:** `9688f659` (i18n keys) + `5ed239bb` (#9 revert), `2be87870` (#1/#4),
+`f2394b66`+`4b6bae37` (#2/#3/#5), `2492ad4c` (#6), `2beb04d0`+`79c49bb1` (#7), `7b710a0a` (#8),
+plus review-driven test-hardening commits (`2045e096`, `2db53629`, `25747f82`).
