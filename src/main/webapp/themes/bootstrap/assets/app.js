@@ -201,19 +201,31 @@ function attachHomeView() {
 /**
  * D.8: Render footer copyright via safe DOM construction (no innerHTML / no sanitizer needed
  * because every node is constructed directly — no user-supplied strings are rendered as HTML).
+ * The release year and org name come from i18n keys so they can be updated without code changes.
  */
 function renderFooterCopyright() {
   const el = document.getElementById("footer-copyright");
   if (!el) return;
   while (el.firstChild) el.removeChild(el.firstChild);
-  el.appendChild(document.createTextNode("© " + new Date().getFullYear() + " "));
+
+  // Use a NUL sentinel as a placeholder for the org name so we can split the
+  // translated template into text segments and insert the <a> link in the middle.
+  const year = t("footer.copyright_year");
+  const org = t("footer.copyright_org");
+  const SENTINEL = "\x00";
+  const rendered = t("footer.copyright", [year, SENTINEL]);
+  const parts = rendered.split(SENTINEL);
+
+  el.appendChild(document.createTextNode(parts[0] || ""));
+
   const a = document.createElement("a");
   a.href = "https://github.com/codelibs";
   a.rel = "noopener noreferrer";
   a.target = "_blank";
-  a.textContent = "CodeLibs Project";
+  a.textContent = org;
   el.appendChild(a);
-  el.appendChild(document.createTextNode("."));
+
+  el.appendChild(document.createTextNode(parts[1] || ""));
 }
 
 /**

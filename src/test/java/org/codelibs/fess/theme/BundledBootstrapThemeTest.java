@@ -371,4 +371,34 @@ public class BundledBootstrapThemeTest {
         assertTrue(md.contains("<table") && md.contains("<thead>") && md.contains("<tbody>"));
         assertTrue(md.contains("<blockquote>") && md.contains("TABLE_DELIM_RE"));
     }
+
+    @Test
+    public void test_cacheJs_rendersBannerAndBaseAndCharset() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/cache.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("labels.search_cache_msg"));
+        assertTrue(js.contains("env.charset"));
+        assertTrue(js.contains("<base href=\""));
+    }
+
+    @Test
+    public void test_i18n_hasCacheKeys() throws Exception {
+        for (final String loc : new String[] { "en", "ja" }) {
+            final String j = Files.readString(THEME_DIR.resolve("i18n/messages." + loc + ".json"), StandardCharsets.UTF_8);
+            assertTrue(j.contains("\"labels.search_result_cache\"") && j.contains("\"labels.search_cache_msg\"")
+                    && j.contains("\"labels.search_unknown\""));
+        }
+    }
+
+    @Test
+    public void test_helpEn_rangesDocumentsExclusiveBounds() throws Exception {
+        final String j = Files.readString(THEME_DIR.resolve("help/en.json"), StandardCharsets.UTF_8);
+        assertTrue(j.contains("{ }") || j.contains("{1024 TO 10240}"));
+    }
+
+    @Test
+    public void test_appJs_footerUsesI18nYearNotClientClock() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("footer.copyright_year"));
+        assertFalse(js.contains("new Date().getFullYear()"));
+    }
 }
