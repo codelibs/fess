@@ -245,15 +245,18 @@ function attachHomeView() {
     });
   }
   // #A (parity index.jsp:123-130): surface a query-param-driven flash message on the
-  // home view (e.g. an auth redirect that appends ?error=login_required). The message
-  // text is looked up via an allowlisted flash.* i18n key (never raw query text).
+  // home view (e.g. an auth redirect that appends ?error=login_required). Only keys on
+  // the explicit allowlist below are rendered, so an attacker cannot reflect arbitrary
+  // text into the alert via the query string (phishing primitive); the text itself is
+  // resolved through the flash.* i18n bundle, never the raw query value.
   // home-flash-query-message
+  const ALLOWED_FLASH_KEYS = new Set(["login_required", "session_expired"]);
   const flashParams = new URLSearchParams(location.search);
   const errKey = flashParams.get("error");
   const msgKey = flashParams.get("msg");
-  if (errKey) {
+  if (errKey && ALLOWED_FLASH_KEYS.has(errKey)) {
     renderHomeFlash(t("flash." + errKey), "danger");
-  } else if (msgKey) {
+  } else if (msgKey && ALLOWED_FLASH_KEYS.has(msgKey)) {
     renderHomeFlash(t("flash." + msgKey), "info");
   } else {
     renderHomeFlash(null);
