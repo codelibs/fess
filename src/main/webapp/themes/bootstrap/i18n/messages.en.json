@@ -205,7 +205,7 @@
   "labels.chat_step_answer": "Answer",
   "labels.chat_retry": "Retry",
   "labels.chat_dismiss": "Dismiss",
-  "labels.chat_retrying": "Retrying…",
+  "labels.chat_retrying": "Retrying… ({attempt}/{max}, next attempt in {seconds}s)",
   "labels.chat_waiting_queue": "Waiting in queue…",
   "labels.chat_fallback_model": "Falling back to alternate model…",
   "labels.chat_warning_token_exhausted": "Token budget exhausted; response truncated.",
@@ -231,5 +231,6 @@
   "labels.cache_not_found": "The cached content is not available.",
   "labels.cache_loading": "Loading cached content…",
   "labels.chat_source_fallback": "(source)",
-  "labels.chat_source_type_document": "Document"
+  "labels.chat_source_type_document": "Document",
+  "labels.chat_filter_search_placeholder": "Search filters…"
 }

@@ -205,7 +205,7 @@
   "labels.chat_step_answer": "回答",
   "labels.chat_retry": "再試行",
   "labels.chat_dismiss": "閉じる",
-  "labels.chat_retrying": "再試行中…",
+  "labels.chat_retrying": "再試行中… ({attempt}/{max}、{seconds} 秒後に再試行)",
   "labels.chat_waiting_queue": "順番待ち中…",
   "labels.chat_fallback_model": "代替モデルに切り替えています…",
   "labels.chat_warning_token_exhausted": "トークン上限に到達しました。応答が打ち切られました。",
@@ -231,5 +231,6 @@
   "labels.cache_not_found": "キャッシュされたコンテンツはありません。",
   "labels.cache_loading": "キャッシュされたコンテンツを読み込み中…",
   "labels.chat_source_fallback": "(出典)",
-  "labels.chat_source_type_document": "ドキュメント"
+  "labels.chat_source_type_document": "ドキュメント",
+  "labels.chat_filter_search_placeholder": "フィルターを検索…"
 }

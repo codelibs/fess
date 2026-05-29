@@ -195,6 +195,11 @@ export function sseStream(path, body, onEvent, onError) {
       buffer += decoder.decode();
       // Flush any remaining partial frame (no trailing blank line).
       if (buffer.trim() !== "") dispatchFrame(buffer, onEvent);
+      // D5d: Emit a synthetic terminal event so consumers can finalise after
+      // a premature EOF (server closed connection without a done/error frame).
+      // The normal done/error path nulls out currentStream first, making this
+      // a no-op in the expected case.
+      if (onEvent) onEvent({ type: "eof", data: null });
     } catch (e) {
       if (signal.aborted) return;
       if (onError) onError(new NetworkError(e));

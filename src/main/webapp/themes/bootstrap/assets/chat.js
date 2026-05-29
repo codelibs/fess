@@ -231,10 +231,40 @@ function buildFilterPanel() {
     filterBadge.classList.toggle("d-none", checked === 0);
   }
 
+  /**
+   * D5e: Add a per-group filter search input that live-filters checkbox rows
+   * by case-insensitive substring of their label text. Auto-hidden when the
+   * group has <= 10 items.
+   *
+   * @param {HTMLElement} groupWrap - container element to append rows to
+   * @param {HTMLElement[]} rowEls  - all label elements in this group
+   */
+  function attachGroupSearch(groupWrap, rowEls) {
+    if (rowEls.length <= 10) return; // auto-hide when <= 10 items
+    const searchInput = el("input", {
+      className: "form-control form-control-sm mb-1 chat-filter-search",
+      attrs: {
+        type: "search",
+        placeholder: t("labels.chat_filter_search_placeholder"),
+        "aria-label": t("labels.chat_filter_search_placeholder")
+      }
+    });
+    groupWrap.insertBefore(searchInput, groupWrap.firstChild);
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.toLowerCase();
+      for (const row of rowEls) {
+        const text = row.textContent.toLowerCase();
+        row.hidden = q.length > 0 && !text.includes(q);
+      }
+    });
+  }
+
   // Label options
   if (labelOptions.length > 0) {
+    const groupWrap = el("div", { className: "chat-filter-group" });
     const groupLabel = el("div", { className: "fw-semibold small mb-1", text: t("labels.facet_label_title") });
-    filterBody.appendChild(groupLabel);
+    groupWrap.appendChild(groupLabel);
+    const rowEls = [];
     for (const opt of labelOptions) {
       const labelEl = el("label", { className: "d-flex align-items-center gap-1 small mb-1" });
       const cb = el("input", { attrs: { type: "checkbox", "data-filter-type": "label", "data-filter-value": opt.value || opt } });
@@ -242,15 +272,20 @@ function buildFilterPanel() {
       checkboxes.push(cb);
       labelEl.appendChild(cb);
       labelEl.appendChild(document.createTextNode(opt.label || opt.value || opt));
-      filterBody.appendChild(labelEl);
+      groupWrap.appendChild(labelEl);
+      rowEls.push(labelEl);
     }
+    attachGroupSearch(groupWrap, rowEls);
+    filterBody.appendChild(groupWrap);
   }
 
   // Facet views
   for (const facetView of facetViews) {
-    const groupLabel = el("div", { className: "fw-semibold small mb-1 mt-2", text: facetView.title || "" });
-    filterBody.appendChild(groupLabel);
+    const groupWrap = el("div", { className: "chat-filter-group mt-2" });
+    const groupLabel = el("div", { className: "fw-semibold small mb-1", text: facetView.title || "" });
+    groupWrap.appendChild(groupLabel);
     const queries = facetView.queryMap || facetView.queries || [];
+    const rowEls = [];
     for (const [key, val] of (Array.isArray(queries) ? queries.map(q => [q.label || q, q.value || q]) : Object.entries(queries))) {
       const labelEl = el("label", { className: "d-flex align-items-center gap-1 small mb-1" });
       const cb = el("input", { attrs: { type: "checkbox", "data-filter-type": "ex_q", "data-filter-value": val } });
@@ -258,8 +293,11 @@ function buildFilterPanel() {
       checkboxes.push(cb);
       labelEl.appendChild(cb);
       labelEl.appendChild(document.createTextNode(key));
-      filterBody.appendChild(labelEl);
+      groupWrap.appendChild(labelEl);
+      rowEls.push(labelEl);
     }
+    attachGroupSearch(groupWrap, rowEls);
+    filterBody.appendChild(groupWrap);
   }
 
   clearBtn.addEventListener("click", () => {
@@ -753,7 +791,13 @@ function buildEventHandlers(ui) {
     }
 
     if (type === "retry") {
-      if (activeBubble) activeBubble.setStatusLine(t("labels.chat_retrying"));
+      // D5a: Interpolate attempt/max_attempts/sleep_ms from the retry event.
+      const seconds = Math.max(1, Math.round(((data && data.sleep_ms) || 0) / 1000));
+      if (activeBubble) activeBubble.setStatusLine(t("labels.chat_retrying", {
+        attempt: (data && data.attempt != null) ? data.attempt : "?",
+        max: (data && data.max_attempts != null) ? data.max_attempts : "?",
+        seconds
+      }));
       return;
     }
 
@@ -917,7 +961,13 @@ function submitQuestion(question, uiRefs) {
     }
 
     if (type === "retry") {
-      activeBubble.setStatusLine(t("labels.chat_retrying"));
+      // D5a: Interpolate attempt/max_attempts/sleep_ms from the retry event.
+      const seconds = Math.max(1, Math.round(((data && data.sleep_ms) || 0) / 1000));
+      activeBubble.setStatusLine(t("labels.chat_retrying", {
+        attempt: (data && data.attempt != null) ? data.attempt : "?",
+        max: (data && data.max_attempts != null) ? data.max_attempts : "?",
+        seconds
+      }));
       return;
     }
 
@@ -935,6 +985,23 @@ function submitQuestion(question, uiRefs) {
       const code = data && data.code;
       if (code === "reasoning_token_exhausted" || code === "token_exhausted") {
         activeBubble.setStatusLine(t("labels.chat_warning_token_exhausted"));
+      }
+      return;
+    }
+
+    if (type === "eof") {
+      // D5d: Premature EOF — only act if stream is still considered active
+      // (currentStream not yet nulled by a done/error event).
+      if (currentStream !== null) {
+        currentStream = null;
+        if (inputEl) inputEl.disabled = false;
+        if (submitEl) submitEl.disabled = false;
+        if (mdBuffer) {
+          statusLozenge.setStatus("ready");
+        } else {
+          statusLozenge.setStatus("error");
+          errorBanner.show(t("error.server"));
+        }
       }
       return;
     }
@@ -1286,9 +1353,20 @@ export function attachStandalone() {
     submitQuestion(q, refs);
   }
 
-  // Char counter (E.9)
+  // Char counter (E.9) + D5b warning/danger thresholds + D5c auto-resize
   textarea.addEventListener("input", () => {
-    charNum.textContent = String(textarea.value.length);
+    const len = textarea.value.length;
+    charNum.textContent = String(len);
+    // D5b: Toggle warning/danger classes on the char-counter span.
+    charCountSpan.classList.remove("warning", "danger");
+    if (len >= 3800) {
+      charCountSpan.classList.add("danger");
+    } else if (len >= 3200) {
+      charCountSpan.classList.add("warning");
+    }
+    // D5c: Auto-resize textarea up to 150px.
+    textarea.style.height = "auto";
+    textarea.style.height = Math.min(textarea.scrollHeight, 150) + "px";
   });
 
   // IME composition guard for standalone textarea (CJK and other composing keyboards)
@@ -1304,6 +1382,9 @@ export function attachStandalone() {
       if (q && !textarea.disabled) {
         textarea.value = "";
         charNum.textContent = "0";
+        // D5b: clear warning/danger; D5c: reset height
+        charCountSpan.classList.remove("warning", "danger");
+        textarea.style.height = "auto";
         doSubmit(q);
       }
     }
@@ -1314,6 +1395,9 @@ export function attachStandalone() {
     if (q && !textarea.disabled) {
       textarea.value = "";
       charNum.textContent = "0";
+      // D5b: clear warning/danger; D5c: reset height
+      charCountSpan.classList.remove("warning", "danger");
+      textarea.style.height = "auto";
       doSubmit(q);
     }
   });
@@ -1346,6 +1430,9 @@ export function attachStandalone() {
     textarea.disabled = false;
     sendBtn.disabled = false;
     lastQuestion = "";
+    // D5b: clear warning/danger; D5c: reset height
+    charCountSpan.classList.remove("warning", "danger");
+    textarea.style.height = "auto";
   });
 
   // Hide progress strip on done/error (done via polling setStatus)

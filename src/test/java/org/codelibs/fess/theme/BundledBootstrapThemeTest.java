@@ -340,4 +340,27 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("phaseStrip.complete("));
         assertTrue(js.contains("data.hit_count"));
     }
+
+    @Test
+    public void test_chat5Features() throws Exception {
+        final String chat = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        final String api = Files.readString(THEME_DIR.resolve("assets/api.js"), StandardCharsets.UTF_8);
+        final String en = Files.readString(THEME_DIR.resolve("i18n/messages.en.json"), StandardCharsets.UTF_8);
+        // D5a: retry interpolation
+        assertTrue(chat.contains("data.sleep_ms"));
+        assertTrue(en.contains("{attempt}") && en.contains("{max}") && en.contains("{seconds}"));
+        // D5c: auto-resize
+        assertTrue(chat.contains("scrollHeight, 150"));
+        // D5d: eof event in api.js and handled in chat.js
+        assertTrue(api.contains("type: \"eof\"") && chat.contains("\"eof\""));
+        // D5e: per-group filter search
+        assertTrue(chat.contains("chat-filter-search"));
+    }
+
+    @Test
+    public void test_markdownTablesBlockquote() throws Exception {
+        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
+        assertTrue(md.contains("<table") && md.contains("<thead>") && md.contains("<tbody>"));
+        assertTrue(md.contains("<blockquote>") && md.contains("TABLE_DELIM_RE"));
+    }
 }

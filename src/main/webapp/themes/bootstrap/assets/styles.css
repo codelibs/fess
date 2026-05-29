@@ -118,6 +118,9 @@ cite.result-site-path { color: var(--bs-success); font-size: .85rem; font-style:
 /* Input area */
 .input-wrapper .input-footer { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--bs-secondary-color); }
 .char-counter { white-space: nowrap; }
+/* D5b: Char-counter warning (80% of 4000 = 3200) and danger (95% = 3800) thresholds */
+.char-counter.warning { color: var(--bs-warning); }
+.char-counter.danger { color: var(--bs-danger); }
 /* Filter panel */
 .chat-filter-panel .card-body { max-height: 260px; overflow-y: auto; }
 /* Status line below bubble */
