@@ -838,6 +838,36 @@ public class ThemeViewActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_serveIndex_busy_emitsErrorCodeHeader429() throws Exception {
+        // ERR-1: /error/busy must yield HTTP 429 AND X-Fess-Error-Code: 429.
+        // busy is NOT mapped to 503 — it is a rate-limit/overload signal distinct from
+        // true service-unavailable (which is only reachable via an explicit app 503).
+        final Path tmp = Files.createTempDirectory("tva-busy-429-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/busy");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            assertTrue(sr.getHttpStatus().isPresent(), "HTTP status must be set for /error/busy");
+            assertEquals(429, (int) sr.getHttpStatus().get());
+            final Map<String, String[]> headers = sr.getHeaderMap();
+            assertNotNull(headers.get("X-Fess-Error-Code"), "X-Fess-Error-Code header must be set for /error/busy");
+            assertEquals("429", headers.get("X-Fess-Error-Code")[0]);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
     public void test_serveIndex_noHttpStatusOverride_forNonErrorRoute() throws Exception {
         // For non-error routes the HTTP status must NOT be set (SPA renders normally).
         final Path tmp = Files.createTempDirectory("tva-status-");
