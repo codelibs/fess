@@ -549,7 +549,11 @@ async function showSuggest(q) {
     return;
   }
   try {
-    const env = await api.get("/suggest-words", { q, num: 10, fn: ["_default", "content", "title"] });
+    const suggestParams = { q, num: 10, fn: ["_default", "content", "title"] };
+    if (Array.isArray(state.lang) && state.lang.length > 0) suggestParams.lang = state.lang;
+    const labelFilters = (state.fields && state.fields.label) || [];
+    if (labelFilters.length > 0) suggestParams.label = labelFilters;
+    const env = await api.get("/suggest-words", suggestParams);
     const items = env.suggest_words || [];
     if (items.length === 0) {
       dropdown.classList.add("d-none");
