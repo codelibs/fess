@@ -275,6 +275,12 @@ export function attach() {
   // Text fields
   const fAll   = makeField("advance.all",   "adv-all");
   const fExact = makeField("advance.exact", "adv-exact");
+
+  // Prefill the must-contain-words field from the incoming ?q= so navigating to
+  // advanced search from the header/home with a query carries it over (JSP parity).
+  const incomingQ = new URLSearchParams(location.search).get("q");
+  if (incomingQ && fAll && fAll.input) { fAll.input.value = incomingQ; }
+
   const fAny   = makeField("advance.any",   "adv-any");
   const fNone  = makeField("advance.none",  "adv-none");
   const fSite  = makeField("advance.site",  "adv-site");

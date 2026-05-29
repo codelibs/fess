@@ -280,6 +280,39 @@ function hasSearchQuery() {
   return new URLSearchParams(location.search).get("q")?.trim().length > 0;
 }
 
+/**
+ * Forward the current query to the "Advanced" links so navigating to /advance
+ * carries ?q= (the SPA router preserves the query string, and advance.js
+ * prefills the must-contain-words field from it). JSP parity: the header/options
+ * Advanced link forwards ?q=${q}.
+ *
+ * The query is taken from whichever search box is populated (header or home),
+ * falling back to the current URL's q= param.
+ */
+function updateAdvanceLinks() {
+  const headerVal = (document.getElementById("search-input") || {}).value;
+  const homeVal = (document.getElementById("home-search-input") || {}).value;
+  const urlQ = new URLSearchParams(location.search).get("q") || "";
+  const q = (headerVal || homeVal || urlQ || "").trim();
+  document.querySelectorAll('a[href^="/advance"]').forEach(a => {
+    a.setAttribute("href", q ? "/advance?q=" + encodeURIComponent(q) : "/advance");
+  });
+}
+
+/** Wire input/route hooks so the Advanced links stay in sync with the query. */
+function attachAdvanceLinkSync() {
+  for (const id of ["search-input", "home-search-input"]) {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.advLinkSync) {
+      el.dataset.advLinkSync = "1";
+      el.addEventListener("input", updateAdvanceLinks);
+    }
+  }
+  // Refresh on every route change so a freshly shown view reflects the query.
+  document.addEventListener("fess:route:change", updateAdvanceLinks);
+  updateAdvanceLinks();
+}
+
 function registerRoutes() {
   // Home route — "/" with no q= parameter shows the centered home view.
   router.register(
@@ -401,6 +434,9 @@ async function main() {
 
   // Wire back-to-top button.
   attachBackToTop();
+
+  // Keep the "Advanced" links carrying the current query (JSP parity).
+  attachAdvanceLinkSync();
 
   // Client-side routing: register routes then attach listeners and dispatch.
   registerRoutes();

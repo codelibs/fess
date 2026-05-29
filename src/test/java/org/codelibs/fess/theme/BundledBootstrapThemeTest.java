@@ -444,4 +444,11 @@ public class BundledBootstrapThemeTest {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("home-sort-select"), "search.js must populate the home option controls");
     }
+
+    @Test
+    public void test_advanceJs_prefillsFromQueryParam() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("params.get(\"q\")") || js.contains("get(\"q\")"),
+                "advance.js must prefill the must-contain-words field from the incoming q param");
+    }
 }
