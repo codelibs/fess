@@ -228,8 +228,11 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
             assertEquals("no-store", headers.get("Cache-Control")[0]);
             assertNotNull(headers.get("Content-Security-Policy"), "CSP header must be set");
-            assertTrue(headers.get("Content-Security-Policy")[0].contains("default-src 'self'"));
-            assertTrue(headers.get("Content-Security-Policy")[0].contains("frame-ancestors 'none'"));
+            final String csp = headers.get("Content-Security-Policy")[0];
+            assertTrue(csp.contains("default-src 'self'"));
+            assertTrue(csp.contains("frame-src blob:"), "CSP must allow blob: frames for cache viewer: " + csp);
+            assertTrue(csp.contains("child-src blob:"), "CSP must allow blob: child-src for cache viewer: " + csp);
+            assertTrue(csp.contains("frame-ancestors 'none'"), "CSP must deny framing of this page: " + csp);
         } finally {
             Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
                 try {

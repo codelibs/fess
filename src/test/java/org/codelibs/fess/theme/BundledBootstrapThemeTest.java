@@ -76,6 +76,14 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_indexHtml_cspAllowsBlobFrameForCacheViewer() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("frame-src blob:"), "index.html CSP must allow blob: frames for cache viewer");
+        assertTrue(html.contains("child-src blob:"), "index.html CSP must allow blob: child-src for cache viewer");
+        assertTrue(html.contains("frame-ancestors 'none'"), "index.html CSP must deny framing of this page");
+    }
+
+    @Test
     public void test_coreAssetFilesArePresent() {
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/app.js")), "assets/app.js missing");
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/api.js")), "assets/api.js missing");
