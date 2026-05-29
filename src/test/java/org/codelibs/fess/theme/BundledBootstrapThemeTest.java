@@ -907,4 +907,12 @@ public class BundledBootstrapThemeTest {
                     });
         }
     }
+
+    @Test
+    public void test_homeSuggestWired() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"home-suggest-dropdown\""), "index.html must contain the home suggest dropdown (parity #1)");
+        assertTrue(js.contains("search.attachSuggest(input, homeSuggest"), "app.js must attach suggest to the home input (parity #1)");
+    }
 }

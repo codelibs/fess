@@ -216,6 +216,18 @@ function attachHomeView() {
   // Autofocus the search box when the home view is revealed (parity with index.jsp).
   // Deferred so it wins over showView()'s heading focus.
   if (input) { Promise.resolve().then(() => input.focus()); }
+  // #1 (parity index.jsp:135-137): attach the shared suggest dropdown to the home
+  // search box, forwarding the selected home languages as the suggest lang filter.
+  const homeSuggest = document.getElementById("home-suggest-dropdown");
+  if (input && homeSuggest && !input.dataset.suggestAttached) {
+    input.dataset.suggestAttached = "1";
+    search.attachSuggest(input, homeSuggest, {
+      get lang() {
+        const sel = document.getElementById("home-lang-select");
+        return sel ? Array.from(sel.selectedOptions).map(o => o.value).filter(v => v !== "") : [];
+      }
+    });
+  }
   renderHomePopularWords();
 }
 

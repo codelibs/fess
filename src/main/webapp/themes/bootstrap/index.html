@@ -65,13 +65,16 @@
       <div id="home-flash" class="d-none" role="alert" aria-live="assertive" aria-atomic="true"></div>
       <div class="text-center">
         <h2 class="mb-4"><img src="/images/logo.png" alt="" data-i18n-alt="labels.header_brand_name" class="home-logo"></h2>
-        <form id="home-search-form" class="d-flex justify-content-center mb-3" role="search" aria-label="Home search">
+        <form id="home-search-form" class="d-flex justify-content-center mb-3 position-relative" role="search" aria-label="Home search">
           <input id="home-search-input" type="search" class="form-control form-control-lg home-search-input"
                  name="q" maxlength="1000" autocomplete="off"
                  data-i18n-placeholder="search.placeholder"
+                 role="combobox" aria-expanded="false" aria-controls="home-suggest-dropdown"
+                 aria-autocomplete="list" aria-haspopup="listbox"
                  aria-label="Search query">
           <button type="submit" class="btn btn-primary btn-lg ms-2"
                   data-i18n="search.button">Search</button>
+          <ul class="list-group suggest-dropdown position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="home-suggest-dropdown" role="listbox" aria-label="Search suggestions"></ul>
         </form>
         <div class="mb-3">
           <button class="btn btn-link btn-sm" type="button" id="home-options-toggle"
