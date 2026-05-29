@@ -206,7 +206,8 @@ public class BundledBootstrapThemeTest {
 
     @Test
     public void test_searchJs_setsPerQueryDocumentTitle() throws Exception {
-        assertTrue(Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8).contains("document.title = state.q ? t(\"page.search_title\")"));
+        assertTrue(Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8)
+                .contains("document.title = state.q ? t(\"page.search_title\")"));
     }
 
     @Test
