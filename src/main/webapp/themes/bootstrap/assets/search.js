@@ -800,12 +800,25 @@ export function runFromUrl() {
   runSearch();
 }
 
+function ensureOsddLink() {
+  const cfg = api.getConfig();
+  if (!cfg) return;
+  if (document.querySelector('link[rel="search"]')) return;
+  const link = document.createElement("link");
+  link.setAttribute("rel", "search");
+  link.setAttribute("type", "application/opensearchdescription+xml");
+  link.setAttribute("title", cfg.site_name || "Fess");
+  link.setAttribute("href", "/osdd");
+  document.head.appendChild(link);
+}
+
 export function attach() {
   if (attached) {
     console.warn("search already attached — skipping duplicate attach()");
     return;
   }
   attached = true;
+  ensureOsddLink();
   ensureRouteListener(); // H.4: cancel suggest timer when navigating away
   const form = document.getElementById("search-form");
   const input = document.getElementById("search-input");
