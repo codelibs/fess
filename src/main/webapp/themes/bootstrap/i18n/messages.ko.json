@@ -11,6 +11,7 @@
   "search.sort.created_asc": "오래된순",
   "search.sort.length_desc": "길이",
   "facet.title": "패싯",
+  "facet.filter_button": "필터",
   "facet.clear": "초기화",
   "facet.empty": "패싯 없음 — 검색을 실행하세요.",
   "facet.not_found": "일치하는 필터가 없습니다.",

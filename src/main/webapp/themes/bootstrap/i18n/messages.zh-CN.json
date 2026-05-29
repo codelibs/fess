@@ -11,6 +11,7 @@
   "search.sort.created_asc": "最旧",
   "search.sort.length_desc": "长度",
   "facet.title": "分面",
+  "facet.filter_button": "筛选",
   "facet.clear": "清除",
   "facet.empty": "暂无分面 — 请执行搜索。",
   "facet.not_found": "没有匹配的筛选条件。",

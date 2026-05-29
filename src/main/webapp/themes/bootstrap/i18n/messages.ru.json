@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Старейшие",
   "search.sort.length_desc": "Длина",
   "facet.title": "Фасеты",
+  "facet.filter_button": "Фильтры",
   "facet.clear": "Очистить",
   "facet.empty": "Фасеты отсутствуют — выполните поиск.",
   "facet.not_found": "No matching filters.",

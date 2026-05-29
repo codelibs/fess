@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Älteste",
   "search.sort.length_desc": "Länge",
   "facet.title": "Facetten",
+  "facet.filter_button": "Filter",
   "facet.clear": "Löschen",
   "facet.empty": "Noch keine Facetten — bitte suchen.",
   "facet.not_found": "Keine passenden Filter.",

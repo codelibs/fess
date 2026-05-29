@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Oldest",
   "search.sort.length_desc": "Length",
   "facet.title": "Facets",
+  "facet.filter_button": "Filters",
   "facet.clear": "Clear",
   "facet.empty": "No facets yet — run a search.",
   "facet.not_found": "No matching filters.",

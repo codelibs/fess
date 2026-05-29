@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Oudste",
   "search.sort.length_desc": "Lengte",
   "facet.title": "Facetten",
+  "facet.filter_button": "Filters",
   "facet.clear": "Wissen",
   "facet.empty": "Nog geen facetten — voer een zoekopdracht uit.",
   "facet.not_found": "No matching filters.",

@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Najstarsze",
   "search.sort.length_desc": "Długość",
   "facet.title": "Aspekty",
+  "facet.filter_button": "Filtry",
   "facet.clear": "Wyczyść",
   "facet.empty": "Brak aspektów — wykonaj wyszukiwanie.",
   "facet.not_found": "No matching filters.",

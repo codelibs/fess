@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Mais antigo",
   "search.sort.length_desc": "Comprimento",
   "facet.title": "Facetas",
+  "facet.filter_button": "Filtros",
   "facet.clear": "Limpar",
   "facet.empty": "Nenhuma faceta ainda — execute uma pesquisa.",
   "facet.not_found": "Nenhum filtro correspondente.",

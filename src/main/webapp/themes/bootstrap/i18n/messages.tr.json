@@ -11,6 +11,7 @@
   "search.sort.created_asc": "En eski",
   "search.sort.length_desc": "Uzunluk",
   "facet.title": "Yönler",
+  "facet.filter_button": "Filtreler",
   "facet.clear": "Temizle",
   "facet.empty": "Henüz yön yok — arama yapın.",
   "facet.not_found": "No matching filters.",

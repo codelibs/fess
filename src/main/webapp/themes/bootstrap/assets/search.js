@@ -217,7 +217,7 @@ function buildResultCard(d, queryId, order) {
   if (features.clipboard_copy_icon) {
     const rawUrl = d.url_link || d.url || "";
     const copyBtn = el("button", {
-      className: "btn btn-link btn-sm copy-url-btn p-0 ms-1",
+      className: "btn btn-link btn-sm copy-url-btn p-0 ms-1 d-print-none",
       attrs: {
         type: "button",
         "aria-label": t("result.copy_url") + ": " + rawUrl
@@ -246,7 +246,7 @@ function buildResultCard(d, queryId, order) {
   if (d.has_cache === "true" || d.has_cache === true) {
     const hlParam = state.highlightParams || ("&hq=" + encodeURIComponent(state.q || ""));
     const cacheLink = el("a", {
-      className: "text-muted",
+      className: "text-muted d-print-none",
       text: t("result.cache"),
       attrs: { href: `/cache/?docId=${encodeURIComponent(d.doc_id || "")}${hlParam}`, target: "_blank", rel: "noopener" }
     });

@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Más antiguo",
   "search.sort.length_desc": "Longitud",
   "facet.title": "Facetas",
+  "facet.filter_button": "Filtros",
   "facet.clear": "Limpiar",
   "facet.empty": "Sin facetas aún — realice una búsqueda.",
   "facet.not_found": "No hay filtros coincidentes.",

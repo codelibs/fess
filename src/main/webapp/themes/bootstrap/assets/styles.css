@@ -1,5 +1,9 @@
 /* Bootstrap static theme — overrides on top of /css/bootstrap.min.css */
 :root { --fess-card-radius: 0.5rem; }
+/* Offset for fixed-top navbar (GAP A). JS (app.js) refines this to the live header height; these are fallbacks. */
+body { padding-top: 4rem; }
+@media (max-width: 767.98px) { body { padding-top: 6.5rem; } }
+@media print { body { padding-top: 0 !important; } }
 .result-card { border: 1px solid var(--bs-border-color); border-radius: var(--fess-card-radius); padding: 1rem; margin-bottom: 1rem; background: var(--bs-body-bg); transition: box-shadow .15s ease-in-out; display: flex; gap: 1rem; align-items: flex-start; }
 .result-card:hover { box-shadow: 0 .25rem .75rem rgba(0,0,0,.08); }
 .result-card-body { flex: 1; min-width: 0; }

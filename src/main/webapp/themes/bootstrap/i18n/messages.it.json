@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Più vecchio",
   "search.sort.length_desc": "Lunghezza",
   "facet.title": "Facce",
+  "facet.filter_button": "Filtri",
   "facet.clear": "Cancella",
   "facet.empty": "Nessuna faccia ancora — esegui una ricerca.",
   "facet.not_found": "No matching filters.",

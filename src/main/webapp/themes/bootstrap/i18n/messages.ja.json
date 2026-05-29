@@ -11,6 +11,7 @@
   "search.sort.created_asc": "古い順",
   "search.sort.length_desc": "本文の長さ",
   "facet.title": "ファセット",
+  "facet.filter_button": "フィルター",
   "facet.clear": "クリア",
   "facet.empty": "ファセットなし — 検索してください。",
   "facet.not_found": "該当する絞り込みがありません。",

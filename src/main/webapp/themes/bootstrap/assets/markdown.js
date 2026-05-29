@@ -89,6 +89,8 @@ const OL_TOP_RE = /^(\d+)\. (.+)$/;
 // D6: GFM table delimiter row — cells of ':?-+:?' separated by '|'.
 // Accepted limitation: column alignment and nested-block-in-cell are NOT rendered.
 const TABLE_DELIM_RE = /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$/;
+// GAP D2: Horizontal rule — three or more -, *, or _ on a line by themselves.
+const HR_RE = /^(?:-{3,}|\*{3,}|_{3,})$/;
 
 // ---------------------------------------------------------------------------
 // Nested list rendering
@@ -244,6 +246,9 @@ function processBlock(block) {
 
   const lines = block.split("\n");
 
+  // GAP D2: Horizontal rule — a single-line block consisting solely of rule chars.
+  if (lines.length === 1 && HR_RE.test(lines[0].trim())) return "<hr>";
+
   // Heading: all lines must be headings for it to render as headings
   // (or just first line for single-line block).
   if (lines.length === 1) {
@@ -359,6 +364,17 @@ function inlineMarkdown(text) {
     const isExternal = /^https?:\/\//i.test(rawUrl.trim());
     const extras = isExternal ? ' target="_blank" rel="nofollow noopener noreferrer"' : "";
     return '<a href="' + url + '"' + extras + ">" + linkText + "</a>";
+  });
+
+  // Angle-bracket autolinks: <https://…> (post-escape form is &lt;…&gt;).
+  // Matches the legacy marked.js gfm autolink behaviour.
+  s = s.replace(/&lt;(https?:\/\/[^\s]+?)&gt;/g, (_m, url) => {
+    // url is already HTML-escaped (& -> &amp;); restore for the scheme check only.
+    const raw = url.replace(/&amp;/g, "&").trim().toLowerCase();
+    if (/^javascript\s*:/i.test(raw) || /^data\s*:/i.test(raw)) {
+      return "&lt;" + url + "&gt;";
+    }
+    return '<a href="' + url + '" target="_blank" rel="nofollow noopener noreferrer">' + url + "</a>";
   });
 
   // Restore inline code placeholders.

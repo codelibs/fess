@@ -11,6 +11,7 @@
   "search.sort.created_asc": "सबसे पुराना",
   "search.sort.length_desc": "लंबाई",
   "facet.title": "पहलू",
+  "facet.filter_button": "फ़िल्टर",
   "facet.clear": "साफ करें",
   "facet.empty": "अभी कोई पहलू नहीं — खोज करें।",
   "facet.not_found": "No matching filters.",

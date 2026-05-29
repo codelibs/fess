@@ -345,6 +345,13 @@ function setChatNavSearchMode(onChat) {
   }
 }
 
+// GAP A: keep body top-padding equal to the fixed-top header height so content is never hidden beneath it.
+function syncHeaderOffset() {
+  const header = document.querySelector("header.navbar");
+  if (!header) return;
+  document.body.style.paddingTop = header.offsetHeight + "px";
+}
+
 /** Attach back-to-top button behaviour. */
 function attachBackToTop() {
   const btn = document.getElementById("back-to-top");
@@ -547,6 +554,14 @@ async function main() {
 
   // Wire back-to-top button.
   attachBackToTop();
+
+  // GAP A: sync body offset to live header height; keep in sync on resize.
+  syncHeaderOffset();
+  window.addEventListener("resize", syncHeaderOffset);
+  if (window.ResizeObserver) {
+    const header = document.querySelector("header.navbar");
+    if (header) new ResizeObserver(syncHeaderOffset).observe(header);
+  }
 
   // Keep the "Advanced" links carrying the current query (JSP parity).
   attachAdvanceLinkSync();

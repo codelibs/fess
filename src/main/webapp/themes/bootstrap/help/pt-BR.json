@@ -3,52 +3,52 @@
     {
       "id": "basic",
       "title": "Pesquisa básica",
-      "html": "<p>(machine translation pending) To search, type your query into the search box and press Enter (or click the Search button).</p><p>Multiple words are combined with AND by default. For example, <code>open source</code> finds documents containing both \"open\" and \"source\".</p>"
+      "html": "<p>Para pesquisar, digite sua consulta na caixa de pesquisa e pressione Enter (ou clique no botão Pesquisar).</p><p>Várias palavras são combinadas com AND por padrão. Por exemplo, <code>open source</code> encontra documentos que contêm tanto \"open\" quanto \"source\".</p>"
     },
     {
       "id": "operators",
       "title": "Operadores de pesquisa",
-      "html": "<p>(machine translation pending)</p><table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operator</th><th scope=\"col\">Description</th><th scope=\"col\">Example</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Both terms must appear</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Either term may appear</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Exclude the term</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Exact phrase</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Restrict to a site</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Restrict to a file type</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operador</th><th scope=\"col\">Descrição</th><th scope=\"col\">Exemplo</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Ambos os termos devem aparecer</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Qualquer um dos termos pode aparecer</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Excluir o termo</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Frase exata</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Restringir a um site</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Restringir a um tipo de arquivo</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
     },
     {
       "id": "wildcards",
       "title": "Curingas",
-      "html": "<p>(machine translation pending) You can use <code>*</code> to match any sequence of characters and <code>?</code> to match a single character.</p><p>Examples: <code>fess*</code> matches \"fess\", \"fessbook\", \"fessful\". <code>te?t</code> matches \"test\" or \"text\".</p>"
+      "html": "<p>Você pode usar <code>*</code> para corresponder a qualquer sequência de caracteres e <code>?</code> para corresponder a um único caractere.</p><p>Exemplos: <code>fess*</code> corresponde a \"fess\", \"fessbook\", \"fessful\". <code>te?t</code> corresponde a \"test\" ou \"text\".</p>"
     },
     {
       "id": "ranges",
       "title": "Consultas de intervalo",
-      "html": "<p>(machine translation pending) Use square brackets to search for a range of values: <code>content_length:[1024 TO 10240]</code> finds documents with sizes between 1KB and 10KB.</p>"
+      "html": "<p>Use colchetes para pesquisar um intervalo de valores: <code>content_length:[1024 TO 10240]</code> encontra documentos com tamanhos entre 1KB e 10KB.</p> Os colchetes <code>[ ]</code> incluem os limites; as chaves <code>{ }</code> os excluem, por exemplo <code>content_length:{1024 TO 10240}</code> corresponde a tamanhos estritamente maiores que 1KB e estritamente menores que 10KB."
     },
     {
       "id": "facets",
       "title": "Filtros de facetas",
-      "html": "<p>(machine translation pending) Use the sidebar facets to narrow your search by label, time period, file size, or file type. Click a facet item to apply it, and click the chip at the top of the results to remove it.</p>"
+      "html": "<p>Use as facetas da barra lateral para refinar sua pesquisa por rótulo, período de tempo, tamanho de arquivo ou tipo de arquivo. Clique em um item de faceta para aplicá-lo e clique no chip no topo dos resultados para removê-lo.</p>"
     },
     {
       "id": "shortcuts",
       "title": "Atalhos de teclado",
-      "html": "<p>(machine translation pending)</p><ul><li><code>/</code> &mdash; Focus the search box</li><li><code>Esc</code> &mdash; Close suggestions or modal</li><li><code>Enter</code> &mdash; Run search or select suggestion</li></ul>"
+      "html": "<ul><li><code>/</code> &mdash; Focar a caixa de pesquisa</li><li><code>Esc</code> &mdash; Fechar sugestões ou modal</li><li><code>Enter</code> &mdash; Executar pesquisa ou selecionar sugestão</li></ul>"
     },
     {
       "id": "field",
       "title": "Pesquisa por campo",
-      "html": "<p>(machine translation pending) You can search any field by typing the field name followed by a colon <code>:</code> and then the term you are looking for. For example, to find documents with \"Fess\" in the title:</p><pre>title:Fess</pre><p>The available fields include <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, and <code>mimetype</code>. These are customizable.</p>"
+      "html": "<p>Você pode pesquisar em qualquer campo digitando o nome do campo seguido de dois pontos <code>:</code> e depois o termo que está procurando. Por exemplo, para encontrar documentos com \"Fess\" no título:</p><pre>title:Fess</pre><p>Os campos disponíveis incluem <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> e <code>mimetype</code>. Esses campos são personalizáveis.</p>"
     },
     {
       "id": "sort",
       "title": "Ordenação",
-      "html": "<p>(machine translation pending) The <code>sort:</code> operator sorts results by a specified field. The format is <code>sort:&lt;field&gt;.&lt;order&gt;</code>, where <code>&lt;order&gt;</code> is <code>asc</code> or <code>desc</code>. For example, to search for \"Fess\" sorted by content length descending:</p><pre>Fess sort:content_length.desc</pre><p>Available sort fields include <code>created</code>, <code>content_length</code>, and <code>last_modified</code>. These are customizable.</p>"
+      "html": "<p>O operador <code>sort:</code> ordena os resultados por um campo especificado. O formato é <code>sort:&lt;field&gt;.&lt;order&gt;</code>, onde <code>&lt;order&gt;</code> é <code>asc</code> ou <code>desc</code>. Por exemplo, para pesquisar \"Fess\" ordenado por tamanho de conteúdo de forma decrescente:</p><pre>Fess sort:content_length.desc</pre><p>Os campos de ordenação disponíveis incluem <code>created</code>, <code>content_length</code> e <code>last_modified</code>. Esses campos são personalizáveis.</p>"
     },
     {
       "id": "boost",
       "title": "Boost",
-      "html": "<p>(machine translation pending) To boost a term, use the <code>^</code> symbol followed by a boost factor (a number) at the end of the search term.</p><pre>Fess^100</pre>"
+      "html": "<p>Para impulsionar um termo, use o símbolo <code>^</code> seguido de um fator de impulso (um número) no final do termo de pesquisa. Um fator mais alto aumenta a pontuação de relevância desse termo.</p><pre>Fess^100</pre>"
     },
     {
       "id": "fuzzy",
       "title": "Pesquisa difusa",
-      "html": "<p>(machine translation pending) To perform a fuzzy search, use the <code>~</code> symbol at the end of a single word. The optional number after <code>~</code> (0 to 1) controls the similarity threshold. The default is <code>0.5</code>.</p><pre>Fess~0.5</pre>"
+      "html": "<p>Para realizar uma pesquisa difusa, use o símbolo <code>~</code> no final de uma única palavra. O número opcional após <code>~</code> (0 a 1) controla o limiar de similaridade. O valor padrão é <code>0.5</code>.</p><pre>Fess~0.5</pre>"
     }
   ]
 }

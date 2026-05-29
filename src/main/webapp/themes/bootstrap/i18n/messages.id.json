@@ -11,6 +11,7 @@
   "search.sort.created_asc": "Terlama",
   "search.sort.length_desc": "Panjang",
   "facet.title": "Faset",
+  "facet.filter_button": "Filter",
   "facet.clear": "Hapus",
   "facet.empty": "Belum ada faset — lakukan pencarian.",
   "facet.not_found": "No matching filters.",

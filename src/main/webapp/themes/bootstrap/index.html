@@ -16,7 +16,7 @@
   <a href="#page-root" class="visually-hidden-focusable position-absolute top-0 start-0 m-2" data-i18n="aria.skip_to_main">Skip to main content</a>
   <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. -->
   <h1 class="visually-hidden" data-i18n="page.heading">Fess Search</h1>
-  <header class="navbar navbar-expand-lg bg-body-tertiary border-bottom" role="banner">
+  <header class="navbar navbar-expand-md fixed-top bg-dark d-print-none" data-bs-theme="dark" role="banner">
     <div class="container-fluid">
       <a class="navbar-brand fw-semibold d-flex align-items-center" href="/" id="brand-link"><img src="/images/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="brand-logo"></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
@@ -36,7 +36,7 @@
             aria-autocomplete="list"
             aria-haspopup="listbox">
         <button class="btn btn-primary ms-2" type="submit" id="search-submit" data-i18n="search.button">Search</button>
-        <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions"></ul>
+        <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions" data-bs-theme="light"></ul>
       </form>
       <div class="collapse navbar-collapse" id="main-nav">
         <nav class="d-flex align-items-center me-2" aria-label="Site navigation">
@@ -109,18 +109,29 @@
       <div id="search-error" class="alert alert-danger d-none mb-2" role="alert" aria-live="assertive"></div>
       <div class="row">
         <aside class="col-lg-3 col-md-4 mb-3" role="complementary" aria-label="Facets">
-          <div class="card shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <strong data-i18n="facet.title">Facets</strong>
-              <button class="btn btn-link btn-sm p-0 d-none" id="facet-clear" data-i18n="facet.clear">Clear</button>
+          <div class="offcanvas-md offcanvas-end" tabindex="-1" id="facet-offcanvas" aria-labelledby="facet-offcanvas-title">
+            <div class="offcanvas-header d-md-none">
+              <h5 class="offcanvas-title" id="facet-offcanvas-title" data-i18n="facet.title">Facets</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#facet-offcanvas" aria-label="Close"></button>
             </div>
-            <div class="card-body" id="facet-body">
-              <p class="text-muted small mb-0" data-i18n="facet.empty">No facets yet — run a search.</p>
+            <div class="offcanvas-body">
+              <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <strong data-i18n="facet.title">Facets</strong>
+                  <button class="btn btn-link btn-sm p-0 d-none" id="facet-clear" data-i18n="facet.clear">Clear</button>
+                </div>
+                <div class="card-body" id="facet-body">
+                  <p class="text-muted small mb-0" data-i18n="facet.empty">No facets yet — run a search.</p>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
 
         <section class="col-lg-6 col-md-8" id="results-column">
+          <button class="btn btn-outline-secondary btn-sm d-md-none mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#facet-offcanvas" aria-controls="facet-offcanvas" data-i18n-aria-label="facet.filter_button">
+            <i class="fa fa-filter" aria-hidden="true"></i> <span data-i18n="facet.filter_button">Filters</span>
+          </button>
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
           </div>
@@ -128,37 +139,45 @@
           <div id="results-popular-words" class="d-none mb-2 text-muted small" aria-live="polite"></div>
           <div id="similar-doc-banner" class="alert alert-info d-none align-items-center mb-2" role="status" aria-live="polite"></div>
           <ul id="current-filters" class="list-inline mb-2"></ul>
-          <div id="search-options" class="d-flex gap-2 flex-wrap align-items-center mb-3">
-            <label class="form-label me-1 mb-0 small" for="sort-select" data-i18n="search.sort">Sort</label>
-            <select id="sort-select" class="form-select form-select-sm options-select" aria-label="Sort order"></select>
-            <label class="form-label me-1 mb-0 small" for="num-select" data-i18n="search.num">Per page</label>
-            <select id="num-select" class="form-select form-select-sm options-select" aria-label="Results per page"></select>
-            <label class="form-label me-1 mb-0 small" for="lang-select" data-i18n="search.lang">Language</label>
-            <select id="lang-select" class="form-select form-select-sm options-select" aria-label="Language filter"></select>
-            <div class="dropdown" id="label-dropdown-wrap">
-              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="label-dropdown-btn"
-                data-bs-toggle="dropdown" aria-expanded="false" data-i18n="search.labels">Labels</button>
-              <ul class="dropdown-menu label-dropdown-menu" id="label-dropdown-menu" aria-labelledby="label-dropdown-btn"></ul>
-            </div>
-            <div class="dropdown" id="geo-dropdown-wrap">
-              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="geo-dropdown-btn"
-                data-bs-toggle="dropdown" aria-expanded="false" data-i18n="search.geo">Location</button>
-              <div class="dropdown-menu geo-dropdown-menu p-3" id="geo-dropdown-menu" aria-labelledby="geo-dropdown-btn">
-                <div class="mb-2">
-                  <label for="geo-lat" class="form-label small mb-1" data-i18n="search.geo_lat">Latitude</label>
-                  <input type="text" class="form-control form-control-sm" id="geo-lat" placeholder="e.g. 35.6895">
-                </div>
-                <div class="mb-2">
-                  <label for="geo-lon" class="form-label small mb-1" data-i18n="search.geo_lon">Longitude</label>
-                  <input type="text" class="form-control form-control-sm" id="geo-lon" placeholder="e.g. 139.6917">
-                </div>
-                <div class="mb-3">
-                  <label for="geo-distance" class="form-label small mb-1" data-i18n="search.geo_distance">Distance (e.g. 1km)</label>
-                  <input type="text" class="form-control form-control-sm" id="geo-distance" placeholder="e.g. 1km">
-                </div>
-                <div class="d-flex gap-2">
-                  <button type="button" class="btn btn-primary btn-sm" id="geo-apply" data-i18n="search.geo_apply">Apply</button>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" id="geo-clear" data-i18n="search.geo_clear">Clear</button>
+          <button class="btn btn-outline-secondary btn-sm mb-2" type="button" id="search-options-toggle"
+                  data-bs-toggle="collapse" data-bs-target="#search-options"
+                  aria-expanded="false" aria-controls="search-options"
+                  data-i18n-aria-label="search.options">
+            <i class="fa fa-cog" aria-hidden="true"></i>
+          </button>
+          <div id="search-options" class="collapse mb-3">
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+              <label class="form-label me-1 mb-0 small" for="sort-select" data-i18n="search.sort">Sort</label>
+              <select id="sort-select" class="form-select form-select-sm options-select" aria-label="Sort order"></select>
+              <label class="form-label me-1 mb-0 small" for="num-select" data-i18n="search.num">Per page</label>
+              <select id="num-select" class="form-select form-select-sm options-select" aria-label="Results per page"></select>
+              <label class="form-label me-1 mb-0 small" for="lang-select" data-i18n="search.lang">Language</label>
+              <select id="lang-select" class="form-select form-select-sm options-select" aria-label="Language filter"></select>
+              <div class="dropdown" id="label-dropdown-wrap">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="label-dropdown-btn"
+                  data-bs-toggle="dropdown" aria-expanded="false" data-i18n="search.labels">Labels</button>
+                <ul class="dropdown-menu label-dropdown-menu" id="label-dropdown-menu" aria-labelledby="label-dropdown-btn"></ul>
+              </div>
+              <div class="dropdown" id="geo-dropdown-wrap">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="geo-dropdown-btn"
+                  data-bs-toggle="dropdown" aria-expanded="false" data-i18n="search.geo">Location</button>
+                <div class="dropdown-menu geo-dropdown-menu p-3" id="geo-dropdown-menu" aria-labelledby="geo-dropdown-btn">
+                  <div class="mb-2">
+                    <label for="geo-lat" class="form-label small mb-1" data-i18n="search.geo_lat">Latitude</label>
+                    <input type="text" class="form-control form-control-sm" id="geo-lat" placeholder="e.g. 35.6895">
+                  </div>
+                  <div class="mb-2">
+                    <label for="geo-lon" class="form-label small mb-1" data-i18n="search.geo_lon">Longitude</label>
+                    <input type="text" class="form-control form-control-sm" id="geo-lon" placeholder="e.g. 139.6917">
+                  </div>
+                  <div class="mb-3">
+                    <label for="geo-distance" class="form-label small mb-1" data-i18n="search.geo_distance">Distance (e.g. 1km)</label>
+                    <input type="text" class="form-control form-control-sm" id="geo-distance" placeholder="e.g. 1km">
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="geo-apply" data-i18n="search.geo_apply">Apply</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="geo-clear" data-i18n="search.geo_clear">Clear</button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -352,7 +352,7 @@ export function attach() {
   // F.1: num select — built from server config num_options
   const numNums = serverConfig.num_options && serverConfig.num_options.length > 0
     ? serverConfig.num_options
-    : [10, 20, 50, 100];
+    : [10, 20, 30, 40, 50, 100];
   const numOpts = [
     { value: "", label: t("labels.advance_search_num") },
     ...numNums.map(n => ({ value: String(n), label: String(n) })),

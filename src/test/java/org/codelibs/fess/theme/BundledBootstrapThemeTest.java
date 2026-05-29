@@ -996,4 +996,221 @@ public class BundledBootstrapThemeTest {
         assertTrue(md.contains("Math.min(hm[1].length, 6)"), "markdown.js must clamp heading level to 6 (parity #E)");
         assertFalse(md.contains("/^(#{2,4}) (.+)$/"), "markdown.js must no longer restrict headings to h2-h4 (parity #E)");
     }
+
+    // ── Parity Round 4 regression tests ────────────────────────────────────────
+
+    /**
+     * R4-1: index.html header must be dark, fixed-top, and hidden on print.
+     * The old navbar-expand-lg bg-body-tertiary pattern must be gone.
+     */
+    @Test
+    public void test_indexHtml_headerIsDarkFixedTopPrintNone() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // Positive assertions — required Bootstrap/Fess classes on the header element
+        assertTrue(html.contains("fixed-top"), "header must carry fixed-top class (parity R4 GAP-A)");
+        assertTrue(html.contains("bg-dark"), "header must carry bg-dark class (parity R4 GAP-A)");
+        assertTrue(html.contains("navbar-expand-md"), "header must carry navbar-expand-md class (parity R4 GAP-A)");
+        assertTrue(html.contains("d-print-none"), "header must carry d-print-none to hide on print (parity R4 GAP-A)");
+        // data-bs-theme="dark" on the header element so child controls inherit dark palette
+        assertTrue(html.contains("data-bs-theme=\"dark\""), "header must set data-bs-theme=\"dark\" (parity R4 GAP-A)");
+        // Negative assertions — the old classes must no longer appear on the header
+        assertFalse(html.contains("navbar-expand-lg bg-body-tertiary"),
+                "header must not use old navbar-expand-lg bg-body-tertiary classes (parity R4 GAP-A)");
+    }
+
+    /**
+     * R4-2: styles.css must offset body top-padding for the fixed header,
+     * and override to 0 in print media so no blank space appears at top of printout.
+     */
+    @Test
+    public void test_stylesCss_bodyPaddingClearsFixedHeader() throws Exception {
+        final String css = Files.readString(THEME_DIR.resolve("assets/styles.css"), StandardCharsets.UTF_8);
+        // Body must carry a non-zero padding-top as a fallback for the JS-calculated offset
+        assertTrue(css.contains("padding-top"), "styles.css must set body padding-top as fixed-header offset (parity R4 GAP-A)");
+        // Print media query must zero it out
+        assertTrue(css.contains("@media print"), "styles.css must contain a @media print block (parity R4 GAP-A)");
+        assertTrue(css.contains("padding-top: 0 !important"),
+                "styles.css @media print must reset padding-top to 0 !important (parity R4 GAP-A)");
+    }
+
+    /**
+     * R4-3: app.js must define syncHeaderOffset() which reads the live header
+     * offsetHeight and applies it as body paddingTop (keeps content clear of
+     * the fixed-top bar on all viewport sizes and orientations).
+     */
+    @Test
+    public void test_appJs_syncsHeaderOffset() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("syncHeaderOffset"), "app.js must define/call syncHeaderOffset (parity R4 GAP-A)");
+        assertTrue(js.contains("offsetHeight"), "app.js syncHeaderOffset must read header.offsetHeight (parity R4 GAP-A)");
+    }
+
+    /**
+     * R4-4: index.html suggest-dropdown must carry data-bs-theme="light" so
+     * autocomplete suggestions remain readable regardless of the header's dark theme.
+     */
+    @Test
+    public void test_indexHtml_suggestDropdownForcedLight() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // The suggest-dropdown element must declare a forced light theme
+        assertTrue(html.contains("id=\"suggest-dropdown\""), "index.html must contain #suggest-dropdown");
+        // Both id and data-bs-theme="light" must appear in close proximity (same element)
+        final int idx = html.indexOf("id=\"suggest-dropdown\"");
+        assertTrue(idx >= 0, "suggest-dropdown element not found");
+        // Check a window around the element for the attribute (element is on a single line)
+        final String line = html.substring(Math.max(0, idx - 200), Math.min(html.length(), idx + 300));
+        assertTrue(line.contains("data-bs-theme=\"light\""),
+                "suggest-dropdown element must carry data-bs-theme=\"light\" (parity R4 GAP-A)");
+    }
+
+    /**
+     * R4-5: index.html facet panel must use Bootstrap's offcanvas-md pattern so it
+     * is accessible as a drawer on small screens and as an inline sidebar on ≥md.
+     * Preserved: facet-body and facet-clear must still be present.
+     * i18n key: facet.filter_button must be on the mobile toggle button.
+     */
+    @Test
+    public void test_indexHtml_facetsUseResponsiveOffcanvas() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // Offcanvas classes
+        assertTrue(html.contains("offcanvas-md"), "index.html must use offcanvas-md for responsive facet panel (parity R4 GAP-B)");
+        // Offcanvas id
+        assertTrue(html.contains("id=\"facet-offcanvas\""), "index.html must have id=\"facet-offcanvas\" (parity R4 GAP-B)");
+        // Toggle button wiring
+        assertTrue(html.contains("data-bs-toggle=\"offcanvas\""),
+                "index.html must contain data-bs-toggle=\"offcanvas\" for the mobile facet toggle (parity R4 GAP-B)");
+        assertTrue(html.contains("data-bs-target=\"#facet-offcanvas\""),
+                "index.html must contain data-bs-target=\"#facet-offcanvas\" on the toggle button (parity R4 GAP-B)");
+        assertTrue(html.contains("aria-controls=\"facet-offcanvas\""),
+                "index.html must contain aria-controls=\"facet-offcanvas\" (parity R4 GAP-B)");
+        // Preserved inner elements
+        assertTrue(html.contains("id=\"facet-body\""), "index.html must preserve id=\"facet-body\" inside the offcanvas (parity R4 GAP-B)");
+        assertTrue(html.contains("id=\"facet-clear\""),
+                "index.html must preserve id=\"facet-clear\" inside the offcanvas (parity R4 GAP-B)");
+        // i18n key on the filter button
+        assertTrue(html.contains("facet.filter_button"),
+                "index.html filter toggle must use the facet.filter_button i18n key (parity R4 GAP-B)");
+    }
+
+    /**
+     * R4-6: index.html search options are behind a collapse toggle so the results
+     * page is not cluttered by default; the sub-controls (sort, num, lang, label,
+     * geo) must still be present inside the collapse container.
+     */
+    @Test
+    public void test_indexHtml_searchOptionsBehindCollapseToggle() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // Toggle button
+        assertTrue(html.contains("id=\"search-options-toggle\""),
+                "index.html must have id=\"search-options-toggle\" collapse button (parity R4 GAP-C)");
+        assertTrue(html.contains("data-bs-target=\"#search-options\""), "index.html toggle must target #search-options (parity R4 GAP-C)");
+        // fa-cog icon on the toggle
+        assertTrue(html.contains("fa-cog"), "index.html search-options toggle must use fa-cog icon (parity R4 GAP-C)");
+        // The collapse container itself
+        assertTrue(html.contains("id=\"search-options\""),
+                "index.html must have id=\"search-options\" collapse container (parity R4 GAP-C)");
+        // The collapse class must appear on or near the search-options element
+        final int idx = html.indexOf("id=\"search-options\"");
+        assertTrue(idx >= 0, "#search-options element not found");
+        final String surroundingMarkup = html.substring(Math.max(0, idx - 50), Math.min(html.length(), idx + 50));
+        assertTrue(surroundingMarkup.contains("collapse"), "#search-options element must carry the collapse class (parity R4 GAP-C)");
+        // Sub-controls must still exist inside the collapsed panel
+        assertTrue(html.contains("id=\"sort-select\""), "index.html must preserve id=\"sort-select\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"num-select\""), "index.html must preserve id=\"num-select\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"lang-select\""), "index.html must preserve id=\"lang-select\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"label-dropdown-wrap\""), "index.html must preserve id=\"label-dropdown-wrap\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"geo-dropdown-wrap\""), "index.html must preserve id=\"geo-dropdown-wrap\" (parity R4 GAP-C)");
+    }
+
+    /**
+     * R4-7: markdown.js must handle horizontal rules (<hr>) and angle-bracket autolinks.
+     * HR_RE is the horizontal-rule line regex; the autolink regex operates on post-escape
+     * form (&lt;https?:…&gt;).
+     */
+    @Test
+    public void test_markdownJs_horizontalRuleAndAutolink() throws Exception {
+        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
+        // Horizontal rule output
+        assertTrue(md.contains("<hr>"), "markdown.js must render horizontal rules as <hr> (parity R4 GAP-D2)");
+        // HR_RE constant name
+        assertTrue(md.contains("HR_RE"), "markdown.js must define HR_RE for horizontal-rule detection (parity R4 GAP-D2)");
+        // Autolink marker: the regex matches the post-escape form &lt;https?:
+        assertTrue(md.contains("&lt;(https?:"), "markdown.js autolink regex must match post-escape &lt;(https?: (parity R4 GAP-D2)");
+    }
+
+    /**
+     * R4-8: format.js ALLOWED_TAGS whitelist must include "HR" so sanitizeHtml
+     * does not strip horizontal rules produced by the markdown renderer.
+     */
+    @Test
+    public void test_formatJs_sanitizerAllowsHr() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("\"HR\""), "format.js ALLOWED_TAGS must contain \"HR\" (parity R4 GAP-D2)");
+    }
+
+    /**
+     * R4-9: advance.js per-page fallback list must match JSP parity ([10,20,30,40,50,100]).
+     * The shorter legacy list ([10,20,50,100]) must not appear as the fallback.
+     */
+    @Test
+    public void test_advanceJs_perPageFallbackMatchesJsp() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("[10, 20, 30, 40, 50, 100]"),
+                "advance.js num fallback must be [10, 20, 30, 40, 50, 100] matching JSP parity (parity R4 GAP-E)");
+        assertFalse(js.contains("[10, 20, 50, 100]"),
+                "advance.js must not use the short legacy num list [10, 20, 50, 100] (parity R4 GAP-E)");
+    }
+
+    /**
+     * R4-10: search.js copy-url button and cache link must carry d-print-none so
+     * they are hidden in print layouts (print-only result hygiene, JSP parity).
+     */
+    @Test
+    public void test_searchJs_copyAndCacheArePrintHidden() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        // Copy-URL button: className string must contain both the base class and d-print-none
+        assertTrue(js.contains("copy-url-btn p-0 ms-1 d-print-none"),
+                "search.js copy-url button className must include d-print-none (parity R4 GAP-G)");
+        // Cache link: className string must contain d-print-none
+        assertTrue(js.contains("text-muted d-print-none"), "search.js cache link className must include d-print-none (parity R4 GAP-G)");
+    }
+
+    /**
+     * R4-11: every i18n message bundle must contain the "facet.filter_button" key
+     * (added in parity GAP-H so the mobile facet filter toggle has translated text).
+     */
+    @Test
+    public void test_i18n_hasFacetFilterButtonKey() throws Exception {
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.filter(p -> p.getFileName().toString().startsWith("messages.") && p.getFileName().toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            final String json = Files.readString(p, StandardCharsets.UTF_8);
+                            assertTrue(json.contains("\"facet.filter_button\""),
+                                    "i18n bundle " + p.getFileName() + " must contain \"facet.filter_button\" (parity R4 GAP-H)");
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+    }
+
+    /**
+     * R4-12: no help JSON file may contain the placeholder string
+     * "machine translation pending" — all help files must be fully translated.
+     */
+    @Test
+    public void test_help_noMachineTranslationPending() throws Exception {
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("help"))) {
+            files.filter(p -> p.getFileName().toString().endsWith(".json")).forEach(p -> {
+                try {
+                    final String json = Files.readString(p, StandardCharsets.UTF_8);
+                    assertFalse(json.contains("machine translation pending"), "help file " + p.getFileName()
+                            + " must not contain 'machine translation pending' placeholder (parity R4 GAP-F)");
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+    }
 }
