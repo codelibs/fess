@@ -988,4 +988,12 @@ public class BundledBootstrapThemeTest {
         assertFalse(js.contains("Keep strip visible for user inspection after completion."),
                 "chat.js must no longer keep the strip visible after completion (parity #C)");
     }
+
+    @Test
+    public void test_markdownJs_h1ThroughH6() throws Exception {
+        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
+        assertTrue(md.contains("/^(#{1,6}) (.+)$/"), "markdown.js HEADING_RE must accept # (h1) through ###### (h6) (parity #E)");
+        assertTrue(md.contains("Math.min(hm[1].length, 6)"), "markdown.js must clamp heading level to 6 (parity #E)");
+        assertFalse(md.contains("/^(#{2,4}) (.+)$/"), "markdown.js must no longer restrict headings to h2-h4 (parity #E)");
+    }
 }

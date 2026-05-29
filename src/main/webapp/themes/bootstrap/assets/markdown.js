@@ -12,7 +12,7 @@ import { escapeHtml } from "./format.js";
  *
  * Supported constructs:
  *   - Fenced code blocks (``` ... ```)
- *   - ATX headings: ## H2 / ### H3 / #### H4
+ *   - ATX headings: # H1 / ## H2 / ### H3 / #### H4 / ##### H5 / ###### H6
  *   - Paragraphs (blank-line separated)
  *   - Line breaks within a paragraph
  *   - **bold** / *italic* / `inline code`
@@ -78,7 +78,7 @@ function splitBlocks(text) {
 // Block processing
 // ---------------------------------------------------------------------------
 
-const HEADING_RE = /^(#{2,4}) (.+)$/;
+const HEADING_RE = /^(#{1,6}) (.+)$/;
 const UL_LINE_RE = /^([ \t]*)[-*] (.+)$/;
 const OL_LINE_RE = /^([ \t]*)(\d+)\. (.+)$/;
 // D6: Blockquote line regex — strips leading '>' with optional space.
@@ -249,7 +249,7 @@ function processBlock(block) {
   if (lines.length === 1) {
     const hm = lines[0].match(HEADING_RE);
     if (hm) {
-      const level = Math.min(hm[1].length, 4);
+      const level = Math.min(hm[1].length, 6);
       const tag = "h" + level;
       return "<" + tag + ">" + inlineMarkdown(hm[2]) + "</" + tag + ">";
     }
@@ -302,7 +302,7 @@ function processBlock(block) {
       // If the line itself is a heading, render it standalone.
       const hm = l.match(HEADING_RE);
       if (hm) {
-        const level = Math.min(hm[1].length, 4);
+        const level = Math.min(hm[1].length, 6);
         const tag = "h" + level;
         return "<" + tag + ">" + inlineMarkdown(hm[2]) + "</" + tag + ">";
       }
