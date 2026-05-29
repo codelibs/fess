@@ -44,6 +44,7 @@
   "error.internal_error": "An internal error occurred. Try again later.",
   "page.title": "Fess Search",
   "page.heading": "Fess Search",
+  "page.search_title": "{0} - Fess",
   "error.title_400": "Bad Request",
   "error.title_404": "Page Not Found",
   "error.title_500": "System Error",

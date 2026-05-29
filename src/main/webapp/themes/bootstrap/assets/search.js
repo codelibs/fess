@@ -450,6 +450,7 @@ async function runSearch() {
   // Record the request time before the call so /go/ URLs embedded in result
   // cards carry the correct rt parameter (mirrors JSP #rt hidden field).
   state.requestedTime = Date.now();
+  document.title = state.q ? t("page.search_title").replace("{0}", state.q) : "Fess";
   try {
     const params = { q: state.q, start: state.start, num: state.num };
     if (state.sort) params.sort = state.sort;

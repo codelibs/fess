@@ -44,6 +44,7 @@
   "error.internal_error": "内部エラーが発生しました。後ほど再試行してください。",
   "page.title": "Fess 検索",
   "page.heading": "Fess 検索",
+  "page.search_title": "{0} - Fess",
   "error.title_400": "不正なリクエスト",
   "error.title_404": "ページが見つかりません",
   "error.title_500": "システムエラー",
