@@ -300,6 +300,73 @@ function buildWelcomeState() {
 }
 
 // ---------------------------------------------------------------------------
+// Source card helpers (E.3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Return a Font Awesome icon class for a source URL / mimetype.
+ *
+ * @param {string} [url]
+ * @param {string} [mimetype]
+ * @returns {string}
+ */
+function sourceIcon(url, mimetype) {
+  if (mimetype) {
+    if (mimetype.indexOf("pdf") !== -1) return "fa-file-pdf-o";
+    if (mimetype.indexOf("word") !== -1 || mimetype.indexOf("document") !== -1) return "fa-file-word-o";
+    if (mimetype.indexOf("excel") !== -1 || mimetype.indexOf("spreadsheet") !== -1) return "fa-file-excel-o";
+    if (mimetype.indexOf("powerpoint") !== -1 || mimetype.indexOf("presentation") !== -1) return "fa-file-powerpoint-o";
+    if (mimetype.indexOf("image") !== -1) return "fa-file-image-o";
+    if (mimetype.indexOf("text") !== -1) return "fa-file-text-o";
+  }
+  if (url) {
+    const ext = url.split(".").pop().toLowerCase().split("?")[0];
+    switch (ext) {
+      case "pdf": return "fa-file-pdf-o";
+      case "doc": case "docx": return "fa-file-word-o";
+      case "xls": case "xlsx": return "fa-file-excel-o";
+      case "ppt": case "pptx": return "fa-file-powerpoint-o";
+      case "jpg": case "jpeg": case "png": case "gif": case "webp": case "svg": return "fa-file-image-o";
+      case "txt": case "md": return "fa-file-text-o";
+      case "html": case "htm": return "fa-globe";
+      default: break;
+    }
+  }
+  return "fa-file-o";
+}
+
+/**
+ * Return a human-readable type label for a source URL / mimetype.
+ *
+ * @param {string} [url]
+ * @param {string} [mimetype]
+ * @returns {string}
+ */
+function sourceTypeLabel(url, mimetype) {
+  if (mimetype) {
+    if (mimetype.indexOf("pdf") !== -1) return "PDF";
+    if (mimetype.indexOf("word") !== -1 || mimetype.indexOf("document") !== -1) return "Word";
+    if (mimetype.indexOf("excel") !== -1 || mimetype.indexOf("spreadsheet") !== -1) return "Excel";
+    if (mimetype.indexOf("powerpoint") !== -1 || mimetype.indexOf("presentation") !== -1) return "PowerPoint";
+    if (mimetype.indexOf("image") !== -1) return "Image";
+  }
+  if (url) {
+    const ext = url.split(".").pop().toLowerCase().split("?")[0];
+    switch (ext) {
+      case "pdf": return "PDF";
+      case "doc": case "docx": return "Word";
+      case "xls": case "xlsx": return "Excel";
+      case "ppt": case "pptx": return "PowerPoint";
+      case "jpg": case "jpeg": case "png": case "gif": case "webp": case "svg": return "Image";
+      case "txt": case "md": return "Text";
+      case "html": case "htm": return "Web";
+      default: break;
+    }
+  }
+  return t("labels.chat_source_type_document");
+}
+
+// ---------------------------------------------------------------------------
 // Bubble factory (E.11 copy-to-clipboard, E.3 sources, E.13 html_content)
 // ---------------------------------------------------------------------------
 
@@ -408,23 +475,43 @@ function appendAssistantBubble(log, initialText) {
     log.scrollTop = log.scrollHeight;
   }
 
-  // E.3: Append sources details element
+  // E.3: Append sources details element — numbered cards with icon/type/index
   function appendSources(sources) {
     if (!sources || sources.length === 0) return;
     const details = el("details", { className: "chat-sources mt-2" });
     const summary = el("summary", { text: t("labels.chat_sources") });
     details.appendChild(summary);
     const ul = el("ul", { className: "list-unstyled mt-1 mb-0" });
-    for (const src of sources) {
-      const li = el("li");
-      const a = el("a", {
-        attrs: {
-          href: safeHref(src.url || src.go_url || ""),
-          target: "_blank",
-          rel: "noopener noreferrer"
-        }
-      });
-      a.textContent = src.title || src.url || "(source)";
+    for (let i = 0; i < sources.length; i++) {
+      const src = sources[i];
+      // URL precedence per backend: go_url (redirect tracker) > url_link (canonical) > url (raw)
+      const href = safeHref(src.go_url || src.url_link || src.url || "");
+      const iconClass = sourceIcon(src.url, src.mimetype);
+      const typeText = sourceTypeLabel(src.url, src.mimetype);
+      const titleText = src.title || src.url || t("labels.chat_source_fallback");
+
+      const li = el("li", { className: "mb-1" });
+      const a = document.createElement("a");
+      a.href = href;
+      a.className = "source-card d-flex align-items-start gap-2 text-decoration-none";
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener noreferrer");
+
+      const indexSpan = el("span", { className: "source-index badge bg-secondary flex-shrink-0", text: String(i + 1) });
+
+      const infoDiv = el("div", { className: "source-info" });
+      const titleSpan = el("span", { className: "source-title d-block", text: titleText });
+      const metaDiv = el("div", { className: "source-meta" });
+      const typeSpan = el("span", { className: "source-type text-muted small" });
+      const icon = el("i", { className: "fa " + iconClass + " me-1", attrs: { "aria-hidden": "true" } });
+      typeSpan.appendChild(icon);
+      typeSpan.appendChild(document.createTextNode(typeText));
+      metaDiv.appendChild(typeSpan);
+      infoDiv.appendChild(titleSpan);
+      infoDiv.appendChild(metaDiv);
+
+      a.appendChild(indexSpan);
+      a.appendChild(infoDiv);
       li.appendChild(a);
       ul.appendChild(li);
     }

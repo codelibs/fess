@@ -94,7 +94,16 @@ cite.result-site-path { color: var(--bs-success); font-size: .85rem; font-style:
 /* Sources details */
 .chat-sources { font-size: 0.85rem; margin-top: 0.5rem; max-width: 85%; }
 .chat-sources summary { cursor: pointer; color: var(--bs-secondary-color); }
-.chat-sources ul { padding-left: 1.25rem; margin: 0.25rem 0 0; }
+.chat-sources ul { padding-left: 0; margin: 0.25rem 0 0; list-style: none; }
+/* Source card: numbered link with icon + type label */
+.source-card { color: inherit; padding: 0.25rem 0.35rem; border-radius: 0.35rem; }
+.source-card:hover { background: var(--bs-tertiary-bg); }
+.source-index { min-width: 1.5rem; text-align: center; font-size: 0.7rem; }
+.source-info { min-width: 0; }
+.source-title { word-break: break-word; font-size: 0.85rem; color: var(--bs-link-color); }
+.source-card:hover .source-title { text-decoration: underline; }
+.source-meta { margin-top: 0.1rem; }
+.source-type { font-size: 0.75rem; }
 /* Phase strip */
 .chat-phase-strip { font-size: 0.8rem; }
 .chat-step { transition: background-color 0.2s; white-space: nowrap; }

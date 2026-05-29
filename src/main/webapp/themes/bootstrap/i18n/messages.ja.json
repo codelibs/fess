@@ -229,5 +229,7 @@
   "labels.cache_doc_id": "ドキュメントID",
   "labels.cache_back_to_results": "検索結果に戻る",
   "labels.cache_not_found": "キャッシュされたコンテンツはありません。",
-  "labels.cache_loading": "キャッシュされたコンテンツを読み込み中…"
+  "labels.cache_loading": "キャッシュされたコンテンツを読み込み中…",
+  "labels.chat_source_fallback": "(出典)",
+  "labels.chat_source_type_document": "ドキュメント"
 }

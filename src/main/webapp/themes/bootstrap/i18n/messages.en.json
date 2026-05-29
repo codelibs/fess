@@ -229,5 +229,7 @@
   "labels.cache_doc_id": "Document ID",
   "labels.cache_back_to_results": "Back to results",
   "labels.cache_not_found": "The cached content is not available.",
-  "labels.cache_loading": "Loading cached content…"
+  "labels.cache_loading": "Loading cached content…",
+  "labels.chat_source_fallback": "(source)",
+  "labels.chat_source_type_document": "Document"
 }
