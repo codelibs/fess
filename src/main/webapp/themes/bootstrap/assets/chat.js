@@ -115,7 +115,7 @@ function buildPhaseStrip() {
     };
     icon.className = iconMap[phase] || "fa fa-circle";
     badge.appendChild(icon);
-    badge.appendChild(document.createTextNode(" " + t("labels.chat_step_" + phase)));
+    badge.appendChild(document.createTextNode(" " + t("labels.chat_phase_" + phase)));
     strip.appendChild(badge);
     badges[phase] = badge;
   }
