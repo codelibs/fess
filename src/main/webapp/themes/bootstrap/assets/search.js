@@ -495,11 +495,21 @@ async function runSearch() {
     renderFacets(env, labels);
     renderActiveChips();
     renderCurrentFilters();
+    // Hide inline validation error box on successful results.
+    const eb = document.getElementById("search-error");
+    if (eb) eb.classList.add("d-none");
     // Fetch related queries and content concurrently (abortable on next search).
     loadRelated(state.q, currentRelatedAbort.signal);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
     if (e && e.name === "AbortError") return; // request superseded — silently ignore
+    const errBox = document.getElementById("search-error");
+    if (e && e.code === "INVALID_REQUEST") {
+      if (errBox) { errBox.textContent = e.message || t("error.invalid_request"); errBox.classList.remove("d-none"); }
+      else { document.getElementById("results-meta").textContent = e.message || t("error.invalid_request"); }
+      return;
+    }
+    if (errBox) errBox.classList.add("d-none");
     const meta = document.getElementById("results-meta");
     if (e && e.name === "NetworkError") {
       meta.textContent = t("error.network");
