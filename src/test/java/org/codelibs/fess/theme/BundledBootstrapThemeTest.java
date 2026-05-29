@@ -463,6 +463,15 @@ public class BundledBootstrapThemeTest {
     public void test_searchJs_disablesSubmitTemporarily() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("3000"), "search.js must re-enable the submit button after a 3s disable (JSP parity)");
+        assertTrue(js.contains("disableSubmitBriefly"), "search.js must define/use the disableSubmitBriefly helper");
+        assertTrue(js.contains("search-submit"), "search.js must wire the 3s disable to the header submit button");
+    }
+
+    @Test
+    public void test_appJs_disablesHomeSubmitTemporarily() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("disableSubmitBriefly"),
+                "app.js must call the shared disableSubmitBriefly helper for the home form (JSP parity)");
     }
 
     @Test
