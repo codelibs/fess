@@ -18,7 +18,7 @@
     {
       "id": "ranges",
       "title": "範囲検索",
-      "html": "<p>角括弧を使って値の範囲を指定できます: <code>content_length:[1024 TO 10240]</code> は 1KB〜10KB のファイルを検索します。</p>"
+      "html": "<p>角括弧を使って値の範囲を指定できます: <code>content_length:[1024 TO 10240]</code> は 1KB〜10KB のファイルを検索します。</p> 角括弧 <code>[ ]</code> は境界値を含み、波括弧 <code>{ }</code> は境界値を含みません。例えば <code>content_length:{1024 TO 10240}</code> は 1KB より大きく 10KB より小さいファイルを検索します。"
     },
     {
       "id": "facets",

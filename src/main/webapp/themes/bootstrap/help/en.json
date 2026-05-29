@@ -18,7 +18,7 @@
     {
       "id": "ranges",
       "title": "Range Queries",
-      "html": "<p>Use square brackets to search for a range of values: <code>content_length:[1024 TO 10240]</code> finds documents with sizes between 1KB and 10KB.</p>"
+      "html": "<p>Use square brackets to search for a range of values: <code>content_length:[1024 TO 10240]</code> finds documents with sizes between 1KB and 10KB.</p> Square brackets <code>[ ]</code> include the bounds; curly braces <code>{ }</code> exclude them, e.g. <code>content_length:{1024 TO 10240}</code> matches sizes strictly greater than 1KB and strictly less than 10KB."
     },
     {
       "id": "facets",
