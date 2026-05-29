@@ -1192,9 +1192,18 @@ function renderFacetQueryViews(body, env) {
     const groupTitleKey = view.group_name || "";
     const title = groupTitleKey.startsWith("labels.") ? t(groupTitleKey) : groupTitleKey;
     const queries = (view.queries || []).filter(qy => Number(countByValue[qy.value]) > 0);
-    if (queries.length === 0) return;
     const group = el("div", { className: "facet-group" });
     group.appendChild(el("h3", { text: title }));
+    // JSP parity: a configured facet-query group with no matching results still
+    // renders its title plus a muted "not found" line (labels.facet_is_not_found).
+    if (queries.length === 0) {
+      const notFound = document.createElement("div");
+      notFound.className = "facet-not-found text-muted";
+      notFound.textContent = t("facet.not_found");
+      group.appendChild(notFound);
+      body.appendChild(group);
+      return;
+    }
     queries.forEach(qy => {
       const active = (state.facetQueries || []).includes(qy.value);
       const item = el("button", {

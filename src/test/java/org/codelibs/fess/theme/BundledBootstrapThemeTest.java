@@ -446,6 +446,13 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_searchJs_facetQueryViewShowsNotFound() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("facet.not_found"),
+                "search.js must render a 'not found' message for a facet-query group with all-zero counts");
+    }
+
+    @Test
     public void test_advanceJs_prefillsFromQueryParam() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("params.get(\"q\")") || js.contains("get(\"q\")"),
