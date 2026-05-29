@@ -15,6 +15,7 @@
 }
 #search-options { }
 .label-dropdown-menu { min-width: 200px; max-height: 300px; overflow-y: auto; }
+.geo-dropdown-menu { min-width: 16rem; }
 .facet-group { margin-bottom: 1rem; }
 .facet-group h3 { font-size: .9rem; font-weight: 600; margin-bottom: .25rem; }
 #suggest-dropdown .list-group-item { cursor: pointer; }

@@ -235,4 +235,30 @@ public class BundledBootstrapThemeTest {
             assertTrue(json.contains("{b0}") && json.contains("{bq}"));
         }
     }
+
+    @Test
+    public void test_indexHtml_hasGeoControls() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"geo-lat\"") && html.contains("id=\"geo-lon\"") && html.contains("id=\"geo-distance\""));
+        assertTrue(html.contains("id=\"geo-apply\""));
+    }
+
+    @Test
+    public void test_searchJs_emitsAndHydratesGeoParams() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("\"geo.location.point\""));
+        assertTrue(js.contains("\"geo.location.distance\""));
+        assertTrue(js.contains("params.get(\"geo.location.point\")"));
+    }
+
+    @Test
+    public void test_i18n_hasGeoKeys() throws Exception {
+        for (final String loc : new String[] { "en", "ja" }) {
+            final String json = Files.readString(THEME_DIR.resolve("i18n/messages." + loc + ".json"), StandardCharsets.UTF_8);
+            for (final String k : new String[] { "search.geo", "search.geo_lat", "search.geo_lon", "search.geo_distance",
+                    "search.geo_apply", "search.geo_clear" }) {
+                assertTrue(json.contains("\"" + k + "\""), "missing " + k + " in " + loc);
+            }
+        }
+    }
 }

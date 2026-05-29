@@ -21,6 +21,7 @@ const state = {
   facets: {},           // field -> [values]
   fields: {},           // extra field filters (e.g. label)
   facetQueries: [],     // string[] — active ex_q clause strings from facet_views (SRCH-4)
+  geo: { lat: "", lon: "", distance: "" }, // GEO-1: geo search state
   requestedTime: 0,     // epoch ms of the most-recent search; used in /go/ click-log URL
   highlightParams: ""   // server-supplied highlight_params string (e.g. "&hl.q=...&hl.fragsize=...")
 };
@@ -480,6 +481,11 @@ async function runSearch() {
       if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
       state.facetQueries.forEach(v => params["ex_q"].push(v));
     }
+    // GEO-1: emit geo params when all three are present
+    if (state.geo && state.geo.lat !== "" && state.geo.lon !== "" && state.geo.distance !== "") {
+      params["geo.location.point"] = state.geo.lat + "," + state.geo.lon;
+      params["geo.location.distance"] = state.geo.distance;
+    }
     const env = await api.get("/search", params, { signal });
     // Prefer the server-supplied requested_time when available (more accurate).
     if (env.requested_time) state.requestedTime = env.requested_time;
@@ -802,6 +808,16 @@ export function runFromUrl() {
   state.sort = params.get("sort") || "";
   // C.16: sync both inputs to reflect the URL query.
   syncSearchInputs(state.q);
+  // GEO-1: hydrate geo state from URL params
+  const geoPoint = params.get("geo.location.point") || "";
+  const geoDistance = params.get("geo.location.distance") || "";
+  if (geoPoint && geoDistance) {
+    const [lat, lon] = geoPoint.split(",");
+    state.geo = { lat: (lat || "").trim(), lon: (lon || "").trim(), distance: geoDistance.trim() };
+    const latEl = document.getElementById("geo-lat"); if (latEl) latEl.value = state.geo.lat;
+    const lonEl = document.getElementById("geo-lon"); if (lonEl) lonEl.value = state.geo.lon;
+    const distEl = document.getElementById("geo-distance"); if (distEl) distEl.value = state.geo.distance;
+  } else { state.geo = { lat: "", lon: "", distance: "" }; }
   runSearch();
 }
 
@@ -897,6 +913,9 @@ export function attach() {
     state.facets = {};
     state.fields = {};
     state.facetQueries = [];
+    // GEO-1: reset geo state and inputs
+    state.geo = { lat: "", lon: "", distance: "" };
+    ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
     // Reset selects: label multi-select deselects all (selectedIndex = -1);
     // sort and num return to their "all / default" first option (selectedIndex = 0).
     const sortSel = document.getElementById("sort-select");
@@ -910,6 +929,23 @@ export function attach() {
       labelMenu.querySelectorAll("input[type=checkbox]").forEach(cb => { cb.checked = false; });
     }
     runSearch();
+  });
+
+  // GEO-1: geo search apply/clear listeners
+  const geoApply = document.getElementById("geo-apply");
+  if (geoApply) geoApply.addEventListener("click", () => {
+    state.geo = {
+      lat: (document.getElementById("geo-lat").value || "").trim(),
+      lon: (document.getElementById("geo-lon").value || "").trim(),
+      distance: (document.getElementById("geo-distance").value || "").trim()
+    };
+    state.start = 0; runSearch();
+  });
+  const geoClear = document.getElementById("geo-clear");
+  if (geoClear) geoClear.addEventListener("click", () => {
+    state.geo = { lat: "", lon: "", distance: "" };
+    ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+    state.start = 0; runSearch();
   });
 
   // Sort select — options are populated by renderSortOptions() after config loads
