@@ -884,4 +884,27 @@ public class BundledBootstrapThemeTest {
         assertTrue(html.contains("id=\"chat-nav-link\" data-spa data-i18n=\"nav.chat_ai_mode\""),
                 "chat nav markup must use nav.chat_ai_mode (parity #4)");
     }
+
+    @Test
+    public void test_appJs_chatHeaderSearchLink() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("header-search-link"), "app.js must swap the chat nav into a Search link on the chat route (parity #F)");
+        assertTrue(js.contains("setChatNavSearchMode(true)"), "app.js chat route must enable Search-link mode (parity #F)");
+        assertTrue(js.contains("setChatNavSearchMode(false)"), "app.js non-chat routes must restore the chat label (parity #F)");
+    }
+
+    @Test
+    public void test_i18n_hasNavSearchKey() throws Exception {
+        try (java.util.stream.Stream<java.nio.file.Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.filter(p -> p.getFileName().toString().startsWith("messages.") && p.getFileName().toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            assertTrue(Files.readString(p, StandardCharsets.UTF_8).contains("\"nav.search\""),
+                                    "bundle " + p.getFileName() + " must contain nav.search (parity #F)");
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+    }
 }

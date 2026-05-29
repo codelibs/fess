@@ -276,6 +276,30 @@ function renderChatNavLink() {
   helpLink.parentNode.insertBefore(chatLink, helpLink);
 }
 
+/**
+ * #F (parity header.jsp:83-89): on the chat route, turn the chat nav link into a
+ * "Search" link (href "/", fa-search). On any other route restore the chat label.
+ * header-search-link
+ */
+function setChatNavSearchMode(onChat) {
+  const link = document.getElementById("chat-nav-link");
+  if (!link) return;
+  while (link.firstChild) link.removeChild(link.firstChild);
+  if (onChat) {
+    link.href = "/";
+    link.setAttribute("data-i18n", "nav.search");
+    const icon = document.createElement("i");
+    icon.className = "fa fa-search me-1";
+    icon.setAttribute("aria-hidden", "true");
+    link.appendChild(icon);
+    link.appendChild(document.createTextNode(t("nav.search")));
+  } else {
+    link.href = "/chat";
+    link.setAttribute("data-i18n", "nav.chat_ai_mode");
+    link.textContent = t("nav.chat_ai_mode");
+  }
+}
+
 /** Attach back-to-top button behaviour. */
 function attachBackToTop() {
   const btn = document.getElementById("back-to-top");
@@ -353,6 +377,7 @@ function registerRoutes() {
   router.register(
     path => (path === "/" || path === "/index" || path === "/index.html") && !hasSearchQuery(),
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("home-view");
       attachHomeView();
@@ -363,6 +388,7 @@ function registerRoutes() {
   router.register(
     path => path === "/" || path === "/search" || path === "/index" || path === "/index.html",
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(true);
       showView("results-view");
       // search.attach() is idempotent; wires DOM listeners once.
@@ -376,6 +402,7 @@ function registerRoutes() {
   router.register(
     path => path === "/profile",
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("profile-view");
       profile.attach();
@@ -386,6 +413,7 @@ function registerRoutes() {
   router.register(
     path => path === "/advance",
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("advance-view");
       advance.attach();
@@ -396,6 +424,7 @@ function registerRoutes() {
   router.register(
     path => path === "/help",
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("help-view");
       help.attach();
@@ -407,6 +436,7 @@ function registerRoutes() {
     path => path === "/chat",
     () => {
       setSearchFormVisible(false);
+      setChatNavSearchMode(true);
       showView("chat-view");
       chat.attachStandalone();
     }
@@ -418,6 +448,7 @@ function registerRoutes() {
   router.register(
     path => path === "/cache" || path.startsWith("/cache/"),
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("cache-view");
       cache.attach();
@@ -428,6 +459,7 @@ function registerRoutes() {
   router.register(
     path => path === "/error" || path.startsWith("/error/"),
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("error-view");
       errorView.attach();
@@ -438,6 +470,7 @@ function registerRoutes() {
   router.register(
     () => true,
     () => {
+      setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("error-view");
       errorView.attach();
