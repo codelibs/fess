@@ -308,4 +308,36 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("search_log_enabled") && js.contains("user_favorite"));
         assertTrue(js.contains("click_count.desc") && js.contains("favorite_count.desc"));
     }
+
+    @Test
+    public void test_chatRequestBodyContract() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("message: question"));
+        assertTrue(js.contains("fields = { label:"));
+        assertTrue(js.contains("extra_queries"));
+        assertFalse(js.contains("body = { question"));
+    }
+
+    @Test
+    public void test_chatImeGuard() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("ev.isComposing"));
+        assertTrue(js.contains("compositionstart") && js.contains("compositionend"));
+    }
+
+    @Test
+    public void test_chatSourcesPrecedence() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("src.go_url || src.url_link || src.url"));
+        assertTrue(js.contains("sourceIcon(") && js.contains("sourceTypeLabel("));
+    }
+
+    @Test
+    public void test_chatPhaseStatusModel() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("data.status"));
+        assertTrue(js.contains("status === \"complete\""));
+        assertTrue(js.contains("phaseStrip.complete("));
+        assertTrue(js.contains("data.hit_count"));
+    }
 }

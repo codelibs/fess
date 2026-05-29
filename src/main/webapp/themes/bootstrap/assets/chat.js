@@ -120,7 +120,7 @@ function buildPhaseStrip() {
     badges[phase] = badge;
   }
 
-  function advanceTo(phase, hitCount) {
+  function advanceTo(phase) {
     const idx = PHASE_ORDER.indexOf(phase);
     if (idx === -1) return;
     for (let i = 0; i < PHASE_ORDER.length; i++) {
@@ -130,18 +130,25 @@ function buildPhaseStrip() {
         b.classList.add("bg-success");
       } else if (i === idx) {
         b.classList.add("bg-primary");
-        // E.12: Show hit_count next to search step
-        if (phase === "search" && hitCount != null) {
-          const countText = t("labels.chat_hit_count", { count: hitCount });
-          // Remove previous count if any
-          const old = b.querySelector(".chat-hit-count");
-          if (old) old.remove();
-          const countSpan = el("span", { className: "chat-hit-count ms-1 small", text: " (" + countText + ")" });
-          b.appendChild(countSpan);
-        }
       } else {
         b.classList.add("bg-secondary");
       }
+    }
+  }
+
+  function complete(phase, hitCount) {
+    const idx = PHASE_ORDER.indexOf(phase);
+    if (idx === -1) return;
+    const b = badges[phase];
+    b.classList.remove("bg-primary", "bg-secondary");
+    b.classList.add("bg-success");
+    // Show hit_count on search phase complete
+    if (phase === "search" && hitCount != null) {
+      const countText = t("labels.chat_hit_count", { count: hitCount });
+      const old = b.querySelector(".chat-hit-count");
+      if (old) old.remove();
+      const countSpan = el("span", { className: "chat-hit-count ms-1 small", text: " (" + countText + ")" });
+      b.appendChild(countSpan);
     }
   }
 
@@ -154,7 +161,7 @@ function buildPhaseStrip() {
     }
   }
 
-  return { strip, advanceTo, reset };
+  return { strip, advanceTo, complete, reset };
 }
 
 // ---------------------------------------------------------------------------
@@ -848,8 +855,12 @@ function submitQuestion(question, uiRefs) {
   function onEvent({ type, data }) {
     if (type === "phase") {
       const phase = data && data.phase;
+      const status = data && data.status;
       const hitCount = data && data.hit_count;
-      if (phase) phaseStrip.advanceTo(phase, hitCount);
+      if (phase) {
+        if (status === "complete") phaseStrip.complete(phase, hitCount);
+        else { phaseStrip.advanceTo(phase); statusLozenge.setStatus("thinking"); }
+      }
       return;
     }
 
@@ -987,7 +998,7 @@ export function attachInline() {
 
   const body = el("div", { className: "card-body p-2" });
 
-  const { strip: phaseStrip, advanceTo: phaseAdvanceTo, reset: phaseReset } = buildPhaseStrip();
+  const { strip: phaseStrip, advanceTo: phaseAdvanceTo, complete: phaseComplete, reset: phaseReset } = buildPhaseStrip();
   body.appendChild(phaseStrip);
 
   const log = el("div", {
@@ -1033,7 +1044,7 @@ export function attachInline() {
 
   const refs = {
     log,
-    phaseStrip: { advanceTo: phaseAdvanceTo, reset: phaseReset },
+    phaseStrip: { advanceTo: phaseAdvanceTo, complete: phaseComplete, reset: phaseReset },
     statusLozenge: { setStatus },
     errorBanner: { show: showError, hide: hideError },
     inputEl: input,
@@ -1188,7 +1199,7 @@ export function attachStandalone() {
   chatMessages.appendChild(emptyState);
 
   // Phase progress strip (E.4)
-  const { strip: phaseStripEl, advanceTo: phaseAdvanceTo, reset: phaseReset } = buildPhaseStrip();
+  const { strip: phaseStripEl, advanceTo: phaseAdvanceTo, complete: phaseComplete, reset: phaseReset } = buildPhaseStrip();
   const progressWrap = el("div", {
     className: "chat-progress-wrap px-3 py-2 d-none",
     attrs: { role: "status", "aria-live": "polite" }
@@ -1257,7 +1268,7 @@ export function attachStandalone() {
 
   const refs = {
     log: chatMessages,
-    phaseStrip: { advanceTo: phaseAdvanceTo, reset: phaseReset },
+    phaseStrip: { advanceTo: phaseAdvanceTo, complete: phaseComplete, reset: phaseReset },
     statusLozenge: { setStatus },
     errorBanner: { show: showError, hide: hideError },
     inputEl: textarea,
