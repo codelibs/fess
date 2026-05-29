@@ -202,8 +202,7 @@ function attachHomeView() {
   }
   // Autofocus the search box when the home view is revealed (parity with index.jsp).
   // Deferred so it wins over showView()'s heading focus.
-  const homeInput = document.getElementById("home-search-input");
-  if (homeInput) { Promise.resolve().then(() => homeInput.focus()); }
+  if (input) { Promise.resolve().then(() => input.focus()); }
   renderHomePopularWords();
 }
 

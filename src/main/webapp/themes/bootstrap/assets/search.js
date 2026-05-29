@@ -839,7 +839,10 @@ function renderHomeOptions() {
     const src = document.getElementById(srcId);
     const dest = document.getElementById(destId);
     if (!src || !dest) return dest;
-    dest.innerHTML = src.innerHTML;
+    // Clear then clone each option (no innerHTML — matches the clear idiom in
+    // renderNumOptions/renderLangOptions and avoids the no-unsanitized rule).
+    while (dest.firstChild) dest.removeChild(dest.firstChild);
+    for (const o of src.options) dest.appendChild(o.cloneNode(true));
     return dest;
   };
 
