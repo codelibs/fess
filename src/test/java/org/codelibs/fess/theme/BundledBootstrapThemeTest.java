@@ -458,4 +458,16 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("params.get(\"q\")") || js.contains("get(\"q\")"),
                 "advance.js must prefill the must-contain-words field from the incoming q param");
     }
+
+    @Test
+    public void test_searchJs_disablesSubmitTemporarily() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("3000"), "search.js must re-enable the submit button after a 3s disable (JSP parity)");
+    }
+
+    @Test
+    public void test_advanceJs_disablesSubmitTemporarily() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("3000"), "advance.js must re-enable the submit button after a 3s disable (JSP parity)");
+    }
 }

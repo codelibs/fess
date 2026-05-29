@@ -606,6 +606,21 @@ function hideSuggest() {
 }
 
 /**
+ * Disable a submit button briefly to guard against double-submits, then
+ * re-enable it. Mirrors the JSP behaviour (BUTTON_DISABLE_DURATION=3000ms).
+ * The SPA navigates client-side, so re-enabling on a timer is appropriate.
+ * Call this AFTER the search/navigation has been triggered — it only touches
+ * the button and never blocks or delays the actual search.
+ *
+ * @param {HTMLButtonElement|null} btn - the submit button to disable
+ */
+export function disableSubmitBriefly(btn) {
+  if (!btn) return;
+  btn.disabled = true;
+  setTimeout(() => { btn.disabled = false; }, 3000);
+}
+
+/**
  * ADV-4: Reusable suggest wiring — attach autocomplete to any text input and dropdown list.
  * Calls /suggest-words with the same shape as showSuggest; renders with createElement/textContent only.
  *
@@ -994,6 +1009,9 @@ export function attach() {
       // C.16: keep home-search-input in sync when submitting from the header
       syncSearchInputs(state.q);
       runSearch();
+      // JSP parity: disable the submit button for 3s after the search has been
+      // triggered, to prevent rapid double-submits.
+      disableSubmitBriefly(document.getElementById("search-submit"));
     });
   }
   if (input) {

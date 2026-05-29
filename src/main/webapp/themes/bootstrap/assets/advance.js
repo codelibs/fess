@@ -5,7 +5,7 @@
 import { getConfig } from "./api.js";
 import { t } from "./i18n.js";
 import { navigate } from "./router.js";
-import { attachSuggest } from "./search.js";
+import { attachSuggest, disableSubmitBriefly } from "./search.js";
 
 // ---------------------------------------------------------------------------
 // DOM helpers
@@ -494,5 +494,9 @@ export function attach() {
     if (sortVal) params.set("sort", sortVal);
 
     navigate("/search?" + params.toString());
+    // JSP parity: disable the submit button for 3000ms after navigation has
+    // been triggered, to prevent rapid double-submits. The shared helper
+    // (search.js) re-enables it on the timer.
+    disableSubmitBriefly(submit);
   });
 }

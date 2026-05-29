@@ -186,6 +186,9 @@ function attachHomeView() {
         params.set("q", q);
         search.applyHomeOptions(params);
         router.navigate("/search?" + params.toString());
+        // JSP parity: disable the submit button for 3s after navigation has been
+        // triggered, to prevent rapid double-submits.
+        search.disableSubmitBriefly(form.querySelector("[data-i18n='search.button']"));
       }
     });
   }
