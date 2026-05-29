@@ -948,4 +948,12 @@ public class BundledBootstrapThemeTest {
                     });
         }
     }
+
+    @Test
+    public void test_searchJs_favoritePostsQueryId() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("toggleFavorite(docId, btn, li.dataset.queryId"),
+                "favorite click must forward the card queryId (parity #3)");
+        assertTrue(js.contains("{ query_id: queryId || \"\" }"), "favorite POST body must include query_id (parity #3)");
+    }
 }

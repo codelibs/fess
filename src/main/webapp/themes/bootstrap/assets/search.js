@@ -451,7 +451,7 @@ function renderResults(env) {
     const btn = li.querySelector(".favorite-btn");
     const docId = li.dataset.docId;
     if (!btn || !docId) return;
-    btn.addEventListener("click", () => toggleFavorite(docId, btn));
+    btn.addEventListener("click", () => toggleFavorite(docId, btn, li.dataset.queryId || ""));
   });
   // Bulk-sync favorites for all result cards in one request (Feature 5).
   if (env.query_id) syncFavorites(env.query_id);
@@ -1743,9 +1743,10 @@ function setFavoriteUi(btn, on, count) {
   }
 }
 
-async function toggleFavorite(docId, btn) {
+async function toggleFavorite(docId, btn, queryId) {
   try {
-    const env = await api.post("/documents/" + encodeURIComponent(docId) + "/favorite", {});
+    // #3 (parity js/search.js:137): include query_id so the click is attributed to its query.
+    const env = await api.post("/documents/" + encodeURIComponent(docId) + "/favorite", { query_id: queryId || "" });
     setFavoriteUi(btn, !!env.favorite, env.count || 0);
   } catch (e) {
     if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
