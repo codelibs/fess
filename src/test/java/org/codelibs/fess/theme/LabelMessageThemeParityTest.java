@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.theme;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -35,10 +36,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Verifies cross-locale key parity for the bundled bootstrap theme i18n bundles.
  *
- * <p>Every key present in {@code messages.en.json} must also be present in
- * {@code messages.ja.json} and all six other supported locale bundles (de, es,
- * fr, ko, pt-BR, zh-CN). An additional sanity check ensures all {@code
- * labels.chat_*} keys introduced for the chat feature are present in all 8
+ * <p>Every key present in {@code messages.en.json} must also be present in all
+ * 16 supported locale bundles (de, en, es, fr, hi, id, it, ja, ko, nl, pl,
+ * pt-BR, ru, tr, zh-CN, zh-TW). An additional sanity check ensures all {@code
+ * labels.chat_*} keys introduced for the chat feature are present in all 16
  * bundles.</p>
  */
 public class LabelMessageThemeParityTest {
@@ -46,7 +47,8 @@ public class LabelMessageThemeParityTest {
     private static final Path I18N_DIR = Paths.get("src/main/webapp/themes/bootstrap/i18n");
 
     /** All non-English locale bundles that must mirror en's key set. */
-    private static final List<String> OTHER_LOCALES = Arrays.asList("ja", "de", "es", "fr", "ko", "pt-BR", "zh-CN");
+    private static final List<String> OTHER_LOCALES =
+            Arrays.asList("ja", "de", "es", "fr", "hi", "id", "it", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW");
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> loadBundle(final String locale) throws Exception {
@@ -97,12 +99,47 @@ public class LabelMessageThemeParityTest {
 
         assertTrue(!chatKeys.isEmpty(), "No labels.chat_* keys found in messages.en.json — something is wrong");
 
-        final List<String> allLocales = Arrays.asList("en", "ja", "de", "es", "fr", "ko", "pt-BR", "zh-CN");
+        final List<String> allLocales =
+                Arrays.asList("de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW");
         for (final String locale : allLocales) {
             final Set<String> localeKeys = new TreeSet<>(loadBundle(locale).keySet());
             final Set<String> missing = new TreeSet<>(chatKeys);
             missing.removeAll(localeKeys);
             assertTrue(missing.isEmpty(), "labels.chat_* keys missing from messages." + locale + ".json: " + missing);
+        }
+    }
+
+    /**
+     * Every locale bundle must have EXACTLY the same key set as {@code messages.en.json}
+     * — no missing keys AND no extra keys (both directions checked).
+     */
+    @Test
+    public void test_allLocalesExactlyMatchEnKeys() throws Exception {
+        final Set<String> enKeys = new TreeSet<>(loadBundle("en").keySet());
+        final List<String> allLocales =
+                Arrays.asList("de", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW");
+        for (final String locale : allLocales) {
+            final Set<String> localeKeys = new TreeSet<>(loadBundle(locale).keySet());
+            final Set<String> missing = new TreeSet<>(enKeys);
+            missing.removeAll(localeKeys);
+            final Set<String> extra = new TreeSet<>(localeKeys);
+            extra.removeAll(enKeys);
+            assertTrue(missing.isEmpty(), "Keys in en but missing from " + locale + ": " + missing);
+            assertTrue(extra.isEmpty(), "Extra keys in " + locale + " not present in en: " + extra);
+            assertEquals(enKeys, localeKeys, "Key set mismatch between en and " + locale);
+        }
+    }
+
+    /**
+     * All 16 locale bundle files must exist on disk.
+     */
+    @Test
+    public void test_allSixteenMessageBundlesExist() {
+        final List<String> allLocales =
+                Arrays.asList("de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW");
+        for (final String locale : allLocales) {
+            final Path path = I18N_DIR.resolve("messages." + locale + ".json");
+            assertTrue(Files.isRegularFile(path), "i18n bundle missing: " + path.toAbsolutePath());
         }
     }
 }
