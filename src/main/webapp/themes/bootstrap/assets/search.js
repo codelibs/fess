@@ -595,6 +595,54 @@ function hideSuggest() {
 }
 
 /**
+ * ADV-4: Reusable suggest wiring — attach autocomplete to any text input and dropdown list.
+ * Calls /suggest-words with the same shape as showSuggest; renders with createElement/textContent only.
+ *
+ * @param {HTMLInputElement} input    - the text field to attach to
+ * @param {HTMLElement}      dropdown - a <ul> that will be populated with <li> suggestions
+ * @param {{ lang?: string[] | { length: number } }} [opts] - options; opts.lang can be a getter
+ */
+export function attachSuggest(input, dropdown, opts = {}) {
+  if (!input || !dropdown) return;
+  let timer = null;
+  const clear = () => {
+    while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
+    dropdown.classList.add("d-none");
+    input.setAttribute("aria-expanded", "false");
+  };
+  const choose = (text) => { input.value = text; clear(); input.focus(); };
+  const render = async (q) => {
+    if (!q || q.length < 1) { clear(); return; }
+    try {
+      const params = { q, num: 10, fn: ["_default", "content", "title"] };
+      const lang = typeof opts.lang === "function" ? opts.lang() : opts.lang;
+      if (Array.isArray(lang) && lang.length > 0) params.lang = lang;
+      const env = await api.get("/suggest-words", params);
+      const items = env.suggest_words || [];
+      while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
+      if (items.length === 0) { clear(); return; }
+      items.forEach((it, i) => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.setAttribute("role", "option");
+        li.id = input.id + "-suggest-" + i;
+        li.textContent = it.text || "";
+        li.addEventListener("mousedown", (e) => { e.preventDefault(); choose(it.text || ""); });
+        dropdown.appendChild(li);
+      });
+      dropdown.classList.remove("d-none");
+      input.setAttribute("aria-expanded", "true");
+    } catch { /* best-effort */ }
+  };
+  input.addEventListener("input", () => {
+    if (timer) clearTimeout(timer);
+    const v = input.value.trim();
+    timer = setTimeout(() => render(v), 150);
+  });
+  input.addEventListener("blur", () => setTimeout(clear, 120));
+}
+
+/**
  * H.4: Subscribe once to the fess:route:change event so that navigating away
  * from the search view (/, /search, /index) cancels any pending suggest timer
  * and collapses the dropdown.  The guard prevents double-registration if

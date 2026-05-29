@@ -5,6 +5,7 @@
 import { getConfig } from "./api.js";
 import { t } from "./i18n.js";
 import { navigate } from "./router.js";
+import { attachSuggest } from "./search.js";
 
 // ---------------------------------------------------------------------------
 // DOM helpers
@@ -394,7 +395,21 @@ export function attach() {
   submit.textContent = t("advance.submit");
   form.appendChild(submit);
 
+  // ADV-4: suggest dropdown for the all-words field
+  const advAllSuggestDropdown = document.createElement("ul");
+  advAllSuggestDropdown.className = "list-group suggest-dropdown d-none";
+  advAllSuggestDropdown.id = "adv-all-suggest";
+  advAllSuggestDropdown.setAttribute("role", "listbox");
+  fAll.wrap.appendChild(advAllSuggestDropdown);
+
   view.appendChild(form);
+
+  // ADV-4: wire up suggest on all-words input using shared attachSuggest from search.js
+  attachSuggest(fAll.input, advAllSuggestDropdown, {
+    get lang() {
+      return Array.from(fLang.input.selectedOptions).map(o => o.value).filter(v => v !== "");
+    }
+  });
 
   // Form submit handler — compose query and navigate to search
   form.addEventListener("submit", (e) => {
