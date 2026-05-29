@@ -955,9 +955,14 @@ export function attachInline() {
     getFilters: () => ({ fields: [], extraQ: [] })
   };
 
-  // Shift+Enter for newline, plain Enter to submit
+  // IME composition guard for inline input (CJK and other composing keyboards)
+  let inlineComposing = false;
+  input.addEventListener("compositionstart", () => { inlineComposing = true; });
+  input.addEventListener("compositionend", () => { inlineComposing = false; });
+
+  // Shift+Enter for newline, plain Enter to submit (guarded against IME composition)
   input.addEventListener("keydown", ev => {
-    if (ev.key === "Enter" && !ev.shiftKey) {
+    if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing && !inlineComposing) {
       ev.preventDefault();
       const q = input.value.trim();
       if (q) {
@@ -1188,9 +1193,14 @@ export function attachStandalone() {
     charNum.textContent = String(textarea.value.length);
   });
 
-  // Enter to submit, Shift+Enter for newline (E.9)
+  // IME composition guard for standalone textarea (CJK and other composing keyboards)
+  let standaloneComposing = false;
+  textarea.addEventListener("compositionstart", () => { standaloneComposing = true; });
+  textarea.addEventListener("compositionend", () => { standaloneComposing = false; });
+
+  // Enter to submit, Shift+Enter for newline (E.9, guarded against IME composition)
   textarea.addEventListener("keydown", ev => {
-    if (ev.key === "Enter" && !ev.shiftKey) {
+    if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing && !standaloneComposing) {
       ev.preventDefault();
       const q = textarea.value.trim();
       if (q && !textarea.disabled) {
