@@ -230,7 +230,7 @@ public class ThemeViewAction extends FessSearchAction {
      *   <li>{@code /error}, {@code /error/error}, {@code /error/system} → 500</li>
      *   <li>{@code /error/badRequest} or {@code /error/badrequest} → 400</li>
      *   <li>{@code /error/notFound} or {@code /error/notfound} → 404</li>
-     *   <li>{@code /error/busy} → 503</li>
+     *   <li>{@code /error/busy} → 429</li>
      *   <li>Any other {@code /error/*} path → 500</li>
      * </ul>
      *
