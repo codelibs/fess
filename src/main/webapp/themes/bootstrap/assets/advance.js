@@ -212,18 +212,28 @@ const TIME_RANGE_QUERY = {
   "1year":  "last_modified:[now/d-1y TO *]",
 };
 
-const FILETYPE_OPTIONS = [
-  { value: "",            labelKey: "advance.any_filetype" },
-  { value: "html",        label: "HTML" },
-  { value: "pdf",         label: "PDF" },
-  { value: "msword",      label: "Word" },
-  { value: "msexcel",     label: "Excel" },
-  { value: "mspowerpoint", label: "PowerPoint" },
-  { value: "txt",         label: "Text" },
-  { value: "image",       labelKey: "labels.facet_filetype_image" },
-  { value: "audio",       labelKey: "labels.facet_filetype_audio" },
-  { value: "video",       labelKey: "labels.facet_filetype_video" },
+const FILETYPE_OPTIONS_FALLBACK = [
+  { value: "",           labelKey: "advance.any_filetype" },
+  { value: "html",       labelKey: "labels.facet_filetype_html" },
+  { value: "word",       labelKey: "labels.facet_filetype_word" },
+  { value: "excel",      labelKey: "labels.facet_filetype_excel" },
+  { value: "powerpoint", labelKey: "labels.facet_filetype_powerpoint" },
+  { value: "odt",        labelKey: "labels.facet_filetype_odt" },
+  { value: "ods",        labelKey: "labels.facet_filetype_ods" },
+  { value: "odp",        labelKey: "labels.facet_filetype_odp" },
+  { value: "pdf",        labelKey: "labels.facet_filetype_pdf" },
+  { value: "txt",        labelKey: "labels.facet_filetype_txt" },
+  { value: "others",     labelKey: "labels.facet_filetype_others" },
 ];
+
+function buildFiletypeOptions(serverConfig) {
+  const fromServer = serverConfig && Array.isArray(serverConfig.filetype_options) ? serverConfig.filetype_options : null;
+  if (fromServer && fromServer.length > 0) {
+    return [{ value: "", labelKey: "advance.any_filetype" },
+      ...fromServer.map(o => ({ value: o.value != null ? o.value : "", labelKey: o.label_key || undefined, label: o.label_key ? undefined : (o.label || o.value || "") }))];
+  }
+  return FILETYPE_OPTIONS_FALLBACK.slice();
+}
 
 // ---------------------------------------------------------------------------
 // View
@@ -258,6 +268,9 @@ export function attach() {
   form.noValidate = true;
   form.className = "advance-form";
 
+  // Server config — resolved before field/select builds that depend on it
+  const serverConfig = getConfig() || {};
+
   // Text fields
   const fAll   = makeField("advance.all",   "adv-all");
   const fExact = makeField("advance.exact", "adv-exact");
@@ -265,15 +278,13 @@ export function attach() {
   const fNone  = makeField("advance.none",  "adv-none");
   const fSite  = makeField("advance.site",  "adv-site");
 
-  // File type select
-  const filetypeOpts = FILETYPE_OPTIONS.map(o => ({
+  // File type select — options sourced from server config (filetype_options) with canonical fallback
+  const filetypeOptDefs = buildFiletypeOptions(serverConfig);
+  const filetypeOpts = filetypeOptDefs.map(o => ({
     value: o.value,
-    label: o.labelKey ? t(o.labelKey) : o.label,
+    label: o.labelKey ? t(o.labelKey) : (o.label || o.value || ""),
   }));
   const fFiletype = makeSelect("advance.filetype", "adv-filetype", filetypeOpts);
-
-  // Server config
-  const serverConfig = getConfig() || {};
 
   // F.2: Language multi-select — built from server config when available
   const langOpts = [{ value: "", label: t("labels.searchoptions_all_langs") }];
