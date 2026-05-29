@@ -121,10 +121,17 @@ export function attach() {
 
   api.get("/cache/" + encodeURIComponent(docId))
     .then(env => {
-      // CacheHandler returns { doc_id, mimetype, content } inside the v2 envelope.
+      // CacheHandler returns { doc_id, mimetype, content, url, created, charset }
+      // inside the v2 envelope (url/created/charset added in Phase A).
       const docIdVal = env.doc_id || docId;
-      const mimetype = env.mimetype || "text/html;charset=utf-8";
+      const baseMime = env.mimetype || "text/html";
+      const charset = env.charset || "utf-8";
+      // Build a charset-aware MIME type for the Blob so the browser decodes the
+      // cached document correctly even when the server omits a charset parameter.
+      const mimetype = /charset=/i.test(baseMime) ? baseMime : baseMime + ";charset=" + charset;
       const content = env.content || "";
+      const cacheUrl = env.url || null;
+      const cacheCreated = env.created || env.last_modified || null;
 
       // Remove loading indicator.
       while (host.firstChild) host.removeChild(host.firstChild);
@@ -142,16 +149,22 @@ export function attach() {
       h2.textContent = t("labels.cache_title");
       host.appendChild(h2);
 
+      // --- Cache banner (out-of-iframe, safe textContent — no innerHTML) ---
+      // Shows "This is a cache of <url>. It is a snapshot of the page as it appeared on <created>."
+      const banner = document.createElement("div");
+      banner.className = "alert alert-secondary cache-banner";
+      banner.setAttribute("role", "status");
+      const unknown = t("labels.search_unknown");
+      banner.textContent = t("labels.search_cache_msg", [cacheUrl || unknown, cacheCreated || unknown]);
+      host.appendChild(banner);
+
       // --- Metadata block ---
       const dl = document.createElement("dl");
       dl.className = "row cache-meta mb-3";
 
       // URL (from the document metadata returned by the API).
-      // The v2 CacheHandler doesn't explicitly include a url field in its payload,
-      // but the legacy cache.hbs shows the URL via {{url_link}}. We do our best
-      // with what the API provides; skip gracefully when absent.
-      if (env.url) {
-        appendMeta(dl, "labels.cache_url", env.url);
+      if (cacheUrl) {
+        appendMeta(dl, "labels.cache_url", cacheUrl);
       }
       if (env.last_modified) {
         appendMeta(dl, "labels.cache_indexed_at", env.last_modified);
@@ -163,11 +176,29 @@ export function attach() {
         host.appendChild(dl);
       }
 
+      // --- <base href> injection ---
+      // Inject a <base href> into the cached HTML so that relative URLs in the
+      // cached document resolve against the original page origin.  This is done
+      // only when a URL is available and the cached document has no existing
+      // <base> element.  The URL is HTML-escaped for attribute context (XSS safe).
+      let docHtml = content;
+      if (cacheUrl && !/<base\b/i.test(docHtml)) {
+        const safeBase = cacheUrl
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        const baseTag = '<base href="' + safeBase + '">';
+        docHtml = /<head\b[^>]*>/i.test(docHtml)
+          ? docHtml.replace(/<head\b[^>]*>/i, m => m + baseTag)
+          : baseTag + docHtml;
+      }
+
       // --- Sandboxed iframe for cached content ---
       // SECURITY: cached HTML is untrusted, arbitrary content. We MUST use a
       // sandboxed iframe without allow-same-origin and without allow-scripts.
       // Never inject content into the SPA DOM directly.
-      const blob = new Blob([content], { type: mimetype || "text/html;charset=utf-8" });
+      const blob = new Blob([docHtml], { type: mimetype });
       const blobUrl = URL.createObjectURL(blob);
       _currentBlobUrl = blobUrl;
 
