@@ -972,4 +972,12 @@ public class BundledBootstrapThemeTest {
                 "phase narration must only substitute keywords when present (parity #6)");
         assertFalse(js.contains("? data.keywords : question"), "phase narration must not fall back to the full question (parity #6)");
     }
+
+    @Test
+    public void test_chatJs_errorClearsBubble() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("activeBubble.wrap.remove()"), "chat.js must remove the assistant bubble on error, banner only (parity #D)");
+        assertFalse(js.contains("activeBubble.bubble.textContent = msg"),
+                "chat.js must not leave the error text in the assistant bubble (parity #D)");
+    }
 }

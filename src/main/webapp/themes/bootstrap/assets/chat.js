@@ -842,13 +842,15 @@ function submitQuestion(question, uiRefs) {
           window.bootstrap.Modal.getOrCreateInstance(loginModal).show();
         }
         errorBanner.show(authMsg);
-        activeBubble.bubble.textContent = authMsg;
+        // #D (parity js/chat.js:646-651): remove the assistant bubble, show banner only.
+        if (activeBubble && activeBubble.wrap) activeBubble.wrap.remove();
         return;
       }
 
       const msg = errorCodeToText(code);
       errorBanner.show(msg);
-      activeBubble.bubble.textContent = msg;
+      // #D (parity js/chat.js:646-651): remove the assistant bubble, show banner only.
+      if (activeBubble && activeBubble.wrap) activeBubble.wrap.remove();
       return;
     }
 
@@ -916,7 +918,8 @@ function submitQuestion(question, uiRefs) {
     statusLozenge.setStatus("error");
     const msg = (err && err.name === "NetworkError") ? t("error.network") : t("error.server");
     errorBanner.show(msg);
-    activeBubble.bubble.textContent = msg;
+    // #D (parity js/chat.js:646-651): remove the assistant bubble, show banner only.
+    if (activeBubble && activeBubble.wrap) activeBubble.wrap.remove();
   }
 
   currentStream = api.sseStream("/chat/stream", body, onEvent, onError);
