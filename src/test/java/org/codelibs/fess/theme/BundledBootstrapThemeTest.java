@@ -262,4 +262,50 @@ public class BundledBootstrapThemeTest {
             }
         }
     }
+
+    @Test
+    public void test_advanceJs_filetypeCanonicalValues() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("word") && js.contains("excel") && js.contains("powerpoint"));
+        assertFalse(js.contains("msword"));
+        assertFalse(js.contains("msexcel"));
+        assertFalse(js.contains("mspowerpoint"));
+        assertTrue(js.contains("filetype_options"));
+    }
+
+    @Test
+    public void test_searchJs_runFromUrlHonorsAdvancedParams() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("getAll(\"lang\")"));
+        assertTrue(js.contains("getAll(\"ex_q\")"));
+    }
+
+    @Test
+    public void test_advanceJs_noneOfUsesNot() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("\"NOT \" + w"));
+        assertFalse(js.contains("\"-\" + w"));
+    }
+
+    @Test
+    public void test_advanceSuggestWired() throws Exception {
+        final String s = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        final String a = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(s.contains("export function attachSuggest"));
+        assertTrue(a.contains("attachSuggest(") && a.contains("from \"./search.js\""));
+    }
+
+    @Test
+    public void test_advanceJs_preservesParams() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("new URLSearchParams(location.search)"));
+        assertTrue(js.contains("startsWith(\"fields.\")"));
+    }
+
+    @Test
+    public void test_advanceJs_sortGatedByConfig() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("search_log_enabled") && js.contains("user_favorite"));
+        assertTrue(js.contains("click_count.desc") && js.contains("favorite_count.desc"));
+    }
 }
