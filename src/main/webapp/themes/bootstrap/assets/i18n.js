@@ -1,7 +1,7 @@
 // Bootstrap theme i18n loader. Resolves the runtime locale once at boot
 // using navigator.language with primary-subtag and English fallbacks per spec §4.6.
 
-const SUPPORTED = ["en", "ja", "de", "es", "fr", "ko", "pt-BR", "zh-CN"];
+const SUPPORTED = ["de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW"];
 let messages = {};
 let locale = "en";
 
