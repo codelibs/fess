@@ -80,6 +80,11 @@ function splitBlocks(text) {
 const HEADING_RE = /^(#{2,4}) (.+)$/;
 const UL_LINE_RE = /^[-*] (.+)$/;
 const OL_LINE_RE = /^(\d+)\. (.+)$/;
+// D6: Blockquote line regex — strips leading '>' with optional space.
+const BLOCKQUOTE_LINE_RE = /^>\s?(.*)$/;
+// D6: GFM table delimiter row — cells of ':?-+:?' separated by '|'.
+// Accepted limitation: column alignment and nested-block-in-cell are NOT rendered.
+const TABLE_DELIM_RE = /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$/;
 
 /**
  * Determine the type of a block and render it.
@@ -118,6 +123,41 @@ function processBlock(block) {
       .filter(l => OL_LINE_RE.test(l))
       .map(l => "<li>" + inlineMarkdown(l.match(OL_LINE_RE)[2]) + "</li>");
     return "<ol>" + items.join("") + "</ol>";
+  }
+
+  // D6: Blockquote — every non-empty line starts with '>'.
+  if (lines.every(l => BLOCKQUOTE_LINE_RE.test(l) || l.trim() === "")) {
+    const inner = lines
+      .filter(l => BLOCKQUOTE_LINE_RE.test(l))
+      .map(l => inlineMarkdown(l.match(BLOCKQUOTE_LINE_RE)[1]))
+      .join("<br>");
+    return "<blockquote>" + inner + "</blockquote>";
+  }
+
+  // D6: GFM table — line 0 is a pipe-delimited header row, line 1 is a delimiter row.
+  // Accepted limitation: column alignment and nested-block-in-cell are NOT rendered.
+  if (lines.length >= 2 && lines[0].includes("|") && TABLE_DELIM_RE.test(lines[1])) {
+    /**
+     * Split a table row on '|', tolerating leading/trailing pipes.
+     * @param {string} row
+     * @returns {string[]}
+     */
+    function splitRow(row) {
+      let s = row.trim();
+      if (s.startsWith("|")) s = s.slice(1);
+      if (s.endsWith("|")) s = s.slice(0, -1);
+      return s.split("|").map(c => c.trim());
+    }
+    const headers = splitRow(lines[0]);
+    const bodyLines = lines.slice(2);
+    const thCells = headers.map(h => "<th>" + inlineMarkdown(h) + "</th>").join("");
+    const bodyRows = bodyLines
+      .filter(l => l.includes("|"))
+      .map(l => {
+        const cells = splitRow(l);
+        return "<tr>" + cells.map(c => "<td>" + inlineMarkdown(c) + "</td>").join("") + "</tr>";
+      }).join("");
+    return "<table class=\"table\"><thead><tr>" + thCells + "</tr></thead><tbody>" + bodyRows + "</tbody></table>";
   }
 
   // Mixed block: treat as a paragraph, joining with <br> for soft line breaks.
