@@ -228,6 +228,22 @@ function attachHomeView() {
       }
     });
   }
+  // #5 (parity js/index.js:62-68, index.jsp:101-103): reset the home option selects.
+  const homeClearBtn = document.getElementById("home-options-clear-btn");
+  if (homeClearBtn && !homeClearBtn.dataset.attached) {
+    homeClearBtn.dataset.attached = "1";
+    homeClearBtn.addEventListener("click", ev => {
+      ev.preventDefault();
+      const sort = document.getElementById("home-sort-select");
+      const num = document.getElementById("home-num-select");
+      const lang = document.getElementById("home-lang-select");
+      const label = document.getElementById("home-label-select");
+      if (sort) sort.selectedIndex = 0;
+      if (num) num.selectedIndex = 0;
+      if (lang) Array.from(lang.options).forEach(o => { o.selected = false; });
+      if (label) Array.from(label.options).forEach(o => { o.selected = false; });
+    });
+  }
   renderHomePopularWords();
 }
 

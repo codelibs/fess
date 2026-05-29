@@ -915,4 +915,12 @@ public class BundledBootstrapThemeTest {
         assertTrue(html.contains("id=\"home-suggest-dropdown\""), "index.html must contain the home suggest dropdown (parity #1)");
         assertTrue(js.contains("search.attachSuggest(input, homeSuggest"), "app.js must attach suggest to the home input (parity #1)");
     }
+
+    @Test
+    public void test_homeOptionsClearButton() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"home-options-clear-btn\""), "home options must have a clear button (parity #5)");
+        assertTrue(js.contains("home-options-clear-btn"), "app.js must wire the home options clear button (parity #5)");
+    }
 }
