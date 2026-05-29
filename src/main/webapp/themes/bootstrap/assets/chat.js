@@ -1360,16 +1360,16 @@ export function attachStandalone() {
     textarea.style.height = "auto";
   });
 
-  // Hide progress strip on done/error (done via polling setStatus)
-  // We wrap setStatus to also control progressWrap visibility.
+  // #C (parity js/chat.js:544,657): hide the progress strip once the stream
+  // completes (ready) or errors, mirroring hideProgressIndicator().
   const origSetStatus = setStatus;
-  // Note: setStatus is a closure from buildStatusLozenge; we wrap refs
   refs.statusLozenge = {
     setStatus: (key) => {
       origSetStatus(key);
       if (key === "ready" || key === "error") {
-        // Keep strip visible for user inspection after completion.
-        // progressWrap stays shown until new chat.
+        // chat-progress-hide-done
+        progressWrap.classList.add("d-none");
+        progressMessageEl.textContent = "";
       }
     }
   };

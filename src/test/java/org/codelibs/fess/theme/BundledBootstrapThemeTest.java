@@ -980,4 +980,12 @@ public class BundledBootstrapThemeTest {
         assertFalse(js.contains("activeBubble.bubble.textContent = msg"),
                 "chat.js must not leave the error text in the assistant bubble (parity #D)");
     }
+
+    @Test
+    public void test_chatJs_hidesProgressOnDone() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("chat-progress-hide-done"), "chat.js must hide the progress strip on ready/error (parity #C)");
+        assertFalse(js.contains("Keep strip visible for user inspection after completion."),
+                "chat.js must no longer keep the strip visible after completion (parity #C)");
+    }
 }
