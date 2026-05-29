@@ -923,4 +923,29 @@ public class BundledBootstrapThemeTest {
         assertTrue(html.contains("id=\"home-options-clear-btn\""), "home options must have a clear button (parity #5)");
         assertTrue(js.contains("home-options-clear-btn"), "app.js must wire the home options clear button (parity #5)");
     }
+
+    @Test
+    public void test_appJs_wiresHomeFlash() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("home-flash-query-message"), "app.js attachHomeView must surface a query-param flash message (parity #A)");
+        assertTrue(js.contains("renderHomeFlash(t(\"flash."), "app.js must call renderHomeFlash with a flash.* i18n key (parity #A)");
+    }
+
+    @Test
+    public void test_i18n_hasFlashKeys() throws Exception {
+        try (java.util.stream.Stream<java.nio.file.Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.filter(p -> p.getFileName().toString().startsWith("messages.") && p.getFileName().toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            final String s = Files.readString(p, StandardCharsets.UTF_8);
+                            assertTrue(s.contains("\"flash.login_required\""),
+                                    "bundle " + p.getFileName() + " must contain flash.login_required (parity #A)");
+                            assertTrue(s.contains("\"flash.session_expired\""),
+                                    "bundle " + p.getFileName() + " must contain flash.session_expired (parity #A)");
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+    }
 }

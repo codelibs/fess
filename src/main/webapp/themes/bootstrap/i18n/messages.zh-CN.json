@@ -250,5 +250,7 @@
   "labels.chat_phase_fetch": "正在获取文档...",
   "labels.chat_phase_answer": "正在生成回答...",
   "labels.chat_fallback_no_results": "未找到文档。正在优化查询并重新搜索...",
-  "labels.chat_fallback_no_relevant_results": "未找到相关文档。正在优化查询并重新搜索..."
+  "labels.chat_fallback_no_relevant_results": "未找到相关文档。正在优化查询并重新搜索...",
+  "flash.login_required": "请登录以继续。",
+  "flash.session_expired": "您的会话已过期。请重新搜索。"
 }

@@ -250,5 +250,7 @@
   "labels.chat_phase_fetch": "Dokumente werden abgerufen...",
   "labels.chat_phase_answer": "Antwort wird generiert...",
   "labels.chat_fallback_no_results": "Keine Dokumente gefunden. Abfrage wird verfeinert und erneut gesucht...",
-  "labels.chat_fallback_no_relevant_results": "Keine relevanten Dokumente gefunden. Abfrage wird verfeinert und erneut gesucht..."
+  "labels.chat_fallback_no_relevant_results": "Keine relevanten Dokumente gefunden. Abfrage wird verfeinert und erneut gesucht...",
+  "flash.login_required": "Bitte melden Sie sich an, um fortzufahren.",
+  "flash.session_expired": "Ihre Sitzung ist abgelaufen. Bitte suchen Sie erneut."
 }

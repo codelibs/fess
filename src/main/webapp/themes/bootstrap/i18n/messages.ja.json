@@ -250,5 +250,7 @@
   "labels.chat_phase_fetch": "ドキュメント取得中...",
   "labels.chat_phase_answer": "回答生成中...",
   "labels.chat_fallback_no_results": "文書が見つからなかったため、検索クエリを変更して再検索します...",
-  "labels.chat_fallback_no_relevant_results": "関連する文書が見つからなかったため、検索クエリを変更して再検索します..."
+  "labels.chat_fallback_no_relevant_results": "関連する文書が見つからなかったため、検索クエリを変更して再検索します...",
+  "flash.login_required": "続行するにはサインインしてください。",
+  "flash.session_expired": "セッションの有効期限が切れました。もう一度検索してください。"
 }

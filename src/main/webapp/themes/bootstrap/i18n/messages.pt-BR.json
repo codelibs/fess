@@ -250,5 +250,7 @@
   "labels.chat_phase_fetch": "Obtendo documentos...",
   "labels.chat_phase_answer": "Gerando resposta...",
   "labels.chat_fallback_no_results": "Nenhum documento encontrado. Refinando a consulta e pesquisando novamente...",
-  "labels.chat_fallback_no_relevant_results": "Nenhum documento relevante encontrado. Refinando a consulta e pesquisando novamente..."
+  "labels.chat_fallback_no_relevant_results": "Nenhum documento relevante encontrado. Refinando a consulta e pesquisando novamente...",
+  "flash.login_required": "Faça login para continuar.",
+  "flash.session_expired": "Sua sessão expirou. Pesquise novamente."
 }

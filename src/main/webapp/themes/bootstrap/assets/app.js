@@ -244,6 +244,20 @@ function attachHomeView() {
       if (label) Array.from(label.options).forEach(o => { o.selected = false; });
     });
   }
+  // #A (parity index.jsp:123-130): surface a query-param-driven flash message on the
+  // home view (e.g. an auth redirect that appends ?error=login_required). The message
+  // text is looked up via an allowlisted flash.* i18n key (never raw query text).
+  // home-flash-query-message
+  const flashParams = new URLSearchParams(location.search);
+  const errKey = flashParams.get("error");
+  const msgKey = flashParams.get("msg");
+  if (errKey) {
+    renderHomeFlash(t("flash." + errKey), "danger");
+  } else if (msgKey) {
+    renderHomeFlash(t("flash." + msgKey), "info");
+  } else {
+    renderHomeFlash(null);
+  }
   renderHomePopularWords();
 }
 
