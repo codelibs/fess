@@ -95,7 +95,7 @@ public class CacheAction extends FessSearchAction {
 
     /**
      * Redirects to the SPA notFound error route carrying the given message key as a query parameter
-     * so {@code ThemeViewAction.injectErrorDetailMeta} can surface the specific error message.
+     * so {@code StaticThemeResponder.injectErrorDetailMeta} can surface the specific error message.
      *
      * @param messageKey the i18n key to forward (e.g. {@code "errors.docid_not_found"})
      * @return redirect response to {@code /error/notfound/?message_key=<messageKey>}

@@ -35,7 +35,7 @@ const PATH_TO_CODE = {
  * camelCase segments (e.g. "notFound", "badRequest") are normalised to
  * all-lowercase before the lookup so both snake_case and camelCase paths match.
  * Returns "500" as the default when no segment matches (mirrors
- * ThemeViewAction.computeErrorStatus, whose else branch is 500).
+ * StaticThemeResponder.computeErrorStatus, whose else branch is 500).
  *
  * @param {string} pathname - e.g. "/error/404", "/error/not_found", "/error/notFound"
  * @returns {string} - one of "400", "404", "429", "500", "503"
@@ -71,7 +71,7 @@ function appendDtDd(dl, label, value) {
 }
 
 /**
- * Read the error code injected by ThemeViewAction (#11).
+ * Read the error code injected by StaticThemeResponder (#11).
  * Returns the numeric-string code (e.g. "404", "429", "500") or null if the
  * meta tag is absent (e.g. when the page is served outside the theme action).
  *
@@ -83,7 +83,7 @@ function readErrorCodeMeta() {
 }
 
 /**
- * Read the error detail key injected by ThemeViewAction (F.9).
+ * Read the error detail key injected by StaticThemeResponder (F.9).
  * Returns the message key string (e.g. "errors.docid_not_found") or null.
  *
  * @returns {string|null}
@@ -169,7 +169,7 @@ function render(container, code, requestedUrl, errorDetailKey) {
  * Attach the error view to the #error-view container.
  * Reads the current pathname and optional ?url search parameter.
  * Also reads the x-fess-error-code meta tag (#11) and the x-fess-error-detail-key
- * meta tag injected by ThemeViewAction (F.9).
+ * meta tag injected by StaticThemeResponder (F.9).
  * Safe to call multiple times — re-renders from scratch each time.
  */
 export function attach() {

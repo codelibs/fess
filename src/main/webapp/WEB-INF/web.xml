@@ -143,17 +143,14 @@
     SECURITY (C-1 / PR #3136): staticThemeFilter MUST come AFTER httpHeaderSecurity,
     rateLimitFilter, loadControlFilter, and corsFilter on the REQUEST dispatch.
 
-    staticThemeFilter intercepts GET requests and RequestDispatcher.forward()s them
-    to /theme/view/. Filters mapped later in the chain that only declare
-    <dispatcher>REQUEST</dispatcher> will NOT run on the forwarded request, so any
-    filter required to apply to static-theme asset/index responses must be ordered
-    before this mapping. Reordering — rather than adding FORWARD dispatcher scopes
-    everywhere — preserves the existing behavior of those security filters on the
-    REQUEST chain (rate-limiting per-request, HSTS/clickjacking headers, CORS,
-    load shedding) without risking double-application via FORWARD.
-
-    lastaPrepareFilter retains REQUEST+FORWARD so the forwarded ThemeViewAction
-    still has Lasta context. Do not move staticThemeFilter ahead of these filters.
+    staticThemeFilter intercepts GET requests for an active static theme and serves the
+    theme's asset/index response directly (via StaticThemeResponder), writing the response and
+    returning WITHOUT calling chain.doFilter(). Filters mapped later in the chain
+    therefore do NOT run on static-theme responses, so any security filter required to
+    apply to those responses must be ordered before this mapping. This preserves the
+    behavior of the security filters on the REQUEST chain (rate-limiting per-request,
+    HSTS/clickjacking headers, CORS, load shedding). Do not move staticThemeFilter
+    ahead of these filters.
   -->
   <filter-mapping>
     <filter-name>staticThemeFilter</filter-name>
@@ -177,12 +174,6 @@
     <filter-name>lastaToActionFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>lastaToActionFilter</filter-name>
-    <url-pattern>/theme/view/</url-pattern>
-    <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
   <!-- ================================================================================= -->

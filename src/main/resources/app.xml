@@ -63,6 +63,8 @@
 	</component>
 	<component name="themeRegistry" class="org.codelibs.fess.theme.ThemeRegistry">
 	</component>
+	<component name="staticThemeResponder" class="org.codelibs.fess.theme.StaticThemeResponder">
+	</component>
 	<component name="staticThemeInstaller" class="org.codelibs.fess.theme.StaticThemeInstaller">
 	</component>
 	<component name="sessionCsrfTokenManager" class="org.codelibs.fess.api.v2.SessionCsrfTokenManager">

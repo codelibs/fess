@@ -611,7 +611,7 @@ public class AdminThemeActionTest extends UnitFessTestCase {
      * then {@code themeRegistry.reload()}, then {@code saveInfo(addSuccessReloadTheme)},
      * then {@code redirect(getClass())} — the full success flow exercised end-to-end.
      * A no-op {@code ThemeRegistry} subclass is used so the reload does not require the
-     * filesystem/search-engine, mirroring the ThemeViewActionTest injection style.
+     * filesystem/search-engine, mirroring the StaticThemeResponderTest injection style.
      */
     @Test
     public void test_reload_redirectsAfterRegistryReload() throws Exception {

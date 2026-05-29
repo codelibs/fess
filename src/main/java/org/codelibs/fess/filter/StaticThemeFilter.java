@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.app.web.theme.ThemeViewAction;
 import org.codelibs.fess.helper.VirtualHostHelper;
+import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
@@ -38,20 +38,32 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Servlet filter that routes GET requests to {@link ThemeViewAction} when a static theme is
+ * Servlet filter that serves a static theme's files directly when a static theme is
  * active for the current virtual host.
+ *
+ * <p>The filter writes the response in place via {@link StaticThemeResponder} (no
+ * {@code RequestDispatcher} forward), so the browser address bar keeps the original
+ * request URI.
+ *
+ * <p>Matching is an <em>allowlist</em>: a request is handled by the theme only when it
+ * targets a theme asset or one of the SPA-owned UI paths (see {@link #THEME_UI_PREFIXES}).
+ * Every other request passes through to the standard Fess routes. This is the inverse of a
+ * denylist of infrastructure prefixes: it keeps Fess's own endpoints (admin, API, login,
+ * crawler/system endpoints, etc.) working by default, and a newly-added Fess route is never
+ * accidentally swallowed by the SPA. The trade-off is that a UI route the SPA expects to
+ * own must be added to {@link #THEME_UI_PREFIXES}; an unlisted path is not served as the
+ * SPA entry.
  *
  * <p>Behavior summary:
  * <ul>
  *   <li>Non-GET requests pass through unchanged.</li>
- *   <li>Pre-declared infrastructure prefixes (admin, API, legacy JSP-theme assets, etc.) pass through.</li>
- *   <li>If no active theme is resolved, or the active theme is JSP, pass through.</li>
- *   <li>For {@code /themes/{name}/...} that matches the active static theme's name, the filter sets
- *       {@link ThemeViewAction#REQ_ATTR_MODE} to {@code "ASSET"} and
- *       {@link ThemeViewAction#REQ_ATTR_ASSET_PATH} to the path after {@code {name}/}, then forwards
- *       to {@value #THEME_VIEW_PATH}.</li>
- *   <li>For any other UI path, the filter sets {@link ThemeViewAction#REQ_ATTR_MODE} to
- *       {@code "INDEX"} and forwards to {@value #THEME_VIEW_PATH}.</li>
+ *   <li>Requests that are neither a {@code /themes/...} asset nor an allowlisted UI path
+ *       pass through unchanged (without even resolving the active theme).</li>
+ *   <li>If no active static theme is resolved, pass through.</li>
+ *   <li>For {@code /themes/{name}/...} that matches the active static theme's name, the filter calls
+ *       {@link StaticThemeResponder#serveAsset} with the path after {@code {name}/}.</li>
+ *   <li>For an allowlisted UI path (when {@code spaFallback} is enabled), the filter calls
+ *       {@link StaticThemeResponder#serveIndex} to serve the SPA entry HTML in place.</li>
  * </ul>
  */
 public class StaticThemeFilter implements Filter {
@@ -59,59 +71,38 @@ public class StaticThemeFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(StaticThemeFilter.class);
 
     /**
-     * Forwarded URL. The trailing slash is required so LastaFlute's
-     * {@code RequestRoutingFilter} does not 301-redirect to the canonical form
-     * (which would leak {@code /theme/view/} into the browser address bar).
-     * Must NOT itself be intercepted to avoid infinite recursion.
-     */
-    static final String THEME_VIEW_PATH = "/theme/view/";
-
-    /**
-     * URI prefixes that bypass the filter even when a static theme is active.
+     * SPA-owned UI path prefixes served as the theme entry ({@code index.html}) when a static
+     * theme is active and {@code spaFallback} is enabled. The root path {@code "/"} is matched
+     * exactly (handled in {@link #isThemeUiPath(String)}); each prefix below matches the bare
+     * path and any sub-path (e.g. {@code /cache} and {@code /cache/}).
      *
-     * <p>Each entry that does NOT end with {@code "/"} matches both the bare path and
-     * any sub-path (see {@link #isPassThrough(String)}). The list intentionally covers:
+     * <p>This set mirrors the public search UI routes that the SPA replaces:
      * <ul>
-     *   <li>Admin/API/SSO infrastructure that the SPA cannot replace
-     *       ({@code /admin}, {@code /api}, {@code /sso}, {@code /logout}).</li>
-     *   <li>Account flows that depend on Fess JSP forms
-     *       ({@code /login} — required for the JSP login form invoked by
-     *       {@code FessAdminAction} redirect targets).
-     *       Note: {@code /profile} is intentionally <em>not</em> in this list so that
-     *       the static SPA theme can handle the profile page.</li>
-     *   <li>Error routes ({@code /error}) are intentionally <em>not</em> in this list;
-     *       when a static theme is active the SPA handles error display.
-     *       {@link org.codelibs.fess.app.web.theme.ThemeViewAction} detects the
-     *       {@code /error} prefix and sets appropriate HTTP status and diagnostic
+     *   <li>{@code /} — search top (root).</li>
+     *   <li>{@code /search} — search results.</li>
+     *   <li>{@code /error} — error pages; {@link StaticThemeResponder} detects the
+     *       {@code /error} prefix and sets the appropriate HTTP status and diagnostic
      *       response headers before serving the SPA entry.</li>
-     *   <li>Static legacy theme assets ({@code /css}, {@code /js}, {@code /images}).</li>
-     *   <li>Crawler/system endpoints ({@code /go}, {@code /thumbnail}, {@code /osdd},
-     *       {@code /favicon.ico}, {@code /robots.txt},
-     *       {@code /sitemap.xml}, {@code /manifest.webmanifest}, {@code /.well-known}).
-     *       Note: {@code /cache} is intentionally <em>not</em> in this list; when a
-     *       static theme is active the SPA cache viewer handles
-     *       {@code /cache/?docId=...} navigation. The underlying
-     *       {@code /api/v2/cache/{docId}} endpoint is still accessible because
-     *       {@code /api/} is already passed through above.</li>
-     *   <li>The forward target itself ({@link #THEME_VIEW_PATH}) to prevent recursion.</li>
+     *   <li>{@code /profile} — the user profile page.</li>
+     *   <li>{@code /cache} — the cached-document viewer ({@code /cache/?docId=...}); the
+     *       underlying {@code /api/v2/cache/{docId}} data endpoint is served by Fess
+     *       because {@code /api/} is not an allowlisted UI path.</li>
      * </ul>
+     *
+     * <p>Add a prefix here when the SPA gains a new top-level UI route that must be served
+     * as the entry HTML rather than handled by Fess.
      */
-    private static final List<String> PASS_THROUGH_PREFIXES = List.of(//
-            "/admin/", "/admin", //
-            "/api/", //
-            "/login", //
-            "/css/", "/js/", "/images/", //
-            "/go", "/thumbnail", "/osdd", //
-            "/sso/", "/logout", //
-            "/favicon.ico", //
-            "/robots.txt", //
-            "/sitemap.xml", //
-            "/manifest.webmanifest", //
-            "/.well-known", //
-            THEME_VIEW_PATH);
+    private static final List<String> THEME_UI_PREFIXES = List.of(//
+            "/search", //
+            "/error", //
+            "/profile", //
+            "/cache");
 
     /** Overridable registry reference; production code uses the container lookup. */
     private ThemeRegistry themeRegistry;
+
+    /** Overridable responder reference; production code uses the container lookup. */
+    private StaticThemeResponder staticThemeResponder;
 
     /**
      * Latches on the first failed {@link ThemeRegistry} lookup so the operator
@@ -128,6 +119,13 @@ public class StaticThemeFilter implements Filter {
      * {@link #firstFailure} but tracks the virtual-host helper independently.
      */
     private final AtomicBoolean hostKeyFirstFailure = new AtomicBoolean(false);
+
+    /**
+     * Latches on the first {@link StaticThemeResponder} lookup failure so the operator sees a
+     * single WARN instead of one per request. Subsequent failures degrade to DEBUG.
+     * Mirrors {@link #firstFailure} but tracks the responder component independently.
+     */
+    private final AtomicBoolean responderFirstFailure = new AtomicBoolean(false);
 
     /**
      * Default constructor.
@@ -165,8 +163,11 @@ public class StaticThemeFilter implements Filter {
 
         final String uri = stripContextPath(req);
 
-        // Always pass through any pre-declared infrastructure paths
-        if (isPassThrough(uri)) {
+        // Allowlist: handle only theme assets and SPA-owned UI paths. Everything else is a
+        // Fess route and passes through without even resolving the active theme.
+        final boolean assetCandidate = uri.startsWith("/themes/");
+        final boolean uiCandidate = isThemeUiPath(uri);
+        if (!assetCandidate && !uiCandidate) {
             chain.doFilter(request, response);
             return;
         }
@@ -183,8 +184,14 @@ public class StaticThemeFilter implements Filter {
             return;
         }
 
+        final StaticThemeResponder responder = resolveResponder();
+        if (responder == null) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         // Asset path: /themes/{name}/...
-        if (uri.startsWith("/themes/")) {
+        if (assetCandidate) {
             final String rest = uri.substring("/themes/".length()); // {name}/path...
             final int slash = rest.indexOf('/');
             if (slash <= 0) {
@@ -198,23 +205,20 @@ public class StaticThemeFilter implements Filter {
                 chain.doFilter(request, response);
                 return;
             }
-            req.setAttribute(ThemeViewAction.REQ_ATTR_MODE, "ASSET");
-            req.setAttribute(ThemeViewAction.REQ_ATTR_ASSET_PATH, assetPath);
-            req.getRequestDispatcher(THEME_VIEW_PATH).forward(req, res);
+            responder.serveAsset(req, res, theme, assetPath);
             return;
         }
 
-        // If the theme manifest has spaFallback=false, do not forward non-asset
-        // requests to the theme view — let the original Fess routes handle them.
+        // If the theme manifest has spaFallback=false, do not serve the theme entry for
+        // UI requests — let the original Fess routes handle them.
         final boolean spaFallback = theme.getManifest().map(ThemeManifest::isSpaFallback).orElse(true);
         if (!spaFallback) {
             chain.doFilter(request, response);
             return;
         }
 
-        // UI path -> index.html (SPA fallback mode)
-        req.setAttribute(ThemeViewAction.REQ_ATTR_MODE, "INDEX");
-        req.getRequestDispatcher(THEME_VIEW_PATH).forward(req, res);
+        // Allowlisted UI path -> serve index.html directly in place.
+        responder.serveIndex(req, res, theme, uri);
     }
 
     private static String stripContextPath(final HttpServletRequest req) {
@@ -229,15 +233,14 @@ public class StaticThemeFilter implements Filter {
         return uri;
     }
 
-    private static boolean isPassThrough(final String uri) {
-        for (final String p : PASS_THROUGH_PREFIXES) {
-            if (p.endsWith("/")) {
-                if (uri.startsWith(p)) {
-                    return true;
-                }
-            } else if (uri.equals(p) || uri.startsWith(p + "/")) {
-                // Note: getRequestURI() never includes the query string per the
-                // Servlet spec, so the dead uri.startsWith(p + "?") branch is omitted.
+    private static boolean isThemeUiPath(final String uri) {
+        if ("/".equals(uri)) {
+            return true;
+        }
+        for (final String p : THEME_UI_PREFIXES) {
+            // Note: getRequestURI() never includes the query string per the Servlet spec,
+            // so matching the bare path and the "{p}/" sub-path covers all cases.
+            if (uri.equals(p) || uri.startsWith(p + "/")) {
                 return true;
             }
         }
@@ -255,6 +258,22 @@ public class StaticThemeFilter implements Filter {
                 logger.warn("ThemeRegistry not available; static-theme routing disabled", e);
             } else if (logger.isDebugEnabled()) {
                 logger.debug("ThemeRegistry not available", e);
+            }
+            return null;
+        }
+    }
+
+    private StaticThemeResponder resolveResponder() {
+        if (staticThemeResponder != null) {
+            return staticThemeResponder;
+        }
+        try {
+            return ComponentUtil.getStaticThemeResponder();
+        } catch (final Exception e) {
+            if (responderFirstFailure.compareAndSet(false, true)) {
+                logger.warn("StaticThemeResponder not available; static-theme routing disabled", e);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("StaticThemeResponder not available", e);
             }
             return null;
         }
@@ -279,5 +298,9 @@ public class StaticThemeFilter implements Filter {
     // ---- Test seam ----
     void setThemeRegistry(final ThemeRegistry r) {
         this.themeRegistry = r;
+    }
+
+    void setStaticThemeResponder(final StaticThemeResponder r) {
+        this.staticThemeResponder = r;
     }
 }

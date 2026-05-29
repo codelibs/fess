@@ -96,6 +96,7 @@ import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.theme.StaticThemeInstaller;
+import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
@@ -151,6 +152,8 @@ public final class ComponentUtil {
     private static final String SESSION_CSRF_TOKEN_MANAGER = "sessionCsrfTokenManager";
 
     private static final String THEME_REGISTRY = "themeRegistry";
+
+    private static final String STATIC_THEME_RESPONDER = "staticThemeResponder";
 
     private static final String STATIC_THEME_INSTALLER = "staticThemeInstaller";
 
@@ -781,6 +784,14 @@ public final class ComponentUtil {
      */
     public static ThemeRegistry getThemeRegistry() {
         return getComponent(THEME_REGISTRY);
+    }
+
+    /**
+     * Gets the static theme responder component.
+     * @return The static theme responder (shared singleton).
+     */
+    public static StaticThemeResponder getStaticThemeResponder() {
+        return getComponent(STATIC_THEME_RESPONDER);
     }
 
     /**
