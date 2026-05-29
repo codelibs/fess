@@ -161,9 +161,9 @@ function compose(parts) {
   }
 
   if (parts.none) {
-    // F.4: use quote-aware tokenizer so "foo bar" becomes -"foo bar"
+    // F.4: use quote-aware tokenizer so "foo bar" becomes NOT "foo bar"
     const tokens = tokenize(parts.none);
-    out.push(...tokens.filter(Boolean).map(w => "-" + w));
+    out.push(...tokens.filter(Boolean).map(w => "NOT " + w));
   }
 
   if (parts.site) {
