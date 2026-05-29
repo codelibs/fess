@@ -875,4 +875,13 @@ public class BundledBootstrapThemeTest {
         final String js = Files.readString(THEME_DIR.resolve("assets/error.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("503 path segments are reserved"), "error.js must mark the 503 path mappings as reserved (#8)");
     }
+
+    @Test
+    public void test_chatNavUsesAiMode() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("t(\"nav.chat_ai_mode\")"), "renderChatNavLink must use nav.chat_ai_mode (parity #4)");
+        assertTrue(html.contains("id=\"chat-nav-link\" data-spa data-i18n=\"nav.chat_ai_mode\""),
+                "chat nav markup must use nav.chat_ai_mode (parity #4)");
+    }
 }

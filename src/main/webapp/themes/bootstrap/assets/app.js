@@ -271,8 +271,8 @@ function renderChatNavLink() {
   chatLink.className = "nav-link px-2";
   chatLink.href = "/chat";
   chatLink.setAttribute("data-spa", "");
-  chatLink.setAttribute("data-i18n", "nav.chat");
-  chatLink.textContent = t("nav.chat");
+  chatLink.setAttribute("data-i18n", "nav.chat_ai_mode");
+  chatLink.textContent = t("nav.chat_ai_mode");
   helpLink.parentNode.insertBefore(chatLink, helpLink);
 }
 
