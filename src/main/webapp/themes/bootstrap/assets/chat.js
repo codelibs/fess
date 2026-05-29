@@ -185,7 +185,10 @@ function buildFilterPanel() {
     wrapper.hidden = true;
     return {
       panel: wrapper,
-      getFilters: () => ({ fields: [], extraQ: [] })
+      getFilters: () => ({ fields: [], extraQ: [] }),
+      // No-op so the New Chat handler can call resetFilters() unconditionally
+      // even when no labels/facets are configured (parity-r3 review: blocker fix).
+      resetFilters: () => {}
     };
   }
 
@@ -224,11 +227,26 @@ function buildFilterPanel() {
 
   // Track all checkboxes.
   const checkboxes = [];
+  // Track per-group badge elements for updateGroupBadge (minor filter UX parity).
+  const groupBadges = [];
 
   function updateBadge() {
     const checked = checkboxes.filter(cb => cb.checked).length;
     filterBadge.textContent = String(checked);
     filterBadge.classList.toggle("d-none", checked === 0);
+  }
+
+  /**
+   * Update a per-group count badge given its group's checkbox array.
+   * Mirrors legacy updateGroupBadge (js/chat.js:942).
+   *
+   * @param {HTMLElement} badgeEl - the badge span for this group
+   * @param {HTMLInputElement[]} groupCbs - checkboxes belonging to this group
+   */
+  function updateGroupBadge(badgeEl, groupCbs) {
+    const count = groupCbs.filter(cb => cb.checked).length;
+    badgeEl.textContent = String(count);
+    badgeEl.classList.toggle("d-none", count === 0);
   }
 
   /**
@@ -262,19 +280,27 @@ function buildFilterPanel() {
   // Label options
   if (labelOptions.length > 0) {
     const groupWrap = el("div", { className: "chat-filter-group" });
-    const groupLabel = el("div", { className: "fw-semibold small mb-1", text: t("labels.facet_label_title") });
-    groupWrap.appendChild(groupLabel);
+    const groupHeaderRow = el("div", { className: "d-flex align-items-center gap-1 mb-1" });
+    const groupLabel = el("div", { className: "fw-semibold small flex-grow-1", text: t("labels.facet_label_title") });
+    // Per-group badge (minor filter UX parity — updateGroupBadge).
+    const groupBadgeEl = el("span", { className: "badge rounded-pill bg-secondary d-none chat-filter-group-badge", text: "0" });
+    groupHeaderRow.appendChild(groupLabel);
+    groupHeaderRow.appendChild(groupBadgeEl);
+    groupWrap.appendChild(groupHeaderRow);
+    const groupCbs = [];
     const rowEls = [];
     for (const opt of labelOptions) {
       const labelEl = el("label", { className: "d-flex align-items-center gap-1 small mb-1" });
       const cb = el("input", { attrs: { type: "checkbox", "data-filter-type": "label", "data-filter-value": opt.value || opt } });
-      cb.addEventListener("change", updateBadge);
+      cb.addEventListener("change", () => { updateBadge(); updateGroupBadge(groupBadgeEl, groupCbs); });
       checkboxes.push(cb);
+      groupCbs.push(cb);
       labelEl.appendChild(cb);
       labelEl.appendChild(document.createTextNode(opt.label || opt.value || opt));
       groupWrap.appendChild(labelEl);
       rowEls.push(labelEl);
     }
+    groupBadges.push({ badgeEl: groupBadgeEl, groupCbs });
     attachGroupSearch(groupWrap, rowEls);
     filterBody.appendChild(groupWrap);
   }
@@ -282,20 +308,28 @@ function buildFilterPanel() {
   // Facet views
   for (const facetView of facetViews) {
     const groupWrap = el("div", { className: "chat-filter-group mt-2" });
-    const groupLabel = el("div", { className: "fw-semibold small mb-1", text: facetView.title || "" });
-    groupWrap.appendChild(groupLabel);
+    const groupHeaderRow = el("div", { className: "d-flex align-items-center gap-1 mb-1" });
+    const groupLabel = el("div", { className: "fw-semibold small flex-grow-1", text: facetView.title || "" });
+    // Per-group badge (minor filter UX parity — updateGroupBadge).
+    const groupBadgeEl = el("span", { className: "badge rounded-pill bg-secondary d-none chat-filter-group-badge", text: "0" });
+    groupHeaderRow.appendChild(groupLabel);
+    groupHeaderRow.appendChild(groupBadgeEl);
+    groupWrap.appendChild(groupHeaderRow);
     const queries = facetView.queryMap || facetView.queries || [];
+    const groupCbs = [];
     const rowEls = [];
     for (const [key, val] of (Array.isArray(queries) ? queries.map(q => [q.label || q, q.value || q]) : Object.entries(queries))) {
       const labelEl = el("label", { className: "d-flex align-items-center gap-1 small mb-1" });
       const cb = el("input", { attrs: { type: "checkbox", "data-filter-type": "ex_q", "data-filter-value": val } });
-      cb.addEventListener("change", updateBadge);
+      cb.addEventListener("change", () => { updateBadge(); updateGroupBadge(groupBadgeEl, groupCbs); });
       checkboxes.push(cb);
+      groupCbs.push(cb);
       labelEl.appendChild(cb);
       labelEl.appendChild(document.createTextNode(key));
       groupWrap.appendChild(labelEl);
       rowEls.push(labelEl);
     }
+    groupBadges.push({ badgeEl: groupBadgeEl, groupCbs });
     attachGroupSearch(groupWrap, rowEls);
     filterBody.appendChild(groupWrap);
   }
@@ -303,6 +337,7 @@ function buildFilterPanel() {
   clearBtn.addEventListener("click", () => {
     checkboxes.forEach(cb => { cb.checked = false; });
     updateBadge();
+    groupBadges.forEach(({ badgeEl, groupCbs }) => updateGroupBadge(badgeEl, groupCbs));
   });
 
   collapse.appendChild(filterBody);
@@ -321,7 +356,17 @@ function buildFilterPanel() {
     return { fields, extraQ };
   }
 
-  return { panel: wrapper, getFilters };
+  /**
+   * Reset all filter checkboxes and badges (legacy resetFilters, js/chat.js:967).
+   * Called on new chat to clear active filters.
+   */
+  function resetFilters() {
+    checkboxes.forEach(cb => { cb.checked = false; });
+    updateBadge();
+    groupBadges.forEach(({ badgeEl, groupCbs }) => updateGroupBadge(badgeEl, groupCbs));
+  }
+
+  return { panel: wrapper, getFilters, resetFilters };
 }
 
 // ---------------------------------------------------------------------------
@@ -686,12 +731,12 @@ function errorCodeToText(code) {
  * Submit a question to the streaming chat API.
  *
  * @param {string} question
- * @param {{ log, phaseStrip, statusLozenge, errorBanner, getLastQuestion, inputEl, submitEl, emptyState, getFilters }} uiRefs
+ * @param {{ log, phaseStrip, statusLozenge, errorBanner, getLastQuestion, inputEl, submitEl, emptyState, getFilters, progressMessageEl }} uiRefs
  */
 function submitQuestion(question, uiRefs) {
   if (!question) return;
 
-  const { log, phaseStrip, statusLozenge, errorBanner, inputEl, submitEl, emptyState, getFilters } = uiRefs;
+  const { log, phaseStrip, statusLozenge, errorBanner, inputEl, submitEl, emptyState, getFilters, progressMessageEl } = uiRefs;
 
   // Hide welcome state
   if (emptyState) emptyState.hidden = true;
@@ -733,8 +778,18 @@ function submitQuestion(question, uiRefs) {
       const status = data && data.status;
       const hitCount = data && data.hit_count;
       if (phase) {
-        if (status === "complete") phaseStrip.complete(phase, hitCount);
-        else { phaseStrip.advanceTo(phase); statusLozenge.setStatus("thinking"); }
+        if (status === "complete") {
+          phaseStrip.complete(phase, hitCount);
+        } else {
+          phaseStrip.advanceTo(phase);
+          statusLozenge.setStatus("thinking");
+          // #7 phase narration: render per-phase status message into progress element.
+          // The search phase uses {0} for keywords; substitute the question text.
+          if (progressMessageEl) {
+            const keywords = (data && data.keywords) ? data.keywords : question;
+            progressMessageEl.textContent = t("labels.chat_phase_" + phase, [keywords]);
+          }
+        }
       }
       return;
     }
@@ -764,6 +819,8 @@ function submitQuestion(question, uiRefs) {
       statusLozenge.setStatus("ready");
       if (data && data.session_id) sessionId = data.session_id;
       if (data && data.html_content) activeBubble.setHtmlContent(data.html_content);
+      // #9 focus restore: return focus to the chat input on completion (JSP parity js/chat.js:546).
+      if (inputEl) inputEl.focus();
       return;
     }
 
@@ -808,7 +865,17 @@ function submitQuestion(question, uiRefs) {
     }
 
     if (type === "fallback") {
-      activeBubble.setStatusLine(t("labels.chat_fallback_model"));
+      // #8 fallback reason: select message by data.reason (JSP parity js/chat.js:577-584).
+      const reason = data && data.reason;
+      let fallbackMsg;
+      if (reason === "no_results") {
+        fallbackMsg = t("labels.chat_fallback_no_results");
+      } else if (reason === "no_relevant_results") {
+        fallbackMsg = t("labels.chat_fallback_no_relevant_results");
+      } else {
+        fallbackMsg = t("labels.chat_fallback_model");
+      }
+      activeBubble.setStatusLine(fallbackMsg);
       return;
     }
 
@@ -1072,7 +1139,7 @@ export function attachStandalone() {
   card.appendChild(cardHeader);
 
   // ---- Filter panel ----
-  const { panel: filterPanel, getFilters } = buildFilterPanel();
+  const { panel: filterPanel, getFilters, resetFilters } = buildFilterPanel();
   // Override the collapse id to match the toggle button target
   const filterCollapse = filterPanel.querySelector(".collapse");
   if (filterCollapse) filterCollapse.id = filterCollapseId;
@@ -1103,6 +1170,12 @@ export function attachStandalone() {
     attrs: { role: "status", "aria-live": "polite" }
   });
   progressWrap.appendChild(phaseStripEl);
+  // #7 phase narration: dedicated progress message element (per-phase longer status text).
+  const progressMessageEl = el("div", {
+    className: "chat-progress-message text-muted small mt-1",
+    attrs: { id: "chat-progress-message", "aria-live": "polite" }
+  });
+  progressWrap.appendChild(progressMessageEl);
 
   cardBody.appendChild(chatMessages);
   cardBody.appendChild(progressWrap);
@@ -1172,7 +1245,8 @@ export function attachStandalone() {
     inputEl: textarea,
     submitEl: sendBtn,
     emptyState,
-    getFilters
+    getFilters,
+    progressMessageEl
   };
 
   function doSubmit(q) {
@@ -1181,6 +1255,7 @@ export function attachStandalone() {
     // Show progress strip
     progressWrap.classList.remove("d-none");
     phaseReset();
+    progressMessageEl.textContent = "";
     submitQuestion(q, refs);
   }
 
@@ -1257,10 +1332,13 @@ export function attachStandalone() {
     hideError();
     phaseReset();
     progressWrap.classList.add("d-none");
+    progressMessageEl.textContent = "";
     setStatus("ready");
     textarea.disabled = false;
     sendBtn.disabled = false;
     lastQuestion = "";
+    // Reset active filters on new chat (legacy resetFilters, js/chat.js:1007).
+    resetFilters();
     // D5b: clear warning/danger; D5c: reset height
     charCountSpan.classList.remove("warning", "danger");
     textarea.style.height = "auto";

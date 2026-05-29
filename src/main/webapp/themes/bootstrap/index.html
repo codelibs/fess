@@ -60,6 +60,9 @@
       <!-- Notification banner for home/search-top view — rendered by app.js when
            notifications.search_top is non-empty in /api/v2/ui/config. -->
       <div id="home-notification" class="d-none" role="status" aria-live="polite"></div>
+      <!-- Flash / message region: surfaced info/error messages (parity with index.jsp:123-130
+           <la:info> / <la:errors>). Populated by app.js renderHomeFlash(). -->
+      <div id="home-flash" class="d-none" role="alert" aria-live="assertive" aria-atomic="true"></div>
       <div class="text-center">
         <h2 class="mb-4"><img src="/images/logo.png" alt="" data-i18n-alt="labels.header_brand_name" class="home-logo"></h2>
         <form id="home-search-form" class="d-flex justify-content-center mb-3" role="search" aria-label="Home search">
@@ -83,7 +86,12 @@
             <label class="form-label me-1 mb-0 small" for="home-num-select" data-i18n="search.num">Per page</label>
             <select id="home-num-select" class="form-select form-select-sm options-select" aria-label="Results per page"></select>
             <label class="form-label me-1 mb-0 small" for="home-lang-select" data-i18n="search.lang">Language</label>
-            <select id="home-lang-select" class="form-select form-select-sm options-select" aria-label="Language filter"></select>
+            <select id="home-lang-select" class="form-select form-select-sm options-select" multiple aria-label="Language filter"></select>
+            <!-- Label multi-select: rendered by search.js renderHomeOptions() when
+                 features.display_label_type is true and label_options is non-empty
+                 (parity with searchOptions.jsp:85-97 / parity-r3 Task 2). -->
+            <label class="form-label me-1 mb-0 small d-none" for="home-label-select" data-i18n="search.labels">Labels</label>
+            <select id="home-label-select" class="form-select form-select-sm options-select d-none" multiple aria-label="Label filter"></select>
           </div>
         </div>
         <div id="home-popular-words" class="text-muted"></div>
@@ -113,6 +121,7 @@
             <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
           </div>
           <p id="results-status" class="text-muted small mb-2" aria-live="polite" aria-atomic="true"></p>
+          <div id="results-popular-words" class="d-none mb-2 text-muted small" aria-live="polite"></div>
           <div id="similar-doc-banner" class="alert alert-info d-none align-items-center mb-2" role="status" aria-live="polite"></div>
           <ul id="current-filters" class="list-inline mb-2"></ul>
           <div id="search-options" class="d-flex gap-2 flex-wrap align-items-center mb-3">
@@ -178,6 +187,7 @@
     <section id="error-view" hidden class="container my-4"></section>
     <section id="profile-view" hidden class="container my-4"></section>
     <section id="help-view" hidden class="container my-4"></section>
+    <!-- chat-progress-message is created dynamically inside #chat-view by chat.js -->
     <section id="chat-view" hidden class="container-fluid my-3"></section>
     <section id="cache-view" hidden class="container my-3"></section>
   </main>

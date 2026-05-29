@@ -145,7 +145,30 @@ function renderNotifications() {
 }
 
 /**
+ * Render a message into the #home-flash aria-live region (parity with index.jsp:123-130
+ * <la:info> / <la:errors> blocks). Accepts a plain text or sanitized HTML string.
+ * Call with null/empty to hide the region.
+ *
+ * @param {string|null} message - text to show (null/empty = hide)
+ * @param {"info"|"danger"} [level] - Bootstrap alert variant (default "info")
+ */
+export function renderHomeFlash(message, level = "info") {
+  const el = document.getElementById("home-flash");
+  if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+  if (!message || (typeof message === "string" && !message.trim())) {
+    el.classList.add("d-none");
+    return;
+  }
+  el.className = "alert alert-" + level + " mb-2";
+  el.classList.remove("d-none");
+  el.appendChild(document.createTextNode(message));
+}
+
+/**
  * Fetch popular words from /api/v2/popular-words and render them in #home-popular-words.
+ * Delegates to the shared renderPopularWords renderer (parity-r3 A7): first 3 always
+ * visible, index ≥ 3 carry d-sm-inline-block; no hard slice-to-5.
  */
 async function renderHomePopularWords() {
   const host = document.getElementById("home-popular-words");
@@ -153,20 +176,7 @@ async function renderHomePopularWords() {
   try {
     const data = await api.get("/popular-words");
     const words = data?.popular_words || data?.words || [];
-    while (host.firstChild) host.removeChild(host.firstChild);
-    if (words.length === 0) return;
-    const label = document.createElement("span");
-    label.className = "me-2";
-    label.textContent = t("search.popular_searches") + ":";
-    host.appendChild(label);
-    words.slice(0, 5).forEach((w, i) => {
-      if (i > 0) host.appendChild(document.createTextNode(" "));
-      const a = document.createElement("a");
-      a.href = "/search?q=" + encodeURIComponent(w);
-      a.setAttribute("data-spa", "");
-      a.textContent = w;
-      host.appendChild(a);
-    });
+    search.renderPopularWords(words, host);
   } catch { /* popular words are optional — fail silently */ }
 }
 
@@ -284,10 +294,10 @@ function hasSearchQuery() {
 }
 
 /**
- * Forward the current query to the "Advanced" links so navigating to /advance
- * carries ?q= (the SPA router preserves the query string, and advance.js
- * prefills the must-contain-words field from it). JSP parity: the header/options
- * Advanced link forwards ?q=${q}.
+ * Forward the current query AND paging/state params to the "Advanced" links so
+ * navigating to /advance carries ?q= plus the relevant state (num/sort/lang/labels).
+ * JSP parity: header.jsp:119 uses fe:pagingQuery(null) which forwards q + paging
+ * state; advance.js can consume these to pre-seed the form (parity-r3 A8).
  *
  * The query is taken from whichever search box is populated (header or home),
  * falling back to the current URL's q= param.
@@ -295,10 +305,32 @@ function hasSearchQuery() {
 function updateAdvanceLinks() {
   const headerVal = (document.getElementById("search-input") || {}).value;
   const homeVal = (document.getElementById("home-search-input") || {}).value;
-  const urlQ = new URLSearchParams(location.search).get("q") || "";
+  const urlParams = new URLSearchParams(location.search);
+  const urlQ = urlParams.get("q") || "";
   const q = (headerVal || homeVal || urlQ || "").trim();
+  if (!q) {
+    document.querySelectorAll('a[href^="/advance"]').forEach(a => {
+      a.setAttribute("href", "/advance");
+    });
+    return;
+  }
+
+  // Build paging/state params from URL (populated by runFromUrl on results view).
+  const advParams = new URLSearchParams();
+  advParams.set("q", q);
+  // num / sort — forward if present and non-empty in URL
+  const num = urlParams.get("num");
+  if (num) advParams.set("num", num);
+  const sort = urlParams.get("sort");
+  if (sort) advParams.set("sort", sort);
+  // lang — multi-valued; forward all
+  urlParams.getAll("lang").filter(v => v !== "").forEach(v => advParams.append("lang", v));
+  // fields.label — multi-valued; forward all
+  urlParams.getAll("fields.label").filter(v => v !== "").forEach(v => advParams.append("fields.label", v));
+
+  const href = "/advance?" + advParams.toString();
   document.querySelectorAll('a[href^="/advance"]').forEach(a => {
-    a.setAttribute("href", q ? "/advance?q=" + encodeURIComponent(q) : "/advance");
+    a.setAttribute("href", href);
   });
 }
 

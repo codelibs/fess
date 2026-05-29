@@ -423,6 +423,34 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * rag_chat_enabled must be present as a boolean in the features map.
+     * Mirrors the gate used by FessSearchAction#setupHtmlData (chatClient.isAvailable()).
+     * In the unit harness ChatClient is not wired, so the value defaults to false —
+     * but the key must always be present so the SPA never sees undefined.
+     */
+    @Test
+    public void test_features_ragChatEnabled_present() throws Exception {
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            assertTrue(body.contains("\"rag_chat_enabled\""), "features.rag_chat_enabled must be present in: " + body);
+            // The value must be a boolean (true or false), never undefined/null.
+            assertTrue(body.contains("\"rag_chat_enabled\":true") || body.contains("\"rag_chat_enabled\":false"),
+                    "rag_chat_enabled must be a boolean in: " + body);
+        }
+    }
+
+    /**
      * ADV-1: buildFiletypeOptions must return exactly the 10 canonical file-type entries
      * in the order matching index.filetype / labels.facet_filetype_* mappings, each with
      * a non-null label_key.

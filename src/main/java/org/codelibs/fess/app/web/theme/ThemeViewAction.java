@@ -128,9 +128,10 @@ public class ThemeViewAction extends FessSearchAction {
      * <ul>
      *   <li>{@code X-Fess-Route: error} — signals to the SPA that this is an error route.</li>
      *   <li>{@code X-Fess-Error-Code: <status>} — the HTTP status code derived from the URI
-     *       (e.g. {@code 404} for {@code /error/notFound}). The HTTP response itself remains
-     *       200 so the SPA can render appropriately; the SPA reads the header to display the
-     *       correct error page.</li>
+     *       (e.g. {@code 404} for {@code /error/notFound}).</li>
+     *   <li>{@code <meta name="x-fess-error-code" content="<status>">} — the same status
+     *       code injected as a meta tag into the HTML {@code <head>} so client-side JS can
+     *       read it directly without relying on the HTTP header (#11).</li>
      * </ul>
      *
      * @return stream response for the entry file, or a 404 response if no theme/entry is available
@@ -174,7 +175,7 @@ public class ThemeViewAction extends FessSearchAction {
         // F.9: For error routes with a message key, read the file upfront so we can inject
         // meta tags and know the final byte length before building the StreamResponse.
         // Content-Length must be set once, so we determine the body first.
-        if (isErrorRoute && messageKey != null && !messageKey.isEmpty()) {
+        if (isErrorRoute) {
             final byte[] originalBytes;
             try (InputStream in = Files.newInputStream(indexFile)) {
                 final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
@@ -183,8 +184,12 @@ public class ThemeViewAction extends FessSearchAction {
             } catch (final java.io.IOException e) {
                 return notFound();
             }
-            final byte[] modifiedBytes = injectErrorDetailMeta(originalBytes, messageKey);
             final int status = computeErrorStatus(uri);
+            // Inject x-fess-error-code meta first (#11), then the detail key meta when present (F.9).
+            byte[] modifiedBytes = injectErrorCodeMeta(originalBytes, status);
+            if (messageKey != null && !messageKey.isEmpty()) {
+                modifiedBytes = injectErrorDetailMeta(modifiedBytes, messageKey);
+            }
             // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
             final StreamResponse resp = new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
                     .headerContentDispositionInline()
@@ -195,7 +200,8 @@ public class ThemeViewAction extends FessSearchAction {
                     .header("X-Fess-Route", "error")
                     .header("X-Fess-Error-Code", String.valueOf(status))
                     .httpStatus(status);
-            return resp.stream(out -> out.stream().write(modifiedBytes));
+            final byte[] finalBytes = modifiedBytes;
+            return resp.stream(out -> out.stream().write(finalBytes));
         }
 
         // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
@@ -207,13 +213,6 @@ public class ThemeViewAction extends FessSearchAction {
                 .header("Content-Security-Policy", INDEX_CSP)
                 .header("Referrer-Policy", "same-origin")
                 .header("Content-Length", String.valueOf(fileSize));
-
-        if (isErrorRoute) {
-            final int status = computeErrorStatus(uri);
-            resp.header("X-Fess-Route", "error");
-            resp.header("X-Fess-Error-Code", String.valueOf(status));
-            resp.httpStatus(status);
-        }
 
         return resp.stream(out -> {
             try (InputStream in = Files.newInputStream(indexFile)) {
@@ -335,18 +334,43 @@ public class ThemeViewAction extends FessSearchAction {
     }
 
     /**
-     * Injects {@code <meta>} tags carrying an error detail key into the HTML bytes
-     * immediately before the closing {@code </head>} tag.
+     * Injects a {@code <meta>} tag carrying the HTTP error code into the HTML bytes
+     * immediately before the closing {@code </head>} tag (#11).
      *
-     * <p>Two meta tags are inserted:
-     * <ul>
-     *   <li>{@code <meta name="x-fess-error-detail-key" content="...">} — the i18n key</li>
-     * </ul>
+     * <p>The injected tag has the form:
+     * {@code <meta name="x-fess-error-code" content="<status>">}, where {@code status}
+     * is the numeric HTTP status code (e.g. {@code 404}, {@code 429}, {@code 500}).
+     * If {@code </head>} is not found in the bytes the original bytes are returned unchanged.
+     *
+     * @param htmlBytes UTF-8 encoded HTML bytes
+     * @param status HTTP status code (e.g. 404, 429, 500)
+     * @return modified bytes with the error-code meta tag injected before {@code </head>}
+     */
+    static byte[] injectErrorCodeMeta(final byte[] htmlBytes, final int status) {
+        if (htmlBytes == null) {
+            return htmlBytes;
+        }
+        final String html = new String(htmlBytes, StandardCharsets.UTF_8);
+        final int headEndIdx = html.indexOf("</head>");
+        if (headEndIdx < 0) {
+            return htmlBytes;
+        }
+        final String injection = "<meta name=\"x-fess-error-code\" content=\"" + status + "\">\n";
+        final String modified = html.substring(0, headEndIdx) + injection + html.substring(headEndIdx);
+        return modified.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Injects a {@code <meta>} tag carrying an error detail key into the HTML bytes
+     * immediately before the closing {@code </head>} tag (F.9).
+     *
+     * <p>The injected tag has the form:
+     * {@code <meta name="x-fess-error-detail-key" content="...">} — the i18n key.
      * If {@code </head>} is not found in the bytes the original bytes are returned unchanged.
      *
      * @param htmlBytes UTF-8 encoded HTML bytes
      * @param messageKey validated, safe message key
-     * @return modified bytes with meta tags injected before {@code </head>}
+     * @return modified bytes with meta tag injected before {@code </head>}
      */
     static byte[] injectErrorDetailMeta(final byte[] htmlBytes, final String messageKey) {
         if (htmlBytes == null || messageKey == null || messageKey.isEmpty()) {

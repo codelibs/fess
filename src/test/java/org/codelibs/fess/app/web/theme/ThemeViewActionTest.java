@@ -968,7 +968,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
     @Test
     public void test_errorPathWithoutMessageKey_leavesIndexUnchanged() throws Exception {
         // When /error/notFound is served WITHOUT ?message_key, the response body must NOT
-        // contain the injected meta tag — the index.html is streamed as-is.
+        // contain the x-fess-error-detail-key meta tag (only the x-fess-error-code meta is injected).
         final Path tmp = Files.createTempDirectory("tva-f9-noinject-");
         try {
             final String originalHtml = "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>";
@@ -997,6 +997,85 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                 } catch (final Exception ignore) {}
             });
         }
+    }
+
+    // ── #11: x-fess-error-code meta injection ────────────────────────────────
+
+    @Test
+    public void test_serveIndex_injectsErrorCodeMeta_notFound() throws Exception {
+        // #11: /error/notFound must inject <meta name="x-fess-error-code" content="404"> into HTML.
+        final Path tmp = Files.createTempDirectory("tva-meta-code-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/notFound");
+
+            final ActionResponse resp = action.serveIndex();
+            final ByteArrayOutputStream bodyBuf = new ByteArrayOutputStream();
+            ((StreamResponse) resp).getStreamCall().callback(captureOut(bodyBuf));
+            final String body = bodyBuf.toString(StandardCharsets.UTF_8);
+            assertTrue(body.contains("<meta name=\"x-fess-error-code\" content=\"404\">"),
+                    "Body must contain x-fess-error-code meta with 404 for /error/notFound: " + body);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_injectsErrorCodeMeta_busy429() throws Exception {
+        // #11: /error/busy must inject <meta name="x-fess-error-code" content="429"> into HTML.
+        final Path tmp = Files.createTempDirectory("tva-meta-busy-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUri(theme, "/error/busy");
+
+            final ActionResponse resp = action.serveIndex();
+            final ByteArrayOutputStream bodyBuf = new ByteArrayOutputStream();
+            ((StreamResponse) resp).getStreamCall().callback(captureOut(bodyBuf));
+            final String body = bodyBuf.toString(StandardCharsets.UTF_8);
+            assertTrue(body.contains("<meta name=\"x-fess-error-code\" content=\"429\">"),
+                    "Body must contain x-fess-error-code meta with 429 for /error/busy: " + body);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_injectErrorCodeMeta_insertsMetaBeforeHeadClose() {
+        // Unit test for injectErrorCodeMeta: tag must appear before </head>.
+        final String html = "<html><head><title>T</title></head><body></body></html>";
+        final byte[] result = ThemeViewAction.injectErrorCodeMeta(html.getBytes(StandardCharsets.UTF_8), 404);
+        final String out = new String(result, StandardCharsets.UTF_8);
+        assertTrue(out.contains("<meta name=\"x-fess-error-code\" content=\"404\">"), "Error code meta tag must be present");
+        final int metaIdx = out.indexOf("x-fess-error-code");
+        final int headIdx = out.indexOf("</head>");
+        assertTrue(metaIdx < headIdx, "Error code meta tag must appear before </head>");
+    }
+
+    @Test
+    public void test_injectErrorCodeMeta_returnsOriginalWhenNoHeadClose() {
+        // When </head> is not found, original bytes must be returned unchanged.
+        final String originalHtml = "<html><body>no head</body></html>";
+        final byte[] html = originalHtml.getBytes(StandardCharsets.UTF_8);
+        final byte[] result = ThemeViewAction.injectErrorCodeMeta(html, 500);
+        final String resultStr = new String(result, StandardCharsets.UTF_8);
+        assertEquals(originalHtml, resultStr);
+        assertFalse(resultStr.contains("x-fess-error-code"), "No meta tag must be injected when </head> is absent");
     }
 
     // ── F.9: injectErrorDetailMeta unit tests ─────────────────────────────────

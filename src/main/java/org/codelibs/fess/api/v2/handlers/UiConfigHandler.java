@@ -30,6 +30,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
@@ -274,6 +275,18 @@ public class UiConfigHandler {
             features.put("installation_link", installationLink);
             // B.2: login link availability flag.
             features.put("login_link", loginLinkEnabled);
+            // rag_chat_enabled: mirrors FessSearchAction#setupHtmlData chatClient.isAvailable()
+            // so the static-theme SPA sees the same availability gate as the legacy JSP path.
+            boolean ragChatEnabled = false;
+            try {
+                final ChatClient chatClient = ComponentUtil.getComponent(ChatClient.class);
+                if (chatClient != null) {
+                    ragChatEnabled = chatClient.isAvailable();
+                }
+            } catch (final Exception ignored) {
+                // ChatClient not wired in unit harness — default to false.
+            }
+            features.put("rag_chat_enabled", ragChatEnabled);
 
             // Server-wide supported language list, surfaced as plain JSON array of codes.
             final String[] langs = cfg.getSupportedLanguagesAsArray();

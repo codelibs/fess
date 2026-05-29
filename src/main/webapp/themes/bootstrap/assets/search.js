@@ -240,9 +240,11 @@ function buildResultCard(d, queryId, order) {
   meta.appendChild(siteRow);
 
   // --- Task 2.4 / A.5: cache link — only when has_cache is truthy ---
-  // Use server-supplied highlight_params when available; fall back to a minimal hl.q param.
+  // Use server-supplied highlight_params when available (already formatted as "&hq=<term>&hq=…").
+  // Fall back to a single &hq= param built from the current query term.
+  // NOTE: the v2 CacheHandler only honours the "hq" parameter (not "hl.q").  [marker: cache-link-hq]
   if (d.has_cache === "true" || d.has_cache === true) {
-    const hlParam = state.highlightParams || ("&hl.q=" + encodeURIComponent(state.q || ""));
+    const hlParam = state.highlightParams || ("&hq=" + encodeURIComponent(state.q || ""));
     const cacheLink = el("a", {
       className: "text-muted",
       text: t("result.cache"),
@@ -424,13 +426,18 @@ function renderResults(env) {
     meta.textContent = "";
     const statusEl = document.getElementById("results-status");
     if (statusEl) statusEl.textContent = "";
-    renderRelatedQueries([]);
-    renderRelatedContent("");
+    // ZERO-RESULT: do NOT clear related queries/content here — loadRelated() (called
+    // after renderResults in runSearch) will populate them. Clearing here would race
+    // against the async loadRelated and wipe its output (parity-r3 A2).
+    const rpw = document.getElementById("results-popular-words");
+    if (rpw) rpw.classList.add("d-none");
     return;
   }
   empty.classList.add("d-none");
   // C.1: populate the result-status banner
   renderResultsStatus(env);
+  // Load popular words for the results header slot (JSP parity: #1).
+  loadResultsPopularWords();
   // exec_time legacy meta (keep for backward compat; status banner is primary)
   const execSec = typeof env.exec_time === "number"
     ? env.exec_time.toFixed(2)
@@ -841,13 +848,13 @@ function renderLabelOptions() {
 }
 
 /**
- * Parity with index.jsp — populate the up-front home-view option selects
- * (#home-sort-select / #home-num-select / #home-lang-select) from the same
- * config that drives the results-view selects. We copy the already-rendered
- * options from the results selects so the two stay in lock-step. The home lang
- * select is a single-select (the panel is intentionally simpler than the
- * results sidebar), so we strip the multi-select attributes the results lang
- * select carries.
+ * Parity with searchOptions.jsp — populate the up-front home-view option selects
+ * (#home-sort-select / #home-num-select / #home-lang-select / #home-label-select)
+ * from the same config that drives the results-view selects.
+ *
+ * home-lang: multi-select (searchOptions.jsp:75-84 uses multiple="true").
+ * home-label: multi-select, shown only when features.display_label_type && label_options non-empty
+ *             (parity with searchOptions.jsp:85-97, parity-r3 Task 2).
  */
 function renderHomeOptions() {
   const copy = (srcId, destId) => {
@@ -867,13 +874,48 @@ function renderHomeOptions() {
   const homeNum = copy("num-select", "home-num-select");
   if (homeNum) homeNum.value = String(state.num || 10);
 
+  // Home lang is multi-select (parity with searchOptions.jsp multiple="true").
+  // Copy options from the results lang select; restore selected state from state.lang.
   const homeLang = copy("lang-select", "home-lang-select");
   if (homeLang) {
-    // Home lang is single-select; drop any multi-select attributes.
-    homeLang.removeAttribute("multiple");
-    homeLang.removeAttribute("size");
     const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
-    homeLang.value = selected.length > 0 ? selected[0] : "";
+    for (const o of homeLang.options) {
+      o.selected = selected.includes(o.value);
+    }
+    // Ensure multi-select attributes are present (the HTML already has them,
+    // but guard against any copy-induced attribute loss).
+    homeLang.setAttribute("multiple", "");
+    // Match the size set by renderLangOptions for the results select.
+    homeLang.setAttribute("size", "4");
+  }
+
+  // Home label multi-select — parity with searchOptions.jsp:85-97.
+  // Show only when display_label_type feature is enabled and options are non-empty.
+  const cfg = api.getConfig() || {};
+  const labelOpts = cfg.label_options || [];
+  const showLabel = !!(cfg.features && cfg.features.display_label_type) && labelOpts.length > 0;
+
+  const homeLabelSel = document.getElementById("home-label-select");
+  const homeLabelLbl = homeLabelSel && homeLabelSel.previousElementSibling;
+  if (homeLabelSel) {
+    if (!showLabel) {
+      homeLabelSel.classList.add("d-none");
+      if (homeLabelLbl && homeLabelLbl.tagName === "LABEL") homeLabelLbl.classList.add("d-none");
+    } else {
+      homeLabelSel.classList.remove("d-none");
+      if (homeLabelLbl && homeLabelLbl.tagName === "LABEL") homeLabelLbl.classList.remove("d-none");
+
+      // Rebuild options from cfg.label_options.
+      while (homeLabelSel.firstChild) homeLabelSel.removeChild(homeLabelSel.firstChild);
+      const selectedLabels = state.fields.label || [];
+      for (const lo of labelOpts) {
+        const opt = document.createElement("option");
+        opt.value = lo.value != null ? lo.value : "";
+        opt.textContent = lo.label || lo.value || "";
+        opt.selected = selectedLabels.includes(opt.value);
+        homeLabelSel.appendChild(opt);
+      }
+    }
   }
 }
 
@@ -929,11 +971,28 @@ export function applyHomeOptions(params) {
   const numSel = document.getElementById("home-num-select");
   if (numSel && numSel.value) params.set("num", numSel.value);
 
+  // home-lang is multi-select (parity with searchOptions.jsp multiple="true");
+  // collect all selected options and emit repeated lang= params.
   const langSel = document.getElementById("home-lang-select");
-  if (langSel && langSel.value) {
-    params.delete("lang");
-    params.append("lang", langSel.value);
+  if (langSel) {
+    const selectedLangs = Array.from(langSel.selectedOptions).map(o => o.value).filter(v => v !== "");
+    if (selectedLangs.length > 0) {
+      params.delete("lang");
+      selectedLangs.forEach(v => params.append("lang", v));
+    }
   }
+
+  // home-label multi-select — carry selected labels as fields.label params
+  // (parity with searchOptions.jsp:85-97, parity-r3 Task 2).
+  const labelSel = document.getElementById("home-label-select");
+  if (labelSel && !labelSel.classList.contains("d-none")) {
+    const selectedLabels = Array.from(labelSel.selectedOptions).map(o => o.value).filter(v => v !== "");
+    if (selectedLabels.length > 0) {
+      params.delete("fields.label");
+      selectedLabels.forEach(v => params.append("fields.label", v));
+    }
+  }
+
   return params;
 }
 
@@ -1445,6 +1504,41 @@ function renderActiveChips() {
   });
 }
 
+/**
+ * Unified popular-words renderer — shared by home, empty-state, and results header slots.
+ * JSP parity: first 3 words are always visible; index ≥ 3 carry class d-sm-inline-block
+ * (hidden on xs, visible on sm+). No fixed upper-limit slice (was slice(0,5)).
+ *
+ * @param {string[]} words    - array of popular word strings
+ * @param {Element}  targetEl - the container element to render into
+ */
+export function renderPopularWords(words, targetEl) {
+  if (!targetEl) return;
+  while (targetEl.firstChild) targetEl.removeChild(targetEl.firstChild);
+  if (!words || words.length === 0) {
+    targetEl.classList.add("d-none");
+    return;
+  }
+  targetEl.classList.remove("d-none");
+  const label = el("span", { className: "me-2", text: t("labels.search_popular_word_word") });
+  targetEl.appendChild(label);
+  words.forEach((w, i) => {
+    // data-spa anchor: the router intercepts the click and navigates to
+    // /search?q=w, which runFromUrl() turns into a full search (syncs inputs,
+    // resets start, pushes history). No inline click handler — parity-r3 review:
+    // an inline runSearch() here double-fired the search alongside the router.
+    const a = el("a", {
+      className: "me-1" + (i >= 3 ? " d-sm-inline-block d-none" : ""),
+      text: w,
+      attrs: {
+        href: "/search?q=" + encodeURIComponent(w),
+        "data-spa": ""
+      }
+    });
+    targetEl.appendChild(a);
+  });
+}
+
 async function loadPopularWords() {
   const target = document.getElementById("popular-words");
   if (!target) return;
@@ -1452,24 +1546,27 @@ async function loadPopularWords() {
     const env = await api.get("/popular-words");
     const words = env.popular_words || [];
     if (words.length === 0) return;
-    target.innerHTML = "";
-    target.appendChild(el("p", { className: "mt-3", text: t("search.popular_searches") }));
-    words.slice(0, 10).forEach(w => {
-      const btn = el("button", {
-        className: "btn btn-sm btn-outline-secondary me-1 mb-1",
-        text: w,
-        attrs: { type: "button" },
-        dataset: { popular: w }
-      });
-      btn.addEventListener("click", () => {
-        const input = document.getElementById("search-input");
-        input.value = w;
-        state.q = w;
-        state.start = 0;
-        runSearch();
-      });
-      target.appendChild(btn);
-    });
+    target.classList.remove("d-none");
+    renderPopularWords(words, target);
+  } catch { /* best-effort */ }
+}
+
+/**
+ * Load popular words and render them into #results-popular-words when
+ * features.popular_word is enabled (JSP parity for non-empty results page).
+ */
+async function loadResultsPopularWords() {
+  const target = document.getElementById("results-popular-words");
+  if (!target) return;
+  const cfg = api.getConfig() || {};
+  if (!cfg.features || !cfg.features.popular_word) {
+    target.classList.add("d-none");
+    return;
+  }
+  try {
+    const env = await api.get("/popular-words");
+    const words = env.popular_words || [];
+    renderPopularWords(words, target);
   } catch { /* best-effort */ }
 }
 
@@ -1663,4 +1760,4 @@ async function toggleFavorite(docId, btn) {
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
 export const _state = state;
-export { runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs };
+export { runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs, renderPopularWords };

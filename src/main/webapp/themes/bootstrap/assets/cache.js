@@ -6,6 +6,7 @@
 
 import * as api from "./api.js";
 import { t } from "./i18n.js";
+import { formatDate } from "./format.js";
 
 /** Currently active blob URL — revoked on route change and after iframe load. */
 let _currentBlobUrl = null;
@@ -119,7 +120,15 @@ export function attach() {
   loading.textContent = t("labels.cache_loading");
   host.appendChild(loading);
 
-  api.get("/cache/" + encodeURIComponent(docId))
+  // Parse hq terms from the current route URL so they can be forwarded to the
+  // cache API.  The search link encodes them as repeated &hq= params
+  // (state.highlightParams from the search response, or a &hq=<q> fallback).
+  // CacheHandler reads req.getParameterValues("hq") and passes the array to
+  // ViewHelper.createCacheContent for in-page term highlighting.  [marker: cache-hq-forward]
+  const hqValues = params.getAll("hq").filter(v => v !== "");
+  const cacheApiParams = hqValues.length > 0 ? { hq: hqValues } : undefined;
+
+  api.get("/cache/" + encodeURIComponent(docId), cacheApiParams)
     .then(env => {
       // CacheHandler returns { doc_id, mimetype, content, url, created, charset }
       // inside the v2 envelope (url/created/charset added in Phase A).
@@ -131,7 +140,11 @@ export function attach() {
       const mimetype = /charset=/i.test(baseMime) ? baseMime : baseMime + ";charset=" + charset;
       const content = env.content || "";
       const cacheUrl = env.url || null;
-      const cacheCreated = env.created || null;
+      // Format the raw stored date string for display. formatDate returns ""
+      // for unparseable values, in which case we fall back to the raw string.
+      // [marker: cache-created-formatdate]
+      const rawCreated = env.created || null;
+      const cacheCreated = rawCreated ? (formatDate(rawCreated) || rawCreated) : null;
 
       // Remove loading indicator.
       while (host.firstChild) host.removeChild(host.firstChild);
@@ -149,14 +162,15 @@ export function attach() {
       h2.textContent = t("labels.cache_title");
       host.appendChild(h2);
 
-      // --- Cache banner (out-of-iframe, safe textContent — no innerHTML) ---
-      // Shows "This is a cache of <url>. It is a snapshot of the page as it appeared on <created>."
-      const banner = document.createElement("div");
-      banner.className = "alert alert-secondary cache-banner";
-      banner.setAttribute("role", "status");
-      const unknown = t("labels.search_unknown");
-      banner.textContent = t("labels.search_cache_msg", [cacheUrl || unknown, cacheCreated || unknown]);
-      host.appendChild(banner);
+      // NOTE: the SPA banner ("This is a cached copy of…") is intentionally
+      // suppressed here.  The API response `content` already contains a banner
+      // rendered by cache.hbs ({{cache_msg}} / {{{hl_cache}}}).  Rendering a
+      // second banner in the SPA shell would show the notice twice.  The metadata
+      // block below (URL / mimetype / doc-id) and the back-to-results link are
+      // SPA-only additions that do not duplicate anything in the iframe content.
+      // The i18n key "labels.search_cache_msg" is intentionally left in the
+      // bundle unused (removing it would break LabelMessageThemeParityTest).
+      // [marker: cache-banner-suppressed]
 
       // --- Metadata block ---
       const dl = document.createElement("dl");
@@ -168,6 +182,9 @@ export function attach() {
       }
       appendMeta(dl, "labels.cache_mimetype", mimetype);
       appendMeta(dl, "labels.cache_doc_id", docIdVal);
+      if (cacheCreated) {
+        appendMeta(dl, "labels.cache_indexed_at", cacheCreated);
+      }
 
       if (dl.children.length > 0) {
         host.appendChild(dl);

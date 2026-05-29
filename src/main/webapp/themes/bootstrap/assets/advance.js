@@ -162,9 +162,9 @@ function compose(parts) {
   }
 
   if (parts.none) {
-    // F.4: use quote-aware tokenizer so "foo bar" becomes NOT "foo bar"
-    const tokens = tokenize(parts.none);
-    out.push(...tokens.filter(Boolean).map(w => "NOT " + w));
+    // Server (QueryStringBuilder:230-235) splits on whitespace, each token → NOT <token>.
+    const tokens = parts.none.trim().split(/\s+/).filter(Boolean);
+    out.push(...tokens.map(w => "NOT " + w));
   }
 
   if (parts.site) {
@@ -174,7 +174,8 @@ function compose(parts) {
 
   if (parts.filetype) {
     const ft = parts.filetype.trim();
-    if (ft) out.push("filetype:" + ft);
+    // Server (QueryStringBuilder:236-238) emits filetype:"<value>" with quotes.
+    if (ft) out.push('filetype:"' + ft + '"');
   }
 
   let q = out.filter(Boolean).join(" ");
@@ -193,24 +194,25 @@ function compose(parts) {
 // Static configuration
 // ---------------------------------------------------------------------------
 
+// JSP parity: exactly four options matching advance.jsp:242-253 (no 3month/6month).
 const TIME_RANGES = [
   { value: "",       labelKey: "facet.any_time" },
   { value: "1day",   labelKey: "labels.facet_timestamp_1day" },
   { value: "1week",  labelKey: "labels.facet_timestamp_1week" },
   { value: "1month", labelKey: "labels.facet_timestamp_1month" },
-  { value: "3month", labelKey: "labels.facet_timestamp_3month" },
-  { value: "6month", labelKey: "labels.facet_timestamp_6month" },
   { value: "1year",  labelKey: "labels.facet_timestamp_1year" },
 ];
 
-/** Maps a TIME_RANGES value to an OpenSearch range query fragment. */
+/**
+ * Maps a TIME_RANGES value to the exact date-math range fragment used by the
+ * server (QueryStringBuilder:242-244; advance.jsp:242-253).
+ * Field is "timestamp"; values are appended to q as "timestamp:<value>".
+ */
 const TIME_RANGE_QUERY = {
-  "1day":   "last_modified:[now/d-1d TO *]",
-  "1week":  "last_modified:[now/d-7d TO *]",
-  "1month": "last_modified:[now/d-1M TO *]",
-  "3month": "last_modified:[now/d-3M TO *]",
-  "6month": "last_modified:[now/d-6M TO *]",
-  "1year":  "last_modified:[now/d-1y TO *]",
+  "1day":   "timestamp:[now-1d/d TO *]",
+  "1week":  "timestamp:[now-1w/d TO *]",
+  "1month": "timestamp:[now-1M/d TO *]",
+  "1year":  "timestamp:[now-1y/d TO *]",
 };
 
 const FILETYPE_OPTIONS_FALLBACK = [
@@ -275,12 +277,6 @@ export function attach() {
   // Text fields
   const fAll   = makeField("advance.all",   "adv-all");
   const fExact = makeField("advance.exact", "adv-exact");
-
-  // Prefill the must-contain-words field from the incoming ?q= so navigating to
-  // advanced search from the header/home with a query carries it over (JSP parity).
-  const incomingQ = new URLSearchParams(location.search).get("q");
-  if (incomingQ && fAll && fAll.input) { fAll.input.value = incomingQ; }
-
   const fAny   = makeField("advance.any",   "adv-any");
   const fNone  = makeField("advance.none",  "adv-none");
   const fSite  = makeField("advance.site",  "adv-site");
@@ -405,6 +401,129 @@ export function attach() {
   ];
   const fSort = makeSelect("labels.advance_search_sort", "adv-sort", sortOpts);
 
+  // ---------------------------------------------------------------------------
+  // Best-effort prefill from incoming URL params (parity-r3 #5 / A3)
+  // ---------------------------------------------------------------------------
+  // Lossless round-trip from a flat q string is impossible (the server flattens
+  // all-words, exact, any-words into a single q without field markers). What we
+  // CAN recover unambiguously:
+  //   site:<v>           → site field
+  //   filetype:"<v>"     → filetype select
+  //   NOT <token>        → none-words field (space-joined)
+  //   "quoted phrase"    → exact-phrase field (first quoted phrase found)
+  //   allintitle:/allinurl: prefix → occt select
+  //   remaining bare tokens → all-words field (best effort; may include any-words)
+  // Additionally forward: lang, sort, num, fields.label from the URL.
+  // Content is never dropped — anything unrecognised lands in all-words.
+  (function prefillFromUrl() {
+    const urlParams = new URLSearchParams(location.search);
+    const rawQ = urlParams.get("q") || "";
+
+    // --- forward non-q params ---
+    // num
+    const numParam = urlParams.get("num");
+    if (numParam) {
+      const opt = Array.from(fNum.input.options).find(o => o.value === numParam);
+      if (opt) fNum.input.value = numParam;
+    }
+    // sort
+    const sortParam = urlParams.get("sort");
+    if (sortParam) {
+      const opt = Array.from(fSort.input.options).find(o => o.value === sortParam);
+      if (opt) fSort.input.value = sortParam;
+    }
+    // lang (multi-select, repeated param)
+    const langParams = urlParams.getAll("lang").filter(v => v !== "");
+    if (langParams.length > 0) {
+      for (const opt of fLang.input.options) {
+        opt.selected = langParams.includes(opt.value);
+      }
+    }
+    // fields.label (repeated param) → checkboxes
+    const labelParams = urlParams.getAll("fields.label").filter(v => v !== "");
+    if (labelParams.length > 0) {
+      for (const cb of labelCheckboxes) {
+        cb.checked = labelParams.includes(cb.value);
+      }
+    }
+
+    if (!rawQ) {
+      return; // nothing to parse
+    }
+
+    // --- parse q ---
+    let q = rawQ.trim();
+
+    // Strip leading occt prefix (allintitle: or allinurl:)
+    let occtVal = "";
+    if (q.startsWith("allintitle:")) {
+      occtVal = "allintitle";
+      q = q.slice("allintitle:".length).trim();
+    } else if (q.startsWith("allinurl:")) {
+      occtVal = "allinurl";
+      q = q.slice("allinurl:".length).trim();
+    }
+    if (occtVal) {
+      const opt = Array.from(fOcct.input.options).find(o => o.value === occtVal);
+      if (opt) fOcct.input.value = occtVal;
+    }
+
+    // Tokenize the remainder (whitespace-separated, respecting quoted strings)
+    const tokens = tokenize(q);
+
+    const notTokens = [];
+    let exactPhrase = "";
+    let siteVal = "";
+    let filetypeVal = "";
+    const bareTokens = [];
+
+    for (const tok of tokens) {
+      // Standalone "NOT" sentinels fall through to bareTokens and are paired with
+      // the following word in the second pass below (the whitespace tokenizer splits
+      // "NOT foo" into ["NOT","foo"]). parity-r3 review: do NOT consume "NOT" here,
+      // or the pairing never fires and the none-words round-trip yields "NOT NOT".
+      if (tok.startsWith("site:")) {
+        siteVal = tok.slice("site:".length);
+      } else if (tok.startsWith("filetype:")) {
+        // Server emits filetype:"value" — strip surrounding quotes if present
+        let ftv = tok.slice("filetype:".length);
+        if (ftv.startsWith('"') && ftv.endsWith('"')) ftv = ftv.slice(1, -1);
+        filetypeVal = ftv;
+      } else if (tok.startsWith('"') && tok.endsWith('"') && tok.length >= 2) {
+        // Quoted phrase → exact-phrase (first one wins; subsequent go to bare)
+        if (!exactPhrase) {
+          exactPhrase = tok.slice(1, -1);
+        } else {
+          bareTokens.push(tok);
+        }
+      } else {
+        bareTokens.push(tok);
+      }
+    }
+
+    // Second pass: collapse consecutive NOT+word pairs that the whitespace
+    // tokenizer splits as ["NOT", "foo"] into NOT entries.
+    const finalBare = [];
+    for (let i = 0; i < bareTokens.length; i++) {
+      if (bareTokens[i] === "NOT" && i + 1 < bareTokens.length) {
+        notTokens.push(bareTokens[i + 1]);
+        i++; // skip next
+      } else {
+        finalBare.push(bareTokens[i]);
+      }
+    }
+
+    if (siteVal) fSite.input.value = siteVal;
+    if (filetypeVal) {
+      const opt = Array.from(fFiletype.input.options).find(o => o.value === filetypeVal);
+      if (opt) fFiletype.input.value = filetypeVal;
+    }
+    if (exactPhrase) fExact.input.value = exactPhrase;
+    if (notTokens.length > 0) fNone.input.value = notTokens.join(" ");
+    // Dump remaining bare tokens into all-words (best effort)
+    if (finalBare.length > 0) fAll.input.value = finalBare.join(" ");
+  })();
+
   // Append all fields before the submit button
   form.append(
     fAll.wrap,
@@ -481,9 +600,12 @@ export function attach() {
       }
     }
 
+    // JSP parity (QueryStringBuilder:242-244): timestamp condition is appended to q,
+    // not passed as ex_q. Emit "timestamp:<value>" directly into the q string.
     const time = fTime.input.value;
     if (time && TIME_RANGE_QUERY[time]) {
-      params.set("ex_q", TIME_RANGE_QUERY[time]);
+      const fullQ = q ? q + " " + TIME_RANGE_QUERY[time] : TIME_RANGE_QUERY[time];
+      params.set("q", fullQ);
     }
 
     // F.1: num and sort

@@ -16,9 +16,10 @@ import { escapeHtml } from "./format.js";
  *   - Paragraphs (blank-line separated)
  *   - Line breaks within a paragraph
  *   - **bold** / *italic* / `inline code`
- *   - Links: [text](url)
- *   - Unordered lists: - item / * item
- *   - Ordered lists: 1. item
+ *   - Links: [text](url) — external links get rel="nofollow noopener noreferrer"
+ *   - Unordered lists: - item / * item (with nesting via indentation)
+ *   - Ordered lists: 1. item (with nesting via indentation)
+ *   - Blockquotes: > text (with nesting via >> / multiple > prefixes)
  *
  * @param {string} text - Raw markdown string (may be untrusted).
  * @returns {string} HTML string safe to pass through sanitizeHtml().
@@ -78,13 +79,158 @@ function splitBlocks(text) {
 // ---------------------------------------------------------------------------
 
 const HEADING_RE = /^(#{2,4}) (.+)$/;
-const UL_LINE_RE = /^[-*] (.+)$/;
-const OL_LINE_RE = /^(\d+)\. (.+)$/;
+const UL_LINE_RE = /^([ \t]*)[-*] (.+)$/;
+const OL_LINE_RE = /^([ \t]*)(\d+)\. (.+)$/;
 // D6: Blockquote line regex — strips leading '>' with optional space.
-const BLOCKQUOTE_LINE_RE = /^>\s?(.*)$/;
+const BLOCKQUOTE_LINE_RE = /^(>+)\s?(.*)$/;
+// Simple (no-indent) list line regexes for type-detection passes.
+const UL_TOP_RE = /^[-*] (.+)$/;
+const OL_TOP_RE = /^(\d+)\. (.+)$/;
 // D6: GFM table delimiter row — cells of ':?-+:?' separated by '|'.
 // Accepted limitation: column alignment and nested-block-in-cell are NOT rendered.
 const TABLE_DELIM_RE = /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$/;
+
+// ---------------------------------------------------------------------------
+// Nested list rendering
+// ---------------------------------------------------------------------------
+
+/**
+ * Measure indentation depth of a line (count of leading spaces/tabs, normalised
+ * to units of 2 — a tab counts as 2).
+ *
+ * @param {string} line
+ * @returns {number}
+ */
+function indentDepth(line) {
+  let count = 0;
+  for (const ch of line) {
+    if (ch === " ") count++;
+    else if (ch === "\t") count += 2;
+    else break;
+  }
+  return Math.floor(count / 2);
+}
+
+/**
+ * Render a group of list lines (ul or ol) into nested HTML, supporting
+ * indentation-based nesting.  Empty lines are skipped.
+ * Nested-list marker: renderList handles indented sub-items.
+ *
+ * @param {string[]} lines
+ * @param {"ul"|"ol"} tag
+ * @returns {string}
+ */
+function renderList(lines, tag) {
+  // Build a flat array of {depth, text} entries.
+  const RE = tag === "ul" ? UL_LINE_RE : OL_LINE_RE;
+  const textIdx = tag === "ul" ? 2 : 3; // capture group index for item text
+  const items = lines
+    .filter(l => RE.test(l))
+    .map(l => {
+      const m = l.match(RE);
+      return { depth: indentDepth(l), text: m[textIdx] };
+    });
+  if (items.length === 0) return "";
+
+  /**
+   * Recursively render items starting at `start` up to `end` (exclusive)
+   * whose depth equals `depth` (sub-items go one level deeper).
+   *
+   * @param {number} start
+   * @param {number} end
+   * @param {number} depth
+   * @returns {string}
+   */
+  function renderItems(start, end, depth) {
+    let html = "";
+    let i = start;
+    while (i < end) {
+      if (items[i].depth === depth) {
+        // Look ahead for indented sub-items.
+        let j = i + 1;
+        while (j < end && items[j].depth > depth) j++;
+        const liContent = inlineMarkdown(items[i].text);
+        if (j > i + 1) {
+          // Has sub-items — render the nested list.
+          const subTag = tag; // keep same type for simplicity
+          html += "<li>" + liContent + renderItems(i + 1, j, depth + 1) + "</li>";
+        } else {
+          html += "<li>" + liContent + "</li>";
+        }
+        i = j;
+      } else if (items[i].depth > depth) {
+        // Sub-list block starting here — wrap in a new list.
+        let j = i;
+        while (j < end && items[j].depth > depth) j++;
+        html += "<" + tag + ">" + renderItems(i, j, depth + 1) + "</" + tag + ">";
+        i = j;
+      } else {
+        // Depth less than expected — stop.
+        break;
+      }
+    }
+    return "<" + tag + ">" + html + "</" + tag + ">";
+  }
+
+  return renderItems(0, items.length, 0);
+}
+
+// ---------------------------------------------------------------------------
+// Nested blockquote rendering
+// ---------------------------------------------------------------------------
+
+/**
+ * Render a group of blockquote lines into nested HTML.
+ * Each line starts with one or more '>' characters; multiple '>' = nesting.
+ * Nested-blockquote marker: renderBlockquote handles >> nesting.
+ *
+ * @param {string[]} lines
+ * @returns {string}
+ */
+function renderBlockquote(lines) {
+  const relevant = lines.filter(l => BLOCKQUOTE_LINE_RE.test(l));
+  if (relevant.length === 0) return "";
+
+  /**
+   * Strip exactly one level of '>' from each line and recurse for groups
+   * that still start with '>'.
+   *
+   * @param {string[]} bqLines - lines already matched by BLOCKQUOTE_LINE_RE
+   * @returns {string}
+   */
+  function buildBq(bqLines) {
+    let inner = "";
+    const stripped = bqLines.map(l => {
+      const m = l.match(BLOCKQUOTE_LINE_RE);
+      // m[1] = one or more '>'; m[2] = rest of line
+      const remaining = m[1].length > 1 ? m[1].slice(1) + " " + m[2] : m[2];
+      return remaining;
+    });
+    // Group consecutive nested lines vs plain lines.
+    let i = 0;
+    while (i < stripped.length) {
+      if (BLOCKQUOTE_LINE_RE.test(stripped[i])) {
+        // Collect run of nested-blockquote lines.
+        let j = i;
+        while (j < stripped.length && BLOCKQUOTE_LINE_RE.test(stripped[j])) j++;
+        inner += buildBq(stripped.slice(i, j));
+        i = j;
+      } else {
+        inner += inlineMarkdown(stripped[i]) + "<br>";
+        i++;
+      }
+    }
+    // Remove trailing <br>.
+    inner = inner.replace(/<br>$/, "");
+    return "<blockquote>" + inner + "</blockquote>";
+  }
+
+  return buildBq(relevant);
+}
+
+// ---------------------------------------------------------------------------
+// Block processing
+// ---------------------------------------------------------------------------
 
 /**
  * Determine the type of a block and render it.
@@ -109,29 +255,19 @@ function processBlock(block) {
     }
   }
 
-  // Check whether every non-empty line is an unordered list item.
+  // Check whether every non-empty line is an unordered list item (possibly indented).
   if (lines.every(l => UL_LINE_RE.test(l) || l.trim() === "")) {
-    const items = lines
-      .filter(l => UL_LINE_RE.test(l))
-      .map(l => "<li>" + inlineMarkdown(l.match(UL_LINE_RE)[1]) + "</li>");
-    return "<ul>" + items.join("") + "</ul>";
+    return renderList(lines, "ul");
   }
 
-  // Check whether every non-empty line is an ordered list item.
+  // Check whether every non-empty line is an ordered list item (possibly indented).
   if (lines.every(l => OL_LINE_RE.test(l) || l.trim() === "")) {
-    const items = lines
-      .filter(l => OL_LINE_RE.test(l))
-      .map(l => "<li>" + inlineMarkdown(l.match(OL_LINE_RE)[2]) + "</li>");
-    return "<ol>" + items.join("") + "</ol>";
+    return renderList(lines, "ol");
   }
 
   // D6: Blockquote — every non-empty line starts with '>'.
   if (lines.every(l => BLOCKQUOTE_LINE_RE.test(l) || l.trim() === "")) {
-    const inner = lines
-      .filter(l => BLOCKQUOTE_LINE_RE.test(l))
-      .map(l => inlineMarkdown(l.match(BLOCKQUOTE_LINE_RE)[1]))
-      .join("<br>");
-    return "<blockquote>" + inner + "</blockquote>";
+    return renderBlockquote(lines);
   }
 
   // D6: GFM table — line 0 is a pipe-delimited header row, line 1 is a delimiter row.
@@ -219,9 +355,9 @@ function inlineMarkdown(text) {
       // Reject dangerous schemes — render as plain text.
       return linkText;
     }
-    // External links get target + rel; keep url HTML-escaped for safety.
+    // External links get target + rel (including nofollow to match legacy); keep url HTML-escaped.
     const isExternal = /^https?:\/\//i.test(rawUrl.trim());
-    const extras = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+    const extras = isExternal ? ' target="_blank" rel="nofollow noopener noreferrer"' : "";
     return '<a href="' + url + '"' + extras + ">" + linkText + "</a>";
   });
 
