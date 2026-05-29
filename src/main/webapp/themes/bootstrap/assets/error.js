@@ -20,6 +20,9 @@ const PATH_TO_CODE = {
   "internalservererror": "500",
   "system": "500",
   "error": "500",
+  // #8: 503 path segments are reserved — computeErrorStatus never emits 503
+  // (busy maps to 429), but a direct /error/503 URL still resolves to the
+  // localized 503 page (error.title_503 / error.body_503 are kept in all 16 bundles).
   "503": "503",
   "service_unavailable": "503",
   "serviceunavailable": "503",
@@ -31,10 +34,11 @@ const PATH_TO_CODE = {
  * Checks each segment (in reverse order) against PATH_TO_CODE.
  * camelCase segments (e.g. "notFound", "badRequest") are normalised to
  * all-lowercase before the lookup so both snake_case and camelCase paths match.
- * Returns "404" as the default when no segment matches.
+ * Returns "500" as the default when no segment matches (mirrors
+ * ThemeViewAction.computeErrorStatus, whose else branch is 500).
  *
  * @param {string} pathname - e.g. "/error/404", "/error/not_found", "/error/notFound"
- * @returns {string} - one of "400", "404", "500", "503"
+ * @returns {string} - one of "400", "404", "429", "500", "503"
  */
 function codeFromPath(pathname) {
   const segments = pathname.split("/").filter(Boolean);
@@ -47,7 +51,7 @@ function codeFromPath(pathname) {
     const raw = segments[i].toLowerCase();
     if (PATH_TO_CODE[raw]) return PATH_TO_CODE[raw];
   }
-  return "404";
+  return "500";
 }
 
 /**
@@ -64,6 +68,18 @@ function appendDtDd(dl, label, value) {
   dd.textContent = value;
   dl.appendChild(dt);
   dl.appendChild(dd);
+}
+
+/**
+ * Read the error code injected by ThemeViewAction (#11).
+ * Returns the numeric-string code (e.g. "404", "429", "500") or null if the
+ * meta tag is absent (e.g. when the page is served outside the theme action).
+ *
+ * @returns {string|null}
+ */
+function readErrorCodeMeta() {
+  const meta = document.querySelector('meta[name="x-fess-error-code"]');
+  return meta ? meta.getAttribute("content") : null;
 }
 
 /**
@@ -152,14 +168,18 @@ function render(container, code, requestedUrl, errorDetailKey) {
 /**
  * Attach the error view to the #error-view container.
  * Reads the current pathname and optional ?url search parameter.
- * Also reads the x-fess-error-detail-key meta tag injected by ThemeViewAction (F.9).
+ * Also reads the x-fess-error-code meta tag (#11) and the x-fess-error-detail-key
+ * meta tag injected by ThemeViewAction (F.9).
  * Safe to call multiple times — re-renders from scratch each time.
  */
 export function attach() {
   const container = document.getElementById("error-view");
   if (!container) return;
 
-  const code = codeFromPath(location.pathname);
+  // #11: Prefer the server-injected x-fess-error-code meta tag as the authoritative
+  // code; fall back to URL-path inference when the meta is absent (e.g. during
+  // local development or when served outside the theme action).
+  const code = readErrorCodeMeta() || codeFromPath(location.pathname);
 
   // Read ?url parameter safely via URL API — never concatenate into markup.
   let requestedUrl = null;
