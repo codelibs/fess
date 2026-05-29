@@ -357,16 +357,45 @@ export function attach() {
   ];
   const fNum = makeSelect("labels.advance_search_num", "adv-num", numOpts);
 
-  // F.1: sort select — built from server config sort_options
-  const sortOptsRaw = serverConfig.sort_options && serverConfig.sort_options.length > 0
-    ? serverConfig.sort_options
-    : [];
-  const sortOpts = [
-    { value: "", label: t("labels.advance_search_sort_default") },
-    ...sortOptsRaw.map(o => ({
+  // ADV-6: sort select — prefer serverConfig.sort_options; when absent build a gated fallback
+  const features = (serverConfig.features) || {};
+  const searchLogEnabled = !!features.search_log_enabled;
+  const favoriteEnabled = !!features.user_favorite;
+  let sortOptsRaw;
+  if (serverConfig.sort_options && serverConfig.sort_options.length > 0) {
+    sortOptsRaw = serverConfig.sort_options.map(o => ({
       value: o.value != null ? o.value : "",
       label: t(o.label_key || o.value || ""),
-    })),
+    }));
+  } else {
+    // Fallback: always include core sort options; gate click_count and favorite_count on features
+    sortOptsRaw = [
+      { value: "score.desc",             label: t("labels.search_result_sort_score_desc") },
+      { value: "filename.asc",           label: t("labels.search_result_sort_filename_asc") },
+      { value: "filename.desc",          label: t("labels.search_result_sort_filename_desc") },
+      { value: "created.asc",            label: t("labels.search_result_sort_created_asc") },
+      { value: "created.desc",           label: t("labels.search_result_sort_created_desc") },
+      { value: "content_length.asc",     label: t("labels.search_result_sort_content_length_asc") },
+      { value: "content_length.desc",    label: t("labels.search_result_sort_content_length_desc") },
+      { value: "last_modified.asc",      label: t("labels.search_result_sort_last_modified_asc") },
+      { value: "last_modified.desc",     label: t("labels.search_result_sort_last_modified_desc") },
+    ];
+    if (searchLogEnabled) {
+      sortOptsRaw.push(
+        { value: "click_count.asc",  label: t("labels.search_result_sort_click_count_asc") },
+        { value: "click_count.desc", label: t("labels.search_result_sort_click_count_desc") },
+      );
+    }
+    if (favoriteEnabled) {
+      sortOptsRaw.push(
+        { value: "favorite_count.asc",  label: t("labels.search_result_sort_favorite_count_asc") },
+        { value: "favorite_count.desc", label: t("labels.search_result_sort_favorite_count_desc") },
+      );
+    }
+  }
+  const sortOpts = [
+    { value: "", label: t("labels.advance_search_sort_default") },
+    ...sortOptsRaw,
   ];
   const fSort = makeSelect("labels.advance_search_sort", "adv-sort", sortOpts);
 
