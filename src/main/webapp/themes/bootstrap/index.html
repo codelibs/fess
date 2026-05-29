@@ -26,6 +26,7 @@
             class="form-control"
             type="search"
             name="q"
+            maxlength="1000"
             autocomplete="off"
             aria-label="Search query"
             data-i18n-placeholder="search.placeholder"
@@ -141,7 +142,9 @@
             <ul class="pagination" id="pagination"></ul>
           </nav>
           <div class="text-center text-muted my-5 d-none" id="empty-state">
-            <p data-i18n="search.no_results">No results.</p>
+            <p class="mb-3"><i class="fa fa-search fa-3x" aria-hidden="true"></i></p>
+            <p class="mb-2" id="empty-did-not-match"></p>
+            <p class="mb-3" data-i18n="search.did_not_match_suggestion">Try different keywords or fewer keywords.</p>
             <div id="popular-words"></div>
           </div>
         </section>

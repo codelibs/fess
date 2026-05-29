@@ -416,6 +416,10 @@ function renderResults(env) {
   // C.2: always refresh similar-doc banner (hides when state.sdh is cleared)
   renderSimilarDocBanner();
   if (data.length === 0) {
+    const dnm = document.getElementById("empty-did-not-match");
+    if (dnm) {
+      dnm.textContent = t("search.did_not_match", [state.q || ""]);
+    }
     empty.classList.remove("d-none");
     meta.textContent = "";
     const statusEl = document.getElementById("results-status");

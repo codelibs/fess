@@ -396,6 +396,26 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_indexHtml_noResultScreenHasIconAndMessages() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"empty-did-not-match\""), "no-result screen must have a did-not-match element");
+        assertTrue(html.contains("fa fa-search fa-3x"), "no-result screen must show a search icon");
+        assertTrue(html.contains("data-i18n=\"search.did_not_match_suggestion\""), "no-result screen must show the suggestion line");
+    }
+
+    @Test
+    public void test_searchJs_noResultRendersInterpolatedQuery() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("search.did_not_match"), "search.js must render the did-not-match message with the query");
+    }
+
+    @Test
+    public void test_indexHtml_searchInputHasMaxLength() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("maxlength=\"1000\""), "search inputs must cap length at 1000 (JSP parity)");
+    }
+
+    @Test
     public void test_appJs_footerUsesI18nYearNotClientClock() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("footer.copyright_year"));
