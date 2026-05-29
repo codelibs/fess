@@ -180,7 +180,12 @@ function attachHomeView() {
       const input = document.getElementById("home-search-input");
       const q = input ? input.value.trim() : "";
       if (q) {
-        router.navigate("/search?q=" + encodeURIComponent(q));
+        // Carry the up-front home option selections (sort / num / lang) into the
+        // search URL so the executed search honours them. runFromUrl() parses them.
+        const params = new URLSearchParams();
+        params.set("q", q);
+        search.applyHomeOptions(params);
+        router.navigate("/search?" + params.toString());
       }
     });
   }
@@ -195,6 +200,10 @@ function attachHomeView() {
   if (btn && !btn.textContent.trim()) {
     btn.textContent = t("search.button");
   }
+  // Autofocus the search box when the home view is revealed (parity with index.jsp).
+  // Deferred so it wins over showView()'s heading focus.
+  const homeInput = document.getElementById("home-search-input");
+  if (homeInput) { Promise.resolve().then(() => homeInput.focus()); }
   renderHomePopularWords();
 }
 

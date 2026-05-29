@@ -61,14 +61,31 @@
            notifications.search_top is non-empty in /api/v2/ui/config. -->
       <div id="home-notification" class="d-none" role="status" aria-live="polite"></div>
       <div class="text-center">
-        <h2 class="display-4 mb-4">Fess</h2>
-        <form id="home-search-form" class="d-flex justify-content-center mb-4" role="search" aria-label="Home search">
+        <h2 class="mb-4"><img src="/images/logo.png" alt="" data-i18n-alt="labels.header_brand_name" class="home-logo"></h2>
+        <form id="home-search-form" class="d-flex justify-content-center mb-3" role="search" aria-label="Home search">
           <input id="home-search-input" type="search" class="form-control form-control-lg home-search-input"
+                 name="q" maxlength="1000" autocomplete="off"
                  data-i18n-placeholder="search.placeholder"
                  aria-label="Search query">
           <button type="submit" class="btn btn-primary btn-lg ms-2"
                   data-i18n="search.button">Search</button>
         </form>
+        <div class="mb-3">
+          <button class="btn btn-link btn-sm" type="button" id="home-options-toggle"
+                  data-bs-toggle="collapse" data-bs-target="#home-options"
+                  aria-expanded="false" aria-controls="home-options" data-i18n="search.options">Options</button>
+          <a class="btn btn-link btn-sm" href="/advance" data-spa id="home-advance-link" data-i18n="advance.link">Advanced</a>
+        </div>
+        <div class="collapse mb-4" id="home-options">
+          <div class="d-flex gap-2 flex-wrap justify-content-center align-items-center">
+            <label class="form-label me-1 mb-0 small" for="home-sort-select" data-i18n="search.sort">Sort</label>
+            <select id="home-sort-select" class="form-select form-select-sm options-select" aria-label="Sort order"></select>
+            <label class="form-label me-1 mb-0 small" for="home-num-select" data-i18n="search.num">Per page</label>
+            <select id="home-num-select" class="form-select form-select-sm options-select" aria-label="Results per page"></select>
+            <label class="form-label me-1 mb-0 small" for="home-lang-select" data-i18n="search.lang">Language</label>
+            <select id="home-lang-select" class="form-select form-select-sm options-select" aria-label="Language filter"></select>
+          </div>
+        </div>
         <div id="home-popular-words" class="text-muted"></div>
       </div>
     </section>

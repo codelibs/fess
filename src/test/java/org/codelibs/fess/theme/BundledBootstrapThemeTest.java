@@ -421,4 +421,27 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("footer.copyright_year"));
         assertFalse(js.contains("new Date().getFullYear()"));
     }
+
+    @Test
+    public void test_indexHtml_homeViewHasLogoImage() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("home-logo"), "home view must render the product logo image, not a text heading");
+        assertFalse(html.contains("<h2 class=\"display-4 mb-4\">Fess</h2>"), "home view text heading must be replaced by the logo");
+    }
+
+    @Test
+    public void test_indexHtml_homeViewHasOptionsPanel() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"home-options\""), "home view must have a collapsible options panel");
+        assertTrue(html.contains("id=\"home-options-toggle\""), "home view must have an Options toggle button");
+        assertTrue(html.contains("id=\"home-sort-select\""), "home options must include a sort select");
+        assertTrue(html.contains("id=\"home-num-select\""), "home options must include a num select");
+        assertTrue(html.contains("id=\"home-lang-select\""), "home options must include a lang select");
+    }
+
+    @Test
+    public void test_searchJs_populatesHomeOptions() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("home-sort-select"), "search.js must populate the home option controls");
+    }
 }

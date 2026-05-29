@@ -826,6 +826,40 @@ function renderLabelOptions() {
 }
 
 /**
+ * Parity with index.jsp — populate the up-front home-view option selects
+ * (#home-sort-select / #home-num-select / #home-lang-select) from the same
+ * config that drives the results-view selects. We copy the already-rendered
+ * options from the results selects so the two stay in lock-step. The home lang
+ * select is a single-select (the panel is intentionally simpler than the
+ * results sidebar), so we strip the multi-select attributes the results lang
+ * select carries.
+ */
+function renderHomeOptions() {
+  const copy = (srcId, destId) => {
+    const src = document.getElementById(srcId);
+    const dest = document.getElementById(destId);
+    if (!src || !dest) return dest;
+    dest.innerHTML = src.innerHTML;
+    return dest;
+  };
+
+  const homeSort = copy("sort-select", "home-sort-select");
+  if (homeSort) homeSort.value = state.sort || "";
+
+  const homeNum = copy("num-select", "home-num-select");
+  if (homeNum) homeNum.value = String(state.num || 10);
+
+  const homeLang = copy("lang-select", "home-lang-select");
+  if (homeLang) {
+    // Home lang is single-select; drop any multi-select attributes.
+    homeLang.removeAttribute("multiple");
+    homeLang.removeAttribute("size");
+    const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
+    homeLang.value = selected.length > 0 ? selected[0] : "";
+  }
+}
+
+/**
  * (Re-)initialise all search option selects from config. Safe to call multiple times.
  * Listeners are attached once in attach(); this only repopulates the options.
  */
@@ -834,6 +868,8 @@ function renderSearchOptions() {
   renderNumOptions();
   renderLangOptions();
   renderLabelOptions();
+  // Mirror the rendered options into the home-view option panel.
+  renderHomeOptions();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -855,6 +891,32 @@ function syncSearchInputs(q) {
   const home   = document.getElementById("home-search-input");
   if (header) header.value = q;
   if (home)   home.value   = q;
+}
+
+/**
+ * Parity with index.jsp — apply the up-front home-view option selections onto a
+ * search query string. Reads #home-sort-select / #home-num-select /
+ * #home-lang-select and appends the corresponding params (sort / num / lang) so
+ * the executed search honours the home panel choices. Only non-empty values are
+ * applied so an unset option never clobbers the server defaults. The resulting
+ * params flow through runFromUrl(), which already parses sort / num / lang.
+ *
+ * @param {URLSearchParams} params query params to mutate in place
+ * @returns {URLSearchParams} the same params object, for chaining
+ */
+export function applyHomeOptions(params) {
+  const sortSel = document.getElementById("home-sort-select");
+  if (sortSel && sortSel.value) params.set("sort", sortSel.value);
+
+  const numSel = document.getElementById("home-num-select");
+  if (numSel && numSel.value) params.set("num", numSel.value);
+
+  const langSel = document.getElementById("home-lang-select");
+  if (langSel && langSel.value) {
+    params.delete("lang");
+    params.append("lang", langSel.value);
+  }
+  return params;
 }
 
 /**
