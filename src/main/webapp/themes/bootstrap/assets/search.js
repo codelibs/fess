@@ -289,27 +289,32 @@ function buildResultCard(d, queryId, order) {
 function renderResultsStatus(env) {
   const statusEl = document.getElementById("results-status");
   if (!statusEl) return;
+  while (statusEl.firstChild) statusEl.removeChild(statusEl.firstChild);
   const count = env.record_count || 0;
   const start = env.start_record_number || 1;
   const end   = env.end_record_number   || 0;
   const q     = state.q || "";
   const isOver = env.record_count_relation && env.record_count_relation !== "EQUAL_TO";
   const statusKey = isOver ? "labels.search_result_status_over" : "labels.search_result_status";
-  // {0}=total, {1}=start, {2}=end, {3}=query
-  let text = t(statusKey)
-    .replace("{0}", String(count))
-    .replace("{1}", String(start))
-    .replace("{2}", String(end))
-    .replace("{3}", q);
+  const values = { b0: String(count), b1: String(start), b2: String(end), bq: q };
+  t(statusKey).split(/(\{b[012q]\})/).forEach(part => {
+    const m = part.match(/^\{(b[012q])\}$/);
+    if (m) {
+      const b = document.createElement("b");
+      b.textContent = values[m[1]] != null ? values[m[1]] : "";
+      statusEl.appendChild(b);
+    } else if (part) {
+      statusEl.appendChild(document.createTextNode(part));
+    }
+  });
   if (env.exec_time != null) {
     const execSec = typeof env.exec_time === "number"
       ? env.exec_time.toFixed(2)
       : (typeof env.query_time === "number" ? (env.query_time / 1000).toFixed(2) : null);
     if (execSec !== null) {
-      text += " " + t("labels.search_result_time").replace("{0}", execSec);
+      statusEl.appendChild(document.createTextNode(" " + t("labels.search_result_time").replace("{0}", execSec)));
     }
   }
-  statusEl.textContent = text;
 }
 
 /**

@@ -184,4 +184,54 @@ public class BundledBootstrapThemeTest {
         assertFalse(js.contains("const TIMESTAMP_RANGES"));
         assertFalse(js.contains("const SIZE_RANGES"));
     }
+
+    @Test
+    public void test_indexHtml_hasInlineSearchErrorRegion() throws Exception {
+        assertTrue(Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8).contains("id=\"search-error\""));
+    }
+
+    @Test
+    public void test_searchJs_surfacesInvalidRequestMessage() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("e.code === \"INVALID_REQUEST\""));
+        assertTrue(js.contains("errBox.textContent = e.message"));
+    }
+
+    @Test
+    public void test_searchJs_suggestForwardsLangAndLabel() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("suggestParams.lang = state.lang"));
+        assertTrue(js.contains("suggestParams.label = labelFilters"));
+    }
+
+    @Test
+    public void test_searchJs_setsPerQueryDocumentTitle() throws Exception {
+        assertTrue(Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8).contains("document.title = state.q ? t(\"page.search_title\")"));
+    }
+
+    @Test
+    public void test_indexHtml_noStaticOsddLink() throws Exception {
+        assertFalse(Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8).contains("rel=\"search\""));
+    }
+
+    @Test
+    public void test_searchJs_injectsOsddLinkGatedOnConfig() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("function ensureOsddLink()"));
+        assertTrue(js.contains("application/opensearchdescription+xml"));
+    }
+
+    @Test
+    public void test_searchJs_statusLineUsesBoldNodes() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("document.createElement(\"b\")"));
+    }
+
+    @Test
+    public void test_i18n_statusTemplatesUseBoldTokens() throws Exception {
+        for (final String loc : new String[] { "en", "ja" }) {
+            final String json = Files.readString(THEME_DIR.resolve("i18n/messages." + loc + ".json"), StandardCharsets.UTF_8);
+            assertTrue(json.contains("{b0}") && json.contains("{bq}"));
+        }
+    }
 }
