@@ -21,6 +21,7 @@ const state = {
   facets: {},           // field -> [values]
   fields: {},           // extra field filters (e.g. label)
   facetQueries: [],     // string[] — active ex_q clause strings from facet_views (SRCH-4)
+  exQ: [],             // string[] — extra ex_q clauses forwarded from advance search (ADV-2)
   geo: { lat: "", lon: "", distance: "" }, // GEO-1: geo search state
   requestedTime: 0,     // epoch ms of the most-recent search; used in /go/ click-log URL
   highlightParams: ""   // server-supplied highlight_params string (e.g. "&hl.q=...&hl.fragsize=...")
@@ -481,6 +482,12 @@ async function runSearch() {
       if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
       state.facetQueries.forEach(v => params["ex_q"].push(v));
     }
+    // ADV-2: extra ex_q clauses forwarded from advance search (e.g. time range)
+    if (Array.isArray(state.exQ) && state.exQ.length > 0) {
+      params["ex_q"] = params["ex_q"] || [];
+      if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
+      params["ex_q"].push(...state.exQ);
+    }
     // GEO-1: emit geo params when all three are present
     if (state.geo && state.geo.lat !== "" && state.geo.lon !== "" && state.geo.distance !== "") {
       params["geo.location.point"] = state.geo.lat + "," + state.geo.lon;
@@ -818,6 +825,16 @@ export function runFromUrl() {
     const lonEl = document.getElementById("geo-lon"); if (lonEl) lonEl.value = state.geo.lon;
     const distEl = document.getElementById("geo-distance"); if (distEl) distEl.value = state.geo.distance;
   } else { state.geo = { lat: "", lon: "", distance: "" }; }
+  // ADV-2: hydrate lang / fields.* / ex_q from URL (forwarded by advance search submit)
+  state.lang = params.getAll("lang").filter(v => v !== "");
+  state.fields = {};
+  for (const [key, value] of params.entries()) {
+    if (key.startsWith("fields.") && value !== "") {
+      const field = key.slice("fields.".length);
+      (state.fields[field] = state.fields[field] || []).push(value);
+    }
+  }
+  state.exQ = params.getAll("ex_q").filter(v => v !== "");
   runSearch();
 }
 
