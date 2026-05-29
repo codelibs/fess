@@ -1197,10 +1197,7 @@ function renderFacetQueryViews(body, env) {
     // JSP parity: a configured facet-query group with no matching results still
     // renders its title plus a muted "not found" line (labels.facet_is_not_found).
     if (queries.length === 0) {
-      const notFound = document.createElement("div");
-      notFound.className = "facet-not-found text-muted";
-      notFound.textContent = t("facet.not_found");
-      group.appendChild(notFound);
+      group.appendChild(el("div", { className: "facet-not-found text-muted", text: t("facet.not_found") }));
       body.appendChild(group);
       return;
     }
