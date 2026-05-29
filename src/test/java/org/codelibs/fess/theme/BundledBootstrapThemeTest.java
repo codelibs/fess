@@ -193,6 +193,7 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_searchJs_surfacesInvalidRequestMessage() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("e.code === \"invalid_request\""));
         assertTrue(js.contains("e.code === \"INVALID_REQUEST\""));
         assertTrue(js.contains("errBox.textContent = e.message"));
     }

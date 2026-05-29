@@ -516,7 +516,7 @@ async function runSearch() {
   } catch (e) {
     if (e && e.name === "AbortError") return; // request superseded — silently ignore
     const errBox = document.getElementById("search-error");
-    if (e && e.code === "INVALID_REQUEST") {
+    if (e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || e.httpStatus === 400)) {
       if (errBox) { errBox.textContent = e.message || t("error.invalid_request"); errBox.classList.remove("d-none"); }
       else { document.getElementById("results-meta").textContent = e.message || t("error.invalid_request"); }
       return;
@@ -1168,7 +1168,7 @@ function renderFacets(env, labels) {
 
 /**
  * Render the "Active filters" chip row above the results list.
- * Chips for: label facets, dynamic facets, filetype, timestampRange, sizeRange.
+ * Chips for: label facets, dynamic facets, filetype, facetQueries.
  * Each chip has a remove button that clears that specific filter.
  */
 function renderActiveChips() {
