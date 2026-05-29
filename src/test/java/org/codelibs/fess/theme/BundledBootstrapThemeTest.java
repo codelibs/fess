@@ -468,6 +468,7 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_advanceJs_disablesSubmitTemporarily() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("3000"), "advance.js must re-enable the submit button after a 3s disable (JSP parity)");
+        assertTrue(js.contains("disableSubmitBriefly"),
+                "advance.js must call the shared disableSubmitBriefly helper after navigate (JSP parity)");
     }
 }
