@@ -956,4 +956,12 @@ public class BundledBootstrapThemeTest {
                 "favorite click must forward the card queryId (parity #3)");
         assertTrue(js.contains("{ query_id: queryId || \"\" }"), "favorite POST body must include query_id (parity #3)");
     }
+
+    @Test
+    public void test_chatJs_inlineProgressMessage() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("chat-inline-progress-message"), "chat.js inline panel must build a progress message element (parity #2)");
+        assertTrue(js.contains("progressMessageEl: inlineProgressMessageEl"),
+                "chat.js inline refs must pass progressMessageEl (parity #2)");
+    }
 }

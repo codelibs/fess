@@ -786,6 +786,7 @@ function submitQuestion(question, uiRefs) {
           // #7 phase narration: render per-phase status message into progress element.
           // The search phase uses {0} for keywords; substitute the question text.
           if (progressMessageEl) {
+            progressMessageEl.classList.remove("d-none");
             const keywords = (data && data.keywords) ? data.keywords : question;
             progressMessageEl.textContent = t("labels.chat_phase_" + phase, [keywords]);
           }
@@ -1004,6 +1005,14 @@ export function attachInline() {
   const hint = el("div", { className: "text-muted small mt-1", text: t("labels.chat_input_hint") });
   body.appendChild(hint);
 
+  // #2 (parity): inline progress message element so the sidebar narrates phases
+  // like the standalone panel (mirror of standalone chat.js progressMessageEl).
+  const inlineProgressMessageEl = el("div", {
+    className: "chat-progress-message text-muted small mt-1 d-none",
+    attrs: { id: "chat-inline-progress-message", "aria-live": "polite" }
+  });
+  body.appendChild(inlineProgressMessageEl);
+
   card.appendChild(body);
   column.appendChild(card);
 
@@ -1015,6 +1024,7 @@ export function attachInline() {
     inputEl: input,
     submitEl: submit,
     emptyState: null,
+    progressMessageEl: inlineProgressMessageEl,
     getFilters: () => ({ fields: [], extraQ: [] })
   };
 
