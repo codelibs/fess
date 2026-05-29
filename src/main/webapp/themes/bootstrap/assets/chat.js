@@ -747,11 +747,12 @@ function submitQuestion(question, uiRefs) {
     currentStream = null;
   }
 
-  // Build request body
+  // Build request body per v2 contract: message / session_id / fields.label / extra_queries
   const filters = getFilters ? getFilters() : { fields: [], extraQ: [] };
-  const body = { question, session_id: sessionId || undefined };
-  if (filters.fields.length > 0) body.fields = filters.fields;
-  if (filters.extraQ.length > 0) body.extra_q = filters.extraQ;
+  const body = { message: question };
+  if (sessionId) body.session_id = sessionId;
+  if (filters.fields.length > 0) body.fields = { label: filters.fields.slice() };
+  if (filters.extraQ.length > 0) body.extra_queries = filters.extraQ.slice();
 
   let mdBuffer = "";
   let deltaCleared = false;
