@@ -458,7 +458,6 @@ export function attach() {
     // ADV-5: delete only the params owned by advance search, preserve unrelated ones
     for (const key of ["q", "start", "num", "sort", "lang", "ex_q"]) params.delete(key);
     for (const key of Array.from(params.keys())) { if (key.startsWith("fields.")) params.delete(key); }
-    params.delete("start");
     if (q) params.set("q", q);
 
     // F.2: collect all selected lang options (multi-select → repeated params)

@@ -466,15 +466,22 @@ async function runSearch() {
       params.lang = state.lang;
     }
     if (state.sdh) params.sdh = state.sdh;
-    // facet-based field filters
+    // Merge facet-based field filters (state.facets) and explicit field filters
+    // (state.fields) into a single deduplicated param per field.  The label field
+    // can appear in both stores (sidebar facet group writes state.facets.label;
+    // the label dropdown writes state.fields.label); emitting duplicates would
+    // produce redundant fields.label params and duplicate active chips.
+    const fieldSets = {};
     for (const [field, values] of Object.entries(state.facets)) {
-      values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
+      (values || []).forEach(v => { (fieldSets[field] = fieldSets[field] || new Set()).add(v); });
     }
-    // explicit field filters (e.g. label dropdown, filetype)
     for (const [field, values] of Object.entries(state.fields)) {
       if (Array.isArray(values)) {
-        values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
+        values.forEach(v => { (fieldSets[field] = fieldSets[field] || new Set()).add(v); });
       }
+    }
+    for (const [field, valueSet] of Object.entries(fieldSets)) {
+      valueSet.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
     }
     // facet query views — active ex_q clauses from server-driven facet_views (SRCH-4)
     if (Array.isArray(state.facetQueries) && state.facetQueries.length > 0) {
@@ -1245,14 +1252,33 @@ function renderActiveChips() {
 
   const chips = [];
 
-  // Label / field-value facets from state.facets
+  // Build a deduplicated chip list for field-value filters.
+  // state.facets and state.fields can both carry the same field (e.g. "label");
+  // merging into a Set per field before building chips prevents duplicate entries.
+  const chipFieldSets = {};
   for (const [field, values] of Object.entries(state.facets)) {
-    (values || []).forEach(v => chips.push({
+    (values || []).forEach(v => { (chipFieldSets[field] = chipFieldSets[field] || new Set()).add(v); });
+  }
+  for (const [field, values] of Object.entries(state.fields)) {
+    if (field === "filetype") continue; // filetype handled separately below
+    (Array.isArray(values) ? values : []).forEach(v => { (chipFieldSets[field] = chipFieldSets[field] || new Set()).add(v); });
+  }
+
+  for (const [field, valueSet] of Object.entries(chipFieldSets)) {
+    valueSet.forEach(v => chips.push({
       label: field + ": " + v,
       remove: () => {
-        const arr = state.facets[field] || [];
-        const idx = arr.indexOf(v);
-        if (idx >= 0) arr.splice(idx, 1);
+        // Remove from whichever store(s) hold this value.
+        if (state.facets[field]) {
+          const arr = state.facets[field];
+          const idx = arr.indexOf(v);
+          if (idx >= 0) arr.splice(idx, 1);
+        }
+        if (Array.isArray(state.fields[field])) {
+          const arr = state.fields[field];
+          const idx = arr.indexOf(v);
+          if (idx >= 0) arr.splice(idx, 1);
+        }
         state.start = 0;
         runSearch();
       }
@@ -1271,22 +1297,6 @@ function renderActiveChips() {
       runSearch();
     }
   }));
-
-  // Other field filters (label dropdown from state.fields.label)
-  for (const [field, values] of Object.entries(state.fields)) {
-    if (field === "filetype") continue; // already handled above
-    (values || []).forEach(v => chips.push({
-      label: field + ": " + v,
-      remove: () => {
-        const arr = state.fields[field] ? [...state.fields[field]] : [];
-        const idx = arr.indexOf(v);
-        if (idx >= 0) arr.splice(idx, 1);
-        state.fields[field] = arr;
-        state.start = 0;
-        runSearch();
-      }
-    }));
-  }
 
   // Facet query view chips (SRCH-4) — derive chip labels from cfg.facet_views value→label
   if (Array.isArray(state.facetQueries) && state.facetQueries.length > 0) {

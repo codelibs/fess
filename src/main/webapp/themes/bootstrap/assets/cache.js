@@ -131,7 +131,7 @@ export function attach() {
       const mimetype = /charset=/i.test(baseMime) ? baseMime : baseMime + ";charset=" + charset;
       const content = env.content || "";
       const cacheUrl = env.url || null;
-      const cacheCreated = env.created || env.last_modified || null;
+      const cacheCreated = env.created || null;
 
       // Remove loading indicator.
       while (host.firstChild) host.removeChild(host.firstChild);
@@ -165,9 +165,6 @@ export function attach() {
       // URL (from the document metadata returned by the API).
       if (cacheUrl) {
         appendMeta(dl, "labels.cache_url", cacheUrl);
-      }
-      if (env.last_modified) {
-        appendMeta(dl, "labels.cache_indexed_at", env.last_modified);
       }
       appendMeta(dl, "labels.cache_mimetype", mimetype);
       appendMeta(dl, "labels.cache_doc_id", docIdVal);
