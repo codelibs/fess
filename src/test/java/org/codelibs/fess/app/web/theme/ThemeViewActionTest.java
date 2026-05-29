@@ -929,6 +929,43 @@ public class ThemeViewActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_errorPath_docidNotFoundMessageKey_injectsDetailMeta() throws Exception {
+        // ERR-2: /error/notfound served with ?message_key=errors.docid_not_found must
+        // inject the x-fess-error-detail-key meta tag AND return HTTP 404.
+        final Path tmp = Files.createTempDirectory("tva-e5-inject-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme("t", tmp, manifest);
+            final ThemeViewAction action = newActionWithRequestUriAndMessageKey(theme, "/error/notfound", "errors.docid_not_found");
+
+            final ActionResponse resp = action.serveIndex();
+            final StreamResponse sr = (StreamResponse) resp;
+            // HTTP status must be 404 for /error/notfound.
+            assertTrue(sr.getHttpStatus().isPresent(), "HTTP status must be set for /error/notfound");
+            assertEquals(404, (int) sr.getHttpStatus().get());
+            // Response body must contain the injected meta tag carrying the message key.
+            final ByteArrayOutputStream bodyBuf = new ByteArrayOutputStream();
+            sr.getStreamCall().callback(captureOut(bodyBuf));
+            final String body = bodyBuf.toString(StandardCharsets.UTF_8);
+            assertTrue(body.contains("content=\"errors.docid_not_found\""),
+                    "Body must contain content=\"errors.docid_not_found\": " + body);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
     public void test_errorPathWithoutMessageKey_leavesIndexUnchanged() throws Exception {
         // When /error/notFound is served WITHOUT ?message_key, the response body must NOT
         // contain the injected meta tag — the index.html is streamed as-is.
