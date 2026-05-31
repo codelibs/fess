@@ -108,17 +108,39 @@ const ALLOWED_ATTRS = {
 };
 
 /**
- * Schemes allowed in <a href>.
- * javascript: and data: are rejected; relative URLs and http(s) are permitted.
+ * Schemes permitted in a sanitized <a href>. Anything outside this allowlist
+ * (javascript:, data:, vbscript:, blob:, file:, …) is rejected. Relative,
+ * protocol-relative and fragment URLs resolve to the page scheme (http/https)
+ * and are therefore permitted.
+ */
+const SAFE_HREF_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:", "ftp:", "ftps:"]);
+
+/**
+ * Return true when `value` is safe to use as an <a href>.
+ *
+ * Parses with the WHATWG URL parser and checks the resolved scheme against an
+ * allowlist, rather than matching dangerous schemes with a denylist regex. A
+ * denylist such as /^javascript:/ is bypassable with obfuscated input like
+ * "java\tscript:" (browsers strip the tab before navigating) or a leading C0
+ * control character; the URL parser normalises those away so the real scheme is
+ * always tested. This mirrors the safeHref helpers in search.js / chat.js.
  *
  * @param {string} value
  * @returns {boolean}
  */
-function isSafeHref(value) {
-  const v = value.trim().toLowerCase();
-  if (/^javascript\s*:/i.test(v)) return false;
-  if (/^data\s*:/i.test(v)) return false;
-  return true;
+export function isSafeHref(value) {
+  if (typeof value !== "string") return false;
+  // Browsers ignore ASCII tab/newline/CR inside URLs; strip them (plus
+  // surrounding whitespace / leading control chars) before parsing so the
+  // scheme cannot be hidden from the check.
+  const cleaned = value.replace(/[\t\n\r]/g, "").trim();
+  if (cleaned === "") return false;
+  try {
+    return SAFE_HREF_SCHEMES.has(new URL(cleaned, window.location.href).protocol);
+  } catch {
+    // Malformed URL — treat as unsafe.
+    return false;
+  }
 }
 
 /**

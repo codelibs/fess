@@ -5,7 +5,7 @@
 // The caller MUST pass the return value through sanitizeHtml() before
 // appending to the live DOM (defense-in-depth).
 
-import { escapeHtml } from "./format.js";
+import { escapeHtml, isSafeHref } from "./format.js";
 
 /**
  * Parse a limited subset of Markdown to HTML.
@@ -355,9 +355,11 @@ function inlineMarkdown(text) {
   s = s.replace(/\[([^\]]*)\]\(([^)]*)\)/g, (_m, linkText, url) => {
     // url came through escapeHtml — restore &amp; for scheme check only.
     const rawUrl = url.replace(/&amp;/g, "&");
-    const lower = rawUrl.trim().toLowerCase();
-    if (/^javascript\s*:/i.test(lower) || /^data\s*:/i.test(lower)) {
-      // Reject dangerous schemes — render as plain text.
+    // Allowlist scheme check (shared with the sanitizer). A denylist regex here
+    // is bypassable with obfuscated schemes such as "java\tscript:"; isSafeHref
+    // normalises the URL before testing the scheme.
+    if (!isSafeHref(rawUrl)) {
+      // Reject unsafe schemes — render as plain text.
       return linkText;
     }
     // External links get target + rel (including nofollow to match legacy); keep url HTML-escaped.
