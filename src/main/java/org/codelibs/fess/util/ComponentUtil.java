@@ -26,6 +26,8 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
+import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatSessionManager;
@@ -40,8 +42,9 @@ import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
-import org.codelibs.fess.helper.CrawlerStatsHelper;
+import org.codelibs.fess.helper.ChatApiHelper;
 import org.codelibs.fess.helper.CoordinatorHelper;
+import org.codelibs.fess.helper.CrawlerStatsHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.CurlHelper;
@@ -92,6 +95,9 @@ import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
+import org.codelibs.fess.theme.StaticThemeInstaller;
+import org.codelibs.fess.theme.StaticThemeResponder;
+import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.security.PrimaryCipher;
@@ -140,6 +146,16 @@ public final class ComponentUtil {
     private static final String ACCESS_TOKEN_HELPER = "accessTokenHelper";
 
     private static final String RATE_LIMIT_HELPER = "rateLimitHelper";
+
+    private static final String LOGIN_RATE_LIMITER = "loginRateLimiter";
+
+    private static final String SESSION_CSRF_TOKEN_MANAGER = "sessionCsrfTokenManager";
+
+    private static final String THEME_REGISTRY = "themeRegistry";
+
+    private static final String STATIC_THEME_RESPONDER = "staticThemeResponder";
+
+    private static final String STATIC_THEME_INSTALLER = "staticThemeInstaller";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
@@ -242,6 +258,8 @@ public final class ComponentUtil {
     private static final String CHAT_SESSION_MANAGER = "chatSessionManager";
 
     private static final String CHAT_CLIENT = "chatClient";
+
+    private static final String CHAT_API_HELPER = "chatApiHelper";
 
     private static final String MARKDOWN_RENDERER = "markdownRenderer";
 
@@ -745,6 +763,46 @@ public final class ComponentUtil {
     }
 
     /**
+     * Gets the v2 login rate limiter component.
+     * @return The login rate limiter (shared singleton).
+     */
+    public static LoginRateLimiter getLoginRateLimiter() {
+        return getComponent(LOGIN_RATE_LIMITER);
+    }
+
+    /**
+     * Gets the session-scoped CSRF token manager component used by the v2 API.
+     * @return The session CSRF token manager (shared singleton).
+     */
+    public static SessionCsrfTokenManager getSessionCsrfTokenManager() {
+        return getComponent(SESSION_CSRF_TOKEN_MANAGER);
+    }
+
+    /**
+     * Gets the theme registry component.
+     * @return The theme registry (shared singleton).
+     */
+    public static ThemeRegistry getThemeRegistry() {
+        return getComponent(THEME_REGISTRY);
+    }
+
+    /**
+     * Gets the static theme responder component.
+     * @return The static theme responder (shared singleton).
+     */
+    public static StaticThemeResponder getStaticThemeResponder() {
+        return getComponent(STATIC_THEME_RESPONDER);
+    }
+
+    /**
+     * Gets the static theme installer component.
+     * @return The static theme installer (shared singleton).
+     */
+    public static StaticThemeInstaller getStaticThemeInstaller() {
+        return getComponent(STATIC_THEME_INSTALLER);
+    }
+
+    /**
      * Gets the query string builder component.
      * @return The query string builder.
      */
@@ -870,6 +928,14 @@ public final class ComponentUtil {
      */
     public static ChatSessionManager getChatSessionManager() {
         return getComponent(CHAT_SESSION_MANAGER);
+    }
+
+    /**
+     * Gets the chat API helper component.
+     * @return The chat API helper.
+     */
+    public static ChatApiHelper getChatApiHelper() {
+        return getComponent(CHAT_API_HELPER);
     }
 
     /**

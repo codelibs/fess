@@ -109,9 +109,6 @@
 		<Logger name="org.codelibs.fess.chat" additivity="false" level="${llm.log.level}">
 			<AppenderRef ref="LlmFile" />
 		</Logger>
-		<Logger name="org.codelibs.fess.api.chat" additivity="false" level="${llm.log.level}">
-			<AppenderRef ref="LlmFile" />
-		</Logger>
 		<Logger name="org.codelibs.fess.app.web.chat" additivity="false" level="${llm.log.level}">
 			<AppenderRef ref="LlmFile" />
 		</Logger>

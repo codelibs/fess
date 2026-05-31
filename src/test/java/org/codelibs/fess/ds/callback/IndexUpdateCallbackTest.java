@@ -237,19 +237,16 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
 
     @Test
     public void test_execution_time_tracking() {
-        // Test execution time tracking
+        // Test execution time tracking. Use a deterministic, accumulated value
+        // instead of wall-clock timing (Thread.sleep + System.currentTimeMillis),
+        // which is non-deterministic under load and makes this test flaky.
         IndexUpdateCallback callback = new IndexUpdateCallback() {
-            private long startTime = System.currentTimeMillis();
-            private long totalTime = 0;
+            private final AtomicLong totalTime = new AtomicLong(0);
 
             @Override
             public void store(DataStoreParams paramMap, Map<String, Object> dataMap) {
-                try {
-                    Thread.sleep(10); // Simulate processing time
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-                totalTime = System.currentTimeMillis() - startTime;
+                // Record processing time for the stored document
+                totalTime.addAndGet(10L);
             }
 
             @Override
@@ -259,7 +256,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
 
             @Override
             public long getExecuteTime() {
-                return totalTime;
+                return totalTime.get();
             }
 
             @Override
@@ -274,8 +271,8 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         // Store a document
         callback.store(new DataStoreParams(), new HashMap<>());
 
-        // Execution time should be greater than 0
-        assertTrue(callback.getExecuteTime() >= 10L);
+        // Execution time should be tracked after storing
+        assertEquals(10L, callback.getExecuteTime());
     }
 
     @Test

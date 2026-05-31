@@ -84,6 +84,16 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
         Assertions.assertEquals(expected, actual, message);
     }
 
+    // assertEquals - JUnit 5 style (message last) - int version
+    // Symmetric with assertTrue/assertFalse JUnit 5 overloads above. The Object-arg
+    // counterpart is deliberately omitted: assertEquals(Object,Object,String) would
+    // be ambiguous with assertEquals(String,Object,Object) when all three args are
+    // String. For Object comparisons in JUnit 5 style, use qualified
+    // org.junit.jupiter.api.Assertions.assertEquals(...) at the call site.
+    protected void assertEquals(int expected, int actual, String message) {
+        Assertions.assertEquals(expected, actual, message);
+    }
+
     // assertSame - JUnit 5 style (no message)
     protected void assertSame(Object expected, Object actual) {
         Assertions.assertSame(expected, actual);

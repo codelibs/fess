@@ -712,7 +712,7 @@ public class SystemHelper {
      *
      * @return true if the application is EOL, false otherwise.
      */
-    protected boolean isEoled() {
+    public boolean isEoled() {
         return getCurrentTimeAsLong() > eolTime;
     }
 
@@ -788,6 +788,7 @@ public class SystemHelper {
      */
     public void reloadConfiguration(final boolean resetJobs) {
         ComponentUtil.getSearchEngineClient().refresh();
+        ComponentUtil.getThemeRegistry().reload();
 
         ComponentUtil.getSuggestHelper().init();
         ComponentUtil.getPopularWordHelper().init();
@@ -929,7 +930,7 @@ public class SystemHelper {
     }
 
     private static final String[] LLM_LOG_PACKAGES =
-            { "org.codelibs.fess.llm", "org.codelibs.fess.chat", "org.codelibs.fess.api.chat", "org.codelibs.fess.app.web.chat" };
+            { "org.codelibs.fess.llm", "org.codelibs.fess.chat", "org.codelibs.fess.app.web.chat" };
 
     /**
      * Sets the log level for LLM-related packages.

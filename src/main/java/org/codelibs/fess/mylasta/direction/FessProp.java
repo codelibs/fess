@@ -334,6 +334,14 @@ public interface FessProp {
         return getSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, getVirtualHostHeaders());
     }
 
+    default void setDefaultTheme(final String value) {
+        setSystemProperty(Constants.DEFAULT_THEME_PROPERTY, value);
+    }
+
+    default String getDefaultTheme() {
+        return getSystemProperty(Constants.DEFAULT_THEME_PROPERTY, StringUtil.EMPTY);
+    }
+
     default void setLoginRequired(final boolean value) {
         setSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, value);
     }
@@ -2400,5 +2408,20 @@ public interface FessProp {
             propMap.put(RATE_LIMIT_TRUSTED_PROXIES_SET, set);
         }
         return set;
+    }
+
+    /**
+     * Resolves {@code api.v2.chat.rate.limit.per.user.per.minute} from the system
+     * properties, defaulting to {@code 30} on absence or parse failure. A return
+     * value &le; 0 disables the per-user chat rate limit entirely.
+     *
+     * @return max chat requests per minute per user, or {@code <= 0} to disable
+     */
+    default int getChatRateLimitPerMinute() {
+        try {
+            return Integer.parseInt(getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
+        } catch (final NumberFormatException e) {
+            return 30;
+        }
     }
 }

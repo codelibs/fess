@@ -404,6 +404,11 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
             }
 
             @Override
+            public String getQueryCollapseInnerHitsName() {
+                return "similar_docs";
+            }
+
+            @Override
             public String getIndexFieldId() {
                 return "id";
             }

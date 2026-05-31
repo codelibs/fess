@@ -6,8 +6,8 @@ var FessChat = (function() {
     'use strict';
 
     var config = {
-        apiUrl: '/api/v1/chat',
-        streamUrl: '/api/v1/chat/stream',
+        apiUrl: '/api/v2/chat',
+        streamUrl: '/api/v2/chat/stream',
         labels: {
             thinking: 'Thinking...',
             waiting: '...',
@@ -52,18 +52,58 @@ var FessChat = (function() {
     var state = {
         sessionId: null,
         isProcessing: false,
-        eventSource: null,
+        streamController: null,
         currentPhase: null,
         completedPhases: [],
         lastMessage: null,
         lastError: null,
         errorHandled: false,
-        filters: { labels: [], extraQueries: [] }
+        filters: { labels: [], extraQueries: [] },
+        csrfToken: ''
     };
 
     var elements = {};
 
     var phaseOrder = ['intent', 'search', 'evaluate', 'fetch', 'answer'];
+
+    /**
+     * Resolve the servlet context path from the hidden #contextPath input that
+     * the JSP renders (see chat.jsp). Returns an empty string when the page is
+     * served from the root context or the input is missing — preserving the
+     * pre-existing absolute-path behaviour on root-context deployments.
+     */
+    function getContextPath() {
+        var el = document.getElementById('contextPath');
+        return (el && el.value) ? el.value : '';
+    }
+
+    /**
+     * Prepend the context path to an absolute API path so requests work when
+     * Fess is mounted under a non-root servlet context (e.g. /fess/api/v2/...).
+     */
+    function withContextPath(path) {
+        return getContextPath() + path;
+    }
+
+    /**
+     * Fetch CSRF token from /api/v2/ui/config
+     */
+    function fetchCsrfToken() {
+        return fetch(withContextPath('/api/v2/ui/config'), {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        }).then(function(resp) {
+            return resp.json();
+        }).then(function(body) {
+            var env = body && body.response;
+            if (env && env.csrf_token) {
+                state.csrfToken = env.csrf_token;
+            }
+        }).catch(function() {
+            // csrf token unavailable — requests will proceed without it
+        });
+    }
 
     /**
      * Initialize the chat module
@@ -91,6 +131,7 @@ var FessChat = (function() {
         autoResizeTextarea();
         updateCharCount();
         showStatus('ready');
+        fetchCsrfToken();
     }
 
     /**
@@ -317,181 +358,285 @@ var FessChat = (function() {
     }
 
     /**
-     * Stream chat using Server-Sent Events
+     * Parse a single SSE frame text into { type, data }.
+     * Returns null when the frame is empty or comment-only.
      */
-    function streamChat(message, thinkingId) {
-        var url = config.streamUrl + '?message=' + encodeURIComponent(message);
-        if (state.sessionId) {
-            url += '&sessionId=' + encodeURIComponent(state.sessionId);
+    function parseSseFrame(frame) {
+        var eventType = 'message';
+        var dataLine = '';
+        var lines = frame.split(/\r?\n/);
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.indexOf('event:') === 0) {
+                eventType = line.slice(6).trim();
+            } else if (line.indexOf('data:') === 0) {
+                dataLine += (dataLine ? '\n' : '') + line.slice(5).trim();
+            }
         }
-        url += getFilterQueryParams();
+        if (!dataLine) return null;
+        var parsed;
+        try { parsed = JSON.parse(dataLine); } catch (ex) { parsed = dataLine; }
+        return { type: eventType, data: parsed };
+    }
 
-        var eventSource = new EventSource(url);
+    /**
+     * Stream chat using fetch + ReadableStream SSE (POST JSON body).
+     * EventSource is not used because it only supports GET.
+     */
+    function streamChat(message, thinkingId, csrfRetried) {
+        // If the message is sent before the async CSRF token fetch in init() has
+        // completed, fetch it once first so the gated POST is not rejected with 403.
+        if (!state.csrfToken && !csrfRetried) {
+            fetchCsrfToken().then(function() {
+                streamChat(message, thinkingId, true);
+            });
+            return;
+        }
+
+        var requestBody = { message: message };
+        if (state.sessionId) {
+            requestBody.session_id = state.sessionId;
+        }
+
+        // Build fields/extra_queries from active filters
+        if (state.filters.labels.length > 0) {
+            requestBody.fields = { label: state.filters.labels.slice() };
+        }
+        if (state.filters.extraQueries.length > 0) {
+            requestBody.extra_queries = state.filters.extraQueries.slice();
+        }
+
+        var controller = new AbortController();
+        state.streamController = controller;
         state.errorHandled = false;
         var responseContent = '';
         var messageElement = null;
+        // Throttle markdown rendering: re-parsing the full accumulated content on every
+        // SSE chunk is O(n^2) for long answers. Coalesce chunk renders to ~1 per 80ms and
+        // always do a final synchronous render on done/EOF so no content is lost.
+        var renderTimer = null;
+        function renderResponseNow() {
+            if (renderTimer !== null) {
+                clearTimeout(renderTimer);
+                renderTimer = null;
+            }
+            if (messageElement) {
+                messageElement.find('.message-text').html(renderMarkdown(responseContent));
+                scrollToBottom();
+            }
+        }
+        function scheduleResponseRender() {
+            if (renderTimer === null) {
+                renderTimer = setTimeout(renderResponseNow, 80);
+            }
+        }
+        function cancelResponseRender() {
+            if (renderTimer !== null) {
+                clearTimeout(renderTimer);
+                renderTimer = null;
+            }
+        }
 
-        eventSource.onopen = function() {
-            // Remove thinking indicator and create message element with waiting text
-            $('#' + thinkingId).remove();
-            messageElement = addMessage('assistant', config.labels.waiting, true);
-        };
+        // Remove thinking indicator and create message element
+        $('#' + thinkingId).remove();
+        messageElement = addMessage('assistant', config.labels.waiting, true);
 
-        eventSource.addEventListener('phase', function(e) {
-            var data = JSON.parse(e.data);
-            if (data.phase) {
-                if (data.status === 'start') {
-                    updatePhase(data.phase, 'active');
-                    var phaseMessage = config.labels.phases[data.phase] || data.message || 'Processing...';
-                    // Replace __keywords__ placeholder with actual keywords
-                    if (data.keywords) {
-                        phaseMessage = phaseMessage.replace('__keywords__', data.keywords);
+        fetch(withContextPath(config.streamUrl), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream',
+                'X-Fess-CSRF-Token': state.csrfToken || ''
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
+        }).then(function(resp) {
+            if (!resp.ok) {
+                return resp.json().then(function(errBody) {
+                    var env = errBody && errBody.response;
+                    var errMsg = config.labels.error;
+                    if (env && env.error && env.error.code && config.labels.errors && config.labels.errors[env.error.code]) {
+                        errMsg = config.labels.errors[env.error.code];
                     }
-                    showStatus('thinking', phaseMessage);
-                    updateProgressMessage(phaseMessage);
-                    // Update message-text element with phase progress
+                    handleError(thinkingId, messageElement, errMsg);
+                }).catch(function() {
+                    handleError(thinkingId, messageElement, config.labels.error);
+                });
+            }
+
+            var reader = resp.body.getReader();
+            var decoder = new TextDecoder('utf-8');
+            var buffer = '';
+
+            function findSep(buf) {
+                var i2 = buf.indexOf('\n\n');
+                var i4 = buf.indexOf('\r\n\r\n');
+                if (i2 === -1 && i4 === -1) return -1;
+                if (i2 === -1) return i4;
+                if (i4 === -1) return i2;
+                return Math.min(i2, i4);
+            }
+
+            function stepLen(buf, idx) {
+                return buf.indexOf('\r\n\r\n') === idx ? 4 : 2;
+            }
+
+            function processFrame(frame) {
+                if (!frame || frame.trim() === '') return;
+                var parsed = parseSseFrame(frame);
+                if (!parsed) return;
+                var type = parsed.type;
+                var data = parsed.data;
+
+                if (type === 'phase') {
+                    if (data.phase) {
+                        if (data.status === 'start') {
+                            updatePhase(data.phase, 'active');
+                            var phaseMessage = config.labels.phases[data.phase] || data.message || 'Processing...';
+                            if (data.keywords) {
+                                phaseMessage = phaseMessage.replace('__keywords__', data.keywords);
+                            }
+                            showStatus('thinking', phaseMessage);
+                            updateProgressMessage(phaseMessage);
+                            if (messageElement) {
+                                messageElement.find('.message-text').text(phaseMessage);
+                                scrollToBottom();
+                            }
+                        } else if (data.status === 'complete') {
+                            updatePhase(data.phase, 'completed');
+                            if (data.phase === 'search' && typeof data.hit_count === 'number') {
+                                var hitMsg = (config.labels.hitCount || '{count} documents found').replace('{count}', data.hit_count);
+                                updateProgressMessage(hitMsg);
+                            }
+                        }
+                    }
+                } else if (type === 'chunk') {
+                    if (data.content) {
+                        responseContent += data.content;
+                        scheduleResponseRender();
+                    }
+                } else if (type === 'sources') {
+                    if (data.sources && data.sources.length > 0 && messageElement) {
+                        addSourcesToMessage(messageElement, data.sources);
+                    }
+                } else if (type === 'done') {
+                    state.sessionId = data.session_id || null;
+                    cancelResponseRender();
+                    if (data.html_content && messageElement) {
+                        // Mirror the streamed-chunk path: sanitize server HTML client-side too.
+                        var safeHtml = (typeof DOMPurify !== 'undefined')
+                            ? DOMPurify.sanitize(data.html_content, markdownSanitizeConfig)
+                            : data.html_content;
+                        messageElement.find('.message-text').html(safeHtml);
+                    } else if (messageElement) {
+                        // Final render of accumulated markdown (flush any throttled chunk render).
+                        messageElement.find('.message-text').html(renderMarkdown(responseContent));
+                    }
                     if (messageElement) {
-                        messageElement.find('.message-text').text(phaseMessage);
+                        addMessageActions(messageElement);
+                    }
+                    state.isProcessing = false;
+                    state.lastError = null;
+                    state.streamController = null;
+                    updateUI();
+                    showStatus('ready');
+                    hideProgressIndicator();
+                    scrollToBottom();
+                    elements.chatInput.focus();
+                } else if (type === 'error') {
+                    state.errorHandled = true;
+                    cancelResponseRender();
+                    var errorMessage = config.labels.error;
+                    if (data.error_code && config.labels.errors && config.labels.errors[data.error_code]) {
+                        errorMessage = config.labels.errors[data.error_code];
+                    } else if (data.message) {
+                        errorMessage = data.message;
+                    }
+                    handleError(thinkingId, messageElement, errorMessage);
+                } else if (type === 'retry') {
+                    try {
+                        var seconds = Math.max(1, Math.round((data.sleep_ms || 0) / 1000));
+                        var retryMsg = (config.labels.retrying || 'Retrying... ({attempt}/{max}, next attempt in {seconds}s)')
+                            .replace('{attempt}', data.attempt != null ? data.attempt : '?')
+                            .replace('{max}', data.max_attempts != null ? data.max_attempts : '?')
+                            .replace('{seconds}', seconds);
+                        updateProgressMessage(retryMsg);
+                        if (messageElement) {
+                            messageElement.find('.message-text').text(retryMsg);
+                            scrollToBottom();
+                        }
+                    } catch (err) { /* ignore */ }
+                } else if (type === 'waiting') {
+                    var waitMsg = config.labels.waitingQueue || 'Waiting for an available slot...';
+                    updateProgressMessage(waitMsg);
+                    if (messageElement) {
+                        messageElement.find('.message-text').text(waitMsg);
                         scrollToBottom();
                     }
-                } else if (data.status === 'complete') {
-                    updatePhase(data.phase, 'completed');
-                    if (data.phase === 'search' && typeof data.hitCount === 'number') {
-                        var hitMsg = (config.labels.hitCount || '{count} documents found').replace('{count}', data.hitCount);
-                        updateProgressMessage(hitMsg);
+                } else if (type === 'fallback') {
+                    var fallbackLabels = config.labels.fallback || {};
+                    var fallbackMsg = fallbackLabels[data.reason] || fallbackLabels.no_results || 'Refining the query and searching again...';
+                    updateProgressMessage(fallbackMsg);
+                    if (messageElement) {
+                        messageElement.find('.message-text').text(fallbackMsg);
+                        scrollToBottom();
+                    }
+                } else if (type === 'warning') {
+                    var warningLabels = config.labels.warning || {};
+                    var warnMsg = warningLabels[data.code];
+                    if (warnMsg) {
+                        updateProgressMessage(warnMsg);
                     }
                 }
             }
-        });
 
-        eventSource.addEventListener('chunk', function(e) {
-            var data = JSON.parse(e.data);
-            if (data.content) {
-                responseContent += data.content;
-                if (messageElement) {
-                    messageElement.find('.message-text').html(renderMarkdown(responseContent));
-                    scrollToBottom();
-                }
+            function pump() {
+                return reader.read().then(function(result) {
+                    if (result.done) {
+                        buffer += decoder.decode();
+                        if (buffer.trim()) processFrame(buffer);
+                        // Stream ended without an explicit 'done'/'error' event (premature
+                        // server close, proxy idle-timeout, network EOF): unblock the UI so
+                        // state.isProcessing does not stay stuck true forever.
+                        if (state.isProcessing && !state.errorHandled) {
+                            if (responseContent) {
+                                // Flush any throttled chunk render before finalizing.
+                                renderResponseNow();
+                                if (messageElement) {
+                                    addMessageActions(messageElement);
+                                }
+                                state.isProcessing = false;
+                                state.streamController = null;
+                                updateUI();
+                                showStatus('ready');
+                                hideProgressIndicator();
+                            } else {
+                                cancelResponseRender();
+                                handleError(thinkingId, messageElement, config.labels.error);
+                            }
+                        }
+                        return;
+                    }
+                    buffer += decoder.decode(result.value, { stream: true });
+                    var sepIdx;
+                    while ((sepIdx = findSep(buffer)) !== -1) {
+                        var frame = buffer.slice(0, sepIdx);
+                        buffer = buffer.slice(sepIdx + stepLen(buffer, sepIdx));
+                        processFrame(frame);
+                    }
+                    return pump();
+                });
             }
-        });
 
-        eventSource.addEventListener('sources', function(e) {
-            var data = JSON.parse(e.data);
-            if (data.sources && data.sources.length > 0 && messageElement) {
-                addSourcesToMessage(messageElement, data.sources);
-            }
-        });
-
-        eventSource.addEventListener('done', function(e) {
-            var data = JSON.parse(e.data);
-            state.sessionId = data.sessionId;
-
-            // Replace streaming text with rendered HTML content if available
-            if (data.htmlContent && messageElement) {
-                messageElement.find('.message-text').html(data.htmlContent);
-            }
-
-            // Add message actions
-            if (messageElement) {
-                addMessageActions(messageElement);
-            }
-
-            state.isProcessing = false;
-            state.lastError = null;
-            updateUI();
-            showStatus('ready');
-            hideProgressIndicator();
-            eventSource.close();
-            scrollToBottom();
-
-            // Focus back to input
-            elements.chatInput.focus();
-        });
-
-        eventSource.addEventListener('error', function(e) {
-            state.errorHandled = true;
-            var errorMessage = config.labels.error;
-            try {
-                var data = JSON.parse(e.data);
-                if (data.errorCode && config.labels.errors && config.labels.errors[data.errorCode]) {
-                    errorMessage = config.labels.errors[data.errorCode];
-                } else if (data.message) {
-                    errorMessage = data.message;
-                }
-            } catch (ex) {}
-
-            handleError(thinkingId, messageElement, errorMessage);
-            eventSource.close();
-        });
-
-        eventSource.addEventListener('retry', function(e) {
-            try {
-                var data = JSON.parse(e.data);
-                var seconds = Math.max(1, Math.round((data.sleepMs || 0) / 1000));
-                var msg = (config.labels.retrying || 'Retrying... ({attempt}/{max}, next attempt in {seconds}s)')
-                    .replace('{attempt}', data.attempt)
-                    .replace('{max}', data.maxAttempts)
-                    .replace('{seconds}', seconds);
-                updateProgressMessage(msg);
-                if (messageElement) {
-                    messageElement.find('.message-text').text(msg);
-                    scrollToBottom();
-                }
-            } catch (err) {
-                // ignore parse errors
-            }
-        });
-
-        eventSource.addEventListener('waiting', function(e) {
-            try {
-                JSON.parse(e.data); // payload reserved for future use
-                var msg = config.labels.waitingQueue || 'Waiting for an available slot...';
-                updateProgressMessage(msg);
-                if (messageElement) {
-                    messageElement.find('.message-text').text(msg);
-                    scrollToBottom();
-                }
-            } catch (err) {
-                // ignore parse errors
-            }
-        });
-
-        eventSource.addEventListener('fallback', function(e) {
-            try {
-                var data = JSON.parse(e.data);
-                var fallbackLabels = config.labels.fallback || {};
-                var msg = fallbackLabels[data.reason] || fallbackLabels.no_results || 'Refining the query and searching again...';
-                updateProgressMessage(msg);
-                if (messageElement) {
-                    messageElement.find('.message-text').text(msg);
-                    scrollToBottom();
-                }
-            } catch (err) {
-                // ignore parse errors
-            }
-        });
-
-        eventSource.addEventListener('warning', function(e) {
-            try {
-                var data = JSON.parse(e.data);
-                var warningLabels = config.labels.warning || {};
-                var msg = warningLabels[data.code];
-                if (msg) {
-                    updateProgressMessage(msg);
-                }
-            } catch (err) {
-                // ignore parse errors
-            }
-        });
-
-        eventSource.onerror = function() {
+            return pump();
+        }).catch(function(err) {
+            cancelResponseRender();
+            if (err && err.name === 'AbortError') return;
             if (!state.errorHandled) {
                 handleError(thinkingId, messageElement, config.labels.error);
             }
-            eventSource.close();
-        };
-
-        state.eventSource = eventSource;
+        });
     }
 
     /**
@@ -739,7 +884,7 @@ var FessChat = (function() {
         for (var i = 0; i < sources.length; i++) {
             var source = sources[i];
             var title = source.title || source.url || ('Source ' + (i + 1));
-            var navigationUrl = sanitizeUrl(source.goUrl || source.urlLink || source.url);
+            var navigationUrl = sanitizeUrl(source.go_url || source.url_link || source.url);
             var icon = getFileTypeIcon(source.url, source.mimetype);
             var typeLabel = getFileTypeLabel(source.url, source.mimetype);
 
@@ -817,20 +962,6 @@ var FessChat = (function() {
     }
 
     /**
-     * Get filter query parameters string for URL
-     */
-    function getFilterQueryParams() {
-        var params = '';
-        for (var i = 0; i < state.filters.labels.length; i++) {
-            params += '&fields.label=' + encodeURIComponent(state.filters.labels[i]);
-        }
-        for (var i = 0; i < state.filters.extraQueries.length; i++) {
-            params += '&ex_q=' + encodeURIComponent(state.filters.extraQueries[i]);
-        }
-        return params;
-    }
-
-    /**
      * Reset all filters
      */
     function resetFilters() {
@@ -847,21 +978,26 @@ var FessChat = (function() {
      * Start a new chat
      */
     function newChat() {
-        // Close any active EventSource connection
-        if (state.eventSource) {
-            state.eventSource.close();
-            state.eventSource = null;
+        // Abort any active stream
+        if (state.streamController) {
+            try { state.streamController.abort(); } catch (e) { /* ignore */ }
+            state.streamController = null;
         }
 
         // Reset processing state
         state.isProcessing = false;
 
         if (state.sessionId) {
-            // Clear session on server
-            $.post(config.apiUrl, {
-                sessionId: state.sessionId,
-                clear: 'true'
-            });
+            // Clear session on server via DELETE /api/v2/chat/sessions/{session_id}
+            var clearUrl = withContextPath('/api/v2/chat/sessions/' + encodeURIComponent(state.sessionId));
+            fetch(clearUrl, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Fess-CSRF-Token': state.csrfToken || ''
+                }
+            }).catch(function() { /* ignore errors on session clear */ });
         }
         state.sessionId = null;
         state.lastMessage = null;

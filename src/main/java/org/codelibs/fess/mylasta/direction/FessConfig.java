@@ -2046,6 +2046,57 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 300 */
     String LOG_NOTIFICATION_INTERVAL = "log.notification.interval";
 
+    /** The key of the configuration. e.g. themes */
+    String THEME_DIRECTORY_PATH = "theme.directory.path";
+
+    /** The key of the configuration. e.g. 52428800 */
+    String THEME_UPLOAD_MAX_SIZE = "theme.upload.max.size";
+
+    /** The key of the configuration. e.g. 209715200 */
+    String THEME_UPLOAD_MAX_EXTRACTED_SIZE = "theme.upload.max.extracted.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String THEME_UPLOAD_MAX_ENTRIES = "theme.upload.max.entries";
+
+    /** The key of the configuration. e.g. 100 */
+    String THEME_UPLOAD_MAX_COMPRESSION_RATIO = "theme.upload.max.compression.ratio";
+
+    /** The key of the configuration. e.g. 50 */
+    String THEME_UPLOAD_ZIP_RATIO_MAX = "theme.upload.zip.ratio.max";
+
+    /** The key of the configuration. e.g. 65536 */
+    String THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES = "theme.upload.zip.ratio.check.threshold.bytes";
+
+    /** The key of the configuration. e.g. 7 */
+    String THEME_UPLOAD_ATTIC_RETENTION_DAYS = "theme.upload.attic.retention.days";
+
+    /** The key of the configuration. e.g. zip */
+    String THEME_ALLOWED_ARCHIVE_EXTENSIONS = "theme.allowed.archive.extensions";
+
+    /** The key of the configuration. e.g. 86400 */
+    String THEME_ASSETS_CACHE_MAX_AGE = "theme.assets.cache.max.age";
+
+    /** The key of the configuration. e.g. true */
+    String THEME_ASSETS_PRECOMPRESSED = "theme.assets.precompressed";
+
+    /** The key of the configuration. e.g. true */
+    String THEME_API_CSRF_REQUIRED = "theme.api.csrf.required";
+
+    /** The key of the configuration. e.g. 10 */
+    String THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE = "theme.api.login.rate.limit.per.ip.per.minute";
+
+    /** The key of the configuration. e.g. 5 */
+    String THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE = "theme.api.login.rate.limit.per.user.per.minute";
+
+    /** The key of the configuration. e.g. 900 */
+    String THEME_API_LOGIN_LOCKOUT_SECONDS = "theme.api.login.lockout.seconds";
+
+    /** The key of the configuration. e.g. 100000 */
+    String THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES = "theme.api.login.rate.limit.max.entries";
+
+    /** The key of the configuration. e.g. 15000 */
+    String API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS = "api.v2.chat.stream.keepalive.interval.ms";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9751,6 +9802,260 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getLogNotificationIntervalAsInteger();
 
     /**
+     * Get the value for the key 'theme.directory.path'. <br>
+     * The value is, e.g. themes <br>
+     * comment: Static theme system (see docs/superpowers/specs/2026-05-21-fess-static-theme-design.md)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeDirectoryPath();
+
+    /**
+     * Get the value for the key 'theme.upload.max.size'. <br>
+     * The value is, e.g. 52428800 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadMaxSize();
+
+    /**
+     * Get the value for the key 'theme.upload.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 52428800 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.max.extracted.size'. <br>
+     * The value is, e.g. 209715200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadMaxExtractedSize();
+
+    /**
+     * Get the value for the key 'theme.upload.max.extracted.size' as {@link Integer}. <br>
+     * The value is, e.g. 209715200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadMaxExtractedSizeAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.max.entries'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadMaxEntries();
+
+    /**
+     * Get the value for the key 'theme.upload.max.entries' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadMaxEntriesAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.max.compression.ratio'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadMaxCompressionRatio();
+
+    /**
+     * Get the value for the key 'theme.upload.max.compression.ratio' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadMaxCompressionRatioAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.max'. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadZipRatioMax();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.max' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadZipRatioMaxAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.check.threshold.bytes'. <br>
+     * The value is, e.g. 65536 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadZipRatioCheckThresholdBytes();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.check.threshold.bytes' as {@link Integer}. <br>
+     * The value is, e.g. 65536 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadZipRatioCheckThresholdBytesAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.attic.retention.days'. <br>
+     * The value is, e.g. 7 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadAtticRetentionDays();
+
+    /**
+     * Get the value for the key 'theme.upload.attic.retention.days' as {@link Integer}. <br>
+     * The value is, e.g. 7 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadAtticRetentionDaysAsInteger();
+
+    /**
+     * Get the value for the key 'theme.allowed.archive.extensions'. <br>
+     * The value is, e.g. zip <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeAllowedArchiveExtensions();
+
+    /**
+     * Get the value for the key 'theme.assets.cache.max.age'. <br>
+     * The value is, e.g. 86400 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeAssetsCacheMaxAge();
+
+    /**
+     * Get the value for the key 'theme.assets.cache.max.age' as {@link Integer}. <br>
+     * The value is, e.g. 86400 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeAssetsCacheMaxAgeAsInteger();
+
+    /**
+     * Get the value for the key 'theme.assets.precompressed'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeAssetsPrecompressed();
+
+    /**
+     * Is the property for the key 'theme.assets.precompressed' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isThemeAssetsPrecompressed();
+
+    /**
+     * Get the value for the key 'theme.api.csrf.required'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiCsrfRequired();
+
+    /**
+     * Is the property for the key 'theme.api.csrf.required' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isThemeApiCsrfRequired();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginRateLimitPerIpPerMinute();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.user.per.minute'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginRateLimitPerUserPerMinute();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.user.per.minute' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+
+    /**
+     * Get the value for the key 'theme.api.login.lockout.seconds'. <br>
+     * The value is, e.g. 900 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginLockoutSeconds();
+
+    /**
+     * Get the value for the key 'theme.api.login.lockout.seconds' as {@link Integer}. <br>
+     * The value is, e.g. 900 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginLockoutSecondsAsInteger();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.max.entries'. <br>
+     * The value is, e.g. 100000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginRateLimitMaxEntries();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.max.entries' as {@link Integer}. <br>
+     * The value is, e.g. 100000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginRateLimitMaxEntriesAsInteger();
+
+    /**
+     * Get the value for the key 'api.v2.chat.stream.keepalive.interval.ms'. <br>
+     * The value is, e.g. 15000 <br>
+     * comment: <br>
+     * Interval between SSE keep-alive pings emitted by /api/v2/chat/stream. The<br>
+     * ping is a comment-only line (": keepalive<br>
+     * <br>
+     * ") that does not affect the<br>
+     * event stream but defeats intermediaries (nginx default proxy_read_timeout<br>
+     * is 60s) that drop idle connections during long LLM phases. Set &lt;=0 to<br>
+     * disable. Unit: milliseconds.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiV2ChatStreamKeepaliveIntervalMs();
+
+    /**
+     * Get the value for the key 'api.v2.chat.stream.keepalive.interval.ms' as {@link Integer}. <br>
+     * The value is, e.g. 15000 <br>
+     * comment: <br>
+     * Interval between SSE keep-alive pings emitted by /api/v2/chat/stream. The<br>
+     * ping is a comment-only line (": keepalive<br>
+     * <br>
+     * ") that does not affect the<br>
+     * event stream but defeats intermediaries (nginx default proxy_read_timeout<br>
+     * is 60s) that drop idle connections during long LLM phases. Set &lt;=0 to<br>
+     * disable. Unit: milliseconds.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -13367,6 +13672,134 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.LOG_NOTIFICATION_INTERVAL);
         }
 
+        public String getThemeDirectoryPath() {
+            return get(FessConfig.THEME_DIRECTORY_PATH);
+        }
+
+        public String getThemeUploadMaxSize() {
+            return get(FessConfig.THEME_UPLOAD_MAX_SIZE);
+        }
+
+        public Integer getThemeUploadMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_MAX_SIZE);
+        }
+
+        public String getThemeUploadMaxExtractedSize() {
+            return get(FessConfig.THEME_UPLOAD_MAX_EXTRACTED_SIZE);
+        }
+
+        public Integer getThemeUploadMaxExtractedSizeAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_MAX_EXTRACTED_SIZE);
+        }
+
+        public String getThemeUploadMaxEntries() {
+            return get(FessConfig.THEME_UPLOAD_MAX_ENTRIES);
+        }
+
+        public Integer getThemeUploadMaxEntriesAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_MAX_ENTRIES);
+        }
+
+        public String getThemeUploadMaxCompressionRatio() {
+            return get(FessConfig.THEME_UPLOAD_MAX_COMPRESSION_RATIO);
+        }
+
+        public Integer getThemeUploadMaxCompressionRatioAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_MAX_COMPRESSION_RATIO);
+        }
+
+        public String getThemeUploadZipRatioMax() {
+            return get(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX);
+        }
+
+        public Integer getThemeUploadZipRatioMaxAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX);
+        }
+
+        public String getThemeUploadZipRatioCheckThresholdBytes() {
+            return get(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES);
+        }
+
+        public Integer getThemeUploadZipRatioCheckThresholdBytesAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES);
+        }
+
+        public String getThemeUploadAtticRetentionDays() {
+            return get(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS);
+        }
+
+        public Integer getThemeUploadAtticRetentionDaysAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS);
+        }
+
+        public String getThemeAllowedArchiveExtensions() {
+            return get(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS);
+        }
+
+        public String getThemeAssetsCacheMaxAge() {
+            return get(FessConfig.THEME_ASSETS_CACHE_MAX_AGE);
+        }
+
+        public Integer getThemeAssetsCacheMaxAgeAsInteger() {
+            return getAsInteger(FessConfig.THEME_ASSETS_CACHE_MAX_AGE);
+        }
+
+        public String getThemeAssetsPrecompressed() {
+            return get(FessConfig.THEME_ASSETS_PRECOMPRESSED);
+        }
+
+        public boolean isThemeAssetsPrecompressed() {
+            return is(FessConfig.THEME_ASSETS_PRECOMPRESSED);
+        }
+
+        public String getThemeApiCsrfRequired() {
+            return get(FessConfig.THEME_API_CSRF_REQUIRED);
+        }
+
+        public boolean isThemeApiCsrfRequired() {
+            return is(FessConfig.THEME_API_CSRF_REQUIRED);
+        }
+
+        public String getThemeApiLoginRateLimitPerIpPerMinute() {
+            return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE);
+        }
+
+        public Integer getThemeApiLoginRateLimitPerIpPerMinuteAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE);
+        }
+
+        public String getThemeApiLoginRateLimitPerUserPerMinute() {
+            return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE);
+        }
+
+        public Integer getThemeApiLoginRateLimitPerUserPerMinuteAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE);
+        }
+
+        public String getThemeApiLoginLockoutSeconds() {
+            return get(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS);
+        }
+
+        public Integer getThemeApiLoginLockoutSecondsAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS);
+        }
+
+        public String getThemeApiLoginRateLimitMaxEntries() {
+            return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES);
+        }
+
+        public Integer getThemeApiLoginRateLimitMaxEntriesAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES);
+        }
+
+        public String getApiV2ChatStreamKeepaliveIntervalMs() {
+            return get(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
+        }
+
+        public Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger() {
+            return getAsInteger(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -13988,6 +14421,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOG_NOTIFICATION_SEARCH_SIZE, "1000");
             defaultMap.put(FessConfig.LOG_NOTIFICATION_BUFFER_SIZE, "1000");
             defaultMap.put(FessConfig.LOG_NOTIFICATION_INTERVAL, "300");
+            defaultMap.put(FessConfig.THEME_DIRECTORY_PATH, "themes");
+            defaultMap.put(FessConfig.THEME_UPLOAD_MAX_SIZE, "52428800");
+            defaultMap.put(FessConfig.THEME_UPLOAD_MAX_EXTRACTED_SIZE, "209715200");
+            defaultMap.put(FessConfig.THEME_UPLOAD_MAX_ENTRIES, "1000");
+            defaultMap.put(FessConfig.THEME_UPLOAD_MAX_COMPRESSION_RATIO, "100");
+            defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX, "50");
+            defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES, "65536");
+            defaultMap.put(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS, "7");
+            defaultMap.put(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS, "zip");
+            defaultMap.put(FessConfig.THEME_ASSETS_CACHE_MAX_AGE, "86400");
+            defaultMap.put(FessConfig.THEME_ASSETS_PRECOMPRESSED, "true");
+            defaultMap.put(FessConfig.THEME_API_CSRF_REQUIRED, "true");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES, "100000");
+            defaultMap.put(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS, "15000");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

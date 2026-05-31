@@ -275,7 +275,13 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
-                    fessConfig.getIndexFieldUrl()));
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldThumbnail(), //
+                    fessConfig.getIndexFieldHasCache(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getQueryCollapseInnerHitsName() + "_count", //
+                    fessConfig.getQueryCollapseInnerHitsName() + "_hash"));
         }
         if (notAnalyzedFieldSet == null) {
             setNotAnalyzedFields(fessConfig.getQueryAdditionalNotAnalyzedFields(//

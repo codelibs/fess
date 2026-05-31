@@ -1,0 +1,5 @@
+apiVersion: fess.codelibs.org/v1
+kind: StaticTheme
+name: fixture-minimal
+displayName: "Fixture Minimal"
+version: "1.0.0"

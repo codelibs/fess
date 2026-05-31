@@ -17,8 +17,6 @@ package org.codelibs.fess.helper;
 
 import java.util.Arrays;
 
-import jakarta.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.commonmark.Extension;
@@ -27,6 +25,8 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Renders markdown to sanitized HTML for safe display in the chat interface.

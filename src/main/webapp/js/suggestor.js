@@ -200,7 +200,7 @@
             cache: false,
             data: {
               q: $textArea.val(),
-              field: settingAjaxInfo.fn,
+              fn: settingAjaxInfo.fn,
               num: settingAjaxInfo.num * 2,
               lang: settingAjaxInfo.lang
             },
@@ -238,12 +238,16 @@
          * Create and display the autocomplete suggestion list
          */
         createAutoCompleteList: function (obj) {
-          if (typeof obj.record_count === "undefined") {
+          // Accept both the v2 envelope ({ response: { record_count, suggest_words } })
+          // and the legacy v1 flat shape ({ record_count, data }) so the plugin keeps
+          // working against either endpoint family during migration.
+          var body = obj && obj.response ? obj.response : obj;
+          if (!body || typeof body.record_count === "undefined") {
             this.hideSuggestionBox();
             return;
           }
 
-          var hits = obj.data,
+          var hits = typeof body.suggest_words !== "undefined" ? body.suggest_words : body.data,
             suggestor = this,
             reslist,
             $olEle,

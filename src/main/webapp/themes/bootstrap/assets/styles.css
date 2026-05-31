@@ -1,0 +1,283 @@
+/* Bootstrap static theme — overrides on top of /css/bootstrap.min.css */
+:root { --fess-card-radius: 0.5rem; }
+/* Offset for fixed-top navbar (GAP A). JS (app.js) refines this to the live header
+   height + 1em gap (JSP parity); these are fallbacks (≈3.5rem navbar + 1rem gap). */
+body { padding-top: 4.5rem; }
+@media (max-width: 767.98px) { body { padding-top: 6.5rem; } }
+@media print { body { padding-top: 0 !important; } }
+.result-card { border: 1px solid var(--bs-border-color); border-radius: var(--fess-card-radius); padding: 1rem; margin-bottom: 1rem; background: var(--bs-body-bg); transition: box-shadow .15s ease-in-out; display: flex; gap: 1rem; align-items: flex-start; }
+.result-card:hover { box-shadow: 0 .25rem .75rem rgba(0,0,0,.08); }
+.result-card-body { flex: 1; min-width: 0; }
+.result-card h2 { font-size: 1.1rem; margin-bottom: .25rem; }
+.result-card .result-url { color: var(--bs-success); font-size: .85rem; word-break: break-all; }
+.result-card .result-info-meta { font-size: .8rem; color: var(--bs-tertiary-color); margin-top: .15rem; }
+.result-card .result-snippet { color: var(--bs-secondary-color); font-size: .95rem; margin-top: .25rem; }
+.result-card .result-meta { font-size: .8rem; color: var(--bs-tertiary-color); margin-top: .5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+.result-card .favorite-btn[aria-pressed="true"] { color: var(--bs-warning); }
+.result-thumbnail { width: 96px; height: 96px; object-fit: contain; border: 1px solid var(--bs-border-color, #dee2e6); border-radius: 4px; background: #f8f9fa; flex-shrink: 0; }
+@media (max-width: 576px) {
+  .result-thumbnail { width: 64px; height: 64px; }
+}
+.facet-group { margin-bottom: 1rem; }
+.facet-group h3 { font-size: .9rem; font-weight: 600; margin-bottom: .25rem; }
+#suggest-dropdown .list-group-item { cursor: pointer; }
+#suggest-dropdown .list-group-item.active, #suggest-dropdown .list-group-item:hover { background: var(--bs-tertiary-bg); }
+/* Suggest dropdowns (header #suggest-dropdown + home/advance .suggest-dropdown):
+   the home view is text-center, so force left-aligned suggestions; give the <ul>
+   an opaque background and a z-index above the search buttons so they don't show
+   through (the dropdown is position-absolute and otherwise paints under later siblings). */
+#suggest-dropdown, .suggest-dropdown { text-align: left; background: var(--bs-body-bg); z-index: 1056; }
+.suggest-dropdown .list-group-item { cursor: pointer; text-align: left; }
+.suggest-dropdown .list-group-item.active, .suggest-dropdown .list-group-item:hover { background: var(--bs-tertiary-bg); }
+/* The suggest dropdown <ul> is the last child of the header input-group, so Bootstrap
+   strips #searchOptionsButton's rounded right corners (it's no longer the last item).
+   Restore them so the options (gear) button caps the search box. */
+#searchOptionsButton { border-top-right-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius); }
+#chat-column .chat-log { height: 60vh; overflow-y: auto; }
+#chat-column .chat-msg { padding: .5rem .75rem; border-radius: .5rem; margin-bottom: .5rem; max-width: 90%; }
+#chat-column .chat-msg.user { background: var(--bs-primary-bg-subtle); margin-left: auto; }
+#chat-column .chat-msg.assistant { background: var(--bs-tertiary-bg); }
+#page-root *:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+/* showView() programmatically focuses each view's first heading/root (given tabindex=-1)
+   so screen readers announce the new view. Those targets are not interactive, so suppress
+   the visible focus ring — otherwise a blue outline flashes (e.g. around the home logo) on load. */
+#page-root [tabindex="-1"]:focus, #page-root [tabindex="-1"]:focus-visible { outline: none; }
+/* Search options drawer (index.jsp / header.jsp #searchOptions + css/style.css parity):
+   a fixed right-side slide-in panel (dark, white text) toggled by the options button,
+   instead of an inline drop-down. Bootstrap's .collapse still controls show/hide; the
+   inner .container slides in via the right offset transition. */
+#searchOptions { position: fixed; z-index: 10; }
+#searchOptions .container {
+  width: 500px; max-width: 100%; height: 100%; overflow: auto;
+  position: fixed; top: 0; bottom: 0; right: -500px;
+  padding-top: 72px; padding-bottom: 20px;
+  color: #fff; background-color: rgba(60, 60, 60, 0.93);
+  transition: all .4s ease 0s;
+}
+#searchOptions.show .container { right: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .result-card { transition: none; }
+}
+/* JSP parity (error/*.jsp wrap content in <div class="text-center">): centre the
+   error view's heading, body, and actions. error-detail keeps its left-aligned
+   key/value block readable via text-start. */
+#error-view { text-align: center; }
+#error-view .error-detail { text-align: start; display: inline-block; }
+.error-title { margin-top: 2rem; }
+.error-body { color: var(--bs-secondary-color, #6c757d); }
+.error-detail { background: #f8f9fa; padding: 0.75rem 1rem; border-left: 3px solid #adb5bd; }
+.error-actions { margin: 1.5rem 0; }
+#profile-view form { max-width: 480px; }
+/* Active filter chips */
+#active-chips { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.active-chips-label { white-space: nowrap; }
+.active-chip { display: inline-flex; align-items: center; gap: .35rem; background: var(--bs-primary-bg-subtle); color: var(--bs-body-color); font-size: .8rem; font-weight: 400; padding: .25rem .5rem; }
+.active-chip-remove { width: .65em; height: .65em; margin: 0; padding: 0; background-size: .65em; flex-shrink: 0; }
+.help-section { margin-bottom: 2rem; }
+.help-section h2 { border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; }
+.help-section code { background: #f8f9fa; padding: 0.125rem 0.25rem; border-radius: 3px; }
+/* JSP parity (advance.jsp): the form lives in a full Bootstrap .container and uses a
+   col-lg-3 label + col-lg-5 control grid — no narrow max-width cap, so label/control
+   proportions match the JSP at desktop widths. */
+.advance-form .form-label { font-weight: 500; }
+/* Related queries */
+#related-queries { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.related-queries-label { white-space: nowrap; }
+/* Related content */
+#related-content { border-left: 3px solid var(--bs-primary); padding: .5rem .75rem; background: var(--bs-tertiary-bg); border-radius: 0 var(--fess-card-radius) var(--fess-card-radius) 0; }
+/* Copy URL button */
+.copy-url-btn { color: var(--bs-tertiary-color); line-height: 1; vertical-align: middle; }
+.copy-url-btn:hover { color: var(--bs-primary); }
+/* Result site row */
+.result-site-row { display: inline-flex; align-items: center; gap: .25rem; }
+/* Favorite count */
+.favorite-count { font-size: .75rem; color: var(--bs-tertiary-color); margin-left: .2rem; vertical-align: middle; }
+/* Brand logo (D.1) */
+.brand-logo { height: 24px; }
+/* Facet item keyboard accessibility (C.13) */
+.facet-item { display: flex; justify-content: space-between; padding: .15rem 0; font-size: .875rem; text-decoration: none; color: var(--bs-body-color); background: none; border: none; }
+.facet-item:hover { background: var(--bs-tertiary-bg); }
+.facet-item.active { font-weight: 600; }
+.facet-item:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+/* Selected facet (list-group-item.active): the JSP doesn't paint applied facets with
+   Bootstrap's heavy blue active style. Use a subtle bold + light background instead so
+   the label/link text stays readable (applied filters are also shown as active-chips
+   and a reset link). */
+#facet-body .list-group-item.active,
+#facet-body-mobile .list-group-item.active {
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color);
+  color: inherit;
+  font-weight: 600;
+}
+/* Result site path breadcrumb (C.5) */
+cite.result-site-path { color: var(--bs-success); font-size: .85rem; font-style: normal; word-break: break-all; display: block; }
+/* Result more link (C.4) */
+.result-more { font-size: .8rem; color: var(--bs-tertiary-color); }
+/* Current filters badge row (C.3) */
+#current-filters { margin: 0; padding: 0; }
+
+/* ---- Chat standalone view ---- */
+/* Messages area */
+.chat-messages { min-height: 300px; max-height: 65vh; overflow-y: auto; padding: 1rem; }
+/* Bubble wrappers */
+.chat-msg-wrap { display: flex; flex-direction: column; margin-bottom: 0.75rem; }
+.chat-msg-wrap.user { align-items: flex-end; }
+.chat-msg-wrap.assistant { align-items: flex-start; }
+/* Bubbles */
+.chat-msg { padding: 0.5rem 0.75rem; border-radius: 0.75rem; max-width: 85%; word-break: break-word; }
+.chat-msg.user { background: var(--bs-primary-bg-subtle); }
+.chat-msg.assistant { background: var(--bs-tertiary-bg); }
+/* Inline chat sidebar bubble (legacy) */
+#chat-column .chat-log { height: 60vh; overflow-y: auto; }
+#chat-column .chat-msg { padding: .5rem .75rem; border-radius: .5rem; margin-bottom: .5rem; max-width: 90%; }
+#chat-column .chat-msg.user { background: var(--bs-primary-bg-subtle); margin-left: auto; }
+#chat-column .chat-msg.assistant { background: var(--bs-tertiary-bg); }
+/* Bubble header (copy button row) */
+.chat-bubble-header { opacity: 0; transition: opacity 0.15s; min-height: 1.5rem; }
+.chat-msg-wrap:hover .chat-bubble-header,
+.chat-msg-wrap:focus-within .chat-bubble-header { opacity: 1; }
+.chat-copy-btn { font-size: 0.75rem; color: var(--bs-tertiary-color); line-height: 1; }
+.chat-copy-btn:hover { color: var(--bs-primary); }
+/* Sources details */
+.chat-sources { font-size: 0.85rem; margin-top: 0.5rem; max-width: 85%; }
+.chat-sources summary { cursor: pointer; color: var(--bs-secondary-color); }
+.chat-sources ul { padding-left: 0; margin: 0.25rem 0 0; list-style: none; }
+/* Source card: numbered link with icon + type label */
+.source-card { color: inherit; padding: 0.25rem 0.35rem; border-radius: 0.35rem; }
+.source-card:hover { background: var(--bs-tertiary-bg); }
+.source-index { min-width: 1.5rem; text-align: center; font-size: 0.7rem; }
+.source-info { min-width: 0; }
+.source-title { word-break: break-word; font-size: 0.85rem; color: var(--bs-link-color); }
+.source-card:hover .source-title { text-decoration: underline; }
+.source-meta { margin-top: 0.1rem; }
+.source-type { font-size: 0.75rem; }
+/* Phase strip */
+.chat-phase-strip { font-size: 0.8rem; }
+/* Bootstrap .badge is 0.75em, which left the phase pills at ~9.6px against the
+   0.8rem strip — too small. Pin an absolute size so the step labels stay legible. */
+.chat-step { transition: background-color 0.2s; white-space: nowrap; font-size: .8rem; }
+/* Status lozenge */
+.chat-status-lozenge { font-size: 0.8rem; }
+/* Error banner */
+.chat-error-banner { font-size: 0.9rem; }
+/* Progress wrap */
+.chat-progress-wrap { border-top: 1px solid var(--bs-border-color); background: var(--bs-tertiary-bg); }
+/* Welcome state */
+.chat-welcome { color: var(--bs-tertiary-color); background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%); }
+/* chat.css parity (.empty-state-icon / .empty-state-title): blue-gradient circular
+   icon badge + emphasised title for the chat empty/welcome state. */
+.chat-welcome-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.25);
+}
+.chat-welcome-icon i { font-size: 2rem; color: #fff; }
+.chat-welcome-title { font-size: 1.25rem; font-weight: 600; color: #172b4d; margin-bottom: 0.5rem; }
+/* Input area */
+.input-wrapper .input-footer { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--bs-secondary-color); }
+.char-counter { white-space: nowrap; }
+/* D5b: Char-counter warning (80% of 4000 = 3200) and danger (95% = 3800) thresholds */
+.char-counter.warning { color: var(--bs-warning); }
+.char-counter.danger { color: var(--bs-danger); }
+/* Filter panel */
+.chat-filter-panel .card-body { max-height: 260px; overflow-y: auto; }
+/* Status line below bubble */
+.chat-status-line { font-size: 0.8rem; margin-top: 0.25rem; }
+/* Hit count badge inside phase strip */
+.chat-hit-count { font-size: 0.75em; }
+@media (prefers-reduced-motion: reduce) {
+  .chat-step { transition: none; }
+  .chat-bubble-header { transition: none; }
+}
+
+/* ---- I.1 inline-style replacements ---- */
+/* Home search input max-width (replaces style="max-width: 600px;" on #home-search-input) */
+.home-search-input { max-width: 600px; }
+/* Back-to-top button fixed positioning (replaces inline bottom/right/z-index) */
+.back-to-top { bottom: 1.5rem; right: 1.5rem; z-index: 1050; }
+/* back-to-top hidden state (replaces inline display:none; toggled by app.js) */
+.back-to-top.is-hidden { display: none; }
+/* Cursor pointer for label dropdown items and label selects (replaces .style.cursor) */
+.cursor-pointer { cursor: pointer; }
+/* Clipboard copy fallback textarea (off-screen, invisible; replaces .style.position/.opacity) */
+.chat-clipboard-fallback { position: fixed; opacity: 0; }
+
+/* ---- Cache viewer ---- */
+.cache-frame {
+  width: 100%;
+  height: 70vh;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 4px;
+  background: var(--bs-body-bg);
+}
+.cache-meta {
+  font-size: .9rem;
+  color: var(--bs-secondary-color);
+}
+.cache-meta dt { font-weight: 600; }
+
+/* ---- Home / top page (index.jsp + css/style.css parity) ---- */
+/* JSP style.css hides ALL <legend> globally; both the #searchOptions drawer and
+   the home search fieldset rely on this — visible text comes from their <label>s.
+   Without this the home fieldset's "Search" legend renders under the logo. */
+legend { display: none; }
+/* JSP .searchFormBox pushes the logo+form block down and centres it vertically. */
+#home-view .searchFormBox { margin-top: 8em; margin-bottom: 4em; }
+/* JSP .mainLogo spacing. */
+#home-view .mainLogo { margin-bottom: 1em; }
+/* JSP .notification sizing. */
+#home-view .notification { font-size: 1.2em; margin: 0.2em; }
+/* JSP .searchButtonBox spacing above the Search/Options button group. */
+#home-view .searchButtonBox { margin-top: 1em; }
+/* Popular-words line sits directly under the query box; add a little top spacing. */
+#home-popular-words { margin-top: 0.75rem; }
+/* JSP .form-control { border-radius: 0 } — the home search input has square corners. */
+#home-view .form-control { border-radius: 0; }
+/* JSP mobile rules: cap the logo width and reduce the top margin under 576px. */
+@media (max-width: 575.98px) {
+  #home-view .mainLogo img { width: 200px; }
+  #home-view .searchFormBox { margin-top: 4em; }
+}
+/* ---- Sticky footer (index.jsp + css/style.css parity) ----
+   JSP: html{min-height:100%;position:relative} + body bottom margin + an absolutely
+   positioned footer pinned to the bottom of the document with a top border, so the
+   footer never floats mid-page on short views like the home page. The theme keeps
+   its existing body{padding-top:4rem} navbar offset (set earlier in this file). */
+html { min-height: 100%; position: relative; }
+body { padding-bottom: 4em; }
+footer[role="contentinfo"] {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4em;
+  padding-top: 1em;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+/* ---- Search results list (searchResults.jsp + css/style.css #result parity) ---- */
+/* JSP global h3 rule: font-size 18px / line-height 32px applies to the result title. */
+#result .title { font-size: 1.125rem; line-height: 2rem; }
+#result ol li { margin: 1em 0; }
+#result ol li:first-child { margin-top: 0; }
+#result .title a:visited { color: #014c8c; }
+/* Thumbnail + description sit on one flex row (thumbnail left, text right). */
+#result .body { display: flex; align-items: flex-start; }
+/* Site path shown as non-italic green, like JSP. */
+#result .site cite { color: #093; font-style: normal; }
+/* "More" link is desktop-hidden (shown only on phones, see media query below). */
+#result .more { display: none; }
+/* Info line (date / size / cache / similar / favorite) is small. */
+#result .info { font-size: 80%; }
+#result .url-copy { color: #007bff; }
+#result .url-copied { color: #2c974b; }
+#result .favorited { display: none; }
+#result .favorited i { color: #fab005; }
+#result .thumbnail { width: 100px; min-height: 30px; background-position: 50% 50%; background-repeat: no-repeat; }
+/* Phones: hide the dense info line, show the "more" link, clamp description to 1 line. */
+@media (max-width: 575.98px) {
+  #result .info { display: none; }
+  #result .more { display: block; }
+  #result .description { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

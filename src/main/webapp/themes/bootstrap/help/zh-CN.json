@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "基本搜索",
+      "html": "<p>要进行搜索，请在搜索框中输入查询内容，然后按 Enter 键（或点击“搜索”按钮）。</p><p>多个词默认以 AND 组合。例如，<code>open source</code> 会查找同时包含 “open” 和 “source” 的文档。</p>"
+    },
+    {
+      "id": "operators",
+      "title": "搜索运算符",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">运算符</th><th scope=\"col\">说明</th><th scope=\"col\">示例</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>两个词都必须出现</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>任意一个词出现即可</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>排除该词</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>精确短语匹配</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>限定到某个站点</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>限定到某种文件类型</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "通配符",
+      "html": "<p>可以使用 <code>*</code> 匹配任意字符序列，使用 <code>?</code> 匹配单个字符。</p><p>示例：<code>fess*</code> 可匹配 “fess”、“fessbook”、“fessful”。<code>te?t</code> 可匹配 “test” 或 “text”。</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "范围查询",
+      "html": "<p>使用方括号搜索某个值的范围：<code>content_length:[1024 TO 10240]</code> 可查找大小在 1KB 到 10KB 之间的文档。</p> 方括号 <code>[ ]</code> 包含边界值；花括号 <code>{ }</code> 不包含边界值，例如 <code>content_length:{1024 TO 10240}</code> 匹配严格大于 1KB 且严格小于 10KB 的大小。"
+    },
+    {
+      "id": "facets",
+      "title": "分面过滤",
+      "html": "<p>使用侧边栏中的分面，可按标签、时间段、文件大小或文件类型缩小搜索范围。点击分面项目以应用筛选，点击结果顶部的标签片段以移除筛选。</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "键盘快捷键",
+      "html": "<ul><li><code>/</code> &mdash; 聚焦搜索框</li><li><code>Esc</code> &mdash; 关闭建议或对话框</li><li><code>Enter</code> &mdash; 执行搜索或选择建议</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "字段搜索",
+      "html": "<p>可以通过输入字段名称后跟冒号 <code>:</code> 再加上要查找的词来搜索任意字段。例如，要查找标题中包含 “Fess” 的文档：</p><pre>title:Fess</pre><p>可用字段包括 <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code> 和 <code>mimetype</code>。这些字段可自定义配置。</p>"
+    },
+    {
+      "id": "sort",
+      "title": "排序",
+      "html": "<p><code>sort:</code> 运算符按指定字段对结果排序。格式为 <code>sort:&lt;field&gt;.&lt;order&gt;</code>，其中 <code>&lt;order&gt;</code> 为 <code>asc</code>（升序）或 <code>desc</code>（降序）。例如，搜索 “Fess” 并按内容长度降序排列：</p><pre>Fess sort:content_length.desc</pre><p>可用的排序字段包括 <code>created</code>、<code>content_length</code> 和 <code>last_modified</code>。这些字段可自定义配置。</p>"
+    },
+    {
+      "id": "boost",
+      "title": "权重提升（Boost）",
+      "html": "<p>要提升某个词的权重，可在搜索词末尾使用 <code>^</code> 符号后跟一个提升因子（数字）。因子越大，该词的相关性得分越高。</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "模糊搜索",
+      "html": "<p>要执行模糊搜索，可在单个词末尾使用 <code>~</code> 符号。<code>~</code> 后面的可选数字（0 到 1）用于控制相似度阈值。默认值为 <code>0.5</code>。</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

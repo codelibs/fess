@@ -21,10 +21,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
-import org.codelibs.fess.app.web.error.ErrorAction;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 
 /**
@@ -77,13 +77,13 @@ public class CacheAction extends FessSearchAction {
         }
         if (doc == null) {
             saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
-            return redirect(ErrorAction.class);
+            return redirect2ErrorWithMessageKey("errors.docid_not_found");
         }
 
         final String content = viewHelper.createCacheContent(doc, form.hq);
         if (content == null) {
             saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
-            return redirect(ErrorAction.class);
+            return redirect2ErrorWithMessageKey("errors.docid_not_found");
         }
 
         final StreamResponse response =
@@ -91,6 +91,17 @@ public class CacheAction extends FessSearchAction {
                         .data(content.getBytes(Constants.CHARSET_UTF_8));
         response.headerContentDispositionInline(); // TODO will be fixed in lastaflute
         return response;
+    }
+
+    /**
+     * Redirects to the SPA notFound error route carrying the given message key as a query parameter
+     * so {@code StaticThemeResponder.injectErrorDetailMeta} can surface the specific error message.
+     *
+     * @param messageKey the i18n key to forward (e.g. {@code "errors.docid_not_found"})
+     * @return redirect response to {@code /error/notfound/?message_key=<messageKey>}
+     */
+    private HtmlResponse redirect2ErrorWithMessageKey(final String messageKey) {
+        return newHtmlResponseAsRedirect("/error/notfound/?message_key=" + messageKey);
     }
 
 }

@@ -9,6 +9,10 @@
 	<component name="chatClient" class="org.codelibs.fess.chat.ChatClient">
 	</component>
 
+	<!-- Shared helper for v2 chat API handlers -->
+	<component name="chatApiHelper" class="org.codelibs.fess.helper.ChatApiHelper">
+	</component>
+
 	<!-- Markdown renderer -->
 	<component name="markdownRenderer" class="org.codelibs.fess.helper.MarkdownRenderer">
 		<postConstruct name="init"/>

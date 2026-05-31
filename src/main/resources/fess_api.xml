@@ -7,13 +7,27 @@
 	<component name="webApiManagerFactory" class="org.codelibs.fess.api.WebApiManagerFactory">
 	</component>
 
-	<!-- ChatApiManager must be registered before SearchApiManager -->
-	<!-- because SearchApiManager matches /api/v1/* which would intercept /api/v1/chat/* -->
-	<component name="chatApiManager" class="org.codelibs.fess.api.chat.ChatApiManager">
-	</component>
+	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager"/>
 
-	<component name="searchApiManager" class="org.codelibs.fess.api.json.SearchApiManager">
-	</component>
-	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager">
+	<!-- v2 request handlers, injected into searchApiV2Manager by field name. -->
+	<component name="searchHandler" class="org.codelibs.fess.api.v2.handlers.SearchHandler"/>
+	<component name="scrollSearchHandler" class="org.codelibs.fess.api.v2.handlers.ScrollSearchHandler"/>
+	<component name="favoriteGetHandler" class="org.codelibs.fess.api.v2.handlers.FavoriteGetHandler"/>
+	<component name="favoritePostHandler" class="org.codelibs.fess.api.v2.handlers.FavoritePostHandler"/>
+	<component name="favoritesListHandler" class="org.codelibs.fess.api.v2.handlers.FavoritesListHandler"/>
+	<component name="meHandler" class="org.codelibs.fess.api.v2.handlers.MeHandler"/>
+	<component name="logoutHandler" class="org.codelibs.fess.api.v2.handlers.LogoutHandler"/>
+	<component name="passwordChangeHandler" class="org.codelibs.fess.api.v2.handlers.PasswordChangeHandler"/>
+	<component name="uiConfigHandler" class="org.codelibs.fess.api.v2.handlers.UiConfigHandler"/>
+	<component name="clickHandler" class="org.codelibs.fess.api.v2.handlers.ClickHandler"/>
+	<component name="chatHandler" class="org.codelibs.fess.api.v2.handlers.ChatHandler"/>
+	<component name="chatStreamHandler" class="org.codelibs.fess.api.v2.handlers.ChatStreamHandler"/>
+	<component name="chatSessionClearHandler" class="org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler"/>
+	<component name="cacheHandler" class="org.codelibs.fess.api.v2.handlers.CacheHandler"/>
+	<component name="loginHandler" class="org.codelibs.fess.api.v2.handlers.LoginHandler"/>
+	<component name="relatedQueriesHandler" class="org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler"/>
+	<component name="relatedContentHandler" class="org.codelibs.fess.api.v2.handlers.RelatedContentHandler"/>
+
+	<component name="searchApiV2Manager" class="org.codelibs.fess.api.v2.SearchApiV2Manager">
 	</component>
 </components>

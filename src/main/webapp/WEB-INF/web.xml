@@ -62,6 +62,11 @@
   </filter>
 
   <filter>
+    <filter-name>staticThemeFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.StaticThemeFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>lastaShowbaseFilter</filter-name>
     <filter-class>org.lastaflute.web.servlet.filter.LastaShowbaseFilter</filter-class>
     <init-param>
@@ -134,6 +139,25 @@
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
 
+  <!--
+    SECURITY (C-1 / PR #3136): staticThemeFilter MUST come AFTER httpHeaderSecurity,
+    rateLimitFilter, loadControlFilter, and corsFilter on the REQUEST dispatch.
+
+    staticThemeFilter intercepts GET requests for an active static theme and serves the
+    theme's asset/index response directly (via StaticThemeResponder), writing the response and
+    returning WITHOUT calling chain.doFilter(). Filters mapped later in the chain
+    therefore do NOT run on static-theme responses, so any security filter required to
+    apply to those responses must be ordered before this mapping. This preserves the
+    behavior of the security filters on the REQUEST chain (rate-limiting per-request,
+    HSTS/clickjacking headers, CORS, load shedding). Do not move staticThemeFilter
+    ahead of these filters.
+  -->
+  <filter-mapping>
+    <filter-name>staticThemeFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
   <filter-mapping>
     <filter-name>webApiFilter</filter-name>
     <url-pattern>/*</url-pattern>
@@ -170,11 +194,28 @@
   <!-- ================================================================================= -->
   <!--                                                                    Session Config -->
   <!--                                                                    ============== -->
-<!--
-    <session-config>
-        <session-timeout>1</session-timeout>
-    </session-config>
+  <!--
+    Session cookie configuration.
+
+    HttpOnly blocks JavaScript access to JSESSIONID, mitigating XSS-based session theft.
+    It is safe to enable on both HTTP and HTTPS deployments.
+
+    The Secure attribute is intentionally NOT set here so the default `bin/fess` experience
+    on http://localhost:8080 works out of the box. In production, terminate TLS at a
+    reverse proxy (nginx, Caddy, ALB, etc.) and have the proxy add the Secure attribute,
+    or set it at the Tomcat connector layer.
+
+    SameSite policy is configured via the `tomcat.sameSiteCookies` key in tomcat_config.properties
+    (default: lax; valid values: lax, strict, none). FessBoot applies it to all
+    CookieProcessor instances at startup. Strict will break OAuth/OIDC redirect flows.
+    See https://tomcat.apache.org/tomcat-10.1-doc/config/cookie-processor.html
   -->
+  <session-config>
+    <cookie-config>
+      <http-only>true</http-only>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
 
   <!-- ================================================================================= -->
   <!--                                                                      Welcome File -->

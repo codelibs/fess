@@ -5,7 +5,7 @@ $(function() {
 
   var SUGGESTOR_CONFIG = {
     ajaxinfo: {
-      url: contextPath + "/api/v1/suggest-words",
+      url: contextPath + "/api/v2/suggest-words",
       fn: ["_default", "content", "title"],
       num: 10,
       lang: $("#langSearchOption").val()

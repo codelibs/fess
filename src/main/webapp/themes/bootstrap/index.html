@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src blob:; child-src blob:; base-uri 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fess</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/themes/bootstrap/assets/styles.css">
+  <link rel="icon" href="/favicon.ico">
+
+</head>
+<body>
+  <a href="#page-root" class="visually-hidden-focusable position-absolute top-0 start-0 m-2" data-i18n="aria.skip_to_main">Skip to main content</a>
+  <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. -->
+  <h1 class="visually-hidden" data-i18n="page.heading">Fess Search</h1>
+
+  <!-- ===================================================================
+       SHARED HEADER — tag-parity with WEB-INF/view/header.jsp.
+       header > nav.navbar… > div#content.container with the brand logo,
+       the search input-group (#query / #searchButton / #searchOptionsButton),
+       and the right-side ul.nav.navbar-nav.d-none.d-md-flex of li.nav-item
+       entries (warnings + auth + chat + help).  The search box is shown on
+       EVERY view (only hidden on /chat — toggled by app.js setSearchFormVisible).
+       =================================================================== -->
+  <header>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none" role="banner" data-bs-theme="dark">
+      <div id="content" class="container">
+        <a class="navbar-brand d-inline-flex" href="/" id="brand-link" data-spa><img src="/themes/bootstrap/assets/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="align-items-center"></a>
+        <div class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0" role="search" id="search-form-wrap">
+          <form class="input-group" id="search-form" role="search" aria-label="Site search">
+            <input
+                id="query"
+                class="form-control"
+                data-bs-theme="light"
+                type="search"
+                name="q"
+                maxlength="1000"
+                autocomplete="off"
+                aria-label="Search query"
+                data-i18n-placeholder="search.placeholder"
+                role="combobox"
+                aria-expanded="false"
+                aria-controls="suggest-dropdown"
+                aria-autocomplete="list"
+                aria-haspopup="listbox">
+            <button type="submit" name="search" id="searchButton" class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i></button>
+            <button type="button" class="btn btn-light" id="searchOptionsButton" data-bs-toggle="collapse" data-bs-target="#searchOptions" aria-expanded="false" aria-controls="searchOptions"><i class="fa fa-cog" aria-hidden="true"></i> <span class="visually-hidden" data-i18n="search.options">Options</span></button>
+            <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions" data-bs-theme="light"></ul>
+          </form>
+        </div>
+        <ul class="nav navbar-nav d-none d-md-flex ms-auto" id="header-nav">
+          <!-- Warning indicators (EOL / dev-mode) rendered by app.js as li.nav-item -->
+          <!-- Auth entry (login nav-link OR user dropdown) rendered by auth.js -->
+          <li class="nav-item" id="auth-controls" data-i18n-aria-label="aria.auth_controls"></li>
+          <!-- Chat (AI mode) — shown by app.js when rag_chat_enabled -->
+          <li class="nav-item d-none" id="chat-nav-item"><a class="nav-link" href="/chat" id="chat-nav-link" data-spa role="button"><i class="fa fa-fw fa-robot" aria-hidden="true"></i> <span data-i18n="nav.chat_ai_mode">AI Search</span></a></li>
+          <li class="nav-item"><a class="nav-link help-link" href="/help" id="help-link" data-spa role="help"><i class="fa fa-fw fa-question-circle" aria-hidden="true"></i> <span data-i18n="nav.help">Help</span></a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===================================================================
+       SEARCH OPTIONS DRAWER — tag-parity with header.jsp #searchOptions +
+       searchOptions.jsp.  A fixed right-side slide-in panel toggled by the
+       header #searchOptionsButton (and the home #searchOptionsButton).
+       select#numSearchOption / #sortSearchOption / #langSearchOption are
+       populated by search.js renderSearchOptions().
+       =================================================================== -->
+  <div id="searchOptions" class="collapse">
+    <div class="container">
+      <h3 id="searchOptionsLabel" data-i18n="search.options_title">Search Options</h3>
+      <div>
+        <fieldset class="mb-3">
+          <legend data-i18n="search.num">Display Count</legend>
+          <label for="numSearchOption" data-i18n="search.num">Display Count</label>
+          <select name="num" id="numSearchOption" class="form-control" aria-label="Results per page"></select>
+        </fieldset>
+        <fieldset class="mb-3">
+          <legend data-i18n="search.sort">Sort</legend>
+          <label for="sortSearchOption" data-i18n="search.sort">Sort</label>
+          <select name="sort" id="sortSearchOption" class="form-control" aria-label="Sort order"></select>
+        </fieldset>
+        <fieldset class="mb-3">
+          <legend data-i18n="search.lang">Preferred Language</legend>
+          <label for="langSearchOption" data-i18n="search.lang">Preferred Language</label>
+          <select name="lang" multiple="multiple" id="langSearchOption" class="form-control" aria-label="Language filter"></select>
+        </fieldset>
+        <fieldset class="mb-3" id="labelSearchOptionFieldset">
+          <legend data-i18n="search.labels">Label</legend>
+          <label for="labelSearchOption" data-i18n="search.labels">Label</label>
+          <select name="fields.label" multiple="multiple" id="labelSearchOption" class="form-control" aria-label="Label filter"></select>
+        </fieldset>
+        <!-- Geo-location filter (theme extra, migrated from the former results-view
+             #search-options panel). Wired by search.js via #geo-lat / #geo-lon /
+             #geo-distance; applied/cleared by the drawer's main Search / Clear buttons. -->
+        <fieldset class="mb-3" id="geoSearchOptionFieldset">
+          <legend data-i18n="search.geo">Location</legend>
+          <label for="geo-lat" data-i18n="search.geo_lat">Latitude</label>
+          <input type="text" class="form-control mb-2" id="geo-lat" placeholder="e.g. 35.6895">
+          <label for="geo-lon" data-i18n="search.geo_lon">Longitude</label>
+          <input type="text" class="form-control mb-2" id="geo-lon" placeholder="e.g. 139.6917">
+          <label for="geo-distance" data-i18n="search.geo_distance">Distance (e.g. 1km)</label>
+          <input type="text" class="form-control mb-2" id="geo-distance" placeholder="e.g. 1km">
+        </fieldset>
+      </div>
+      <div>
+        <button type="button" class="btn btn-light" id="searchOptionsClearButton" data-i18n="facet.clear">Clear</button>
+        <button type="submit" class="btn btn-primary" form="search-form">
+          <i class="fa fa-search" aria-hidden="true"></i> <span data-i18n="nav.search">Search</span>
+        </button>
+        <a href="/search/advance" data-spa id="searchOptionsAdvanceLink" class="btn btn-secondary">
+          <i class="fa fa-cog" aria-hidden="true"></i> <span data-i18n="advance.link">Advanced Search</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       HOME / TOP VIEW — tag-parity with WEB-INF/view/index.jsp <main>.
+       main.container > div.row > div.col.text-center.searchFormBox with the
+       big logo (h1.mainLogo), .notification, and a fieldset holding the
+       single-line query box (#contentQuery) + searchButtonBox button group.
+       =================================================================== -->
+  <main id="page-root" role="main">
+    <section id="home-view" hidden>
+      <form id="home-search-form" class="container" role="search" aria-label="Home search">
+        <div class="row">
+          <div class="col text-center searchFormBox">
+            <h1 class="mainLogo">
+              <img src="/themes/bootstrap/assets/logo.png" alt="" data-i18n-alt="labels.index_title" class="home-logo">
+            </h1>
+            <!-- Notification banner (parity index.jsp .notification) — rendered by
+                 app.js renderNotifications() from config.notifications.search_top. -->
+            <div class="notification" id="home-notification" role="status" aria-live="polite"></div>
+            <!-- Flash / message region (parity index.jsp la:info / la:errors). -->
+            <div id="home-flash" class="d-none" role="alert" aria-live="assertive" aria-atomic="true"></div>
+            <fieldset>
+              <!-- Legend hidden via CSS (legend{display:none}); kept for semantics. -->
+              <legend data-i18n="nav.search">Search</legend>
+              <div class="clearfix">
+                <div class="mx-auto col-10 col-sm-8 col-md-8 col-lg-6 position-relative">
+                  <input id="contentQuery" type="search" class="query form-control"
+                         name="q" maxlength="1000" autocomplete="off"
+                         data-i18n-placeholder="search.placeholder"
+                         role="combobox" aria-expanded="false" aria-controls="home-suggest-dropdown"
+                         aria-autocomplete="list" aria-haspopup="listbox" aria-label="Search query">
+                  <ul class="list-group suggest-dropdown position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm"
+                      id="home-suggest-dropdown" role="listbox" aria-label="Search suggestions"></ul>
+                </div>
+              </div>
+              <!-- Popular words (parity index.jsp:140-156). -->
+              <div class="clearfix">
+                <p class="text-truncate" id="home-popular-words"></p>
+              </div>
+              <div class="clearfix searchButtonBox btn-group">
+                <button type="submit" name="search" id="home-search-submit" class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i> <span data-i18n="search.button">Search</span></button>
+                <button type="button" class="btn btn-outline-secondary" id="home-options-toggle"
+                        data-bs-toggle="collapse" data-bs-target="#searchOptions"
+                        aria-expanded="false" aria-controls="searchOptions">
+                  <i class="fa fa-cog" aria-hidden="true"></i> <span data-i18n="search.options">Options</span>
+                </button>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===================================================================
+         SEARCH RESULTS VIEW — tag-parity with searchResults.jsp.
+         main#content.container holds: ul.list-inline (options bar),
+         div#subheader.row (status), the mobile facet button + offcanvas,
+         div#result.row (ol.list-unstyled.col-md-8 + aside.col-md-4), and
+         div.row > nav#subfooter (pagination).
+         =================================================================== -->
+    <section id="results-view">
+      <div id="content-results" class="container">
+        <!-- Notification + error banners (theme runtime extras). -->
+        <div id="results-notification" class="d-none mb-2" role="status" aria-live="polite"></div>
+        <div id="search-error" class="alert alert-danger d-none mb-2" role="alert" aria-live="assertive"></div>
+
+        <!-- Options bar (parity searchResults.jsp ul.list-inline). -->
+        <ul class="list-inline" id="options-bar"></ul>
+
+        <!-- Status line (parity searchResults.jsp div#subheader.row). -->
+        <div id="subheader" class="row">
+          <div class="col">
+            <p id="results-status" aria-live="polite" aria-atomic="true"></p>
+            <div id="results-popular-words" class="d-none text-muted small" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- Mobile facet toggle (parity searchResults.jsp div.d-md-none.mb-2). -->
+        <div class="d-md-none mb-2" id="facet-toggle-wrap">
+          <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#facetOffcanvas" aria-controls="facetOffcanvas" data-i18n-aria-label="facet.filter_button">
+            <i class="fa fa-filter" aria-hidden="true"></i> <span data-i18n="facet.filter_button">Filter</span>
+          </button>
+        </div>
+        <!-- Mobile facet offcanvas (parity searchResults.jsp #facetOffcanvas).
+             facet-body-mobile is a mirror of the desktop facet body. -->
+        <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="facetOffcanvas" aria-labelledby="facetOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="facetOffcanvasLabel" data-i18n="facet.title">Filter</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body" id="facet-body-mobile"></div>
+        </div>
+
+        <!-- Optional results-view widgets (theme extras; kept hidden unless used). -->
+        <div id="similar-doc-banner" class="alert alert-info d-none align-items-center mb-2" role="status" aria-live="polite"></div>
+        <ul id="current-filters" class="list-inline mb-2 d-none"></ul>
+        <div class="d-none mb-2" id="related-queries" aria-live="polite" aria-label="Related searches"></div>
+        <div class="d-none mb-2" id="related-content" aria-live="polite"></div>
+        <div class="d-none mb-2" id="active-chips" aria-live="polite" aria-atomic="true" aria-label="Active filters"></div>
+        <div id="results-warning" class="alert alert-warning d-none mb-2" role="status" aria-live="polite"></div>
+
+        <!-- Results grid (parity searchResults.jsp div#result.row). -->
+        <div id="result" class="row">
+          <input type="hidden" id="queryId" value="">
+          <input type="hidden" id="rt" value="">
+          <ol class="list-unstyled col-md-8" id="results" role="list"></ol>
+          <aside class="col-md-4 d-none d-md-block" id="facet-body"></aside>
+        </div>
+
+        <!-- Pagination (parity searchResults.jsp div.row > nav#subfooter). -->
+        <div class="row">
+          <nav id="subfooter" class="mx-auto d-none" aria-label="Pagination">
+            <ul class="pagination justify-content-center" id="pagination"></ul>
+          </nav>
+        </div>
+
+        <!-- The inline "back to top" text link was removed per request; the floating
+             #back-to-top button covers this. -->
+
+        <!-- Empty / no-result state (parity searchNoResult.jsp). -->
+        <div class="text-center text-muted my-5 d-none" id="empty-state">
+          <p class="mb-3"><i class="fa fa-search fa-3x" aria-hidden="true"></i></p>
+          <p class="mb-2" id="empty-did-not-match"></p>
+          <p class="mb-3" data-i18n="search.did_not_match_suggestion">Try different keywords or fewer keywords.</p>
+          <div id="popular-words"></div>
+        </div>
+
+        <aside class="col-lg-3 d-none" id="chat-column" role="complementary" aria-label="Chat"></aside>
+        <!-- results-meta retained as a hidden status sink for error paths. -->
+        <div id="results-meta" class="visually-hidden" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="advance-view" hidden class="container my-4">
+      <div id="advance-notification" class="d-none" role="status" aria-live="polite"></div>
+    </section>
+    <section id="error-view" hidden class="container my-4"></section>
+    <section id="profile-view" hidden class="container my-4"></section>
+    <section id="help-view" hidden class="container my-4"></section>
+    <section id="chat-view" hidden class="container-fluid my-3"></section>
+    <section id="cache-view" hidden class="container my-3"></section>
+  </main>
+
+  <!-- JSP parity (footer.jsp): <footer><div class="container text-center"><p class="text-muted">…</p></div></footer>. -->
+  <footer class="d-print-none" role="contentinfo" data-i18n-aria-label="aria.footer">
+    <div class="container text-center">
+      <p class="text-muted mb-0" id="footer-copyright"></p>
+    </div>
+  </footer>
+
+  <!-- Back to top button -->
+  <button id="back-to-top"
+          class="btn btn-secondary position-fixed back-to-top is-hidden d-print-none"
+          aria-label="Back to top"
+          data-i18n-aria-label="footer.back_to_top">
+    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <!-- Login modal -->
+  <div class="modal fade" id="login-modal" tabindex="-1" aria-labelledby="login-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="modal-content" id="login-form">
+        <div class="modal-header">
+          <h5 class="modal-title" id="login-modal-title" data-i18n="auth.login">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Login notification banner (parity login/index.jsp:25 <div class="notification">${notification}</div>).
+               Filled from config.notifications.login by auth.js when the modal opens. -->
+          <div class="notification d-none" id="login-notification" role="status" aria-live="polite"></div>
+          <div class="alert alert-danger d-none" id="login-error" role="alert"></div>
+          <div class="mb-3">
+            <label for="login-username" class="form-label" data-i18n="auth.username">Username</label>
+            <input class="form-control" id="login-username" name="username" autocomplete="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="login-password" class="form-label" data-i18n="auth.password">Password</label>
+            <input class="form-control" id="login-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="auth.cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="auth.login">Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- contextPath hidden field (parity index.jsp:176 / searchResults.jsp). -->
+  <input type="hidden" id="contextPath" value="">
+
+  <!--
+    Load order matters: popper.min.js MUST load before bootstrap.min.js (the
+    non-bundle build needs Popper's createPopper for dropdowns/tooltips), and both
+    classic defer scripts MUST appear before app.js (type="module") in document order.
+  -->
+  <script src="/js/popper.min.js" defer></script>
+  <script src="/js/bootstrap.min.js" defer></script>
+  <script type="module" src="/themes/bootstrap/assets/app.js"></script>
+</body>
+</html>

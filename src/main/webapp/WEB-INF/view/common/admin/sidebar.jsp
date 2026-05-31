@@ -35,7 +35,7 @@
 				</li>
 			</c:if>
 				
-            <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or fe:permission('admin-design-view') or fe:permission('admin-dict-view') or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view')}">
+            <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or fe:permission('admin-design-view') or fe:permission('admin-dict-view') or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view') or fe:permission('admin-theme-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='system'}">menu-open</c:if>">
 				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='system'}">active</c:if>">
 					<i class='nav-icon fa fa-laptop' aria-hidden="true"></i>
@@ -105,6 +105,14 @@
 						<a href="${fe:url('/admin/storage/')}" class="nav-link <c:if test="${param.menuType=='storage'}">active</c:if>" <c:if test="${param.menuType=='storage'}">aria-current="page"</c:if>>
 							<i class='fa fa-hdd nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_storage" /></p>
+						</a>
+					</li>
+					</c:if>
+					<c:if test="${fe:permission('admin-theme-view')}">
+					<li class="nav-item">
+						<a href="${fe:url('/admin/theme/')}" class="nav-link <c:if test="${param.menuType=='theme'}">active</c:if>" <c:if test="${param.menuType=='theme'}">aria-current="page"</c:if>>
+							<i class='fa fa-palette nav-icon' aria-hidden="true"></i>
+							<p><la:message key="labels.menu_theme" /></p>
 						</a>
 					</li>
 					</c:if>

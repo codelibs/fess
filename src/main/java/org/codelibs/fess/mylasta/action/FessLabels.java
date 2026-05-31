@@ -587,6 +587,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Plugin */
     public static final String LABELS_menu_plugin = "{labels.menu_plugin}";
 
+    /** The key of the message: Theme */
+    public static final String LABELS_menu_theme = "{labels.menu_theme}";
+
     /** The key of the message: Storage */
     public static final String LABELS_menu_storage = "{labels.menu_storage}";
 
@@ -3785,6 +3788,57 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Use Domain Services */
     public static final String LABELS_entraid_use_ds = "{labels.entraid_use_ds}";
+
+    /** The key of the message: Theme */
+    public static final String LABELS_theme_title = "{labels.theme_title}";
+
+    /** The key of the message: Theme List */
+    public static final String LABELS_theme_list_name = "{labels.theme_list_name}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_theme_name = "{labels.theme_name}";
+
+    /** The key of the message: Display Name */
+    public static final String LABELS_theme_display_name = "{labels.theme_display_name}";
+
+    /** The key of the message: Version */
+    public static final String LABELS_theme_version = "{labels.theme_version}";
+
+    /** The key of the message: Default */
+    public static final String LABELS_theme_is_default = "{labels.theme_is_default}";
+
+    /** The key of the message: Health */
+    public static final String LABELS_theme_health = "{labels.theme_health}";
+
+    /** The key of the message: OK */
+    public static final String LABELS_theme_health_ok = "{labels.theme_health_ok}";
+
+    /** The key of the message: Upload Theme */
+    public static final String LABELS_theme_upload_title = "{labels.theme_upload_title}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_theme_upload = "{labels.theme_upload}";
+
+    /** The key of the message: Theme ZIP File */
+    public static final String LABELS_theme_zip_file = "{labels.theme_zip_file}";
+
+    /** The key of the message: Set Default */
+    public static final String LABELS_theme_set_default = "{labels.theme_set_default}";
+
+    /** The key of the message: Reload */
+    public static final String LABELS_theme_reload = "{labels.theme_reload}";
+
+    /** The key of the message: (no default) */
+    public static final String LABELS_theme_default_none = "{labels.theme_default_none}";
+
+    /** The key of the message: Theme Details */
+    public static final String LABELS_theme_details_title = "{labels.theme_details_title}";
+
+    /** The key of the message: Manifest */
+    public static final String LABELS_theme_manifest = "{labels.theme_manifest}";
+
+    /** The key of the message: Thumbnail */
+    public static final String LABELS_theme_thumbnail = "{labels.theme_thumbnail}";
 
     /**
      * Assert the property is not null.

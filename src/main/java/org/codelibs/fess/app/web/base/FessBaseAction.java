@@ -124,7 +124,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     /** Manager for handling HTTP request operations. */
     @Resource
-    private RequestManager requestManager;
+    protected RequestManager requestManager;
 
     // ===================================================================================
     //                                                                               Hook

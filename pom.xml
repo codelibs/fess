@@ -229,6 +229,7 @@
 						<exclude>**/*min.js</exclude>
 						<exclude>**/*min.css</exclude>
 						<exclude>**/plugins/**/*.js</exclude>
+						<exclude>**/themes/**/*.js</exclude>
 						<exclude>**/WEB-INF/site/**</exclude>
 					</excludes>
 					<sourceDirectory>src/main/webapp/js</sourceDirectory>
