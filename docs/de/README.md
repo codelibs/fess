@@ -8,7 +8,7 @@
 Fess ist ein sehr leistungsstarker und einfach zu implementierender Enterprise-Suchserver. Sie können Fess schnell auf jeder Plattform installieren und ausführen, auf der die Java-Laufzeitumgebung (JRE) läuft. Fess wird unter der [Apache-Lizenz 2.0](LICENSE) bereitgestellt.
 
 Fess basiert auf [OpenSearch](https://github.com/opensearch-project/OpenSearch), aber es ist kein Wissen oder Erfahrung mit OpenSearch erforderlich. Fess bietet eine einfach zu bedienende Administrations-GUI zur Konfiguration des Systems über Ihren Browser.
-Fess enthält auch einen Crawler, der Dokumente auf einem [Webserver](https://fess.codelibs.org/15.3/admin/webconfig-guide.html), [Dateisystem](https://fess.codelibs.org/15.3/admin/fileconfig-guide.html) oder [Datenspeicher](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html) (wie CSV oder Datenbank) durchsuchen kann. Viele Dateiformate werden unterstützt, einschließlich (aber nicht beschränkt auf): Microsoft Office, PDF und zip.
+Fess enthält auch einen Crawler, der Dokumente auf einem [Webserver](https://fess.codelibs.org/15.6/admin/webconfig-guide.html), [Dateisystem](https://fess.codelibs.org/15.6/admin/fileconfig-guide.html) oder [Datenspeicher](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html) (wie CSV oder Datenbank) durchsuchen kann. Viele Dateiformate werden unterstützt, einschließlich (aber nicht beschränkt auf): Microsoft Office, PDF und zip.
 
 *[Fess Site Search](https://github.com/codelibs/fess-site-search)* ist eine kostenlose Alternative zur [Google Site Search](https://enterprise.google.com/search/products/gss.html). Weitere Details finden Sie in der [Dokumentation des FSS JS Generators](https://fss-generator.codelibs.org/docs/manual).
 
@@ -26,15 +26,15 @@ Es gibt zwei Möglichkeiten, Fess auszuprobieren. Die erste besteht darin, es se
 
 ### Herunterladen und Installieren/Ausführen
 
-Fess 15.3 ist jetzt verfügbar und kann auf der [Release-Seite](https://github.com/codelibs/fess/releases "download") heruntergeladen werden. Downloads gibt es in drei Formaten: deb, rpm, zip.
+Fess 15.6 ist jetzt verfügbar und kann auf der [Release-Seite](https://github.com/codelibs/fess/releases "download") heruntergeladen werden. Downloads gibt es in drei Formaten: deb, rpm, zip.
 
 Die folgenden Befehle zeigen, wie der Zip-Download verwendet wird:
 
-    $ unzip fess-15.3.x.zip
-    $ cd fess-15.3.x
+    $ unzip fess-15.6.x.zip
+    $ cd fess-15.6.x
     $ ./bin/fess
 
-Weitere Informationen finden Sie im [Installationshandbuch](https://fess.codelibs.org/15.3/install/index.html).
+Weitere Informationen finden Sie im [Installationshandbuch](https://fess.codelibs.org/15.6/install/index.html).
 
 ### Docker
 
@@ -50,7 +50,7 @@ Wir bieten Docker-Images auf [ghcr.io](https://github.com/orgs/codelibs/packages
 
 ![Administrationsoberfläche](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-Sie können in der Administrationsoberfläche (Web, Datei, Datenspeicher) Crawling-Ziele in den Crawler-Konfigurationsseiten registrieren und den Crawler manuell auf der [Scheduler-Seite](https://fess.codelibs.org/15.3/admin/scheduler-guide.html) starten.
+Sie können in der Administrationsoberfläche (Web, Datei, Datenspeicher) Crawling-Ziele in den Crawler-Konfigurationsseiten registrieren und den Crawler manuell auf der [Scheduler-Seite](https://fess.codelibs.org/15.6/admin/scheduler-guide.html) starten.
 
 ## Migration von einem anderen Suchanbieter
 
@@ -58,7 +58,7 @@ Bitte lesen Sie [MIGRATION.md](MIGRATION.md).
 
 ## Datenspeicher
 
-Derzeit unterstützt Fess das Crawlen der folgenden [Speicherorte und APIs](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html):
+Derzeit unterstützt Fess das Crawlen der folgenden [Speicherorte und APIs](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html):
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
@@ -129,11 +129,35 @@ Führen Sie das `package`-Ziel aus, und dann wird die Release-Datei im Verzeichn
 
 ### Integrationstests
 
-Starten Sie den Fess-Server und führen Sie den folgenden Befehl aus:
+Integrationstests erfordern einen laufenden Fess-Server mit OpenSearch. Befolgen Sie diese Schritte:
+
+#### 1. Fess erstellen
+
+    $ mvn antrun:run  # OpenSearch-Plugins herunterladen (falls noch nicht geschehen)
+    $ mvn package     # Das Paket erstellen
+
+#### 2. Fess-Server starten
+
+    $ unzip target/releases/fess-*.zip
+    $ ./fess-*/bin/fess &
+
+Warten Sie, bis Fess bereit ist (dies kann bis zu 60 Sekunden dauern):
+
+    $ curl -s "http://localhost:8080/api/v1/health"
+
+Wenn Fess bereit ist, sollten Sie eine JSON-Antwort sehen.
+
+#### 3. Testdaten klonen
+
+Erforderlich für SearchApiTests:
+
+    $ git clone https://github.com/codelibs/fess-testdata.git /tmp/fess-testdata
+
+#### 4. Integrationstests ausführen
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
 
-Um einen einzelnen Testfall auszuführen, können Sie verwenden:
+Um einen einzelnen Testfall auszuführen:
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201" -Dtest=SearchApiTests
 
