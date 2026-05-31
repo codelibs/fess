@@ -69,6 +69,8 @@ tags:
     description: RAG chat operations
   - name: cache
     description: Cached document content
+  - name: related
+    description: Related query and content suggestions
 
 paths:
   /health:
@@ -156,11 +158,31 @@ paths:
           schema: { type: string }
         - name: fields.label
           in: query
-          description: Filter by label name; repeatable.
+          description: |-
+            Filter by label name; repeatable. This is the most common case of
+            the generic `fields.<name>` family — any `fields.<name>` query
+            parameter restricts results where the document field `<name>`
+            matches the supplied value(s).
           required: false
           style: form
           explode: true
           schema: { type: array, items: { type: string }, example: [news] }
+        - name: as.*
+          in: query
+          description: |-
+            Advanced-search conditions. Any `as.<name>` parameter (e.g.
+            `as.q`, `as.filetype`) is forwarded to the advanced-search
+            condition builder. Repeatable per name.
+          required: false
+          schema: { type: string }
+        - name: track_total_hits
+          in: query
+          description: |-
+            Forwarded to the search engine to control exact hit counting
+            (e.g. `true` or an integer threshold). Affects whether
+            `record_count_relation` is `eq` or `gte`.
+          required: false
+          schema: { type: string }
         - name: facet.field
           in: query
           required: false
@@ -173,6 +195,24 @@ paths:
           style: form
           explode: true
           schema: { type: array, items: { type: string } }
+        - name: facet.size
+          in: query
+          description: Maximum number of facet terms to return.
+          required: false
+          schema: { type: integer }
+        - name: facet.minDocCount
+          in: query
+          description: Minimum document count for a facet term to be included.
+          required: false
+          schema: { type: integer, format: int64 }
+        - name: facet.sort
+          in: query
+          required: false
+          schema: { type: string }
+        - name: facet.missing
+          in: query
+          required: false
+          schema: { type: string }
         - name: geo.location.point
           in: query
           required: false
@@ -204,11 +244,49 @@ paths:
         `{"error":{"code":"internal_error","message":"stream error"}}` line
         and flushes. Clients MUST inspect the last line's first key to
         distinguish stream-complete from server-crashed.
+
+        The query is built with the same parameter set as `GET /search`
+        (`q`, `sort`, `num`, `lang`, `ex_q`, `sdh`, `fields.*`, `as.*`,
+        `track_total_hits`, `facet.*`, `geo.*`). When scroll search is disabled
+        via `api.search.scroll=false` the endpoint responds with
+        `invalid_request` (400).
       operationId: scrollSearchV2
       parameters:
         - { $ref: '#/components/parameters/Q' }
         - name: sort
           in: query
+          required: false
+          schema: { type: string }
+        - name: num
+          in: query
+          description: Page (scroll batch) size. Values `<= 0` produce `invalid_request`.
+          required: false
+          schema: { type: integer, minimum: 1 }
+        - name: lang
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: ex_q
+          in: query
+          description: Extra query expression; repeatable.
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: fields.label
+          in: query
+          description: |-
+            Filter by label name; repeatable. Part of the generic
+            `fields.<name>` family (see `GET /search`).
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: sdh
+          in: query
+          description: Similar-document hash.
           required: false
           schema: { type: string }
       responses:
@@ -221,7 +299,13 @@ paths:
                 example: |
                   {"data":{"url":"https://example.com/","title":"Example"}}
                   {"data":{"url":"https://example.org/","title":"Example Org"}}
-        '400': { $ref: '#/components/responses/BadRequest' }
+        '400':
+          description: |-
+            Request was rejected as invalid (e.g. malformed query, `num <= 0`,
+            or scroll search disabled via `api.search.scroll=false`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -313,6 +397,49 @@ paths:
               schema:
                 $ref: '#/components/schemas/PopularWordsResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /related-queries:
+    get:
+      tags: [related]
+      summary: Related query suggestions for a query
+      description: |-
+        Returns related query terms for the `q` parameter. A blank or absent
+        `q` yields an empty `queries` array rather than an error; the response
+        is always a success envelope.
+      operationId: relatedQueriesV2
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+      responses:
+        '200':
+          description: Related queries returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelatedQueriesResponse'
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /related-content:
+    get:
+      tags: [related]
+      summary: Related HTML content for a query
+      description: |-
+        Returns related HTML content for the `q` parameter. When multiple
+        content items match they are joined with a newline. A blank or absent
+        `q` yields an empty `content` string rather than an error; the response
+        is always a success envelope.
+      operationId: relatedContentV2
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+      responses:
+        '200':
+          description: Related content returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelatedContentResponse'
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -890,13 +1017,23 @@ components:
     # --- Reusable user shape -----------------------------------------
     UserPayload:
       type: object
-      required: [user_id, roles, groups, permissions, editable]
+      required: [user_id, username, name, roles, groups, permissions, editable, admin]
       description: |-
         Authenticated-user descriptor used by `/auth/me` and `/auth/login`.
         All array fields are guaranteed non-null (empty arrays when no
         values are present).
       properties:
         user_id: { type: string }
+        username:
+          type: string
+          description: |-
+            Display username for the SPA account menu. Currently equals
+            `user_id`; a future backend may supply it independently.
+        name:
+          type: string
+          description: |-
+            Display name for the SPA account menu. Currently equals
+            `user_id`; a future backend may supply it independently.
         roles:
           type: array
           items: { type: string }
@@ -907,6 +1044,12 @@ components:
           type: array
           items: { type: string }
         editable: { type: boolean }
+        admin:
+          type: boolean
+          description: |-
+            `true` when the user holds one of the configured
+            `authentication.admin.roles`. Drives the visibility of the
+            SPA "Administration" entry.
 
     # --- Health ------------------------------------------------------
     HealthResponse:
@@ -1064,6 +1207,41 @@ components:
                   type: array
                   items: { type: string }
 
+    # --- Related queries / content -----------------------------------
+    RelatedQueriesResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [queries]
+              properties:
+                queries:
+                  type: array
+                  description: Related query terms; empty when `q` is blank or absent.
+                  items: { type: string }
+
+    RelatedContentResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [content, content_type]
+              properties:
+                content:
+                  type: string
+                  description: |-
+                    Related HTML content; multiple items are newline-joined.
+                    Empty string when `q` is blank or absent.
+                content_type:
+                  type: string
+                  enum: [html]
+
     # --- UI config ---------------------------------------------------
     UiConfigResponse:
       type: object
@@ -1081,6 +1259,13 @@ components:
                 - features
                 - page_size_default
                 - page_size_max
+                - sort_options
+                - num_options
+                - lang_options
+                - label_options
+                - notifications
+                - facet_views
+                - filetype_options
                 - csrf_required
                 - csrf_token
               properties:
@@ -1091,10 +1276,14 @@ components:
                   items: { type: string }
                 theme:
                   type: object
-                  description: Always present; may be empty when no custom theme is active.
+                  description: |-
+                    Active theme descriptor. Always present; the object is
+                    empty when no custom theme is bound to the request. The
+                    manifest-derived keys (`display_name`, `version`,
+                    `supported_locales`) are present only when the active
+                    theme ships a manifest.
                   properties:
                     name: { type: string }
-                    type: { type: string }
                     display_name: { type: string }
                     version: { type: string }
                     supported_locales:
@@ -1108,14 +1297,128 @@ components:
                     - suggest_search_log
                     - suggest_documents
                     - login_required
+                    - eoled
+                    - development_mode
+                    - search_log_enabled
+                    - thumbnail_enabled
+                    - display_label_type
+                    - clipboard_copy_icon
+                    - eol_link
+                    - installation_link
+                    - login_link
+                    - rag_chat_enabled
                   properties:
                     user_favorite: { type: boolean }
                     popular_word: { type: boolean }
                     suggest_search_log: { type: boolean }
                     suggest_documents: { type: boolean }
                     login_required: { type: boolean }
+                    eoled:
+                      type: boolean
+                      description: Whether this Fess build has reached end-of-life.
+                    development_mode:
+                      type: boolean
+                      description: |-
+                        `true` when the embedded (development) search engine is in use.
+                    search_log_enabled: { type: boolean }
+                    thumbnail_enabled: { type: boolean }
+                    display_label_type:
+                      type: boolean
+                      description: '`true` when at least one label is configured.'
+                    clipboard_copy_icon: { type: boolean }
+                    eol_link:
+                      type: string
+                      description: |-
+                        Resolved end-of-life information URL. Empty string when
+                        the build is not EOL or the link cannot be resolved.
+                    installation_link:
+                      type: string
+                      description: |-
+                        Resolved installation guide URL. Empty string when it
+                        cannot be resolved.
+                    login_link:
+                      type: boolean
+                      description: Whether the login link should be shown.
+                    rag_chat_enabled:
+                      type: boolean
+                      description: Whether the RAG chat feature is available.
                 page_size_default: { type: integer }
                 page_size_max: { type: integer }
+                sort_options:
+                  type: array
+                  description: |-
+                    Sort options for the search UI. `click_count.*` entries are
+                    present only when search logging is enabled; `favorite_count.*`
+                    only when user favorites are enabled.
+                  items:
+                    type: object
+                    required: [value, label_key]
+                    properties:
+                      value: { type: string }
+                      label_key: { type: string }
+                num_options:
+                  type: array
+                  description: |-
+                    Selectable page sizes, filtered to values not exceeding
+                    `page_size_max`.
+                  items: { type: integer }
+                lang_options:
+                  type: array
+                  description: |-
+                    Language filter options. The first entry is the `all`
+                    sentinel, followed by one entry per supported language code.
+                  items:
+                    type: object
+                    required: [value, label_key]
+                    properties:
+                      value: { type: string }
+                      label_key: { type: string }
+                label_options:
+                  type: array
+                  description: Configured labels; empty when none are defined.
+                  items:
+                    type: object
+                    required: [value, name]
+                    properties:
+                      value: { type: string }
+                      name: { type: string }
+                notifications:
+                  type: object
+                  description: |-
+                    HTML notification snippets shown at the top of specific
+                    views. Empty string means no notification for that view.
+                  required: [search_top, advance_search, login]
+                  properties:
+                    search_top: { type: string }
+                    advance_search: { type: string }
+                    login: { type: string }
+                facet_views:
+                  type: array
+                  description: |-
+                    Configured facet query view groups. Empty when none are
+                    defined.
+                  items:
+                    type: object
+                    required: [group_name, queries]
+                    properties:
+                      group_name: { type: string }
+                      queries:
+                        type: array
+                        items:
+                          type: object
+                          required: [label_key, value]
+                          properties:
+                            label_key: { type: string }
+                            value: { type: string }
+                filetype_options:
+                  type: array
+                  description: File-type facet options for the advanced search form.
+                  items:
+                    type: object
+                    required: [value, label_key]
+                    properties:
+                      value: { type: string }
+                      label_key: { type: string }
                 csrf_required: { type: boolean }
                 csrf_token:
                   type: string
@@ -1300,7 +1603,10 @@ components:
                 session_id: { type: string }
                 content:
                   type: string
-                  description: The generated message text.
+                  nullable: true
+                  description: |-
+                    The generated message text. Always present; may be `null`
+                    when the model produced no content.
                 sources:
                   type: array
                   items: { $ref: '#/components/schemas/ChatSource' }
@@ -1408,13 +1714,28 @@ components:
           allOf:
             - $ref: '#/components/schemas/EnvelopeMeta'
             - type: object
-              required: [doc_id, mimetype, content]
+              required: [doc_id, mimetype, content, charset]
               properties:
                 doc_id: { type: string }
                 mimetype:
                   type: string
                   enum: [text/html]
                 content: { type: string }
+                url:
+                  type: string
+                  description: |-
+                    Document URL (the `url_link` field when present, otherwise
+                    the raw indexed URL). Omitted when neither is available.
+                created:
+                  type: string
+                  description: |-
+                    Document creation timestamp from the index. Omitted when
+                    absent.
+                charset:
+                  type: string
+                  description: |-
+                    Charset parsed from the document mimetype; defaults to
+                    `UTF-8` when none is present.
 
     # --- Generic OK --------------------------------------------------
     OkResponse:
