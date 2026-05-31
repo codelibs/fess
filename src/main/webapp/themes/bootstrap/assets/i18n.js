@@ -79,6 +79,42 @@ export function t(key, params) {
 export function getLocale() { return locale; }
 
 /**
+ * Return a human-readable language name for a BCP-47 or underscore-variant code.
+ *
+ * Resolution order:
+ *  1. Theme i18n key "labels.lang_<value>" — used when it resolves to something
+ *     other than the raw key string.
+ *  2. Intl.DisplayNames in the current UI locale — robust for the ~53 server
+ *     language codes that the theme i18n files do not cover.
+ *  3. fallbackLabel or value as last resort.
+ *
+ * @param {string} value         - language code from the server (e.g. "ar", "pt_BR", "zh_CN")
+ * @param {string} [fallbackLabel] - label supplied by server (used when i18n + Intl both fail)
+ * @returns {string}
+ */
+export function languageLabel(value, fallbackLabel) {
+  if (!value) return fallbackLabel || value || "";
+
+  // Step 1: try theme i18n key
+  const key = "labels.lang_" + value;
+  const translated = t(key);
+  if (translated !== key) return translated;
+
+  // Step 2: normalize underscore variants (e.g. pt_BR → pt-BR) for Intl
+  const normalized = value.replace(/_/g, "-");
+  try {
+    const dn = new Intl.DisplayNames([locale, "en"], { type: "language" });
+    const name = dn.of(normalized);
+    if (name && name !== normalized && name !== value) return name;
+  } catch (e) {
+    // Intl.DisplayNames not supported or invalid tag — fall through
+  }
+
+  // Step 3: fallback
+  return fallbackLabel || value;
+}
+
+/**
  * Apply i18n translations to all data-i18n* elements within root.
  * Call this on any dynamically-inserted subtree to localise new content.
  *

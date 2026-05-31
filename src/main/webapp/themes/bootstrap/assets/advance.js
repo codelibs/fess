@@ -3,7 +3,8 @@
 // All DOM construction uses createElement/textContent/setAttribute — no innerHTML.
 
 import { getConfig } from "./api.js";
-import { t } from "./i18n.js";
+import { sanitizeHtml } from "./format.js";
+import { t, languageLabel } from "./i18n.js";
 import { navigate } from "./router.js";
 import { attachSuggest, disableSubmitBriefly } from "./search.js";
 
@@ -21,19 +22,23 @@ import { attachSuggest, disableSubmitBriefly } from "./search.js";
  */
 function makeField(labelKey, inputId, type = "text") {
   const wrap = document.createElement("div");
-  wrap.className = "mb-3";
+  wrap.className = "mb-3 row";
 
   const label = document.createElement("label");
   label.htmlFor = inputId;
-  label.className = "form-label";
+  label.className = "col-lg-3 col-md-4 col-sm-5 col-12 col-form-label";
   label.textContent = t(labelKey);
+
+  const fieldWrap = document.createElement("div");
+  fieldWrap.className = "col-lg-5 col-md-8 col-sm-7 col-6";
 
   const input = document.createElement("input");
   input.type = type;
   input.id = inputId;
   input.className = "form-control";
 
-  wrap.append(label, input);
+  fieldWrap.appendChild(input);
+  wrap.append(label, fieldWrap);
   return { wrap, input };
 }
 
@@ -48,16 +53,19 @@ function makeField(labelKey, inputId, type = "text") {
  */
 function makeSelect(labelKey, selectId, options, multiple = false) {
   const wrap = document.createElement("div");
-  wrap.className = "mb-3";
+  wrap.className = "mb-3 row";
 
   const label = document.createElement("label");
   label.htmlFor = selectId;
-  label.className = "form-label";
+  label.className = "col-lg-3 col-md-4 col-sm-5 col-12 col-form-label";
   label.textContent = t(labelKey);
+
+  const fieldWrap = document.createElement("div");
+  fieldWrap.className = "col-lg-5 col-md-8 col-sm-7 col-6";
 
   const select = document.createElement("select");
   select.id = selectId;
-  select.className = "form-select";
+  select.className = "form-control";
   if (multiple) {
     select.multiple = true;
     select.size = 4;
@@ -70,7 +78,8 @@ function makeSelect(labelKey, selectId, options, multiple = false) {
     select.appendChild(opt);
   }
 
-  wrap.append(label, select);
+  fieldWrap.appendChild(select);
+  wrap.append(label, fieldWrap);
   return { wrap, input: select };
 }
 
@@ -196,7 +205,7 @@ function compose(parts) {
 
 // JSP parity: exactly four options matching advance.jsp:242-253 (no 3month/6month).
 const TIME_RANGES = [
-  { value: "",       labelKey: "facet.any_time" },
+  { value: "",       labelKey: "labels.advance_search_timestamp_default" },
   { value: "1day",   labelKey: "labels.facet_timestamp_1day" },
   { value: "1week",  labelKey: "labels.facet_timestamp_1week" },
   { value: "1month", labelKey: "labels.facet_timestamp_1month" },
@@ -254,16 +263,28 @@ export function attach() {
   // Clear previous content without innerHTML assignment.
   while (view.firstChild) view.removeChild(view.firstChild);
 
-  // Page heading
-  const h1 = document.createElement("h1");
-  h1.textContent = t("advance.title");
-  view.appendChild(h1);
+  // Page heading (JSP parity: advance.jsp uses <h2>labels.advance_search_title</h2>
+  // with no introductory paragraph).
+  const heading = document.createElement("h2");
+  heading.textContent = t("advance.title");
+  view.appendChild(heading);
 
-  // Introductory paragraph
-  const intro = document.createElement("p");
-  intro.className = "text-muted";
-  intro.textContent = t("advance.intro");
-  view.appendChild(intro);
+  // Notification banner (JSP parity advance.jsp:95 <div class="notification">${notification}</div>,
+  // placed right after the <h2>). attach() rebuilds #advance-view from scratch on every
+  // navigation, so the static #advance-notification div from index.html is wiped here and
+  // app.js's one-shot renderNotifications() can't reach it — recreate and fill the slot
+  // ourselves from config.notifications.advance_search. Empty value → keep it hidden.
+  const notification = document.createElement("div");
+  notification.id = "advance-notification";
+  notification.className = "notification d-none";
+  notification.setAttribute("role", "status");
+  notification.setAttribute("aria-live", "polite");
+  const advHtml = ((getConfig() || {}).notifications || {}).advance_search || "";
+  if (typeof advHtml === "string" && advHtml.trim() !== "") {
+    notification.classList.remove("d-none");
+    notification.appendChild(sanitizeHtml(advHtml));
+  }
+  view.appendChild(notification);
 
   // Build the form
   const form = document.createElement("form");
@@ -292,13 +313,10 @@ export function attach() {
   // F.2: Language multi-select — built from server config when available
   const langOpts = [{ value: "", label: t("labels.searchoptions_all_langs") }];
   for (const lo of (serverConfig.lang_options || [])) {
-    const langLabel =
-      t("labels.lang_" + lo.value) !== "labels.lang_" + lo.value
-        ? t("labels.lang_" + lo.value)
-        : (lo.label || lo.value);
+    if (lo.value === "all" || lo.value === "" || lo.value == null) continue;
     langOpts.push({
-      value: lo.value === "all" ? "" : lo.value,
-      label: langLabel,
+      value: lo.value,
+      label: languageLabel(lo.value, lo.label || lo.value),
     });
   }
   const fLang = makeSelect("advance.lang", "adv-lang", langOpts, true /* multiple */);
@@ -309,12 +327,15 @@ export function attach() {
   const labelCheckboxes = [];
   if (labelOptions.length > 0) {
     fLabelWrap = document.createElement("div");
-    fLabelWrap.className = "mb-3";
+    fLabelWrap.className = "mb-3 row";
 
     const labelHeading = document.createElement("label");
-    labelHeading.className = "form-label";
+    labelHeading.className = "col-lg-3 col-md-4 col-sm-5 col-12 col-form-label";
     labelHeading.textContent = t("labels.advance_search_label");
     fLabelWrap.appendChild(labelHeading);
+
+    const checksCol = document.createElement("div");
+    checksCol.className = "col-lg-5 col-md-8 col-sm-7 col-6";
 
     for (const lo of labelOptions) {
       const checkWrap = document.createElement("div");
@@ -333,15 +354,16 @@ export function attach() {
       cbLabel.textContent = lo.label || lo.value || "";
 
       checkWrap.append(cb, cbLabel);
-      fLabelWrap.appendChild(checkWrap);
+      checksCol.appendChild(checkWrap);
     }
+    fLabelWrap.appendChild(checksCol);
   }
 
   // F.3: Occurrence (search in) select
   const occtOpts = [
     { value: "",           label: t("labels.advance_search_occt_default") },
-    { value: "allintitle", label: t("labels.advance_search_occt_title") },
-    { value: "allinurl",   label: t("labels.advance_search_occt_url") },
+    { value: "allintitle", label: t("labels.advance_search_occt_allintitle") },
+    { value: "allinurl",   label: t("labels.advance_search_occt_allinurl") },
   ];
   const fOcct = makeSelect("labels.advance_search_occt", "adv-occt", occtOpts);
 
@@ -357,7 +379,9 @@ export function attach() {
     { value: "", label: t("labels.advance_search_num") },
     ...numNums.map(n => ({ value: String(n), label: String(n) })),
   ];
-  const fNum = makeSelect("labels.advance_search_num", "adv-num", numOpts);
+  // Field label uses the short "表示件数" (search.num / index_num); the leading
+  // option keeps labels.advance_search_num ("- 表示件数 -") as the placeholder.
+  const fNum = makeSelect("search.num", "adv-num", numOpts);
 
   // ADV-6: sort select — prefer serverConfig.sort_options; when absent build a gated fallback
   const features = (serverConfig.features) || {};
@@ -395,11 +419,19 @@ export function attach() {
       );
     }
   }
+  // JSP parity (advance.jsp:159-162): a single empty-value placeholder heads
+  // the sort list, followed by the real sort options. The server's sort_options
+  // already supplies a leading value="" entry (labelled "Score"); drop it before
+  // prepending the theme's own default placeholder so the list does not show a
+  // duplicate empty option + "Score"/"スコア順" pair.
+  const sortOptsBody = (sortOptsRaw.length > 0 && sortOptsRaw[0].value === "")
+    ? sortOptsRaw.slice(1)
+    : sortOptsRaw;
   const sortOpts = [
     { value: "", label: t("labels.advance_search_sort_default") },
-    ...sortOptsRaw,
+    ...sortOptsBody,
   ];
-  const fSort = makeSelect("labels.advance_search_sort", "adv-sort", sortOpts);
+  const fSort = makeSelect("search.sort", "adv-sort", sortOpts);
 
   // ---------------------------------------------------------------------------
   // Best-effort prefill from incoming URL params (parity-r3 #5 / A3)
@@ -524,37 +556,50 @@ export function attach() {
     if (finalBare.length > 0) fAll.input.value = finalBare.join(" ");
   })();
 
-  // Append all fields before the submit button
+  // Append all fields in JSP order:
+  // all, exact, any, none, num, sort, lang, label (if present),
+  // time, filetype, occt, site, then submit.
   form.append(
     fAll.wrap,
     fExact.wrap,
     fAny.wrap,
     fNone.wrap,
-    fSite.wrap,
-    fFiletype.wrap,
-    fOcct.wrap,
+    fNum.wrap,
+    fSort.wrap,
     fLang.wrap,
   );
   if (fLabelWrap) form.appendChild(fLabelWrap);
   form.append(
     fTime.wrap,
-    fNum.wrap,
-    fSort.wrap,
+    fFiletype.wrap,
+    fOcct.wrap,
+    fSite.wrap,
   );
 
-  // Submit button
+  // Submit button — centered to match JSP (row justify-content-center / col-auto)
+  const submitRow = document.createElement("div");
+  submitRow.className = "row justify-content-center";
+  const submitCol = document.createElement("div");
+  submitCol.className = "col-auto";
   const submit = document.createElement("button");
   submit.type = "submit";
   submit.className = "btn btn-primary";
-  submit.textContent = t("advance.submit");
-  form.appendChild(submit);
+  // JSP parity (advance.jsp:309-313): search icon + label.
+  const submitIcon = document.createElement("i");
+  submitIcon.className = "fa fa-search";
+  submitIcon.setAttribute("aria-hidden", "true");
+  submit.append(submitIcon, document.createTextNode(" " + t("advance.submit")));
+  submitCol.appendChild(submit);
+  submitRow.appendChild(submitCol);
+  form.appendChild(submitRow);
 
   // ADV-4: suggest dropdown for the all-words field
+  // Append to the input's parent col-div so positioning is relative to the input.
   const advAllSuggestDropdown = document.createElement("ul");
   advAllSuggestDropdown.className = "list-group suggest-dropdown d-none";
   advAllSuggestDropdown.id = "adv-all-suggest";
   advAllSuggestDropdown.setAttribute("role", "listbox");
-  fAll.wrap.appendChild(advAllSuggestDropdown);
+  fAll.input.parentNode.appendChild(advAllSuggestDropdown);
 
   view.appendChild(form);
 

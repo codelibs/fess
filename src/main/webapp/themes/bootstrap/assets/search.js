@@ -1,6 +1,7 @@
 import * as api from "./api.js";
-import { t } from "./i18n.js";
+import { t, languageLabel } from "./i18n.js";
 import { formatFileSize, formatDate, renderHighlightedSnippet, sanitizeHtml } from "./format.js";
+import { navigate } from "./router.js";
 
 /** Guard: prevent duplicate event-listener registration on hot-reload. */
 let attached = false;
@@ -68,6 +69,35 @@ function el(tag, opts) {
 }
 
 /**
+ * Copy text to the clipboard with a fallback for non-secure contexts.
+ * navigator.clipboard is undefined on plain-HTTP non-localhost origins
+ * (e.g. http://host:8080), so fall back to a hidden textarea + execCommand.
+ *
+ * @param {string} text
+ * @returns {Promise<void>}
+ */
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.className = "chat-clipboard-fallback"; // off-screen, invisible
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy command rejected"));
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+/**
  * Build the /go/ click-tracking URL for a result link.
  *
  * Mirrors the JSP mousedown handler in src/main/webapp/js/search.js:111-127.
@@ -123,141 +153,142 @@ function plainTitle(d) {
 }
 
 function buildResultCard(d, queryId, order) {
+  // Tag-parity with searchResults.jsp result item:
+  //   li#result{n}
+  //     h3.title.text-truncate > a.link[data-uri,data-id,data-order]
+  //     div.body > (div.me-3 > a.link.d-none.d-sm-flex > img.thumbnail)? + div.description
+  //     div.site.text-truncate > (i.far.fa-copy.url-copy)? + cite
+  //     div.more > a
+  //     div.info > date + (size) + (cache)
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
+  const idx0 = order - 1;
 
   const li = el("li", {
-    className: "result-card",
-    attrs: { id: "result-" + (order - 1) },
+    attrs: { id: "result" + idx0 },
     dataset: { docId: d.doc_id || "", queryId: queryId || "" }
   });
 
-  // --- Task 2.2: thumbnail (left side) ---
-  if (d.thumbnail && features.thumbnail_enabled) {
-    const img = document.createElement("img");
-    img.className = "result-thumbnail";
-    img.setAttribute("loading", "lazy");
-    img.setAttribute("alt", "");
-    img.setAttribute("src",
-      "/thumbnail/?docId=" + encodeURIComponent(d.doc_id || "") +
-      "&queryId=" + encodeURIComponent(queryId || ""));
-    img.addEventListener("error", () => { img.classList.add("d-none"); });
-    li.appendChild(img);
-  }
-
-  // --- card body (right side) ---
-  const body = el("div", { className: "result-card-body" });
-
-  // Build /go/ URL so all click types (left, middle, right→open-in-tab) are
-  // routed through GoAction for click-log recording and server-side redirect
-  // (including file-proxy).  Falls back to "#" for unsafe schemes.
+  // Build /go/ URL so click-logging + server-side redirect work for all click types.
   const originalUrl = d.url_link || d.url || "";
   const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, order, state.requestedTime);
 
-  const h2 = el("h2");
+  // --- h3.title > a.link ---
+  const h3 = el("h3", { className: "title text-truncate" });
   const a = el("a", {
+    className: "link",
     attrs: {
       href: goHref,
-      // Keep the real URL visible on hover for usability / accessibility.
+      "data-uri": safeHref(originalUrl) !== "#" ? originalUrl : "",
+      "data-id": d.doc_id || "",
+      "data-order": String(idx0),
       title: safeHref(originalUrl) !== "#" ? originalUrl : ""
-    },
-    dataset: { resultLink: "1" }
+    }
   });
   if (d.content_title) {
     a.innerHTML = renderHighlightedSnippet(d.content_title);
   } else {
     a.textContent = d.title || d.url || "";
   }
-  h2.appendChild(a);
-  body.appendChild(h2);
+  h3.appendChild(a);
+  li.appendChild(h3);
 
-  // C.5: use site_path when present; fall back to host/url
-  if (d.site_path) {
-    body.appendChild(el("cite", { className: "result-url result-site-path", text: d.site_path }));
-  } else {
-    body.appendChild(el("div", { className: "result-url", text: d.site || d.url || "" }));
+  // --- div.body > (thumbnail)? + div.description ---
+  const body = el("div", { className: "body" });
+  if (d.thumbnail && features.thumbnail_enabled) {
+    const thumbWrap = el("div", { className: "me-3" });
+    const thumbA = el("a", {
+      className: "link d-none d-sm-flex",
+      attrs: { href: goHref, "aria-hidden": "true", tabindex: "-1" }
+    });
+    const img = document.createElement("img");
+    img.className = "thumbnail";
+    img.setAttribute("loading", "lazy");
+    img.setAttribute("alt", "");
+    img.setAttribute("src",
+      "/thumbnail/?docId=" + encodeURIComponent(d.doc_id || "") +
+      "&queryId=" + encodeURIComponent(queryId || ""));
+    img.addEventListener("error", () => { thumbWrap.classList.add("d-none"); });
+    thumbA.appendChild(img);
+    thumbWrap.appendChild(thumbA);
+    body.appendChild(thumbWrap);
   }
+  const description = el("div", { className: "description" });
+  description.innerHTML = renderHighlightedSnippet(d.content_description || d.digest || "");
+  body.appendChild(description);
+  li.appendChild(body);
 
-  // --- Task 2.3: info meta (size · date · click_count) ---
-  const infoParts = [];
-  const sizeStr = formatFileSize(d.content_length);
-  if (sizeStr) infoParts.push(sizeStr);
-  const dateStr = formatDate(d.last_modified || d.created);
-  if (dateStr) infoParts.push(dateStr);
-  if (features.search_log_enabled && d.click_count > 0) {
-    infoParts.push(t("result.click_views", { count: d.click_count }));
-  }
-  if (infoParts.length > 0) {
-    body.appendChild(el("div", { className: "result-info-meta text-muted small", text: infoParts.join(" · ") }));
-  }
-
-  // --- Task 2.6: highlighted snippet via renderHighlightedSnippet ---
-  const snippetEl = el("div", { className: "result-snippet" });
-  snippetEl.innerHTML = renderHighlightedSnippet(d.content_description || d.digest || "");
-  body.appendChild(snippetEl);
-
-  // C.4: "More.." anchor link — fragment targets the card's own id
-  const moreLink = el("a", {
-    className: "result-more",
-    text: t("labels.search_result_more"),
-    attrs: {
-      href: "#result-" + (order - 1),
-      "aria-label": t("labels.search_result_more") + " - " + plainTitle(d)
-    }
-  });
-  body.appendChild(moreLink);
-
-  // --- result-meta row: cache link, similar docs, host, favorite ---
-  const meta = el("div", { className: "result-meta" });
-
-  // --- site/URL row with optional Copy URL button ---
-  const siteRow = el("div", { className: "result-site-row" });
-  siteRow.appendChild(el("span", { className: "text-muted result-host", text: d.host || "" }));
-
+  // --- div.site.text-truncate > (copy icon)? + cite ---
+  const site = el("div", { className: "site text-truncate" });
   if (features.clipboard_copy_icon) {
     const rawUrl = d.url_link || d.url || "";
-    const copyBtn = el("button", {
-      className: "btn btn-link btn-sm copy-url-btn p-0 ms-1 d-print-none",
-      attrs: {
-        type: "button",
-        "aria-label": t("result.copy_url") + ": " + rawUrl
-      }
+    const copyIcon = el("i", {
+      className: "far fa-copy url-copy d-print-none",
+      attrs: { "aria-hidden": "true", "data-clipboard-text": rawUrl, role: "button", "aria-label": t("result.copy_url") + ": " + rawUrl }
     });
-    const copyIcon = el("i", { className: "far fa-copy", attrs: { "aria-hidden": "true" } });
-    copyBtn.appendChild(copyIcon);
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(rawUrl).then(() => {
-        copyIcon.className = "fa fa-check";
-        copyBtn.setAttribute("aria-label", t("result.copied"));
+    copyIcon.addEventListener("click", () => {
+      copyToClipboard(rawUrl).then(() => {
+        // JSP parity (js/search.js): swap the copy icon to a green checkmark for ~2s.
+        copyIcon.classList.remove("url-copy", "far", "fa-copy");
+        copyIcon.classList.add("url-copied", "fas", "fa-check");
+        copyIcon.setAttribute("aria-label", t("result.copied"));
         setTimeout(() => {
-          copyIcon.className = "far fa-copy";
-          copyBtn.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
+          copyIcon.classList.remove("url-copied", "fas", "fa-check");
+          copyIcon.classList.add("url-copy", "far", "fa-copy");
+          copyIcon.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
         }, 2000);
       }).catch(() => { /* clipboard not available */ });
     });
-    siteRow.appendChild(copyBtn);
+    site.appendChild(copyIcon);
+    // JSP has whitespace between the copy icon and the cite — keep them from touching.
+    site.appendChild(document.createTextNode(" "));
   }
-  meta.appendChild(siteRow);
+  site.appendChild(el("cite", { text: d.site_path || d.site || d.url || "" }));
+  li.appendChild(site);
 
-  // --- Task 2.4 / A.5: cache link — only when has_cache is truthy ---
-  // Use server-supplied highlight_params when available (already formatted as "&hq=<term>&hq=…").
-  // Fall back to a single &hq= param built from the current query term.
-  // NOTE: the v2 CacheHandler only honours the "hq" parameter (not "hl.q").  [marker: cache-link-hq]
+  // --- div.more > a (hidden on desktop via #result .more{display:none}) ---
+  const more = el("div", { className: "more" });
+  more.appendChild(el("a", {
+    text: t("labels.search_result_more"),
+    attrs: { href: "#result" + idx0, "aria-label": t("labels.search_result_more") + " - " + plainTitle(d) }
+  }));
+  li.appendChild(more);
+
+  // --- div.info > date + (size) + (cache) + (similar) + (favorite) ---
+  const info = el("div", { className: "info" });
+  const dateStr = formatDate(d.last_modified || d.created);
+  if (dateStr) info.appendChild(document.createTextNode(dateStr + " "));
+
+  const appendNbspSpacer = () => {
+    info.appendChild(el("div", { className: "d-sm-none" }));
+    const sp = el("span", { className: "d-none d-sm-inline-block" });
+    sp.appendChild(document.createTextNode(" "));
+    info.appendChild(sp);
+  };
+
+  const sizeStr = formatFileSize(d.content_length);
+  if (sizeStr) {
+    appendNbspSpacer();
+    info.appendChild(document.createTextNode(sizeStr + " "));
+  }
+
+  // cache link
   if (d.has_cache === "true" || d.has_cache === true) {
+    appendNbspSpacer();
     const hlParam = state.highlightParams || ("&hq=" + encodeURIComponent(state.q || ""));
-    const cacheLink = el("a", {
-      className: "text-muted d-print-none",
+    info.appendChild(el("a", {
+      className: "cache d-print-none",
       text: t("result.cache"),
       attrs: { href: `/cache/?docId=${encodeURIComponent(d.doc_id || "")}${hlParam}`, target: "_blank", rel: "noopener" }
-    });
-    meta.appendChild(cacheLink);
+    }));
   }
 
-  // --- Task 2.5: similar docs link ---
+  // similar docs link (theme extra; same .info row)
   const simCount = Number(d.similar_docs_count);
   if (simCount > 1) {
+    appendNbspSpacer();
     const simLink = el("a", {
-      className: "text-muted",
+      className: "similar d-print-none",
       text: t("result.similar", { count: simCount }),
       attrs: { href: "#" }
     });
@@ -267,22 +298,27 @@ function buildResultCard(d, queryId, order) {
       state.start = 0;
       runSearch();
     });
-    meta.appendChild(simLink);
+    info.appendChild(simLink);
   }
 
-  const favBtn = el("button", {
-    className: "btn btn-link btn-sm favorite-btn p-0",
-    attrs: { type: "button", "aria-pressed": "false", "aria-label": t("result.favorite_add") }
-  });
-  const favIcon = el("i", { className: "fa fa-star-o", attrs: { "aria-hidden": "true" } });
-  favBtn.appendChild(favIcon);
-  // A.3: set initial count from server data so the badge shows before syncFavorites runs.
-  favBtn.dataset.count = String(d.favorite_count || 0);
-  setFavoriteUi(favBtn, false, d.favorite_count || 0);
-  meta.appendChild(favBtn);
+  // favorite button (theme extra; same .info row). Config flag is features.user_favorite
+  // (searchResults.jsp favoriteSupport / FessConfig.isUserFavorite), not features.favorite.
+  // Favorites are per-user — only show for authenticated users (guests would 401).
+  if (features.user_favorite && api.isAuthenticated()) {
+    // Spacer before the star (searchResults.jsp puts an &nbsp; before the favorite).
+    appendNbspSpacer();
+    const favBtn = el("button", {
+      className: "btn btn-link btn-sm favorite-btn p-0",
+      attrs: { type: "button", "aria-pressed": "false", "aria-label": t("result.favorite_add") }
+    });
+    const favIcon = el("i", { className: "far fa-star", attrs: { "aria-hidden": "true" } });
+    favBtn.appendChild(favIcon);
+    favBtn.dataset.count = String(d.favorite_count || 0);
+    setFavoriteUi(favBtn, false, d.favorite_count || 0);
+    info.appendChild(favBtn);
+  }
 
-  body.appendChild(meta);
-  li.appendChild(body);
+  li.appendChild(info);
   return li;
 }
 
@@ -300,7 +336,7 @@ function renderResultsStatus(env) {
   const q     = state.q || "";
   const isOver = env.record_count_relation && env.record_count_relation !== "EQUAL_TO";
   const statusKey = isOver ? "labels.search_result_status_over" : "labels.search_result_status";
-  const values = { b0: String(count), b1: String(start), b2: String(end), bq: q };
+  const values = { b0: count.toLocaleString(), b1: String(start), b2: String(end), bq: q };
   t(statusKey).split(/(\{b[012q]\})/).forEach(part => {
     const m = part.match(/^\{(b[012q])\}$/);
     if (m) {
@@ -364,13 +400,13 @@ function renderCurrentFilters() {
   if (state.sort) {
     const opt = (cfg.sort_options || []).find(o => o.value === state.sort);
     const name = opt ? t(opt.label_key || opt.value) : state.sort;
-    badges.push({ name, targetId: "sort-select" });
+    badges.push({ name, targetId: "sortSearchOption" });
   }
 
   // Num (only show when non-default)
   const defaultNum = cfg.num_options && cfg.num_options.length > 0 ? cfg.num_options[0] : 10;
   if (state.num !== Number(defaultNum)) {
-    badges.push({ name: t("search.num_format", { num: state.num }), targetId: "num-select" });
+    badges.push({ name: t("search.num_format", { num: state.num }), targetId: "numSearchOption" });
   }
 
   // Lang
@@ -380,14 +416,14 @@ function renderCurrentFilters() {
     const name = opt
       ? (t(opt.label_key || "labels.lang_" + opt.value) || opt.label || langVal)
       : langVal;
-    badges.push({ name, targetId: "lang-select" });
+    badges.push({ name, targetId: "langSearchOption" });
   });
 
   // Label field filter
   (state.fields.label || []).forEach(val => {
     const opt = (cfg.label_options || []).find(o => o.value === val);
     const name = opt ? (opt.label || opt.value) : val;
-    badges.push({ name, targetId: "label-dropdown-btn" });
+    badges.push({ name, targetId: "labelSearchOption" });
   });
 
   if (badges.length === 0) return;
@@ -407,6 +443,81 @@ function renderCurrentFilters() {
     li.appendChild(btn);
     ul.appendChild(li);
   });
+}
+
+/**
+ * JSP parity (search.jsp always-visible options bar): populate #options-bar with
+ * list-inline items showing current sort / num / lang / label (when enabled).
+ * Each value badge is an <a> that toggles the #searchOptions drawer collapse
+ * (JSP parity: searchResults.jsp options links open header.jsp #searchOptions).
+ */
+function renderOptionsBar() {
+  const bar = document.getElementById("options-bar");
+  if (!bar) return;
+  while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+  const cfg = api.getConfig() || {};
+
+  const makeItem = (labelText, valueText) => {
+    const li = el("li", { className: "list-inline-item" });
+    li.appendChild(document.createTextNode(labelText + " "));
+    const a = el("a", {
+      className: "badge text-bg-primary text-decoration-none",
+      text: valueText,
+      attrs: { href: "#searchOptions", "data-bs-toggle": "collapse" }
+    });
+    li.appendChild(a);
+    return li;
+  };
+
+  // Sort
+  const sortOpts = cfg.sort_options || [];
+  let sortLabel;
+  if (state.sort) {
+    const found = sortOpts.find(o => o.value === state.sort);
+    sortLabel = found ? t(found.label_key || found.value || "") : state.sort;
+  } else {
+    sortLabel = t("search.menu_score");
+  }
+  bar.appendChild(makeItem(t("search.menu_sort"), sortLabel));
+
+  // Num
+  const numNums = cfg.num_options && cfg.num_options.length > 0 ? cfg.num_options : [10, 20, 50];
+  const numText = t("search.menu_num_format", { num: state.num || (numNums[0] || 10) });
+  bar.appendChild(makeItem(t("search.menu_num"), numText));
+
+  // Lang
+  const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
+  let langText;
+  if (selected.length === 0) {
+    langText = t("search.all");
+  } else {
+    langText = selected.map(langVal => {
+      const opt = (cfg.lang_options || []).find(o => o.value === langVal);
+      if (opt) {
+        const key = opt.label_key || ("labels.lang_" + langVal);
+        const resolved = t(key);
+        return (resolved !== key) ? resolved : (opt.label || langVal);
+      }
+      return langVal;
+    }).join(", ");
+  }
+  bar.appendChild(makeItem(t("search.menu_lang"), langText));
+
+  // Label (only when display_label_type is enabled)
+  if (cfg.features && cfg.features.display_label_type) {
+    const activeLabels = state.fields.label || [];
+    let labelText;
+    if (activeLabels.length === 0) {
+      labelText = t("search.all");
+    } else {
+      labelText = activeLabels.map(val => {
+        const opt = (cfg.label_options || []).find(o => o.value === val);
+        return opt ? (opt.label || opt.value) : val;
+      }).join(", ");
+    }
+    bar.appendChild(makeItem(t("search.menu_labels"), labelText));
+  }
 }
 
 function renderResults(env) {
@@ -438,23 +549,28 @@ function renderResults(env) {
   renderResultsStatus(env);
   // Load popular words for the results header slot (JSP parity: #1).
   loadResultsPopularWords();
-  // exec_time legacy meta (keep for backward compat; status banner is primary)
-  const execSec = typeof env.exec_time === "number"
-    ? env.exec_time.toFixed(2)
-    : (typeof env.query_time === "number" ? (env.query_time / 1000).toFixed(2) : null);
-  meta.textContent = execSec !== null
-    ? `${env.record_count} · ${t("search.exec_time", { n: execSec })}`
-    : String(env.record_count);
+  // #results-meta is intentionally left empty on success; status line (#results-status)
+  // is the canonical count display. Error/network paths below still write to it.
+  meta.textContent = "";
+  // Reflect the server queryId / requestedTime into the hidden #queryId / #rt
+  // fields (JSP parity: searchResults.jsp hidden inputs).
+  const queryIdEl = document.getElementById("queryId");
+  if (queryIdEl) queryIdEl.value = env.query_id || "";
+  const rtEl = document.getElementById("rt");
+  if (rtEl) rtEl.value = String(state.requestedTime || "");
   // Pass 1-based order so buildResultCard can embed it in the /go/ URL.
   data.forEach((d, idx) => list.appendChild(buildResultCard(d, env.query_id, idx + 1)));
-  list.querySelectorAll("li.result-card").forEach(li => {
+  list.querySelectorAll("li[data-doc-id]").forEach(li => {
     const btn = li.querySelector(".favorite-btn");
     const docId = li.dataset.docId;
     if (!btn || !docId) return;
     btn.addEventListener("click", () => toggleFavorite(docId, btn, li.dataset.queryId || ""));
   });
-  // Bulk-sync favorites for all result cards in one request (Feature 5).
-  if (env.query_id) syncFavorites(env.query_id);
+  // Bulk-sync favorites for all result cards in one request (Feature 5). Only when the
+  // user_favorite feature is enabled AND the user is authenticated — otherwise
+  // GET /favorites returns 400 (feature off) or 401 (guest session).
+  const favEnabled = !!(api.getConfig()?.features?.user_favorite) && api.isAuthenticated();
+  if (favEnabled && env.query_id) syncFavorites(env.query_id);
 }
 
 async function runSearch() {
@@ -511,6 +627,16 @@ async function runSearch() {
       params["geo.location.point"] = state.geo.lat + "," + state.geo.lon;
       params["geo.location.distance"] = state.geo.distance;
     }
+    // Request the same facets the JSP sidebar renders: the "label" field facet plus
+    // every configured facet-query view (timestamp / size / filetype ranges). Without
+    // these the API returns no facet data, so the query-view groups render empty and
+    // the sidebar is effectively dead (JSP parity: query.facet.fields + .queries).
+    const cfgFacet = api.getConfig() || {};
+    params["facet.field"] = ["label"];
+    const facetQueryValues = [];
+    (cfgFacet.facet_views || []).forEach(v =>
+      (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.push(qy.value); }));
+    if (facetQueryValues.length > 0) params["facet.query"] = facetQueryValues;
     const env = await api.get("/search", params, { signal });
     // Prefer the server-supplied requested_time when available (more accurate).
     if (env.requested_time) state.requestedTime = env.requested_time;
@@ -532,6 +658,7 @@ async function runSearch() {
     renderFacets(env, labels);
     renderActiveChips();
     renderCurrentFilters();
+    renderOptionsBar();
     // Hide inline validation error box on successful results.
     const eb = document.getElementById("search-error");
     if (eb) eb.classList.add("d-none");
@@ -578,7 +705,7 @@ function renderSuggestItems(items) {
 
 async function showSuggest(q) {
   const dropdown = document.getElementById("suggest-dropdown");
-  const inp = document.getElementById("search-input");
+  const inp = document.getElementById("query");
   if (!q || q.length < 2) {
     dropdown.classList.add("d-none");
     while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
@@ -606,7 +733,7 @@ async function showSuggest(q) {
 
 function hideSuggest() {
   const dropdown = document.getElementById("suggest-dropdown");
-  const inp = document.getElementById("search-input");
+  const inp = document.getElementById("query");
   dropdown.classList.add("d-none");
   if (inp) { inp.setAttribute("aria-expanded", "false"); inp.removeAttribute("aria-activedescendant"); }
   suggestIndex = -1;
@@ -703,7 +830,7 @@ function ensureRouteListener() {
  * Uses fess_label-compatible keys directly as i18n keys (no mapping needed).
  */
 function renderSortOptions() {
-  const sel = document.getElementById("sort-select");
+  const sel = document.getElementById("sortSearchOption");
   if (!sel) return;
   while (sel.firstChild) sel.removeChild(sel.firstChild);
   const cfg = api.getConfig() || {};
@@ -723,7 +850,7 @@ function renderSortOptions() {
  * Task 3.2 — Populate the num <select> from api config num_options.
  */
 function renderNumOptions() {
-  const sel = document.getElementById("num-select");
+  const sel = document.getElementById("numSearchOption");
   if (!sel) return;
   while (sel.firstChild) sel.removeChild(sel.firstChild);
   const cfg = api.getConfig() || {};
@@ -746,7 +873,7 @@ function renderNumOptions() {
  * lang= query parameters.
  */
 function renderLangOptions() {
-  const sel = document.getElementById("lang-select");
+  const sel = document.getElementById("langSearchOption");
   if (!sel) return;
   while (sel.firstChild) sel.removeChild(sel.firstChild);
 
@@ -781,9 +908,7 @@ function renderLangOptions() {
       opt.textContent = t("labels.searchoptions_all_langs");
       opt.selected = selected.length === 0;
     } else {
-      // Try fess_label-compatible key first, fall back to raw value
-      const labelKey = lang.label_key || ("labels.lang_" + rawVal);
-      opt.textContent = t(labelKey) !== labelKey ? t(labelKey) : (lang.label || rawVal || "");
+      opt.textContent = languageLabel(rawVal, lang.label || rawVal || "");
       opt.selected = selected.includes(optVal);
     }
     sel.appendChild(opt);
@@ -795,55 +920,25 @@ function renderLangOptions() {
  * label_options: [{ value, label }] from api config.
  */
 function renderLabelOptions() {
-  const wrap = document.getElementById("label-dropdown-wrap");
-  const menu = document.getElementById("label-dropdown-menu");
-  if (!wrap || !menu) return;
+  // Parity with searchOptions.jsp label fieldset: a multi-select #labelSearchOption
+  // shown only when display_label_type is enabled and label options exist.
+  const sel = document.getElementById("labelSearchOption");
+  const fieldset = document.getElementById("labelSearchOptionFieldset");
+  if (!sel) return;
   const cfg = api.getConfig() || {};
   const labelOpts = cfg.label_options || [];
+  const show = !!(cfg.features && cfg.features.display_label_type) && labelOpts.length > 0;
+  if (fieldset) fieldset.classList.toggle("d-none", !show);
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  if (!show) return;
 
-  if (labelOpts.length === 0) {
-    wrap.classList.add("d-none");
-    return;
-  }
-  wrap.classList.remove("d-none");
-
-  while (menu.firstChild) menu.removeChild(menu.firstChild);
-
-  const selected = (state.fields.label || []);
+  const selected = state.fields.label || [];
   for (const lo of labelOpts) {
-    const li = document.createElement("li");
-    li.className = "dropdown-item";
-
-    const label = document.createElement("label");
-    label.className = "d-flex align-items-center gap-2 mb-0";
-    label.classList.add("cursor-pointer");
-
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.value = lo.value != null ? lo.value : "";
-    cb.checked = selected.includes(cb.value);
-
-    const span = document.createElement("span");
-    span.textContent = lo.label || lo.value || "";
-
-    label.appendChild(cb);
-    label.appendChild(span);
-    li.appendChild(label);
-
-    cb.addEventListener("change", () => {
-      const arr = state.fields.label ? [...state.fields.label] : [];
-      if (cb.checked) {
-        if (!arr.includes(cb.value)) arr.push(cb.value);
-      } else {
-        const i = arr.indexOf(cb.value);
-        if (i >= 0) arr.splice(i, 1);
-      }
-      state.fields.label = arr;
-      state.start = 0;
-      runSearch();
-    });
-
-    menu.appendChild(li);
+    const opt = document.createElement("option");
+    opt.value = lo.value != null ? lo.value : "";
+    opt.textContent = lo.label || lo.value || "";
+    opt.selected = selected.includes(opt.value);
+    sel.appendChild(opt);
   }
 }
 
@@ -868,15 +963,15 @@ function renderHomeOptions() {
     return dest;
   };
 
-  const homeSort = copy("sort-select", "home-sort-select");
+  const homeSort = copy("sortSearchOption", "home-sort-select");
   if (homeSort) homeSort.value = state.sort || "";
 
-  const homeNum = copy("num-select", "home-num-select");
+  const homeNum = copy("numSearchOption", "home-num-select");
   if (homeNum) homeNum.value = String(state.num || 10);
 
   // Home lang is multi-select (parity with searchOptions.jsp multiple="true").
-  // Copy options from the results lang select; restore selected state from state.lang.
-  const homeLang = copy("lang-select", "home-lang-select");
+  // Copy options from the drawer lang select; restore selected state from state.lang.
+  const homeLang = copy("langSearchOption", "home-lang-select");
   if (homeLang) {
     const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
     for (const o of homeLang.options) {
@@ -947,8 +1042,8 @@ export function refresh() {
  * Call with the new query value whenever a view transition changes the canonical query.
  */
 function syncSearchInputs(q) {
-  const header = document.getElementById("search-input");
-  const home   = document.getElementById("home-search-input");
+  const header = document.getElementById("query");
+  const home   = document.getElementById("contentQuery");
   if (header) header.value = q;
   if (home)   home.value   = q;
 }
@@ -1049,28 +1144,98 @@ function ensureOsddLink() {
 }
 
 export function attach() {
+  // Called from both main() (to wire the header form early) and the results route;
+  // the second call is expected and idempotent, so return quietly (no warning noise).
   if (attached) {
-    console.warn("search already attached — skipping duplicate attach()");
     return;
   }
   attached = true;
   ensureOsddLink();
   ensureRouteListener(); // H.4: cancel suggest timer when navigating away
   const form = document.getElementById("search-form");
-  const input = document.getElementById("search-input");
+  const input = document.getElementById("query");
   const dropdown = document.getElementById("suggest-dropdown");
   if (form) {
     form.addEventListener("submit", ev => {
       ev.preventDefault();
-      state.q = input.value.trim();
-      state.start = 0;
+      const q = input.value.trim();
+      // A new query from the header search box starts a fresh search, so any facet
+      // filters applied to the previous query are reset (they no longer apply).
+      state.facets = {};
+      state.fields = {};
+      state.facetQueries = [];
       hideSuggest();
       // C.16: keep home-search-input in sync when submitting from the header
-      syncSearchInputs(state.q);
-      runSearch();
+      syncSearchInputs(q);
+      // Reflect the query in the address bar: build the /search URL from the new
+      // query, carrying over current options (num/sort/lang/geo) while dropping the
+      // previous query's page offset and facet/field filters, then navigate().
+      // navigate() pushes history and runFromUrl() runs the search, so the URL's q=
+      // param always matches what was searched (and back/forward works).
+      const params = new URLSearchParams(location.search);
+      if (q) params.set("q", q); else params.delete("q");
+      params.delete("start");
+      for (const key of [...params.keys()]) {
+        if (key.startsWith("fields.") || key === "ex_q") params.delete(key);
+      }
+      navigate("/search?" + params.toString());
       // JSP parity: disable the submit button for 3s after the search has been
       // triggered, to prevent rapid double-submits.
-      disableSubmitBriefly(document.getElementById("search-submit"));
+      disableSubmitBriefly(document.getElementById("searchButton"));
+    });
+  }
+  // Search-options "Clear" button (searchOptions.jsp #searchOptionsClearButton):
+  // reset the drawer option controls (num/sort/lang/label + geo) to their defaults.
+  const optClearBtn = document.getElementById("searchOptionsClearButton");
+  if (optClearBtn) {
+    optClearBtn.addEventListener("click", () => {
+      // Geo filter (migrated into the drawer): clear inputs + state first so the
+      // select-change handlers below re-run the search with geo already cleared.
+      ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      state.geo = { lat: "", lon: "", distance: "" };
+      ["numSearchOption", "sortSearchOption", "langSearchOption", "labelSearchOption"].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        if (sel.multiple) {
+          Array.from(sel.options).forEach(o => { o.selected = false; });
+        } else {
+          sel.selectedIndex = 0;
+        }
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+  }
+  // Search-options drawer "Search" button. It is form="search-form" (the header form),
+  // but on the home view the header form is hidden and the query lives in #contentQuery,
+  // so a plain submit does nothing. Build the search URL from the active query + drawer
+  // options and navigate — works from both the home and results views.
+  const optSearchBtn = document.querySelector('#searchOptions button[type="submit"]');
+  if (optSearchBtn) {
+    optSearchBtn.addEventListener("click", ev => {
+      ev.preventDefault();
+      const homeActive = !document.getElementById("home-view")?.hasAttribute("hidden");
+      const qInput = homeActive ? document.getElementById("contentQuery") : document.getElementById("query");
+      const q = ((qInput && qInput.value) || "").trim();
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      const sortSel = document.getElementById("sortSearchOption");
+      if (sortSel && sortSel.value) params.set("sort", sortSel.value);
+      const numSel = document.getElementById("numSearchOption");
+      if (numSel && numSel.value) params.set("num", numSel.value);
+      const langSel = document.getElementById("langSearchOption");
+      if (langSel) Array.from(langSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("lang", v));
+      const labelSel = document.getElementById("labelSearchOption");
+      if (labelSel) Array.from(labelSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("fields.label", v));
+      // Geo filter (migrated into the drawer): include only when all three inputs
+      // are set, matching the geo.location.point/distance pair runSearch() emits.
+      const geoLat = (document.getElementById("geo-lat")?.value || "").trim();
+      const geoLon = (document.getElementById("geo-lon")?.value || "").trim();
+      const geoDist = (document.getElementById("geo-distance")?.value || "").trim();
+      if (geoLat && geoLon && geoDist) {
+        params.set("geo.location.point", geoLat + "," + geoLon);
+        params.set("geo.location.distance", geoDist);
+      }
+      navigate("/search?" + params.toString());
     });
   }
   if (input) {
@@ -1136,38 +1301,22 @@ export function attach() {
     ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
     // Reset selects: label multi-select deselects all (selectedIndex = -1);
     // sort and num return to their "all / default" first option (selectedIndex = 0).
-    const sortSel = document.getElementById("sort-select");
+    const sortSel = document.getElementById("sortSearchOption");
     if (sortSel) { sortSel.selectedIndex = 0; state.sort = sortSel.value || ""; }
-    const numSel = document.getElementById("num-select");
+    const numSel = document.getElementById("numSearchOption");
     if (numSel) { numSel.selectedIndex = 0; state.num = Number(numSel.value) || 10; }
-    const langSel = document.getElementById("lang-select");
+    const langSel = document.getElementById("langSearchOption");
     if (langSel) { langSel.selectedIndex = -1; state.lang = []; }
-    const labelMenu = document.getElementById("label-dropdown-menu");
-    if (labelMenu) {
-      labelMenu.querySelectorAll("input[type=checkbox]").forEach(cb => { cb.checked = false; });
-    }
+    const labelSel = document.getElementById("labelSearchOption");
+    if (labelSel) { Array.from(labelSel.options).forEach(o => { o.selected = false; }); }
     runSearch();
   });
 
-  // GEO-1: geo search apply/clear listeners
-  const geoApply = document.getElementById("geo-apply");
-  if (geoApply) geoApply.addEventListener("click", () => {
-    state.geo = {
-      lat: (document.getElementById("geo-lat").value || "").trim(),
-      lon: (document.getElementById("geo-lon").value || "").trim(),
-      distance: (document.getElementById("geo-distance").value || "").trim()
-    };
-    state.start = 0; runSearch();
-  });
-  const geoClear = document.getElementById("geo-clear");
-  if (geoClear) geoClear.addEventListener("click", () => {
-    state.geo = { lat: "", lon: "", distance: "" };
-    ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
-    state.start = 0; runSearch();
-  });
+  // Geo filter apply/clear is handled by the drawer's main Search / Clear buttons
+  // (geo inputs were migrated into #searchOptions); no separate geo buttons.
 
   // Sort select — options are populated by renderSortOptions() after config loads
-  const sortSelect = document.getElementById("sort-select");
+  const sortSelect = document.getElementById("sortSearchOption");
   if (sortSelect) sortSelect.addEventListener("change", () => {
     state.sort = sortSelect.value || "";
     state.start = 0;
@@ -1175,7 +1324,7 @@ export function attach() {
   });
 
   // Num select
-  const numSelect = document.getElementById("num-select");
+  const numSelect = document.getElementById("numSearchOption");
   if (numSelect) numSelect.addEventListener("change", () => {
     state.num = Number(numSelect.value) || 10;
     state.start = 0;
@@ -1184,7 +1333,7 @@ export function attach() {
 
   // Lang multi-select: collect all selected option values; when "All" (value="")
   // is selected or nothing is selected, reset to empty array.
-  const langSelect = document.getElementById("lang-select");
+  const langSelect = document.getElementById("langSearchOption");
   if (langSelect) langSelect.addEventListener("change", () => {
     const selected = Array.from(langSelect.selectedOptions).map(o => o.value).filter(v => v !== "");
     state.lang = selected;
@@ -1227,19 +1376,21 @@ async function loadLabels() {
  * Each entry click toggles the value in state.facets[fieldKey].
  */
 function buildFacetGroup(title, entries, fieldKey) {
-  const group = el("div", { className: "facet-group" });
-  group.appendChild(el("h3", { text: title }));
+  // Tag-parity with searchResults.jsp facet group:
+  //   ul.list-group.mb-2 > li.list-group-item.text-uppercase(title)
+  //                      + li.list-group-item > a > span.badge.rounded-pill.text-bg-secondary.float-end
+  const ul = el("ul", { className: "list-group mb-2" });
+  ul.appendChild(el("li", { className: "list-group-item text-uppercase", text: title }));
   entries.forEach(entry => {
     const active = (state.facets[fieldKey] || []).includes(entry.value);
-    const item = el("button", {
-      className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
-      attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
-    });
-    item.appendChild(el("span", { text: entry.labelText }));
+    const li = el("li", { className: "list-group-item" + (active ? " active" : "") });
+    const a = el("a", { attrs: { href: "#" } });
+    a.appendChild(document.createTextNode(entry.labelText + " "));
     if (entry.count != null) {
-      item.appendChild(el("span", { className: "badge bg-secondary", text: String(entry.count) }));
+      a.appendChild(el("span", { className: "badge rounded-pill text-bg-secondary float-end", text: String(entry.count) }));
     }
-    item.addEventListener("click", () => {
+    a.addEventListener("click", ev => {
+      ev.preventDefault();
       state.facets[fieldKey] = state.facets[fieldKey] || [];
       const arr = state.facets[fieldKey];
       const idx = arr.indexOf(entry.value);
@@ -1247,9 +1398,10 @@ function buildFacetGroup(title, entries, fieldKey) {
       state.start = 0;
       runSearch();
     });
-    group.appendChild(item);
+    li.appendChild(a);
+    ul.appendChild(li);
   });
-  return group;
+  return ul;
 }
 
 /**
@@ -1269,25 +1421,20 @@ function renderFacetQueryViews(body, env) {
     const groupTitleKey = view.group_name || "";
     const title = groupTitleKey.startsWith("labels.") ? t(groupTitleKey) : groupTitleKey;
     const queries = (view.queries || []).filter(qy => Number(countByValue[qy.value]) > 0);
-    const group = el("div", { className: "facet-group" });
-    group.appendChild(el("h3", { text: title }));
-    // JSP parity: a configured facet-query group with no matching results still
-    // renders its title plus a muted "not found" line (labels.facet_is_not_found).
-    if (queries.length === 0) {
-      group.appendChild(el("div", { className: "facet-not-found text-muted", text: t("facet.not_found") }));
-      body.appendChild(group);
-      return;
-    }
+    // ul.list-group.mb-2 > li.list-group-item.text-uppercase(title) + entries.
+    // A group with no matching results still renders its title li (JSP parity:
+    // the sidebar keeps the group header even when empty).
+    const ul = el("ul", { className: "list-group mb-2" });
+    ul.appendChild(el("li", { className: "list-group-item text-uppercase", text: title }));
     queries.forEach(qy => {
       const active = (state.facetQueries || []).includes(qy.value);
-      const item = el("button", {
-        className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
-        attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
-      });
+      const li = el("li", { className: "list-group-item" + (active ? " active" : "") });
+      const a = el("a", { attrs: { href: "#" } });
       const label = qy.label_key && qy.label_key.startsWith("labels.") ? t(qy.label_key) : (qy.label_key || qy.value);
-      item.appendChild(el("span", { text: label }));
-      item.appendChild(el("span", { className: "badge bg-secondary", text: String(countByValue[qy.value]) }));
-      item.addEventListener("click", () => {
+      a.appendChild(document.createTextNode(label + " "));
+      a.appendChild(el("span", { className: "badge rounded-pill text-bg-secondary float-end", text: String(countByValue[qy.value]) }));
+      a.addEventListener("click", ev => {
+        ev.preventDefault();
         const arr = state.facetQueries ? [...state.facetQueries] : [];
         const i = arr.indexOf(qy.value);
         if (i >= 0) arr.splice(i, 1); else arr.push(qy.value);
@@ -1295,62 +1442,35 @@ function renderFacetQueryViews(body, env) {
         state.start = 0;
         runSearch();
       });
-      group.appendChild(item);
+      li.appendChild(a);
+      ul.appendChild(li);
     });
-    body.appendChild(group);
+    body.appendChild(ul);
   });
-}
-
-/**
- * Build the filetype facet group.
- * - If the API response contains a filetype facet field, use its counts.
- * - Otherwise render the static list without counts.
- * Clicking toggles the value in state.fields.filetype (multi-select).
- */
-function buildFiletypeFacetGroup(env) {
-  const group = el("div", { className: "facet-group" });
-  group.appendChild(el("h3", { text: t("labels.facet_filetype_title") }));
-
-  // Try to find counts from API facet_field response
-  const facetField = env.facet_field || [];
-  const ftField = facetField.find(f => f.name === "filetype");
-  const countMap = {};
-  if (ftField) {
-    (ftField.result || []).forEach(r => { countMap[r.value] = r.count; });
-  }
-
-  const selected = state.fields.filetype || [];
-  FILETYPE_VALUES.forEach(ftValue => {
-    // skip if API returned counts for this field but this value has zero results
-    if (ftField && countMap[ftValue] == null) return;
-
-    const active = selected.includes(ftValue);
-    const item = el("button", {
-      className: "facet-item btn btn-link p-0 text-start w-100" + (active ? " active" : ""),
-      attrs: { type: "button", "aria-pressed": active ? "true" : "false" }
-    });
-    item.appendChild(el("span", { text: t("labels.facet_filetype_" + ftValue) }));
-    if (countMap[ftValue] != null) {
-      item.appendChild(el("span", { className: "badge bg-secondary", text: String(countMap[ftValue]) }));
-    }
-    item.addEventListener("click", () => {
-      const arr = state.fields.filetype ? [...state.fields.filetype] : [];
-      const idx = arr.indexOf(ftValue);
-      if (idx >= 0) arr.splice(idx, 1); else arr.push(ftValue);
-      state.fields.filetype = arr;
-      state.start = 0;
-      runSearch();
-    });
-    group.appendChild(item);
-  });
-  return group;
 }
 
 function renderFacets(env, labels) {
   const body = document.getElementById("facet-body");
   const clearBtn = document.getElementById("facet-clear");
+  if (!body) return;
   // Clear existing children without innerHTML = ""
   while (body.firstChild) body.removeChild(body.firstChild);
+
+  // ZERO-RESULT: hide the whole facet sidebar (desktop aside + mobile filter button)
+  // when the search returned no documents — there is nothing to refine, so an empty
+  // sidebar is just noise. #facet-body keeps its base "d-none" (mobile-hidden) class;
+  // toggling "d-md-block" controls its desktop visibility. The mobile filter toggle
+  // (#facet-toggle-wrap) is hidden outright with "d-none".
+  const mobileBody = document.getElementById("facet-body-mobile");
+  const toggleWrap = document.getElementById("facet-toggle-wrap");
+  const hasResults = (env.data || []).length > 0;
+  body.classList.toggle("d-md-block", hasResults);
+  if (toggleWrap) toggleWrap.classList.toggle("d-none", !hasResults);
+  if (!hasResults) {
+    if (mobileBody) while (mobileBody.firstChild) mobileBody.removeChild(mobileBody.firstChild);
+    if (clearBtn) clearBtn.classList.add("d-none");
+    return;
+  }
 
   // 1. Label facet — built from env.facet_field where name === "label" with per-label counts,
   //    zero-count suppressed, de-duplicated against the /labels list (SRCH-3).
@@ -1376,18 +1496,62 @@ function renderFacets(env, labels) {
     }
   }
 
-  // 3. Server-driven facet query views (timestamp ranges, size ranges, etc.) (SRCH-4)
+  // 3. Server-driven facet query views (timestamp ranges, size ranges, filetype
+  //    ranges, etc.) (SRCH-4). The filetype group is one of these query views
+  //    (filetype:html, filetype:word, …), matching the JSP sidebar — so there is
+  //    no separate field-based filetype group (that produced a duplicate
+  //    "ファイル種別" with no counts).
   renderFacetQueryViews(body, env);
 
-  // 4. Filetype facet
-  body.appendChild(buildFiletypeFacetGroup(env));
-
-  // Show clear button if any filter is active
+  // Show clear button if any filter is active (optional control; may be absent).
   const anyActive =
     Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0) ||
     Object.values(state.fields).some(arr => Array.isArray(arr) && arr.length > 0) ||
     (Array.isArray(state.facetQueries) && state.facetQueries.length > 0);
-  clearBtn.classList.toggle("d-none", !anyActive);
+  if (clearBtn) clearBtn.classList.toggle("d-none", !anyActive);
+
+  // Mirror the rendered facet groups into the mobile offcanvas (#facet-body-mobile).
+  // The desktop aside (#facet-body) is the source of truth; clone its <ul> groups and
+  // forward clone-anchor clicks to the originals so the offcanvas drives the same
+  // searches. Re-rendered after each search (idempotent).
+  const mobile = document.getElementById("facet-body-mobile");
+  if (mobile) {
+    while (mobile.firstChild) mobile.removeChild(mobile.firstChild);
+    body.querySelectorAll("ul.list-group").forEach(ul => {
+      const clone = ul.cloneNode(true);
+      const srcAnchors = ul.querySelectorAll("li.list-group-item a");
+      clone.querySelectorAll("li.list-group-item a").forEach((ca, i) => {
+        const src = srcAnchors[i];
+        if (src) ca.addEventListener("click", ev => { ev.preventDefault(); src.click(); });
+      });
+      mobile.appendChild(clone);
+    });
+  }
+
+  // JSP parity (searchResults.jsp): when any facet filter is applied, show a
+  // "reset" link at the foot of the facet sidebar that clears all facet selections.
+  if (anyActive) {
+    const buildReset = () => {
+      const wrap = el("div", { className: "d-flex justify-content-end" });
+      const link = el("a", {
+        className: "btn btn-link btn-sm facet-reset",
+        text: t("labels.facet_label_reset"),
+        attrs: { href: "#", role: "button" }
+      });
+      link.addEventListener("click", ev => {
+        ev.preventDefault();
+        state.facets = {};
+        state.fields = {};
+        state.facetQueries = [];
+        state.start = 0;
+        runSearch();
+      });
+      wrap.appendChild(link);
+      return wrap;
+    };
+    body.appendChild(buildReset());
+    if (mobile) mobile.appendChild(buildReset());
+  }
 }
 
 /**
@@ -1595,7 +1759,7 @@ function renderRelatedQueries(queries) {
     });
     btn.addEventListener("click", ev => {
       ev.preventDefault();
-      const input = document.getElementById("search-input");
+      const input = document.getElementById("query");
       if (input) input.value = q;
       state.q = q;
       state.start = 0;
@@ -1666,7 +1830,7 @@ async function syncFavorites(queryId) {
     const favoriteSet = new Set((env.data || []).map(item => String(item.doc_id || item)));
     const list = document.getElementById("results");
     if (!list) return;
-    list.querySelectorAll("li.result-card").forEach(li => {
+    list.querySelectorAll("li[data-doc-id]").forEach(li => {
       const btn = li.querySelector(".favorite-btn");
       if (!btn) return;
       const docId = li.dataset.docId;
@@ -1680,39 +1844,78 @@ async function syncFavorites(queryId) {
 }
 
 function renderPagination(env) {
-  const nav = document.getElementById("pagination-nav");
+  // Tag-parity with searchResults.jsp pagination:
+  //   nav#subfooter.mx-auto > ul.pagination.justify-content-center
+  //     > li.page-item[.disabled] > a.page-link > span[aria-hidden] + span.visually-hidden (prev)
+  //     > li.page-item[.active] > a.page-link (numbers; far pages get d-none d-sm-inline-block)
+  //     > li.page-item > a.page-link > span.visually-hidden + span[aria-hidden] (next)
+  const nav = document.getElementById("subfooter");
   const ul = document.getElementById("pagination");
+  if (!nav || !ul) return;
   ul.innerHTML = "";
   // C.6: use prev_page / next_page flags — handles estimated counts correctly
   if (!env.prev_page && !env.next_page) { nav.classList.add("d-none"); return; }
   nav.classList.remove("d-none");
 
-  const buildPageItem = (label, opts) => {
-    const extraClass = opts.extraClass ? " " + opts.extraClass : "";
-    const li = el("li", { className: "page-item" + (opts.disabled ? " disabled" : "") + (opts.active ? " active" : "") + extraClass });
-    const btn = el("button", { className: "page-link", text: label, attrs: { type: "button" } });
-    if (opts.onClick) btn.addEventListener("click", opts.onClick);
-    li.appendChild(btn);
-    return li;
+  const makeLi = (cls) => el("li", { className: cls });
+  const makeLink = () => el("a", { className: "page-link", attrs: { href: "#" } });
+
+  // Navigate to a page and scroll back to the top so the new results start in view.
+  const goToPage = (start) => {
+    state.start = Math.max(0, start);
+    runSearch();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  ul.appendChild(buildPageItem(t("pagination.prev"), {
-    disabled: !env.prev_page,
-    onClick: () => { if (env.prev_page) { state.start = Math.max(0, state.start - state.num); runSearch(); } }
-  }));
+  // Prev
+  {
+    const li = makeLi("page-item" + (env.prev_page ? "" : " disabled"));
+    li.setAttribute("aria-label", t("pagination.prev"));
+    const a = makeLink();
+    const s1 = el("span", { attrs: { "aria-hidden": "true" } });
+    s1.appendChild(document.createTextNode("«"));
+    a.appendChild(s1);
+    a.appendChild(document.createTextNode(" "));
+    a.appendChild(el("span", { className: "visually-hidden", text: t("pagination.prev") }));
+    a.addEventListener("click", ev => {
+      ev.preventDefault();
+      if (env.prev_page) goToPage(state.start - state.num);
+    });
+    li.appendChild(a);
+    ul.appendChild(li);
+  }
+
+  // Page numbers
   (env.page_numbers || []).forEach(n => {
-    // C.6: hide page numbers more than 2 away from current on small screens
-    const isFar = Math.abs(n - env.page_number) > 2;
-    ul.appendChild(buildPageItem(String(n), {
-      active: n === env.page_number,
-      extraClass: isFar ? "d-none d-sm-inline-block" : "",
-      onClick: () => { state.start = (n - 1) * state.num; runSearch(); }
-    }));
+    // page_numbers come back as strings ("1") while page_number is a number (1),
+    // so coerce before comparing — otherwise the current page never gets .active.
+    const pageNum = Number(n);
+    const isFar = Math.abs(pageNum - env.page_number) > 2;
+    const li = makeLi("page-item" + (pageNum === env.page_number ? " active" : "") + (isFar ? " d-none d-sm-inline-block" : ""));
+    const a = makeLink();
+    a.textContent = String(pageNum);
+    a.addEventListener("click", ev => { ev.preventDefault(); goToPage((pageNum - 1) * state.num); });
+    li.appendChild(a);
+    ul.appendChild(li);
   });
-  ul.appendChild(buildPageItem(t("pagination.next"), {
-    disabled: !env.next_page,
-    onClick: () => { if (env.next_page) { state.start = state.start + state.num; runSearch(); } }
-  }));
+
+  // Next
+  {
+    const li = makeLi("page-item" + (env.next_page ? "" : " disabled"));
+    li.setAttribute("aria-label", t("pagination.next"));
+    const a = makeLink();
+    a.appendChild(el("span", { className: "visually-hidden", text: t("pagination.next") }));
+    a.appendChild(document.createTextNode(" "));
+    const s2 = el("span", { attrs: { "aria-hidden": "true" } });
+    s2.appendChild(document.createTextNode("»"));
+    a.appendChild(s2);
+    a.addEventListener("click", ev => {
+      ev.preventDefault();
+      if (env.next_page) goToPage(state.start + state.num);
+    });
+    li.appendChild(a);
+    ul.appendChild(li);
+  }
 }
 
 async function refreshFavorite(docId, btn) {
@@ -1728,7 +1931,9 @@ function setFavoriteUi(btn, on, count) {
   btn.setAttribute("aria-pressed", on ? "true" : "false");
   btn.setAttribute("aria-label", on ? t("result.favorite_remove") : t("result.favorite_add"));
   const icon = btn.querySelector("i");
-  if (icon) icon.className = on ? "fa fa-star" : "fa fa-star-o";
+  // Font Awesome 5+: solid star when favorited, regular (outline) when not.
+  // (fa-star-o is FA4 syntax and renders nothing with this theme's FA build.)
+  if (icon) icon.className = on ? "fas fa-star" : "far fa-star";
   btn.dataset.count = String(count);
   // Show or hide the count badge next to the star icon
   let countEl = btn.querySelector(".favorite-count");
@@ -1761,4 +1966,7 @@ async function toggleFavorite(docId, btn, queryId) {
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
 export const _state = state;
-export { runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs, renderPopularWords };
+// renderPopularWords is exported inline at its declaration (line ~1515); do NOT
+// re-export it here — a duplicate export is a module-level SyntaxError that aborts
+// the entire SPA bootstrap (app.js never runs, so the home view never renders).
+export { runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs };

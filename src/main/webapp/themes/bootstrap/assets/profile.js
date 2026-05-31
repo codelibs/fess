@@ -25,29 +25,43 @@ function el(tag, opts = {}) {
 }
 
 /**
- * Helper: create a labelled password input group.
+ * Helper: create an input-group password field with a trailing lock icon.
+ * A visually-hidden <label> keeps accessibility; placeholder doubles as visible hint.
  *
- * @param {string} labelText
+ * @param {string} labelText  - used as placeholder AND aria/label text
  * @param {string} inputId
  * @param {object} [inputAttrs] - additional attributes (minlength, autocomplete, etc.)
- * @returns {HTMLDivElement}
+ * @returns {HTMLDivElement}   - wrapper div.mb-3
  */
 function makePasswordField(labelText, inputId, inputAttrs = {}) {
-  const group = el("div", { className: "mb-3" });
+  const wrapper = el("div", { className: "mb-3" });
 
-  const label = el("label", { className: "form-label", textContent: labelText });
+  // Visually-hidden label for screen readers.
+  const label = el("label", { className: "visually-hidden", textContent: labelText });
   label.setAttribute("for", inputId);
-  group.appendChild(label);
+  wrapper.appendChild(label);
+
+  const group = el("div", { className: "input-group" });
 
   const input = el("input", { id: inputId, className: "form-control" });
   input.type = "password";
   input.name = inputId;
   input.required = true;
+  input.placeholder = labelText;
+  input.setAttribute("aria-label", labelText);
   input.setAttribute("autocomplete", inputAttrs.autocomplete || "current-password");
   if (inputAttrs.minlength) input.setAttribute("minlength", String(inputAttrs.minlength));
   group.appendChild(input);
 
-  return group;
+  // Trailing lock icon span.
+  const iconSpan = el("span", { className: "input-group-text" });
+  const icon = el("i", { className: "fa fa-lock fa-fw" });
+  icon.setAttribute("aria-hidden", "true");
+  iconSpan.appendChild(icon);
+  group.appendChild(iconSpan);
+
+  wrapper.appendChild(group);
+  return wrapper;
 }
 
 /**
@@ -62,19 +76,28 @@ export function attach() {
   // Clear previous content without innerHTML assignment.
   while (container.firstChild) container.removeChild(container.firstChild);
 
-  // Page heading
-  const heading = el("h1", { textContent: t("profile.title") });
-  container.appendChild(heading);
+  // ── Centered column layout ────────────────────────────────────────────────
+  // #profile-view already has class="container my-4"; add top margin so the card
+  // sits comfortably below the fixed header (no logo above it anymore).
+  const row = el("div", { className: "row justify-content-center mt-4" });
+  const col = el("div", { className: "col-12 col-sm-9 col-md-7 col-lg-5" });
+  row.appendChild(col);
+  container.appendChild(row);
 
-  // Back-to-search link
-  const backLink = el("a", { className: "btn btn-link ps-0 mb-3", textContent: t("profile.back") });
-  backLink.href = "/";
-  backLink.setAttribute("data-spa", "");
-  container.appendChild(backLink);
+  // ── Card ──────────────────────────────────────────────────────────────────
+  const card = el("div", { className: "card" });
+  const cardBody = el("div", { className: "card-body" });
+  card.appendChild(cardBody);
+  col.appendChild(card);
+
+  // Card heading
+  const heading = el("h1", { className: "h4 text-center mb-3", textContent: t("profile.title") });
+  cardBody.appendChild(heading);
 
   // Password change form
   const form = el("form", { id: "password-form" });
   form.setAttribute("novalidate", "");
+  cardBody.appendChild(form);
 
   // Current password
   form.appendChild(makePasswordField(
@@ -97,10 +120,30 @@ export function attach() {
     { autocomplete: "new-password" }
   ));
 
-  // Submit button
-  const submitBtn = el("button", { className: "btn btn-primary", textContent: t("profile.update") });
+  // Button row
+  const btnRow = el("div", { className: "text-center" });
+
+  // Back link (btn-secondary)
+  const backLink = el("a", { className: "btn btn-secondary me-2" });
+  backLink.href = "/";
+  backLink.setAttribute("data-spa", "");
+  const backIcon = el("i", { className: "fa fa-arrow-left" });
+  backIcon.setAttribute("aria-hidden", "true");
+  backLink.appendChild(backIcon);
+  backLink.appendChild(document.createTextNode(" " + t("profile.back")));
+  btnRow.appendChild(backLink);
+
+  // Submit button (btn-success)
+  const submitBtn = document.createElement("button");
   submitBtn.type = "submit";
-  form.appendChild(submitBtn);
+  submitBtn.className = "btn btn-success";
+  const updateIcon = el("i", { className: "fa fa-pencil-alt" });
+  updateIcon.setAttribute("aria-hidden", "true");
+  submitBtn.appendChild(updateIcon);
+  submitBtn.appendChild(document.createTextNode(" " + t("profile.update")));
+  btnRow.appendChild(submitBtn);
+
+  form.appendChild(btnRow);
 
   // Error alert (hidden by default)
   const errorDiv = el("div", { id: "profile-error", className: "alert alert-danger d-none mt-3" });
@@ -163,6 +206,4 @@ export function attach() {
       submitBtn.disabled = false;
     }
   });
-
-  container.appendChild(form);
 }

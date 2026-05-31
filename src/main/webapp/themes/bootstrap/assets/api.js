@@ -255,3 +255,9 @@ export async function init() {
 export function getConfig() { return config; }
 export function getCsrfToken() { return csrfToken; }
 export function setCsrfToken(t) { csrfToken = t || ""; }
+
+// Last-known authentication state, maintained by auth.js (probeMe / login / logout).
+// Per-user features (e.g. favorites) check this to avoid 401s for guest sessions.
+let authenticated = false;
+export function isAuthenticated() { return authenticated; }
+export function setAuthenticated(v) { authenticated = !!v; }

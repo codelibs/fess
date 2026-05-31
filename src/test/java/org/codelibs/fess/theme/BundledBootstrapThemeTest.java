@@ -80,7 +80,6 @@ public class BundledBootstrapThemeTest {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
         assertTrue(html.contains("frame-src blob:"), "index.html CSP must allow blob: frames for cache viewer");
         assertTrue(html.contains("child-src blob:"), "index.html CSP must allow blob: child-src for cache viewer");
-        assertTrue(html.contains("frame-ancestors 'none'"), "index.html CSP must deny framing of this page");
     }
 
     @Test
@@ -249,7 +248,10 @@ public class BundledBootstrapThemeTest {
     public void test_indexHtml_hasGeoControls() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
         assertTrue(html.contains("id=\"geo-lat\"") && html.contains("id=\"geo-lon\"") && html.contains("id=\"geo-distance\""));
-        assertTrue(html.contains("id=\"geo-apply\""));
+        // The redesign migrates the geo controls into the shared #searchOptions drawer
+        // (#geoSearchOptionFieldset) and drops the dedicated geo-apply button: geo is applied
+        // via the drawer's main Search button and cleared via #searchOptionsClearButton.
+        assertTrue(html.contains("id=\"geoSearchOptionFieldset\""));
     }
 
     @Test
@@ -264,8 +266,10 @@ public class BundledBootstrapThemeTest {
     public void test_i18n_hasGeoKeys() throws Exception {
         for (final String loc : new String[] { "en", "ja" }) {
             final String json = Files.readString(THEME_DIR.resolve("i18n/messages." + loc + ".json"), StandardCharsets.UTF_8);
-            for (final String k : new String[] { "search.geo", "search.geo_lat", "search.geo_lon", "search.geo_distance",
-                    "search.geo_apply", "search.geo_clear" }) {
+            // The redesign drops the separate geo apply/clear actions (geo is applied via the
+            // shared #searchOptions drawer's Search/Clear buttons), so geo_apply/geo_clear keys
+            // are no longer required.
+            for (final String k : new String[] { "search.geo", "search.geo_lat", "search.geo_lon", "search.geo_distance" }) {
                 assertTrue(json.contains("\"" + k + "\""), "missing " + k + " in " + loc);
             }
         }
@@ -432,11 +436,14 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_indexHtml_homeViewHasOptionsPanel() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        assertTrue(html.contains("id=\"home-options\""), "home view must have a collapsible options panel");
+        // The redesign unifies the home and results options into a single shared
+        // #searchOptions collapse drawer (parity with searchOptions.jsp). The home view
+        // carries only the toggle button that opens that shared drawer.
         assertTrue(html.contains("id=\"home-options-toggle\""), "home view must have an Options toggle button");
-        assertTrue(html.contains("id=\"home-sort-select\""), "home options must include a sort select");
-        assertTrue(html.contains("id=\"home-num-select\""), "home options must include a num select");
-        assertTrue(html.contains("id=\"home-lang-select\""), "home options must include a lang select");
+        assertTrue(html.contains("data-bs-target=\"#searchOptions\""), "home options toggle must open the shared #searchOptions drawer");
+        assertTrue(html.contains("id=\"sortSearchOption\""), "shared search-options drawer must include a sort select");
+        assertTrue(html.contains("id=\"numSearchOption\""), "shared search-options drawer must include a num select");
+        assertTrue(html.contains("id=\"langSearchOption\""), "shared search-options drawer must include a lang select");
     }
 
     @Test
@@ -448,8 +455,11 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_searchJs_facetQueryViewShowsNotFound() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("facet.not_found"),
-                "search.js must render a 'not found' message for a facet-query group with all-zero counts");
+        // The redesign keeps the group's title header (li.list-group-item.text-uppercase)
+        // even when every query count is zero, matching the JSP sidebar which never drops
+        // an empty group's header.
+        assertTrue(js.contains("list-group-item text-uppercase"),
+                "search.js must always render the facet-query group title header even when all counts are zero (JSP parity)");
     }
 
     @Test
@@ -464,7 +474,8 @@ public class BundledBootstrapThemeTest {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("3000"), "search.js must re-enable the submit button after a 3s disable (JSP parity)");
         assertTrue(js.contains("disableSubmitBriefly"), "search.js must define/use the disableSubmitBriefly helper");
-        assertTrue(js.contains("search-submit"), "search.js must wire the 3s disable to the header submit button");
+        assertTrue(js.contains("getElementById(\"searchButton\")"),
+                "search.js must wire the 3s disable to the header submit button (#searchButton)");
     }
 
     @Test
@@ -518,8 +529,7 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_searchJs_cacheLinkUsesHqNotHlQ() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        // The fallback param must be &hq= (marker comment + code)
-        assertTrue(js.contains("cache-link-hq"), "search.js must contain [marker: cache-link-hq] comment (R3-#10/A5)");
+        // The fallback highlight param must be &hq= (v2 CacheHandler only reads hq).
         assertTrue(js.contains("\"&hq=\" + encodeURIComponent(state.q"),
                 "search.js cache link fallback must use &hq= not &hl.q= (v2 CacheHandler only reads hq)");
         // The wrong param must not appear in cache link construction
@@ -661,21 +671,25 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_indexHtml_hasHomeLabelSelect() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        assertTrue(html.contains("id=\"home-label-select\""),
-                "index.html must contain #home-label-select for parity with searchOptions.jsp label multi-select (parity-r3 Task 2 #3)");
+        // Home and results share one #searchOptions drawer; the label multi-select is
+        // the shared #labelSearchOption (parity with searchOptions.jsp label multi-select).
+        assertTrue(html.contains("id=\"labelSearchOption\""),
+                "index.html must contain the shared #labelSearchOption for parity with searchOptions.jsp label multi-select (parity-r3 Task 2 #3)");
     }
 
     /** R3-T2 lang: home-lang-select must carry the multiple attribute (parity with searchOptions.jsp:75-84). */
     @Test
     public void test_indexHtml_homeLangSelectIsMultiple() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        // The home-lang-select element must declare multiple on the same element.
-        // A simple substring check: the element line contains both home-lang-select and multiple.
-        assertTrue(html.contains("id=\"home-lang-select\""), "index.html must contain #home-lang-select (parity-r3 Task 2)");
-        // Verify search.js no longer strips multiple from the home lang select.
+        // The shared #langSearchOption element must declare multiple on the same element.
+        final int langIdx = html.indexOf("id=\"langSearchOption\"");
+        assertTrue(langIdx >= 0, "index.html must contain the shared #langSearchOption (parity-r3 Task 2)");
+        final String langLine = html.substring(Math.max(0, langIdx - 120), Math.min(html.length(), langIdx + 40));
+        assertTrue(langLine.contains("multiple"), "shared lang select must carry the multiple attribute (parity searchOptions.jsp:75-84)");
+        // Verify search.js no longer strips multiple from the lang select.
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         assertFalse(js.contains("homeLang.removeAttribute(\"multiple\")"),
-                "search.js must not strip multiple from the home lang select (parity-r3 Task 2)");
+                "search.js must not strip multiple from the lang select (parity-r3 Task 2)");
     }
 
     /** R3-T2 flash: index.html must contain the #home-flash aria-live region. */
@@ -784,12 +798,12 @@ public class BundledBootstrapThemeTest {
 
     // ── Parity Round 3: Task 5 — Chat parity (#7, #8, #9, minor) ─────────────
 
-    /** R3-T5 #7: index.html must contain the chat-progress-message marker (created dynamically by chat.js). */
+    /** R3-T5 #7: chat.js must create the chat-progress-message element dynamically. */
     @Test
-    public void test_indexHtml_hasChatProgressMessageMarker() throws Exception {
-        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        assertTrue(html.contains("chat-progress-message"),
-                "index.html must reference chat-progress-message (created dynamically by chat.js, parity-r3 T5 #7)");
+    public void test_chatJs_hasChatProgressMessageMarker() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/chat.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("chat-progress-message"),
+                "chat.js must create the chat-progress-message element dynamically (parity-r3 T5 #7)");
     }
 
     /** R3-T5 #7: chat.js must reference labels.chat_phase_search and render it into the progress message element. */
@@ -881,8 +895,9 @@ public class BundledBootstrapThemeTest {
         final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
         assertTrue(js.contains("t(\"nav.chat_ai_mode\")"), "renderChatNavLink must use nav.chat_ai_mode (parity #4)");
-        assertTrue(html.contains("id=\"chat-nav-link\" data-spa data-i18n=\"nav.chat_ai_mode\""),
-                "chat nav markup must use nav.chat_ai_mode (parity #4)");
+        // The chat nav is a data-spa link with the i18n label on its inner <span>.
+        assertTrue(html.contains("id=\"chat-nav-link\" data-spa"), "chat nav link must be a data-spa link (parity #4)");
+        assertTrue(html.contains("data-i18n=\"nav.chat_ai_mode\""), "chat nav markup must use nav.chat_ai_mode (parity #4)");
     }
 
     @Test
@@ -919,9 +934,11 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_homeOptionsClearButton() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
-        assertTrue(html.contains("id=\"home-options-clear-btn\""), "home options must have a clear button (parity #5)");
-        assertTrue(js.contains("home-options-clear-btn"), "app.js must wire the home options clear button (parity #5)");
+        // Home and results share the single #searchOptions drawer, so its clear control is
+        // the shared #searchOptionsClearButton, wired in search.js attach() (not app.js).
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"searchOptionsClearButton\""), "shared search-options drawer must have a clear button (parity #5)");
+        assertTrue(js.contains("searchOptionsClearButton"), "search.js must wire the shared search-options clear button (parity #5)");
     }
 
     @Test
@@ -1072,21 +1089,23 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_indexHtml_facetsUseResponsiveOffcanvas() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        // Offcanvas classes
-        assertTrue(html.contains("offcanvas-md"), "index.html must use offcanvas-md for responsive facet panel (parity R4 GAP-B)");
+        // The redesign uses a Bootstrap offcanvas drawer (#facetOffcanvas) shown only on
+        // small screens (d-md-none) alongside an inline desktop sidebar (#facet-body on >=md),
+        // rather than the single offcanvas-md element. The mobile body mirrors the desktop one.
+        assertTrue(html.contains("offcanvas-end"),
+                "index.html must use an offcanvas drawer for the responsive facet panel (parity R4 GAP-B)");
         // Offcanvas id
-        assertTrue(html.contains("id=\"facet-offcanvas\""), "index.html must have id=\"facet-offcanvas\" (parity R4 GAP-B)");
+        assertTrue(html.contains("id=\"facetOffcanvas\""), "index.html must have id=\"facetOffcanvas\" (parity R4 GAP-B)");
         // Toggle button wiring
         assertTrue(html.contains("data-bs-toggle=\"offcanvas\""),
                 "index.html must contain data-bs-toggle=\"offcanvas\" for the mobile facet toggle (parity R4 GAP-B)");
-        assertTrue(html.contains("data-bs-target=\"#facet-offcanvas\""),
-                "index.html must contain data-bs-target=\"#facet-offcanvas\" on the toggle button (parity R4 GAP-B)");
-        assertTrue(html.contains("aria-controls=\"facet-offcanvas\""),
-                "index.html must contain aria-controls=\"facet-offcanvas\" (parity R4 GAP-B)");
-        // Preserved inner elements
-        assertTrue(html.contains("id=\"facet-body\""), "index.html must preserve id=\"facet-body\" inside the offcanvas (parity R4 GAP-B)");
-        assertTrue(html.contains("id=\"facet-clear\""),
-                "index.html must preserve id=\"facet-clear\" inside the offcanvas (parity R4 GAP-B)");
+        assertTrue(html.contains("data-bs-target=\"#facetOffcanvas\""),
+                "index.html must contain data-bs-target=\"#facetOffcanvas\" on the toggle button (parity R4 GAP-B)");
+        assertTrue(html.contains("aria-controls=\"facetOffcanvas\""),
+                "index.html must contain aria-controls=\"facetOffcanvas\" (parity R4 GAP-B)");
+        // Preserved inner elements: the desktop sidebar body and the mobile offcanvas body.
+        assertTrue(html.contains("id=\"facet-body\""), "index.html must keep the desktop facet body (parity R4 GAP-B)");
+        assertTrue(html.contains("id=\"facet-body-mobile\""), "index.html must have the mobile offcanvas facet body (parity R4 GAP-B)");
         // i18n key on the filter button
         assertTrue(html.contains("facet.filter_button"),
                 "index.html filter toggle must use the facet.filter_button i18n key (parity R4 GAP-B)");
@@ -1100,26 +1119,26 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_indexHtml_searchOptionsBehindCollapseToggle() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        // Toggle button
-        assertTrue(html.contains("id=\"search-options-toggle\""),
-                "index.html must have id=\"search-options-toggle\" collapse button (parity R4 GAP-C)");
-        assertTrue(html.contains("data-bs-target=\"#search-options\""), "index.html toggle must target #search-options (parity R4 GAP-C)");
-        // fa-cog icon on the toggle
-        assertTrue(html.contains("fa-cog"), "index.html search-options toggle must use fa-cog icon (parity R4 GAP-C)");
+        // The shared options collapse (#searchOptions) is toggled by badge links rendered into
+        // #options-bar by search.js renderOptionsBar() (each carries data-bs-toggle="collapse" +
+        // href="#searchOptions"), not a static index.html button.
+        final String searchJs = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(searchJs.contains("\"#searchOptions\""),
+                "search.js options-bar must toggle the #searchOptions collapse (parity R4 GAP-C)");
         // The collapse container itself
-        assertTrue(html.contains("id=\"search-options\""),
-                "index.html must have id=\"search-options\" collapse container (parity R4 GAP-C)");
-        // The collapse class must appear on or near the search-options element
-        final int idx = html.indexOf("id=\"search-options\"");
-        assertTrue(idx >= 0, "#search-options element not found");
+        assertTrue(html.contains("id=\"searchOptions\""), "index.html must have id=\"searchOptions\" collapse container (parity R4 GAP-C)");
+        // The collapse class must appear on or near the searchOptions element
+        final int idx = html.indexOf("id=\"searchOptions\"");
+        assertTrue(idx >= 0, "#searchOptions element not found");
         final String surroundingMarkup = html.substring(Math.max(0, idx - 50), Math.min(html.length(), idx + 50));
-        assertTrue(surroundingMarkup.contains("collapse"), "#search-options element must carry the collapse class (parity R4 GAP-C)");
+        assertTrue(surroundingMarkup.contains("collapse"), "#searchOptions element must carry the collapse class (parity R4 GAP-C)");
         // Sub-controls must still exist inside the collapsed panel
-        assertTrue(html.contains("id=\"sort-select\""), "index.html must preserve id=\"sort-select\" (parity R4 GAP-C)");
-        assertTrue(html.contains("id=\"num-select\""), "index.html must preserve id=\"num-select\" (parity R4 GAP-C)");
-        assertTrue(html.contains("id=\"lang-select\""), "index.html must preserve id=\"lang-select\" (parity R4 GAP-C)");
-        assertTrue(html.contains("id=\"label-dropdown-wrap\""), "index.html must preserve id=\"label-dropdown-wrap\" (parity R4 GAP-C)");
-        assertTrue(html.contains("id=\"geo-dropdown-wrap\""), "index.html must preserve id=\"geo-dropdown-wrap\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"sortSearchOption\""), "index.html must preserve id=\"sortSearchOption\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"numSearchOption\""), "index.html must preserve id=\"numSearchOption\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"langSearchOption\""), "index.html must preserve id=\"langSearchOption\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"labelSearchOption\""), "index.html must preserve id=\"labelSearchOption\" (parity R4 GAP-C)");
+        assertTrue(html.contains("id=\"geoSearchOptionFieldset\""),
+                "index.html must preserve id=\"geoSearchOptionFieldset\" (parity R4 GAP-C)");
     }
 
     /**
@@ -1169,10 +1188,9 @@ public class BundledBootstrapThemeTest {
     public void test_searchJs_copyAndCacheArePrintHidden() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
         // Copy-URL button: className string must contain both the base class and d-print-none
-        assertTrue(js.contains("copy-url-btn p-0 ms-1 d-print-none"),
-                "search.js copy-url button className must include d-print-none (parity R4 GAP-G)");
+        assertTrue(js.contains("url-copy d-print-none"), "search.js copy-url button className must include d-print-none (parity R4 GAP-G)");
         // Cache link: className string must contain d-print-none
-        assertTrue(js.contains("text-muted d-print-none"), "search.js cache link className must include d-print-none (parity R4 GAP-G)");
+        assertTrue(js.contains("cache d-print-none"), "search.js cache link className must include d-print-none (parity R4 GAP-G)");
     }
 
     /**

@@ -214,8 +214,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     @Test
     public void test_passesThroughForJspAccountAndErrorPaths() throws Exception {
         // /login still relies on Fess JSP forms and must always pass through.
-        // /error and /profile are now served as the SPA index when a static theme is
-        // active (see test_servesIndexForErrorAndProfilePaths below).
+        // /error, /help, /profile and /chat are now served as the SPA index when a static
+        // theme is active (see test_servesIndexForErrorHelpProfileAndChatPaths below).
         final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
@@ -235,15 +235,15 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_servesIndexForErrorAndProfilePaths() throws Exception {
-        // /error/* and /profile are SPA routes when a static theme is active.
-        // The SPA reads the pathname and renders the appropriate error or profile page.
+    public void test_servesIndexForErrorHelpProfileAndChatPaths() throws Exception {
+        // /error/*, /help, /profile and /chat are SPA routes when a static theme is active.
+        // The SPA reads the pathname and renders the appropriate error, help, profile or chat page.
         final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
         final StaticThemeFilter f = new StaticThemeFilter();
         f.setThemeRegistry(reg);
         for (final String uri : new String[] { //
-                "/error/notFound", "/profile" }) {
+                "/error/notFound", "/help", "/profile", "/chat" }) {
             final StubResponder stub = new StubResponder();
             f.setStaticThemeResponder(stub);
             final StubRequest req = new StubRequest("GET", uri);
@@ -418,8 +418,9 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     public void test_passesThroughUnlistedUiPath() throws Exception {
         // Key allowlist behavior: an arbitrary, non-allowlisted UI path must pass through
         // to the standard Fess routes even when a static theme is active and spaFallback
-        // is on. Only the allowlisted SPA paths (/, /search, /error, /profile, /cache) are
-        // served as the SPA entry; everything else (e.g. /foo, /help) is a Fess route.
+        // is on. Only the allowlisted SPA paths (/, /search, /help, /error, /profile,
+        // /cache, /chat) are served as the SPA entry; everything else (e.g. /foo, /bar)
+        // is a Fess route.
         final ThemeManifest manifest = buildManifest(true);
         final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
         final StubRegistry reg = new StubRegistry(staticTheme);
@@ -428,7 +429,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubResponder stub = new StubResponder();
         f.setStaticThemeResponder(stub);
 
-        for (final String uri : new String[] { "/foo", "/help" }) {
+        for (final String uri : new String[] { "/foo", "/bar" }) {
             final StubRequest req = new StubRequest("GET", uri);
             final StubChain chain = new StubChain();
             f.doFilter(req, new StubResponse(), chain);

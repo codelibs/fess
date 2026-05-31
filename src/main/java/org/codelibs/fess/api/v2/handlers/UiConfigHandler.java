@@ -342,6 +342,7 @@ public class UiConfigHandler {
             final Map<String, Object> notifications = new LinkedHashMap<>();
             notifications.put("search_top", cfg.getNotificationSearchTop());
             notifications.put("advance_search", cfg.getNotificationAdvanceSearch());
+            notifications.put("login", cfg.getNotificationLogin());
 
             // B.3: facet_views — ordered list of FacetQueryView group descriptors from ViewHelper.
             // Each entry: {group_name: String, queries: [{label_key: String, value: String}]}

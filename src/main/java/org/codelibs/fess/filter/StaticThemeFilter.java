@@ -80,6 +80,7 @@ public class StaticThemeFilter implements Filter {
      * <ul>
      *   <li>{@code /} — search top (root).</li>
      *   <li>{@code /search} — search results.</li>
+     *   <li>{@code /help} — the search help page.</li>
      *   <li>{@code /error} — error pages; {@link StaticThemeResponder} detects the
      *       {@code /error} prefix and sets the appropriate HTTP status and diagnostic
      *       response headers before serving the SPA entry.</li>
@@ -87,6 +88,7 @@ public class StaticThemeFilter implements Filter {
      *   <li>{@code /cache} — the cached-document viewer ({@code /cache/?docId=...}); the
      *       underlying {@code /api/v2/cache/{docId}} data endpoint is served by Fess
      *       because {@code /api/} is not an allowlisted UI path.</li>
+     *   <li>{@code /chat} — the chat UI page.</li>
      * </ul>
      *
      * <p>Add a prefix here when the SPA gains a new top-level UI route that must be served
@@ -94,9 +96,11 @@ public class StaticThemeFilter implements Filter {
      */
     private static final List<String> THEME_UI_PREFIXES = List.of(//
             "/search", //
+            "/help", //
             "/error", //
             "/profile", //
-            "/cache");
+            "/cache", //
+            "/chat");
 
     /** Overridable registry reference; production code uses the container lookup. */
     private ThemeRegistry themeRegistry;

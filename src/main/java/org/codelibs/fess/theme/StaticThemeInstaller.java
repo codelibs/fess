@@ -128,9 +128,9 @@ public class StaticThemeInstaller {
                 if (cfgZipRatioMax != null) {
                     zipRatioMax = cfgZipRatioMax;
                 }
-                final Long cfgZipRatioThreshold = fessConfig.getThemeUploadZipRatioCheckThresholdBytesAsLong();
+                final Integer cfgZipRatioThreshold = fessConfig.getThemeUploadZipRatioCheckThresholdBytesAsInteger();
                 if (cfgZipRatioThreshold != null) {
-                    zipRatioCheckThresholdBytes = cfgZipRatioThreshold;
+                    zipRatioCheckThresholdBytes = cfgZipRatioThreshold.longValue();
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to read theme upload config from FessConfig; using defaults", e);

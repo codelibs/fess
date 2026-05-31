@@ -2697,8 +2697,8 @@ public class FessMessages extends FessLabels {
      * message: Theme archive is too large: {1} bytes exceeds the configured limit of {0} bytes.
      * </pre>
      * @param property The property name for the message. (NotNull)
-     * @param arg0 The configured limit in bytes. (NotNull)
-     * @param arg1 The actual size in bytes. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
      * @return this. (NotNull)
      */
     public FessMessages addErrorsThemeUploadTooLarge(String property, String arg0, String arg1) {

@@ -26,21 +26,46 @@ function showView(id) {
       const target = heading || el;
       if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
       // Defer focus so the element is visible before receiving focus.
-      Promise.resolve().then(() => target.focus({ preventScroll: false }));
+      Promise.resolve().then(() => target.focus({ preventScroll: true }));
     } else {
       el.setAttribute("hidden", "");
     }
   }
+  // JSP parity: home (index.jsp) shows an empty navbar-brand; other views show the logo.
+  setBrandVisible(id !== "home-view");
+  // JSP parity (REFERENCE §HEADER): the shared header (header.jsp) is identical on
+  // every view including home — brand logo + search box are always shown. The only
+  // exception is the chat page, where setSearchFormVisible(false) hides the search
+  // box. So no per-view brand/advanced toggling is done here.
 }
 
-/** Toggle the header search form visibility. */
+/** Toggle the header search form visibility (hides the whole input-group wrapper). */
 function setSearchFormVisible(visible) {
-  const form = document.getElementById("search-form");
-  if (!form) return;
+  const wrap = document.getElementById("search-form-wrap") || document.getElementById("search-form");
+  if (!wrap) return;
   if (visible) {
-    form.removeAttribute("hidden");
+    wrap.removeAttribute("hidden");
+    wrap.classList.remove("d-none");
+    wrap.classList.add("d-flex");
   } else {
-    form.setAttribute("hidden", "");
+    wrap.setAttribute("hidden", "");
+    wrap.classList.remove("d-flex");
+    wrap.classList.add("d-none");
+  }
+}
+
+/** Toggle the header brand logo. JSP parity: home (index.jsp) has an empty
+ *  navbar-brand; all other views show the logo. d-inline-flex is !important so
+ *  swap it with d-none rather than relying on the hidden attribute. */
+function setBrandVisible(visible) {
+  const brand = document.getElementById("brand-link");
+  if (!brand) return;
+  if (visible) {
+    brand.classList.remove("d-none");
+    brand.classList.add("d-inline-flex");
+  } else {
+    brand.classList.remove("d-inline-flex");
+    brand.classList.add("d-none");
   }
 }
 
@@ -51,63 +76,42 @@ function setSearchFormVisible(visible) {
  * D.6: Dev-mode uses fa-exclamation-triangle text-warning with Bootstrap Tooltip and optional link.
  */
 function renderWarnings() {
-  const host = document.getElementById("warning-indicators");
-  if (!host) return;
-  while (host.firstChild) host.removeChild(host.firstChild);
+  const nav = document.getElementById("header-nav");
+  if (!nav) return;
+  // Remove any previously-rendered warning li entries.
+  nav.querySelectorAll("li.nav-item.warning-indicator").forEach(el => el.remove());
   const features = api.getConfig()?.features || {};
 
-  // D.5: EOL warning
-  if (features.eoled) {
-    const tooltipText = t("labels.eol_error");
+  // header.jsp parity: warnings are li.nav-item > a.nav-link.active > i at the
+  // start of ul.nav.navbar-nav, with a tooltip on the li.
+  function buildWarning(iconClass, tooltipText, link) {
+    const li = document.createElement("li");
+    li.className = "nav-item warning-indicator";
+    li.setAttribute("data-bs-toggle", "tooltip");
+    li.setAttribute("data-bs-placement", "left");
+    li.setAttribute("title", tooltipText);
+    const a = document.createElement("a");
+    a.className = "nav-link active";
+    if (link) { a.href = link; a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    else { a.href = "#"; }
+    a.setAttribute("aria-label", tooltipText);
     const icon = document.createElement("i");
-    icon.className = "fas fa-times-circle text-danger";
+    icon.className = iconClass;
     icon.setAttribute("aria-hidden", "true");
-
-    let el;
-    if (features.eol_link) {
-      el = document.createElement("a");
-      el.href = features.eol_link;
-      el.target = "_blank";
-      el.rel = "noopener noreferrer";
-      el.className = "ms-2";
-      el.setAttribute("aria-label", tooltipText);
-    } else {
-      el = document.createElement("span");
-      el.className = "ms-2";
-      el.setAttribute("aria-label", tooltipText);
-    }
-    el.setAttribute("data-bs-toggle", "tooltip");
-    el.setAttribute("data-bs-title", tooltipText);
-    el.appendChild(icon);
-    host.appendChild(el);
-    if (window.bootstrap?.Tooltip) new window.bootstrap.Tooltip(el);
+    a.appendChild(icon);
+    li.appendChild(a);
+    if (window.bootstrap?.Tooltip) new window.bootstrap.Tooltip(li);
+    return li;
   }
 
+  const first = nav.firstChild;
+  // D.5: EOL warning
+  if (features.eoled) {
+    nav.insertBefore(buildWarning("fas fa-times-circle text-danger", t("labels.eol_error"), features.eol_link), first);
+  }
   // D.6: Development mode warning
   if (features.development_mode) {
-    const tooltipText = t("labels.development_mode_warning");
-    const icon = document.createElement("i");
-    icon.className = "fas fa-exclamation-triangle text-warning";
-    icon.setAttribute("aria-hidden", "true");
-
-    let el;
-    if (features.installation_link) {
-      el = document.createElement("a");
-      el.href = features.installation_link;
-      el.target = "_blank";
-      el.rel = "noopener noreferrer";
-      el.className = "ms-2";
-      el.setAttribute("aria-label", tooltipText);
-    } else {
-      el = document.createElement("span");
-      el.className = "ms-2";
-      el.setAttribute("aria-label", tooltipText);
-    }
-    el.setAttribute("data-bs-toggle", "tooltip");
-    el.setAttribute("data-bs-title", tooltipText);
-    el.appendChild(icon);
-    host.appendChild(el);
-    if (window.bootstrap?.Tooltip) new window.bootstrap.Tooltip(el);
+    nav.insertBefore(buildWarning("fa fa-exclamation-triangle text-warning", t("labels.development_mode_warning"), features.installation_link), first);
   }
 }
 
@@ -187,7 +191,7 @@ function attachHomeView() {
     form.dataset.attached = "1";
     form.addEventListener("submit", ev => {
       ev.preventDefault();
-      const input = document.getElementById("home-search-input");
+      const input = document.getElementById("contentQuery");
       const q = input ? input.value.trim() : "";
       if (q) {
         // Carry the up-front home option selections (sort / num / lang) into the
@@ -198,13 +202,13 @@ function attachHomeView() {
         router.navigate("/search?" + params.toString());
         // JSP parity: disable the submit button for 3s after navigation has been
         // triggered, to prevent rapid double-submits.
-        search.disableSubmitBriefly(form.querySelector("[data-i18n='search.button']"));
+        search.disableSubmitBriefly(document.querySelector("#home-search-form button[type=submit]"));
       }
     });
   }
   // Apply i18n placeholder manually (data-i18n-placeholder is applied by i18n.js
   // on load, but the element may not have existed at that point).
-  const input = document.getElementById("home-search-input");
+  const input = document.getElementById("contentQuery");
   if (input && !input.placeholder) {
     input.placeholder = t("search.placeholder");
   }
@@ -223,27 +227,15 @@ function attachHomeView() {
     input.dataset.suggestAttached = "1";
     search.attachSuggest(input, homeSuggest, {
       get lang() {
-        const sel = document.getElementById("home-lang-select");
+        // Home and results share the single #searchOptions drawer (JSP parity),
+        // so the suggest lang filter reads the drawer's #langSearchOption select.
+        const sel = document.getElementById("langSearchOption");
         return sel ? Array.from(sel.selectedOptions).map(o => o.value).filter(v => v !== "") : [];
       }
     });
   }
-  // #5 (parity js/index.js:62-68, index.jsp:101-103): reset the home option selects.
-  const homeClearBtn = document.getElementById("home-options-clear-btn");
-  if (homeClearBtn && !homeClearBtn.dataset.attached) {
-    homeClearBtn.dataset.attached = "1";
-    homeClearBtn.addEventListener("click", ev => {
-      ev.preventDefault();
-      const sort = document.getElementById("home-sort-select");
-      const num = document.getElementById("home-num-select");
-      const lang = document.getElementById("home-lang-select");
-      const label = document.getElementById("home-label-select");
-      if (sort) sort.selectedIndex = 0;
-      if (num) num.selectedIndex = 0;
-      if (lang) Array.from(lang.options).forEach(o => { o.selected = false; });
-      if (label) Array.from(label.options).forEach(o => { o.selected = false; });
-    });
-  }
+  // The home options Clear button is the shared drawer #searchOptionsClearButton,
+  // wired in search.js attach(); no separate home clear handler is needed.
   // #A (parity index.jsp:123-130): surface a query-param-driven flash message on the
   // home view (e.g. an auth redirect that appends ?error=login_required). Only keys on
   // the explicit allowlist below are rendered, so an attacker cannot reflect arbitrary
@@ -302,23 +294,10 @@ function renderFooterCopyright() {
 function renderChatNavLink() {
   const features = api.getConfig()?.features || {};
   if (!features.rag_chat_enabled) return;
-  // If markup already has the chat link (added by Phase E agent), just show it.
-  const existing = document.getElementById("chat-nav-link");
-  if (existing) {
-    existing.classList.remove("d-none");
-    return;
-  }
-  // Otherwise create it and insert before the Help link.
-  const helpLink = document.querySelector("nav a[href='/help']");
-  if (!helpLink) return;
-  const chatLink = document.createElement("a");
-  chatLink.id = "chat-nav-link";
-  chatLink.className = "nav-link px-2";
-  chatLink.href = "/chat";
-  chatLink.setAttribute("data-spa", "");
-  chatLink.setAttribute("data-i18n", "nav.chat_ai_mode");
-  chatLink.textContent = t("nav.chat_ai_mode");
-  helpLink.parentNode.insertBefore(chatLink, helpLink);
+  // The chat nav entry is the li.nav-item#chat-nav-item in markup (header.jsp
+  // parity). Reveal it by removing d-none from the li wrapper.
+  const item = document.getElementById("chat-nav-item");
+  if (item) item.classList.remove("d-none");
 }
 
 /**
@@ -329,27 +308,39 @@ function renderChatNavLink() {
 function setChatNavSearchMode(onChat) {
   const link = document.getElementById("chat-nav-link");
   if (!link) return;
+  // data-i18n lives on an inner <span> (not the <a>) so i18n.js's textContent
+  // reset keeps the leading icon. Mirror header.jsp: fa-robot for the chat link,
+  // fa-search for the "Search" link shown while on the chat route.
+  link.removeAttribute("data-i18n");
   while (link.firstChild) link.removeChild(link.firstChild);
+  const icon = document.createElement("i");
+  icon.setAttribute("aria-hidden", "true");
+  const span = document.createElement("span");
   if (onChat) {
     link.href = "/";
-    link.setAttribute("data-i18n", "nav.search");
-    const icon = document.createElement("i");
-    icon.className = "fa fa-search me-1";
-    icon.setAttribute("aria-hidden", "true");
-    link.appendChild(icon);
-    link.appendChild(document.createTextNode(t("nav.search")));
+    icon.className = "fa fa-fw fa-search";
+    span.setAttribute("data-i18n", "nav.search");
+    span.textContent = t("nav.search");
   } else {
     link.href = "/chat";
-    link.setAttribute("data-i18n", "nav.chat_ai_mode");
-    link.textContent = t("nav.chat_ai_mode");
+    icon.className = "fa fa-fw fa-robot";
+    span.setAttribute("data-i18n", "nav.chat_ai_mode");
+    span.textContent = t("nav.chat_ai_mode");
   }
+  link.appendChild(icon);
+  link.appendChild(document.createTextNode(" "));
+  link.appendChild(span);
 }
 
 // GAP A: keep body top-padding equal to the fixed-top header height so content is never hidden beneath it.
 function syncHeaderOffset() {
-  const header = document.querySelector("header.navbar");
+  const header = document.querySelector(".navbar.fixed-top");
   if (!header) return;
-  document.body.style.paddingTop = header.offsetHeight + "px";
+  // JSP parity (css/style.css: body { padding: 1em 0; margin: 56px 0 4em }): content
+  // clears the fixed-top navbar plus a 1em gap, so add that gap on top of the live
+  // navbar height instead of butting content right against the bar.
+  const gap = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  document.body.style.paddingTop = (header.offsetHeight + gap) + "px";
 }
 
 /** Attach back-to-top button behaviour. */
@@ -379,14 +370,14 @@ function hasSearchQuery() {
  * falling back to the current URL's q= param.
  */
 function updateAdvanceLinks() {
-  const headerVal = (document.getElementById("search-input") || {}).value;
-  const homeVal = (document.getElementById("home-search-input") || {}).value;
+  const headerVal = (document.getElementById("query") || {}).value;
+  const homeVal = (document.getElementById("contentQuery") || {}).value;
   const urlParams = new URLSearchParams(location.search);
   const urlQ = urlParams.get("q") || "";
   const q = (headerVal || homeVal || urlQ || "").trim();
   if (!q) {
-    document.querySelectorAll('a[href^="/advance"]').forEach(a => {
-      a.setAttribute("href", "/advance");
+    document.querySelectorAll('a[href^="/search/advance"]').forEach(a => {
+      a.setAttribute("href", "/search/advance");
     });
     return;
   }
@@ -404,15 +395,15 @@ function updateAdvanceLinks() {
   // fields.label — multi-valued; forward all
   urlParams.getAll("fields.label").filter(v => v !== "").forEach(v => advParams.append("fields.label", v));
 
-  const href = "/advance?" + advParams.toString();
-  document.querySelectorAll('a[href^="/advance"]').forEach(a => {
+  const href = "/search/advance?" + advParams.toString();
+  document.querySelectorAll('a[href^="/search/advance"]').forEach(a => {
     a.setAttribute("href", href);
   });
 }
 
 /** Wire input/route hooks so the Advanced links stay in sync with the query. */
 function attachAdvanceLinkSync() {
-  for (const id of ["search-input", "home-search-input"]) {
+  for (const id of ["query", "contentQuery"]) {
     const el = document.getElementById(id);
     if (el && !el.dataset.advLinkSync) {
       el.dataset.advLinkSync = "1";
@@ -432,6 +423,10 @@ function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("home-view");
+      // JSP parity (index.jsp): the home query box starts empty — clear any value the
+      // SPA carried over from a previous search (syncSearchInputs keeps both inputs in sync).
+      const cq = document.getElementById("contentQuery");
+      if (cq) cq.value = "";
       attachHomeView();
     }
   );
@@ -461,9 +456,10 @@ function registerRoutes() {
     }
   );
 
-  // Advanced search view.
+  // Advanced search view. Accept both the SPA path (/advance) and the
+  // canonical Fess URL (/search/advance) so direct links / bookmarks work.
   router.register(
-    path => path === "/advance",
+    path => path === "/advance" || path === "/search/advance",
     () => {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
@@ -472,12 +468,13 @@ function registerRoutes() {
     }
   );
 
-  // Help view.
+  // Help view. JSP parity: help.jsp includes header.jsp, which shows the
+  // header search box — so keep it visible here (unlike home/advance/profile).
   router.register(
     path => path === "/help",
     () => {
       setChatNavSearchMode(false);
-      setSearchFormVisible(false);
+      setSearchFormVisible(true);
       showView("help-view");
       help.attach();
     }
@@ -508,11 +505,12 @@ function registerRoutes() {
   );
 
   // Error routes — /error, /error/*, /error/400, /error/404, etc.
+  // JSP parity: error/*.jsp include header.jsp, which shows the header search box.
   router.register(
     path => path === "/error" || path.startsWith("/error/"),
     () => {
       setChatNavSearchMode(false);
-      setSearchFormVisible(false);
+      setSearchFormVisible(true);
       showView("error-view");
       errorView.attach();
     }
@@ -547,10 +545,26 @@ async function main() {
   renderChatNavLink();
   await auth.attach();
   search.attach();
-  chat.attach(); // no-op when rag_chat_enabled is false
+  // JSP parity: searchResults.jsp has NO inline chat sidebar — chat lives only on the
+  // standalone /chat page (chat.attachStandalone, wired in the /chat route). Mounting
+  // the inline panel here wrongly showed a chat column on the results page, so it is
+  // intentionally not called. (#chat-column stays d-none as defined in index.html.)
   // After login, refresh results without re-attaching event listeners.
   // search.attach() is idempotent but search.refresh() is semantically cleaner.
   document.addEventListener("fess:auth:login", () => search.refresh());
+
+  // Close the search-options drawer on client-side navigation. The JSP dismisses it
+  // via a full page reload; in the SPA the Bootstrap collapse would otherwise stay
+  // open across view changes (e.g. after submitting a search or opening /search/advance).
+  document.addEventListener("fess:route:change", () => {
+    const so = document.getElementById("searchOptions");
+    if (so && window.bootstrap && window.bootstrap.Collapse) {
+      // {toggle:false} is REQUIRED: Bootstrap Collapse defaults to toggle:true, so
+      // getOrCreateInstance() would OPEN a freshly-seen (closed) drawer on creation.
+      // With toggle:false, hide() just closes it if open (no-op when already closed).
+      window.bootstrap.Collapse.getOrCreateInstance(so, { toggle: false }).hide();
+    }
+  });
 
   // Wire back-to-top button.
   attachBackToTop();
@@ -559,7 +573,7 @@ async function main() {
   syncHeaderOffset();
   window.addEventListener("resize", syncHeaderOffset);
   if (window.ResizeObserver) {
-    const header = document.querySelector("header.navbar");
+    const header = document.querySelector(".navbar.fixed-top");
     if (header) new ResizeObserver(syncHeaderOffset).observe(header);
   }
 

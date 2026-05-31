@@ -150,6 +150,10 @@ public class StaticThemeResponder {
             res.setHeader("Content-Disposition", "inline; filename=\"index.html\"");
             res.setHeader("Cache-Control", "no-store");
             res.setHeader("Content-Security-Policy", INDEX_CSP);
+            // Clickjacking defense-in-depth: INDEX_CSP already sets frame-ancestors 'none'
+            // (enforced via this HTTP header, unlike a <meta> CSP); X-Frame-Options covers
+            // older browsers that don't honor frame-ancestors.
+            res.setHeader("X-Frame-Options", "DENY");
             res.setHeader("Referrer-Policy", "same-origin");
             res.setHeader("X-Fess-Route", "error");
             res.setHeader("X-Fess-Error-Code", String.valueOf(status));
@@ -166,6 +170,9 @@ public class StaticThemeResponder {
         res.setHeader("Content-Disposition", "inline; filename=\"index.html\"");
         res.setHeader("Cache-Control", "no-store");
         res.setHeader("Content-Security-Policy", INDEX_CSP);
+        // Clickjacking defense-in-depth (see error path above): frame-ancestors 'none' is in
+        // INDEX_CSP; X-Frame-Options: DENY covers browsers that don't honor frame-ancestors.
+        res.setHeader("X-Frame-Options", "DENY");
         res.setHeader("Referrer-Policy", "same-origin");
         res.setContentLengthLong(fileSize);
         try (InputStream in = Files.newInputStream(indexFile)) {

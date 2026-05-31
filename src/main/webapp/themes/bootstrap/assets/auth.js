@@ -1,4 +1,5 @@
 import * as api from "./api.js";
+import { sanitizeHtml } from "./format.js";
 import { t } from "./i18n.js";
 
 /**
@@ -14,8 +15,15 @@ function isLoginLinkEnabled() {
 export async function probeMe() {
   try {
     const env = await api.get("/auth/me");
-    setLoggedIn(env.user || {});
-    return env.user;
+    // /auth/me always returns HTTP 200 with { authenticated, user? }. Only show the
+    // user dropdown when actually authenticated; otherwise show the guest login link
+    // (header.jsp parity: username!='guest' → dropdown, else → login link).
+    if (env && env.authenticated && env.user) {
+      setLoggedIn(env.user);
+      return env.user;
+    }
+    setLoggedOut();
+    return null;
   } catch (e) {
     // 401 / AUTH_REQUIRED → not logged in; expected and silent.
     if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
@@ -50,24 +58,32 @@ export async function probeMe() {
  * @returns {HTMLElement} the dropdown wrapper div
  */
 function buildUserDropdown(user) {
+  // Tag-parity with header.jsp logged-in block:
+  //   div.dropdown
+  //     > a#userMenu.nav-link.dropdown-toggle > i.fa.fa-fw.fa-user + span(name)
+  //     > div.dropdown-menu[aria-labelledby=userMenu]
+  //         > a.dropdown-item (profile)?  + a.dropdown-item (admin)?  + a.dropdown-item (logout)
   const displayName = user.name || user.username || user.user_id || "";
 
   // Wrapper
   const wrapper = document.createElement("div");
   wrapper.className = "dropdown";
 
-  // Toggle button
-  const toggle = document.createElement("button");
-  toggle.className = "btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-1";
-  toggle.type = "button";
+  // Toggle is an <a id="userMenu"> (JSP parity), not a button.
+  const toggle = document.createElement("a");
+  toggle.id = "userMenu";
+  toggle.className = "nav-link dropdown-toggle";
+  toggle.href = "#";
+  toggle.setAttribute("role", "button");
   toggle.setAttribute("data-bs-toggle", "dropdown");
-  toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-haspopup", "true");
+  toggle.setAttribute("aria-expanded", "false");
 
   const icon = document.createElement("i");
-  icon.className = "fa fa-user";
+  icon.className = "fa fa-fw fa-user";
   icon.setAttribute("aria-hidden", "true");
   toggle.appendChild(icon);
+  toggle.appendChild(document.createTextNode(" "));
 
   const nameSpan = document.createElement("span");
   nameSpan.id = "user-name";
@@ -76,84 +92,99 @@ function buildUserDropdown(user) {
 
   wrapper.appendChild(toggle);
 
-  // Dropdown menu
-  const menu = document.createElement("ul");
-  menu.className = "dropdown-menu dropdown-menu-end";
+  // Dropdown menu — direct a.dropdown-item children (no ul/li), JSP parity.
+  const menu = document.createElement("div");
+  menu.className = "dropdown-menu";
+  menu.setAttribute("aria-labelledby", "userMenu");
 
   // Profile item — only when user.editable !== false
   if (user.editable !== false) {
-    const profileLi = document.createElement("li");
     const profileA = document.createElement("a");
     profileA.className = "dropdown-item";
     profileA.href = "/profile";
     profileA.setAttribute("data-spa", "");
     profileA.setAttribute("data-i18n", "nav.profile");
     profileA.textContent = t("nav.profile");
-    profileLi.appendChild(profileA);
-    menu.appendChild(profileLi);
+    menu.appendChild(profileA);
   }
 
   // Administration item — only when user.admin === true
   if (user.admin === true) {
-    const adminLi = document.createElement("li");
     const adminA = document.createElement("a");
     adminA.className = "dropdown-item";
     adminA.href = "/admin/";
     adminA.setAttribute("data-i18n", "nav.administration");
     adminA.textContent = t("nav.administration");
-    adminLi.appendChild(adminA);
-    menu.appendChild(adminLi);
+    menu.appendChild(adminA);
   }
 
-  // Divider
-  const dividerLi = document.createElement("li");
-  const divider = document.createElement("hr");
-  divider.className = "dropdown-divider";
-  dividerLi.appendChild(divider);
-  menu.appendChild(dividerLi);
-
-  // Logout item
-  const logoutLi = document.createElement("li");
-  const logoutBtn = document.createElement("button");
+  // Logout item — an a.dropdown-item (JSP uses la:link /logout/). Keeps id
+  // #logout-btn so the existing click handler in setLoggedIn() wires to it.
+  const logoutBtn = document.createElement("a");
   logoutBtn.className = "dropdown-item";
   logoutBtn.id = "logout-btn";
-  logoutBtn.type = "button";
+  logoutBtn.href = "#";
+  logoutBtn.setAttribute("role", "button");
   logoutBtn.setAttribute("data-i18n", "auth.logout");
   logoutBtn.textContent = t("auth.logout");
-  logoutLi.appendChild(logoutBtn);
-  menu.appendChild(logoutLi);
+  menu.appendChild(logoutBtn);
 
   wrapper.appendChild(menu);
   return wrapper;
 }
 
+/**
+ * Build the guest login control inside #auth-controls (the li.nav-item).
+ * header.jsp parity: a.nav-link[/login] > i.fa.fa-fw.fa-sign-in + span(Login).
+ * Default action opens the SPA login modal; with SSO it is a direct link.
+ */
+function buildLoginLink() {
+  const cfg = api.getConfig() || {};
+  const features = cfg.features || {};
+  const a = document.createElement("a");
+  a.className = "nav-link";
+  a.id = "login-btn";
+  a.setAttribute("role", "button");
+  if (features.sso_enabled && features.login_link) {
+    a.href = features.login_link;
+  } else {
+    a.href = "/login";
+    a.setAttribute("data-bs-toggle", "modal");
+    a.setAttribute("data-bs-target", "#login-modal");
+  }
+  const icon = document.createElement("i");
+  icon.className = "fa fa-fw fa-sign-in";
+  icon.setAttribute("aria-hidden", "true");
+  a.appendChild(icon);
+  a.appendChild(document.createTextNode(" "));
+  const span = document.createElement("span");
+  span.setAttribute("data-i18n", "auth.login");
+  span.textContent = t("auth.login");
+  a.appendChild(span);
+  return a;
+}
+
 function setLoggedIn(user) {
+  api.setAuthenticated(true);
   const controls = document.getElementById("auth-controls");
   if (!controls) return;
 
-  // Remove previous dynamic content (old logout/login buttons),
-  // leave the static login button as a reference point.
+  // Remove the dynamic login link and any prior dropdown.
   const loginBtn = document.getElementById("login-btn");
-  const logoutBtn = document.getElementById("logout-btn");
+  if (loginBtn) loginBtn.remove();
   const existingDropdown = document.getElementById("user-dropdown");
-
-  if (logoutBtn) logoutBtn.classList.add("d-none");
-  if (loginBtn) loginBtn.classList.add("d-none");
   if (existingDropdown) existingDropdown.remove();
 
-  // Build and insert the dropdown before the login button (or append).
+  // Build and insert the user dropdown into the li.nav-item host.
   const dropdown = buildUserDropdown(user);
   dropdown.id = "user-dropdown";
-  if (loginBtn && loginBtn.parentNode === controls) {
-    controls.insertBefore(dropdown, loginBtn);
-  } else {
-    controls.appendChild(dropdown);
-  }
+  controls.appendChild(dropdown);
 
-  // Wire the logout button inside the freshly-built dropdown.
+  // Wire the logout link inside the freshly-built dropdown.
   const newLogoutBtn = dropdown.querySelector("#logout-btn");
   if (newLogoutBtn) {
-    newLogoutBtn.addEventListener("click", async () => {
+    newLogoutBtn.addEventListener("click", async (ev) => {
+      ev.preventDefault();
       let logoutEnv = null;
       try { logoutEnv = await api.post("/auth/logout", {}); } catch { /* server may have already invalidated */ }
       await rotateCsrf(logoutEnv);
@@ -164,20 +195,17 @@ function setLoggedIn(user) {
 }
 
 function setLoggedOut() {
-  const loginBtn = document.getElementById("login-btn");
-  const logoutBtn = document.getElementById("logout-btn");
+  api.setAuthenticated(false);
+  const controls = document.getElementById("auth-controls");
   const existingDropdown = document.getElementById("user-dropdown");
-
-  if (logoutBtn) logoutBtn.classList.add("d-none");
-  // Only show the login button when login_link feature is enabled (D.3).
-  if (loginBtn) {
-    if (isLoginLinkEnabled()) {
-      loginBtn.classList.remove("d-none");
-    } else {
-      loginBtn.classList.add("d-none");
-    }
-  }
   if (existingDropdown) existingDropdown.remove();
+  const existingLogin = document.getElementById("login-btn");
+  if (existingLogin) existingLogin.remove();
+  if (!controls) return;
+  // Only show the login link when the login_link feature is enabled (D.3).
+  if (isLoginLinkEnabled()) {
+    controls.appendChild(buildLoginLink());
+  }
 }
 
 /**
@@ -211,6 +239,21 @@ export function attach() {
   if (!isLoginLinkEnabled()) {
     const loginBtn = document.getElementById("login-btn");
     if (loginBtn) loginBtn.classList.add("d-none");
+  }
+
+  // Login notification banner (parity login/index.jsp:25). The configured message
+  // (config.notifications.login, set via admin General settings) is static, so fill
+  // the slot once on attach; the modal is opened declaratively by Bootstrap.
+  const notification = document.getElementById("login-notification");
+  if (notification) {
+    const html = (api.getConfig()?.notifications || {}).login || "";
+    while (notification.firstChild) notification.removeChild(notification.firstChild);
+    if (typeof html === "string" && html.trim() !== "") {
+      notification.classList.remove("d-none");
+      notification.appendChild(sanitizeHtml(html));
+    } else {
+      notification.classList.add("d-none");
+    }
   }
 
   const form = document.getElementById("login-form");

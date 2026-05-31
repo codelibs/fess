@@ -99,6 +99,7 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final ThemeListForm form) {
+        validate(form, messages -> {}, () -> asListHtml(form));
         saveToken();
         return asListHtml(form);
     }

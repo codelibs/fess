@@ -229,13 +229,14 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             assertTrue(body.contains("\"notifications\""), "notifications block missing in " + body);
             assertTrue(body.contains("\"search_top\""), "notifications.search_top missing in " + body);
             assertTrue(body.contains("\"advance_search\""), "notifications.advance_search missing in " + body);
+            assertTrue(body.contains("\"login\""), "notifications.login missing in " + body);
         }
     }
 
     /**
      * Task 3 (Notification): the {@code notifications} object must be present
-     * in the wire response and contain {@code search_top} and {@code advance_search}
-     * string fields (empty strings when no notifications are configured).
+     * in the wire response and contain {@code search_top}, {@code advance_search}
+     * and {@code login} string fields (empty strings when no notifications are configured).
      */
     @Test
     public void test_notifications_presentInSuccessPayload() throws Exception {
@@ -253,9 +254,10 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         if (res.status == 200) {
             final String body = res.body();
             assertTrue(body.contains("\"notifications\""), "notifications object missing in " + body);
-            // search_top and advance_search must both be present (as strings, may be empty).
+            // search_top, advance_search and login must all be present (as strings, may be empty).
             assertTrue(body.contains("\"search_top\""), "notifications.search_top missing in " + body);
             assertTrue(body.contains("\"advance_search\""), "notifications.advance_search missing in " + body);
+            assertTrue(body.contains("\"login\""), "notifications.login missing in " + body);
         }
     }
 

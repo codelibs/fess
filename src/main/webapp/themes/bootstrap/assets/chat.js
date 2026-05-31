@@ -173,7 +173,11 @@ function buildPhaseStrip() {
  *
  * @returns {{ panel: HTMLElement, getFilters: () => { fields: string[], extraQ: string[] } }}
  */
-function buildFilterPanel() {
+function buildFilterPanel(opts) {
+  // When embedded in the standalone card, the card-header already provides the
+  // filter toggle, so the panel's own toggle/clear header row is suppressed to
+  // avoid a duplicate "Filter" button (JSP parity: chat.jsp toggles from the header).
+  const embedded = !!(opts && opts.embedded);
   const cfg = api.getConfig() || {};
   const labelOptions = cfg.label_options || cfg.labels || [];
   const facetViews = cfg.facet_views || [];
@@ -220,7 +224,8 @@ function buildFilterPanel() {
 
   header.appendChild(toggleBtn);
   header.appendChild(clearBtn);
-  wrapper.appendChild(header);
+  // Embedded (standalone) mode hides this duplicate header; the card-header toggle drives the collapse.
+  if (!embedded) wrapper.appendChild(header);
 
   const collapse = el("div", { className: "collapse", attrs: { id: collapseId } });
   const filterBody = el("div", { className: "card card-body p-2 mb-2" });
@@ -296,7 +301,7 @@ function buildFilterPanel() {
       checkboxes.push(cb);
       groupCbs.push(cb);
       labelEl.appendChild(cb);
-      labelEl.appendChild(document.createTextNode(opt.label || opt.value || opt));
+      labelEl.appendChild(document.createTextNode(opt.label_key ? t(opt.label_key) : (opt.label || opt.value || opt)));
       groupWrap.appendChild(labelEl);
       rowEls.push(labelEl);
     }
@@ -309,7 +314,7 @@ function buildFilterPanel() {
   for (const facetView of facetViews) {
     const groupWrap = el("div", { className: "chat-filter-group mt-2" });
     const groupHeaderRow = el("div", { className: "d-flex align-items-center gap-1 mb-1" });
-    const groupLabel = el("div", { className: "fw-semibold small flex-grow-1", text: facetView.title || "" });
+    const groupLabel = el("div", { className: "fw-semibold small flex-grow-1", text: facetView.group_name ? t(facetView.group_name) : (facetView.title || "") });
     // Per-group badge (minor filter UX parity — updateGroupBadge).
     const groupBadgeEl = el("span", { className: "badge rounded-pill bg-secondary d-none chat-filter-group-badge", text: "0" });
     groupHeaderRow.appendChild(groupLabel);
@@ -318,7 +323,7 @@ function buildFilterPanel() {
     const queries = facetView.queryMap || facetView.queries || [];
     const groupCbs = [];
     const rowEls = [];
-    for (const [key, val] of (Array.isArray(queries) ? queries.map(q => [q.label || q, q.value || q]) : Object.entries(queries))) {
+    for (const [key, val] of (Array.isArray(queries) ? queries.map(q => [q.label_key ? t(q.label_key) : (q.label || q.value || q), q.value != null ? q.value : q]) : Object.entries(queries))) {
       const labelEl = el("label", { className: "d-flex align-items-center gap-1 small mb-1" });
       const cb = el("input", { attrs: { type: "checkbox", "data-filter-type": "ex_q", "data-filter-value": val } });
       cb.addEventListener("change", () => { updateBadge(); updateGroupBadge(groupBadgeEl, groupCbs); });
@@ -375,8 +380,9 @@ function buildFilterPanel() {
 
 function buildWelcomeState() {
   const wrap = el("div", { className: "chat-welcome text-center py-5" });
-  const icon = el("div", { className: "mb-3" });
-  const iconI = el("i", { className: "fa fa-comments fa-3x text-muted", attrs: { "aria-hidden": "true" } });
+  // chat.css parity (.empty-state-icon): a circular blue-gradient badge holding a white icon.
+  const icon = el("div", { className: "chat-welcome-icon mb-3" });
+  const iconI = el("i", { className: "fa fa-comments", attrs: { "aria-hidden": "true" } });
   icon.appendChild(iconI);
   wrap.appendChild(icon);
 
@@ -1154,7 +1160,7 @@ export function attachStandalone() {
   card.appendChild(cardHeader);
 
   // ---- Filter panel ----
-  const { panel: filterPanel, getFilters, resetFilters } = buildFilterPanel();
+  const { panel: filterPanel, getFilters, resetFilters } = buildFilterPanel({ embedded: true });
   // Override the collapse id to match the toggle button target
   const filterCollapse = filterPanel.querySelector(".collapse");
   if (filterCollapse) filterCollapse.id = filterCollapseId;
@@ -1215,7 +1221,7 @@ export function attachStandalone() {
     attrs: {
       id: "standalone-chat-input",
       placeholder: t("labels.chat_input_placeholder"),
-      rows: "2",
+      rows: "1",
       maxlength: "4000",
       "aria-label": t("labels.chat_input_placeholder")
     }
