@@ -7,7 +7,7 @@
 
 Fess 是一个功能强大且易于部署的企业搜索服务器。您可以在任何可以运行 Java 运行时环境的平台上快速安装和运行 Fess。Fess 根据 [Apache 许可证 2.0](LICENSE) 提供。
 
-Fess 基于 [OpenSearch](https://github.com/opensearch-project/OpenSearch)，但不需要 OpenSearch 的知识或经验。Fess 提供了一个易于使用的管理 GUI，您可以通过浏览器配置系统。Fess 还包含一个爬虫，能够抓取 [Web 服务器](https://fess.codelibs.org/15.3/admin/webconfig-guide.html)、[文件系统](https://fess.codelibs.org/15.3/admin/fileconfig-guide.html)或[数据存储](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html)（如 CSV 或数据库）中的文档。Fess 支持多种文件格式，包括但不限于：Microsoft Office、PDF 和 zip。
+Fess 基于 [OpenSearch](https://github.com/opensearch-project/OpenSearch)，但不需要 OpenSearch 的知识或经验。Fess 提供了一个易于使用的管理 GUI，您可以通过浏览器配置系统。Fess 还包含一个爬虫，能够抓取 [Web 服务器](https://fess.codelibs.org/15.6/admin/webconfig-guide.html)、[文件系统](https://fess.codelibs.org/15.6/admin/fileconfig-guide.html)或[数据存储](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html)（如 CSV 或数据库）中的文档。Fess 支持多种文件格式，包括但不限于：Microsoft Office、PDF 和 zip。
 
 *[Fess 网站搜索](https://github.com/codelibs/fess-site-search)* 是 [Google 网站搜索](https://enterprise.google.com/search/products/gss.html)的免费替代品。更多详情请参阅 [FSS JS 生成器文档](https://fss-generator.codelibs.org/docs/manual)。
 
@@ -25,15 +25,15 @@ Fess 基于 [OpenSearch](https://github.com/opensearch-project/OpenSearch)，但
 
 ### 下载并安装/运行
 
-Fess 15.3 现已发布，可在 [发布页面](https://github.com/codelibs/fess/releases "download") 下载。提供三种下载形式：deb、rpm、zip。
+Fess 15.6 现已发布，可在 [发布页面](https://github.com/codelibs/fess/releases "download") 下载。提供三种下载形式：deb、rpm、zip。
 
 以下命令展示了如何使用 zip 下载：
 
-    $ unzip fess-15.3.x.zip
-    $ cd fess-15.3.x
+    $ unzip fess-15.6.x.zip
+    $ cd fess-15.6.x
     $ ./bin/fess
 
-更多详情请参阅 [安装指南](https://fess.codelibs.org/15.3/install/index.html)。
+更多详情请参阅 [安装指南](https://fess.codelibs.org/15.6/install/index.html)。
 
 ### Docker
 
@@ -49,7 +49,7 @@ Fess 15.3 现已发布，可在 [发布页面](https://github.com/codelibs/fess/
 
 ![Admin UI](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-您可以在管理 UI 的 (Web、文件、数据存储) 爬虫配置页面中注册爬取目标，然后在 [调度器页面](https://fess.codelibs.org/15.3/admin/scheduler-guide.html)手动启动爬虫。
+您可以在管理 UI 的 (Web、文件、数据存储) 爬虫配置页面中注册爬取目标，然后在 [调度器页面](https://fess.codelibs.org/15.6/admin/scheduler-guide.html)手动启动爬虫。
 
 ## 从其他搜索提供商迁移
 
@@ -57,7 +57,7 @@ Fess 15.3 现已发布，可在 [发布页面](https://github.com/codelibs/fess/
 
 ## 数据存储
 
-当前，Fess 支持抓取以下[存储位置和 API](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html)：
+当前，Fess 支持抓取以下[存储位置和 API](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html)：
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
@@ -128,11 +128,35 @@ Fess 15.3 现已发布，可在 [发布页面](https://github.com/codelibs/fess/
 
 ### 集成测试
 
-启动 Fess 服务器并运行以下命令：
+集成测试需要一个运行中的 Fess 服务器以及 OpenSearch。请按照以下步骤操作：
+
+#### 1. 构建 Fess
+
+    $ mvn antrun:run  # 下载 OpenSearch 插件（如果尚未下载）
+    $ mvn package     # 构建软件包
+
+#### 2. 启动 Fess 服务器
+
+    $ unzip target/releases/fess-*.zip
+    $ ./fess-*/bin/fess &
+
+等待 Fess 准备就绪（这可能需要最多 60 秒）：
+
+    $ curl -s "http://localhost:8080/api/v1/health"
+
+当 Fess 准备就绪时，您应该会看到一个 JSON 响应。
+
+#### 3. 克隆测试数据
+
+SearchApiTests 需要：
+
+    $ git clone https://github.com/codelibs/fess-testdata.git /tmp/fess-testdata
+
+#### 4. 运行集成测试
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
 
-要运行单个测试用例，您可以使用：
+要运行单个测试用例：
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201" -Dtest=SearchApiTests
 
