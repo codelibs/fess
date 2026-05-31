@@ -92,17 +92,7 @@ public class ChatApiHelper {
             return Collections.emptyMap();
         }
 
-        final List<String> labelValues = new ArrayList<>();
-        if (labelsRaw instanceof List<?> l) {
-            for (final Object o : l) {
-                if (o != null) {
-                    labelValues.add(o.toString());
-                }
-            }
-        } else {
-            labelValues.add(labelsRaw.toString());
-        }
-
+        final List<String> labelValues = toStringList(labelsRaw);
         if (labelValues.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -120,18 +110,7 @@ public class ChatApiHelper {
             logger.warn("chat allowlist load failed for labels", e);
         }
 
-        final List<String> valid = new ArrayList<>();
-        final List<String> rejected = new ArrayList<>();
-        for (final String v : labelValues) {
-            if (v != null && allowed.contains(v)) {
-                valid.add(v);
-            } else if (v != null) {
-                rejected.add(v);
-            }
-        }
-        if (!rejected.isEmpty()) {
-            warnings.put("fields.label", Collections.unmodifiableList(rejected));
-        }
+        final List<String> valid = partitionAllowed(labelValues, allowed, "fields.label", warnings);
         if (valid.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -157,17 +136,7 @@ public class ChatApiHelper {
             return new String[0];
         }
 
-        final List<String> values = new ArrayList<>();
-        if (exqRaw instanceof List<?> l) {
-            for (final Object o : l) {
-                if (o != null) {
-                    values.add(o.toString());
-                }
-            }
-        } else {
-            values.add(exqRaw.toString());
-        }
-
+        final List<String> values = toStringList(exqRaw);
         if (values.isEmpty()) {
             return new String[0];
         }
@@ -182,6 +151,44 @@ public class ChatApiHelper {
             logger.warn("chat allowlist load failed for extra_queries", e);
         }
 
+        final List<String> valid = partitionAllowed(values, allowed, "extra_queries", warnings);
+        return valid.toArray(new String[0]);
+    }
+
+    /**
+     * Coerces a raw request value into a list of strings: each element of a {@link List} is
+     * converted via {@code toString()} (skipping nulls); any other non-null value yields a
+     * single-element list. A {@code null} input yields an empty list.
+     *
+     * @param raw the raw value (a {@code List}, a scalar, or {@code null})
+     * @return the coerced string values (never {@code null})
+     */
+    private static List<String> toStringList(final Object raw) {
+        final List<String> values = new ArrayList<>();
+        if (raw instanceof List<?> l) {
+            for (final Object o : l) {
+                if (o != null) {
+                    values.add(o.toString());
+                }
+            }
+        } else if (raw != null) {
+            values.add(raw.toString());
+        }
+        return values;
+    }
+
+    /**
+     * Partitions {@code values} against an allowlist, returning the accepted values and recording
+     * rejected ones under {@code warningKey} in {@code warnings} (only when non-empty).
+     *
+     * @param values the candidate values
+     * @param allowed the set of permitted values
+     * @param warningKey the key under which rejected values are recorded
+     * @param warnings mutable map collecting rejected values
+     * @return the values present in {@code allowed} (never {@code null})
+     */
+    private static List<String> partitionAllowed(final List<String> values, final Set<String> allowed, final String warningKey,
+            final Map<String, List<String>> warnings) {
         final List<String> valid = new ArrayList<>();
         final List<String> rejected = new ArrayList<>();
         for (final String v : values) {
@@ -192,9 +199,9 @@ public class ChatApiHelper {
             }
         }
         if (!rejected.isEmpty()) {
-            warnings.put("extra_queries", Collections.unmodifiableList(rejected));
+            warnings.put(warningKey, Collections.unmodifiableList(rejected));
         }
-        return valid.toArray(new String[0]);
+        return valid;
     }
 
     /**

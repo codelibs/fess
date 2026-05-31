@@ -21,11 +21,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.helper.SearchHelper;
@@ -71,9 +69,6 @@ public class ClickHandler {
     // Click payloads are tiny — 2 KiB is generous enough for any reasonable
     // client and small enough to make payload-bomb attacks pointless.
     private static final int MAX_BODY_BYTES = 2 * 1024;
-
-    // Conservative whitelist — see FavoriteGetHandler for rationale.
-    private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     /**
      * One-shot warning flag so a missing {@code UserInfoHelper} component is
@@ -173,7 +168,7 @@ public class ClickHandler {
         }
         final String docId = stringOrNull(body, "doc_id");
         final String queryId = stringOrNull(body, "query_id");
-        if (StringUtil.isBlank(docId) || !DOC_ID_PATTERN.matcher(docId).matches()) {
+        if (!DocIdValidator.isValid(docId)) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }

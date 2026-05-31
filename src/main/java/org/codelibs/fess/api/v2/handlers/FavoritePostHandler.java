@@ -18,7 +18,6 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -86,9 +85,6 @@ public class FavoritePostHandler {
     // ample headroom while making payload-bomb attacks pointless.
     private static final int MAX_BODY_BYTES = 1024;
 
-    // Conservative whitelist — see FavoriteGetHandler for rationale.
-    private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
-
     /**
      * Processes one {@code /api/v2/documents/{docId}/favorite} POST request.
      *
@@ -150,7 +146,7 @@ public class FavoritePostHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
-        if (StringUtil.isBlank(docId) || !DOC_ID_PATTERN.matcher(docId).matches()) {
+        if (!DocIdValidator.isValid(docId)) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }

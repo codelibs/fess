@@ -28,6 +28,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -66,6 +67,12 @@ public class StaticThemeResponder {
      * and permits inline styles that SVG documents often contain.
      */
     static final String SVG_CSP = "default-src 'none'; style-src 'unsafe-inline'";
+
+    /**
+     * Allowlist for the {@code message_key} request parameter: letters, digits, dots,
+     * underscores and hyphens only. Compiled once rather than per request.
+     */
+    private static final Pattern MESSAGE_KEY_PATTERN = Pattern.compile("[A-Za-z0-9._\\-]+");
 
     /**
      * Default constructor.
@@ -266,7 +273,7 @@ public class StaticThemeResponder {
             return null;
         }
         // Allowlist: letters, digits, dots, underscores, hyphens only.
-        if (!raw.matches("[A-Za-z0-9._\\-]+")) {
+        if (!MESSAGE_KEY_PATTERN.matcher(raw).matches()) {
             return null;
         }
         return raw;

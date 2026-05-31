@@ -18,7 +18,6 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,12 +67,6 @@ public class CacheHandler {
 
     private static final Logger logger = LogManager.getLogger(CacheHandler.class);
 
-    // Conservative whitelist — matches the same character class used by
-    // FavoriteGetHandler / FavoritePostHandler. The v1 action accepts an
-    // unconstrained form-bound string, but v2 surfaces docId via the URL path
-    // so we lock it down to avoid path-traversal-style abuse.
-    private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
-
     /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
@@ -96,7 +89,7 @@ public class CacheHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
-        if (StringUtil.isBlank(docId) || !DOC_ID_PATTERN.matcher(docId).matches()) {
+        if (!DocIdValidator.isValid(docId)) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }

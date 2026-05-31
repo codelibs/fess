@@ -251,6 +251,24 @@ public class StaticThemeFilter implements Filter {
         return false;
     }
 
+    /**
+     * Logs {@code warnMsg} at WARN the first time {@code latch} is tripped, then degrades
+     * subsequent occurrences to a DEBUG {@code debugMsg}. Keeps the per-component lookup
+     * failures from flooding the log one line per request.
+     *
+     * @param latch the per-component first-failure latch
+     * @param warnMsg the message logged once at WARN
+     * @param debugMsg the message logged at DEBUG on later failures
+     * @param e the cause
+     */
+    private void warnOnce(final AtomicBoolean latch, final String warnMsg, final String debugMsg, final Exception e) {
+        if (latch.compareAndSet(false, true)) {
+            logger.warn(warnMsg, e);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug(debugMsg, e);
+        }
+    }
+
     private ThemeRegistry resolveRegistry() {
         if (themeRegistry != null) {
             return themeRegistry;
@@ -258,11 +276,7 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getThemeRegistry();
         } catch (final Exception e) {
-            if (firstFailure.compareAndSet(false, true)) {
-                logger.warn("ThemeRegistry not available; static-theme routing disabled", e);
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("ThemeRegistry not available", e);
-            }
+            warnOnce(firstFailure, "ThemeRegistry not available; static-theme routing disabled", "ThemeRegistry not available", e);
             return null;
         }
     }
@@ -274,11 +288,8 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getStaticThemeResponder();
         } catch (final Exception e) {
-            if (responderFirstFailure.compareAndSet(false, true)) {
-                logger.warn("StaticThemeResponder not available; static-theme routing disabled", e);
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("StaticThemeResponder not available", e);
-            }
+            warnOnce(responderFirstFailure, "StaticThemeResponder not available; static-theme routing disabled",
+                    "StaticThemeResponder not available", e);
             return null;
         }
     }
@@ -290,11 +301,8 @@ public class StaticThemeFilter implements Filter {
                 return h.getVirtualHostKey();
             }
         } catch (final Exception e) {
-            if (hostKeyFirstFailure.compareAndSet(false, true)) {
-                logger.warn("VirtualHostHelper not available; using null host key for static-theme routing", e);
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("VirtualHostHelper not available; using null host key", e);
-            }
+            warnOnce(hostKeyFirstFailure, "VirtualHostHelper not available; using null host key for static-theme routing",
+                    "VirtualHostHelper not available; using null host key", e);
         }
         return null;
     }
