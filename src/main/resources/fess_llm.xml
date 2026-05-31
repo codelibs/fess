@@ -10,7 +10,7 @@
 	</component>
 
 	<!-- Shared helper for v2 chat API handlers -->
-	<component name="chatApiHelper" class="org.codelibs.fess.api.chat.ChatApiHelper">
+	<component name="chatApiHelper" class="org.codelibs.fess.helper.ChatApiHelper">
 	</component>
 
 	<!-- Markdown renderer -->

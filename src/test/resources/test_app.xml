@@ -10,5 +10,5 @@
 
 	<!-- Stateless helper used by v2 chat API handlers/tests (its getUserId DI path is exercised
 	     only in production; handler tests override the handler getUserId seam). -->
-	<component name="chatApiHelper" class="org.codelibs.fess.api.chat.ChatApiHelper" />
+	<component name="chatApiHelper" class="org.codelibs.fess.helper.ChatApiHelper" />
 </components>

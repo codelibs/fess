@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.api.chat.ChatApiHelper;
+import org.codelibs.fess.helper.ChatApiHelper;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**

@@ -911,7 +911,7 @@ public class SystemHelper {
     }
 
     private static final String[] LLM_LOG_PACKAGES =
-            { "org.codelibs.fess.llm", "org.codelibs.fess.chat", "org.codelibs.fess.api.chat", "org.codelibs.fess.app.web.chat" };
+            { "org.codelibs.fess.llm", "org.codelibs.fess.chat", "org.codelibs.fess.app.web.chat" };
 
     /**
      * Sets the log level for LLM-related packages.

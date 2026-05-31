@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.api.chat;
+package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -77,7 +76,6 @@ public class ChatApiHelper {
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return a map of validated field filters, or an empty map when none are present
      */
-    @SuppressWarnings("unchecked")
     public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
         // Support nested fields object: {"fields": {"label": ... }}
         Object labelsRaw = null;
@@ -153,7 +151,6 @@ public class ChatApiHelper {
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return array of validated extra query strings; empty array when none present
      */
-    @SuppressWarnings("unchecked")
     public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
         final Object exqRaw = raw.get("extra_queries");
         if (exqRaw == null) {

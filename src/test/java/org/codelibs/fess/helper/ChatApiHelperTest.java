@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.api.chat;
+package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
