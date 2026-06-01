@@ -133,8 +133,11 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse reload(final ThemeListForm form) {
+        // validate must run before verifyToken: ThemeListForm carries validator annotations,
+        // so LastaFlute requires the validator call to precede token verification
+        // (otherwise DoubleSubmitVerifyTokenBeforeValidationException is raised).
+        validate(form, messages -> {}, () -> asListHtml(form));
         verifyToken(() -> asListHtml(form));
-        // validate is intentionally not called for reload — it has no form fields to validate
         try {
             themeRegistry.reload();
             saveInfo(m -> m.addSuccessReloadTheme(GLOBAL));
@@ -176,8 +179,8 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final ThemeUploadForm form) {
-        verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         // C-2: normalize null fileName (multipart parts without a filename= attribute return null
         // from getFileName()). Using the normalized local everywhere prevents a literal "null"
         // from appearing in error/success messages and prevents NPE in hasZipExtension.
@@ -298,8 +301,8 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final ThemeDeleteForm form) {
-        verifyToken(() -> asListHtml(new ThemeListForm()));
         validate(form, messages -> {}, () -> asListHtml(new ThemeListForm()));
+        verifyToken(() -> asListHtml(new ThemeListForm()));
         try {
             staticThemeInstaller.delete(form.name);
             saveInfo(m -> m.addSuccessDeleteTheme(GLOBAL, form.name));
@@ -349,8 +352,8 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse setdefault(final ThemeListForm form) {
-        verifyToken(() -> asListHtml(form));
         validate(form, messages -> {}, () -> asListHtml(form));
+        verifyToken(() -> asListHtml(form));
         final String name = form.defaultTheme == null ? "" : form.defaultTheme.trim();
         if (!name.isEmpty()) {
             // existence check — refuse to point the default theme at a missing theme
@@ -359,7 +362,9 @@ public class AdminThemeAction extends FessAdminAction {
             }
         }
         try {
-            ComponentUtil.getFessConfig().setDefaultTheme(name);
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            fessConfig.setDefaultTheme(name);
+            fessConfig.storeSystemProperties(); // setDefaultTheme only updates the in-memory value; persist it to system.properties
             themeRegistry.reload(); // re-resolve in case the new default needs to take effect immediately
             if (name.isEmpty()) {
                 saveInfo(m -> m.addSuccessClearDefaultTheme(GLOBAL));

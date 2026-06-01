@@ -525,8 +525,8 @@ public class AdminThemeActionTest extends UnitFessTestCase {
     }
 
     /**
-     * Production path covered: {@code AdminThemeAction#upload} calls {@code verifyToken()},
-     * then {@code validate()}, then detects a non-zip extension via {@code hasZipExtension()}
+     * Production path covered: {@code AdminThemeAction#upload} calls {@code validate()},
+     * then {@code verifyToken()}, then detects a non-zip extension via {@code hasZipExtension()}
      * and calls {@code throwValidationError(addErrorsFileIsNotSupported)} before reading any
      * stream — confirming the pre-flight extension guard fires for a {@code .txt} file.
      */
@@ -582,8 +582,8 @@ public class AdminThemeActionTest extends UnitFessTestCase {
     }
 
     /**
-     * Production path covered: {@code AdminThemeAction#setdefault} calls {@code verifyToken()},
-     * then {@code validate()}, then checks {@code themeRegistry.getTheme(name).isEmpty()} for a
+     * Production path covered: {@code AdminThemeAction#setdefault} calls {@code validate()},
+     * then {@code verifyToken()}, then checks {@code themeRegistry.getTheme(name).isEmpty()} for a
      * non-empty name and calls {@code throwValidationError(addErrorsThemeNotFound)} when the
      * registry returns empty — which it does for any name not actually installed.
      */
@@ -607,9 +607,10 @@ public class AdminThemeActionTest extends UnitFessTestCase {
     }
 
     /**
-     * Production path covered: {@code AdminThemeAction#reload} calls {@code verifyToken()},
-     * then {@code themeRegistry.reload()}, then {@code saveInfo(addSuccessReloadTheme)},
-     * then {@code redirect(getClass())} — the full success flow exercised end-to-end.
+     * Production path covered: {@code AdminThemeAction#reload} calls {@code validate()},
+     * then {@code verifyToken()}, then {@code themeRegistry.reload()}, then
+     * {@code saveInfo(addSuccessReloadTheme)}, then {@code redirect(getClass())} — the full
+     * success flow exercised end-to-end.
      * A no-op {@code ThemeRegistry} subclass is used so the reload does not require the
      * filesystem/search-engine, mirroring the StaticThemeResponderTest injection style.
      */
