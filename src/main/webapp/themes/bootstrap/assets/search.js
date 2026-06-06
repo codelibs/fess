@@ -706,7 +706,7 @@ function renderSuggestItems(items) {
 async function showSuggest(q) {
   const dropdown = document.getElementById("suggest-dropdown");
   const inp = document.getElementById("query");
-  if (!q || q.length < 2) {
+  if (!q || q.length < 1) {
     dropdown.classList.add("d-none");
     while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
     if (inp) inp.setAttribute("aria-expanded", "false");
