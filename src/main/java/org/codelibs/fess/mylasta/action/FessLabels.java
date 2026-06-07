@@ -3822,7 +3822,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Theme ZIP File */
     public static final String LABELS_theme_zip_file = "{labels.theme_zip_file}";
 
-    /** The key of the message: Set Default */
+    /** The key of the message: Default Theme */
+    public static final String LABELS_theme_default = "{labels.theme_default}";
+
+    /** The key of the message: Set */
     public static final String LABELS_theme_set_default = "{labels.theme_set_default}";
 
     /** The key of the message: Reload */
