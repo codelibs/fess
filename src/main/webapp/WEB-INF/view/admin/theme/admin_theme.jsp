@@ -60,7 +60,7 @@ ${fe:html(true)}
                                         <la:form action="/admin/theme/setdefault" styleId="setDefaultForm">
                                             <div class="form-group row">
                                                 <label for="defaultTheme" class="col-md-3 text-sm-right col-form-label">
-                                                    <la:message key="labels.theme_set_default"/>
+                                                    <la:message key="labels.theme_default"/>
                                                 </label>
                                                 <div class="col-md-6">
                                                     <la:select property="defaultTheme" styleId="defaultTheme" styleClass="form-control">
