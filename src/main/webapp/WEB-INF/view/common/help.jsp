@@ -1,70 +1,66 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<h2>Query Syntax</h2>
-<dl>
-	<dt>Field</dt>
-	<dd>
-		You can search any field by typing the field name followed by a colon
-		":" and then the term you are looking for. If you want to find
-		documents which has "Fess" as the document title, you can enter:
-		<pre>title:Fess</pre>
-		The available fields are "url", "host", "site", "title", "content",
-		"content_length", "last_modified" and "mimetype", and they are
-		customizable.
-	</dd>
-	<dt>Sort</dt>
-	<dd>
-		sort field sorts documents by a specified field name. The format is
-		"sort:&lt;field&gt;.&lt;order&gt;", where &lt;order&gt; is asc or
-		desc. If you want to find documents which has "Fess" and sort them in
-		descending order, you can enter:
-		<pre>Fess sort:content_length.desc</pre>
-		The available sort field are "created", "content_length" and
-		"last_modified", and they are customizable.
-	</dd>
-	<dt>AND</dt>
-	<dd>
-		AND operator is the default conjunction operator. You can omit it from
-		a query. AND operator matches documents where both terms exist
-		anywhere in the text of a single document.
-		<pre>Fess AND CodeLibs</pre>
-	</dd>
-	</dd>
-	<dt>OR</dt>
-	<dd>
-		OR operator matches documents where any terms exist anywhere in the
-		text of a single document.
-		<pre>Fess OR CodeLibs</pre>
-	</dd>
-	<dt>Wildcard</dt>
-	<dd>
-		single and multiple character wildcard searches within single terms
-		are supported. "?" symbol is a single character wildcard search, and
-		"*" is a multiple character wildcard search.
-		<pre>Fess*</pre>
-		or
-		<pre>Fe?s</pre>
-	</dd>
-	<dt>Range</dt>
-	<dd>
-		Range Queries allow one to match documents whose field(s) values are
-		between the lower and upper bound specified by the Range Query. Range
-		Queries can be inclusive or exclusive of the upper and lower bounds.
-		If you want to find documents whose content_length fields have values
-		between 1000 and 10000, inclusive, you can enter:
-		<pre>content_length:[1000 TO 10000]</pre>
-		If you want to exclude the upper and lower bounds, use "{}".
-	</dd>
-	<dt>Boost</dt>
-	<dd>
-		To boost a term use the "^" symbol with a boost factor (a number) at
-		the end of the term you are searching.
-		<pre>Fess^100</pre>
-	</dd>
-	<dt>Fuzzy</dt>
-	<dd>
-		To do a fuzzy search use the "~" symbol at the end of a single word
-		term. For example to search for a term similar in spelling to "Fess"
-		use the fuzzy search:
-		<pre>Fess~0.5</pre>
-	</dd>
-</dl>
+<section id="help-basic" class="help-section">
+	<h2>Basic Search</h2>
+	<p>To search, type your query into the search box and press Enter (or click the Search button).</p>
+	<p>Multiple words are combined with AND by default. For example, <code>open source</code> finds documents containing both "open" and "source".</p>
+</section>
+<section id="help-operators" class="help-section">
+	<h2>Search Operators</h2>
+	<table class="table table-sm">
+		<thead>
+			<tr><th scope="col">Operator</th><th scope="col">Description</th><th scope="col">Example</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Both terms must appear</td><td><code>fess AND search</code></td></tr>
+			<tr><td><code>OR</code> / <code>||</code></td><td>Either term may appear</td><td><code>fess OR opensearch</code></td></tr>
+			<tr><td><code>NOT</code> / <code>-</code></td><td>Exclude the term</td><td><code>fess -lucene</code></td></tr>
+			<tr><td><code>"..."</code></td><td>Exact phrase</td><td><code>"full text search"</code></td></tr>
+			<tr><td><code>site:</code></td><td>Restrict to a site</td><td><code>site:example.com fess</code></td></tr>
+			<tr><td><code>filetype:</code></td><td>Restrict to a file type</td><td><code>filetype:pdf fess</code></td></tr>
+		</tbody>
+	</table>
+</section>
+<section id="help-wildcards" class="help-section">
+	<h2>Wildcards</h2>
+	<p>You can use <code>*</code> to match any sequence of characters and <code>?</code> to match a single character.</p>
+	<p>Examples: <code>fess*</code> matches "fess", "fessbook", "fessful". <code>te?t</code> matches "test" or "text".</p>
+</section>
+<section id="help-ranges" class="help-section">
+	<h2>Range Queries</h2>
+	<p>Use square brackets to search for a range of values: <code>content_length:[1024 TO 10240]</code> finds documents with sizes between 1KB and 10KB.</p>
+	Square brackets <code>[ ]</code> include the bounds; curly braces <code>{ }</code> exclude them, e.g. <code>content_length:{1024 TO 10240}</code> matches sizes strictly greater than 1KB and strictly less than 10KB.
+</section>
+<section id="help-facets" class="help-section">
+	<h2>Facet Filters</h2>
+	<p>Use the sidebar facets to narrow your search by label, time period, file size, or file type. Click a facet item to apply it, and click the chip at the top of the results to remove it.</p>
+</section>
+<section id="help-shortcuts" class="help-section">
+	<h2>Keyboard Shortcuts</h2>
+	<ul>
+		<li><code>/</code> &mdash; Focus the search box</li>
+		<li><code>Esc</code> &mdash; Close suggestions or modal</li>
+		<li><code>Enter</code> &mdash; Run search or select suggestion</li>
+	</ul>
+</section>
+<section id="help-field" class="help-section">
+	<h2>Field Search</h2>
+	<p>You can search any field by typing the field name followed by a colon <code>:</code> and then the term you are looking for. For example, to find documents with "Fess" in the title:</p>
+	<pre>title:Fess</pre>
+	<p>The available fields include <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, and <code>mimetype</code>. These are customizable.</p>
+</section>
+<section id="help-sort" class="help-section">
+	<h2>Sort</h2>
+	<p>The <code>sort:</code> operator sorts results by a specified field. The format is <code>sort:&lt;field&gt;.&lt;order&gt;</code>, where <code>&lt;order&gt;</code> is <code>asc</code> or <code>desc</code>. For example, to search for "Fess" sorted by content length descending:</p>
+	<pre>Fess sort:content_length.desc</pre>
+	<p>Available sort fields include <code>created</code>, <code>content_length</code>, and <code>last_modified</code>. These are customizable.</p>
+</section>
+<section id="help-boost" class="help-section">
+	<h2>Boost</h2>
+	<p>To boost a term, use the <code>^</code> symbol followed by a boost factor (a number) at the end of the search term. A higher factor increases the relevance score of that term.</p>
+	<pre>Fess^100</pre>
+</section>
+<section id="help-fuzzy" class="help-section">
+	<h2>Fuzzy Search</h2>
+	<p>To perform a fuzzy search, use the <code>~</code> symbol at the end of a single word. The optional number after <code>~</code> (0 to 1) controls the similarity threshold. The default is <code>0.5</code>.</p>
+	<pre>Fess~0.5</pre>
+</section>
