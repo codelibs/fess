@@ -489,6 +489,45 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
                 res.headers.get("Referrer-Policy"));
     }
 
+    @Test
+    public void test_process_setsNoStoreCacheControlOnSuccessResponses() throws Exception {
+        // Success envelopes can carry session-scoped data: the CSRF token on /ui/config,
+        // user identity on /auth/me and /auth/login, and role-filtered hits on /search.
+        // process() must therefore default every v2 response to Cache-Control: no-store
+        // before dispatch so shared proxies never store them. The error path already gets
+        // the header from V2EnvelopeWriter.writeErrorWithDetails, so this asserts the
+        // success path via a stub handler that does NOT set the header itself.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final org.codelibs.fess.api.v2.handlers.LoginHandler stub =
+                new org.codelibs.fess.api.v2.handlers.LoginHandler(new org.codelibs.fess.api.v2.handlers.LoginRateLimiter()) {
+                    @Override
+                    public void handle(final jakarta.servlet.http.HttpServletRequest req,
+                            final jakarta.servlet.http.HttpServletResponse res) throws java.io.IOException {
+                        res.setContentType("application/json");
+                        res.setStatus(200);
+                        res.getWriter().write("{\"stub\":\"ok\"}");
+                    }
+                };
+        m.loginHandler = stub;
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/auth/login").withMethod("POST"), res, new NopChain());
+        assertEquals(200, res.status);
+        assertEquals("v2 success responses must default to Cache-Control: no-store", "no-store", res.headers.get("Cache-Control"));
+    }
+
+    @Test
+    public void test_process_cacheControlDefaultPrecedesConfiguredHeaders() throws Exception {
+        // The no-store default must be set BEFORE writeHeaders applies the operator's
+        // api.json.response.headers, so a deployment can deliberately override the
+        // caching policy through configuration. With the default config (which only
+        // sets Referrer-Policy) both headers must be present on the same response.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/does-not-exist"), res, new NopChain());
+        assertEquals("no-store", res.headers.get("Cache-Control"));
+        assertEquals("strict-origin-when-cross-origin", res.headers.get("Referrer-Policy"));
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override

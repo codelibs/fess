@@ -187,6 +187,14 @@ public class SearchApiV2Manager extends BaseApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
+        // Default every v2 response to `no-store`: success envelopes can carry the session
+        // CSRF token (/ui/config), user identity (/auth/me, /auth/login) or role-filtered
+        // hits (/search, /favorites), none of which a shared cache may ever store. Without
+        // an explicit Cache-Control a 200 GET response is eligible for HTTP heuristic
+        // caching. Set BEFORE writeHeaders so an operator-configured Cache-Control in
+        // `api.json.response.headers` deliberately overrides this default; the error path
+        // (V2EnvelopeWriter.writeErrorWithDetails) re-asserts `no-store` independently.
+        response.setHeader("Cache-Control", "no-store");
         // Apply the configured `api.json.response.headers` (e.g. Referrer-Policy) at the very
         // top of dispatch so EVERY v2 response carries the security-baseline headers —
         // including CSRF rejections, NDJSON / SSE streams, and error envelopes. Unlike v1
