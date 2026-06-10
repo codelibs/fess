@@ -1925,15 +1925,6 @@ function renderPagination(env) {
   }
 }
 
-async function refreshFavorite(docId, btn) {
-  try {
-    const env = await api.get("/documents/" + encodeURIComponent(docId) + "/favorite");
-    setFavoriteUi(btn, !!env.favorite, env.count || 0);
-  } catch (e) {
-    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) btn.classList.add("d-none");
-  }
-}
-
 function setFavoriteUi(btn, on, count) {
   btn.setAttribute("aria-pressed", on ? "true" : "false");
   btn.setAttribute("aria-label", on ? t("result.favorite_remove") : t("result.favorite_add"));
@@ -1961,7 +1952,12 @@ async function toggleFavorite(docId, btn, queryId) {
     const env = await api.post("/documents/" + encodeURIComponent(docId) + "/favorite", { query_id: queryId || "" });
     setFavoriteUi(btn, !!env.favorite, env.count || 0);
   } catch (e) {
-    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
+    // 401/AUTH_REQUIRED: adding a favorite requires login (FavoritePostHandler gate).
+    // 403: the CSRF gate rejects a stale session-bound token (e.g. the guest session
+    // expired between page load and the click) *before* the auth check runs, so a
+    // guest click can surface as 403 instead of 401. Logging in through the modal
+    // issues a fresh session + token, so treat both the same.
+    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403) {
       if (!window.bootstrap || !bootstrap.Modal) {
         console.warn("[fess] bootstrap not loaded; skipping modal show");
       } else {
