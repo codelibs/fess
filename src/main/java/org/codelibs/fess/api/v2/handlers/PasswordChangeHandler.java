@@ -81,7 +81,9 @@ import jakarta.servlet.http.HttpSession;
  *
  * <p>MJ-30 i18n contract: {@code error.message} values in this handler are
  * developer-facing English strings. Clients MUST use {@code error.code}
- * (the V2ErrorCode token) for user-facing i18n.</p>
+ * (the V2ErrorCode token) for user-facing i18n. Handlers also emit a stable
+ * {@code error.details.reason} token (and {@code min_length} for
+ * {@code errors.password_length}) so clients can localize the specific failure.</p>
  */
 public class PasswordChangeHandler {
 
@@ -189,15 +191,18 @@ public class PasswordChangeHandler {
         final String newPw = stringOrNull(body.get("new_password"));
         final String confirm = stringOrNull(body.get("confirm_password"));
         if (StringUtil.isBlank(currentPw)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "current_password is required");
+            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "current_password is required",
+                    Map.of("reason", "current_password_required"));
             return;
         }
         if (newPw == null || newPw.isBlank()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "new_password is required");
+            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "new_password is required",
+                    Map.of("reason", "new_password_required"));
             return;
         }
         if (!newPw.equals(confirm)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "passwords do not match");
+            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "passwords do not match",
+                    Map.of("reason", "password_mismatch"));
             return;
         }
         final String userId = userBean.get().getUserId();
@@ -249,12 +254,21 @@ public class PasswordChangeHandler {
                 V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
                 return;
             }
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid current password");
+            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.AUTH_REQUIRED, "invalid current password",
+                    Map.of("reason", "invalid_current_password"));
             return;
         }
         final String validationError = ComponentUtil.getSystemHelper().validatePassword(newPw);
         if (StringUtil.isNotBlank(validationError)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "weak password: " + validationError);
+            final Map<String, Object> details = new LinkedHashMap<>();
+            details.put("reason", validationError);
+            if ("errors.password_length".equals(validationError)) {
+                final Integer minLength = ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger();
+                if (minLength != null) {
+                    details.put("min_length", minLength);
+                }
+            }
+            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "weak password: " + validationError, details);
             return;
         }
         try {

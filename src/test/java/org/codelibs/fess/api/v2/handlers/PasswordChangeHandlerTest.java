@@ -373,6 +373,42 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_weakPassword_returnsReasonAndMinLength() throws Exception {
+        // MJ-30 i18n contract: a password that violates the policy (here: too short) must
+        // surface the SPECIFIC failure reason in error.details so the SPA can localize it.
+        // The handler keeps the developer-facing English error.message AND adds a stable
+        // reason token plus min_length (for errors.password_length). We register a
+        // SystemHelper that reports errors.password_length and rely on the real FessConfig
+        // default (password.min.length=8) for the min_length detail.
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return "errors.password_length";
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"short\",\"confirm_password\":\"short\"}"), res);
+            org.junit.jupiter.api.Assertions.assertEquals(400, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("\"reason\":\"errors.password_length\""), res.body());
+            assertTrue(res.body().contains("\"min_length\""), res.body());
+            assertFalse(changedCalled[0], "changePassword must NOT be invoked for a weak password");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
     public void passwordChange_currentPasswordWrong_consumesRateLimit() throws Exception {
         // C-3: a wrong current_password must consume exactly one slot in the per-user
         // bucket. The handler reads the limit from FessConfig (default 5/min for the
