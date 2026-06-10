@@ -303,8 +303,13 @@ function buildResultCard(d, queryId, order) {
 
   // favorite button (theme extra; same .info row). Config flag is features.user_favorite
   // (searchResults.jsp favoriteSupport / FessConfig.isUserFavorite), not features.favorite.
-  // Favorites are per-user — only show for authenticated users (guests would 401).
-  if (features.user_favorite && api.isAuthenticated()) {
+  // The star + favorite count are shown to EVERYONE (guests included) when the feature is on
+  // — matching the legacy searchResults.jsp, which renders the star purely on ${favoriteSupport}
+  // — so the count acts as a popularity / social-proof signal. Adding a favorite, however,
+  // requires login: a guest click hits FavoritePostHandler's AUTH_REQUIRED gate and
+  // toggleFavorite() opens the login modal. So gate display only on features.user_favorite; do
+  // NOT add an api.isAuthenticated() check here (that would hide the count from guests).
+  if (features.user_favorite) {
     // Spacer before the star (searchResults.jsp puts an &nbsp; before the favorite).
     appendNbspSpacer();
     const favBtn = el("button", {
@@ -566,9 +571,11 @@ function renderResults(env) {
     if (!btn || !docId) return;
     btn.addEventListener("click", () => toggleFavorite(docId, btn, li.dataset.queryId || ""));
   });
-  // Bulk-sync favorites for all result cards in one request (Feature 5). Only when the
-  // user_favorite feature is enabled AND the user is authenticated — otherwise
-  // GET /favorites returns 400 (feature off) or 401 (guest session).
+  // Bulk-sync the *per-user* favorited state (solid vs outline star) for all result cards in
+  // one request (Feature 5). Only logged-in users can own favorites (adding requires login),
+  // so gate this on api.isAuthenticated() — a guest has nothing to sync. The star itself and
+  // its count are still rendered for guests above; this only flips already-favorited stars to
+  // the solid icon for the signed-in user.
   const favEnabled = !!(api.getConfig()?.features?.user_favorite) && api.isAuthenticated();
   if (favEnabled && env.query_id) syncFavorites(env.query_id);
 }
