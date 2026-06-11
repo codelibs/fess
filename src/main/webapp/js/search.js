@@ -168,6 +168,17 @@ $(function() {
               return;
             }
             $favorite.attr("href", "#" + docId);
+            // 401: adding a favorite requires login (FavoritePostHandler's
+            // AUTH_REQUIRED gate). 403 after the token refresh above: the CSRF
+            // gate rejects a session-bound token before the auth check runs, so
+            // a guest whose session rotated after page load surfaces as 403
+            // instead of 401. Logging in issues a fresh session + token, so
+            // send both to the login page — same spec as the static themes,
+            // which open the login modal here.
+            if (jqXHR && (jqXHR.status === 401 || jqXHR.status === 403)) {
+              window.location.href = contextPath + "/login/";
+              return;
+            }
             console.error("Failed to add favorite:", textStatus, errorThrown);
           });
       };
@@ -215,6 +226,12 @@ $(function() {
         }
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
+        // 401: guest session — favorites are per-user, so a guest has nothing
+        // to sync. The star itself stays visible (write requires login and
+        // redirects to the login page on click), matching the static themes.
+        if (jqXHR && jqXHR.status === 401) {
+          return;
+        }
         console.error("Failed to load favorites:", textStatus, errorThrown);
       });
   }
