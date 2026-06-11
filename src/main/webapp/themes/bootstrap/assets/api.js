@@ -7,10 +7,11 @@ let config = null;
 let csrfToken = "";
 
 export class ApiError extends Error {
-  constructor(code, message, httpStatus) {
+  constructor(code, message, httpStatus, details) {
     super(message);
     this.code = code;
     this.httpStatus = httpStatus;
+    this.details = details || null;
     this.name = "ApiError";
   }
 }
@@ -35,7 +36,7 @@ async function unwrap(resp) {
   if (!env) throw new ApiError("PROTOCOL", "Missing response envelope", resp.status);
   if (env.status !== 0) {
     const err = env.error || {};
-    throw new ApiError(err.code || "UNKNOWN", err.message || "Unknown error", resp.status);
+    throw new ApiError(err.code || "UNKNOWN", err.message || "Unknown error", resp.status, err.details);
   }
   return env;
 }
@@ -154,15 +155,17 @@ export function sseStream(path, body, onEvent, onError) {
       // Try to parse a JSON error envelope; fall back to HTTP status.
       let code = "HTTP_ERROR";
       let message = "HTTP " + resp.status;
+      let details;
       try {
         const errBody = await resp.json();
         const env = errBody && errBody.response;
         if (env && env.error) {
           code = env.error.code || code;
           message = env.error.message || message;
+          details = env.error.details;
         }
       } catch { /* ignore parse failure */ }
-      if (onError) onError(new ApiError(code, message, resp.status));
+      if (onError) onError(new ApiError(code, message, resp.status, details));
       return;
     }
 

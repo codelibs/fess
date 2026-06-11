@@ -65,6 +65,50 @@ function makePasswordField(labelText, inputId, inputAttrs = {}) {
 }
 
 /**
+ * Map a password-change error from POST /api/v2/auth/password to a localized,
+ * user-facing message. Per the V2 i18n contract the server's `error.message` is
+ * developer-facing English; the client localizes using the stable `error.code`
+ * and the structured `error.details.reason` token (mirrors auth.js login errors).
+ *
+ * @param {object} err - ApiError (code/httpStatus/details) or NetworkError
+ * @returns {string} a localized message safe to render via textContent
+ */
+function localizePasswordError(err) {
+  if (err && err.name === "NetworkError") return t("error.network");
+  const code = err && err.code;
+  const httpStatus = err && err.httpStatus;
+  if (code === "RATE_LIMITED" || httpStatus === 429) return t("auth.error_rate_limited");
+  const details = (err && err.details) || {};
+  const reason = details.reason;
+  if (reason === "invalid_current_password") return t("profile.error_wrong_current");
+  switch (reason) {
+    case "errors.password_length":
+      return t("profile.error_password_length", [details.min_length]);
+    case "errors.password_no_uppercase":
+      return t("profile.error_password_no_uppercase");
+    case "errors.password_no_lowercase":
+      return t("profile.error_password_no_lowercase");
+    case "errors.password_no_digit":
+      return t("profile.error_password_no_digit");
+    case "errors.password_no_special_char":
+      return t("profile.error_password_no_special_char");
+    case "errors.password_is_blacklisted":
+      return t("profile.error_password_blacklisted");
+    case "errors.blank_password":
+    case "new_password_required":
+    case "current_password_required":
+      return t("profile.error_blank_password");
+    case "password_mismatch":
+      return t("profile.error_mismatch");
+    default:
+      break;
+  }
+  // Fallbacks by HTTP/code when no specific reason is present.
+  if (code === "AUTH_REQUIRED" || httpStatus === 401) return t("profile.error_wrong_current");
+  return t("error.server");
+}
+
+/**
  * Attach the profile view to the #profile-view container.
  * Clears previous content and rebuilds from scratch each time.
  * Safe to call on every navigation to /profile.
@@ -198,9 +242,7 @@ export function attach() {
         form.reset();
       }
     } catch (err) {
-      // err.message is a developer-facing English string from the server — safe to
-      // display as plain text via textContent (never innerHTML).
-      errorDiv.textContent = err.message || t("error.server");
+      errorDiv.textContent = localizePasswordError(err);
       errorDiv.classList.remove("d-none");
     } finally {
       submitBtn.disabled = false;
