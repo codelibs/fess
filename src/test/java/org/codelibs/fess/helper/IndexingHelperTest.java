@@ -359,8 +359,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
 
         final Map<String, Object> document = indexingHelper.getDocument(client, "001", new String[] { "title", "content" });
         assertEquals("fess.update", resultMap.get("index"));
-        assertEquals(
-                "{\"query\":{\"ids\":{\"values\":[\"001\"],\"boost\":1.0}},\"_source\":{\"includes\":[\"title\",\"content\"],\"excludes\":[]}}",
+        assertEquals("{\"query\":{\"ids\":{\"values\":[\"001\"],\"boost\":1.0}},\"_source\":{\"includes\":[\"title\",\"content\"]}}",
                 resultMap.get("query"));
         assertEquals(3, document.size());
     }
@@ -387,7 +386,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
                 indexingHelper.getDocumentListByPrefixId(client, "001", new String[] { "title", "content" });
         assertEquals("fess.update", resultMap.get("index"));
         assertEquals(
-                "{\"size\":1,\"query\":{\"prefix\":{\"_id\":{\"value\":\"001\",\"boost\":1.0}}},\"_source\":{\"includes\":[\"title\",\"content\"],\"excludes\":[]}}",
+                "{\"size\":1,\"query\":{\"prefix\":{\"_id\":{\"value\":\"001\",\"boost\":1.0}}},\"_source\":{\"includes\":[\"title\",\"content\"]}}",
                 resultMap.get("query"));
         assertEquals(1, documents.size());
     }
@@ -438,7 +437,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         final List<Map<String, Object>> documents = indexingHelper.getChildDocumentList(client, "001", new String[] { "title", "content" });
         assertEquals("fess.update", resultMap.get("index"));
         assertEquals(
-                "{\"size\":1,\"query\":{\"term\":{\"parent_id\":{\"value\":\"001\",\"boost\":1.0}}},\"_source\":{\"includes\":[\"title\",\"content\"],\"excludes\":[]}}",
+                "{\"size\":1,\"query\":{\"term\":{\"parent_id\":{\"value\":\"001\",\"boost\":1.0}}},\"_source\":{\"includes\":[\"title\",\"content\"]}}",
                 resultMap.get("query"));
         assertEquals(1, documents.size());
     }
@@ -465,7 +464,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
                 indexingHelper.getDocumentListByQuery(client, QueryBuilders.idsQuery().addIds("001"), new String[] { "title", "content" });
         assertEquals("fess.update", resultMap.get("index"));
         assertEquals(
-                "{\"size\":1,\"query\":{\"ids\":{\"values\":[\"001\"],\"boost\":1.0}},\"_source\":{\"includes\":[\"title\",\"content\"],\"excludes\":[]}}",
+                "{\"size\":1,\"query\":{\"ids\":{\"values\":[\"001\"],\"boost\":1.0}},\"_source\":{\"includes\":[\"title\",\"content\"]}}",
                 resultMap.get("query"));
         assertEquals(1, documents.size());
     }
