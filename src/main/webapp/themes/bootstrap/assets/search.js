@@ -303,8 +303,13 @@ function buildResultCard(d, queryId, order) {
 
   // favorite button (theme extra; same .info row). Config flag is features.user_favorite
   // (searchResults.jsp favoriteSupport / FessConfig.isUserFavorite), not features.favorite.
-  // Favorites are per-user — only show for authenticated users (guests would 401).
-  if (features.user_favorite && api.isAuthenticated()) {
+  // The star + favorite count are shown to EVERYONE (guests included) when the feature is on
+  // — matching the legacy searchResults.jsp, which renders the star purely on ${favoriteSupport}
+  // — so the count acts as a popularity / social-proof signal. Adding a favorite, however,
+  // requires login: a guest click hits FavoritePostHandler's AUTH_REQUIRED gate and
+  // toggleFavorite() opens the login modal. So gate display only on features.user_favorite; do
+  // NOT add an api.isAuthenticated() check here (that would hide the count from guests).
+  if (features.user_favorite) {
     // Spacer before the star (searchResults.jsp puts an &nbsp; before the favorite).
     appendNbspSpacer();
     const favBtn = el("button", {
@@ -566,9 +571,11 @@ function renderResults(env) {
     if (!btn || !docId) return;
     btn.addEventListener("click", () => toggleFavorite(docId, btn, li.dataset.queryId || ""));
   });
-  // Bulk-sync favorites for all result cards in one request (Feature 5). Only when the
-  // user_favorite feature is enabled AND the user is authenticated — otherwise
-  // GET /favorites returns 400 (feature off) or 401 (guest session).
+  // Bulk-sync the *per-user* favorited state (solid vs outline star) for all result cards in
+  // one request (Feature 5). Only logged-in users can own favorites (adding requires login),
+  // so gate this on api.isAuthenticated() — a guest has nothing to sync. The star itself and
+  // its count are still rendered for guests above; this only flips already-favorited stars to
+  // the solid icon for the signed-in user.
   const favEnabled = !!(api.getConfig()?.features?.user_favorite) && api.isAuthenticated();
   if (favEnabled && env.query_id) syncFavorites(env.query_id);
 }
@@ -1918,15 +1925,6 @@ function renderPagination(env) {
   }
 }
 
-async function refreshFavorite(docId, btn) {
-  try {
-    const env = await api.get("/documents/" + encodeURIComponent(docId) + "/favorite");
-    setFavoriteUi(btn, !!env.favorite, env.count || 0);
-  } catch (e) {
-    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) btn.classList.add("d-none");
-  }
-}
-
 function setFavoriteUi(btn, on, count) {
   btn.setAttribute("aria-pressed", on ? "true" : "false");
   btn.setAttribute("aria-label", on ? t("result.favorite_remove") : t("result.favorite_add"));
@@ -1954,7 +1952,12 @@ async function toggleFavorite(docId, btn, queryId) {
     const env = await api.post("/documents/" + encodeURIComponent(docId) + "/favorite", { query_id: queryId || "" });
     setFavoriteUi(btn, !!env.favorite, env.count || 0);
   } catch (e) {
-    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
+    // 401/AUTH_REQUIRED: adding a favorite requires login (FavoritePostHandler gate).
+    // 403: the CSRF gate rejects a stale session-bound token (e.g. the guest session
+    // expired between page load and the click) *before* the auth check runs, so a
+    // guest click can surface as 403 instead of 401. Logging in through the modal
+    // issues a fresh session + token, so treat both the same.
+    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403) {
       if (!window.bootstrap || !bootstrap.Modal) {
         console.warn("[fess] bootstrap not loaded; skipping modal show");
       } else {
