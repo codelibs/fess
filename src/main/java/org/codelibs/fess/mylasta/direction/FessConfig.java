@@ -2007,6 +2007,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3 */
     String RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "rag.chat.highlight.number.of.fragments";
 
+    /** The key of the configuration. e.g. 3000 */
+    String RAG_CHAT_CONTENT_FULLTEXT_MAX_LENGTH = "rag.chat.content.fulltext.max.length";
+
+    /** The key of the configuration. e.g. 1000 */
+    String RAG_CHAT_ANSWER_HIGHLIGHT_FRAGMENT_SIZE = "rag.chat.answer.highlight.fragment.size";
+
+    /** The key of the configuration. e.g. 5 */
+    String RAG_CHAT_ANSWER_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "rag.chat.answer.highlight.number.of.fragments";
+
     /** The key of the configuration. e.g. smart_summary */
     String RAG_CHAT_HISTORY_ASSISTANT_CONTENT = "rag.chat.history.assistant.content";
 
@@ -9610,6 +9619,61 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagChatHighlightNumberOfFragmentsAsInteger();
 
     /**
+     * Get the value for the key 'rag.chat.content.fulltext.max.length'. <br>
+     * The value is, e.g. 3000 <br>
+     * comment: <br>
+     * Large-document handling for answer generation.<br>
+     * Documents whose content_length exceeds this value use highlighted passages<br>
+     * instead of full content in the answer context.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatContentFulltextMaxLength();
+
+    /**
+     * Get the value for the key 'rag.chat.content.fulltext.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 3000 <br>
+     * comment: <br>
+     * Large-document handling for answer generation.<br>
+     * Documents whose content_length exceeds this value use highlighted passages<br>
+     * instead of full content in the answer context.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatContentFulltextMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.answer.highlight.fragment.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Highlight settings used when extracting passages from large documents for the answer context.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatAnswerHighlightFragmentSize();
+
+    /**
+     * Get the value for the key 'rag.chat.answer.highlight.fragment.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Highlight settings used when extracting passages from large documents for the answer context.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatAnswerHighlightFragmentSizeAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.answer.highlight.number.of.fragments'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatAnswerHighlightNumberOfFragments();
+
+    /**
+     * Get the value for the key 'rag.chat.answer.highlight.number.of.fragments' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatAnswerHighlightNumberOfFragmentsAsInteger();
+
+    /**
      * Get the value for the key 'rag.chat.history.assistant.content'. <br>
      * The value is, e.g. smart_summary <br>
      * comment: <br>
@@ -13584,6 +13648,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
         }
 
+        public String getRagChatContentFulltextMaxLength() {
+            return get(FessConfig.RAG_CHAT_CONTENT_FULLTEXT_MAX_LENGTH);
+        }
+
+        public Integer getRagChatContentFulltextMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_CONTENT_FULLTEXT_MAX_LENGTH);
+        }
+
+        public String getRagChatAnswerHighlightFragmentSize() {
+            return get(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_FRAGMENT_SIZE);
+        }
+
+        public Integer getRagChatAnswerHighlightFragmentSizeAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_FRAGMENT_SIZE);
+        }
+
+        public String getRagChatAnswerHighlightNumberOfFragments() {
+            return get(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
+        }
+
+        public Integer getRagChatAnswerHighlightNumberOfFragmentsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
+        }
+
         public String getRagChatHistoryAssistantContent() {
             return get(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT);
         }
@@ -14408,6 +14496,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH, "4000");
             defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE, "500");
             defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "3");
+            defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FULLTEXT_MAX_LENGTH, "3000");
+            defaultMap.put(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_FRAGMENT_SIZE, "1000");
+            defaultMap.put(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "5");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT, "smart_summary");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT, "5");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
