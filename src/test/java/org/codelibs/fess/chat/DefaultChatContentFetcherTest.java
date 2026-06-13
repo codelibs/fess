@@ -123,6 +123,25 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_normalizeHighlightedDocs_setsContentAndDropsBlank() {
+        final TestableFetcher f = new TestableFetcher();
+        final Map<String, Object> withSnippet = new LinkedHashMap<>();
+        withSnippet.put("doc_id", "a");
+        withSnippet.put("content_description", "snippet-a");
+        final Map<String, Object> blankSnippet = new LinkedHashMap<>();
+        blankSnippet.put("doc_id", "b");
+        blankSnippet.put("content_description", "");
+        final Map<String, Object> noSnippet = new LinkedHashMap<>();
+        noSnippet.put("doc_id", "c");
+
+        final List<Map<String, Object>> out = f.normalizeHighlightedDocs(new ArrayList<>(List.of(withSnippet, blankSnippet, noSnippet)));
+
+        assertEquals(1, out.size());
+        assertEquals("a", out.get(0).get("doc_id"));
+        assertEquals("snippet-a", out.get(0).get("content"));
+    }
+
+    @Test
     public void test_fetchContent_missingReconciledToFull() {
         final TestableFetcher f = new TestableFetcher() {
             @Override

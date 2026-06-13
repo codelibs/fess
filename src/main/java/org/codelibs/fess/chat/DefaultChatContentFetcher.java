@@ -184,7 +184,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
                     .getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
                             SearchRequestParams.SearchRequestType.JSON);
         } catch (final Exception e) {
-            logger.warn("Failed to fetch full content for docIds={}. error={}, elapsedTime={}ms", docIds, e.getMessage(),
+            logger.warn("[RAG] Failed to fetch full content for docIds={}. error={}, elapsedTime={}ms", docIds, e.getMessage(),
                     System.currentTimeMillis() - startTime);
             return Collections.emptyList();
         }
@@ -218,18 +218,34 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             if (docs == null) {
                 return Collections.emptyList();
             }
-            for (final Map<String, Object> doc : docs) {
-                final String snippet = (String) doc.get("content_description");
-                if (StringUtil.isNotBlank(snippet)) {
-                    doc.put("content", snippet); // normalize: buildContext is content-first
-                }
-            }
-            return docs;
+            return normalizeHighlightedDocs(docs);
         } catch (final Exception e) {
-            logger.warn("Failed to fetch highlighted content for docIds={}. Falling back to full. error={}, elapsedTime={}ms", docIds,
+            logger.warn("[RAG] Failed to fetch highlighted content for docIds={}. Falling back to full. error={}, elapsedTime={}ms", docIds,
                     e.getMessage(), System.currentTimeMillis() - startTime);
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Normalizes highlighted search results: copies the highlight snippet into the
+     * {@code content} field, and drops documents whose snippet is blank so the
+     * caller's reconciliation step re-fetches them with full content (the highlight
+     * search response does not include the full content field).
+     *
+     * @param docs the highlighted search result maps
+     * @return maps with non-blank snippets only, each with {@code content} set to the snippet
+     */
+    protected List<Map<String, Object>> normalizeHighlightedDocs(final List<Map<String, Object>> docs) {
+        final List<Map<String, Object>> normalized = new ArrayList<>();
+        for (final Map<String, Object> doc : docs) {
+            final String snippet = (String) doc.get("content_description");
+            if (StringUtil.isNotBlank(snippet)) {
+                doc.put("content", snippet); // normalize: buildContext is content-first
+                normalized.add(doc);
+            }
+            // blank snippet -> omit so reconciliation re-fetches full content
+        }
+        return normalized;
     }
 
     private void putByDocId(final Map<String, Map<String, Object>> target, final List<Map<String, Object>> docs) {
