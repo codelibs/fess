@@ -129,8 +129,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * @return the threshold in characters
      */
     protected long getFulltextThreshold() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return Long.parseLong(fessConfig.getOrDefault("rag.chat.content.fulltext.max.length", "3000"));
+        return ComponentUtil.getFessConfig().getRagChatContentFulltextMaxLengthAsInteger().longValue();
     }
 
     /**
@@ -320,8 +319,8 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
                 final String[] extraQueries) {
             super(query, pageSize, fessConfig, Collections.emptyMap(), extraQueries);
             // Resolve once; getHighlightInfo() may be called repeatedly during search execution.
-            this.fragmentSize = Integer.parseInt(fessConfig.getOrDefault("rag.chat.answer.highlight.fragment.size", "1000"));
-            this.numOfFragments = Integer.parseInt(fessConfig.getOrDefault("rag.chat.answer.highlight.number.of.fragments", "5"));
+            this.fragmentSize = fessConfig.getRagChatAnswerHighlightFragmentSizeAsInteger();
+            this.numOfFragments = fessConfig.getRagChatAnswerHighlightNumberOfFragmentsAsInteger();
         }
 
         @Override
