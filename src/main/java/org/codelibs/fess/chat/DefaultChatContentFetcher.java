@@ -37,7 +37,9 @@ import org.dbflute.optional.OptionalThing;
  * {@code content_length}: small documents are fetched in full (existing
  * behavior), large documents use query-relevant highlighted passages so the
  * relevant section reaches the LLM. Highlight snippets are normalized into the
- * {@code content} field so the downstream context builder is unchanged.
+ * {@code content} field so the downstream context builder is unchanged. A large
+ * document with no extractable highlight passage falls back to its full content
+ * truncated to the threshold; its short digest is never used as a passage.
  */
 public class DefaultChatContentFetcher implements ChatContentFetcher {
 
@@ -81,10 +83,15 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         putByDocId(resultMap, fetchFullContent(fullIds));
         putByDocId(resultMap, fetchHighlightedContent(highlightIds, request.getQuery()));
 
-        // Reconcile: any requested doc still missing (e.g. highlight had no match) -> full fetch fallback.
-        final List<String> missingIds = docIds.stream().filter(id -> !resultMap.containsKey(id)).collect(Collectors.toList());
+        // Fallback for large documents that produced no highlight passage: fetch the full content
+        // and truncate it to the threshold so the document still contributes a leading excerpt
+        // without crowding out the answer context (its short digest is never used as a passage).
+        final List<String> missingIds = highlightIds.stream().filter(id -> !resultMap.containsKey(id)).collect(Collectors.toList());
         if (!missingIds.isEmpty()) {
-            putByDocId(resultMap, fetchFullContent(missingIds));
+            final long maxLength = getFulltextThreshold();
+            final List<Map<String, Object>> fallbackDocs = fetchFullContent(missingIds);
+            fallbackDocs.forEach(doc -> truncateContent(doc, maxLength));
+            putByDocId(resultMap, fallbackDocs);
         }
 
         // Reorder to preserve original docIds (search-score) order.
@@ -124,6 +131,22 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
     protected long getFulltextThreshold() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return Long.parseLong(fessConfig.getOrDefault("rag.chat.content.fulltext.max.length", "3000"));
+    }
+
+    /**
+     * Truncates the {@code content} field of a document to at most {@code maxLength}
+     * characters, keeping the leading portion. Used as the fallback for a large
+     * document that produced no highlight passage so it still contributes a leading
+     * excerpt without crowding out the answer context.
+     *
+     * @param doc the document map (modified in place)
+     * @param maxLength the maximum content length in characters
+     */
+    protected void truncateContent(final Map<String, Object> doc, final long maxLength) {
+        final Object value = doc.get("content");
+        if (value instanceof String && ((String) value).length() > maxLength) {
+            doc.put("content", ((String) value).substring(0, (int) maxLength));
+        }
     }
 
     /**
@@ -227,25 +250,44 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
     }
 
     /**
-     * Normalizes highlighted search results: copies the highlight snippet into the
-     * {@code content} field, and drops documents whose snippet is blank so the
-     * caller's reconciliation step re-fetches them with full content (the highlight
-     * search response does not include the full content field).
+     * Normalizes highlighted search results: copies the highlight passage into the
+     * {@code content} field, and drops documents that produced no highlight passage
+     * so the caller can fall back to their truncated full content.
+     *
+     * <p>The passage is read from the raw highlight field ({@code hl_content}), not
+     * from {@code content_description}. {@code content_description} is built by
+     * {@code ViewHelper#getContentDescription} from {@code hl_content,digest} and
+     * therefore falls back to the short crawl-time {@code digest} when there is no
+     * highlight match; relying on it would mask the "no passage" case and send the
+     * digest to the LLM instead of the truncated full-content fallback. Reading the
+     * highlight field directly keeps that case detectable.</p>
      *
      * @param docs the highlighted search result maps
-     * @return maps with non-blank snippets only, each with {@code content} set to the snippet
+     * @return maps that produced a highlight passage only, each with {@code content} set to it
      */
     protected List<Map<String, Object>> normalizeHighlightedDocs(final List<Map<String, Object>> docs) {
+        final String highlightField = getHighlightContentField();
         final List<Map<String, Object>> normalized = new ArrayList<>();
         for (final Map<String, Object> doc : docs) {
-            final String snippet = (String) doc.get("content_description");
+            final String snippet = (String) doc.get(highlightField);
             if (StringUtil.isNotBlank(snippet)) {
                 doc.put("content", snippet); // normalize: buildContext is content-first
                 normalized.add(doc);
             }
-            // blank snippet -> omit so reconciliation re-fetches full content
+            // no highlight passage -> drop so the caller falls back to truncated full content
         }
         return normalized;
+    }
+
+    /**
+     * Returns the document-map key that holds the highlight passage for the content
+     * field (the highlight prefix joined with the content field name, e.g.
+     * {@code hl_content}).
+     *
+     * @return the highlight content field key
+     */
+    protected String getHighlightContentField() {
+        return ComponentUtil.getQueryHelper().getHighlightPrefix() + ComponentUtil.getFessConfig().getIndexFieldContent();
     }
 
     private void putByDocId(final Map<String, Map<String, Object>> target, final List<Map<String, Object>> docs) {
@@ -263,7 +305,8 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * display-oriented {@code rag.chat.highlight.*}.
      */
     protected static class AnswerHighlightSearchParams extends ChatClient.ChatSearchRequestParams {
-        private final FessConfig fessConfig;
+        private final int fragmentSize;
+        private final int numOfFragments;
 
         /**
          * Creates answer-highlight search params.
@@ -276,14 +319,15 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         public AnswerHighlightSearchParams(final String query, final int pageSize, final FessConfig fessConfig,
                 final String[] extraQueries) {
             super(query, pageSize, fessConfig, Collections.emptyMap(), extraQueries);
-            this.fessConfig = fessConfig;
+            // Resolve once; getHighlightInfo() may be called repeatedly during search execution.
+            this.fragmentSize = Integer.parseInt(fessConfig.getOrDefault("rag.chat.answer.highlight.fragment.size", "1000"));
+            this.numOfFragments = Integer.parseInt(fessConfig.getOrDefault("rag.chat.answer.highlight.number.of.fragments", "5"));
         }
 
         @Override
         public HighlightInfo getHighlightInfo() {
-            return new HighlightInfo()
-                    .fragmentSize(Integer.parseInt(fessConfig.getOrDefault("rag.chat.answer.highlight.fragment.size", "1000")))
-                    .numOfFragments(Integer.parseInt(fessConfig.getOrDefault("rag.chat.answer.highlight.number.of.fragments", "5")))
+            return new HighlightInfo().fragmentSize(fragmentSize)
+                    .numOfFragments(numOfFragments)
                     .preTags(StringUtil.EMPTY)
                     .postTags(StringUtil.EMPTY);
         }
