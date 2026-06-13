@@ -473,7 +473,8 @@ public class ChatClient {
                         // Phase 4: Fetch full content
                         phaseStartTime = System.currentTimeMillis();
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
-                        final List<Map<String, Object>> fullDocs = fetchFullContent(evalResult.getRelevantDocIds());
+                        final List<Map<String, Object>> fullDocs = ComponentUtil.getChatContentFetcher()
+                                .fetchContent(new ChatContentRequest(evalResult.getRelevantDocIds(), searchResults, finalSearchQuery));
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
                         sources = fullDocs;
 
@@ -926,58 +927,17 @@ public class ChatClient {
     }
 
     /**
-     * Fetches full document content for the given document IDs.
+     * Fetches full document content for the given doc ids.
+     *
+     * <p>Delegates to {@link ChatContentFetcher}. With a blank query the fetcher
+     * resolves every document to its full content, preserving the original
+     * behavior of this method.</p>
      *
      * @param docIds the document IDs to fetch
-     * @return list of documents with full content
+     * @return list of documents with full content, in docIds order
      */
     protected List<Map<String, Object>> fetchFullContent(final List<String> docIds) {
-        if (docIds.isEmpty()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Fetch full content called with empty docIds.");
-            }
-            return Collections.emptyList();
-        }
-
-        final long startTime = System.currentTimeMillis();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String[] fields = fessConfig.getRagChatContentFields().split(",");
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Fetching full content. docIds={}, fields={}", docIds, String.join(",", fields));
-        }
-
-        try {
-            final List<Map<String, Object>> results = ComponentUtil.getSearchHelper()
-                    .getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
-                            SearchRequestParams.SearchRequestType.JSON);
-
-            // Reorder results to match original docIds order (preserve search score order)
-            final Map<String, Map<String, Object>> resultMap = new LinkedHashMap<>();
-            for (final Map<String, Object> doc : results) {
-                final String docId = (String) doc.get("doc_id");
-                if (docId != null) {
-                    resultMap.put(docId, doc);
-                }
-            }
-            final List<Map<String, Object>> orderedResults = new ArrayList<>();
-            for (final String docId : docIds) {
-                final Map<String, Object> doc = resultMap.get(docId);
-                if (doc != null) {
-                    orderedResults.add(doc);
-                }
-            }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Full content fetched. docIdCount={}, fetchedCount={}, elapsedTime={}ms", docIds.size(),
-                        orderedResults.size(), System.currentTimeMillis() - startTime);
-            }
-            return orderedResults;
-        } catch (final Exception e) {
-            logger.warn("Failed to fetch full content for docIds={}. error={}, elapsedTime={}ms", docIds, e.getMessage(),
-                    System.currentTimeMillis() - startTime);
-            return Collections.emptyList();
-        }
+        return ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, Collections.emptyList(), null));
     }
 
     /**
