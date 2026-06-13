@@ -30,6 +30,7 @@ import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.chat.ChatClient;
+import org.codelibs.fess.chat.ChatContentFetcher;
 import org.codelibs.fess.chat.ChatSessionManager;
 import org.codelibs.fess.cors.CorsHandlerFactory;
 import org.codelibs.fess.crawler.client.CrawlerClientCreator;
@@ -258,6 +259,8 @@ public final class ComponentUtil {
     private static final String CHAT_SESSION_MANAGER = "chatSessionManager";
 
     private static final String CHAT_CLIENT = "chatClient";
+
+    private static final String CHAT_CONTENT_FETCHER = "chatContentFetcher";
 
     private static final String CHAT_API_HELPER = "chatApiHelper";
 
@@ -944,6 +947,15 @@ public final class ComponentUtil {
      */
     public static ChatClient getChatClient() {
         return getComponent(CHAT_CLIENT);
+    }
+
+    /**
+     * Gets the chat content fetcher component.
+     *
+     * @return the chat content fetcher
+     */
+    public static ChatContentFetcher getChatContentFetcher() {
+        return getComponent(CHAT_CONTENT_FETCHER);
     }
 
     /**

@@ -9,6 +9,10 @@
 	<component name="chatClient" class="org.codelibs.fess.chat.ChatClient">
 	</component>
 
+	<!-- Resolves document content for the answer context (size-based full/highlight dispatch) -->
+	<component name="chatContentFetcher" class="org.codelibs.fess.chat.DefaultChatContentFetcher">
+	</component>
+
 	<!-- Shared helper for v2 chat API handlers -->
 	<component name="chatApiHelper" class="org.codelibs.fess.helper.ChatApiHelper">
 	</component>
