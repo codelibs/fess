@@ -256,8 +256,18 @@ export function attach() {
     }
   }
 
+  const modal = document.getElementById("login-modal");
   const form = document.getElementById("login-form");
   const err = document.getElementById("login-error");
+  if (modal && form) {
+    modal.addEventListener("hidden.bs.modal", () => {
+      form.reset();
+      if (err) {
+        err.classList.add("d-none");
+        err.textContent = "";
+      }
+    });
+  }
   if (form) {
     form.addEventListener("submit", async ev => {
       ev.preventDefault();
