@@ -841,9 +841,21 @@ function renderSortOptions() {
   if (!sel) return;
   while (sel.firstChild) sel.removeChild(sel.firstChild);
   const cfg = api.getConfig() || {};
-  const opts = cfg.sort_options && cfg.sort_options.length > 0
+  const rawOpts = cfg.sort_options && cfg.sort_options.length > 0
     ? cfg.sort_options
-    : [{ value: "", label_key: "labels.search_result_sort_score_desc" }];
+    : [{ value: "score.desc", label_key: "labels.search_result_sort_score_desc" }];
+  // JSP parity (searchOptions.jsp): a single empty-value placeholder heads the
+  // sort list, followed by the real sort options. The server's sort_options
+  // already supplies a leading value="" entry (labelled "Score"); drop it before
+  // prepending the placeholder so the list does not show a duplicate empty
+  // option + "Score"/"スコア順" pair.
+  const body = (rawOpts.length > 0 && (rawOpts[0].value == null || rawOpts[0].value === ""))
+    ? rawOpts.slice(1)
+    : rawOpts;
+  const opts = [
+    { value: "", label_key: "labels.advance_search_sort_default" },
+    ...body,
+  ];
   for (const o of opts) {
     const opt = document.createElement("option");
     opt.value = o.value != null ? o.value : "";
