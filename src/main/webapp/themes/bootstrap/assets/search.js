@@ -767,7 +767,11 @@ export function disableSubmitBriefly(btn) {
  *
  * @param {HTMLInputElement} input    - the text field to attach to
  * @param {HTMLElement}      dropdown - a <ul> that will be populated with <li> suggestions
- * @param {{ lang?: string[] | { length: number } }} [opts] - options; opts.lang can be a getter
+ * @param {{ lang?: string[] | { length: number }, submitOnSelect?: boolean }} [opts] - options;
+ *   opts.lang can be a getter; opts.submitOnSelect (opt-in) dispatches a submit event on the
+ *   input's form after selection — matches default-JSP suggestor.js and the results-page header
+ *   suggest (search.js mousedown handler).  Advanced search does NOT set this flag so it stays
+ *   fill-only (other fields would be empty on premature submit).
  */
 export function attachSuggest(input, dropdown, opts = {}) {
   if (!input || !dropdown) return;
@@ -777,7 +781,19 @@ export function attachSuggest(input, dropdown, opts = {}) {
     dropdown.classList.add("d-none");
     input.setAttribute("aria-expanded", "false");
   };
-  const choose = (text) => { input.value = text; clear(); input.focus(); };
+  const choose = (text) => {
+    input.value = text;
+    clear();
+    // submitOnSelect: opt-in flag — submit the form after filling the input, matching
+    // default-JSP suggestor.js and the results-page header suggest behavior.
+    // Advanced search does not pass this flag and keeps the fill-only path.
+    if (opts.submitOnSelect) {
+      const form = input.form || input.closest("form");
+      if (form) { form.dispatchEvent(new Event("submit")); }
+      return;
+    }
+    input.focus();
+  };
   const render = async (q) => {
     if (!q || q.length < 1) { clear(); return; }
     try {

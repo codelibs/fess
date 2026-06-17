@@ -1231,4 +1231,47 @@ public class BundledBootstrapThemeTest {
             });
         }
     }
+
+    // ── Home suggest submit-on-select fix ──────────────────────────────────────
+
+    /**
+     * search.js attachSuggest() must support an opt-in submitOnSelect option so that
+     * callers can request the form to be submitted when a suggestion is chosen.
+     * This mirrors the default-JSP suggestor.js and the results-page header suggest
+     * (search.js ~line 1298: form.dispatchEvent(new Event("submit"))).
+     * Advanced search must NOT opt in — it stays fill-only.
+     */
+    @Test
+    public void test_searchJs_homeSuggestSubmitsOnSelectOptIn() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("submitOnSelect"),
+                "search.js attachSuggest() must support the submitOnSelect option so callers can opt in to submitting on suggestion click");
+        assertTrue(js.contains("opts.submitOnSelect"),
+                "search.js choose() must check opts.submitOnSelect to decide whether to submit the form");
+        assertTrue(js.contains("input.form"),
+                "search.js choose() must resolve the form via input.form (with fallback) for the submitOnSelect path");
+    }
+
+    /**
+     * app.js home wiring must enable submitOnSelect: true so that clicking a suggestion
+     * on the home page runs the search (matches default-JSP / results-page behavior).
+     */
+    @Test
+    public void test_appJs_homeSuggestEnablesSubmitOnSelect() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("submitOnSelect: true"),
+                "app.js home attachSuggest call must pass submitOnSelect: true so suggestion clicks submit the home search form");
+    }
+
+    /**
+     * advance.js must NOT pass submitOnSelect — it must remain fill-only so that
+     * clicking a suggestion only fills the all-words field without prematurely
+     * submitting the advanced search form (other fields would be empty).
+     */
+    @Test
+    public void test_advanceJs_keepsSuggestFillOnly() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
+        assertFalse(js.contains("submitOnSelect"),
+                "advance.js must NOT pass submitOnSelect — advanced search suggestion clicks must remain fill-only");
+    }
 }
