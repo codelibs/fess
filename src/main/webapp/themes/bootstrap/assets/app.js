@@ -226,6 +226,9 @@ function attachHomeView() {
   if (input && homeSuggest && !input.dataset.suggestAttached) {
     input.dataset.suggestAttached = "1";
     search.attachSuggest(input, homeSuggest, {
+      // submitOnSelect: true — clicking a suggestion on the home page submits the search
+      // form immediately, matching default-JSP suggestor.js and results-page header behavior.
+      submitOnSelect: true,
       get lang() {
         // Home and results share the single #searchOptions drawer (JSP parity),
         // so the suggest lang filter reads the drawer's #langSearchOption select.
