@@ -441,6 +441,24 @@ public class SystemHelper {
     }
 
     /**
+     * Gets the resolved online help link for the installation guide.
+     *
+     * @return The localized installation help URL.
+     */
+    public String getInstallationLink() {
+        return getHelpUrl(ComponentUtil.getFessConfig().getOnlineHelpInstallation());
+    }
+
+    /**
+     * Gets the resolved online help link for end-of-life information.
+     *
+     * @return The localized end-of-life help URL.
+     */
+    public String getEolLink() {
+        return getHelpUrl(ComponentUtil.getFessConfig().getOnlineHelpEol());
+    }
+
+    /**
      * Adds a design JSP file name to the map.
      *
      * @param key   The key for the JSP file.
@@ -658,14 +676,12 @@ public class SystemHelper {
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
         runtime.registerData("developmentMode", ComponentUtil.getSearchEngineClient().isEmbedded());
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String installationLink = fessConfig.getOnlineHelpInstallation();
-        runtime.registerData("installationLink", getHelpUrl(installationLink));
+        runtime.registerData("installationLink", getInstallationLink());
         runtime.registerData("storageEnabled", isStorageEnabled(fessConfig));
         final boolean eoled = isEoled();
         runtime.registerData("eoled", eoled);
         if (eoled) {
-            final String eolLink = fessConfig.getOnlineHelpEol();
-            runtime.registerData("eolLink", getHelpUrl(eolLink));
+            runtime.registerData("eolLink", getEolLink());
         }
     }
 
@@ -696,14 +712,11 @@ public class SystemHelper {
      */
     public void setupSearchHtmlData(final TypicalAction action, final ActionRuntime runtime) {
         runtime.registerData("developmentMode", ComponentUtil.getSearchEngineClient().isEmbedded());
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String installationLink = fessConfig.getOnlineHelpInstallation();
-        runtime.registerData("installationLink", getHelpUrl(installationLink));
+        runtime.registerData("installationLink", getInstallationLink());
         final boolean eoled = isEoled();
         runtime.registerData("eoled", eoled);
         if (eoled) {
-            final String eolLink = fessConfig.getOnlineHelpEol();
-            runtime.registerData("eolLink", getHelpUrl(eolLink));
+            runtime.registerData("eolLink", getEolLink());
         }
     }
 
