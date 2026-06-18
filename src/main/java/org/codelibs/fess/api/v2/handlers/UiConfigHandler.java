@@ -223,9 +223,10 @@ public class UiConfigHandler {
             }
 
             // eol_link / installation_link — surfaced as resolved URLs. Derivation mirrors
-            // JSP runtime data registered by SystemHelper. Uses getHelpLink(name) for the
-            // installation URL (same base-link pattern); for eol_link, uses the raw config
-            // value since it is a full template URL rather than a guide-page name.
+            // the JSP runtime data registered by SystemHelper (setupSearchHtmlData /
+            // setupAdminHtmlData): the installation link resolves the online.help.installation
+            // template and the EOL link resolves the online.help.eol template, both via the
+            // shared SystemHelper#getHelpUrl locale/version substitution.
             // Falls back to empty string when SystemHelper / RequestManager are unavailable.
             String eolLink = "";
             String installationLink = "";
@@ -233,13 +234,13 @@ public class UiConfigHandler {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 if (systemHelper != null) {
                     try {
-                        installationLink = systemHelper.getHelpLink("installation");
+                        installationLink = systemHelper.getInstallationLink();
                     } catch (final Exception ignored) {
                         // RequestManager not bound in unit harness — leave empty.
                     }
                     if (eoled) {
                         try {
-                            eolLink = systemHelper.getHelpLink("eol");
+                            eolLink = systemHelper.getEolLink();
                         } catch (final Exception ignored) {
                             // RequestManager not bound in unit harness — leave empty.
                         }
