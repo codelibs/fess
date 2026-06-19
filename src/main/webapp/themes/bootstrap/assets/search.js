@@ -1220,23 +1220,21 @@ export function attach() {
     });
   }
   // Search-options "Clear" button (searchOptions.jsp #searchOptionsClearButton):
-  // reset the drawer option controls (num/sort/lang/label + geo) to their defaults.
+  // reset the drawer option controls (num/sort/lang/label + geo) to their defaults,
+  // then dispatch change events so the existing select handlers re-run the search.
   const optClearBtn = document.getElementById("searchOptionsClearButton");
   if (optClearBtn) {
     optClearBtn.addEventListener("click", () => {
-      // Geo filter (migrated into the drawer): clear inputs + state first so the
-      // select-change handlers below re-run the search with geo already cleared.
-      ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      // Silent DOM reset (no change dispatch, no re-search).
+      resetOptionsDOM();
+      // geo has no change handler that syncs state, so reset state.geo explicitly here
+      // before the change dispatches below trigger a re-search (parity: facet-clear handler).
       state.geo = { lat: "", lon: "", distance: "" };
+      // Dispatch change on each drawer select so the existing handlers (sort/num/lang)
+      // pick up the reset value and re-run the search — preserving original behaviour.
       ["numSearchOption", "sortSearchOption", "langSearchOption", "labelSearchOption"].forEach(id => {
         const sel = document.getElementById(id);
-        if (!sel) return;
-        if (sel.multiple) {
-          Array.from(sel.options).forEach(o => { o.selected = false; });
-        } else {
-          sel.selectedIndex = 0;
-        }
-        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        if (sel) sel.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
   }
@@ -1993,6 +1991,66 @@ async function toggleFavorite(docId, btn, queryId) {
       }
     }
   }
+}
+
+/**
+ * HOME-RESET: Silently reset drawer option controls (num/sort/lang/label + geo) to
+ * their default DOM state without dispatching change events or triggering a re-search.
+ * Shared by clearSearchState() and the #searchOptionsClearButton handler (SRCH-6681).
+ */
+function resetOptionsDOM() {
+  // Geo inputs.
+  ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const e = document.getElementById(id); if (e) e.value = ""; });
+  // Drawer selects: single → selectedIndex 0; multiple → deselect all.
+  ["numSearchOption", "sortSearchOption", "langSearchOption", "labelSearchOption"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    if (sel.multiple) { Array.from(sel.options).forEach(o => { o.selected = false; }); }
+    else { sel.selectedIndex = 0; }
+  });
+  // Home-view up-front option selects (same treatment as drawer selects).
+  ["home-sort-select", "home-num-select", "home-lang-select", "home-label-select"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    if (sel.multiple) { Array.from(sel.options).forEach(o => { o.selected = false; }); }
+    else { sel.selectedIndex = 0; }
+  });
+}
+
+/**
+ * HOME-RESET (SRCH-6681): Authoritatively reset all search state and option controls
+ * when navigating back to the home view.  This is a *silent* reset — no change events
+ * are dispatched and no re-search is triggered.  app.js calls this from the home route
+ * handler so the SPA matches JSP parity (index.jsp is re-rendered on every request).
+ *
+ * Resets:
+ *  - module-level `state` to initial values
+ *  - geo inputs (#geo-lat, #geo-lon, #geo-distance)
+ *  - drawer selects (#numSearchOption, #sortSearchOption, #langSearchOption, #labelSearchOption)
+ *  - home up-front selects (#home-sort-select, #home-num-select, #home-lang-select, #home-label-select)
+ *  - both query inputs via syncSearchInputs("") (#query + #contentQuery)
+ */
+export function clearSearchState() {
+  // Reset module-level state to initial values.
+  state.q             = "";
+  state.start         = 0;
+  state.num           = 10;
+  state.sort          = "";
+  state.lang          = [];
+  state.sdh           = "";
+  state.facets        = {};
+  state.fields        = {};
+  state.facetQueries  = [];
+  state.exQ           = [];
+  state.geo           = { lat: "", lon: "", distance: "" };
+  state.requestedTime = 0;
+  state.highlightParams = "";
+
+  // Reset DOM controls silently (no change dispatch).
+  resetOptionsDOM();
+
+  // Clear both query inputs (header #query + home #contentQuery).
+  syncSearchInputs("");
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.

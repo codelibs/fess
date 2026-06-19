@@ -426,10 +426,10 @@ function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("home-view");
-      // JSP parity (index.jsp): the home query box starts empty — clear any value the
-      // SPA carried over from a previous search (syncSearchInputs keeps both inputs in sync).
-      const cq = document.getElementById("contentQuery");
-      if (cq) cq.value = "";
+      // JSP parity (index.jsp): home view is re-rendered on every request in the
+      // default theme, so all search state is gone.  Replicate that by doing a full
+      // silent reset — clears module state, option selects, and both query inputs.
+      search.clearSearchState();
       attachHomeView();
     }
   );
