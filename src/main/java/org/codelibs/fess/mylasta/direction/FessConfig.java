@@ -304,7 +304,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3600 */
     String API_CORS_MAX_AGE = "api.cors.max.age";
 
-    /** The key of the configuration. e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With */
+    /** The key of the configuration. e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With, X-Fess-CSRF-Token */
     String API_CORS_ALLOW_HEADERS = "api.cors.allow.headers";
 
     /** The key of the configuration. e.g. true */
@@ -2941,8 +2941,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.cors.allow.headers'. <br>
-     * The value is, e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With <br>
-     * comment: Allowed headers for CORS.
+     * The value is, e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With, X-Fess-CSRF-Token <br>
+     * comment: Allowed request headers for CORS preflight. A static list is returned (Access-Control-Request-Headers is not reflected). Includes X-Fess-CSRF-Token for cross-origin SPAs sending the CSRF token.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowHeaders();
@@ -13956,7 +13956,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
-            defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization, X-Requested-With");
+            defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS,
+                    "Origin, Content-Type, Accept, Authorization, X-Requested-With, X-Fess-CSRF-Token");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
             defaultMap.put(FessConfig.API_PING_search_engine_FIELDS, "status,timed_out");
