@@ -665,7 +665,6 @@ paths:
                 $ref: '#/components/schemas/ChatResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
-        '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
@@ -723,7 +722,7 @@ paths:
                 type: string
                 example: |
                   event: phase
-                  data: {"phase":"retrieval","status":"start"}
+                  data: {"phase":"search","status":"start","message":"Searching documents..."}
 
                   event: chunk
                   data: {"content":"Fess is "}
@@ -766,7 +765,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatClearResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
@@ -1559,7 +1557,12 @@ components:
       type: object
       required: [message]
       properties:
-        message: { type: string }
+        message:
+          type: string
+          description: |-
+            The user message. The maximum length is bounded by
+            `rag.chat.message.max.length` (default 4000); exceeding it
+            returns `invalid_request` (HTTP 400).
         session_id: { type: string }
         fields:
           type: object
