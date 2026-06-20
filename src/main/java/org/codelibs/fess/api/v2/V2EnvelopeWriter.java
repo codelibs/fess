@@ -54,6 +54,11 @@ public class V2EnvelopeWriter {
     private final ObjectMapper mapper = new ObjectMapper();
     private static final String CONTENT_TYPE = "application/json; charset=UTF-8";
 
+    /**
+     * Creates the v2 envelope writer. Registered as the DI component
+     * {@code v2EnvelopeWriter} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2EnvelopeWriter()}.
+     */
     public V2EnvelopeWriter() {
         // default constructor
     }

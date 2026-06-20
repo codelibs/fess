@@ -61,6 +61,11 @@ public class V2JsonBody {
     /** UTF-8 BOM byte sequence (EF BB BF). Present in some editor-generated JSON files. */
     private static final byte[] UTF8_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
 
+    /**
+     * Creates the v2 JSON body reader. Registered as the DI component
+     * {@code v2JsonBody} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2JsonBody()}.
+     */
     public V2JsonBody() {
         // default constructor
     }

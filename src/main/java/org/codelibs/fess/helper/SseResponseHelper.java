@@ -36,6 +36,11 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SseResponseHelper {
 
+    /**
+     * Creates the SSE response helper. Registered as the DI component
+     * {@code sseResponseHelper} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getSseResponseHelper()}.
+     */
     public SseResponseHelper() {
         // default constructor
     }

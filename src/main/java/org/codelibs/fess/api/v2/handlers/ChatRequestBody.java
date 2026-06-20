@@ -32,7 +32,8 @@ import java.util.Map;
  * {@code /api/v2/chat/sessions/{session_id}}; the {@code clear} flag is no
  * longer accepted here.</p>
  *
- * <p>Length is enforced inside {@link #from(Map, int)} so the caller does not need
+ * <p>Length is enforced inside {@link org.codelibs.fess.helper.ChatApiHelper#parseRequestBody(Map, int)}
+ * so the caller does not need
  * a separate guard. Label and {@code extra_queries} validation uses the same allowlist
  * helpers v1 calls — {@code LabelTypeHelper} for labels and {@code ViewHelper}
  * for facet queries — to prevent query injection, delegated to the
@@ -64,6 +65,17 @@ public final class ChatRequestBody {
      */
     private final Map<String, List<String>> warnings;
 
+    /**
+     * Creates a parsed chat request body. Instances are normally produced by
+     * {@link org.codelibs.fess.helper.ChatApiHelper#parseRequestBody(Map, int)} after the
+     * raw body has been validated, so callers rarely invoke this constructor directly.
+     *
+     * @param message the trimmed {@code message} value, or {@code null} when omitted or blank
+     * @param sessionId the trimmed {@code session_id} value, or {@code null} for a fresh session
+     * @param fields the validated label-filter map; never {@code null}
+     * @param extraQueries the validated {@code extra_queries} array; never {@code null}
+     * @param warnings the map of rejected field values tracked for diagnostics; never {@code null}
+     */
     public ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
             final Map<String, List<String>> warnings) {
         this.message = message;
@@ -124,7 +136,6 @@ public final class ChatRequestBody {
         return Collections.unmodifiableMap(warnings);
     }
 
-    /**
     /** Thrown when the request {@code message} exceeds {@code rag.chat.message.max.length}. */
     public static class MessageTooLongException extends IOException {
         private static final long serialVersionUID = 1L;

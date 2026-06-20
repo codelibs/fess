@@ -41,6 +41,11 @@ import org.codelibs.fess.util.ComponentUtil;
  */
 public class UserPayloads {
 
+    /**
+     * Creates the user-payload helper. Registered as the DI component
+     * {@code v2UserPayloads} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2UserPayloads()}.
+     */
     public UserPayloads() {
         // default constructor
     }

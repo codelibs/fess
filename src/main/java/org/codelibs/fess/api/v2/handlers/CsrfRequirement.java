@@ -40,6 +40,11 @@ import java.util.Locale;
  */
 public class CsrfRequirement {
 
+    /**
+     * Creates a CSRF requirement evaluator. Registered as the DI component
+     * {@code v2CsrfRequirement} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2CsrfRequirement()}.
+     */
     public CsrfRequirement() {
         // default constructor
     }

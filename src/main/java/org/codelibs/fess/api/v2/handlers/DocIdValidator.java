@@ -35,6 +35,11 @@ public class DocIdValidator {
     /** Allowlist for {@code doc_id}: ASCII letters, digits, underscore and hyphen. */
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
+    /**
+     * Creates a document-id validator. Registered as the DI component
+     * {@code v2DocIdValidator} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2DocIdValidator()}.
+     */
     public DocIdValidator() {
         // default constructor
     }
