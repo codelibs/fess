@@ -99,10 +99,9 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     /**
-     * m-14: when {@code theme.api.csrf.required=true} (default), the response must
-     * include both {@code csrf_required:true} and a non-empty {@code csrf_token}.
-     * When false, {@code csrf_required:false} must be present and {@code csrf_token}
-     * must be empty string.
+     * The token is always required now: the response must include
+     * {@code csrf_required:true} and a non-empty {@code csrf_token} bound to the
+     * session.
      *
      * <p>The unit harness returns the FessConfig default value. We register a VirtualHostHelper
      * and ThemeRegistry stub so the handler reaches the payload-assembly section.</p>
@@ -123,11 +122,10 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
         if (res.status == 200) {
             final String body = res.body();
-            // csrf_required field must always be present (m-14).
-            assertTrue(body.contains("\"csrf_required\""), "csrf_required field missing in: " + body);
-            // The value is a boolean — check for true or false.
-            assertTrue(body.contains("\"csrf_required\":true") || body.contains("\"csrf_required\":false"),
-                    "csrf_required must be a boolean in: " + body);
+            // csrf_required is always true now.
+            assertTrue(body.contains("\"csrf_required\":true"), "csrf_required must be true in: " + body);
+            // A fresh session-bound token is always issued, so csrf_token must be non-empty.
+            assertFalse(body.contains("\"csrf_token\":\"\""), "csrf_token must not be empty in: " + body);
         }
     }
 

@@ -2088,8 +2088,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String THEME_ASSETS_PRECOMPRESSED = "theme.assets.precompressed";
 
-    /** The key of the configuration. e.g. true */
-    String THEME_API_CSRF_REQUIRED = "theme.api.csrf.required";
+    /** The key of the configuration. e.g.  */
+    String THEME_API_CSRF_SERVER_ORIGINS = "theme.api.csrf.server.origins";
 
     /** The key of the configuration. e.g. 10 */
     String THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE = "theme.api.login.rate.limit.per.ip.per.minute";
@@ -10015,18 +10015,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isThemeAssetsPrecompressed();
 
     /**
-     * Get the value for the key 'theme.api.csrf.required'. <br>
-     * The value is, e.g. true <br>
+     * Get the value for the key 'theme.api.csrf.server.origins'. <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getThemeApiCsrfRequired();
-
-    /**
-     * Is the property for the key 'theme.api.csrf.required' true? <br>
-     * The value is, e.g. true <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isThemeApiCsrfRequired();
+    String getThemeApiCsrfServerOrigins();
 
     /**
      * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute'. <br>
@@ -13840,12 +13833,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.THEME_ASSETS_PRECOMPRESSED);
         }
 
-        public String getThemeApiCsrfRequired() {
-            return get(FessConfig.THEME_API_CSRF_REQUIRED);
-        }
-
-        public boolean isThemeApiCsrfRequired() {
-            return is(FessConfig.THEME_API_CSRF_REQUIRED);
+        public String getThemeApiCsrfServerOrigins() {
+            return get(FessConfig.THEME_API_CSRF_SERVER_ORIGINS);
         }
 
         public String getThemeApiLoginRateLimitPerIpPerMinute() {
@@ -14524,7 +14513,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS, "zip");
             defaultMap.put(FessConfig.THEME_ASSETS_CACHE_MAX_AGE, "86400");
             defaultMap.put(FessConfig.THEME_ASSETS_PRECOMPRESSED, "true");
-            defaultMap.put(FessConfig.THEME_API_CSRF_REQUIRED, "true");
+            defaultMap.put(FessConfig.THEME_API_CSRF_SERVER_ORIGINS, "");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
             defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
