@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -70,12 +71,24 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
 
         StreamUtil.split(value, "\n").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> {
             final String[] values = StringUtils.split(s, "=", 2);
+            if (values.length < 2) {
+                logger.warn("Unexpected value: value={}", s);
+                return;
+            }
+            final String[] keyValue = StringUtils.split(values[1], ":", 2);
+            final String headerName = keyValue.length >= 1 ? keyValue[0].trim() : StringUtil.EMPTY;
+            final String lowerName = headerName.toLowerCase(Locale.ROOT);
+            if (lowerName.startsWith("access-control-") || "timing-allow-origin".equals(lowerName)) {
+                logger.warn(
+                        "Ignoring CORS-control response header from response.headers (controlled by api.cors.* / CorsFilter): header={}, value={}",
+                        headerName, s);
+                return;
+            }
             List<Pair<String, String>> list = responseHeaderMap.get(values[0]);
             if (list == null) {
                 list = new ArrayList<>();
                 responseHeaderMap.put(values[0], list);
             }
-            final String[] keyValue = StringUtils.split(values[1], ":", 2);
             if (keyValue.length == 2) {
                 list.add(new Pair<>(keyValue[0].trim(), keyValue[1].trim()));
             } else if (keyValue.length == 1) {
