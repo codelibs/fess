@@ -21,7 +21,7 @@ info:
     State-changing endpoints (`POST` / `PUT` / `DELETE`) require the
     `X-Fess-CSRF-Token` header. Acquire the token from
     `POST /auth/login` (in the `csrf_token` field) or from
-    `GET /ui/config` when `csrf_required=true`. The token rotates on
+    `GET /ui/config`. The token rotates on
     login, logout, and password change.
 
     CSRF verification runs **before** authentication, so a state-changing
@@ -917,8 +917,7 @@ components:
       in: header
       description: |-
         CSRF token issued by `POST /auth/login` or `GET /ui/config`.
-        Required for all state-changing requests when
-        `theme.api.csrf.required=true` (the default).
+        Required for all state-changing requests.
       required: true
       schema: { type: string }
 
@@ -1438,8 +1437,8 @@ components:
                 csrf_token:
                   type: string
                   description: |-
-                    Empty string when `csrf_required` is `false`; otherwise a
-                    fresh token bound to the current session.
+                    A fresh CSRF token bound to the current session
+                    (`csrf_required` is always `true`).
 
     # --- Auth --------------------------------------------------------
     AuthMeResponse:

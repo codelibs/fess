@@ -86,4 +86,35 @@ public class CsrfRequirementTest {
         assertTrue(new CsrfRequirement().requiresCsrf("/unknown/endpoint", "PUT"));
         assertTrue(new CsrfRequirement().requiresCsrf("/another/new/path", "DELETE"));
     }
+
+    // isUnsafeMethod: safe (GET/HEAD/OPTIONS) vs unsafe (state-changing) methods
+
+    @Test
+    public void test_isUnsafeMethod_safeMethodsAreFalse() {
+        assertFalse(CsrfRequirement.isUnsafeMethod("GET"));
+        assertFalse(CsrfRequirement.isUnsafeMethod("HEAD"));
+        assertFalse(CsrfRequirement.isUnsafeMethod("OPTIONS"));
+    }
+
+    @Test
+    public void test_isUnsafeMethod_stateChangingMethodsAreTrue() {
+        assertTrue(CsrfRequirement.isUnsafeMethod("POST"));
+        assertTrue(CsrfRequirement.isUnsafeMethod("PUT"));
+        assertTrue(CsrfRequirement.isUnsafeMethod("DELETE"));
+        assertTrue(CsrfRequirement.isUnsafeMethod("PATCH"));
+    }
+
+    @Test
+    public void test_isUnsafeMethod_isCaseInsensitive() {
+        assertFalse(CsrfRequirement.isUnsafeMethod("get"));
+        assertFalse(CsrfRequirement.isUnsafeMethod("Head"));
+        assertFalse(CsrfRequirement.isUnsafeMethod("options"));
+        assertTrue(CsrfRequirement.isUnsafeMethod("post"));
+        assertTrue(CsrfRequirement.isUnsafeMethod("Delete"));
+    }
+
+    @Test
+    public void test_isUnsafeMethod_nullIsFalse() {
+        assertFalse(CsrfRequirement.isUnsafeMethod(null));
+    }
 }

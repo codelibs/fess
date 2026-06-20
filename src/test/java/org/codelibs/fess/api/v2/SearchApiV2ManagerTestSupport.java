@@ -28,12 +28,16 @@ import org.codelibs.fess.api.v2.handlers.HealthHandler;
 import org.codelibs.fess.api.v2.handlers.LabelsHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
+import org.codelibs.fess.api.v2.handlers.OriginValidator;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
+import org.codelibs.fess.api.v2.handlers.TargetOriginResolver;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
+import org.codelibs.fess.cors.CorsHandlerFactory;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Test support factory for {@link SearchApiV2Manager}.
@@ -63,6 +67,13 @@ final class SearchApiV2ManagerTestSupport {
      * @return a fully initialised {@code SearchApiV2Manager} ready for unit testing
      */
     static SearchApiV2Manager newManagerWithHandlers() {
+        // The v2 CSRF Origin layer (SearchApiV2Manager.process) resolves the CORS
+        // allow list via ComponentUtil.getCorsHandlerFactory() for unsafe methods.
+        // The unit container does not auto-register it, so mirror the DI wiring with
+        // an empty factory (no EXACT/wildcard entries) unless a test registered its own.
+        if (!ComponentUtil.hasComponent("corsHandlerFactory")) {
+            ComponentUtil.register(new CorsHandlerFactory(), "corsHandlerFactory");
+        }
         final SearchApiV2Manager m = new SearchApiV2Manager();
         m.searchHandler = new SearchHandler();
         m.scrollSearchHandler = new ScrollSearchHandler();
@@ -83,6 +94,30 @@ final class SearchApiV2ManagerTestSupport {
         m.labelsHandler = new LabelsHandler();
         m.popularWordsHandler = new PopularWordsHandler();
         m.loginHandler = new LoginHandler();
+        // The Origin layer (SearchApiV2Manager.process) calls originValidator.isAllowed(...)
+        // for unsafe methods. Mirror the DI wiring: a real OriginValidator whose
+        // targetOriginResolver reconstructs the same-origin set from the servlet request
+        // (server.origins empty + untrusted peer in the unit harness).
+        m.originValidator = newOriginValidator();
         return m;
+    }
+
+    /**
+     * Builds an {@link OriginValidator} with a {@link TargetOriginResolver} injected,
+     * mirroring the Lasta DI {@code @Resource} wiring for unit tests that construct the
+     * validator outside the container.
+     *
+     * @return a fully wired {@code OriginValidator}
+     */
+    static OriginValidator newOriginValidator() {
+        final OriginValidator validator = new OriginValidator();
+        try {
+            final java.lang.reflect.Field field = OriginValidator.class.getDeclaredField("targetOriginResolver");
+            field.setAccessible(true);
+            field.set(validator, new TargetOriginResolver());
+        } catch (final ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to wire TargetOriginResolver into OriginValidator", e);
+        }
+        return validator;
     }
 }

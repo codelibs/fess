@@ -2417,6 +2417,21 @@ public interface FessProp {
         return set;
     }
 
+    String THEME_API_CSRF_SERVER_ORIGINS_SET = "themeApiCsrfServerOriginsSet";
+
+    String getThemeApiCsrfServerOrigins();
+
+    default Set<String> getThemeApiCsrfServerOriginsAsSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> set = (Set<String>) propMap.get(THEME_API_CSRF_SERVER_ORIGINS_SET);
+        if (set == null) {
+            set = split(getThemeApiCsrfServerOrigins(), "[\\n,]")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            propMap.put(THEME_API_CSRF_SERVER_ORIGINS_SET, set);
+        }
+        return set;
+    }
+
     /**
      * Resolves {@code api.v2.chat.rate.limit.per.user.per.minute} from the system
      * properties, defaulting to {@code 30} on absence or parse failure. A return

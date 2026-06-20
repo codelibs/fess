@@ -136,10 +136,10 @@ public class UiConfigHandler {
      * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#METHOD_NOT_ALLOWED}.
      * Otherwise assembles the SPA bootstrap payload — site name, login
      * requirement, supported locales, active theme descriptor, feature flags,
-     * paging defaults, and (when {@code theme.api.csrf.required=true}) a
-     * freshly-issued CSRF token bound to the session — and writes it via the
-     * standard v2 envelope. Any unexpected exception is caught and emitted as
-     * a structured {@code internal_error} envelope.</p>
+     * paging defaults, and a freshly-issued CSRF token bound to the session
+     * (always required now) — and writes it via the standard v2 envelope. Any
+     * unexpected exception is caught and emitted as a structured
+     * {@code internal_error} envelope.</p>
      *
      * @param req the incoming HTTP request
      * @param res the HTTP response to write to
@@ -292,21 +292,14 @@ public class UiConfigHandler {
             // Server-wide supported language list, surfaced as plain JSON array of codes.
             final String[] langs = cfg.getSupportedLanguagesAsArray();
 
-            // m-14: expose whether CSRF is required so the SPA can decide whether to
-            // send the X-Fess-CSRF-Token header. When csrf_required=false the SPA MAY
-            // omit the header; when true it MUST include it for all state-changing
-            // requests. The csrf_token field is only populated when csrf_required=true
-            // (empty string otherwise) to avoid issuing a session-bound token that the
-            // SPA will never use.
-            final boolean csrfRequired = cfg.isThemeApiCsrfRequired();
-            String csrfToken = "";
-            if (csrfRequired) {
-                // Issue (or echo) a CSRF token so the SPA can immediately POST. Using
-                // getSession(true) ensures the session exists even on the very first request.
-                final HttpSession session = req.getSession(true);
-                final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
-                csrfToken = csrf == null ? "" : csrf.issue(session);
-            }
+            // The CSRF token is always required for v2 state-changing requests, so the SPA
+            // MUST include the X-Fess-CSRF-Token header. The csrf_required/csrf_token fields
+            // are retained for SPA backward compatibility; csrf_required is now always true
+            // and a freshly-issued session-bound token is always returned. Using
+            // getSession(true) ensures the session exists even on the very first request.
+            final HttpSession session = req.getSession(true);
+            final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
+            final String csrfToken = csrf == null ? "" : csrf.issue(session);
 
             // sort_options: conditionally include click_count and favorite_count entries.
             final List<Map<String, Object>> sortOptions = buildSortOptions(searchLogEnabled, userFavoriteEnabled);
@@ -387,7 +380,7 @@ public class UiConfigHandler {
             payload.put("notifications", notifications);
             payload.put("facet_views", facetViews);
             payload.put("filetype_options", buildFiletypeOptions());
-            payload.put("csrf_required", csrfRequired);
+            payload.put("csrf_required", true);
             payload.put("csrf_token", csrfToken);
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {

@@ -39,6 +39,8 @@
 	<component name="loginHandler" class="org.codelibs.fess.api.v2.handlers.LoginHandler"/>
 	<component name="relatedQueriesHandler" class="org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler"/>
 	<component name="relatedContentHandler" class="org.codelibs.fess.api.v2.handlers.RelatedContentHandler"/>
+	<component name="targetOriginResolver" class="org.codelibs.fess.api.v2.handlers.TargetOriginResolver"/>
+	<component name="originValidator" class="org.codelibs.fess.api.v2.handlers.OriginValidator"/>
 
 	<component name="searchApiV2Manager" class="org.codelibs.fess.api.v2.SearchApiV2Manager">
 	</component>

@@ -25,6 +25,7 @@ import org.codelibs.fess.api.v2.handlers.ChatHandler;
 import org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler;
 import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
+import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritesListHandler;
@@ -33,6 +34,7 @@ import org.codelibs.fess.api.v2.handlers.LabelsHandler;
 import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
+import org.codelibs.fess.api.v2.handlers.OriginValidator;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.RelatedContentHandler;
@@ -155,6 +157,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     @Resource
     protected RelatedContentHandler relatedContentHandler;
 
+    /** Validates the request origin for the baseline CSRF Origin layer (unsafe methods). */
+    @Resource
+    protected OriginValidator originValidator;
+
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
      */
@@ -203,8 +209,18 @@ public class SearchApiV2Manager extends BaseApiManager {
         // servlet spec; headers set here are preserved.
         writeHeaders(response);
         final String sub = subPath(request);
-        if (ComponentUtil.getFessConfig().isThemeApiCsrfRequired()
-                && ComponentUtil.getV2CsrfRequirement().requiresCsrf(sub, request.getMethod())) {
+
+        // Layer 1: baseline Origin check (always applied). Rejects browser-driven
+        // cross-site state-changing requests before any handler runs. A missing
+        // Origin/Referer is allowed (non-browser API client compatibility); see
+        // OriginValidator.
+        if (CsrfRequirement.isUnsafeMethod(request.getMethod()) && !originValidator.isAllowed(request)) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.FORBIDDEN, "cross-site request blocked");
+            return;
+        }
+
+        // Layer 2: session-bound CSRF token verification (always applied).
+        if (ComponentUtil.getV2CsrfRequirement().requiresCsrf(sub, request.getMethod())) {
             final HttpSession session = request.getSession(false);
             final String header = request.getHeader("X-Fess-CSRF-Token");
             final SessionCsrfTokenManager csrf = ComponentUtil.getSessionCsrfTokenManager();
