@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.entity.FacetQueryView;
