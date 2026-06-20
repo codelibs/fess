@@ -488,8 +488,14 @@ paths:
       description: |-
         On success, the servlet session id is rotated, a fresh CSRF token
         is issued, and the rate-limit buckets for the caller IP and the
-        target user are cleared. On rate-limit, a `Retry-After` header
-        carries the cooldown in seconds.
+        target user are cleared.
+
+        Rate limiting has two scopes. The per-IP gate returns `429
+        rate_limited` with a `Retry-After` header. The per-user gate is
+        scoped to `(client IP, username)`; when it trips, the response is a
+        generic `401 auth_required` with no `Retry-After` — identical to a
+        credential rejection — so it does not disclose per-user rate-limit
+        state.
 
         An already-authenticated session does not short-circuit; the
         supplied credentials are always verified.
@@ -523,10 +529,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401':
+          description: |-
+            Authentication is required or credentials were invalid. The
+            per-user rate-limit gate (scoped to client IP + username) also
+            returns this status, with no `Retry-After`, so user-scope
+            throttling is indistinguishable from a credential rejection.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '429':
-          description: Rate limited; the `Retry-After` header carries the cooldown in seconds.
+          description: |-
+            Per-IP rate limit exceeded. The `Retry-After` header carries the
+            cooldown in seconds. (The per-user gate does NOT use this status;
+            it returns 401 — see above.)
           headers:
             Retry-After:
               description: Seconds the caller should wait before retrying.
