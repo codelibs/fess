@@ -93,16 +93,16 @@ public class FavoriteGetHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
-        if (!DocIdValidator.isValid(docId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
+        if (!ComponentUtil.getV2DocIdValidator().isValid(docId)) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isUserFavorite()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "favorite feature is not available");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "favorite feature is not available");
             return;
         }
         try {
@@ -113,7 +113,7 @@ public class FavoriteGetHandler {
             final OptionalEntity<Map<String, Object>> docOpt = searchHelper.getDocumentByDocId(docId,
                     new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldFavoriteCount() }, OptionalThing.empty());
             if (!docOpt.isPresent()) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
                 return;
             }
             final Map<String, Object> doc = docOpt.get();
@@ -133,9 +133,9 @@ public class FavoriteGetHandler {
             payload.put("doc_id", docId);
             payload.put("favorite", favorite);
             payload.put("count", count);
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite GET");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite GET");
         }
     }
 }

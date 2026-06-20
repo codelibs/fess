@@ -17,12 +17,8 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.codelibs.fess.helper.ChatApiHelper;
-import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Parsed view of a chat request body shared by {@link ChatHandler} and
@@ -68,7 +64,7 @@ public final class ChatRequestBody {
      */
     private final Map<String, List<String>> warnings;
 
-    private ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
+    public ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
             final Map<String, List<String>> warnings) {
         this.message = message;
         this.sessionId = sessionId;
@@ -129,40 +125,6 @@ public final class ChatRequestBody {
     }
 
     /**
-     * Parses a raw JSON body map into a validated {@link ChatRequestBody}.
-     *
-     * <p>The {@code message} and {@code session_id} values are trimmed; blank
-     * inputs become {@code null}. Label filters and {@code extra_queries} are
-     * passed through the {@link ChatApiHelper} allowlist; rejected values are
-     * tracked in {@link #getWarnings()} but otherwise dropped.</p>
-     *
-     * @param raw the parsed JSON request body
-     * @param maxMessageLength upper bound on the {@code message} length, in characters
-     * @return a validated, immutable view of the request body
-     * @throws MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
-     * @throws IOException if validation reports an unrecoverable error
-     */
-    public static ChatRequestBody from(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
-        final String message = trimmedOrNull(raw.get("message"));
-        final String sessionId = trimmedOrNull(raw.get("session_id"));
-        if (message != null && message.length() > maxMessageLength) {
-            throw new MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
-        }
-        final Map<String, List<String>> warnings = new HashMap<>();
-        final ChatApiHelper chatApiHelper = ComponentUtil.getChatApiHelper();
-        final Map<String, String[]> fields = chatApiHelper.parseFieldFilters(raw, warnings);
-        final String[] extraQueries = chatApiHelper.parseExtraQueries(raw, warnings);
-        return new ChatRequestBody(message, sessionId, fields, extraQueries, warnings);
-    }
-
-    private static String trimmedOrNull(final Object v) {
-        if (v == null) {
-            return null;
-        }
-        final String s = v.toString().trim();
-        return s.isEmpty() ? null : s;
-    }
-
     /** Thrown when the request {@code message} exceeds {@code rag.chat.message.max.length}. */
     public static class MessageTooLongException extends IOException {
         private static final long serialVersionUID = 1L;

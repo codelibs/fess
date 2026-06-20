@@ -1,0 +1,82 @@
+/*
+ * Copyright 2012-2025 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.api.v2.handlers;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+/**
+ * Handles the {@code /api/v2/labels} endpoint.
+ */
+public class LabelsHandler {
+
+    private static final Logger logger = LogManager.getLogger(LabelsHandler.class);
+
+    /**
+     * Default constructor used by the DI container.
+     */
+    public LabelsHandler() {
+        // default constructor
+    }
+
+    /**
+     * Processes one labels request.
+     *
+     * @param request the incoming HTTP request
+     * @param response the HTTP response to write to
+     * @throws IOException if writing the envelope fails
+     */
+    public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            return;
+        }
+        try {
+            final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
+            final Locale locale = request.getLocale() == null ? Locale.ROOT : request.getLocale();
+            final List<Map<String, String>> items = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON, locale);
+            final List<Map<String, Object>> labels = new ArrayList<>(items.size());
+            for (final Map<String, String> item : items) {
+                final Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("label", item.get(Constants.ITEM_LABEL));
+                entry.put("value", item.get(Constants.ITEM_VALUE));
+                labels.add(entry);
+            }
+            final Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("record_count", labels.size());
+            payload.put("labels", labels);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
+        } catch (final Exception e) {
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/labels");
+        }
+    }
+}

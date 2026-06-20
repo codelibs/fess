@@ -35,7 +35,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("k", "v");
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        new V2EnvelopeWriter().writeSuccess(res, payload);
         final String body = res.body();
         assertTrue(body.contains("\"status\":0"), body);
         assertFalse(body.contains("\"version\""), body);
@@ -46,7 +46,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     @Test
     public void test_writeError_setsStatusAndCode() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
         final String body = res.body();
         assertEquals(401, res.status);
         assertTrue(body.contains("\"status\":1"), body);
@@ -57,7 +57,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     @Test
     public void test_writeError_notFoundSetsHttpStatus404() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "no");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "no");
         assertEquals(404, res.status);
         assertTrue(res.body().contains("\"code\":\"not_found\""));
     }
@@ -65,7 +65,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     @Test
     public void test_writeError_forbiddenSetsHttpStatus403() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.FORBIDDEN, "no permission");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.FORBIDDEN, "no permission");
         assertEquals(403, res.status);
         assertTrue(res.body().contains("\"code\":\"forbidden\""));
     }
@@ -73,7 +73,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     @Test
     public void test_writeError_sets_characterEncoding_to_UTF_8() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "bad");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "bad");
         assertEquals("UTF-8", res.characterEncoding);
     }
 
@@ -85,7 +85,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
                 return true;
             }
         };
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "should not appear");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "should not appear");
         // If response is committed, nothing should be written to the body
         assertEquals("", res.body());
         // Status should not be changed from initial 200
@@ -95,18 +95,18 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     @Test
     public void test_writeError_mapsStatusSystemError_for_5xx_codes() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "err");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "err");
         assertTrue(res.body().contains("\"status\":9"), res.body());
     }
 
     @Test
     public void test_writeError_mapsStatusUserError_for_4xx_codes() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "not found");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "not found");
         assertTrue(res.body().contains("\"status\":1"), res.body());
 
         final CapturingResponse res2 = new CapturingResponse();
-        V2EnvelopeWriter.writeError(res2, V2ErrorCode.INVALID_REQUEST, "bad request");
+        new V2EnvelopeWriter().writeError(res2, V2ErrorCode.INVALID_REQUEST, "bad request");
         assertTrue(res2.body().contains("\"status\":1"), res2.body());
     }
 
@@ -115,7 +115,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("status", 99); // reserved — must be rejected
-        assertThrows(IllegalStateException.class, () -> V2EnvelopeWriter.writeSuccess(res, payload),
+        assertThrows(IllegalStateException.class, () -> new V2EnvelopeWriter().writeSuccess(res, payload),
                 "payload containing 'status' should throw IllegalStateException");
     }
 
@@ -125,7 +125,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("version", "custom");
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        new V2EnvelopeWriter().writeSuccess(res, payload);
         assertTrue(res.body().contains("\"version\":\"custom\""), res.body());
     }
 
@@ -133,7 +133,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     public void test_writeSuccess_nullPayloadIsAllowed() throws Exception {
         // null payload is documented as "treated as empty"; must not throw.
         final CapturingResponse res = new CapturingResponse();
-        V2EnvelopeWriter.writeSuccess(res, null);
+        new V2EnvelopeWriter().writeSuccess(res, null);
         final String body = res.body();
         assertTrue(body.contains("\"status\":0"), body);
         assertFalse(body.contains("\"version\""), body);
@@ -151,7 +151,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         res.getWriter().write("{\"partial\":1}\n");
         res.getWriter().write("{\"partial\":2}\n");
         // Failure pre-flush → writeError takes over.
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "boom");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "boom");
         // resetBuffer must have been invoked.
         assertTrue(res.resetBufferCalled, "writeError must call resetBuffer() to clear streaming partial body");
         // Content-Type must end up as application/json (not the NDJSON one set earlier).
@@ -170,7 +170,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final Map<String, Object> engine = new LinkedHashMap<>();
         engine.put("cluster_name", "fess");
         engine.put("status", "red");
-        V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, "cluster red", Map.of("engine", engine));
+        new V2EnvelopeWriter().writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, "cluster red", Map.of("engine", engine));
         final String body = res.body();
         assertEquals(503, res.status);
         assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
@@ -195,7 +195,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         };
         final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
         payload.put("k", "v");
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        new V2EnvelopeWriter().writeSuccess(res, payload);
         // Nothing must be written to the body — the response is committed.
         assertEquals("", res.body());
         // HTTP status must remain at the default 200 (not changed).
@@ -213,7 +213,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         res.getWriter().write("{\"partial\":\"stale\"}");
         final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
         payload.put("result", "ok");
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        new V2EnvelopeWriter().writeSuccess(res, payload);
         // resetBuffer() must have been called, discarding the stale partial body.
         assertTrue(res.resetBufferCalled, "writeSuccess must call resetBuffer() before writing");
         final String body = res.body();
@@ -232,7 +232,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         // Simulate the SSE prelude header that was set before the handler errored.
         res.setHeader("Cache-Control", "no-cache");
-        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "boom");
+        new V2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "boom");
         assertEquals("writeError must override Cache-Control to no-store so SSE prelude no-cache does not leak", "no-store",
                 res.headers.get("Cache-Control"));
     }
@@ -242,7 +242,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         // F4: the details-bearing path must apply the same Cache-Control override.
         final CapturingResponse res = new CapturingResponse();
         res.setHeader("Cache-Control", "no-cache");
-        V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, "red", java.util.Map.of("engine", "red"));
+        new V2EnvelopeWriter().writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, "red", java.util.Map.of("engine", "red"));
         assertEquals("writeErrorWithDetails must also override Cache-Control to no-store", "no-store", res.headers.get("Cache-Control"));
     }
 
@@ -257,7 +257,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         // assertion here is that writeSuccess itself does not set Cache-Control.
         final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
         payload.put("k", "v");
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        new V2EnvelopeWriter().writeSuccess(res, payload);
         assertFalse(res.headers.containsKey("Cache-Control"),
                 "writeSuccess must not set Cache-Control on its own; caching is endpoint-specific");
     }
@@ -268,7 +268,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         // Create a logger that does nothing (we just need to not throw)
         final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
         final Exception secret = new RuntimeException("secret connection string: jdbc:postgresql://10.0.0.1:5432/prod");
-        V2EnvelopeWriter.writeInternalError(res, secret, noopLogger, "/test");
+        new V2EnvelopeWriter().writeInternalError(res, secret, noopLogger, "/test");
         final String body = res.body();
         // Must contain the safe message, not the secret
         assertTrue(body.contains("internal error"), "expected 'internal error' in body: " + body);

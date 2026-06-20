@@ -38,9 +38,10 @@ import java.util.Locale;
  * {@code CsrfRequirementCompleteCoverageTest} to pin the decision. Failing to do so is safe
  * (the new path is CSRF-required by default), but the coverage test will flag the omission.</p>
  */
-public final class CsrfRequirement {
+public class CsrfRequirement {
 
-    private CsrfRequirement() {
+    public CsrfRequirement() {
+        // default constructor
     }
 
     /**
@@ -59,7 +60,7 @@ public final class CsrfRequirement {
      * @param method the HTTP method (case-insensitive)
      * @return {@code true} if a valid CSRF token must accompany the request
      */
-    public static boolean requiresCsrf(final String subPath, final String method) {
+    public boolean requiresCsrf(final String subPath, final String method) {
         if (method == null) {
             return false;
         }

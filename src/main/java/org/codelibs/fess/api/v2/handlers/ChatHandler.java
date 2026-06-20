@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
@@ -87,40 +86,40 @@ public class ChatHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
             return;
         }
 
         final Map<String, Object> raw;
         try {
-            raw = V2JsonBody.read(req, MAX_BODY_BYTES);
+            raw = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
             return;
         } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
             return;
         } catch (final V2JsonBody.MalformedJsonException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
 
         final int maxLen = ComponentUtil.getChatApiHelper().getMaxMessageLength(fessConfig);
         final ChatRequestBody body;
         try {
-            body = ChatRequestBody.from(raw, maxLen);
+            body = ComponentUtil.getChatApiHelper().parseRequestBody(raw, maxLen);
         } catch (final ChatRequestBody.MessageTooLongException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
 
         if (StringUtil.isBlank(body.message())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "message is required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "message is required");
             return;
         }
 
@@ -134,7 +133,7 @@ public class ChatHandler {
         } catch (final RuntimeException e) {
             // Limiter DI not available (e.g. slim test harness); log and surface as 500.
             logger.warn("[RAG] /api/v2/chat rate-limit lookup failed", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
         final int chatLimit = fessConfig.getChatRateLimitPerMinute();
@@ -144,7 +143,7 @@ public class ChatHandler {
         if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
                 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
         }
 
@@ -165,12 +164,12 @@ public class ChatHandler {
             payload.put("content", result.getMessage().getContent());
             final List<ChatSource> sources = result.getMessage().getSources();
             if (sources != null) {
-                payload.put("sources", toSourceMaps(sources));
+                payload.put("sources", ComponentUtil.getChatApiHelper().toSourceMaps(sources));
             }
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
             logger.warn("[RAG] /api/v2/chat failed. error={}", e.getMessage(), e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "chat failed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "chat failed");
         }
     }
 
@@ -199,37 +198,4 @@ public class ChatHandler {
         return ComponentUtil.getChatClient();
     }
 
-    /**
-     * Converts a list of {@link ChatSource} objects to a list of snake_case maps
-     * suitable for JSON serialization. The Java field names on ChatSource are kept
-     * unchanged (v1 compatibility); only the output wire keys are snake_case.
-     *
-     * <p>Output keys: {@code rank}, {@code title}, {@code url}, {@code doc_id},
-     * {@code snippet}, {@code url_link}, {@code go_url}. A {@link LinkedHashMap}
-     * is used to guarantee key order.</p>
-     *
-     * @param sources list of chat sources to convert
-     * @return list of snake_case maps, one per source
-     */
-    static List<Map<String, Object>> toSourceMaps(final List<ChatSource> sources) {
-        final List<Map<String, Object>> result = new java.util.ArrayList<>(sources.size());
-        for (final ChatSource src : sources) {
-            final Map<String, Object> m = new LinkedHashMap<>();
-            m.put("rank", src.getIndex());
-            putIfNotNull(m, "title", src.getTitle());
-            putIfNotNull(m, "url", src.getUrl());
-            putIfNotNull(m, "doc_id", src.getDocId());
-            putIfNotNull(m, "snippet", src.getSnippet());
-            putIfNotNull(m, "url_link", src.getUrlLink());
-            putIfNotNull(m, "go_url", src.getGoUrl());
-            result.add(m);
-        }
-        return result;
-    }
-
-    private static void putIfNotNull(final Map<String, Object> map, final String key, final Object value) {
-        if (value != null) {
-            map.put(key, value);
-        }
-    }
 }

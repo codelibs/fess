@@ -38,7 +38,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * {@code application/json}, and malformed JSON. The empty body is treated as
  * an empty map so callers do not need to null-check before lookups.</p>
  */
-public final class V2JsonBody {
+public class V2JsonBody {
 
     /**
      * Shared Jackson mapper with tight {@link StreamReadConstraints} to defend against
@@ -50,7 +50,7 @@ public final class V2JsonBody {
      *   <li>{@code maxStringLength(1 MiB)} — rejects individual string values exceeding 1 MiB.</li>
      * </ul>
      */
-    private static final JsonMapper MAPPER = JsonMapper.builder(JsonFactory.builder()
+    private final JsonMapper mapper = JsonMapper.builder(JsonFactory.builder()
             .streamReadConstraints(
                     StreamReadConstraints.builder().maxNestingDepth(32).maxNumberLength(1000).maxStringLength(1 << 20).build())
             .build()).build();
@@ -61,7 +61,8 @@ public final class V2JsonBody {
     /** UTF-8 BOM byte sequence (EF BB BF). Present in some editor-generated JSON files. */
     private static final byte[] UTF8_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
 
-    private V2JsonBody() {
+    public V2JsonBody() {
+        // default constructor
     }
 
     /**
@@ -91,7 +92,7 @@ public final class V2JsonBody {
      * @throws MalformedJsonException if the body is not valid JSON
      * @throws IOException if reading the request stream fails
      */
-    public static Map<String, Object> read(final HttpServletRequest req, final int maxBytes) throws IOException {
+    public Map<String, Object> read(final HttpServletRequest req, final int maxBytes) throws IOException {
         final String ct = req.getContentType();
         if (ct == null) {
             throw new UnsupportedMediaTypeException("content-type is required");
@@ -132,7 +133,7 @@ public final class V2JsonBody {
         }
         final byte[] jsonBytes = offset == 0 ? buf : java.util.Arrays.copyOfRange(buf, offset, buf.length);
         try {
-            return MAPPER.readValue(new String(jsonBytes, StandardCharsets.UTF_8), TYPE);
+            return mapper.readValue(new String(jsonBytes, StandardCharsets.UTF_8), TYPE);
         } catch (final JsonProcessingException e) {
             throw new MalformedJsonException(e.getMessage());
         }

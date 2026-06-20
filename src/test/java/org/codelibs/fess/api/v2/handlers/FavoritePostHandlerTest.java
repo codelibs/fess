@@ -178,7 +178,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
                 res, "abc");
         if (res.status == 500) {
             final String body = res.body();
-            // V2EnvelopeWriter.writeInternalError always emits "internal error" — the
+            // new V2EnvelopeWriter().writeInternalError always emits "internal error" — the
             // exact literal used by all internal-error paths in the v2 API. The original
             // expectation of "favorite add failed" predated writeInternalError and is
             // corrected here to match the current fixed-string contract.

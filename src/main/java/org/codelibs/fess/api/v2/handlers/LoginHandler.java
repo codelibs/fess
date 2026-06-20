@@ -129,7 +129,7 @@ public class LoginHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final LoginRateLimiter limiter = limiter();
@@ -142,25 +142,25 @@ public class LoginHandler {
         if (!limiter.allow(LoginRateLimiter.Scope.IP, clientIp, ipLimit, 60)) {
             limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec);
             res.setHeader("Retry-After", Integer.toString(lockoutSec));
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (ip)");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (ip)");
             return;
         }
 
         final Map<String, Object> body;
         try {
-            body = V2JsonBody.read(req, MAX_BODY_BYTES);
+            body = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "payload too large");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "payload too large");
             return;
         } catch (final V2JsonBody.MalformedJsonException | V2JsonBody.UnsupportedMediaTypeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
         final String username = stringOrNull(body.get("username"));
         final String password = stringOrNull(body.get("password"));
         final String returnTo = stringOrNull(body.get("return_to"));
         if (StringUtil.isBlank(username) || StringUtil.isBlank(password)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "username and password are required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "username and password are required");
             return;
         }
         final String userKey = userScopeKey(clientIp, username);
@@ -175,7 +175,7 @@ public class LoginHandler {
             // credential rejection, with no Retry-After, so the response cannot be used to probe
             // a per-user counter. The IP-scope gate above still returns 429 + Retry-After.
             limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
         }
 
@@ -188,7 +188,7 @@ public class LoginHandler {
             assist = ComponentUtil.getComponent(FessLoginAssist.class);
         } catch (final RuntimeException e) {
             logger.warn("login failed unexpectedly: could not acquire FessLoginAssist", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
 
@@ -210,7 +210,7 @@ public class LoginHandler {
             prevUserId = existingBean.isPresent() ? existingBean.get().getUserId() : null;
         } catch (final RuntimeException e) {
             logger.warn("login: could not check existing session state", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
 
@@ -225,7 +225,7 @@ public class LoginHandler {
             if (!limiter.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
                 limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
             }
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
         } catch (final RuntimeException e) {
             // Anything else (DI binding failure, transient lookup error, etc.) is a system
@@ -233,7 +233,7 @@ public class LoginHandler {
             // server would lock real users out. We surface INTERNAL_ERROR with a generic
             // message; the exception detail goes to the log only.
             logger.warn("login failed unexpectedly", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
 
@@ -276,7 +276,7 @@ public class LoginHandler {
             payload.put("csrf_token", token);
             addReturnTo(payload, returnTo);
         }
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 
     /**
@@ -284,9 +284,9 @@ public class LoginHandler {
      * Uses {@link UserPayloads#toJson(FessUserBean)} to guarantee shape parity
      * with MeHandler (MJ-28).
      */
-    private static Map<String, Object> buildUserPayload(final FessUserBean u, final String token, final String returnTo) {
+    private Map<String, Object> buildUserPayload(final FessUserBean u, final String token, final String returnTo) {
         final Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("user", UserPayloads.toJson(u));
+        payload.put("user", ComponentUtil.getV2UserPayloads().toJson(u));
         payload.put("csrf_token", token);
         addReturnTo(payload, returnTo);
         return payload;
@@ -298,7 +298,7 @@ public class LoginHandler {
      * any ASCII control character. The pattern requires a leading '/' so relative
      * paths below the app root are always safe.
      */
-    private static void addReturnTo(final Map<String, Object> payload, final String returnTo) {
+    private void addReturnTo(final Map<String, Object> payload, final String returnTo) {
         if (returnTo == null) {
             return;
         }
@@ -324,7 +324,7 @@ public class LoginHandler {
      * username and let the auth flow proceed with a stringified non-string, which
      * is not what the wire contract intends.
      */
-    private static String stringOrNull(final Object v) {
+    private String stringOrNull(final Object v) {
         return v instanceof String s ? s : null;
     }
 
@@ -342,7 +342,7 @@ public class LoginHandler {
      * @param username submitted username
      * @return composite key {@code clientIp + NUL + username}
      */
-    static String userScopeKey(final String clientIp, final String username) {
+    String userScopeKey(final String clientIp, final String username) {
         return clientIp + USER_SCOPE_KEY_SEP + username;
     }
 
@@ -351,7 +351,7 @@ public class LoginHandler {
      * falling back to {@link HttpServletRequest#getRemoteAddr()} when the helper
      * is not available — e.g. in slim test DI graphs.
      */
-    private static String resolveClientIp(final HttpServletRequest req) {
+    private String resolveClientIp(final HttpServletRequest req) {
         try {
             return ComponentUtil.getRateLimitHelper().getClientIp(req);
         } catch (final RuntimeException e) {

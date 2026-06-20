@@ -77,7 +77,7 @@ public class MeHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         OptionalThing<FessUserBean> userBean;
@@ -93,14 +93,14 @@ public class MeHandler {
         final Map<String, Object> payload = new LinkedHashMap<>();
         if (userBean.isPresent()) {
             final FessUserBean u = userBean.get();
-            // MJ-28: use shared UserPayloads.toJson() to guarantee the same wire shape as
+            // MJ-28: use shared ComponentUtil.getV2UserPayloads().toJson() to guarantee the same wire shape as
             // LoginHandler — roles/groups/permissions are always arrays, never null.
             payload.put("authenticated", true);
-            payload.put("user", UserPayloads.toJson(u));
+            payload.put("user", ComponentUtil.getV2UserPayloads().toJson(u));
         } else {
             payload.put("authenticated", false);
         }
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 
     /**

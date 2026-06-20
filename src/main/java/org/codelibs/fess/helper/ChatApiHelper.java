@@ -15,10 +15,12 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,7 +28,9 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.api.v2.handlers.ChatRequestBody;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -156,6 +160,49 @@ public class ChatApiHelper {
     }
 
     /**
+     * Parses a raw v2 chat JSON body into a validated {@link ChatRequestBody}.
+     *
+     * @param raw the parsed JSON request body
+     * @param maxMessageLength upper bound on the {@code message} length, in characters
+     * @return a validated request body
+     * @throws ChatRequestBody.MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
+     * @throws IOException if validation reports an unrecoverable error
+     */
+    public ChatRequestBody parseRequestBody(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
+        final String message = trimmedOrNull(raw.get("message"));
+        final String sessionId = trimmedOrNull(raw.get("session_id"));
+        if (message != null && message.length() > maxMessageLength) {
+            throw new ChatRequestBody.MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
+        }
+        final Map<String, List<String>> warnings = new HashMap<>();
+        final Map<String, String[]> fields = parseFieldFilters(raw, warnings);
+        final String[] extraQueries = parseExtraQueries(raw, warnings);
+        return new ChatRequestBody(message, sessionId, fields, extraQueries, warnings);
+    }
+
+    /**
+     * Converts chat sources to the v2 API response shape.
+     *
+     * @param sources list of chat sources to convert
+     * @return list of snake_case maps, one per source
+     */
+    public List<Map<String, Object>> toSourceMaps(final List<ChatSource> sources) {
+        final List<Map<String, Object>> result = new ArrayList<>(sources.size());
+        for (final ChatSource src : sources) {
+            final Map<String, Object> m = new LinkedHashMap<>();
+            m.put("rank", src.getIndex());
+            putIfNotNull(m, "title", src.getTitle());
+            putIfNotNull(m, "url", src.getUrl());
+            putIfNotNull(m, "doc_id", src.getDocId());
+            putIfNotNull(m, "snippet", src.getSnippet());
+            putIfNotNull(m, "url_link", src.getUrlLink());
+            putIfNotNull(m, "go_url", src.getGoUrl());
+            result.add(m);
+        }
+        return result;
+    }
+
+    /**
      * Coerces a raw request value into a list of strings: each element of a {@link List} is
      * converted via {@code toString()} (skipping nulls); any other non-null value yields a
      * single-element list. A {@code null} input yields an empty list.
@@ -163,7 +210,7 @@ public class ChatApiHelper {
      * @param raw the raw value (a {@code List}, a scalar, or {@code null})
      * @return the coerced string values (never {@code null})
      */
-    private static List<String> toStringList(final Object raw) {
+    private List<String> toStringList(final Object raw) {
         final List<String> values = new ArrayList<>();
         if (raw instanceof List<?> l) {
             for (final Object o : l) {
@@ -177,6 +224,20 @@ public class ChatApiHelper {
         return values;
     }
 
+    private String trimmedOrNull(final Object v) {
+        if (v == null) {
+            return null;
+        }
+        final String s = v.toString().trim();
+        return s.isEmpty() ? null : s;
+    }
+
+    private void putIfNotNull(final Map<String, Object> map, final String key, final Object value) {
+        if (value != null) {
+            map.put(key, value);
+        }
+    }
+
     /**
      * Partitions {@code values} against an allowlist, returning the accepted values and recording
      * rejected ones under {@code warningKey} in {@code warnings} (only when non-empty).
@@ -187,7 +248,7 @@ public class ChatApiHelper {
      * @param warnings mutable map collecting rejected values
      * @return the values present in {@code allowed} (never {@code null})
      */
-    private static List<String> partitionAllowed(final List<String> values, final Set<String> allowed, final String warningKey,
+    private List<String> partitionAllowed(final List<String> values, final Set<String> allowed, final String warningKey,
             final Map<String, List<String>> warnings) {
         final List<String> valid = new ArrayList<>();
         final List<String> rejected = new ArrayList<>();

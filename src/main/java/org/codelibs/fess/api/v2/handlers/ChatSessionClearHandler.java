@@ -89,19 +89,19 @@ public class ChatSessionClearHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String sessionId) throws IOException {
         if (!"DELETE".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "DELETE");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
             return;
         }
 
         // Validate the session_id path segment before touching any backend state.
         if (sessionId == null || !SESSION_ID_PATTERN.matcher(sessionId).matches()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid session_id");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid session_id");
             return;
         }
 
@@ -114,7 +114,7 @@ public class ChatSessionClearHandler {
             limiter = ComponentUtil.getLoginRateLimiter();
         } catch (final RuntimeException e) {
             logger.warn("[RAG] /api/v2/chat/sessions DELETE rate-limit lookup failed", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
         final int chatLimit = fessConfig.getChatRateLimitPerMinute();
@@ -124,23 +124,23 @@ public class ChatSessionClearHandler {
         if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
                 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
         }
 
         try {
             final boolean cleared = ComponentUtil.getChatSessionManager().clearSession(sessionId, userId);
             if (!cleared) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "session not found");
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "session not found");
                 return;
             }
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("session_id", sessionId);
             payload.put("cleared", true);
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
             logger.warn("[RAG] DELETE /api/v2/chat/sessions/{} failed. error={}", sessionId, e.getMessage(), e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
         }
     }
 

@@ -70,7 +70,7 @@ public class LogoutHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
@@ -88,6 +88,6 @@ public class LogoutHandler {
                 // FessLoginAssist.logout() may have already invalidated the session.
             }
         }
-        V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true));
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, Map.of("ok", true));
     }
 }

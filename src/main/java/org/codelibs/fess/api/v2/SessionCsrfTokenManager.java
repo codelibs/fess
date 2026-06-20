@@ -143,7 +143,7 @@ public class SessionCsrfTokenManager {
      * @param session the HTTP session whose id should be hashed; may be {@code null}
      * @return an 8-character lowercase hex prefix of {@code SHA-256(sessionId)}, or a literal placeholder
      */
-    static String redactSessionId(final HttpSession session) {
+    private String redactSessionId(final HttpSession session) {
         if (session == null) {
             return "(null)";
         }
@@ -167,7 +167,7 @@ public class SessionCsrfTokenManager {
         }
     }
 
-    private static boolean constantTimeEquals(final String a, final String b) {
+    private boolean constantTimeEquals(final String a, final String b) {
         if (a.length() != b.length()) {
             return false;
         }

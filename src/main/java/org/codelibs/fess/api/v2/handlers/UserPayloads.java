@@ -39,10 +39,10 @@ import org.codelibs.fess.util.ComponentUtil;
  * developer-facing English. Clients MUST use error.code (the V2ErrorCode token)
  * for user-facing i18n.</p>
  */
-public final class UserPayloads {
+public class UserPayloads {
 
-    private UserPayloads() {
-        // utility class — no instances
+    public UserPayloads() {
+        // default constructor
     }
 
     /**
@@ -54,7 +54,7 @@ public final class UserPayloads {
      * @param u the authenticated user bean (must not be null)
      * @return a LinkedHashMap suitable for inclusion in a v2 response payload
      */
-    public static Map<String, Object> toJson(final FessUserBean u) {
+    public Map<String, Object> toJson(final FessUserBean u) {
         final Map<String, Object> userMap = new LinkedHashMap<>();
         final String userId = u.getUserId();
         userMap.put("user_id", userId);
@@ -76,7 +76,7 @@ public final class UserPayloads {
         return userMap;
     }
 
-    private static List<String> arrayOrEmpty(final String[] arr) {
+    private List<String> arrayOrEmpty(final String[] arr) {
         return arr == null ? List.of() : List.of(arr);
     }
 }

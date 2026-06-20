@@ -40,7 +40,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * to work. The {@code version} field is omitted from the envelope because
  * the API version is already encoded in the URL path ({@code /api/v2/...}).</p>
  */
-public final class V2EnvelopeWriter {
+public class V2EnvelopeWriter {
 
     /** Status value indicating a successful response. */
     public static final int STATUS_OK = 0;
@@ -51,11 +51,11 @@ public final class V2EnvelopeWriter {
     /** Status value indicating an unexpected server-side failure. */
     public static final int STATUS_SYSTEM_ERROR = 9;
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     private static final String CONTENT_TYPE = "application/json; charset=UTF-8";
 
-    private V2EnvelopeWriter() {
-        // Utility class — no instances.
+    public V2EnvelopeWriter() {
+        // default constructor
     }
 
     /**
@@ -88,7 +88,7 @@ public final class V2EnvelopeWriter {
      * @throws IOException if writing to the response fails
      * @throws IllegalStateException if {@code payload} contains a reserved envelope key ({@code "status"})
      */
-    public static void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
+    public void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
         if (res.isCommitted()) {
             return;
         }
@@ -112,7 +112,7 @@ public final class V2EnvelopeWriter {
             envelope.putAll(payload);
         }
         final Map<String, Object> root = Map.of("response", envelope);
-        MAPPER.writeValue(res.getWriter(), root);
+        mapper.writeValue(res.getWriter(), root);
     }
 
     /**
@@ -134,7 +134,7 @@ public final class V2EnvelopeWriter {
      * @param message a human-readable message safe to expose to API callers
      * @throws IOException if writing to the response fails
      */
-    public static void writeError(final HttpServletResponse res, final V2ErrorCode code, final String message) throws IOException {
+    public void writeError(final HttpServletResponse res, final V2ErrorCode code, final String message) throws IOException {
         writeErrorWithDetails(res, code, message, null);
     }
 
@@ -157,7 +157,7 @@ public final class V2EnvelopeWriter {
      * @param details optional structured details merged under {@code error.details}; {@code null} omits the key
      * @throws IOException if writing to the response fails
      */
-    public static void writeErrorWithDetails(final HttpServletResponse res, final V2ErrorCode code, final String message,
+    public void writeErrorWithDetails(final HttpServletResponse res, final V2ErrorCode code, final String message,
             final Map<String, Object> details) throws IOException {
         if (res.isCommitted()) {
             return;
@@ -185,7 +185,7 @@ public final class V2EnvelopeWriter {
         envelope.put("status", statusValue);
         envelope.put("error", err);
         final Map<String, Object> root = Map.of("response", envelope);
-        MAPPER.writeValue(res.getWriter(), root);
+        mapper.writeValue(res.getWriter(), root);
     }
 
     /**
@@ -204,8 +204,8 @@ public final class V2EnvelopeWriter {
      * @param contextTag a brief tag identifying the call site (e.g. "/api/v2/health")
      * @throws IOException if writing the envelope fails
      */
-    public static void writeInternalError(final HttpServletResponse res, final Throwable cause, final Logger logger,
-            final String contextTag) throws IOException {
+    public void writeInternalError(final HttpServletResponse res, final Throwable cause, final Logger logger, final String contextTag)
+            throws IOException {
         if (cause != null) {
             logger.warn("v2 internal error: {}", contextTag, cause);
         } else {

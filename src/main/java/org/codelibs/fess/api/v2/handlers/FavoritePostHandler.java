@@ -143,11 +143,11 @@ public class FavoritePostHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
-        if (!DocIdValidator.isValid(docId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
+        if (!ComponentUtil.getV2DocIdValidator().isValid(docId)) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
         // Auth check before body parsing — avoids spending CPU on the body for
@@ -162,7 +162,7 @@ public class FavoritePostHandler {
             assist = ComponentUtil.getComponent(FessLoginAssist.class);
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: could not acquire FessLoginAssist", docId, e);
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
             return;
         }
         final OptionalThing<FessUserBean> userBean;
@@ -170,40 +170,40 @@ public class FavoritePostHandler {
             userBean = assist.getSavedUserBean();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: getSavedUserBean failed", docId, e);
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
             return;
         }
         if (!userBean.isPresent()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
             return;
         }
         final FessConfig cfg = ComponentUtil.getFessConfig();
         if (!cfg.isUserFavorite()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "favorite feature is not available");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "favorite feature is not available");
             return;
         }
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
         final String userCode = userInfoHelper.getUserCode();
         if (StringUtil.isBlank(userCode)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "no user session");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "no user session");
             return;
         }
         final Map<String, Object> body;
         try {
-            body = V2JsonBody.read(req, MAX_BODY_BYTES);
+            body = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
             return;
         } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
             return;
         } catch (final V2JsonBody.MalformedJsonException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
         final String queryId = (String) body.get("query_id");
         if (StringUtil.isBlank(queryId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id is required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id is required");
             return;
         }
 
@@ -216,15 +216,15 @@ public class FavoritePostHandler {
         try {
             docIds = userInfoHelper.getResultDocIds(queryId);
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid query_id");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid query_id");
             return;
         }
         if (docIds == null) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "no searched urls");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "no searched urls");
             return;
         }
         if (!ArrayUtils.contains(docIds, docId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not in search result");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not in search result");
             return;
         }
 
@@ -282,7 +282,7 @@ public class FavoritePostHandler {
                     });
         } catch (final DocNotFoundException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: doc not found", docId, e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
             return;
         } catch (final AlreadyFavoritedException e) {
             // M-9: idempotent re-POST — return 200 with the full payload shape so the
@@ -297,14 +297,14 @@ public class FavoritePostHandler {
             idempotentPayload.put("favorite", true);
             idempotentPayload.put("count", favoriteCountHolder[0]);
             idempotentPayload.put("already_existed", true);
-            V2EnvelopeWriter.writeSuccess(res, idempotentPayload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, idempotentPayload);
             return;
         } catch (final FavoriteAddFailedException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: add failed", docId, e);
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
             return;
         } catch (final RuntimeException e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
             return;
         }
 
@@ -313,6 +313,6 @@ public class FavoritePostHandler {
         successPayload.put("ok", true);
         successPayload.put("favorite", true);
         successPayload.put("count", favoriteCountHolder[0]);
-        V2EnvelopeWriter.writeSuccess(res, successPayload);
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, successPayload);
     }
 }

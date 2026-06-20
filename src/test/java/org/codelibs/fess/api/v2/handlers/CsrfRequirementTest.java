@@ -22,50 +22,50 @@ public class CsrfRequirementTest {
 
     @Test
     public void test_getNeverRequiresCsrf() {
-        assertFalse(CsrfRequirement.requiresCsrf("/search", "GET"));
-        assertFalse(CsrfRequirement.requiresCsrf("/auth/me", "GET"));
-        assertFalse(CsrfRequirement.requiresCsrf("/documents/abc/favorite", "GET"));
+        assertFalse(new CsrfRequirement().requiresCsrf("/search", "GET"));
+        assertFalse(new CsrfRequirement().requiresCsrf("/auth/me", "GET"));
+        assertFalse(new CsrfRequirement().requiresCsrf("/documents/abc/favorite", "GET"));
     }
 
     @Test
     public void test_loginIsExemptFromCsrf() {
-        assertFalse(CsrfRequirement.requiresCsrf("/auth/login", "POST"));
+        assertFalse(new CsrfRequirement().requiresCsrf("/auth/login", "POST"));
     }
 
     @Test
     public void test_logoutRequiresCsrf() {
-        assertTrue(CsrfRequirement.requiresCsrf("/auth/logout", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/auth/logout", "POST"));
     }
 
     @Test
     public void test_passwordRequiresCsrf() {
-        assertTrue(CsrfRequirement.requiresCsrf("/auth/password", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/auth/password", "POST"));
     }
 
     @Test
     public void test_favoritePostRequiresCsrf() {
-        assertTrue(CsrfRequirement.requiresCsrf("/documents/abc/favorite", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/documents/abc/favorite", "POST"));
     }
 
     @Test
     public void test_clickRequiresCsrf() {
-        assertTrue(CsrfRequirement.requiresCsrf("/click", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/click", "POST"));
     }
 
     @Test
     public void test_chatPostRequiresCsrf() {
-        assertTrue(CsrfRequirement.requiresCsrf("/chat", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat", "POST"));
     }
 
     @Test
     public void test_chatStreamPostRequiresCsrf() {
-        assertTrue(CsrfRequirement.requiresCsrf("/chat/stream", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat/stream", "POST"));
     }
 
     @Test
     public void test_chatGetIsExemptFromCsrf() {
-        assertFalse(CsrfRequirement.requiresCsrf("/chat", "GET"));
-        assertFalse(CsrfRequirement.requiresCsrf("/chat/stream", "GET"));
+        assertFalse(new CsrfRequirement().requiresCsrf("/chat", "GET"));
+        assertFalse(new CsrfRequirement().requiresCsrf("/chat/stream", "GET"));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class CsrfRequirementTest {
         // The manager normalizes paths before dispatch so /chat/ is normalized to /chat
         // before it reaches CsrfRequirement. The trailing-slash form is therefore not an
         // exempted path and falls through to the secure default: CSRF required.
-        assertTrue(CsrfRequirement.requiresCsrf("/chat/", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat/", "POST"));
     }
 
     @Test
@@ -82,8 +82,8 @@ public class CsrfRequirementTest {
         // state-changing method (POST/PUT/DELETE) must require CSRF so that a new endpoint
         // added to SearchApiV2Manager.process without a corresponding CsrfRequirement entry
         // is CSRF-gated rather than silently exempt.
-        assertTrue(CsrfRequirement.requiresCsrf("/some/future/path", "POST"));
-        assertTrue(CsrfRequirement.requiresCsrf("/unknown/endpoint", "PUT"));
-        assertTrue(CsrfRequirement.requiresCsrf("/another/new/path", "DELETE"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/some/future/path", "POST"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/unknown/endpoint", "PUT"));
+        assertTrue(new CsrfRequirement().requiresCsrf("/another/new/path", "DELETE"));
     }
 }
