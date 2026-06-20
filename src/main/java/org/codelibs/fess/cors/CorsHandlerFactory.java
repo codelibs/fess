@@ -68,4 +68,24 @@ public class CorsHandlerFactory {
         }
         return handerMap.get("*");
     }
+
+    /**
+     * Resolves the CORS handler and match type for the specified origin.
+     * An exact registration yields {@link CorsMatchType#EXACT}; a {@code "*"} fallback
+     * yields {@link CorsMatchType#WILDCARD}; no match yields {@code null}.
+     *
+     * @param origin the origin to look up
+     * @return the resolution, or {@code null} if neither an exact nor a wildcard handler is registered
+     */
+    public CorsResolution resolve(final String origin) {
+        final CorsHandler exact = handerMap.get(origin);
+        if (exact != null) {
+            return new CorsResolution(exact, CorsMatchType.EXACT);
+        }
+        final CorsHandler wildcard = handerMap.get("*");
+        if (wildcard != null) {
+            return new CorsResolution(wildcard, CorsMatchType.WILDCARD);
+        }
+        return null;
+    }
 }

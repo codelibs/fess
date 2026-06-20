@@ -263,6 +263,66 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertTrue(factory.handerMap.isEmpty());
     }
 
+    @Test
+    public void test_resolve_exactMatch() {
+        final String origin = "https://example.com";
+        final TestCorsHandler handler = new TestCorsHandler("exact-handler");
+        corsHandlerFactory.add(origin, handler);
+
+        final CorsResolution resolution = corsHandlerFactory.resolve(origin);
+
+        assertNotNull(resolution);
+        assertSame(handler, resolution.getHandler());
+        assertEquals(CorsMatchType.EXACT, resolution.getMatchType());
+    }
+
+    @Test
+    public void test_resolve_wildcardFallback() {
+        final TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
+        corsHandlerFactory.add("*", wildcardHandler);
+
+        final CorsResolution resolution = corsHandlerFactory.resolve("https://unknown.com");
+
+        assertNotNull(resolution);
+        assertSame(wildcardHandler, resolution.getHandler());
+        assertEquals(CorsMatchType.WILDCARD, resolution.getMatchType());
+    }
+
+    @Test
+    public void test_resolve_exactWinsOverWildcard() {
+        final String specific = "https://specific.com";
+        final TestCorsHandler specificHandler = new TestCorsHandler("specific-handler");
+        final TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
+        corsHandlerFactory.add(specific, specificHandler);
+        corsHandlerFactory.add("*", wildcardHandler);
+
+        final CorsResolution exact = corsHandlerFactory.resolve(specific);
+        assertEquals(CorsMatchType.EXACT, exact.getMatchType());
+        assertSame(specificHandler, exact.getHandler());
+
+        final CorsResolution wildcard = corsHandlerFactory.resolve("https://unknown.com");
+        assertEquals(CorsMatchType.WILDCARD, wildcard.getMatchType());
+        assertSame(wildcardHandler, wildcard.getHandler());
+    }
+
+    @Test
+    public void test_resolve_noMatchNoWildcard() {
+        corsHandlerFactory.add("https://example.com", new TestCorsHandler("h"));
+
+        assertNull(corsHandlerFactory.resolve("https://nonexistent.com"));
+    }
+
+    @Test
+    public void test_resolve_wildcardOriginExactKey() {
+        // A request whose Origin is literally "*" matches the "*" key EXACTly.
+        final TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
+        corsHandlerFactory.add("*", wildcardHandler);
+
+        final CorsResolution resolution = corsHandlerFactory.resolve("*");
+        assertEquals(CorsMatchType.EXACT, resolution.getMatchType());
+        assertSame(wildcardHandler, resolution.getHandler());
+    }
+
     // Test implementation of CorsHandler for testing purposes
     private static class TestCorsHandler extends CorsHandler {
         private final String name;
