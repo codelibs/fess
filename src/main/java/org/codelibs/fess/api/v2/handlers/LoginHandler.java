@@ -163,15 +163,19 @@ public class LoginHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "username and password are required");
             return;
         }
+        final String userKey = userScopeKey(clientIp, username);
 
         // USER-scope pre-validation uses peek() so the bucket is NOT consumed yet. The slot is
-        // taken only on credential failure below, so that a system-error path (e.g. login
-        // subsystem down) does not count against the legitimate user's bucket. IP-scope
-        // check above stays pre-validation because it is the cheap bot/scanner gate.
-        if (!limiter.peek(LoginRateLimiter.Scope.USER, username, userLimit, 60)) {
-            limiter.lockOut(LoginRateLimiter.Scope.USER, username, lockoutSec);
-            res.setHeader("Retry-After", Integer.toString(lockoutSec));
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (user)");
+        // taken only on credential failure below, so a system-error path (e.g. login subsystem
+        // down) does not count against the legitimate user's bucket. The USER bucket is keyed by
+        // (clientIp, username) (H-1) so an attacker cannot lock a victim from a different IP.
+        if (!limiter.peek(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
+            // Keep stamping the lockout internally (protects this (IP,user) pair), but M-1: do
+            // NOT disclose the per-user rate-limit state. Return a generic 401 identical to a
+            // credential rejection, with no Retry-After, so the response cannot be used to probe
+            // a per-user counter. The IP-scope gate above still returns 429 + Retry-After.
+            limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
         }
 
@@ -213,16 +217,13 @@ public class LoginHandler {
         try {
             assist.login(new LocalUserCredential(username, password), op -> {});
         } catch (final LoginFailureException e) {
-            // Credential rejection consumes the USER slot exactly once, on the failure path.
-            // The post-consume check decides whether to also lock the bucket — when the user
-            // has just exhausted the window, we stamp a lockUntil so subsequent requests are
-            // refused even after the sliding window expires (parity with the existing IP
-            // gate's lockOut behavior).
-            if (!limiter.allow(LoginRateLimiter.Scope.USER, username, userLimit, 60)) {
-                limiter.lockOut(LoginRateLimiter.Scope.USER, username, lockoutSec);
-                res.setHeader("Retry-After", Integer.toString(lockoutSec));
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (user)");
-                return;
+            // Credential rejection consumes the USER slot exactly once, on the failure path
+            // (keyed by (clientIp, username) — H-1). When the window is exhausted we also stamp a
+            // lockUntil so subsequent requests from this (IP,user) are refused even after the
+            // sliding window expires. M-1: the response is a generic 401 in BOTH cases (exhausted
+            // or not), with no Retry-After, so the per-user counter state never leaks.
+            if (!limiter.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
+                limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
             }
             V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
@@ -261,8 +262,9 @@ public class LoginHandler {
 
         // MJ-5: clear both USER and IP rate-limit buckets on successful login so that a
         // legitimate user who exhausted the window (e.g. typo run) is not penalized on
-        // their next attempt after providing the correct credentials.
-        limiter.clear(LoginRateLimiter.Scope.USER, username);
+        // their next attempt after providing the correct credentials. The USER bucket is the
+        // (clientIp, username) composite (H-1).
+        limiter.clear(LoginRateLimiter.Scope.USER, userKey);
         limiter.clear(LoginRateLimiter.Scope.IP, clientIp);
 
         final OptionalThing<FessUserBean> userBean = assist.getSavedUserBean();
@@ -324,6 +326,24 @@ public class LoginHandler {
      */
     private static String stringOrNull(final Object v) {
         return v instanceof String s ? s : null;
+    }
+
+    /** Separator for USER-scope composite keys. NUL cannot appear in a resolved IP. */
+    static final String USER_SCOPE_KEY_SEP = "\u0000";
+
+    /**
+     * Builds the USER-scope rate-limit key scoped to the originating client IP so that an
+     * unauthenticated attacker cannot lock a victim's account by name from a different IP
+     * (H-1). The limiter treats the key as opaque, so the (IP,user) scoping lives entirely
+     * here in the handler — {@code LoginRateLimiter.Scope.USER} keeps its plain-key contract
+     * (also used by PasswordChangeHandler with a bare userId).
+     *
+     * @param clientIp resolved client IP (see {@link #resolveClientIp})
+     * @param username submitted username
+     * @return composite key {@code clientIp + NUL + username}
+     */
+    static String userScopeKey(final String clientIp, final String username) {
+        return clientIp + USER_SCOPE_KEY_SEP + username;
     }
 
     /**

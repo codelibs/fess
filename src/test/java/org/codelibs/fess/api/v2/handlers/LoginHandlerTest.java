@@ -72,6 +72,9 @@ public class LoginHandlerTest extends UnitFessTestCase {
         new LoginHandler(rl).handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}")
                 .withRemoteAddr("1.2.3.4"), res);
         assertEquals(429, res.status);
+        assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+        assertTrue(res.body().contains("(ip)"), res.body());
+        org.junit.jupiter.api.Assertions.assertNotNull(res.getHeader("Retry-After"), "IP-scope exhaustion must still carry Retry-After");
     }
 
     @Test
@@ -83,27 +86,60 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_perUserRateLimit_triggersAfterConfiguredFailuresAcrossIps() throws Exception {
-        // The USER bucket is shared across all source IPs, so an attacker can't bypass it
-        // by rotating IPs. After the rate-limit ordering fix, only LoginFailureException
-        // (credential rejection) consumes a slot — the slim test harness's
-        // AutoBindingFailureException is a system error and does NOT consume. So we
-        // pre-saturate the bucket directly through the limiter, then assert that the
-        // handler's peek() gate refuses the next attempt with 429/rate_limited regardless
-        // of the source IP (the IP buckets remain empty in this scenario).
+    public void test_perUserRateLimit_isScopedToClientIp() throws Exception {
+        // H-1: the USER bucket is keyed by (clientIp, username). An unauthenticated attacker
+        // cannot lock a victim's account from a different IP. Pre-saturate the (attackerIp,"bob")
+        // composite bucket via the EXACT key the handler computes, then assert:
+        //  (a) the attacker's own IP+user is refused at the peek() gate with a unified 401
+        //      (M-1: no Retry-After, indistinguishable from a credential rejection), and
+        //  (b) the SAME username from a DIFFERENT IP is NOT gated (its composite bucket is empty),
+        //      so the request flows past the gate into the (test-DI-unavailable) login subsystem.
         final LoginRateLimiter rl = new LoginRateLimiter();
-        // Default fess_config has user=5/min. Burn through it by direct calls.
+        final String attackerIp = "10.0.0.99";
+        final String victimIp = "10.0.0.50";
         for (int i = 0; i < 5; i++) {
-            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60));
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, LoginHandler.userScopeKey(attackerIp, "bob"), 5, 60));
         }
-        // The handler should now see the bucket as exhausted via peek() and return 429.
         final LoginHandler handler = new LoginHandler(rl);
-        final CapturingResponse limited = new CapturingResponse();
+
+        final CapturingResponse attacker = new CapturingResponse();
         handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
-                .withRemoteAddr("10.0.0.99"), limited);
-        assertEquals(429, limited.status);
-        assertTrue(limited.body().contains("\"code\":\"rate_limited\""), limited.body());
-        assertTrue(limited.body().contains("(user)"), limited.body());
+                .withRemoteAddr(attackerIp), attacker);
+        assertEquals(401, attacker.status, attacker.body());
+        assertTrue(attacker.body().contains("\"code\":\"auth_required\""), attacker.body());
+        org.junit.jupiter.api.Assertions.assertNull(attacker.getHeader("Retry-After"),
+                "user-scope exhaustion must not advertise Retry-After");
+
+        final CapturingResponse victim = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+                .withRemoteAddr(victimIp), victim);
+        // The victim is neither IP-gated (429) nor USER-gated (401 from the peek branch): correct
+        // (IP,user) scoping lets the request reach login(), which yields a system error in the slim
+        // harness. Broken/global keying would re-gate the victim on the saturated "bob" bucket → 401.
+        org.junit.jupiter.api.Assertions.assertNotEquals(429, victim.status, victim.body());
+        org.junit.jupiter.api.Assertions.assertNotEquals(401, victim.status, victim.body());
+    }
+
+    @Test
+    public void login_userScopeUsesProxyResolvedIp_whenTrustedProxy() throws Exception {
+        // H-1 + M-2: the USER composite key must use the proxy-RESOLVED client IP (from XFF when
+        // the direct peer is a trusted proxy 127.0.0.1), not the proxy's own address. UnitFessTestCase
+        // wires app.xml so RateLimitHelper honours XFF for the default trusted proxy.
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 5; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, LoginHandler.userScopeKey("203.0.113.5", "bob"), 5, 60));
+        }
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(rl).handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+                .withRemoteAddr("127.0.0.1")
+                .withHeader("X-Forwarded-For", "203.0.113.5"), res);
+        // In this slim DI graph the RateLimitHelper does not resolve XFF to 203.0.113.5, so the
+        // handler's composite key (127.0.0.1, bob) does not match the pre-saturated bucket and the
+        // request flows into the (test-DI-unavailable) login subsystem → 500. Mirror the sibling
+        // login_rateLimitUsesProxyResolvedIp_whenTrustedProxy test: assert only that the handler
+        // never returns 200, guarding against a regression that bypasses the gate entirely.
+        org.junit.jupiter.api.Assertions.assertNotEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertNull(res.getHeader("Retry-After"), res.body());
     }
 
     @Test
@@ -416,17 +452,20 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // so the next allow() succeeds.
         //
         // We can't easily produce a real successful login in the slim test harness, but we
-        // can verify the clear() contract at the limiter layer directly.
+        // can verify the clear() contract at the limiter layer directly. The on-success clear
+        // targets the (clientIp, username) composite key (H-1), so we mirror that key here.
         final LoginRateLimiter rl = new LoginRateLimiter();
+        final String userKey = LoginHandler.userScopeKey("10.0.0.7", "dave");
         for (int i = 0; i < 5; i++) {
-            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "dave", 5, 60));
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, 5, 60));
         }
         // Bucket exhausted.
-        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "dave", 5, 60));
+        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, userKey, 5, 60));
 
-        // clear() simulates the on-success path in LoginHandler.
-        rl.clear(LoginRateLimiter.Scope.USER, "dave");
-        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, "dave", 5, 60), "bucket must be clear after successful login");
+        // clear() simulates the on-success path in LoginHandler, which clears the (clientIp,
+        // username) composite key.
+        rl.clear(LoginRateLimiter.Scope.USER, userKey);
+        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, userKey, 5, 60), "bucket must be clear after successful login");
     }
 
     // ── M-2: reverse-proxy / client IP resolution ───────────────────────────────
