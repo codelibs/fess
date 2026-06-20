@@ -53,11 +53,9 @@ import jakarta.servlet.http.Part;
  * available — we only assert that the gate did <em>not</em> emit a
  * {@code "forbidden"} envelope, not that the downstream handler succeeded.</p>
  *
- * <p>TODO: the spec §7.3 "csrf-required=false" scenario is intentionally deferred
- * to an integration test. {@link UnitFessTestCase}'s {@code FessConfig} is loaded
- * from {@code fess_config.properties} on disk and overriding
- * {@code theme.api.csrf.required} requires injecting a fake config component,
- * which is heavier than the value this case adds at the unit level.</p>
+ * <p>The token layer is always applied to state-changing requests (there is no
+ * enable/disable flag), so every unsafe request to a CSRF-gated path without a
+ * valid token is rejected.</p>
  */
 public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
 
