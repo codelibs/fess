@@ -81,6 +81,9 @@ public class CorsHandlerTest extends UnitFessTestCase {
         assertEquals("Access-Control-Allow-Private-Network", CorsHandler.ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK);
         assertEquals("Access-Control-Allow-Credentials", CorsHandler.ACCESS_CONTROL_ALLOW_CREDENTIALS);
         assertEquals("Access-Control-Max-Age", CorsHandler.ACCESS_CONTROL_MAX_AGE);
+        assertEquals("*", CorsHandler.ALLOW_ORIGIN_ALL);
+        assertEquals("Vary", CorsHandler.VARY);
+        assertEquals("Origin", CorsHandler.ORIGIN);
     }
 
     // Test that constants are protected static final

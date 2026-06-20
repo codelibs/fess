@@ -62,6 +62,21 @@ public abstract class CorsHandler {
     protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 
     /**
+     * Literal value returned in {@code Access-Control-Allow-Origin} for wildcard (non-credentialed) CORS.
+     */
+    protected static final String ALLOW_ORIGIN_ALL = "*";
+
+    /**
+     * HTTP {@code Vary} response header name.
+     */
+    protected static final String VARY = "Vary";
+
+    /**
+     * HTTP {@code Origin} header name. Appended to {@code Vary} for every origin-bearing request.
+     */
+    protected static final String ORIGIN = "Origin";
+
+    /**
      * Processes the CORS request by setting appropriate headers.
      *
      * @param origin the origin of the request
