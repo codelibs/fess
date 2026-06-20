@@ -720,8 +720,8 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
     /**
      * Guards that PasswordChangeHandler keeps using a bare {@code userId} key for its
-     * {@code Scope.USER} rate-limit bucket (C-3), independent of LoginHandler's (clientIp, username)
-     * composite keying (H-1). The two handlers share {@code Scope.USER} but must NOT share key shape.
+     * {@code Scope.USER} rate-limit bucket, independent of LoginHandler's (clientIp, username)
+     * composite keying. The two handlers share {@code Scope.USER} but must NOT share key shape.
      */
     @Test
     public void passwordChangeUserBucket_isKeyedByBareUserId_notCompositeWithIp() {

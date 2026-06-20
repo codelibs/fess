@@ -87,11 +87,11 @@ public class LoginHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_perUserRateLimit_isScopedToClientIp() throws Exception {
-        // H-1: the USER bucket is keyed by (clientIp, username). An unauthenticated attacker
+        // The USER bucket is keyed by (clientIp, username). An unauthenticated attacker
         // cannot lock a victim's account from a different IP. Pre-saturate the (attackerIp,"bob")
         // composite bucket via the EXACT key the handler computes, then assert:
         //  (a) the attacker's own IP+user is refused at the peek() gate with a unified 401
-        //      (M-1: no Retry-After, indistinguishable from a credential rejection), and
+        //      (no Retry-After, indistinguishable from a credential rejection), and
         //  (b) the SAME username from a DIFFERENT IP is NOT gated (its composite bucket is empty),
         //      so the request flows past the gate into the (test-DI-unavailable) login subsystem.
         final LoginRateLimiter rl = new LoginRateLimiter();
@@ -122,7 +122,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
 
     @Test
     public void login_userScopeUsesProxyResolvedIp_whenTrustedProxy() throws Exception {
-        // H-1 + M-2: the USER composite key must use the proxy-RESOLVED client IP (from XFF when
+        // The USER composite key must use the proxy-RESOLVED client IP (from XFF when
         // the direct peer is a trusted proxy 127.0.0.1), not the proxy's own address. UnitFessTestCase
         // wires app.xml so RateLimitHelper honours XFF for the default trusted proxy.
         final LoginRateLimiter rl = new LoginRateLimiter();
@@ -453,7 +453,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         //
         // We can't easily produce a real successful login in the slim test harness, but we
         // can verify the clear() contract at the limiter layer directly. The on-success clear
-        // targets the (clientIp, username) composite key (H-1), so we mirror that key here.
+        // targets the (clientIp, username) composite key, so we mirror that key here.
         final LoginRateLimiter rl = new LoginRateLimiter();
         final String userKey = LoginHandler.userScopeKey("10.0.0.7", "dave");
         for (int i = 0; i < 5; i++) {

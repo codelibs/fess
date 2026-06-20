@@ -168,9 +168,9 @@ public class LoginHandler {
         // USER-scope pre-validation uses peek() so the bucket is NOT consumed yet. The slot is
         // taken only on credential failure below, so a system-error path (e.g. login subsystem
         // down) does not count against the legitimate user's bucket. The USER bucket is keyed by
-        // (clientIp, username) (H-1) so an attacker cannot lock a victim from a different IP.
+        // (clientIp, username) so an attacker cannot lock a victim's account from a different IP.
         if (!limiter.peek(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
-            // Keep stamping the lockout internally (protects this (IP,user) pair), but M-1: do
+            // Keep stamping the lockout internally (protects this (IP,user) pair), but do
             // NOT disclose the per-user rate-limit state. Return a generic 401 identical to a
             // credential rejection, with no Retry-After, so the response cannot be used to probe
             // a per-user counter. The IP-scope gate above still returns 429 + Retry-After.
@@ -218,9 +218,9 @@ public class LoginHandler {
             assist.login(new LocalUserCredential(username, password), op -> {});
         } catch (final LoginFailureException e) {
             // Credential rejection consumes the USER slot exactly once, on the failure path
-            // (keyed by (clientIp, username) — H-1). When the window is exhausted we also stamp a
+            // (keyed by (clientIp, username)). When the window is exhausted we also stamp a
             // lockUntil so subsequent requests from this (IP,user) are refused even after the
-            // sliding window expires. M-1: the response is a generic 401 in BOTH cases (exhausted
+            // sliding window expires. The response is a generic 401 in BOTH cases (exhausted
             // or not), with no Retry-After, so the per-user counter state never leaks.
             if (!limiter.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
                 limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
@@ -263,7 +263,7 @@ public class LoginHandler {
         // MJ-5: clear both USER and IP rate-limit buckets on successful login so that a
         // legitimate user who exhausted the window (e.g. typo run) is not penalized on
         // their next attempt after providing the correct credentials. The USER bucket is the
-        // (clientIp, username) composite (H-1).
+        // (clientIp, username) composite.
         limiter.clear(LoginRateLimiter.Scope.USER, userKey);
         limiter.clear(LoginRateLimiter.Scope.IP, clientIp);
 
@@ -333,8 +333,8 @@ public class LoginHandler {
 
     /**
      * Builds the USER-scope rate-limit key scoped to the originating client IP so that an
-     * unauthenticated attacker cannot lock a victim's account by name from a different IP
-     * (H-1). The limiter treats the key as opaque, so the (IP,user) scoping lives entirely
+     * unauthenticated attacker cannot lock a victim's account by name from a different IP.
+     * The limiter treats the key as opaque, so the (IP,user) scoping lives entirely
      * here in the handler — {@code LoginRateLimiter.Scope.USER} keeps its plain-key contract
      * (also used by PasswordChangeHandler with a bare userId).
      *
