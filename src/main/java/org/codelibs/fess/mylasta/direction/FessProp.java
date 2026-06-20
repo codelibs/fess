@@ -2094,17 +2094,34 @@ public interface FessProp {
 
     String getApiGsaResponseHeaders();
 
+    /**
+     * Parses a newline-separated {@code Name:Value} header configuration into pairs,
+     * excluding headers that control CORS / cross-origin disclosure. Excluded (silently,
+     * since an interface cannot hold a logger): any header whose name starts with
+     * {@code "access-control-"} (case-insensitive) and {@code "timing-allow-origin"}.
+     * CORS is controlled exclusively by {@code api.cors.*} / CorsFilter.
+     *
+     * @param value the raw configured header lines
+     * @return the sanitized list of header name/value pairs
+     */
+    private static List<Pair<String, String>> parseResponseHeaderList(final String value) {
+        return split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+            final String[] values = s.split(":", 2);
+            if (values.length == 2) {
+                return new Pair<>(values[0], values[1]);
+            }
+            return new Pair<>(values[0], StringUtil.EMPTY);
+        }).filter(pair -> {
+            final String name = pair.getFirst().trim().toLowerCase(Locale.ROOT);
+            return !name.startsWith("access-control-") && !"timing-allow-origin".equals(name);
+        }).collect(Collectors.toList()));
+    }
+
     default List<Pair<String, String>> getApiGsaResponseHeaderList() {
         @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_GSA_RESPONSE_HEADER_LIST);
         if (list == null) {
-            list = split(getApiGsaResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                final String[] values = s.split(":", 2);
-                if (values.length == 2) {
-                    return new Pair<>(values[0], values[1]);
-                }
-                return new Pair<>(values[0], StringUtil.EMPTY);
-            }).collect(Collectors.toList()));
+            list = parseResponseHeaderList(getApiGsaResponseHeaders());
             propMap.put(API_GSA_RESPONSE_HEADER_LIST, list);
         }
         return list;
@@ -2116,13 +2133,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_JSON_RESPONSE_HEADER_LIST);
         if (list == null) {
-            list = split(getApiJsonResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                final String[] values = s.split(":", 2);
-                if (values.length == 2) {
-                    return new Pair<>(values[0], values[1]);
-                }
-                return new Pair<>(values[0], StringUtil.EMPTY);
-            }).collect(Collectors.toList()));
+            list = parseResponseHeaderList(getApiJsonResponseHeaders());
             propMap.put(API_JSON_RESPONSE_HEADER_LIST, list);
         }
         return list;
@@ -2134,13 +2145,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_DASHBOARD_RESPONSE_HEADER_LIST);
         if (list == null) {
-            list = split(getApiDashboardResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                final String[] values = s.split(":", 2);
-                if (values.length == 2) {
-                    return new Pair<>(values[0], values[1]);
-                }
-                return new Pair<>(values[0], StringUtil.EMPTY);
-            }).collect(Collectors.toList()));
+            list = parseResponseHeaderList(getApiDashboardResponseHeaders());
             propMap.put(API_DASHBOARD_RESPONSE_HEADER_LIST, list);
         }
         return list;
@@ -2152,8 +2157,10 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         List<String> list = (List<String>) propMap.get(CORS_ALLOW_ORIGIN);
         if (list == null) {
-            list = split(getApiCorsAllowOrigin(), "\n")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toList()));
+            list = split(getApiCorsAllowOrigin(), "[\\n,]").get(stream -> stream.map(String::trim)
+                    .filter(StringUtil::isNotEmpty)
+                    .filter(s -> !"null".equalsIgnoreCase(s))
+                    .collect(Collectors.toList()));
             propMap.put(CORS_ALLOW_ORIGIN, list);
         }
         return list;
