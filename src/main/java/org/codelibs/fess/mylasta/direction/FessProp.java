@@ -2098,7 +2098,7 @@ public interface FessProp {
      * Parses a newline-separated {@code Name:Value} header configuration into pairs,
      * excluding headers that control CORS / cross-origin disclosure. Excluded (silently,
      * since an interface cannot hold a logger): any header whose name starts with
-     * {@code "access-control-"} (case-insensitive) and {@code "timing-allow-origin"}.
+     * {@code "access-control-"} (case-insensitive) or {@code "timing-allow-origin"}.
      * CORS is controlled exclusively by {@code api.cors.*} / CorsFilter.
      *
      * @param value the raw configured header lines

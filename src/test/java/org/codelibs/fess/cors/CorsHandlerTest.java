@@ -37,7 +37,6 @@ public class CorsHandlerTest extends UnitFessTestCase {
     private Map<String, List<String>> responseHeaders;
     private boolean processCalled;
     private String processOrigin;
-    private CorsMatchType processMatchType;
     private ServletRequest processRequest;
     private ServletResponse processResponse;
 
@@ -47,7 +46,6 @@ public class CorsHandlerTest extends UnitFessTestCase {
         responseHeaders = new HashMap<>();
         processCalled = false;
         processOrigin = null;
-        processMatchType = null;
         processRequest = null;
         processResponse = null;
 
@@ -57,7 +55,6 @@ public class CorsHandlerTest extends UnitFessTestCase {
             public void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response) {
                 processCalled = true;
                 processOrigin = origin;
-                processMatchType = matchType;
                 processRequest = request;
                 processResponse = response;
 
