@@ -332,7 +332,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         }
 
         @Override
-        public void process(String origin, ServletRequest request, ServletResponse response) {
+        public void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response) {
             // Test implementation - no operation
         }
 

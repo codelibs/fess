@@ -80,9 +80,10 @@ public abstract class CorsHandler {
      * Processes the CORS request by setting appropriate headers.
      *
      * @param origin the origin of the request
+     * @param matchType how the origin matched the allow list (EXACT reflects the origin and may send credentials; WILDCARD returns literal "*")
      * @param request the servlet request
      * @param response the servlet response
      */
-    public abstract void process(String origin, ServletRequest request, ServletResponse response);
+    public abstract void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response);
 
 }
