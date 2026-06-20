@@ -20,8 +20,8 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.cors.CorsHandler;
 import org.codelibs.fess.cors.CorsHandlerFactory;
+import org.codelibs.fess.cors.CorsResolution;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.servlet.Filter;
@@ -52,27 +52,50 @@ public class CorsFilter implements Filter {
      */
     protected static final String OPTIONS = "OPTIONS";
 
+    /** Header name read to detect a genuine CORS preflight. */
+    protected static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
+
+    /** {@code Vary} response header name. */
+    protected static final String VARY = "Vary";
+
+    /** {@code Origin} value appended to {@code Vary}. */
+    protected static final String ORIGIN = "Origin";
+
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) request;
-        final String origin = httpRequest.getHeader("Origin");
-        if (StringUtil.isNotBlank(origin)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("HTTP Request: method={}", httpRequest.getMethod());
-            }
-            final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
-            final CorsHandler handler = factory.get(origin);
-            if (handler != null) {
-                handler.process(origin, request, response);
+        final String origin = httpRequest.getHeader(ORIGIN);
+        if (StringUtil.isBlank(origin)) {
+            chain.doFilter(request, response);
+            return;
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("HTTP Request: method={}", httpRequest.getMethod());
+        }
+        final HttpServletResponse httpResponse = (HttpServletResponse) response;
+        // Append Origin to Vary for every origin-bearing request (cache-poisoning safe; single REQUEST dispatch).
+        httpResponse.addHeader(VARY, ORIGIN);
 
-                if (OPTIONS.equals(httpRequest.getMethod())) {
-                    final HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
-                    return;
-                }
-            } else if (logger.isDebugEnabled()) {
+        final boolean preflight =
+                OPTIONS.equals(httpRequest.getMethod()) && StringUtil.isNotBlank(httpRequest.getHeader(ACCESS_CONTROL_REQUEST_METHOD));
+
+        final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
+        final CorsResolution resolution = factory.resolve(origin);
+        if (resolution != null) {
+            resolution.getHandler().process(origin, resolution.getMatchType(), request, response);
+            if (preflight) {
+                httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
+                return;
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
                 logger.debug("No CorsHandler: origin={}", origin);
+            }
+            if (preflight) {
+                // Disallowed genuine preflight: short-circuit with no CORS headers so the browser blocks it.
+                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
             }
         }
 

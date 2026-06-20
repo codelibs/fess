@@ -62,12 +62,28 @@ public abstract class CorsHandler {
     protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 
     /**
+     * Literal value returned in {@code Access-Control-Allow-Origin} for wildcard (non-credentialed) CORS.
+     */
+    protected static final String ALLOW_ORIGIN_ALL = "*";
+
+    /**
+     * HTTP {@code Vary} response header name.
+     */
+    protected static final String VARY = "Vary";
+
+    /**
+     * HTTP {@code Origin} header name. Appended to {@code Vary} for every origin-bearing request.
+     */
+    protected static final String ORIGIN = "Origin";
+
+    /**
      * Processes the CORS request by setting appropriate headers.
      *
      * @param origin the origin of the request
+     * @param matchType how the origin matched the allow list (EXACT reflects the origin and may send credentials; WILDCARD returns literal "*")
      * @param request the servlet request
      * @param response the servlet response
      */
-    public abstract void process(String origin, ServletRequest request, ServletResponse response);
+    public abstract void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response);
 
 }

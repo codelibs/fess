@@ -52,7 +52,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
         // Create a test implementation of CorsHandler
         corsHandler = new CorsHandler() {
             @Override
-            public void process(String origin, ServletRequest request, ServletResponse response) {
+            public void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response) {
                 processCalled = true;
                 processOrigin = origin;
                 processRequest = request;
@@ -81,6 +81,9 @@ public class CorsHandlerTest extends UnitFessTestCase {
         assertEquals("Access-Control-Allow-Private-Network", CorsHandler.ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK);
         assertEquals("Access-Control-Allow-Credentials", CorsHandler.ACCESS_CONTROL_ALLOW_CREDENTIALS);
         assertEquals("Access-Control-Max-Age", CorsHandler.ACCESS_CONTROL_MAX_AGE);
+        assertEquals("*", CorsHandler.ALLOW_ORIGIN_ALL);
+        assertEquals("Vary", CorsHandler.VARY);
+        assertEquals("Origin", CorsHandler.ORIGIN);
     }
 
     // Test that constants are protected static final
@@ -107,8 +110,8 @@ public class CorsHandlerTest extends UnitFessTestCase {
     @Test
     public void test_processMethodIsAbstract() throws Exception {
         try {
-            java.lang.reflect.Method processMethod =
-                    CorsHandler.class.getDeclaredMethod("process", String.class, ServletRequest.class, ServletResponse.class);
+            java.lang.reflect.Method processMethod = CorsHandler.class.getDeclaredMethod("process", String.class, CorsMatchType.class,
+                    ServletRequest.class, ServletResponse.class);
             assertTrue("process method should be abstract", Modifier.isAbstract(processMethod.getModifiers()));
             assertTrue("process method should be public", Modifier.isPublic(processMethod.getModifiers()));
         } catch (NoSuchMethodException e) {
@@ -121,7 +124,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     public void test_constructor() {
         CorsHandler handler = new CorsHandler() {
             @Override
-            public void process(String origin, ServletRequest request, ServletResponse response) {
+            public void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response) {
                 // Test implementation
             }
         };
@@ -134,7 +137,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
 
-        corsHandler.process(null, request, response);
+        corsHandler.process(null, CorsMatchType.EXACT, request, response);
 
         assertTrue("process should be called", processCalled);
         assertNull(processOrigin, "origin should be null");
@@ -148,7 +151,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
 
-        corsHandler.process("", request, response);
+        corsHandler.process("", CorsMatchType.EXACT, request, response);
 
         assertTrue("process should be called", processCalled);
         assertEquals("", processOrigin);
@@ -163,7 +166,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
 
-        corsHandler.process(testOrigin, request, response);
+        corsHandler.process(testOrigin, CorsMatchType.EXACT, request, response);
 
         assertTrue("process should be called", processCalled);
         assertEquals(testOrigin, processOrigin);
@@ -188,7 +191,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
             HttpServletRequest request = createMockRequest();
             HttpServletResponse response = createMockResponse();
 
-            corsHandler.process(origin, request, response);
+            corsHandler.process(origin, CorsMatchType.EXACT, request, response);
 
             assertTrue("process should be called for origin: " + origin, processCalled);
             assertEquals(origin, processOrigin);
@@ -206,7 +209,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
 
-        corsHandler.process(wildcardOrigin, request, response);
+        corsHandler.process(wildcardOrigin, CorsMatchType.WILDCARD, request, response);
 
         assertTrue("process should be called", processCalled);
         assertEquals(wildcardOrigin, processOrigin);
@@ -223,7 +226,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
 
-        corsHandler.process(testOrigin, request, response);
+        corsHandler.process(testOrigin, CorsMatchType.EXACT, request, response);
 
         // Check all CORS headers are present
         assertNotNull(responseHeaders.get("Access-Control-Allow-Origin"), "Allow-Origin header should be set");
@@ -312,7 +315,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
             }
         };
 
-        corsHandler.process(testOrigin, request, response);
+        corsHandler.process(testOrigin, CorsMatchType.EXACT, request, response);
 
         assertTrue("process should be called", processCalled);
         assertEquals(testOrigin, processOrigin);
@@ -329,7 +332,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
 
         for (String origin : origins) {
             processCalled = false;
-            corsHandler.process(origin, request, response);
+            corsHandler.process(origin, CorsMatchType.EXACT, request, response);
             assertTrue("process should be called for " + origin, processCalled);
             assertEquals(origin, processOrigin);
         }
