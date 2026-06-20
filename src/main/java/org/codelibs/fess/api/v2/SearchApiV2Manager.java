@@ -561,6 +561,13 @@ public class SearchApiV2Manager extends BaseApiManager {
         // apply uniformly across both v1 and v2 JSON responses. V2EnvelopeWriter only sets the
         // Content-Type / charset; security-baseline headers must be applied here so they reach
         // every response that flows through write(...) → writeHeaders(...).
-        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+        // Vary is merged (addHeader) so it does not clobber CorsFilter's `Vary: Origin`.
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> {
+            if ("Vary".equalsIgnoreCase(e.getFirst())) {
+                response.addHeader(e.getFirst(), e.getSecond());
+            } else {
+                response.setHeader(e.getFirst(), e.getSecond());
+            }
+        });
     }
 }
