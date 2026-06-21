@@ -250,11 +250,8 @@ public class ChatStreamHandler {
             return;
         }
         final int chatLimit = fessConfig.getChatRateLimitPerMinute();
-        // Rate-limit by a key that an anonymous attacker cannot rotate: the server-validated
-        // username for authenticated callers, otherwise the proxy-aware client IP. Keying on the
-        // forgeable guest userCode (as the old userId-based throttle did) let anonymous callers
-        // rotate the key per request and bypass the limit; the key is always non-blank so the
-        // throttle now always applies. userId above is still used for chat-session binding.
+        // Throttle by a key an anonymous caller cannot rotate (see ChatApiHelper#resolveChatRateLimitKey);
+        // the key is always non-blank so the throttle always applies. userId above stays for chat-session binding.
         final String rateLimitKey = getRateLimitKey(req);
         if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(rateLimitKey)
                 && !limiter.allow(LoginRateLimiter.Scope.CHAT, rateLimitKey, chatLimit, 60)) {

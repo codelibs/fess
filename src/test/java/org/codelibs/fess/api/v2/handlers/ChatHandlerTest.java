@@ -321,12 +321,11 @@ public class ChatHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
         try {
             final CapturingResponse res = new CapturingResponse();
-            final java.util.concurrent.atomic.AtomicInteger rotation = new java.util.concurrent.atomic.AtomicInteger();
             final ChatHandler handler = new ChatHandler() {
                 @Override
                 protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    // Simulate a forged/rotated guest userCode that changes per request.
-                    return "forged-" + rotation.incrementAndGet();
+                    // A forged guest userCode — irrelevant to the IP-based throttle key below.
+                    return "forged-guest";
                 }
 
                 @Override
