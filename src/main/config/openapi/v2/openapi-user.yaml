@@ -1620,12 +1620,13 @@ components:
           pattern: '^[A-Za-z0-9_-]+$'
         rank:
           type: integer
-          minimum: 1
+          minimum: 0
           maximum: 10000
           description: |-
-            1-based position in the result list. The upper bound aligns with
-            the OpenSearch default `index.max_result_window`; ranks above it
-            are rejected with `invalid_request` (400).
+            Position in the result list. The current implementation rejects
+            negative values and values above the OpenSearch default
+            `index.max_result_window`; ranks above it are rejected with
+            `invalid_request` (400).
         rt:
           type: integer
           format: int64
@@ -1684,6 +1685,13 @@ components:
                 - { type: string, maxLength: 1000 }
                 - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
               description: Restricts retrieval to allowlisted labels.
+        fields.label:
+          oneOf:
+            - { type: string, maxLength: 1000 }
+            - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
+          description: |-
+            Legacy dotted-key alias for `fields.label`. Accepted for
+            compatibility when the nested `fields.label` value is absent.
         extra_queries:
           oneOf:
             - { type: string, maxLength: 1000 }
