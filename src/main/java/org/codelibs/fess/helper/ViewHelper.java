@@ -230,6 +230,10 @@ public class ViewHelper {
             final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
             servletContext.setSessionTrackingModes(
                     fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf).collect(Collectors.toSet()));
+            // Add the Secure attribute to the session cookie when enabled (recommended for HTTPS deployments).
+            if (fessConfig.isSessionCookieSecureEnabled()) {
+                servletContext.getSessionCookieConfig().setSecure(true);
+            }
         } catch (final Throwable t) {
             logger.warn("Failed to set SessionTrackingMode.", t);
         }

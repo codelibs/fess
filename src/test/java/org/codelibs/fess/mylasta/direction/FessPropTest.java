@@ -695,4 +695,25 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(2147483647L, fessConfig.getQueryFacetFieldsMinDocCountMaxAsLong());
         assertEquals(9999999999999L, fessConfig.getApiV2ClickMaxRtAsLong());
     }
+
+    @Test
+    public void test_isSessionCookieSecureEnabled() {
+        assertFalse(createSessionCookieSecureConfig("").isSessionCookieSecureEnabled());
+        assertFalse(createSessionCookieSecureConfig(" ").isSessionCookieSecureEnabled());
+        assertTrue(createSessionCookieSecureConfig("true").isSessionCookieSecureEnabled());
+        assertTrue(createSessionCookieSecureConfig("TRUE").isSessionCookieSecureEnabled());
+        assertTrue(createSessionCookieSecureConfig("True").isSessionCookieSecureEnabled());
+        assertFalse(createSessionCookieSecureConfig("false").isSessionCookieSecureEnabled());
+        assertFalse(createSessionCookieSecureConfig("yes").isSessionCookieSecureEnabled());
+        assertFalse(createSessionCookieSecureConfig("1").isSessionCookieSecureEnabled());
+    }
+
+    private FessConfig createSessionCookieSecureConfig(final String value) {
+        return new FessConfig.SimpleImpl() {
+            @Override
+            public String getSessionCookieSecure() {
+                return value;
+            }
+        };
+    }
 }
