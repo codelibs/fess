@@ -998,4 +998,94 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.apiResponseFieldSet.contains("favorite_count"),
                 "apiResponseFieldSet must contain favorite_count; actual set: " + queryFieldConfig.apiResponseFieldSet);
     }
+
+    /**
+     * Regression guard for the v2 API response field allowlist (Excessive Data Exposure /
+     * OWASP API3:2023). This pins the
+     * default, DI-booted v2 API response field allowlist that
+     * {@link QueryFieldConfig#isApiResponseField(String)} enforces as an exact-match
+     * allowlist (no wildcard / prefix matching). It is the substantive security
+     * guarantee that ACL / role / internal fields are never serialized into
+     * SearchResponse.data[] or /documents/all.
+     *
+     * <p>Unlike {@code test_isApiResponseField}, which exercises synthetic fields via
+     * {@code setApiResponseFields(...)}, this test verifies the real allowlist built by
+     * {@code init()} during the DI boot (via {@link ComponentUtil#getQueryFieldConfig()}),
+     * so it catches regressions in the default field set itself.
+     *
+     * <p>The expected field names are resolved from the same {@link FessConfig} the
+     * {@code QueryFieldConfig} was booted with, rather than hard-coded, so the test pins the
+     * <em>logical</em> allowlist (which fields are emitted) independently of deployment-specific
+     * index field naming (for example {@code _id} vs {@code id}). The 26 logical fields match
+     * the v2 search hit contract enumerated in openapi-user.yaml's {@code SearchHit} schema.
+     * {@code _id} / {@code similar_docs_count} / {@code similar_docs_hash} are allowlist members
+     * deterministically (independent of runtime hit content), so they are asserted unconditionally.
+     */
+    @Test
+    public void test_isApiResponseField_defaultAllowlist_allowsSafeFields() {
+        final QueryFieldConfig config = ComponentUtil.getQueryFieldConfig();
+        assertNotNull(config, "queryFieldConfig must be available from the DI container");
+        assertNotNull(config.apiResponseFieldSet, "apiResponseFieldSet must not be null after init");
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        // The 26 logical fields the v2 SearchHit contract enumerates, resolved from FessConfig.
+        final String collapseName = fessConfig.getQueryCollapseInnerHitsName();
+        final String[] allowedFields = { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(),
+                fessConfig.getResponseFieldContentDescription(), fessConfig.getResponseFieldContentTitle(), fessConfig.getIndexFieldSite(),
+                fessConfig.getResponseFieldSitePath(), fessConfig.getResponseFieldUrlLink(), fessConfig.getIndexFieldHost(),
+                fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldFilename(),
+                fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                fessConfig.getIndexFieldCreated(), QueryFieldConfig.SCORE_FIELD, fessConfig.getIndexFieldBoost(),
+                fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldId(), fessConfig.getIndexFieldThumbnail(),
+                fessConfig.getIndexFieldHasCache(), fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
+                collapseName + "_count", collapseName + "_hash" };
+        for (final String field : allowedFields) {
+            assertTrue(config.isApiResponseField(field),
+                    "expected allowlisted API response field '" + field + "'; actual set: " + config.apiResponseFieldSet);
+        }
+        // Pin the cardinality so a silently widened allowlist (e.g. an accidental extra entry)
+        // is caught even if it happens to be a benign field name.
+        assertEquals(allowedFields.length, config.apiResponseFieldSet.size(),
+                "default API response allowlist size changed; actual set: " + config.apiResponseFieldSet);
+    }
+
+    /**
+     * Regression guard (Excessive Data Exposure / OWASP API3:2023): ACL / role / internal index
+     * fields must NOT be exposed by the v2 API.
+     * {@code isApiResponseField} is an exact-match allowlist, so any field not enumerated in
+     * the allowlist is automatically excluded (fail-safe). The fields below are explicitly
+     * asserted as the regression net: if any of them is ever (mistakenly) added to the
+     * allowlist, this test fails. Most critically {@code role} and {@code virtual_host}
+     * (search ACL / virtual-host isolation) must always return false.
+     *
+     * <p>Note {@code lang} is asymmetric: it is present in {@code responseFields} (fetched from
+     * the index) but intentionally absent from {@code apiResponseFieldSet} (not emitted to the
+     * API), which is easy to regress, so it is pinned here. Field names are resolved from the
+     * same {@link FessConfig} the {@code QueryFieldConfig} was booted with where typed accessors
+     * exist; the literals {@code virtual_host} / {@code important_content} / {@code content_minhash*}
+     * / {@code location} have no typed accessor here and are asserted by their canonical index names.
+     */
+    @Test
+    public void test_isApiResponseField_defaultAllowlist_excludesAclAndInternalFields() {
+        final QueryFieldConfig config = ComponentUtil.getQueryFieldConfig();
+        assertNotNull(config, "queryFieldConfig must be available from the DI container");
+        assertNotNull(config.apiResponseFieldSet, "apiResponseFieldSet must not be null after init");
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        // P1 (ACL / sensitive), P2 (internal), P3 (asymmetric / metadata) per design 3.2.1.
+        final String[] excludedFields = {
+                // P1: ACL / sensitive
+                fessConfig.getIndexFieldRole(), "virtual_host", fessConfig.getIndexFieldContent(), "important_content",
+                fessConfig.getIndexFieldCache(),
+                // P2: internal
+                fessConfig.getIndexFieldParentId(), fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldExpires(),
+                fessConfig.getIndexFieldAnchor(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldLabel(),
+                // P3: asymmetric / metadata
+                fessConfig.getIndexFieldLang(), "content_minhash", "content_minhash_bits", "location", fessConfig.getIndexFieldVersion(),
+                fessConfig.getIndexFieldSeqNo(), fessConfig.getIndexFieldPrimaryTerm() };
+        for (final String field : excludedFields) {
+            assertFalse(config.isApiResponseField(field),
+                    "ACL/internal field '" + field + "' must never be an API response field; actual set: " + config.apiResponseFieldSet);
+        }
+    }
 }

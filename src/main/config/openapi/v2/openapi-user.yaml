@@ -298,11 +298,25 @@ paths:
           schema: { type: string, maxLength: 1000 }
       responses:
         '200':
-          description: NDJSON stream.
+          description: |-
+            NDJSON stream. Each successful line is a `{"data": <SearchHit>}`
+            object whose document fields follow the same server-side allowlist
+            (`QueryFieldConfig#isApiResponseField`) as `GET /search`; see the
+            `SearchHit` schema for the exact fields and types. The collapse-only
+            fields `similar_docs_count` / `similar_docs_hash` are never present
+            on this scroll endpoint. If a failure occurs mid-stream the handler
+            emits a final
+            `{"error":{"code":"internal_error","message":"stream error"}}` line
+            and flushes; clients MUST inspect the last line's first key to
+            distinguish stream-complete from server-crashed.
           content:
             application/x-ndjson:
               schema:
                 type: string
+                description: |-
+                  Newline-delimited JSON. Each line is either
+                  `{"data": <SearchHit>}` (see the `SearchHit` schema) or, as the
+                  final line on mid-stream failure, `{"error":{...}}`.
                 example: |
                   {"data":{"url":"https://example.com/","title":"Example"}}
                   {"data":{"url":"https://example.org/","title":"Example Org"}}
@@ -1137,13 +1151,9 @@ components:
                   items: { type: string }
                 data:
                   type: array
-                  description: |-
-                    One entry per document. Only fields permitted by
-                    `QueryFieldConfig#isApiResponseField` are present; nulls
-                    and blank keys are dropped.
+                  description: One entry per matching document.
                   items:
-                    type: object
-                    additionalProperties: true
+                    $ref: '#/components/schemas/SearchHit'
                 facet_field:
                   type: array
                   description: Present only when facet fields were requested.
@@ -1169,6 +1179,64 @@ components:
                     properties:
                       value: { type: string }
                       count: { type: integer, format: int64 }
+
+    SearchHit:
+      type: object
+      description: |-
+        A single search hit derived from an indexed document. This object
+        describes the `data[]` entries only (the sibling `related_query` /
+        `related_contents` fields are a different, non-document channel).
+        The set of emitted fields is server-side allowlisted by
+        `QueryFieldConfig#isApiResponseField` (authoritative). ACL / role /
+        internal fields (for example `role`, `virtual_host`, the raw
+        `content` body) are never emitted. Null values and blank keys are
+        dropped, so any given field MAY be absent (fields are therefore
+        optional and never `null`). Operators can expose additional crawled
+        fields via `query.additional.api.response.fields` (and dynamic
+        language-template fields such as `*_ja` / `*_en` may pass through),
+        which is why `additionalProperties` is `true`.
+      properties:
+        url: { type: string }
+        title: { type: string }
+        digest: { type: string }
+        content_description: { type: string }
+        content_title: { type: string }
+        site: { type: string }
+        site_path: { type: string }
+        url_link: { type: string }
+        host: { type: string }
+        mimetype: { type: string }
+        filetype: { type: string }
+        filename: { type: string }
+        content_length: { type: integer, format: int64 }
+        last_modified: { type: string, format: date-time }
+        timestamp: { type: string, format: date-time }
+        created: { type: string, format: date-time }
+        score: { type: number, format: float }
+        boost: { type: number, format: float }
+        doc_id: { type: string }
+        _id:
+          type: string
+          description: OpenSearch document `_id` (the only metadata field exposed).
+        thumbnail: { type: string }
+        has_cache:
+          type: string
+          enum: ['true', 'false']
+          description: Stored as the string `"true"`/`"false"`, not a JSON boolean.
+        click_count: { type: integer, format: int64 }
+        favorite_count: { type: integer, format: int64 }
+        similar_docs_count:
+          type: integer
+          format: int64
+          description: |-
+            Present only when result collapsing is enabled and the group has
+            duplicates. Never present on `/documents/all`.
+        similar_docs_hash:
+          type: string
+          description: |-
+            Present only when result collapsing is enabled. Never present on
+            `/documents/all`.
+      additionalProperties: true
 
     # --- Suggest / labels / popular ---------------------------------
     SuggestWordsResponse:
@@ -1692,6 +1760,7 @@ components:
                   items:
                     type: object
                     required: [doc_id]
+                    additionalProperties: false
                     properties:
                       doc_id: { type: string }
 
@@ -1765,7 +1834,15 @@ components:
                 mimetype:
                   type: string
                   enum: [text/html]
-                content: { type: string }
+                content:
+                  type: string
+                  description: |-
+                    Cached document body for the requested document. The
+                    document is fetched role-filtered via
+                    `getDocumentByDocId(userBean)`, so a caller only receives
+                    content they are authorized to see. The fetch field set
+                    (`getCacheResponseFields()`) contains no ACL or internal
+                    fields.
                 url:
                   type: string
                   description: |-
