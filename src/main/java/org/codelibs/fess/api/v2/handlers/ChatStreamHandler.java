@@ -365,7 +365,9 @@ public class ChatStreamHandler {
      * @return the rate-limit key (never null/blank)
      */
     protected String getRateLimitKey(final HttpServletRequest req) {
-        return ComponentUtil.getChatApiHelper().resolveChatRateLimitKey(req);
+        final String username = ComponentUtil.getSystemHelper().getUsername();
+        return ComponentUtil.getChatApiHelper()
+                .resolveChatRateLimitKey(username, () -> ComponentUtil.getRateLimitHelper().getClientIp(req));
     }
 
     /**

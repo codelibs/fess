@@ -37,8 +37,6 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 /**
  * Shared utilities for v2 chat API handlers.
  *
@@ -343,64 +341,33 @@ public class ChatApiHelper {
      * back to the cookie-bound, client-supplied userCode for guests), this key must be robust
      * against abuse: the guest userCode is only validated by regex/length, so a malicious client
      * could forge and rotate it per request to obtain a fresh throttle bucket and bypass the limit.
-     * Instead, authenticated callers are keyed by their server-validated session username and all
-     * other callers (guest / anonymous / forged / rotated / blank userCode) are keyed by the
-     * proxy-aware client IP, which an anonymous attacker cannot freely rotate.</p>
+     * Authenticated (non-guest) callers are keyed by their server-validated username
+     * ({@code "u:"+username}); all other callers (guest / anonymous / forged / rotated / blank
+     * userCode) are keyed by the proxy-aware client IP ({@code "ip:"+clientIp}), which an anonymous
+     * attacker cannot freely rotate. The client-IP supplier is evaluated lazily so the IP is only
+     * resolved for guest visitors.</p>
      *
      * <p>The returned key is namespaced ({@code "u:"} for usernames, {@code "ip:"} for client IPs)
      * so the two key spaces never collide, and is always non-blank so the chat throttle always
      * applies.</p>
      *
-     * <p>Behind a reverse proxy the per-IP key is only as trustworthy as the proxy setup:
-     * {@link RateLimitHelper#getClientIp(jakarta.servlet.http.HttpServletRequest)} honors
-     * {@code X-Forwarded-For} / {@code X-Real-IP} only from proxies listed in
-     * {@code rate.limit.trusted.proxies}, so that fronting proxy must be trusted and must
-     * sanitize any inbound forwarded headers for the per-IP key to resist rotation.</p>
-     *
-     * @param req the incoming HTTP request (used to resolve the client IP for guests)
-     * @return the chat rate-limit key (never null/blank)
-     */
-    public String resolveChatRateLimitKey(final HttpServletRequest req) {
-        final String username = ComponentUtil.getSystemHelper().getUsername();
-        return resolveChatRateLimitKey(username, () -> resolveClientIp(req));
-    }
-
-    /**
-     * Pure resolution logic behind {@link #resolveChatRateLimitKey(HttpServletRequest)}, separated so
-     * the branching can be unit-tested without the DI container. Authenticated (non-guest) callers
-     * are keyed by their server-validated username ({@code "u:"+username}); all other callers
-     * (guest / anonymous / forged / rotated / blank userCode) are keyed by the proxy-aware client IP
-     * ({@code "ip:"+clientIp}), which an anonymous attacker cannot freely rotate. The client-IP
-     * supplier is evaluated lazily so the IP is only resolved for guest visitors.
+     * <p>The client IP is resolved by the caller (the v2 chat handlers, via
+     * {@code RateLimitHelper#getClientIp}) rather than here, so this helper carries no servlet-API
+     * dependency and stays loadable by non-web Fess processes (e.g. the crawler) whose DI container
+     * also instantiates it. Behind a reverse proxy the per-IP key is only as trustworthy as the
+     * proxy setup: {@code rate.limit.trusted.proxies} gates which proxies' {@code X-Forwarded-For} /
+     * {@code X-Real-IP} headers are honored, so the fronting proxy must be trusted and must sanitize
+     * any inbound forwarded headers for the per-IP key to resist rotation.</p>
      *
      * @param username the authenticated username (may be {@link Constants#GUEST_USER})
      * @param clientIpSupplier supplies the proxy-aware client IP for guest visitors
      * @return the namespaced chat rate-limit key (never null/blank)
      */
-    String resolveChatRateLimitKey(final String username, final java.util.function.Supplier<String> clientIpSupplier) {
+    public String resolveChatRateLimitKey(final String username, final java.util.function.Supplier<String> clientIpSupplier) {
         if (!Constants.GUEST_USER.equals(username)) {
             return "u:" + username;
         }
         return "ip:" + clientIpSupplier.get();
-    }
-
-    /**
-     * Resolves the proxy-aware client IP, mirroring {@code LoginHandler#resolveClientIp}: prefer
-     * {@link RateLimitHelper#getClientIp(HttpServletRequest)} and fall back to
-     * {@link HttpServletRequest#getRemoteAddr()} if the helper is unavailable.
-     *
-     * @param req the incoming HTTP request
-     * @return the client IP (never null when {@code getRemoteAddr()} is set)
-     */
-    private String resolveClientIp(final HttpServletRequest req) {
-        try {
-            return ComponentUtil.getRateLimitHelper().getClientIp(req);
-        } catch (final RuntimeException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr", e);
-            }
-            return req.getRemoteAddr();
-        }
     }
 
     /**
