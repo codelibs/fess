@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,6 +76,12 @@ public class FavoritesListHandler {
 
     private static final Logger logger = LogManager.getLogger(FavoritesListHandler.class);
 
+    /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
+    private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
+
+    /** Maximum length of {@code query_id} as declared in the OpenAPI spec. */
+    private static final int QUERY_ID_MAX_LENGTH = 100;
+
     /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
@@ -107,6 +114,15 @@ public class FavoritesListHandler {
         final String queryId = req.getParameter("query_id");
         if (StringUtil.isBlank(queryId)) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id is required");
+            return;
+        }
+        if (queryId.length() > QUERY_ID_MAX_LENGTH) {
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id exceeds the maximum length of " + QUERY_ID_MAX_LENGTH);
+            return;
+        }
+        if (!QUERY_ID_PATTERN.matcher(queryId).matches()) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id contains invalid characters");
             return;
         }
         // Resolve the session-bound user code BEFORE doing any expensive work — anonymous

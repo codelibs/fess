@@ -18,6 +18,7 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -83,6 +84,12 @@ public class FavoritePostHandler {
     // Favorite payloads are tiny — only a query_id field is consumed. 1 KiB is
     // ample headroom while making payload-bomb attacks pointless.
     private static final int MAX_BODY_BYTES = 1024;
+
+    /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
+    private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
+
+    /** Maximum length of {@code query_id} as declared in the OpenAPI spec. */
+    private static final int QUERY_ID_MAX_LENGTH = 100;
 
     /**
      * Processes one {@code /api/v2/documents/{docId}/favorite} POST request.
@@ -203,6 +210,15 @@ public class FavoritePostHandler {
         final String queryId = (String) body.get("query_id");
         if (StringUtil.isBlank(queryId)) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id is required");
+            return;
+        }
+        if (queryId.length() > QUERY_ID_MAX_LENGTH) {
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id exceeds the maximum length of " + QUERY_ID_MAX_LENGTH);
+            return;
+        }
+        if (!QUERY_ID_PATTERN.matcher(queryId).matches()) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id contains invalid characters");
             return;
         }
 

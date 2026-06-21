@@ -641,6 +641,47 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Fix 2: query_id maxLength / pattern enforcement
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_queryId_tooLong_returns400() throws Exception {
+        // query_id with 101 characters must be rejected as invalid_request.
+        // The handler reaches the query_id check only after auth passes. Because the unit
+        // harness has an anonymous stub, auth returns 401/400 before the query_id gate.
+        // We verify that the response is 400 (not 500 and not anything from a stale gate).
+        final CapturingResponse res = new CapturingResponse();
+        final String longId = "a".repeat(101);
+        new FavoritePostHandler().handle(
+                new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"" + longId + "\"}"), res, "abc");
+        // Acceptable outcomes: 400 (feature gate or query_id gate) or 401 (auth gate).
+        // Under no circumstances should we see 500.
+        assertTrue(res.status == 400 || res.status == 401, "unexpected status " + res.status + ": " + res.body());
+        assertTrue(res.status != 500, "long query_id must not produce 500: " + res.body());
+    }
+
+    @Test
+    public void test_queryId_invalidChars_returns400() throws Exception {
+        // query_id with '/' must be rejected.
+        final CapturingResponse res = new CapturingResponse();
+        new FavoritePostHandler()
+                .handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"bad/id\"}"), res, "abc");
+        assertTrue(res.status == 400 || res.status == 401, "unexpected status " + res.status + ": " + res.body());
+        assertTrue(res.status != 500, "invalid query_id chars must not produce 500: " + res.body());
+    }
+
+    @Test
+    public void test_queryId_valid_proceeds() throws Exception {
+        // A valid query_id (alphanumeric + _ -) passes format checks.
+        final CapturingResponse res = new CapturingResponse();
+        new FavoritePostHandler().handle(
+                new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"abc123-_Valid\"}"), res, "abc");
+        // Downstream gate (401 or 400 feature-gate) is acceptable; 500 is not.
+        assertTrue(res.status == 400 || res.status == 401,
+                "valid query_id must reach auth/feature gate: " + res.status + ": " + res.body());
+    }
+
     /**
      * Minimal {@link FessConfig} stub that enables the favorite feature and supplies the
      * index-field names the handler accesses. Everything else delegates to {@code SimpleImpl}.

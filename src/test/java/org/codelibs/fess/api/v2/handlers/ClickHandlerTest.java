@@ -285,6 +285,75 @@ public class ClickHandlerTest extends UnitFessTestCase {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Fix 2: query_id maxLength / pattern enforcement
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_queryId_tooLong_returns400() throws Exception {
+        // query_id exceeding 100 characters must be rejected with 400.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final String longId = "a".repeat(101);
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"" + longId + "\"}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_queryId_invalidChars_returns400() throws Exception {
+        // query_id with '/' must be rejected with 400.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"bad/id\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_queryId_valid_proceeds() throws Exception {
+        // A valid query_id passes format checks; downstream may return 404/500 from backend.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"abc123-_Valid\"}"), res);
+            // Must not be a query_id-specific 400 rejection.
+            assertFalse(res.status == 400 && res.body().contains("query_id"),
+                    "valid query_id must not yield 400 with query_id error: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
