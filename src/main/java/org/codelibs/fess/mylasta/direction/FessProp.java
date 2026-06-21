@@ -2446,4 +2446,49 @@ public interface FessProp {
             return 30;
         }
     }
+
+    /**
+     * Returns the maximum allowed length for a v2 API string query parameter
+     * (e.g. {@code q}, {@code sort}, {@code sdh}). Enforced server-side per
+     * OWASP API4:2023 guidance.
+     *
+     * @return maximum character length; defaults to {@code 1000}
+     */
+    default int getApiV2ParamMaxLengthAsInteger() {
+        final Integer value = getAsInteger("api.v2.param.max.length");
+        return value != null ? value.intValue() : 1000;
+    }
+
+    /**
+     * Returns the maximum number of values allowed for a v2 API repeatable
+     * query parameter (e.g. array-typed fields).
+     *
+     * @return maximum item count; defaults to {@code 100}
+     */
+    default int getApiV2ParamMaxArraySizeAsInteger() {
+        final Integer value = getAsInteger("api.v2.param.max.array.size");
+        return value != null ? value.intValue() : 100;
+    }
+
+    /**
+     * Returns the maximum allowed length for a password field submitted via the
+     * v2 API.
+     *
+     * @return maximum character length; defaults to {@code 100}
+     */
+    default int getPasswordMaxLengthAsInteger() {
+        final Integer value = getAsInteger("password.max.length");
+        return value != null ? value.intValue() : 100;
+    }
+
+    /**
+     * Returns the upper clamp for the {@code facet.size} parameter applied at
+     * the search chokepoint.
+     *
+     * @return maximum facet field size; defaults to {@code 1000}
+     */
+    default int getQueryFacetFieldsSizeMaxAsInteger() {
+        final Integer value = getAsInteger("query.facet.fields.size.max");
+        return value != null ? value.intValue() : 1000;
+    }
 }
