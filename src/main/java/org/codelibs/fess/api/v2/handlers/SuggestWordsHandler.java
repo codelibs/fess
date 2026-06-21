@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -68,12 +67,7 @@ public class SuggestWordsHandler {
         try {
             final String q = request.getParameter("q");
             final String numStr = request.getParameter("num");
-            final int num;
-            if (StringUtil.isNotBlank(numStr) && StringUtils.isNumeric(numStr)) {
-                num = Integer.parseInt(numStr);
-            } else {
-                num = 10;
-            }
+            final int num = resolveSize(numStr, 10, ComponentUtil.getFessConfig().getPagingSearchPageMaxSizeAsInteger());
             final String[] fields = SearchRequestParams.getParamValueArray(request, "fn");
             final String[] langs = SearchRequestParams.getParamValueArray(request, "lang");
             final String[] tags = SearchRequestParams.getParamValueArray(request, "label");
@@ -125,8 +119,38 @@ public class SuggestWordsHandler {
             payload.put("query_time", suggestResponse.getTookMs());
             payload.put("suggest_words", items);
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
+        } catch (final InvalidRequestParameterException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/suggest-words");
+        }
+    }
+
+    /**
+     * Resolves the effective suggest result size from the {@code num} request parameter.
+     *
+     * <p>Returns {@code defaultSize} when the parameter is blank or non-numeric.
+     * Clamps the value to {@code maxSize} when it exceeds the maximum.
+     * Throws {@link InvalidRequestParameterException} for non-positive values.</p>
+     *
+     * @param numParam    the raw {@code num} query parameter (may be {@code null} or blank)
+     * @param defaultSize the size to use when {@code numParam} is absent or non-numeric
+     * @param maxSize     the upper bound to clamp the requested size against
+     * @return the effective size, in the range {@code [1, maxSize]}
+     * @throws InvalidRequestParameterException if the parsed value is zero or negative
+     */
+    static int resolveSize(final String numParam, final int defaultSize, final int maxSize) {
+        if (StringUtil.isBlank(numParam)) {
+            return defaultSize;
+        }
+        try {
+            final int requested = Integer.parseInt(numParam);
+            if (requested <= 0) {
+                throw new InvalidRequestParameterException("num must be positive, got: " + requested);
+            }
+            return Math.min(requested, maxSize);
+        } catch (final NumberFormatException e) {
+            return defaultSize;
         }
     }
 }

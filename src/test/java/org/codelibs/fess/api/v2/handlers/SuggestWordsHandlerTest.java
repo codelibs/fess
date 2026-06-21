@@ -99,6 +99,29 @@ public class SuggestWordsHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_resolveSize_clampOverMax() {
+        assertEquals(100, SuggestWordsHandler.resolveSize("9999", 10, 100));
+    }
+
+    @Test
+    public void test_resolveSize_zeroRejected() {
+        try {
+            SuggestWordsHandler.resolveSize("0", 10, 100);
+            fail();
+        } catch (final InvalidRequestParameterException e) {}
+    }
+
+    @Test
+    public void test_resolveSize_blankDefault() {
+        assertEquals(10, SuggestWordsHandler.resolveSize(null, 10, 100));
+    }
+
+    @Test
+    public void test_resolveSize_nonNumericDefault() {
+        assertEquals(10, SuggestWordsHandler.resolveSize("abc", 10, 100));
+    }
+
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
