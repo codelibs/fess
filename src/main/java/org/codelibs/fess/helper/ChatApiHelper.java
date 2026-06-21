@@ -84,6 +84,7 @@ public class ChatApiHelper {
      * @param raw the raw request body map
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return a map of validated field filters, or an empty map when none are present
+     * @throws IOException if {@code fields.label} exceeds the configured maximum array size or per-element length
      */
     public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings)
             throws IOException {
@@ -150,6 +151,7 @@ public class ChatApiHelper {
      * @param raw the raw request body map
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return array of validated extra query strings; empty array when none present
+     * @throws IOException if {@code extra_queries} exceeds the configured maximum array size or per-element length
      */
     public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) throws IOException {
         final Object exqRaw = raw.get("extra_queries");
