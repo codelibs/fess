@@ -73,16 +73,18 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public String getTrackTotalHits() {
-        return request.getParameter(Constants.TRACK_TOTAL_HITS);
+        return V2ParamValidator.checkMaxLength(request.getParameter(Constants.TRACK_TOTAL_HITS), 100, "track_total_hits");
     }
 
     @Override
     public String getQuery() {
-        return request.getParameter("q");
+        return V2ParamValidator.checkMaxLength(request.getParameter("q"), fessConfig.getApiV2ParamMaxLengthAsInteger(), "q");
     }
 
     @Override
     public String[] getExtraQueries() {
+        V2ParamValidator.checkArray(request.getParameterValues("ex_q"), fessConfig.getApiV2ParamMaxArraySizeAsInteger(),
+                fessConfig.getApiV2ParamMaxLengthAsInteger(), "ex_q");
         return getParamValueArray(request, "ex_q");
     }
 
@@ -95,6 +97,10 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 final String[] value = simplifyArray(entry.getValue());
                 fields.put(key.substring("fields.".length()), value);
             }
+        }
+        if (fields.size() > fessConfig.getApiV2ParamMaxArraySizeAsInteger()) {
+            throw new InvalidRequestParameterException(
+                    "fields exceeds the maximum number of distinct names: " + fessConfig.getApiV2ParamMaxArraySizeAsInteger());
         }
         return fields;
     }
@@ -109,11 +115,17 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 conditions.put(key.substring("as.".length()), value);
             }
         }
+        if (conditions.size() > fessConfig.getApiV2ParamMaxArraySizeAsInteger()) {
+            throw new InvalidRequestParameterException(
+                    "conditions exceeds the maximum number of distinct names: " + fessConfig.getApiV2ParamMaxArraySizeAsInteger());
+        }
         return conditions;
     }
 
     @Override
     public String[] getLanguages() {
+        V2ParamValidator.checkArray(request.getParameterValues("lang"), fessConfig.getApiV2ParamMaxArraySizeAsInteger(),
+                fessConfig.getApiV2ParamMaxLengthAsInteger(), "lang");
         return getParamValueArray(request, "lang");
     }
 
@@ -124,12 +136,16 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public FacetInfo getFacetInfo() {
+        final int maxItems = fessConfig.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxLen = fessConfig.getApiV2ParamMaxLengthAsInteger();
+        V2ParamValidator.checkArray(request.getParameterValues("facet.field"), maxItems, maxLen, "facet.field");
+        V2ParamValidator.checkArray(request.getParameterValues("facet.query"), maxItems, maxLen, "facet.query");
         return createFacetInfo(request);
     }
 
     @Override
     public String getSort() {
-        return request.getParameter("sort");
+        return V2ParamValidator.checkMaxLength(request.getParameter("sort"), fessConfig.getApiV2ParamMaxLengthAsInteger(), "sort");
     }
 
     /**
@@ -320,7 +336,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public String getSimilarDocHash() {
-        return request.getParameter("sdh");
+        return V2ParamValidator.checkMaxLength(request.getParameter("sdh"), fessConfig.getApiV2ParamMaxLengthAsInteger(), "sdh");
     }
 
     @Override
