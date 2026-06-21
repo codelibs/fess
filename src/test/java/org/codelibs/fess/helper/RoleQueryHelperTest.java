@@ -459,6 +459,17 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
                 // Anonymous request: no access token presented.
                 return false;
             }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                // Anonymous request: no logged-in user. Returning empty keeps this test off the shared
+                // container's FessLoginAssist/UserBhv resolution path, which intermittently throws
+                // AutoBindingFailureException when a concurrent test clears ComponentUtil.componentMap
+                // under surefire parallel-class execution. The orElse branch (guest-role backfill) is
+                // exactly what this test asserts.
+                return org.dbflute.optional.OptionalThing.empty();
+            }
         };
         roleQueryHelper.init();
 

@@ -34,6 +34,7 @@ import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -181,7 +182,7 @@ public class RoleQueryHelper {
 
             final RequestManager requestManager = ComponentUtil.getRequestManager();
             try {
-                requestManager.findUserBean(FessUserBean.class)
+                findUserBean(requestManager)
                         .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add)))
                         .orElse(() -> {
                             if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
@@ -230,6 +231,18 @@ public class RoleQueryHelper {
             }).orElse(false);
         }
         return false;
+    }
+
+    /**
+     * Resolves the logged-in user bean for the current request. Exposed as a protected seam so unit
+     * tests can substitute an empty result without driving the shared LastaFlute container to resolve
+     * {@code FessLoginAssist} (and its OpenSearch-backed {@code UserBhv}), which is unavailable in the
+     * unit test environment.
+     * @param requestManager The request manager.
+     * @return the optional user bean, empty when no user is logged in.
+     */
+    protected OptionalThing<FessUserBean> findUserBean(final RequestManager requestManager) {
+        return requestManager.findUserBean(FessUserBean.class);
     }
 
     /**
