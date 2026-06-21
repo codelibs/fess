@@ -23,8 +23,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -82,6 +84,13 @@ public class ClickHandler {
 
     /** Maximum length of {@code query_id} as declared in the OpenAPI spec. */
     private static final int QUERY_ID_MAX_LENGTH = 100;
+
+    /**
+     * Upper bound for the 1-based click rank; aligns with OpenSearch default
+     * {@code index.max_result_window}; values above this (including ones that
+     * overflow int) are rejected to limit analytics forgery (L-5).
+     */
+    private static final int MAX_RANK = 10000;
 
     /**
      * Default constructor. The handler is stateless and intended to be
@@ -202,6 +211,25 @@ public class ClickHandler {
         if (rank instanceof Number && ((Number) rank).intValue() < 0) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank must not be negative");
             return;
+        }
+        // rank upper-bound guard (L-5): evaluate as long to also catch int-overflow values.
+        if (rank instanceof Number && ((Number) rank).longValue() > MAX_RANK) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank exceeds the maximum");
+            return;
+        }
+        // query_id membership (L-5, best-effort): only reject a provable mismatch; skip when the
+        // per-session result set is unknown/empty so logging is never broken in default deployments.
+        if (StringUtil.isNotBlank(queryId)) {
+            String[] resultDocIds;
+            try {
+                resultDocIds = ComponentUtil.getUserInfoHelper().getResultDocIds(queryId);
+            } catch (final RuntimeException e) {
+                resultDocIds = null; // unverifiable; do not break logging
+            }
+            if (resultDocIds != null && resultDocIds.length > 0 && !ArrayUtils.contains(resultDocIds, docId)) {
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not in search result");
+                return;
+            }
         }
         try {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
