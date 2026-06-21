@@ -264,7 +264,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
      * {@code <= 0}. Handlers should catch this and map it to
      * {@link org.codelibs.fess.api.v2.V2ErrorCode#INVALID_REQUEST}.
      */
-    public static class InvalidPageSizeException extends RuntimeException {
+    public static class InvalidPageSizeException extends InvalidRequestParameterException {
         private static final long serialVersionUID = 1L;
 
         /**
