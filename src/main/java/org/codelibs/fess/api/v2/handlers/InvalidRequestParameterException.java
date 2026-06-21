@@ -22,6 +22,11 @@ package org.codelibs.fess.api.v2.handlers;
 public class InvalidRequestParameterException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs the exception with a message describing the violated constraint.
+     *
+     * @param message the detail message describing the invalid request parameter
+     */
     public InvalidRequestParameterException(final String message) {
         super(message);
     }

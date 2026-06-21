@@ -82,6 +82,7 @@ public class ChatApiHelper {
      * @param raw the raw request body map
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return a map of validated field filters, or an empty map when none are present
+     * @throws IOException if {@code fields.label} exceeds the configured maximum array size or per-element length
      */
     public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings)
             throws IOException {
@@ -148,6 +149,7 @@ public class ChatApiHelper {
      * @param raw the raw request body map
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return array of validated extra query strings; empty array when none present
+     * @throws IOException if {@code extra_queries} exceeds the configured maximum array size or per-element length
      */
     public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) throws IOException {
         final Object exqRaw = raw.get("extra_queries");
@@ -330,6 +332,42 @@ public class ChatApiHelper {
             return username;
         }
         return guestUserCodeSupplier.get();
+    }
+
+    /**
+     * Resolves a rate-limit key for the chat endpoints that an anonymous caller cannot rotate.
+     *
+     * <p>Unlike {@link #getUserId()} (which keys chat-session continuity and intentionally falls
+     * back to the cookie-bound, client-supplied userCode for guests), this key must be robust
+     * against abuse: the guest userCode is only validated by regex/length, so a malicious client
+     * could forge and rotate it per request to obtain a fresh throttle bucket and bypass the limit.
+     * Authenticated (non-guest) callers are keyed by their server-validated username
+     * ({@code "u:"+username}); all other callers (guest / anonymous / forged / rotated / blank
+     * userCode) are keyed by the proxy-aware client IP ({@code "ip:"+clientIp}), which an anonymous
+     * attacker cannot freely rotate. The client-IP supplier is evaluated lazily so the IP is only
+     * resolved for guest visitors.</p>
+     *
+     * <p>The returned key is namespaced ({@code "u:"} for usernames, {@code "ip:"} for client IPs)
+     * so the two key spaces never collide, and is always non-blank so the chat throttle always
+     * applies.</p>
+     *
+     * <p>The client IP is resolved by the caller (the v2 chat handlers, via
+     * {@code RateLimitHelper#getClientIp}) rather than here, so this helper carries no servlet-API
+     * dependency and stays loadable by non-web Fess processes (e.g. the crawler) whose DI container
+     * also instantiates it. Behind a reverse proxy the per-IP key is only as trustworthy as the
+     * proxy setup: {@code rate.limit.trusted.proxies} gates which proxies' {@code X-Forwarded-For} /
+     * {@code X-Real-IP} headers are honored, so the fronting proxy must be trusted and must sanitize
+     * any inbound forwarded headers for the per-IP key to resist rotation.</p>
+     *
+     * @param username the authenticated username (may be {@link Constants#GUEST_USER})
+     * @param clientIpSupplier supplies the proxy-aware client IP for guest visitors
+     * @return the namespaced chat rate-limit key (never null/blank)
+     */
+    public String resolveChatRateLimitKey(final String username, final java.util.function.Supplier<String> clientIpSupplier) {
+        if (!Constants.GUEST_USER.equals(username)) {
+            return "u:" + username;
+        }
+        return "ip:" + clientIpSupplier.get();
     }
 
     /**

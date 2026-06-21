@@ -117,11 +117,11 @@ public class ChatSessionClearHandler {
             return;
         }
         final int chatLimit = fessConfig.getChatRateLimitPerMinute();
-        // Skip the per-user throttle for anonymous callers with no resolvable user id
-        // (e.g. a guest whose session is not yet established): a null/blank key would
-        // otherwise hit the limiter's null-key deny path and 429 the first request.
-        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
-                && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+        // Throttle by a key an anonymous caller cannot rotate (see ChatApiHelper#resolveChatRateLimitKey);
+        // the key is always non-blank so the throttle always applies. userId above stays for chat-session binding.
+        final String rateLimitKey = getRateLimitKey(req);
+        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(rateLimitKey)
+                && !limiter.allow(LoginRateLimiter.Scope.CHAT, rateLimitKey, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
@@ -154,5 +154,21 @@ public class ChatSessionClearHandler {
      */
     protected String getUserId(final HttpServletRequest req) {
         return ComponentUtil.getChatApiHelper().getUserId();
+    }
+
+    /**
+     * Resolves the chat rate-limit key (server-validated username for authenticated callers, else the
+     * proxy-aware client IP). Exposed as a seam so unit tests can pin the throttle key deterministically;
+     * the underlying {@code SystemHelper}/{@code RateLimitHelper} are smart-deploy components that are
+     * unreliable to stub via {@code ComponentUtil.register} once the shared test container has resolved
+     * the real ones (same rationale as {@link #getUserId}).
+     *
+     * @param req the incoming HTTP request
+     * @return the rate-limit key (never null/blank)
+     */
+    protected String getRateLimitKey(final HttpServletRequest req) {
+        final String username = ComponentUtil.getSystemHelper().getUsername();
+        return ComponentUtil.getChatApiHelper()
+                .resolveChatRateLimitKey(username, () -> ComponentUtil.getRateLimitHelper().getClientIp(req));
     }
 }
