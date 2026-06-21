@@ -195,6 +195,18 @@ public class PasswordChangeHandler {
                             Map.of("reason", "current_password_required"));
             return;
         }
+        try {
+            final int maxPwLen = ComponentUtil.getFessConfig().getPasswordMaxLengthAsInteger();
+            if (currentPw.length() > maxPwLen) {
+                throw new InvalidRequestParameterException("current_password exceeds the maximum length of " + maxPwLen);
+            }
+            if (confirm != null && confirm.length() > maxPwLen) {
+                throw new InvalidRequestParameterException("confirm_password exceeds the maximum length of " + maxPwLen);
+            }
+        } catch (final InvalidRequestParameterException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            return;
+        }
         if (newPw == null || newPw.isBlank()) {
             ComponentUtil.getV2EnvelopeWriter()
                     .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "new_password is required",
