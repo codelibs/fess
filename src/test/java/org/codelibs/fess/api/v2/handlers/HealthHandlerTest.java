@@ -85,10 +85,12 @@ public class HealthHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         // The v2 envelope never carries a "version" key, on either the happy or failure path.
         assertFalse(body.contains("\"version\""), body);
+        // cluster_name is intentionally not exposed by the anonymous health endpoint to avoid
+        // leaking the OpenSearch cluster name; verify on every path (success / 503 / 500).
+        assertFalse(body.contains("\"cluster_name\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"engine\""), body);
-            assertTrue(body.contains("\"cluster_name\""), body);
             assertTrue(body.contains("\"ping_status\""), body);
         } else {
             // No engine in this JVM → handler emits a structured 503 (cluster red /

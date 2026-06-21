@@ -272,11 +272,13 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // service_unavailable error envelope (status:9) instead of a success envelope.
         final String body = res.body();
         assertFalse(body.contains("\"version\""), body);
+        // cluster_name is intentionally not exposed by the anonymous health endpoint to avoid
+        // leaking the OpenSearch cluster name; verify on every path (success / 503 / 500).
+        assertFalse(body.contains("\"cluster_name\""), body);
         if (res.status == 200) {
             // green or yellow — success envelope with engine details.
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"engine\""), body);
-            assertTrue(body.contains("\"cluster_name\""), body);
         } else if (res.status == 503) {
             // red cluster — error envelope; engine details embedded under error.details.
             assertTrue(body.contains("\"status\":9"), body);
