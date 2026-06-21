@@ -119,6 +119,46 @@ public class FavoritesListHandlerTest extends UnitFessTestCase {
                 || body.contains("\"code\":\"internal_error\""), body);
     }
 
+    // -----------------------------------------------------------------------
+    // Fix 2: query_id maxLength / pattern enforcement
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_favoritesList_queryId_tooLong_returns400() throws Exception {
+        final FavoritesListHandler handler = new FavoritesListHandler();
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("query_id", new String[] { "a".repeat(101) });
+        handler.handle(new StubRequest("/api/v2/favorites", params), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_favoritesList_queryId_invalidChars_returns400() throws Exception {
+        final FavoritesListHandler handler = new FavoritesListHandler();
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("query_id", new String[] { "bad/id" });
+        handler.handle(new StubRequest("/api/v2/favorites", params), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_favoritesList_queryId_valid_proceeds() throws Exception {
+        // A valid query_id passes format checks and reaches subsequent gates
+        // (feature disabled -> 400, or no user session -> 401).
+        final FavoritesListHandler handler = new FavoritesListHandler();
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("query_id", new String[] { "abc123-_Valid" });
+        handler.handle(new StubRequest("/api/v2/favorites", params), res);
+        // Must not be a query_id-specific rejection; any downstream gate (400/401/500) is ok.
+        assertTrue(res.status == 400 || res.status == 401 || res.status == 500,
+                "unexpected status for valid query_id: " + res.status + ": " + res.body());
+    }
+
     /** Minimal HttpServletResponse stub. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();

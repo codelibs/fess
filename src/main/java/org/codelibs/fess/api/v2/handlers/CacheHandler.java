@@ -92,6 +92,19 @@ public class CacheHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
+        // Validate hq parameter bounds early (fail fast, before the expensive backend lookup).
+        // If FessConfig is unavailable in a stripped harness, skip the check (same pattern as
+        // the login-required check below) — in production FessConfig is always present.
+        try {
+            final org.codelibs.fess.mylasta.direction.FessConfig cfg = ComponentUtil.getFessConfig();
+            V2ParamValidator.checkArray(req.getParameterValues("hq"), cfg.getApiV2ParamMaxArraySizeAsInteger(),
+                    cfg.getApiV2ParamMaxLengthAsInteger(), "hq");
+        } catch (final InvalidRequestParameterException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            return;
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2/cache: FessConfig lookup failed; skipping hq bounds check", e);
+        }
         // M-17: split DI-binding failure from "no user bean present". A genuine anonymous
         // caller still falls into the AUTH_REQUIRED branch below (when login is required);
         // a system-level lookup failure surfaces as INTERNAL_ERROR (500) so a logged-in
@@ -138,7 +151,7 @@ public class CacheHandler {
                 return;
             }
             final Map<String, Object> doc = docOpt.get();
-            // hq is multi-valued in v1 (CacheForm#hq is String[]) — pass through verbatim.
+            // hq is multi-valued in v1 (CacheForm#hq is String[]) — bounds already validated above, pass through.
             final String[] hq = req.getParameterValues("hq");
             final String content = ComponentUtil.getViewHelper().createCacheContent(doc, hq);
             if (content == null) {

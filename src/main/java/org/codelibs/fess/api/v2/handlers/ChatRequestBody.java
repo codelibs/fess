@@ -136,8 +136,22 @@ public final class ChatRequestBody {
         return Collections.unmodifiableMap(warnings);
     }
 
+    /** Base for chat request body validation errors that map to HTTP 400. */
+    public static class InvalidRequestException extends IOException {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Creates a new exception describing the validation violation.
+         *
+         * @param m the developer-facing detail message
+         */
+        public InvalidRequestException(final String m) {
+            super(m);
+        }
+    }
+
     /** Thrown when the request {@code message} exceeds {@code rag.chat.message.max.length}. */
-    public static class MessageTooLongException extends IOException {
+    public static class MessageTooLongException extends InvalidRequestException {
         private static final long serialVersionUID = 1L;
 
         /**
@@ -146,6 +160,34 @@ public final class ChatRequestBody {
          * @param m the developer-facing detail message
          */
         public MessageTooLongException(final String m) {
+            super(m);
+        }
+    }
+
+    /** Thrown when session_id exceeds the maximum length or contains invalid characters. */
+    public static class InvalidSessionIdException extends InvalidRequestException {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Creates a new exception describing the session_id violation.
+         *
+         * @param m the developer-facing detail message
+         */
+        public InvalidSessionIdException(final String m) {
+            super(m);
+        }
+    }
+
+    /** Thrown when an array parameter (extra_queries, fields.label) exceeds the count or per-element length limit. */
+    public static class TooManyValuesException extends InvalidRequestException {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Creates a new exception describing the array size or element length violation.
+         *
+         * @param m the developer-facing detail message
+         */
+        public TooManyValuesException(final String m) {
             super(m);
         }
     }

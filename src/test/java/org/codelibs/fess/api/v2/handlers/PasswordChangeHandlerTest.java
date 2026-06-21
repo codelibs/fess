@@ -738,6 +738,43 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         assertTrue(rl.peek(LoginRateLimiter.Scope.USER, new LoginHandler().userScopeKey("10.0.0.7", userId), 5, 60));
     }
 
+    @Test
+    public void passwordChange_currentPasswordExceedsMaxLength_returns400() throws Exception {
+        // current_password over 100 chars must be rejected with 400 before auth lookup.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final String longPw = "a".repeat(101);
+            new PasswordChangeHandler().handle(
+                    new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                            "{\"current_password\":\"" + longPw + "\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_confirmPasswordExceedsMaxLength_returns400() throws Exception {
+        // confirm_password over 100 chars must be rejected with 400.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final String longPw = "a".repeat(101);
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"" + longPw + "\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
     /**
      * Stub FessLoginAssist that returns a populated entity only when the supplied
      * LocalUserCredential carries {@code expectedPw}. Used by the password-change

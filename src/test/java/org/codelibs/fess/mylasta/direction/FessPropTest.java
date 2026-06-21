@@ -684,4 +684,15 @@ public class FessPropTest extends UnitFessTestCase {
         };
         assertEquals(30, fessConfig.getChatRateLimitPerMinute());
     }
+
+    @Test
+    public void test_apiV2InputBoundGetters_defaults() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        assertEquals(1000, fessConfig.getApiV2ParamMaxLengthAsInteger());
+        assertEquals(100, fessConfig.getApiV2ParamMaxArraySizeAsInteger());
+        assertEquals(100, fessConfig.getPasswordMaxLengthAsInteger());
+        assertEquals(1000, fessConfig.getQueryFacetFieldsSizeMaxAsInteger());
+        assertEquals(2147483647L, fessConfig.getQueryFacetFieldsMinDocCountMaxAsLong());
+        assertEquals(9999999999999L, fessConfig.getApiV2ClickMaxRtAsLong());
+    }
 }

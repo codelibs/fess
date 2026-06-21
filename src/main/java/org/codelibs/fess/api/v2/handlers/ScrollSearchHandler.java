@@ -152,7 +152,7 @@ public class ScrollSearchHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded {} documents", count);
             }
-        } catch (final V2JsonRequestParams.InvalidPageSizeException e) {
+        } catch (final InvalidRequestParameterException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {

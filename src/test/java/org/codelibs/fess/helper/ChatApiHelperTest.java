@@ -25,6 +25,7 @@ import java.util.Map;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -50,7 +51,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     // ── parseFieldFilters ─────────────────────────────────────────────────────
 
     @Test
-    public void test_parseFieldFilters_nullInput_returnsEmptyMap() {
+    public void test_parseFieldFilters_nullInput_returnsEmptyMap() throws Exception {
         final Map<String, List<String>> warnings = new HashMap<>();
         final Map<String, String[]> result = chatApiHelper.parseFieldFilters(null != null ? null : Collections.emptyMap(), warnings);
         assertTrue(result.isEmpty(), "null/empty raw input must return empty map");
@@ -58,7 +59,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_emptyRaw_returnsEmptyMap() {
+    public void test_parseFieldFilters_emptyRaw_returnsEmptyMap() throws Exception {
         final Map<String, List<String>> warnings = new HashMap<>();
         final Map<String, String[]> result = chatApiHelper.parseFieldFilters(Collections.emptyMap(), warnings);
         assertTrue(result.isEmpty(), "empty raw map must return empty map");
@@ -66,7 +67,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_fieldsIsString_typesMismatch_returnsEmptyMap() {
+    public void test_parseFieldFilters_fieldsIsString_typesMismatch_returnsEmptyMap() throws Exception {
         // "fields" key present but value is a plain String, not a Map — must be ignored
         final Map<String, Object> raw = new HashMap<>();
         raw.put("fields", "not-a-map");
@@ -77,7 +78,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_nestedStringLabel_allowlistEmpty_addedToWarnings() {
+    public void test_parseFieldFilters_nestedStringLabel_allowlistEmpty_addedToWarnings() throws Exception {
         // Nested structure {"fields":{"label":"x"}} — LabelTypeHelper absent → allowlist empty
         // → "x" is rejected and added to warnings["fields.label"]
         final Map<String, Object> fieldsMap = new HashMap<>();
@@ -94,7 +95,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_nestedArrayLabel_allowlistEmpty_allRejected() {
+    public void test_parseFieldFilters_nestedArrayLabel_allowlistEmpty_allRejected() throws Exception {
         // {"fields":{"label":["a","b"]}} — both values rejected when allowlist is empty
         final List<String> labelList = new ArrayList<>(Arrays.asList("a", "b"));
         final Map<String, Object> fieldsMap = new HashMap<>();
@@ -113,7 +114,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_dottedKeyFallback_allowlistEmpty_addedToWarnings() {
+    public void test_parseFieldFilters_dottedKeyFallback_allowlistEmpty_addedToWarnings() throws Exception {
         // Legacy dotted-key {"fields.label":["v1"]} fallback — value rejected → warning
         final List<String> labelList = new ArrayList<>(Collections.singletonList("v1"));
         final Map<String, Object> raw = new HashMap<>();
@@ -127,7 +128,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_listWithNullElement_nullSkipped() {
+    public void test_parseFieldFilters_listWithNullElement_nullSkipped() throws Exception {
         // List containing a null element — nulls must be silently skipped
         final List<Object> labelList = new ArrayList<>();
         labelList.add(null);
@@ -148,7 +149,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseFieldFilters_warningsKeyIsFieldsDotLabel() {
+    public void test_parseFieldFilters_warningsKeyIsFieldsDotLabel() throws Exception {
         // The warnings key must use the snake_case dotted form "fields.label", not "label"
         final Map<String, Object> fieldsMap = new HashMap<>();
         fieldsMap.put("label", "rejected-value");
@@ -169,7 +170,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     // ── parseExtraQueries ─────────────────────────────────────────────────────
 
     @Test
-    public void test_parseExtraQueries_nullKey_returnsEmptyArray() {
+    public void test_parseExtraQueries_nullKey_returnsEmptyArray() throws Exception {
         // No "extra_queries" key in raw → empty array, no warnings
         final Map<String, Object> raw = new HashMap<>();
         final Map<String, List<String>> warnings = new HashMap<>();
@@ -179,7 +180,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseExtraQueries_scalarString_rejectedWhenAllowlistEmpty() {
+    public void test_parseExtraQueries_scalarString_rejectedWhenAllowlistEmpty() throws Exception {
         // extra_queries as plain string (scalar) — ViewHelper absent → empty allowlist
         final Map<String, Object> raw = new HashMap<>();
         raw.put("extra_queries", "query-a");
@@ -192,7 +193,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseExtraQueries_arrayInput_rejectedWhenAllowlistEmpty() {
+    public void test_parseExtraQueries_arrayInput_rejectedWhenAllowlistEmpty() throws Exception {
         // extra_queries as list — all values rejected when ViewHelper absent
         final Map<String, Object> raw = new HashMap<>();
         raw.put("extra_queries", new ArrayList<>(Arrays.asList("q1", "q2")));
@@ -205,7 +206,7 @@ public class ChatApiHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_parseExtraQueries_warningsKeyIsSnakeCase() {
+    public void test_parseExtraQueries_warningsKeyIsSnakeCase() throws Exception {
         // The warnings key for extra_queries must be "extra_queries" (snake_case)
         final Map<String, Object> raw = new HashMap<>();
         raw.put("extra_queries", "any-value");
@@ -287,6 +288,98 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         };
         final int len = chatApiHelper.getMaxMessageLength(cfg);
         assertEquals(4000, len);
+    }
+
+    // ── parseRequestBody: session_id validation ───────────────────────────────
+
+    @Test
+    public void test_parseRequestBody_sessionId101Chars_throwsInvalidSessionId() {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        raw.put("session_id", "a".repeat(101));
+        Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.InvalidSessionIdException.class,
+                () -> chatApiHelper.parseRequestBody(raw, 4000), "101-char session_id must throw InvalidSessionIdException");
+    }
+
+    @Test
+    public void test_parseRequestBody_sessionId100Chars_ok() throws Exception {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        raw.put("session_id", "a".repeat(100));
+        final org.codelibs.fess.api.v2.handlers.ChatRequestBody body = chatApiHelper.parseRequestBody(raw, 4000);
+        assertNotNull(body);
+        assertEquals("a".repeat(100), body.sessionId());
+    }
+
+    @Test
+    public void test_parseRequestBody_sessionIdInvalidChars_throwsInvalidSessionId() {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        raw.put("session_id", "bad id!");
+        Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.InvalidSessionIdException.class,
+                () -> chatApiHelper.parseRequestBody(raw, 4000), "session_id with space/exclamation must throw InvalidSessionIdException");
+    }
+
+    @Test
+    public void test_parseRequestBody_sessionIdNull_ok() throws Exception {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        // no session_id key
+        final org.codelibs.fess.api.v2.handlers.ChatRequestBody body = chatApiHelper.parseRequestBody(raw, 4000);
+        assertNotNull(body);
+        assertNull(body.sessionId());
+    }
+
+    // ── parseExtraQueries: array size and element length validation ───────────
+
+    @Test
+    public void test_parseExtraQueries_101Items_throwsTooManyValues() {
+        final Map<String, Object> raw = new HashMap<>();
+        final java.util.List<String> list = new java.util.ArrayList<>();
+        for (int i = 0; i < 101; i++) {
+            list.add("q" + i);
+        }
+        raw.put("extra_queries", list);
+        final Map<String, List<String>> warnings = new HashMap<>();
+        Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.TooManyValuesException.class,
+                () -> chatApiHelper.parseExtraQueries(raw, warnings), "101 extra_queries items must throw TooManyValuesException");
+    }
+
+    @Test
+    public void test_parseExtraQueries_elementExceeds1000Chars_throwsTooManyValues() {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("extra_queries", "x".repeat(1001));
+        final Map<String, List<String>> warnings = new HashMap<>();
+        Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.TooManyValuesException.class,
+                () -> chatApiHelper.parseExtraQueries(raw, warnings), "1001-char element must throw TooManyValuesException");
+    }
+
+    // ── parseFieldFilters: array size and element length validation ───────────
+
+    @Test
+    public void test_parseFieldFilters_101Items_throwsTooManyValues() {
+        final java.util.List<String> list = new java.util.ArrayList<>();
+        for (int i = 0; i < 101; i++) {
+            list.add("label" + i);
+        }
+        final Map<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put("label", list);
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("fields", fieldsMap);
+        final Map<String, List<String>> warnings = new HashMap<>();
+        Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.TooManyValuesException.class,
+                () -> chatApiHelper.parseFieldFilters(raw, warnings), "101 fields.label items must throw TooManyValuesException");
+    }
+
+    @Test
+    public void test_parseFieldFilters_elementExceeds1000Chars_throwsTooManyValues() {
+        final Map<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put("label", "x".repeat(1001));
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("fields", fieldsMap);
+        final Map<String, List<String>> warnings = new HashMap<>();
+        Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.TooManyValuesException.class,
+                () -> chatApiHelper.parseFieldFilters(raw, warnings), "1001-char label element must throw TooManyValuesException");
     }
 
 }

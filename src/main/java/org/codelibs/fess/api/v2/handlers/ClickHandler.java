@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,6 +76,12 @@ public class ClickHandler {
      * swallowed. Mirrors {@code LoginHandler.ipResolveWarned}.
      */
     private static final AtomicBoolean userInfoHelperWarned = new AtomicBoolean(false);
+
+    /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
+    private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
+
+    /** Maximum length of {@code query_id} as declared in the OpenAPI spec. */
+    private static final int QUERY_ID_MAX_LENGTH = 100;
 
     /**
      * Default constructor. The handler is stateless and intended to be
@@ -171,6 +178,31 @@ public class ClickHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
+        if (queryId != null) {
+            if (queryId.length() > QUERY_ID_MAX_LENGTH) {
+                ComponentUtil.getV2EnvelopeWriter()
+                        .writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id exceeds the maximum length of " + QUERY_ID_MAX_LENGTH);
+                return;
+            }
+            if (!QUERY_ID_PATTERN.matcher(queryId).matches()) {
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id contains invalid characters");
+                return;
+            }
+        }
+        final Object rt = body.get("rt");
+        final Object rank = body.get("rank");
+        if (rt instanceof Number && ((Number) rt).longValue() < 0) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt must not be negative");
+            return;
+        }
+        if (rt instanceof Number && ((Number) rt).longValue() > cfg.getApiV2ClickMaxRtAsLong()) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt exceeds the maximum");
+            return;
+        }
+        if (rank instanceof Number && ((Number) rank).intValue() < 0) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank must not be negative");
+            return;
+        }
         try {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final OptionalEntity<Map<String, Object>> docOpt = searchHelper.getDocumentByDocId(docId,
@@ -186,7 +218,6 @@ public class ClickHandler {
             clickLog.setUrlId((String) doc.get(cfg.getIndexFieldId()));
             clickLog.setUrl(url);
             clickLog.setRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-            final Object rt = body.get("rt");
             if (rt instanceof Number) {
                 // m-8: use UTC so the same epoch-ms yields the same LocalDateTime regardless of
                 // host timezone; click logs are stored consistently across mixed-TZ clusters.
@@ -197,7 +228,6 @@ public class ClickHandler {
             clickLog.setUserSessionId(userSessionId);
             clickLog.setDocId(docId);
             clickLog.setQueryId(queryId);
-            final Object rank = body.get("rank");
             if (rank instanceof Number) {
                 clickLog.setOrder(((Number) rank).intValue());
             }

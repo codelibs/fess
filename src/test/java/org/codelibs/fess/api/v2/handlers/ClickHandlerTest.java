@@ -221,6 +221,183 @@ public class ClickHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_negativeRt_returns400() throws Exception {
+        // rt < 0 must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":-1,\"rank\":1}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_negativeRank_returns400() throws Exception {
+        // rank < 0 must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":0,\"rank\":-1}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_positiveRtAndRank_areAccepted() throws Exception {
+        // Positive rt and rank must pass validation (may still get 404/500 from backend).
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":1000,\"rank\":3}"),
+                    res);
+            // 400 invalid_request must NOT be returned for valid rt/rank values.
+            assertFalse(res.status == 400 && res.body().contains("invalid_request"),
+                    "positive rt/rank must not yield 400 invalid_request: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_rtOverMax_returns400() throws Exception {
+        // rt above the configured maximum must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            // Default max is 9999999999999; one above the limit must be rejected.
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":10000000000000,\"rank\":1}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_rtAtMax_isAccepted() throws Exception {
+        // rt exactly at the configured maximum must pass validation (may still get 404/500 from backend).
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            // Default max is 9999999999999; the at-limit value must not yield 400 invalid_request.
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":9999999999999,\"rank\":1}"), res);
+            assertFalse(res.status == 400 && res.body().contains("invalid_request"),
+                    "at-limit rt must not yield 400 invalid_request: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Fix 2: query_id maxLength / pattern enforcement
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_queryId_tooLong_returns400() throws Exception {
+        // query_id exceeding 100 characters must be rejected with 400.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final String longId = "a".repeat(101);
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"" + longId + "\"}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_queryId_invalidChars_returns400() throws Exception {
+        // query_id with '/' must be rejected with 400.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"bad/id\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_queryId_valid_proceeds() throws Exception {
+        // A valid query_id passes format checks; downstream may return 404/500 from backend.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"abc123-_Valid\"}"), res);
+            // Must not be a query_id-specific 400 rejection.
+            assertFalse(res.status == 400 && res.body().contains("query_id"),
+                    "valid query_id must not yield 400 with query_id error: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();

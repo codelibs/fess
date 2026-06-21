@@ -165,6 +165,26 @@ public class CacheHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_hq_tooManyValues_returns400() throws Exception {
+        final String[] manyHq = new String[101];
+        java.util.Arrays.fill(manyHq, "keyword");
+        final CapturingResponse res = new CapturingResponse();
+        new CacheHandler().handle(new StubRequestWithHq("GET", "/api/v2/cache/abc", manyHq), res, "abc");
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_hq_tooLongElement_returns400() throws Exception {
+        final String longValue = "a".repeat(1001);
+        final String[] hqValues = new String[] { longValue };
+        final CapturingResponse res = new CapturingResponse();
+        new CacheHandler().handle(new StubRequestWithHq("GET", "/api/v2/cache/abc", hqValues), res, "abc");
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
     public void test_buildCachePayload_includesUrlCreatedCharset() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "https://example.com/doc.html");
@@ -736,6 +756,27 @@ public class CacheHandlerTest extends UnitFessTestCase {
 
         @Override
         public jakarta.servlet.ServletConnection getServletConnection() {
+            return null;
+        }
+    }
+
+    /**
+     * StubRequest variant that returns a fixed set of {@code hq} parameter values,
+     * used to test {@code hq} item-count and element-length validation in CacheHandler.
+     */
+    private static class StubRequestWithHq extends StubRequest {
+        private final String[] hqValues;
+
+        StubRequestWithHq(final String method, final String uri, final String[] hqValues) {
+            super(method, uri);
+            this.hqValues = hqValues;
+        }
+
+        @Override
+        public String[] getParameterValues(final String name) {
+            if ("hq".equals(name)) {
+                return hqValues;
+            }
             return null;
         }
     }

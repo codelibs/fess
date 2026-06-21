@@ -104,7 +104,7 @@ public class SearchHandler {
             final V2JsonRequestParams params = new V2JsonRequestParams(request, fessConfig);
             searchHelper.search(params, data, OptionalThing.empty());
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, buildPayload(params.getQuery(), data));
-        } catch (final V2JsonRequestParams.InvalidPageSizeException e) {
+        } catch (final InvalidRequestParameterException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {

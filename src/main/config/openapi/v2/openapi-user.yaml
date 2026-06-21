@@ -116,46 +116,49 @@ paths:
         - { $ref: '#/components/parameters/Q' }
         - name: start
           in: query
-          description: 0-based start position.
+          description: |-
+            0-based start position. Depends on `query.max.search.result.offset`.
           required: false
-          schema: { type: integer, minimum: 0, default: 0 }
+          schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
         - name: offset
           in: query
-          description: Offset from `start`.
+          description: |-
+            Offset from `start`. Depends on `query.max.search.result.offset`.
           required: false
-          schema: { type: integer, minimum: 0, default: 0 }
+          schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
         - name: num
           in: query
           description: |-
             Page size. Values `<= 0` produce `invalid_request`. Values above
             the configured maximum are silently clamped — clients can detect
             clamping by comparing the request `num` with the response
-            `page_size` field.
+            `page_size` field. Effective upper bound is clamped by
+            `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 1, default: 20 }
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
         - name: sort
           in: query
           required: false
-          schema: { type: string, example: score }
+          schema: { type: string, maxLength: 1000, example: score }
         - name: lang
           in: query
           description: Repeatable.
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string }, example: [en] }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 }, example: [en] }
         - name: ex_q
           in: query
           description: Extra query expression; repeatable.
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: sdh
           in: query
           description: Similar-document hash.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
         - name: fields.label
           in: query
           description: |-
@@ -166,7 +169,7 @@ paths:
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string }, example: [news] }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 }, example: [news] }
         - name: as.*
           in: query
           description: |-
@@ -174,7 +177,7 @@ paths:
             `as.q`, `as.filetype`) is forwarded to the advanced-search
             condition builder. Repeatable per name.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
         - name: track_total_hits
           in: query
           description: |-
@@ -182,29 +185,31 @@ paths:
             (e.g. `true` or an integer threshold). Affects whether
             `record_count_relation` is `eq` or `gte`.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 100 }
         - name: facet.field
           in: query
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: facet.query
           in: query
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: facet.size
           in: query
-          description: Maximum number of facet terms to return.
+          description: |-
+            Maximum number of facet terms to return. Effective upper bound is
+            clamped by the configuration `query.facet.fields.size.max`.
           required: false
-          schema: { type: integer }
+          schema: { type: integer, minimum: 0, maximum: 1000 }
         - name: facet.minDocCount
           in: query
           description: Minimum document count for a facet term to be included.
           required: false
-          schema: { type: integer, format: int64 }
+          schema: { type: integer, format: int64, minimum: 0, maximum: 2147483647 }
         - name: facet.sort
           in: query
           required: false
@@ -256,25 +261,27 @@ paths:
         - name: sort
           in: query
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
         - name: num
           in: query
-          description: Page (scroll batch) size. Values `<= 0` produce `invalid_request`.
+          description: |-
+            Page (scroll batch) size. Values `<= 0` produce `invalid_request`.
+            Effective upper bound is clamped by `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 1 }
+          schema: { type: integer, minimum: 1, maximum: 100 }
         - name: lang
           in: query
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: ex_q
           in: query
           description: Extra query expression; repeatable.
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: fields.label
           in: query
           description: |-
@@ -283,12 +290,12 @@ paths:
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: sdh
           in: query
           description: Similar-document hash.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
       responses:
         '200':
           description: NDJSON stream.
@@ -318,8 +325,11 @@ paths:
         - { $ref: '#/components/parameters/Q' }
         - name: num
           in: query
+          description: |-
+            Number of suggestions to return. Effective upper bound is clamped
+            by `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 0, default: 10 }
+          schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
         - name: fn
           in: query
           description: Suggest field name(s); repeatable.
@@ -773,7 +783,7 @@ paths:
           in: path
           required: true
           description: Identifies the session to clear.
-          schema: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9._-]+$' }
+          schema: { type: string, minLength: 1, maxLength: 100, pattern: '^[A-Za-z0-9._-]+$' }
       responses:
         '200':
           description: Session cleared.
@@ -808,7 +818,7 @@ paths:
           in: query
           description: Opaque `query_id` echoed by `/search`.
           required: true
-          schema: { type: string }
+          schema: { type: string, maxLength: 100, pattern: '^[A-Za-z0-9_-]+$' }
       responses:
         '200':
           description: Favorited document ids returned.
@@ -884,7 +894,7 @@ paths:
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
       responses:
         '200':
           description: Cached content returned.
@@ -905,13 +915,13 @@ components:
       in: query
       description: Search query string.
       required: false
-      schema: { type: string, example: Fess }
+      schema: { type: string, maxLength: 1000, example: Fess }
     DocId:
       name: docId
       in: path
       description: Document identifier (matches `[A-Za-z0-9_-]+`).
       required: true
-      schema: { type: string, pattern: '^[A-Za-z0-9_-]+$' }
+      schema: { type: string, minLength: 1, maxLength: 512, pattern: '^[A-Za-z0-9_-]+$' }
     CsrfHeader:
       name: X-Fess-CSRF-Token
       in: header
@@ -1461,10 +1471,11 @@ components:
       type: object
       required: [username, password]
       properties:
-        username: { type: string, minLength: 1 }
-        password: { type: string, minLength: 1 }
+        username: { type: string, minLength: 1, maxLength: 100 }
+        password: { type: string, minLength: 1, maxLength: 100 }
         return_to:
           type: string
+          maxLength: 10000
           description: |-
             Optional post-login redirect target. Must be a relative path
             matching `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Additionally
@@ -1496,14 +1507,16 @@ components:
       type: object
       required: [current_password, new_password, confirm_password]
       properties:
-        current_password: { type: string, minLength: 1 }
+        current_password: { type: string, minLength: 1, maxLength: 100 }
         new_password:
           type: string
           minLength: 1
+          maxLength: 100
           description: Must satisfy the configured password policy.
         confirm_password:
           type: string
           minLength: 1
+          maxLength: 100
           description: Must equal `new_password`.
 
     PasswordChangeResponse:
@@ -1531,8 +1544,13 @@ components:
       properties:
         doc_id:
           type: string
+          minLength: 1
+          maxLength: 512
           pattern: '^[A-Za-z0-9_-]+$'
-        query_id: { type: string }
+        query_id:
+          type: string
+          maxLength: 100
+          pattern: '^[A-Za-z0-9_-]+$'
         rank:
           type: integer
           minimum: 1
@@ -1540,6 +1558,8 @@ components:
         rt:
           type: integer
           format: int64
+          minimum: 0
+          maximum: 9999999999999
           description: |-
             Epoch milliseconds of the originating search request. Defaults
             to the server's current time when absent.
@@ -1575,24 +1595,28 @@ components:
       properties:
         message:
           type: string
+          maxLength: 4000
           description: |-
             The user message. The maximum length is bounded by
             `rag.chat.message.max.length` (default 4000); exceeding it
             returns `invalid_request` (HTTP 400).
-        session_id: { type: string }
+        session_id:
+          type: string
+          maxLength: 100
+          pattern: '^[A-Za-z0-9._-]+$'
         fields:
           type: object
           description: Optional filter fields for the retrieval step.
           properties:
             label:
               oneOf:
-                - { type: string }
-                - { type: array, items: { type: string } }
+                - { type: string, maxLength: 1000 }
+                - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
               description: Restricts retrieval to allowlisted labels.
         extra_queries:
           oneOf:
-            - { type: string }
-            - { type: array, items: { type: string } }
+            - { type: string, maxLength: 1000 }
+            - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
           description: Allowlisted facet query expressions.
 
     ChatSource:
@@ -1691,6 +1715,8 @@ components:
       properties:
         query_id:
           type: string
+          maxLength: 100
+          pattern: '^[A-Za-z0-9_-]+$'
           description: Opaque `query_id` echoed by `/search`.
 
     FavoritePostResponse:

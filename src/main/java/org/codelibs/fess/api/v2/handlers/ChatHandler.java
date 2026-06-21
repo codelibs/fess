@@ -113,7 +113,7 @@ public class ChatHandler {
         final ChatRequestBody body;
         try {
             body = ComponentUtil.getChatApiHelper().parseRequestBody(raw, maxLen);
-        } catch (final ChatRequestBody.MessageTooLongException e) {
+        } catch (final ChatRequestBody.InvalidRequestException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }

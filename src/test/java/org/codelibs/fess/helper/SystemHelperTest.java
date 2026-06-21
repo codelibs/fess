@@ -1045,6 +1045,54 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_validatePassword_maxLength() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return null;
+            }
+
+            @Override
+            public int getPasswordMaxLengthAsInteger() {
+                // Explicit override: avoids getAsInteger NPE in slim test harness.
+                return 100;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "admin";
+            }
+        });
+
+        // Exactly 100 chars (maxLength) is valid.
+        assertEquals("", systemHelper.validatePassword("a".repeat(100)));
+        // 101 chars exceeds maxLength — returns the same key as minLength violation.
+        assertEquals("errors.password_length", systemHelper.validatePassword("a".repeat(101)));
+    }
+
+    @Test
     public void test_validatePassword_requireUppercase() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;

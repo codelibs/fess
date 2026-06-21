@@ -528,6 +528,45 @@ public class LoginHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
     }
 
+    @Test
+    public void login_usernameTooLong_returns400() throws Exception {
+        // username exceeding 100 chars must yield 400 invalid_request.
+        final CapturingResponse res = new CapturingResponse();
+        final String longUsername = "u".repeat(101);
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"" + longUsername + "\",\"password\":\"p\"}"),
+                res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void login_passwordTooLong_returns400() throws Exception {
+        // password exceeding 100 chars (default max) must yield 400 invalid_request.
+        final CapturingResponse res = new CapturingResponse();
+        final String longPassword = "p".repeat(101);
+        new LoginHandler(new LoginRateLimiter()).handle(new StubRequest("POST", "/api/v2/auth/login")
+                .withJsonBody("{\"username\":\"alice\",\"password\":\"" + longPassword + "\"}"), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void login_returnToExceedingMaxLength_isSilentlyDropped() throws Exception {
+        // return_to values over 10000 chars must be silently dropped: the response
+        // does not echo return_to. Verified by calling addReturnTo via reflection.
+        final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        final java.lang.reflect.Method addReturnTo = LoginHandler.class.getDeclaredMethod("addReturnTo", java.util.Map.class, String.class);
+        addReturnTo.setAccessible(true);
+        // Legitimate return_to is echoed.
+        addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/home");
+        assertEquals("/home", payload.get("return_to"));
+        payload.clear();
+        // Oversized return_to (10001 chars) must be silently dropped.
+        addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/".repeat(10001));
+        assertNull(payload.get("return_to"), "return_to exceeding 10000 chars must be silently dropped");
+    }
+
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();

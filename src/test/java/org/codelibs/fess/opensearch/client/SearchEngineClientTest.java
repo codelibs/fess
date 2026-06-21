@@ -48,4 +48,19 @@ public class SearchEngineClientTest extends UnitFessTestCase {
         assertNotNull(testValue);
         assertEquals("test", testValue);
     }
+
+    @Test
+    public void test_clampFacetSize() {
+        assertEquals(0, SearchEngineClient.clampFacetSize(-5, 1000));
+        assertEquals(500, SearchEngineClient.clampFacetSize(500, 1000));
+        assertEquals(1000, SearchEngineClient.clampFacetSize(5000, 1000));
+    }
+
+    @Test
+    public void test_clampMinDocCount_withMax() {
+        assertEquals(0L, SearchEngineClient.clampMinDocCount(-1L, 100L));
+        assertEquals(50L, SearchEngineClient.clampMinDocCount(50L, 100L));
+        assertEquals(100L, SearchEngineClient.clampMinDocCount(5000L, 100L));
+        assertEquals(100L, SearchEngineClient.clampMinDocCount(100L, 100L));
+    }
 }
