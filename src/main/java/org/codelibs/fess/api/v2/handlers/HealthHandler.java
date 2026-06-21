@@ -59,7 +59,9 @@ public class HealthHandler {
             final PingResponse ping = ComponentUtil.getSearchEngineClient().ping();
             final String clusterStatus = ping.getClusterStatus();
             final Map<String, Object> engine = new LinkedHashMap<>();
-            engine.put("cluster_name", ping.getClusterName());
+            // The OpenSearch cluster name is intentionally omitted from this anonymous endpoint
+            // to avoid leaking deployment metadata; only the coarse status and ping_status are
+            // surfaced. Operators that need cluster details use the authenticated admin API.
             engine.put("status", clusterStatus);
             engine.put("ping_status", ping.getStatus());
             if ("red".equalsIgnoreCase(clusterStatus)) {

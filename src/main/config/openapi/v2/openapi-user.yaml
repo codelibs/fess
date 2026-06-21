@@ -1102,9 +1102,8 @@ components:
               properties:
                 engine:
                   type: object
-                  required: [cluster_name, status, ping_status]
+                  required: [status, ping_status]
                   properties:
-                    cluster_name: { type: string }
                     status:
                       type: string
                       enum: [green, yellow, red]
