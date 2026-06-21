@@ -162,6 +162,17 @@ public class LoginHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "username and password are required");
             return;
         }
+        try {
+            if (username.length() > 100) {
+                throw new InvalidRequestParameterException("username exceeds the maximum length of 100");
+            }
+            if (password.length() > fessConfig.getPasswordMaxLengthAsInteger()) {
+                throw new InvalidRequestParameterException("password exceeds the maximum length");
+            }
+        } catch (final InvalidRequestParameterException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            return;
+        }
         final String userKey = userScopeKey(clientIp, username);
 
         // USER-scope pre-validation uses peek() so the bucket is NOT consumed yet. The slot is
@@ -299,6 +310,10 @@ public class LoginHandler {
      */
     private void addReturnTo(final Map<String, Object> payload, final String returnTo) {
         if (returnTo == null) {
+            return;
+        }
+        // Silent-drop oversized return_to values before any further validation.
+        if (returnTo.length() > 10000) {
             return;
         }
         // Reject if it contains any ASCII control character (includes \r, \n, \t, NUL).
