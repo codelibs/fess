@@ -144,8 +144,8 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     @Test
     public void test_sessionIdTooLong_returns400() throws Exception {
         enableRagChat();
-        // 129 characters — one over the 128-character cap
-        final String tooLong = "a".repeat(129);
+        // 101 characters — one over the 100-character cap
+        final String tooLong = "a".repeat(101);
         final CapturingResponse res = new CapturingResponse();
         new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, tooLong);
         assertEquals(400, res.status);
@@ -154,16 +154,39 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_validSessionIdBoundary_acceptsMaxLength() throws Exception {
-        // 128 characters — exactly at the cap; should pass pattern validation.
+        // 100 characters — exactly at the cap; should pass pattern validation.
         // With RAG enabled, the next gate is the rate limiter. In the test harness
         // the limiter DI is absent, so we expect INTERNAL_ERROR (500) — confirming
         // the session_id was accepted and processing continued past the pattern check.
         enableRagChat();
-        final String maxId = "a".repeat(128);
+        final String maxId = "a".repeat(100);
         final CapturingResponse res = new CapturingResponse();
         handlerForUser("test-user").handle(new StubRequest("DELETE"), res, maxId);
         // Must NOT be a 400 invalid_request from the pattern guard
-        assertFalse(res.body().contains("invalid session_id"), "128-char session_id must pass pattern validation, got: " + res.body());
+        assertFalse(res.body().contains("invalid session_id"), "100-char session_id must pass pattern validation, got: " + res.body());
+    }
+
+    @Test
+    public void test_sessionId100Chars_accepted() throws Exception {
+        // Exactly 100 characters — at the new cap; should pass pattern validation.
+        enableRagChat();
+        final String maxId = "a".repeat(100);
+        final CapturingResponse res = new CapturingResponse();
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, maxId);
+        // Must NOT be a 400 invalid_request from the pattern guard
+        assertFalse("100-char session_id must pass pattern validation, got: " + res.body(), res.body().contains("invalid session_id"));
+    }
+
+    @Test
+    public void test_sessionId101Chars_returns400() throws Exception {
+        // 101 characters — one over the new 100-character cap; must be rejected.
+        enableRagChat();
+        final String tooLong = "a".repeat(101);
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, tooLong);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("invalid session_id"), res.body());
     }
 
     @Test
