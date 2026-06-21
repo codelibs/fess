@@ -240,6 +240,40 @@ public class ChatApiHelperTest extends UnitFessTestCase {
         assertEquals("cookie-code-xyz", userId);
     }
 
+    // ── resolveChatRateLimitKey ───────────────────────────────────────────────
+
+    @Test
+    public void test_resolveChatRateLimitKey_authenticatedUser_keysByUsername() {
+        // A non-guest username is keyed as "u:<username>"; the client-IP supplier must NOT be
+        // consulted (the username is server-validated and cannot be rotated by the caller).
+        final String key = chatApiHelper.resolveChatRateLimitKey("alice", () -> {
+            throw new AssertionError("client IP must not be resolved for an authenticated user");
+        });
+        assertEquals("u:alice", key);
+    }
+
+    @Test
+    public void test_resolveChatRateLimitKey_guestUser_keysByClientIp() {
+        // GUEST_USER (anonymous) is keyed by the proxy-aware client IP as "ip:<clientIp>",
+        // never by the forgeable guest userCode.
+        final String key = chatApiHelper.resolveChatRateLimitKey(Constants.GUEST_USER, () -> "203.0.113.7");
+        assertEquals("ip:203.0.113.7", key);
+    }
+
+    @Test
+    public void test_resolveChatRateLimitKey_forgedUserCode_doesNotChangeKey() {
+        // L-1 regression: for a guest, the key must depend only on the client IP, not on any
+        // caller-supplied userCode. Even if a malicious client rotates/forges its userCode per
+        // request, the resolved key stays IP-based and unchanged, so a fresh throttle bucket
+        // cannot be obtained by rotating the userCode.
+        final String clientIp = "198.51.100.9";
+        final String first = chatApiHelper.resolveChatRateLimitKey(Constants.GUEST_USER, () -> clientIp);
+        final String second = chatApiHelper.resolveChatRateLimitKey(Constants.GUEST_USER, () -> clientIp);
+        assertEquals("ip:" + clientIp, first);
+        // Message-first overload: assertEquals(message, expected, actual).
+        assertEquals("key must be IP-based and stable across requests regardless of userCode", first, second);
+    }
+
     // ── getMaxMessageLength ───────────────────────────────────────────────────
 
     @Test

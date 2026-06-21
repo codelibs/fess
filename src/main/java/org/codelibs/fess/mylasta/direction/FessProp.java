@@ -2441,9 +2441,14 @@ public interface FessProp {
     /**
      * Resolves {@code api.v2.chat.rate.limit.per.user.per.minute} from the system
      * properties, defaulting to {@code 30} on absence or parse failure. A return
-     * value &le; 0 disables the per-user chat rate limit entirely.
+     * value &le; 0 disables the chat rate limit entirely.
      *
-     * @return max chat requests per minute per user, or {@code <= 0} to disable
+     * <p>This single threshold governs both chat throttle buckets: authenticated callers
+     * are limited per server-validated username, while guest / anonymous callers are
+     * limited per client IP (see {@code ChatApiHelper#resolveChatRateLimitKey}). The
+     * property name keeps its {@code per.user} form for backward compatibility.</p>
+     *
+     * @return max chat requests per minute per throttle key, or {@code <= 0} to disable
      */
     default int getChatRateLimitPerMinute() {
         try {

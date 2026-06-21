@@ -183,13 +183,14 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         // ChatStreamHandler under the test harness, then assert the next request returns
         // the 429 JSON envelope.
         enableRagChat();
-        // Fix the user id via the getUserId seam instead of stubbing SystemHelper/UserInfoHelper
-        // (smart-deploy components whose ComponentUtil.register stubs are not reliably honored once
-        // the shared test container has resolved the real ones across the full suite).
-        final String userId = "rate-limited-user";
+        // An authenticated caller is keyed by "u:<username>". Fix the rate-limit key via the
+        // getRateLimitKey seam instead of stubbing SystemHelper/RateLimitHelper (smart-deploy
+        // components whose ComponentUtil.register stubs are not reliably honored once the shared
+        // test container has resolved the real ones across the full suite).
+        final String key = "u:rate-limited-user";
         final LoginRateLimiter rl = new LoginRateLimiter();
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, userId, 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, key, 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
@@ -198,12 +199,19 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
             final ChatStreamHandler handler = new ChatStreamHandler() {
                 @Override
                 protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return userId;
+                    // Keep the userId seam pinned so the handler does not touch the real
+                    // SystemHelper/UserInfoHelper DI path for chat-session binding.
+                    return "rate-limited-user";
+                }
+
+                @Override
+                protected String getRateLimitKey(final jakarta.servlet.http.HttpServletRequest req) {
+                    return key;
                 }
             };
             handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
             final String body = res.body();
-            // The bucket for userId is pre-saturated (30/30), so this request is the 31st and must
+            // The bucket for key is pre-saturated (30/30), so this request is the 31st and must
             // be rejected with the 429 JSON envelope — NOT an SSE event.
             assertEquals(429, res.status);
             assertEquals("application/json", contentTypeMimeOnly(res));
@@ -218,89 +226,44 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void chatStream_anonymousUser_nullUserId_notRateLimited() throws Exception {
-        // When getUserId returns null, StringUtil.isNotBlank(null) is false, so the per-user
-        // throttle is skipped entirely — even with a saturated limiter and a positive chat limit.
-        // The handler must NOT return 429/rate_limited; it proceeds past the rate-limit gate.
-        // Without a real ChatClient the subsequent chat invocation fails, but the response must
-        // NOT be the 429 JSON envelope — proving the anonymous bypass applied.
+    public void chatStream_anonymousUser_rateLimitedByClientIp() throws Exception {
+        // Regression for L-1: anonymous SSE callers used to bypass the throttle entirely because the
+        // guard skipped a blank userId and keyed on the forgeable guest userCode. Now the handler
+        // keys anonymous traffic by the client IP ("ip:<clientIp>"), so an anonymous caller from the
+        // same IP that exceeds the limit IS rate-limited with the pre-stream 429 JSON envelope (NOT
+        // an SSE event). Rotating/forging a userCode per request does not change the IP-based key.
         enableRagChat();
+        final String clientIp = "203.0.113.7";
+        final String key = "ip:" + clientIp;
         final LoginRateLimiter rl = new LoginRateLimiter();
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, key, 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
         try {
             final CapturingResponse res = new CapturingResponse();
+            final java.util.concurrent.atomic.AtomicInteger rotation = new java.util.concurrent.atomic.AtomicInteger();
             final ChatStreamHandler handler = new ChatStreamHandler() {
                 @Override
                 protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return null;
+                    return "forged-" + rotation.incrementAndGet();
                 }
-            };
-            handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
-            final String body = res.body();
-            assertFalse("anonymous null userId must not yield 429, got: " + body, body.contains("\"code\":\"rate_limited\""));
-            assertTrue("anonymous null userId must not yield 429 status, was: " + res.status, res.status != 429);
-        } finally {
-            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
-            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
-        }
-    }
 
-    @Test
-    public void chatStream_anonymousUser_blankUserId_notRateLimited() throws Exception {
-        // When getUserId returns a blank string, StringUtil.isNotBlank is false,
-        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
-        enableRagChat();
-        final LoginRateLimiter rl = new LoginRateLimiter();
-        for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
-        }
-        ComponentUtil.register(rl, "loginRateLimiter");
-        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
-        try {
-            final CapturingResponse res = new CapturingResponse();
-            final ChatStreamHandler handler = new ChatStreamHandler() {
                 @Override
-                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return "   ";
+                protected String getRateLimitKey(final jakarta.servlet.http.HttpServletRequest req) {
+                    return key;
                 }
             };
             handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
             final String body = res.body();
-            assertFalse("anonymous blank userId must not yield 429, got: " + body, body.contains("\"code\":\"rate_limited\""));
-            assertTrue("anonymous blank userId must not yield 429 status, was: " + res.status, res.status != 429);
-        } finally {
-            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
-            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
-        }
-    }
-
-    @Test
-    public void chatStream_anonymousUser_emptyStringUserId_notRateLimited() throws Exception {
-        // When getUserId returns an empty string, StringUtil.isNotBlank("") is false,
-        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
-        enableRagChat();
-        final LoginRateLimiter rl = new LoginRateLimiter();
-        for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
-        }
-        ComponentUtil.register(rl, "loginRateLimiter");
-        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
-        try {
-            final CapturingResponse res = new CapturingResponse();
-            final ChatStreamHandler handler = new ChatStreamHandler() {
-                @Override
-                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return "";
-                }
-            };
-            handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
-            final String body = res.body();
-            assertFalse("anonymous empty userId must not yield 429, got: " + body, body.contains("\"code\":\"rate_limited\""));
-            assertTrue("anonymous empty userId must not yield 429 status, was: " + res.status, res.status != 429);
+            // The IP bucket is pre-saturated (30/30), so this anonymous request must be the 429 JSON
+            // envelope — NOT an SSE event.
+            assertEquals(429, res.status);
+            assertEquals("application/json", contentTypeMimeOnly(res));
+            assertTrue(body.contains("\"code\":\"rate_limited\""), body);
+            assertTrue(body.contains("too many chat requests"), body);
+            assertFalse(body.contains("event: error"), body);
         } finally {
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
             ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
