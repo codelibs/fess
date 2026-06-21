@@ -32,8 +32,8 @@ import org.codelibs.core.lang.StringUtil;
  */
 public class DocIdValidator {
 
-    /** Allowlist for {@code doc_id}: ASCII letters, digits, underscore and hyphen. */
-    private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
+    /** Allowlist for {@code doc_id}: ASCII letters, digits, underscore and hyphen; 1–512 characters. */
+    private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]{1,512}");
 
     /**
      * Creates a document-id validator. Registered as the DI component
