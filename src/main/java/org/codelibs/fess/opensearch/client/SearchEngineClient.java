@@ -2310,10 +2310,11 @@ public class SearchEngineClient implements Client {
                         AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
                 termsBuilder.order(facetInfo.getBucketOrder());
                 if (facetInfo.size != null) {
-                    termsBuilder.size(facetInfo.size);
+                    final int maxFacetSize = fessConfig.getQueryFacetFieldsSizeMaxAsInteger();
+                    termsBuilder.size(clampFacetSize(facetInfo.size, maxFacetSize));
                 }
                 if (facetInfo.minDocCount != null) {
-                    termsBuilder.minDocCount(facetInfo.minDocCount);
+                    termsBuilder.minDocCount(clampMinDocCount(facetInfo.minDocCount));
                 }
                 if (facetInfo.missing != null) {
                     termsBuilder.missing(facetInfo.missing);
@@ -3379,5 +3380,29 @@ public class SearchEngineClient implements Client {
     public ActionFuture<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listViewNames(
             org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request) {
         throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Clamps the facet size to a valid non-negative value not exceeding the configured maximum.
+     *
+     * @param size the requested facet size
+     * @param max  the maximum allowed facet size
+     * @return the clamped facet size
+     */
+    static int clampFacetSize(final int size, final int max) {
+        if (size < 0) {
+            return 0;
+        }
+        return Math.min(size, max);
+    }
+
+    /**
+     * Clamps the minimum document count to a valid non-negative value.
+     *
+     * @param minDocCount the requested minimum document count
+     * @return the clamped minimum document count
+     */
+    static long clampMinDocCount(final long minDocCount) {
+        return minDocCount < 0L ? 0L : minDocCount;
     }
 }
