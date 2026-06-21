@@ -2491,4 +2491,42 @@ public interface FessProp {
         final Integer value = getAsInteger("query.facet.fields.size.max");
         return value != null ? value.intValue() : 1000;
     }
+
+    /**
+     * Returns the upper clamp for the {@code facet.minDocCount} parameter applied
+     * at the search chokepoint. Read as a long because the value (and its default)
+     * may exceed the {@code int} range.
+     *
+     * @return maximum facet minimum document count; defaults to {@code 2147483647}
+     */
+    default long getQueryFacetFieldsMinDocCountMaxAsLong() {
+        final String value = get("query.facet.fields.min_doc_count.max");
+        if (value != null) {
+            try {
+                return Long.parseLong(value.trim());
+            } catch (final NumberFormatException e) {
+                // Fall through to the default when the configured value is not a valid long.
+            }
+        }
+        return 2147483647L;
+    }
+
+    /**
+     * Returns the maximum click-log timestamp ({@code rt}, epoch milliseconds)
+     * accepted by the v2 click API. Read as a long because the value (and its
+     * default) exceeds the {@code int} range.
+     *
+     * @return maximum accepted {@code rt}; defaults to {@code 9999999999999}
+     */
+    default long getApiV2ClickMaxRtAsLong() {
+        final String value = get("api.v2.click.max.rt");
+        if (value != null) {
+            try {
+                return Long.parseLong(value.trim());
+            } catch (final NumberFormatException e) {
+                // Fall through to the default when the configured value is not a valid long.
+            }
+        }
+        return 9999999999999L;
+    }
 }

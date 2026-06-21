@@ -692,5 +692,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(100, fessConfig.getApiV2ParamMaxArraySizeAsInteger());
         assertEquals(100, fessConfig.getPasswordMaxLengthAsInteger());
         assertEquals(1000, fessConfig.getQueryFacetFieldsSizeMaxAsInteger());
+        assertEquals(2147483647L, fessConfig.getQueryFacetFieldsMinDocCountMaxAsLong());
+        assertEquals(9999999999999L, fessConfig.getApiV2ClickMaxRtAsLong());
     }
 }

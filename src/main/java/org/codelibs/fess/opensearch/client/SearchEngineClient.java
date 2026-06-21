@@ -2314,7 +2314,7 @@ public class SearchEngineClient implements Client {
                     termsBuilder.size(clampFacetSize(facetInfo.size, maxFacetSize));
                 }
                 if (facetInfo.minDocCount != null) {
-                    termsBuilder.minDocCount(clampMinDocCount(facetInfo.minDocCount));
+                    termsBuilder.minDocCount(clampMinDocCount(facetInfo.minDocCount, fessConfig.getQueryFacetFieldsMinDocCountMaxAsLong()));
                 }
                 if (facetInfo.missing != null) {
                     termsBuilder.missing(facetInfo.missing);
@@ -3397,12 +3397,16 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Clamps the minimum document count to a valid non-negative value.
+     * Clamps the minimum document count to a valid non-negative value not exceeding the configured maximum.
      *
      * @param minDocCount the requested minimum document count
+     * @param max         the maximum allowed minimum document count
      * @return the clamped minimum document count
      */
-    static long clampMinDocCount(final long minDocCount) {
-        return minDocCount < 0L ? 0L : minDocCount;
+    static long clampMinDocCount(final long minDocCount, final long max) {
+        if (minDocCount < 0L) {
+            return 0L;
+        }
+        return Math.min(minDocCount, max);
     }
 }

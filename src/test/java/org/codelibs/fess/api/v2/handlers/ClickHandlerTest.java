@@ -285,6 +285,50 @@ public class ClickHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_rtOverMax_returns400() throws Exception {
+        // rt above the configured maximum must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            // Default max is 9999999999999; one above the limit must be rejected.
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":10000000000000,\"rank\":1}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_rtAtMax_isAccepted() throws Exception {
+        // rt exactly at the configured maximum must pass validation (may still get 404/500 from backend).
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            // Default max is 9999999999999; the at-limit value must not yield 400 invalid_request.
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":9999999999999,\"rank\":1}"), res);
+            assertFalse(res.status == 400 && res.body().contains("invalid_request"),
+                    "at-limit rt must not yield 400 invalid_request: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Fix 2: query_id maxLength / pattern enforcement
     // -----------------------------------------------------------------------

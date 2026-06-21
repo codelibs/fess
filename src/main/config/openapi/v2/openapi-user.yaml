@@ -209,7 +209,7 @@ paths:
           in: query
           description: Minimum document count for a facet term to be included.
           required: false
-          schema: { type: integer, format: int64, minimum: 0 }
+          schema: { type: integer, format: int64, minimum: 0, maximum: 2147483647 }
         - name: facet.sort
           in: query
           required: false
@@ -1559,6 +1559,7 @@ components:
           type: integer
           format: int64
           minimum: 0
+          maximum: 9999999999999
           description: |-
             Epoch milliseconds of the originating search request. Defaults
             to the server's current time when absent.

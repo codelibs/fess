@@ -57,8 +57,10 @@ public class SearchEngineClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_clampMinDocCount() {
-        assertEquals(0L, SearchEngineClient.clampMinDocCount(-1L));
-        assertEquals(3L, SearchEngineClient.clampMinDocCount(3L));
+    public void test_clampMinDocCount_withMax() {
+        assertEquals(0L, SearchEngineClient.clampMinDocCount(-1L, 100L));
+        assertEquals(50L, SearchEngineClient.clampMinDocCount(50L, 100L));
+        assertEquals(100L, SearchEngineClient.clampMinDocCount(5000L, 100L));
+        assertEquals(100L, SearchEngineClient.clampMinDocCount(100L, 100L));
     }
 }

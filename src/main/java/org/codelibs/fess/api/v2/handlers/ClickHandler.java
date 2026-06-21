@@ -195,6 +195,10 @@ public class ClickHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt must not be negative");
             return;
         }
+        if (rt instanceof Number && ((Number) rt).longValue() > cfg.getApiV2ClickMaxRtAsLong()) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt exceeds the maximum");
+            return;
+        }
         if (rank instanceof Number && ((Number) rank).intValue() < 0) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank must not be negative");
             return;
