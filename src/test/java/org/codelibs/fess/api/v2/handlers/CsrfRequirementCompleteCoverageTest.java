@@ -123,12 +123,12 @@ public class CsrfRequirementCompleteCoverageTest {
 
     @Test
     public void test_everyEndpointHasDeliberateCsrfDecision() {
-        // Enumerate every entry and assert the decision matches CsrfRequirement.requiresCsrf.
+        // Enumerate every entry and assert the decision matches new CsrfRequirement().requiresCsrf.
         final List<String> failures = new java.util.ArrayList<>();
         for (final Map.Entry<String, Boolean> entry : ENDPOINT_DECISIONS.entrySet()) {
             final String subPath = entry.getKey();
             final boolean expectedCsrf = entry.getValue();
-            final boolean actualCsrf = CsrfRequirement.requiresCsrf(subPath, "POST");
+            final boolean actualCsrf = new CsrfRequirement().requiresCsrf(subPath, "POST");
             if (actualCsrf != expectedCsrf) {
                 failures.add(String.format("  subPath=%-35s POST: expected csrf=%b, got=%b", subPath, expectedCsrf, actualCsrf));
             }
@@ -136,7 +136,7 @@ public class CsrfRequirementCompleteCoverageTest {
         if (!failures.isEmpty()) {
             fail("CsrfRequirement decision mismatch for the following endpoints:\n" + String.join("\n", failures)
                     + "\n\nFor each mismatch, either:\n"
-                    + "  (a) update CsrfRequirement.requiresCsrf() to reflect the intended decision, or\n"
+                    + "  (a) update new CsrfRequirement().requiresCsrf() to reflect the intended decision, or\n"
                     + "  (b) update this test's ENDPOINT_DECISIONS table if the intended decision changed.");
         }
     }
@@ -148,10 +148,10 @@ public class CsrfRequirementCompleteCoverageTest {
         final List<String> stateChangingPost =
                 Arrays.asList("/auth/logout", "/auth/password", "/click", "/documents/abc123/favorite", "/chat", "/chat/stream");
         for (final String path : stateChangingPost) {
-            assertTrue(CsrfRequirement.requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
+            assertTrue(new CsrfRequirement().requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
         }
         // DELETE /chat/sessions/{session_id} is state-changing — CSRF required
-        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/abc", "DELETE"),
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/abc", "DELETE"),
                 "DELETE /chat/sessions/{session_id} must require CSRF token");
     }
 
@@ -159,28 +159,29 @@ public class CsrfRequirementCompleteCoverageTest {
     public void test_deleteChatSessions_requiresCsrf() {
         // DELETE /chat/sessions/{session_id} was added as a state-mutating endpoint.
         // Verify several representative session_id values all require CSRF.
-        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/abc", "DELETE"), "DELETE /chat/sessions/abc must require CSRF");
-        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/def", "DELETE"), "DELETE /chat/sessions/def must require CSRF");
-        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/", "DELETE"), "DELETE /chat/sessions/ (trailing slash) must require CSRF");
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/abc", "DELETE"), "DELETE /chat/sessions/abc must require CSRF");
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/def", "DELETE"), "DELETE /chat/sessions/def must require CSRF");
+        assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/", "DELETE"),
+                "DELETE /chat/sessions/ (trailing slash) must require CSRF");
     }
 
     @Test
     public void test_getChatSessions_isExemptByGetRule() {
         // GET on chat/sessions path must be exempt — GET is always idempotent
-        assertFalse(CsrfRequirement.requiresCsrf("/chat/sessions/abc", "GET"), "GET /chat/sessions/{session_id} must be CSRF-exempt");
+        assertFalse(new CsrfRequirement().requiresCsrf("/chat/sessions/abc", "GET"), "GET /chat/sessions/{session_id} must be CSRF-exempt");
     }
 
     @Test
     public void test_loginIsExplicitlyExempt() {
         // /auth/login must be CSRF-exempt because the client has no token yet.
-        assertFalse(CsrfRequirement.requiresCsrf("/auth/login", "POST"), "/auth/login POST must be CSRF-exempt");
+        assertFalse(new CsrfRequirement().requiresCsrf("/auth/login", "POST"), "/auth/login POST must be CSRF-exempt");
     }
 
     @Test
     public void test_getMethodIsAlwaysExemptForAllKnownPaths() {
         // All known endpoints: GET must never require CSRF regardless of path.
         for (final String subPath : ENDPOINT_DECISIONS.keySet()) {
-            assertFalse(CsrfRequirement.requiresCsrf(subPath, "GET"), "GET must always be CSRF-exempt, including: " + subPath);
+            assertFalse(new CsrfRequirement().requiresCsrf(subPath, "GET"), "GET must always be CSRF-exempt, including: " + subPath);
         }
     }
 }

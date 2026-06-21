@@ -23,10 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.entity.FessUser;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -43,98 +40,71 @@ import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
 
 /**
- * Unit tests for {@link MeHandler}.
+ * Unit tests for {@link HealthHandler}.
  *
- * <p>Extends {@link UnitFessTestCase} so {@code FessLoginAssist} can be
- * resolved via Lasta DI. In the unit harness there is no session bound, so
- * {@code getSavedUserBean()} returns an empty {@code OptionalThing} and the
- * anonymous branch of the handler is exercised — exactly what we want to
- * assert against without faking the login subsystem.</p>
+ * <p>Verifies the wire contract for {@code GET /api/v2/health}: the method gate
+ * rejects non-GET requests with a structured 405 + {@code Allow: GET}, and the
+ * success envelope carries the engine status keys. The embedded search engine is
+ * not always wired in the unit JVM, so the envelope-shape test tolerates either a
+ * real 200 or the structured 503/500 error envelope the handler emits when
+ * {@code ping()} is unavailable — same tolerance pattern as the other v2 handler
+ * tests.</p>
  */
-public class MeHandlerTest extends UnitFessTestCase {
+public class HealthHandlerTest extends UnitFessTestCase {
 
     @Test
-    public void test_anonymousReturns200AndAuthenticatedFalse() throws Exception {
+    public void test_health_methodGate_rejectsPost() throws Exception {
+        final HealthHandler handler = new HealthHandler();
         final CapturingResponse res = new CapturingResponse();
-        new MeHandler().handle(new StubRequest("GET", "/api/v2/auth/me"), res);
-        assertEquals(200, res.status);
-        assertTrue(res.body().contains("\"authenticated\":false"), res.body());
-    }
-
-    @Test
-    public void test_rejectsNonGet() throws Exception {
-        final CapturingResponse res = new CapturingResponse();
-        new MeHandler().handle(new StubRequest("POST", "/api/v2/auth/me"), res);
+        handler.handle(new StubRequest("/api/v2/health").withMethod("POST"), res);
         assertEquals(405, res.status);
-        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        final String body = res.body();
+        assertTrue(body.contains("\"status\":1"), body);
+        assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
+        assertTrue(body.contains("method not allowed"), body);
+        assertEquals("Allow header must be set on 405", "GET", res.getHeader("Allow"));
     }
-
-    // ── MJ-28: shape consistency — arrays are always JSON arrays, never null ────
 
     @Test
-    public void test_authenticatedUser_rolesGroupsPermissionsAreAlwaysArrays() throws Exception {
-        // MJ-28: a logged-in user whose roles/groups/permissions arrays are null. MeHandler must
-        // still emit JSON arrays (not null). The user is supplied by overriding the getSavedUserBean
-        // seam rather than registering a FessLoginAssist stub via ComponentUtil.register (which is
-        // not reliably honored once the shared test container can resolve the real component).
+    public void test_health_methodGate_rejectsDelete() throws Exception {
+        final HealthHandler handler = new HealthHandler();
         final CapturingResponse res = new CapturingResponse();
-        final MeHandler handler = new MeHandler() {
-            @Override
-            protected OptionalThing<FessUserBean> getSavedUserBean() {
-                return OptionalThing.of(new FessUserBean(new StubFessUser("eve")));
-            }
-        };
-        handler.handle(new StubRequest("GET", "/api/v2/auth/me"), res);
-        assertEquals(res.body(), 200, res.status);
-        assertTrue(res.body(), res.body().contains("\"authenticated\":true"));
-        // The user shape must include roles/groups/permissions as JSON arrays.
-        assertTrue("roles must be [] not null: " + res.body(), res.body().contains("\"roles\":[]"));
-        assertTrue("groups must be [] not null: " + res.body(), res.body().contains("\"groups\":[]"));
-        assertTrue("permissions must be [] not null: " + res.body(), res.body().contains("\"permissions\":[]"));
-        // Sanity: null literal must not appear for these fields.
-        assertFalse(res.body(), res.body().contains("\"roles\":null"));
-        // MJ-35: username, name, and admin fields must be present.
-        assertTrue("username must be present: " + res.body(), res.body().contains("\"username\":"));
-        assertTrue("name must be present: " + res.body(), res.body().contains("\"name\":"));
-        assertTrue("admin must be present: " + res.body(), res.body().contains("\"admin\":"));
+        handler.handle(new StubRequest("/api/v2/health").withMethod("DELETE"), res);
+        assertEquals(405, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"status\":1"), body);
+        assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
+        assertEquals("Allow header must be set on 405", "GET", res.getHeader("Allow"));
     }
 
-    /** Minimal FessUser with null role/group/permission arrays. */
-    private static class StubFessUser implements FessUser {
-        private static final long serialVersionUID = 1L;
-        private final String name;
-
-        StubFessUser(final String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String[] getRoleNames() {
-            return null; // intentionally null — ComponentUtil.getV2UserPayloads().toJson must handle this
-        }
-
-        @Override
-        public String[] getGroupNames() {
-            return null; // intentionally null
-        }
-
-        @Override
-        public String[] getPermissions() {
-            return null; // intentionally null
+    @Test
+    public void test_health_envelopeShape() throws Exception {
+        final HealthHandler handler = new HealthHandler();
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("/api/v2/health"), res);
+        final String body = res.body();
+        // The v2 envelope never carries a "version" key, on either the happy or failure path.
+        assertFalse(body.contains("\"version\""), body);
+        if (res.status == 200) {
+            assertTrue(body.contains("\"status\":0"), body);
+            assertTrue(body.contains("\"engine\""), body);
+            assertTrue(body.contains("\"cluster_name\""), body);
+            assertTrue(body.contains("\"ping_status\""), body);
+        } else {
+            // No engine in this JVM → handler emits a structured 503 (cluster red /
+            // unavailable) or 500 (ping threw). Accept both so the test stays stable.
+            assertTrue(res.status == 503 || res.status == 500, "unexpected status " + res.status + ": " + body);
+            assertTrue(body.contains("\"code\":\"service_unavailable\"") || body.contains("\"code\":\"internal_error\""), body);
         }
     }
 
-    /** Minimal HttpServletResponse stub — captures status, content type and body. */
+    /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -276,10 +246,12 @@ public class MeHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -292,39 +264,50 @@ public class MeHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 
-    /** Minimal HttpServletRequest stub — only method/URI matter for MeHandler. */
+    /** Minimal HttpServletRequest stub — local copy of SearchApiV2ManagerTest.StubRequest. */
     private static class StubRequest implements HttpServletRequest {
-        private final String method;
         private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();
+        private final Map<String, String[]> params;
+        private String method = "GET";
 
-        StubRequest(final String method, final String uri) {
-            this.method = method;
-            this.uri = uri;
+        StubRequest(final String uri) {
+            this(uri, Collections.emptyMap());
         }
 
-        @Override
-        public String getMethod() {
-            return method;
+        StubRequest(final String uri, final Map<String, String[]> params) {
+            this.uri = uri;
+            this.params = params == null ? Collections.emptyMap() : params;
+        }
+
+        StubRequest withMethod(final String m) {
+            this.method = m;
+            return this;
         }
 
         @Override
         public String getServletPath() {
             return uri;
+        }
+
+        @Override
+        public String getMethod() {
+            return method;
         }
 
         @Override
@@ -530,22 +513,23 @@ public class MeHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getParameter(final String name) {
-            return null;
+            final String[] vals = params.get(name);
+            return vals == null || vals.length == 0 ? null : vals[0];
         }
 
         @Override
         public Enumeration<String> getParameterNames() {
-            return Collections.emptyEnumeration();
+            return Collections.enumeration(params.keySet());
         }
 
         @Override
         public String[] getParameterValues(final String name) {
-            return null;
+            return params.get(name);
         }
 
         @Override
         public Map<String, String[]> getParameterMap() {
-            return Collections.emptyMap();
+            return Collections.unmodifiableMap(params);
         }
 
         @Override

@@ -178,8 +178,8 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
     @Test
     public void searchApiV2Manager_handlerThrows_doesNotLeakMessage() throws Exception {
         // Verify the outer catch's sanitization by directly inspecting the source. The
-        // fix replaced `V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage())`
-        // with `V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, "internal error")`.
+        // fix replaced `ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage())`
+        // with `ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INTERNAL_ERROR, "internal error")`.
         // The simplest verifiable invariant from a unit test: read the source file (under
         // src/main) and confirm the broad catch no longer passes `e.getMessage()`. This is
         // a static-assertion-style test that protects against future regressions where a
@@ -192,10 +192,10 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
         assertTrue(catchIdx >= 0, "broad-catch log statement not found — has the file been restructured?");
         // Inspect the small window of source immediately after the log call.
         final String window = source.substring(catchIdx, Math.min(source.length(), catchIdx + 2000));
-        // Find the actual V2EnvelopeWriter.writeError call inside the broad catch and assert
+        // Find the actual ComponentUtil.getV2EnvelopeWriter().writeError call inside the broad catch and assert
         // its arguments — the window also contains a "do not leak e.getMessage()" comment we
         // intentionally keep, so scope the leak check to the function-call expression.
-        final int writeErrorCall = window.indexOf("V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR");
+        final int writeErrorCall = window.indexOf("ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INTERNAL_ERROR");
         assertTrue(writeErrorCall >= 0, "broad-catch writeError call missing: " + window);
         final int callEnd = window.indexOf(");", writeErrorCall);
         final String call = window.substring(writeErrorCall, callEnd >= 0 ? callEnd : window.length());
@@ -227,7 +227,7 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
         // broad-catch declaration.
         final String window = source.substring(catchIdx, Math.min(source.length(), catchIdx + 2000));
         final int committedIdx = window.indexOf("isCommitted()");
-        final int writeErrorIdx = window.indexOf("V2EnvelopeWriter.writeError");
+        final int writeErrorIdx = window.indexOf("ComponentUtil.getV2EnvelopeWriter().writeError");
         assertTrue(committedIdx > 0, "isCommitted() guard missing: " + window);
         assertTrue(writeErrorIdx > 0, "writeError call missing: " + window);
         assertTrue(committedIdx < writeErrorIdx, "isCommitted() guard must precede writeError() in the broad catch: " + window);

@@ -95,12 +95,12 @@ public class LoginHandlerTest extends UnitFessTestCase {
         //  (b) the SAME username from a DIFFERENT IP is NOT gated (its composite bucket is empty),
         //      so the request flows past the gate into the (test-DI-unavailable) login subsystem.
         final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
         final String attackerIp = "10.0.0.99";
         final String victimIp = "10.0.0.50";
         for (int i = 0; i < 5; i++) {
-            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, LoginHandler.userScopeKey(attackerIp, "bob"), 5, 60));
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, handler.userScopeKey(attackerIp, "bob"), 5, 60));
         }
-        final LoginHandler handler = new LoginHandler(rl);
 
         final CapturingResponse attacker = new CapturingResponse();
         handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
@@ -126,11 +126,12 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // the direct peer is a trusted proxy 127.0.0.1), not the proxy's own address. UnitFessTestCase
         // wires app.xml so RateLimitHelper honours XFF for the default trusted proxy.
         final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
         for (int i = 0; i < 5; i++) {
-            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, LoginHandler.userScopeKey("203.0.113.5", "bob"), 5, 60));
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, handler.userScopeKey("203.0.113.5", "bob"), 5, 60));
         }
         final CapturingResponse res = new CapturingResponse();
-        new LoginHandler(rl).handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
                 .withRemoteAddr("127.0.0.1")
                 .withHeader("X-Forwarded-For", "203.0.113.5"), res);
         // In this slim DI graph the RateLimitHelper does not resolve XFF to 203.0.113.5, so the
@@ -455,7 +456,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // can verify the clear() contract at the limiter layer directly. The on-success clear
         // targets the (clientIp, username) composite key, so we mirror that key here.
         final LoginRateLimiter rl = new LoginRateLimiter();
-        final String userKey = LoginHandler.userScopeKey("10.0.0.7", "dave");
+        final String userKey = new LoginHandler().userScopeKey("10.0.0.7", "dave");
         for (int i = 0; i < 5; i++) {
             assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, 5, 60));
         }

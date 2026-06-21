@@ -23,12 +23,17 @@ import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
 import org.codelibs.fess.api.v2.handlers.LoginHandler;
+import org.codelibs.fess.api.v2.handlers.FavoritesListHandler;
+import org.codelibs.fess.api.v2.handlers.HealthHandler;
+import org.codelibs.fess.api.v2.handlers.LabelsHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.OriginValidator;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
+import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
+import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.TargetOriginResolver;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
 import org.codelibs.fess.cors.CorsHandlerFactory;
@@ -74,6 +79,7 @@ final class SearchApiV2ManagerTestSupport {
         m.scrollSearchHandler = new ScrollSearchHandler();
         m.favoriteGetHandler = new FavoriteGetHandler();
         m.favoritePostHandler = new FavoritePostHandler();
+        m.favoritesListHandler = new FavoritesListHandler();
         m.meHandler = new MeHandler();
         m.logoutHandler = new LogoutHandler();
         m.passwordChangeHandler = new PasswordChangeHandler();
@@ -83,6 +89,10 @@ final class SearchApiV2ManagerTestSupport {
         m.chatStreamHandler = new ChatStreamHandler();
         m.chatSessionClearHandler = new ChatSessionClearHandler();
         m.cacheHandler = new CacheHandler();
+        m.healthHandler = new HealthHandler();
+        m.suggestWordsHandler = new SuggestWordsHandler();
+        m.labelsHandler = new LabelsHandler();
+        m.popularWordsHandler = new PopularWordsHandler();
         m.loginHandler = new LoginHandler();
         // The Origin layer (SearchApiV2Manager.process) calls originValidator.isAllowed(...)
         // for unsafe methods. Mirror the DI wiring: a real OriginValidator whose

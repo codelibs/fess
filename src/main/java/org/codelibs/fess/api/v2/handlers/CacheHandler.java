@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.ViewHelper;
@@ -86,11 +85,11 @@ public class CacheHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
-        if (!DocIdValidator.isValid(docId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
+        if (!ComponentUtil.getV2DocIdValidator().isValid(docId)) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
         // M-17: split DI-binding failure from "no user bean present". A genuine anonymous
@@ -103,7 +102,7 @@ public class CacheHandler {
             assist = ComponentUtil.getComponent(FessLoginAssist.class);
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/cache/{}: could not acquire FessLoginAssist", docId, e);
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
             return;
         }
         final OptionalThing<FessUserBean> userBean;
@@ -111,7 +110,7 @@ public class CacheHandler {
             userBean = assist.getSavedUserBean();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/cache/{}: getSavedUserBean failed", docId, e);
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
             return;
         }
         // MJ-20: parity with v1 CacheAction:68-70 — honor app.login.required.
@@ -120,7 +119,7 @@ public class CacheHandler {
         try {
             final org.codelibs.fess.mylasta.direction.FessConfig fessConfig = ComponentUtil.getFessConfig();
             if (fessConfig.isLoginRequired() && !userBean.isPresent()) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
                 return;
             }
         } catch (final Exception e) {
@@ -135,7 +134,7 @@ public class CacheHandler {
             final OptionalEntity<Map<String, Object>> docOpt =
                     ComponentUtil.getSearchHelper().getDocumentByDocId(docId, qfc.getCacheResponseFields(), userBean);
             if (!docOpt.isPresent()) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
                 return;
             }
             final Map<String, Object> doc = docOpt.get();
@@ -143,12 +142,12 @@ public class CacheHandler {
             final String[] hq = req.getParameterValues("hq");
             final String content = ComponentUtil.getViewHelper().createCacheContent(doc, hq);
             if (content == null) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "no cache for: " + docId);
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "no cache for: " + docId);
                 return;
             }
-            V2EnvelopeWriter.writeSuccess(res, buildCachePayload(docId, content, doc));
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, buildCachePayload(docId, content, doc));
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
         }
     }
 
@@ -174,7 +173,7 @@ public class CacheHandler {
 
     // Note: RFC2045-quoted charset values (e.g. charset="UTF-8") are not unquoted here. This is
     // acceptable because crawler-indexed mimetypes store the charset unquoted (e.g. charset=UTF-8).
-    private static String parseCharset(final String mimetype) {
+    private String parseCharset(final String mimetype) {
         if (StringUtil.isNotBlank(mimetype)) {
             final int idx = mimetype.toLowerCase(java.util.Locale.ROOT).indexOf("charset=");
             if (idx >= 0) {

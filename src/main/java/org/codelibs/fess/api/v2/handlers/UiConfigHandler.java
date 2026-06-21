@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -123,7 +122,7 @@ public class UiConfigHandler {
         return list;
     }
 
-    private static void addSortOption(final List<Map<String, Object>> list, final String value, final String labelKey) {
+    private void addSortOption(final List<Map<String, Object>> list, final String value, final String labelKey) {
         final Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("value", value);
         entry.put("label_key", labelKey);
@@ -148,7 +147,7 @@ public class UiConfigHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
@@ -382,9 +381,9 @@ public class UiConfigHandler {
             payload.put("filetype_options", buildFiletypeOptions());
             payload.put("csrf_required", true);
             payload.put("csrf_token", csrfToken);
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/ui/config");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/ui/config");
         }
     }
 }

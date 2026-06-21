@@ -17,12 +17,8 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.codelibs.fess.helper.ChatApiHelper;
-import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Parsed view of a chat request body shared by {@link ChatHandler} and
@@ -36,7 +32,8 @@ import org.codelibs.fess.util.ComponentUtil;
  * {@code /api/v2/chat/sessions/{session_id}}; the {@code clear} flag is no
  * longer accepted here.</p>
  *
- * <p>Length is enforced inside {@link #from(Map, int)} so the caller does not need
+ * <p>Length is enforced inside {@link org.codelibs.fess.helper.ChatApiHelper#parseRequestBody(Map, int)}
+ * so the caller does not need
  * a separate guard. Label and {@code extra_queries} validation uses the same allowlist
  * helpers v1 calls — {@code LabelTypeHelper} for labels and {@code ViewHelper}
  * for facet queries — to prevent query injection, delegated to the
@@ -68,7 +65,18 @@ public final class ChatRequestBody {
      */
     private final Map<String, List<String>> warnings;
 
-    private ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
+    /**
+     * Creates a parsed chat request body. Instances are normally produced by
+     * {@link org.codelibs.fess.helper.ChatApiHelper#parseRequestBody(Map, int)} after the
+     * raw body has been validated, so callers rarely invoke this constructor directly.
+     *
+     * @param message the trimmed {@code message} value, or {@code null} when omitted or blank
+     * @param sessionId the trimmed {@code session_id} value, or {@code null} for a fresh session
+     * @param fields the validated label-filter map; never {@code null}
+     * @param extraQueries the validated {@code extra_queries} array; never {@code null}
+     * @param warnings the map of rejected field values tracked for diagnostics; never {@code null}
+     */
+    public ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
             final Map<String, List<String>> warnings) {
         this.message = message;
         this.sessionId = sessionId;
@@ -126,41 +134,6 @@ public final class ChatRequestBody {
      */
     public Map<String, List<String>> getWarnings() {
         return Collections.unmodifiableMap(warnings);
-    }
-
-    /**
-     * Parses a raw JSON body map into a validated {@link ChatRequestBody}.
-     *
-     * <p>The {@code message} and {@code session_id} values are trimmed; blank
-     * inputs become {@code null}. Label filters and {@code extra_queries} are
-     * passed through the {@link ChatApiHelper} allowlist; rejected values are
-     * tracked in {@link #getWarnings()} but otherwise dropped.</p>
-     *
-     * @param raw the parsed JSON request body
-     * @param maxMessageLength upper bound on the {@code message} length, in characters
-     * @return a validated, immutable view of the request body
-     * @throws MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
-     * @throws IOException if validation reports an unrecoverable error
-     */
-    public static ChatRequestBody from(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
-        final String message = trimmedOrNull(raw.get("message"));
-        final String sessionId = trimmedOrNull(raw.get("session_id"));
-        if (message != null && message.length() > maxMessageLength) {
-            throw new MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
-        }
-        final Map<String, List<String>> warnings = new HashMap<>();
-        final ChatApiHelper chatApiHelper = ComponentUtil.getChatApiHelper();
-        final Map<String, String[]> fields = chatApiHelper.parseFieldFilters(raw, warnings);
-        final String[] extraQueries = chatApiHelper.parseExtraQueries(raw, warnings);
-        return new ChatRequestBody(message, sessionId, fields, extraQueries, warnings);
-    }
-
-    private static String trimmedOrNull(final Object v) {
-        if (v == null) {
-            return null;
-        }
-        final String s = v.toString().trim();
-        return s.isEmpty() ? null : s;
     }
 
     /** Thrown when the request {@code message} exceeds {@code rag.chat.message.max.length}. */

@@ -121,7 +121,8 @@ public class ChatHandlerTest extends UnitFessTestCase {
         src.setSnippet("some snippet");
         src.setUrlLink("https://example.com/link");
         src.setGoUrl("https://go.example.com");
-        final java.util.List<java.util.Map<String, Object>> maps = ChatHandler.toSourceMaps(java.util.List.of(src));
+        final java.util.List<java.util.Map<String, Object>> maps =
+                new org.codelibs.fess.helper.ChatApiHelper().toSourceMaps(java.util.List.of(src));
         assertEquals(1, maps.size());
         final java.util.Map<String, Object> m = maps.get(0);
         assertEquals("rank must be getIndex() value", 1, m.get("rank"));
@@ -144,7 +145,8 @@ public class ChatHandlerTest extends UnitFessTestCase {
         final org.codelibs.fess.entity.ChatMessage.ChatSource src = new org.codelibs.fess.entity.ChatMessage.ChatSource();
         src.setIndex(2);
         // All optional fields left null
-        final java.util.List<java.util.Map<String, Object>> maps = ChatHandler.toSourceMaps(java.util.List.of(src));
+        final java.util.List<java.util.Map<String, Object>> maps =
+                new org.codelibs.fess.helper.ChatApiHelper().toSourceMaps(java.util.List.of(src));
         final java.util.Map<String, Object> m = maps.get(0);
         assertEquals(2, m.get("rank"));
         assertFalse(m.containsKey("title"), "null title must be omitted");

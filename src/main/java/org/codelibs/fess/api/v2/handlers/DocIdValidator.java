@@ -30,13 +30,18 @@ import org.codelibs.core.lang.StringUtil;
  * path-traversal-style abuse). Centralised here so the handlers share a single
  * compiled pattern instead of each declaring its own copy.</p>
  */
-final class DocIdValidator {
+public class DocIdValidator {
 
     /** Allowlist for {@code doc_id}: ASCII letters, digits, underscore and hyphen. */
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
-    private DocIdValidator() {
-        // no instances
+    /**
+     * Creates a document-id validator. Registered as the DI component
+     * {@code v2DocIdValidator} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2DocIdValidator()}.
+     */
+    public DocIdValidator() {
+        // default constructor
     }
 
     /**
@@ -45,7 +50,7 @@ final class DocIdValidator {
      * @param docId the candidate document id
      * @return {@code true} if non-blank and composed only of allowed characters
      */
-    static boolean isValid(final String docId) {
+    public boolean isValid(final String docId) {
         return StringUtil.isNotBlank(docId) && DOC_ID_PATTERN.matcher(docId).matches();
     }
 }

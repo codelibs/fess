@@ -735,7 +735,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         assertFalse(rl.peek(LoginRateLimiter.Scope.USER, userId, 5, 60));
         // ...while the LoginHandler-style composite key for the same user is a DIFFERENT bucket
         // and remains available. This proves the two key shapes do not collide.
-        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, LoginHandler.userScopeKey("10.0.0.7", userId), 5, 60));
+        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, new LoginHandler().userScopeKey("10.0.0.7", userId), 5, 60));
     }
 
     /**
