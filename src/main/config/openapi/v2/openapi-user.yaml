@@ -1621,7 +1621,11 @@ components:
         rank:
           type: integer
           minimum: 1
-          description: 1-based position in the result list.
+          maximum: 10000
+          description: |-
+            1-based position in the result list. The upper bound aligns with
+            the OpenSearch default `index.max_result_window`; ranks above it
+            are rejected with `invalid_request` (400).
         rt:
           type: integer
           format: int64
