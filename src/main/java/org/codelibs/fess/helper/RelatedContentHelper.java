@@ -15,13 +15,18 @@
  */
 package org.codelibs.fess.helper;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +34,9 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.opensearch.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
+import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.taglib.function.LaFunctions;
 
 import jakarta.annotation.PostConstruct;
 
@@ -74,6 +81,22 @@ public class RelatedContentHelper extends AbstractConfigHelper {
      * a regex pattern matches the query.
      */
     protected String queryPlaceHolder = "__QUERY__";
+
+    /**
+     * Placeholder string used in regex-based related content templates for URL contexts.
+     * This placeholder is replaced with the URL-encoded search query when
+     * a regex pattern matches the query, making it safe to embed in URL parameters
+     * (e.g. {@code href="...?q=..."}).
+     */
+    protected String urlQueryPlaceHolder = "__URL_QUERY__";
+
+    /**
+     * Placeholder string used in regex-based related content templates for JavaScript contexts.
+     * This placeholder is replaced with the JavaScript-escaped search query when
+     * a regex pattern matches the query, making it safe to embed inside a JavaScript
+     * string literal (e.g. inside a {@code <script>} block).
+     */
+    protected String jsQueryPlaceHolder = "__JS_QUERY__";
 
     /**
      * Initializes the RelatedContentHelper by loading related content configurations
@@ -148,7 +171,9 @@ public class RelatedContentHelper extends AbstractConfigHelper {
     /**
      * Retrieves related content for a given search query.
      * First checks for exact term matches, then evaluates regex patterns.
-     * For regex matches, the query placeholder is replaced with the actual query.
+     * For regex matches, the query placeholders are replaced with the actual query,
+     * each encoded for its target context (HTML / URL / JavaScript) to prevent
+     * reflected XSS.
      *
      * @param query the search query to find related content for
      * @return array of related content strings, or empty array if no matches found
@@ -164,12 +189,59 @@ public class RelatedContentHelper extends AbstractConfigHelper {
             }
             for (final Pair<Pattern, String> regexData : pair.getSecond()) {
                 if (regexData.getFirst().matcher(query).matches()) {
-                    contentList.add(regexData.getSecond().replace(queryPlaceHolder, query));
+                    // query is untrusted user input; encode it for each context (HTML/URL/JS) before
+                    // substituting into the admin template to prevent reflected XSS. The substitution is
+                    // performed in a single pass and substituted values are never re-scanned, so an
+                    // encoded value cannot be re-substituted through another placeholder.
+                    contentList.add(applyQueryPlaceHolders(regexData.getSecond(), query));
                 }
             }
             return contentList.toArray(new String[contentList.size()]);
         }
         return StringUtil.EMPTY_STRINGS;
+    }
+
+    /**
+     * Substitutes the query placeholders in the given template with the search query,
+     * encoding the query for each placeholder's target context (HTML / URL / JavaScript).
+     * <p>
+     * The three placeholders are replaced in a single regex pass: the template is scanned
+     * once and each matched placeholder is replaced with its context-encoded query value.
+     * Only the query value is encoded; the admin template itself is never modified or
+     * re-encoded. Because substituted values are never re-scanned, an encoded value cannot
+     * be re-substituted through another placeholder (which would otherwise allow escaping
+     * to be bypassed, e.g. attribute injection).
+     *
+     * @param template the admin-registered content template containing placeholders
+     * @param query the untrusted search query to substitute
+     * @return the template with placeholders replaced by context-encoded query values
+     */
+    protected String applyQueryPlaceHolders(final String template, final String query) {
+        final Map<String, String> replacements = new LinkedHashMap<>();
+        putPlaceHolder(replacements, urlQueryPlaceHolder, URLEncoder.encode(query, StandardCharsets.UTF_8));
+        putPlaceHolder(replacements, jsQueryPlaceHolder, FessFunctions.escapeJs(query));
+        putPlaceHolder(replacements, queryPlaceHolder, LaFunctions.h(query));
+        if (replacements.isEmpty()) {
+            return template;
+        }
+        final String regex = replacements.keySet()
+                .stream()
+                .sorted((a, b) -> b.length() - a.length())
+                .map(Pattern::quote)
+                .collect(Collectors.joining("|"));
+        final Matcher matcher = Pattern.compile(regex).matcher(template);
+        final StringBuilder buf = new StringBuilder();
+        while (matcher.find()) {
+            matcher.appendReplacement(buf, Matcher.quoteReplacement(replacements.get(matcher.group())));
+        }
+        matcher.appendTail(buf);
+        return buf.toString();
+    }
+
+    private void putPlaceHolder(final Map<String, String> replacements, final String placeHolder, final String value) {
+        if (StringUtil.isNotBlank(placeHolder)) {
+            replacements.putIfAbsent(placeHolder, value);
+        }
     }
 
     private String toLowerCase(final String term) {
@@ -196,6 +268,28 @@ public class RelatedContentHelper extends AbstractConfigHelper {
      */
     public void setQueryPlaceHolder(final String queryPlaceHolder) {
         this.queryPlaceHolder = queryPlaceHolder;
+    }
+
+    /**
+     * Sets the placeholder string used in regex-based related content templates for URL contexts.
+     * This placeholder is replaced with the URL-encoded search query when
+     * a regex pattern matches the query.
+     *
+     * @param urlQueryPlaceHolder the placeholder string to be replaced with the URL-encoded query (default: "__URL_QUERY__")
+     */
+    public void setUrlQueryPlaceHolder(final String urlQueryPlaceHolder) {
+        this.urlQueryPlaceHolder = urlQueryPlaceHolder;
+    }
+
+    /**
+     * Sets the placeholder string used in regex-based related content templates for JavaScript contexts.
+     * This placeholder is replaced with the JavaScript-escaped search query when
+     * a regex pattern matches the query.
+     *
+     * @param jsQueryPlaceHolder the placeholder string to be replaced with the JavaScript-escaped query (default: "__JS_QUERY__")
+     */
+    public void setJsQueryPlaceHolder(final String jsQueryPlaceHolder) {
+        this.jsQueryPlaceHolder = jsQueryPlaceHolder;
     }
 
 }
