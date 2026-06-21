@@ -90,34 +90,40 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public Map<String, String[]> getFields() {
+        final int maxItems = fessConfig.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxLen = fessConfig.getApiV2ParamMaxLengthAsInteger();
         final Map<String, String[]> fields = new HashMap<>();
         for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith("fields.")) {
+                final String name = key.substring("fields.".length());
                 final String[] value = simplifyArray(entry.getValue());
-                fields.put(key.substring("fields.".length()), value);
+                V2ParamValidator.checkArray(value, maxItems, maxLen, "fields." + name);
+                fields.put(name, value);
             }
         }
-        if (fields.size() > fessConfig.getApiV2ParamMaxArraySizeAsInteger()) {
-            throw new InvalidRequestParameterException(
-                    "fields exceeds the maximum number of distinct names: " + fessConfig.getApiV2ParamMaxArraySizeAsInteger());
+        if (fields.size() > maxItems) {
+            throw new InvalidRequestParameterException("fields exceeds the maximum number of distinct names: " + maxItems);
         }
         return fields;
     }
 
     @Override
     public Map<String, String[]> getConditions() {
+        final int maxItems = fessConfig.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxLen = fessConfig.getApiV2ParamMaxLengthAsInteger();
         final Map<String, String[]> conditions = new HashMap<>();
         for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith("as.")) {
+                final String name = key.substring("as.".length());
                 final String[] value = simplifyArray(entry.getValue());
-                conditions.put(key.substring("as.".length()), value);
+                V2ParamValidator.checkArray(value, maxItems, maxLen, "as." + name);
+                conditions.put(name, value);
             }
         }
-        if (conditions.size() > fessConfig.getApiV2ParamMaxArraySizeAsInteger()) {
-            throw new InvalidRequestParameterException(
-                    "conditions exceeds the maximum number of distinct names: " + fessConfig.getApiV2ParamMaxArraySizeAsInteger());
+        if (conditions.size() > maxItems) {
+            throw new InvalidRequestParameterException("conditions exceeds the maximum number of distinct names: " + maxItems);
         }
         return conditions;
     }

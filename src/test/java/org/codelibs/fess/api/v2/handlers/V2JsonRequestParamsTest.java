@@ -309,6 +309,61 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
         assertThrows(InvalidRequestParameterException.class, params::getFacetInfo, "facet.field element with 1001 chars must throw");
     }
 
+    // -----------------------------------------------------------------------
+    // Fix 1: per-name value count and element length for fields.* and as.*
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_getFields_singleName_tooManyValues_throws() {
+        // 101 distinct values for a single fields.label key must throw after simplifyArray dedup.
+        // Values must be distinct so simplifyArray does not collapse them below the limit.
+        final String[] many = new String[101];
+        for (int i = 0; i < many.length; i++) {
+            many[i] = "val" + i;
+        }
+        final V2JsonRequestParams params = newParams(Map.of("fields.label", many));
+        assertThrows(InvalidRequestParameterException.class, params::getFields, "fields.label with 101 distinct values must throw");
+    }
+
+    @Test
+    public void test_getFields_singleName_elementTooLong_throws() {
+        // An element of 1001 characters in fields.label must throw.
+        final String longValue = "x".repeat(1001);
+        final V2JsonRequestParams params = newParams(Map.of("fields.label", new String[] { longValue }));
+        assertThrows(InvalidRequestParameterException.class, params::getFields, "fields.label element with 1001 chars must throw");
+    }
+
+    @Test
+    public void test_getFields_singleName_atLimit_ok() {
+        // 100 distinct values each at 1000 characters — must not throw.
+        final String[] many = new String[100];
+        for (int i = 0; i < many.length; i++) {
+            many[i] = String.format("%04d", i) + "x".repeat(996);
+        }
+        final V2JsonRequestParams params = newParams(Map.of("fields.label", many));
+        final Map<String, String[]> fields = params.getFields();
+        assertEquals(100, fields.get("label").length);
+    }
+
+    @Test
+    public void test_getConditions_singleName_tooManyValues_throws() {
+        // 101 distinct values for a single as.q key must throw after simplifyArray dedup.
+        final String[] many = new String[101];
+        for (int i = 0; i < many.length; i++) {
+            many[i] = "val" + i;
+        }
+        final V2JsonRequestParams params = newParams(Map.of("as.q", many));
+        assertThrows(InvalidRequestParameterException.class, params::getConditions, "as.q with 101 distinct values must throw");
+    }
+
+    @Test
+    public void test_getConditions_singleName_elementTooLong_throws() {
+        // An element of 1001 characters in as.q must throw.
+        final String longValue = "x".repeat(1001);
+        final V2JsonRequestParams params = newParams(Map.of("as.q", new String[] { longValue }));
+        assertThrows(InvalidRequestParameterException.class, params::getConditions, "as.q element with 1001 chars must throw");
+    }
+
     private static V2JsonRequestParams newParams(final Map<String, String[]> params) {
         return new V2JsonRequestParams(new StubRequest(params), ComponentUtil.getFessConfig());
     }
