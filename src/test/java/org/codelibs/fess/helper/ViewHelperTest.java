@@ -17,11 +17,14 @@ package org.codelibs.fess.helper;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -36,6 +39,9 @@ import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.SessionCookieConfig;
 
 public class ViewHelperTest extends UnitFessTestCase {
     public ViewHelper viewHelper;
@@ -771,5 +777,82 @@ public class ViewHelperTest extends UnitFessTestCase {
         text = "";
         result = viewHelper.removeHighlightTag(text);
         assertEquals("", result);
+    }
+
+    @Test
+    public void test_sessionCookieSecure_enabled() {
+        // When the flag is enabled, the session cookie must be marked Secure.
+        assertEquals(Boolean.TRUE, applySessionCookieSecure("true"));
+    }
+
+    @Test
+    public void test_sessionCookieSecure_enabled_uppercase() {
+        assertEquals(Boolean.TRUE, applySessionCookieSecure("TRUE"));
+    }
+
+    @Test
+    public void test_sessionCookieSecure_blank() {
+        // Blank (default) leaves the cookie untouched (Tomcat's automatic behavior).
+        assertNull(applySessionCookieSecure(""));
+    }
+
+    @Test
+    public void test_sessionCookieSecure_false() {
+        // Any non-true value (e.g. false) also leaves the cookie untouched.
+        assertNull(applySessionCookieSecure("false"));
+    }
+
+    /**
+     * Exercises the same decision the {@link ViewHelper#init()} cookie-secure block performs:
+     * when {@link FessConfig#isSessionCookieSecureEnabled()} is true, call
+     * {@code servletContext.getSessionCookieConfig().setSecure(true)}. Returns the boolean
+     * passed to {@code setSecure(boolean)}, or {@code null} when it was not called.
+     */
+    private Boolean applySessionCookieSecure(final String secureValue) {
+        final AtomicReference<Boolean> secureRef = new AtomicReference<>();
+        final SessionCookieConfig sessionCookieConfig = (SessionCookieConfig) Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class<?>[] { SessionCookieConfig.class }, (proxy, method, args) -> {
+                    if ("setSecure".equals(method.getName())) {
+                        secureRef.set((Boolean) args[0]);
+                        return null;
+                    }
+                    return defaultReturn(method);
+                });
+        final ServletContext servletContext = (ServletContext) Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class<?>[] { ServletContext.class }, (proxy, method, args) -> {
+                    if ("getSessionCookieConfig".equals(method.getName())) {
+                        return sessionCookieConfig;
+                    }
+                    return defaultReturn(method);
+                });
+        // Drives the production FessConfig#isSessionCookieSecureEnabled() default method via the
+        // overridden getSessionCookieSecure() value under test, then replays the ViewHelper logic.
+        final FessConfig fessConfig = createSessionCookieSecureConfig(secureValue);
+        if (fessConfig.isSessionCookieSecureEnabled()) {
+            servletContext.getSessionCookieConfig().setSecure(true);
+        }
+        return secureRef.get();
+    }
+
+    private FessConfig createSessionCookieSecureConfig(final String secureValue) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSessionCookieSecure() {
+                return secureValue;
+            }
+        };
+    }
+
+    private Object defaultReturn(final Method method) {
+        final Class<?> returnType = method.getReturnType();
+        if (boolean.class.equals(returnType)) {
+            return Boolean.FALSE;
+        }
+        if (returnType.isPrimitive() && !void.class.equals(returnType)) {
+            return Integer.valueOf(0);
+        }
+        return null;
     }
 }

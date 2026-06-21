@@ -2180,6 +2180,12 @@ public interface FessProp {
                 .get(stream -> stream.map(s -> s.trim().toUpperCase(Locale.ENGLISH)).collect(Collectors.toSet()));
     }
 
+    String getSessionCookieSecure();
+
+    default boolean isSessionCookieSecureEnabled() {
+        return Constants.TRUE.equalsIgnoreCase(getSessionCookieSecure());
+    }
+
     String getQueryTrackTotalHits();
 
     default Object getQueryTrackTotalHitsValue() {

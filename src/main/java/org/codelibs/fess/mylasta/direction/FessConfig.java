@@ -1332,6 +1332,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. cookie */
     String SESSION_TRACKING_MODES = "session.tracking.modes";
 
+    /** The key of the configuration. e.g.  */
+    String SESSION_COOKIE_SECURE = "session.cookie.secure";
+
     /** The key of the configuration. e.g. q,num,sort */
     String COOKIE_SEARCH_PARAMETER_KEYS = "cookie.search.parameter.keys";
 
@@ -6900,6 +6903,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSessionTrackingModes();
 
     /**
+     * Get the value for the key 'session.cookie.secure'. <br>
+     * The value is, e.g.  <br>
+     * comment: Whether to add the Secure attribute to the session cookie (JSESSIONID) at startup.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSessionCookieSecure();
+
+    /**
      * Get the value for the key 'cookie.search.parameter.keys'. <br>
      * The value is, e.g. q,num,sort <br>
      * comment: Comma-separated list of request parameter keys to store in cookies before SSO login.
@@ -12321,6 +12332,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.SESSION_TRACKING_MODES);
         }
 
+        public String getSessionCookieSecure() {
+            return get(FessConfig.SESSION_COOKIE_SECURE);
+        }
+
         public String getCookieSearchParameterKeys() {
             return get(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS);
         }
@@ -14260,6 +14275,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.COOKIE_DEFAULT_PATH, "/");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
             defaultMap.put(FessConfig.SESSION_TRACKING_MODES, "cookie");
+            defaultMap.put(FessConfig.SESSION_COOKIE_SECURE, "");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS, "q,num,sort");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_required_keys, "q");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH, "1000");
