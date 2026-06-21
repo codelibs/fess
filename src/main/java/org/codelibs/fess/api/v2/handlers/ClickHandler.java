@@ -171,6 +171,16 @@ public class ClickHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
+        final Object rt = body.get("rt");
+        final Object rank = body.get("rank");
+        if (rt instanceof Number && ((Number) rt).longValue() < 0) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt must not be negative");
+            return;
+        }
+        if (rank instanceof Number && ((Number) rank).intValue() < 0) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank must not be negative");
+            return;
+        }
         try {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final OptionalEntity<Map<String, Object>> docOpt = searchHelper.getDocumentByDocId(docId,
@@ -186,7 +196,6 @@ public class ClickHandler {
             clickLog.setUrlId((String) doc.get(cfg.getIndexFieldId()));
             clickLog.setUrl(url);
             clickLog.setRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-            final Object rt = body.get("rt");
             if (rt instanceof Number) {
                 // m-8: use UTC so the same epoch-ms yields the same LocalDateTime regardless of
                 // host timezone; click logs are stored consistently across mixed-TZ clusters.
@@ -197,7 +206,6 @@ public class ClickHandler {
             clickLog.setUserSessionId(userSessionId);
             clickLog.setDocId(docId);
             clickLog.setQueryId(queryId);
-            final Object rank = body.get("rank");
             if (rank instanceof Number) {
                 clickLog.setOrder(((Number) rank).intValue());
             }
