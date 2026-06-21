@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,6 +56,8 @@ public class ChatApiHelper {
 
     private static final Logger logger = LogManager.getLogger(ChatApiHelper.class);
 
+    private static final Pattern SESSION_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._-]+$");
+
     /**
      * Default constructor for ChatApiHelper.
      */
@@ -80,7 +83,8 @@ public class ChatApiHelper {
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return a map of validated field filters, or an empty map when none are present
      */
-    public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
+    public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings)
+            throws IOException {
         // Support nested fields object: {"fields": {"label": ... }}
         Object labelsRaw = null;
         final Object fieldsObj = raw.get("fields");
@@ -97,6 +101,17 @@ public class ChatApiHelper {
         }
 
         final List<String> labelValues = toStringList(labelsRaw);
+        final org.codelibs.fess.mylasta.direction.FessConfig cfg = ComponentUtil.getFessConfig();
+        final int maxArraySize = cfg.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxElementLen = cfg.getApiV2ParamMaxLengthAsInteger();
+        if (labelValues.size() > maxArraySize) {
+            throw new ChatRequestBody.TooManyValuesException("fields.label exceeds the maximum number of values: " + maxArraySize);
+        }
+        for (final String v : labelValues) {
+            if (v != null && v.length() > maxElementLen) {
+                throw new ChatRequestBody.TooManyValuesException("fields.label element exceeds the maximum length: " + maxElementLen);
+            }
+        }
         if (labelValues.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -134,13 +149,24 @@ public class ChatApiHelper {
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return array of validated extra query strings; empty array when none present
      */
-    public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
+    public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) throws IOException {
         final Object exqRaw = raw.get("extra_queries");
         if (exqRaw == null) {
             return new String[0];
         }
 
         final List<String> values = toStringList(exqRaw);
+        final org.codelibs.fess.mylasta.direction.FessConfig cfg2 = ComponentUtil.getFessConfig();
+        final int maxArraySize2 = cfg2.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxElementLen2 = cfg2.getApiV2ParamMaxLengthAsInteger();
+        if (values.size() > maxArraySize2) {
+            throw new ChatRequestBody.TooManyValuesException("extra_queries exceeds the maximum number of values: " + maxArraySize2);
+        }
+        for (final String v : values) {
+            if (v != null && v.length() > maxElementLen2) {
+                throw new ChatRequestBody.TooManyValuesException("extra_queries element exceeds the maximum length: " + maxElementLen2);
+            }
+        }
         if (values.isEmpty()) {
             return new String[0];
         }
@@ -165,12 +191,22 @@ public class ChatApiHelper {
      * @param raw the parsed JSON request body
      * @param maxMessageLength upper bound on the {@code message} length, in characters
      * @return a validated request body
+     * @throws ChatRequestBody.InvalidSessionIdException if {@code session_id} exceeds 100 characters or contains invalid characters
      * @throws ChatRequestBody.MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
+     * @throws ChatRequestBody.TooManyValuesException if {@code extra_queries} or {@code fields.label} exceeds the count or per-element length limit
      * @throws IOException if validation reports an unrecoverable error
      */
     public ChatRequestBody parseRequestBody(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
         final String message = trimmedOrNull(raw.get("message"));
         final String sessionId = trimmedOrNull(raw.get("session_id"));
+        if (sessionId != null) {
+            if (sessionId.length() > 100) {
+                throw new ChatRequestBody.InvalidSessionIdException("session_id exceeds the maximum length of 100");
+            }
+            if (!SESSION_ID_PATTERN.matcher(sessionId).matches()) {
+                throw new ChatRequestBody.InvalidSessionIdException("session_id contains invalid characters");
+            }
+        }
         if (message != null && message.length() > maxMessageLength) {
             throw new ChatRequestBody.MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
         }
