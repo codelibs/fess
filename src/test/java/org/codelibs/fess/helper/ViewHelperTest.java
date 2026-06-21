@@ -803,10 +803,11 @@ public class ViewHelperTest extends UnitFessTestCase {
     }
 
     /**
-     * Exercises the same decision the {@link ViewHelper#init()} cookie-secure block performs:
-     * when {@link FessConfig#isSessionCookieSecureEnabled()} is true, call
-     * {@code servletContext.getSessionCookieConfig().setSecure(true)}. Returns the boolean
-     * passed to {@code setSecure(boolean)}, or {@code null} when it was not called.
+     * Drives the real {@link ViewHelper#configureSessionCookie(ServletContext, FessConfig)} with the
+     * given {@code session.cookie.secure} value and captures whether {@code Secure} was applied to the
+     * session cookie. Returns the boolean passed to {@link SessionCookieConfig#setSecure(boolean)}, or
+     * {@code null} when it was not called. Because it invokes the production method (not a copy of its
+     * logic), a regression that removes or alters the cookie-secure block is caught here.
      */
     private Boolean applySessionCookieSecure(final String secureValue) {
         final AtomicReference<Boolean> secureRef = new AtomicReference<>();
@@ -825,12 +826,7 @@ public class ViewHelperTest extends UnitFessTestCase {
                     }
                     return defaultReturn(method);
                 });
-        // Drives the production FessConfig#isSessionCookieSecureEnabled() default method via the
-        // overridden getSessionCookieSecure() value under test, then replays the ViewHelper logic.
-        final FessConfig fessConfig = createSessionCookieSecureConfig(secureValue);
-        if (fessConfig.isSessionCookieSecureEnabled()) {
-            servletContext.getSessionCookieConfig().setSecure(true);
-        }
+        viewHelper.configureSessionCookie(servletContext, createSessionCookieSecureConfig(secureValue));
         return secureRef.get();
     }
 
@@ -841,6 +837,11 @@ public class ViewHelperTest extends UnitFessTestCase {
             @Override
             public String getSessionCookieSecure() {
                 return secureValue;
+            }
+
+            @Override
+            public String getSessionTrackingModes() {
+                return "cookie";
             }
         };
     }
