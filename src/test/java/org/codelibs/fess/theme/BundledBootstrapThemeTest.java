@@ -1325,4 +1325,24 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("getElementById(\"numSearchOption\")"), "app.js home submit must read the num select");
         assertTrue(js.contains("getElementById(\"langSearchOption\")"), "app.js home submit must read the lang select");
     }
+
+    /**
+     * runFromUrl() must re-sync the drawer option selects to the URL-derived state on
+     * every navigation. attach() renders the selects only once, so without a re-render
+     * inside runFromUrl() a navigation (link / back-forward / facet submit) leaves the
+     * selects showing stale values. Now that the selects are applied on the Search
+     * button, a stale displayed value would be written back into the URL on the next
+     * submit, silently reverting the user's actual sort / num / lang.
+     */
+    @Test
+    public void test_searchJs_runFromUrlResyncsOptionSelects() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        final int start = js.indexOf("export function runFromUrl()");
+        assertTrue(start >= 0, "search.js must define runFromUrl()");
+        // Bound the search to the runFromUrl body (up to the next top-level function).
+        final int end = js.indexOf("\nfunction ", start);
+        final String body = end > start ? js.substring(start, end) : js.substring(start);
+        assertTrue(body.contains("renderSearchOptions()"),
+                "runFromUrl() must call renderSearchOptions() so the drawer selects reflect the URL after navigation");
+    }
 }

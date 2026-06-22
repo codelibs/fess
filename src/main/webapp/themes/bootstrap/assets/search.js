@@ -1055,6 +1055,16 @@ export function runFromUrl() {
     }
   }
   state.exQ = params.getAll("ex_q").filter(v => v !== "");
+  // Re-sync the search-options drawer selects (sort / num / lang / label) to the
+  // freshly hydrated state. attach() renders them only once, so without this a
+  // navigation (link click, back/forward, facet submit) would leave the selects
+  // showing stale values. That matters now that the selects are applied on the
+  // Search button: a stale displayed value would otherwise be written back into the
+  // URL on the next submit, silently reverting the user's actual sort/num/lang.
+  // Guarded on config so the option lists exist before we re-render them.
+  if (api.getConfig()) {
+    renderSearchOptions();
+  }
   // Run a search when a keyword OR any active filter is present in the URL (label /
   // other fields, geo, or ex_q). The classic JSP theme issues the request for
   // filter-only URLs such as /search?fields.label=foo, so mirror that here instead
@@ -1125,6 +1135,8 @@ export function attach() {
         const sortSel = document.getElementById("sortSearchOption");
         if (sortSel) { if (sortSel.value) params.set("sort", sortSel.value); else params.delete("sort"); }
         const numSel = document.getElementById("numSearchOption");
+        // Unlike sort, the num select has no empty placeholder option, so its value is always
+        // present; there is no empty case to delete here.
         if (numSel && numSel.value) params.set("num", numSel.value);
         const langSel = document.getElementById("langSearchOption");
         if (langSel) {
@@ -1143,8 +1155,10 @@ export function attach() {
   // JSP parity: this is a purely visual reset — it does NOT re-run the search.
   // The reset values are applied on the next Search-button press, matching searchOptions.jsp
   // whose Clear button only resets the select indices and never submits the form. (The geo
-  // inputs are cleared visually here too; the in-memory geo filter is dropped on the next
-  // search when the now-empty geo inputs are read.)
+  // inputs are cleared visually here too; the geo filter is dropped only when the drawer's own
+  // Search button is pressed and reads the now-empty inputs. A header-form submit instead
+  // preserves the geo params already in the URL, matching the JSP theme whose header form
+  // carries geo forward via hidden inputs.)
   const optClearBtn = document.getElementById("searchOptionsClearButton");
   if (optClearBtn) {
     optClearBtn.addEventListener("click", () => {
