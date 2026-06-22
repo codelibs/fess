@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Powrót do wyników",
   "labels.cache_not_found": "Zawartość pamięci podręcznej nie jest dostępna.",
   "labels.cache_loading": "Ładowanie zawartości z pamięci podręcznej…",
+  "labels.search_loading": "Wyszukiwanie…",
   "labels.search_result_cache": "Pamięć podręczna",
   "labels.search_cache_msg": "To jest pamięć podręczna {0}. Jest to migawka strony, która pojawiła się {1}.",
   "labels.search_unknown": "Nieznany",

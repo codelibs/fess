@@ -580,6 +580,16 @@ function renderResults(env) {
   if (favEnabled && env.query_id) syncFavorites(env.query_id);
 }
 
+/**
+ * Toggle the in-flight search loading indicator (#search-loading).
+ * Gives sighted users visible feedback during a /search request; cache and chat
+ * already have loading states, search did not.
+ */
+function showSearchLoading(show) {
+  const el = document.getElementById("search-loading");
+  if (el) el.classList.toggle("d-none", !show);
+}
+
 async function runSearch() {
   // Cancel any in-flight request before issuing a new one.
   if (currentSearchAbort) currentSearchAbort.abort();
@@ -592,6 +602,10 @@ async function runSearch() {
   // cards carry the correct rt parameter (mirrors JSP #rt hidden field).
   state.requestedTime = Date.now();
   document.title = state.q ? t("page.search_title").replace("{0}", state.q) : "Fess";
+  // Clear any stale error banner from a previous attempt and show the loading indicator.
+  const prevErr = document.getElementById("search-error");
+  if (prevErr) prevErr.classList.add("d-none");
+  showSearchLoading(true);
   try {
     const params = { q: state.q, start: state.start, num: state.num };
     if (state.sort) params.sort = state.sort;
@@ -673,20 +687,26 @@ async function runSearch() {
     loadRelated(state.q, currentRelatedAbort.signal);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
-    if (e && e.name === "AbortError") return; // request superseded — silently ignore
+    if (e && e.name === "AbortError") return; // request superseded — newer request owns the UI
     const errBox = document.getElementById("search-error");
     if (e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || e.httpStatus === 400)) {
       if (errBox) { errBox.textContent = e.message || t("error.invalid_request"); errBox.classList.remove("d-none"); }
       else { document.getElementById("results-meta").textContent = e.message || t("error.invalid_request"); }
       return;
     }
-    if (errBox) errBox.classList.add("d-none");
-    const meta = document.getElementById("results-meta");
-    if (e && e.name === "NetworkError") {
-      meta.textContent = t("error.network");
-    } else {
-      meta.textContent = e.code === "AUTH_REQUIRED" ? t("error.auth_required") : t("error.server");
-    }
+    // Network/server/auth failures: surface in the VISIBLE banner too. Previously these wrote
+    // only to the screen-reader-only #results-meta sink, so a sighted user saw nothing when a
+    // search failed with a 500 or a dropped connection. Fall back to #results-meta when a
+    // theme has no visible banner.
+    const msg = (e && e.name === "NetworkError") ? t("error.network")
+              : (e && e.code === "AUTH_REQUIRED") ? t("error.auth_required")
+              : t("error.server");
+    if (errBox) { errBox.textContent = msg; errBox.classList.remove("d-none"); }
+    else { const meta = document.getElementById("results-meta"); if (meta) meta.textContent = msg; }
+  } finally {
+    // Only the latest request clears the spinner. If this request was superseded,
+    // currentSearchAbort already points at a newer controller, so leave it running.
+    if (currentSearchAbort && currentSearchAbort.signal === signal) showSearchLoading(false);
   }
 }
 

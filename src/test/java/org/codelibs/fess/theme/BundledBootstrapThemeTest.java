@@ -1345,4 +1345,88 @@ public class BundledBootstrapThemeTest {
         assertTrue(body.contains("renderSearchOptions()"),
                 "runFromUrl() must call renderSearchOptions() so the drawer selects reflect the URL after navigation");
     }
+
+    // ── Functional review fixes: visible failure feedback, loading indicator, data-i18n-alt ──
+
+    /**
+     * Fix 1: search.js must surface network/server/auth failures in the VISIBLE
+     * #search-error banner — previously these wrote only to the screen-reader-only
+     * #results-meta sink, leaving a sighted user with no feedback when a search failed
+     * with a 500 or a dropped connection.
+     */
+    @Test
+    public void test_searchJs_surfacesNetworkAndServerErrorsInVisibleBanner() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("t(\"error.network\")"), "search.js must map NetworkError to error.network");
+        assertTrue(js.contains("t(\"error.server\")"), "search.js must map server failures to error.server");
+        // The resolved message must be written to the visible banner (errBox), not only #results-meta.
+        assertTrue(js.contains("errBox.textContent = msg"),
+                "search.js must write network/server/auth failures to the visible #search-error banner (not only #results-meta)");
+    }
+
+    /**
+     * Fix 2: the results view must show a visible loading indicator while a /search
+     * request is in flight (cache and chat already had one; search did not).
+     */
+    @Test
+    public void test_indexHtml_hasSearchLoadingIndicator() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("id=\"search-loading\""), "index.html must contain the #search-loading indicator");
+        assertTrue(html.contains("data-i18n=\"labels.search_loading\""),
+                "the loading indicator must use the labels.search_loading i18n key");
+    }
+
+    /** Fix 2: search.js must toggle the loading indicator at the start and end of a search. */
+    @Test
+    public void test_searchJs_togglesLoadingIndicator() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("function showSearchLoading("), "search.js must define showSearchLoading()");
+        assertTrue(js.contains("showSearchLoading(true)"), "search.js must show the loading indicator when a search starts");
+        assertTrue(js.contains("showSearchLoading(false)"), "search.js must hide the loading indicator when a search settles");
+    }
+
+    /** Fix 2: every i18n bundle must contain the labels.search_loading key. */
+    @Test
+    public void test_i18n_hasSearchLoadingKey() throws Exception {
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.filter(p -> p.getFileName().toString().startsWith("messages.") && p.getFileName().toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            assertTrue(Files.readString(p, StandardCharsets.UTF_8).contains("\"labels.search_loading\""),
+                                    "i18n bundle " + p.getFileName() + " must contain labels.search_loading");
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+    }
+
+    /**
+     * Fix 3: i18n.js applyDom must localize the alt attribute via data-i18n-alt
+     * (previously the attribute was present on the logos but never processed).
+     */
+    @Test
+    public void test_i18nJs_appliesDataI18nAlt() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/i18n.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("data-i18n-alt"), "i18n.js applyDom must process data-i18n-alt attributes");
+        assertTrue(js.contains("setAttribute(\"alt\""), "i18n.js must set the alt attribute from the data-i18n-alt key");
+    }
+
+    /**
+     * Fix 3: both theme logos must reference real i18n keys for their localized alt text,
+     * so the rendered alt is never the raw key string. The previously-referenced but
+     * never-defined labels.index_title key must be gone.
+     */
+    @Test
+    public void test_indexHtml_logoAltKeysResolve() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final String en = Files.readString(THEME_DIR.resolve("i18n/messages.en.json"), StandardCharsets.UTF_8);
+        assertTrue(html.contains("data-i18n-alt=\"labels.header_brand_name\""),
+                "header brand logo must localize alt via labels.header_brand_name");
+        assertTrue(html.contains("data-i18n-alt=\"page.heading\""), "home logo must localize alt via page.heading");
+        assertTrue(en.contains("\"labels.header_brand_name\""), "labels.header_brand_name must exist in en bundle");
+        assertTrue(en.contains("\"page.heading\""), "page.heading must exist in en bundle");
+        assertFalse(html.contains("data-i18n-alt=\"labels.index_title\""),
+                "home logo must not reference the undefined labels.index_title key");
+    }
 }

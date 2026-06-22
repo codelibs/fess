@@ -124,4 +124,5 @@ export function applyDom(root) {
   root.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
   root.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder)); });
   root.querySelectorAll("[data-i18n-aria-label]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAriaLabel)); });
+  root.querySelectorAll("[data-i18n-alt]").forEach(el => { el.setAttribute("alt", t(el.dataset.i18nAlt)); });
 }

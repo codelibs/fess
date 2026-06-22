@@ -131,7 +131,7 @@
         <div class="row">
           <div class="col text-center searchFormBox">
             <h1 class="mainLogo">
-              <img src="/themes/bootstrap/assets/logo.png" alt="" data-i18n-alt="labels.index_title" class="home-logo">
+              <img src="/themes/bootstrap/assets/logo.png" alt="" data-i18n-alt="page.heading" class="home-logo">
             </h1>
             <!-- Notification banner (parity index.jsp .notification) — rendered by
                  app.js renderNotifications() from config.notifications.search_top. -->
@@ -182,6 +182,13 @@
         <!-- Notification + error banners (theme runtime extras). -->
         <div id="results-notification" class="d-none mb-2" role="status" aria-live="polite"></div>
         <div id="search-error" class="alert alert-danger d-none mb-2" role="alert" aria-live="assertive"></div>
+
+        <!-- Loading indicator shown while a /search request is in flight, so sighted
+             users get visible feedback on slow queries (parity with cache/chat loading). -->
+        <div id="search-loading" class="d-none text-center text-muted my-4" role="status" aria-live="polite">
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          <span data-i18n="labels.search_loading">Searching…</span>
+        </div>
 
         <!-- Options bar (parity searchResults.jsp ul.list-inline). -->
         <ul class="list-inline" id="options-bar"></ul>

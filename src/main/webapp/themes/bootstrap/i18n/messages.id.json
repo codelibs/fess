@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Kembali ke hasil",
   "labels.cache_not_found": "Konten tembolok tidak tersedia.",
   "labels.cache_loading": "Memuat konten tembolok…",
+  "labels.search_loading": "Mencari…",
   "labels.search_result_cache": "Tembolok",
   "labels.search_cache_msg": "Ini adalah cache dari {0}. Ini adalah snapshot halaman seperti yang muncul pada {1}.",
   "labels.search_unknown": "Tidak Diketahui",

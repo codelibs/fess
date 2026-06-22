@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Terug naar resultaten",
   "labels.cache_not_found": "De gecachete inhoud is niet beschikbaar.",
   "labels.cache_loading": "Gecachete inhoud laden…",
+  "labels.search_loading": "Zoeken…",
   "labels.search_result_cache": "Cache",
   "labels.search_cache_msg": "Dit is een cache van {0}. Het is een momentopname van de pagina zoals deze verscheen op {1}.",
   "labels.search_unknown": "Onbekend",
