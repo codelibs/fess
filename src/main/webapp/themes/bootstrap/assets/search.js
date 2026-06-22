@@ -1134,9 +1134,7 @@ export function applyHomeOptions(params) {
 export function runFromUrl() {
   const params = new URLSearchParams(location.search);
   const q = params.get("q");
-  // Only run a search when a query is present in the URL.
-  if (!q) return;
-  state.q = q;
+  state.q = q || "";
   state.start = Number(params.get("start")) || 0;
   const numVal = Number(params.get("num"));
   if (numVal > 0) state.num = numVal;
@@ -1163,6 +1161,17 @@ export function runFromUrl() {
     }
   }
   state.exQ = params.getAll("ex_q").filter(v => v !== "");
+  // Run a search when a keyword OR any active filter is present in the URL (label /
+  // other fields, geo, or ex_q). The classic JSP theme issues the request for
+  // filter-only URLs such as /search?fields.label=foo, so mirror that here instead
+  // of bailing on an empty keyword. sort/num/lang are query modifiers, not a search
+  // on their own. Hydrating state above before this check also sets state.q to "" for
+  // a filter-only URL, so a previous keyword can't leak into the next search:
+  // runSearch() reads state.q, and the option-drawer Search button omits an empty q.
+  const hasFields = Object.keys(state.fields).length > 0;
+  const hasGeo = !!(state.geo.lat && state.geo.lon && state.geo.distance);
+  const hasExQ = state.exQ.length > 0;
+  if (!state.q && !hasFields && !hasGeo && !hasExQ) return;
   runSearch();
 }
 
