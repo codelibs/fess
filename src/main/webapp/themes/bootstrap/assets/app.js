@@ -194,11 +194,8 @@ function attachHomeView() {
       const input = document.getElementById("contentQuery");
       const q = input ? input.value.trim() : "";
       if (q) {
-        // Carry the up-front home option selections (sort / num / lang) into the
-        // search URL so the executed search honours them. runFromUrl() parses them.
         const params = new URLSearchParams();
         params.set("q", q);
-        search.applyHomeOptions(params);
         router.navigate("/search?" + params.toString());
         // JSP parity: disable the submit button for 3s after navigation has been
         // triggered, to prevent rapid double-submits.

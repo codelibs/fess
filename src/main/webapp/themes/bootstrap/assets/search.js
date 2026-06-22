@@ -978,78 +978,6 @@ function renderLabelOptions() {
 }
 
 /**
- * Parity with searchOptions.jsp — populate the up-front home-view option selects
- * (#home-sort-select / #home-num-select / #home-lang-select / #home-label-select)
- * from the same config that drives the results-view selects.
- *
- * home-lang: multi-select (searchOptions.jsp:75-84 uses multiple="true").
- * home-label: multi-select, shown only when features.display_label_type && label_options non-empty
- *             (parity with searchOptions.jsp:85-97, parity-r3 Task 2).
- */
-function renderHomeOptions() {
-  const copy = (srcId, destId) => {
-    const src = document.getElementById(srcId);
-    const dest = document.getElementById(destId);
-    if (!src || !dest) return dest;
-    // Clear then clone each option (no innerHTML — matches the clear idiom in
-    // renderNumOptions/renderLangOptions and avoids the no-unsanitized rule).
-    while (dest.firstChild) dest.removeChild(dest.firstChild);
-    for (const o of src.options) dest.appendChild(o.cloneNode(true));
-    return dest;
-  };
-
-  const homeSort = copy("sortSearchOption", "home-sort-select");
-  if (homeSort) homeSort.value = state.sort || "";
-
-  const homeNum = copy("numSearchOption", "home-num-select");
-  if (homeNum) homeNum.value = String(state.num || 10);
-
-  // Home lang is multi-select (parity with searchOptions.jsp multiple="true").
-  // Copy options from the drawer lang select; restore selected state from state.lang.
-  const homeLang = copy("langSearchOption", "home-lang-select");
-  if (homeLang) {
-    const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
-    for (const o of homeLang.options) {
-      o.selected = selected.includes(o.value);
-    }
-    // Ensure multi-select attributes are present (the HTML already has them,
-    // but guard against any copy-induced attribute loss).
-    homeLang.setAttribute("multiple", "");
-    // Match the size set by renderLangOptions for the results select.
-    homeLang.setAttribute("size", "4");
-  }
-
-  // Home label multi-select — parity with searchOptions.jsp:85-97.
-  // Show only when display_label_type feature is enabled and options are non-empty.
-  const cfg = api.getConfig() || {};
-  const labelOpts = cfg.label_options || [];
-  const showLabel = !!(cfg.features && cfg.features.display_label_type) && labelOpts.length > 0;
-
-  const homeLabelSel = document.getElementById("home-label-select");
-  const homeLabelLbl = homeLabelSel && homeLabelSel.previousElementSibling;
-  if (homeLabelSel) {
-    if (!showLabel) {
-      homeLabelSel.classList.add("d-none");
-      if (homeLabelLbl && homeLabelLbl.tagName === "LABEL") homeLabelLbl.classList.add("d-none");
-    } else {
-      homeLabelSel.classList.remove("d-none");
-      if (homeLabelLbl && homeLabelLbl.tagName === "LABEL") homeLabelLbl.classList.remove("d-none");
-
-      // Rebuild options from cfg.label_options.
-      while (homeLabelSel.firstChild) homeLabelSel.removeChild(homeLabelSel.firstChild);
-      const selectedLabels = state.fields.label || [];
-      for (const lo of labelOpts) {
-        const opt = document.createElement("option");
-        opt.value = lo.value != null ? lo.value : "";
-        opt.textContent = lo.label || lo.value || "";
-        opt.selected = selectedLabels.includes(opt.value);
-        homeLabelSel.appendChild(opt);
-      }
-    }
-  }
-}
-
-/**
  * (Re-)initialise all search option selects from config. Safe to call multiple times.
  * Listeners are attached once in attach(); this only repopulates the options.
  */
@@ -1058,8 +986,6 @@ function renderSearchOptions() {
   renderNumOptions();
   renderLangOptions();
   renderLabelOptions();
-  // Mirror the rendered options into the home-view option panel.
-  renderHomeOptions();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1081,49 +1007,6 @@ function syncSearchInputs(q) {
   const home   = document.getElementById("contentQuery");
   if (header) header.value = q;
   if (home)   home.value   = q;
-}
-
-/**
- * Parity with index.jsp — apply the up-front home-view option selections onto a
- * search query string. Reads #home-sort-select / #home-num-select /
- * #home-lang-select and appends the corresponding params (sort / num / lang) so
- * the executed search honours the home panel choices. Only non-empty values are
- * applied so an unset option never clobbers the server defaults. The resulting
- * params flow through runFromUrl(), which already parses sort / num / lang.
- *
- * @param {URLSearchParams} params query params to mutate in place
- * @returns {URLSearchParams} the same params object, for chaining
- */
-export function applyHomeOptions(params) {
-  const sortSel = document.getElementById("home-sort-select");
-  if (sortSel && sortSel.value) params.set("sort", sortSel.value);
-
-  const numSel = document.getElementById("home-num-select");
-  if (numSel && numSel.value) params.set("num", numSel.value);
-
-  // home-lang is multi-select (parity with searchOptions.jsp multiple="true");
-  // collect all selected options and emit repeated lang= params.
-  const langSel = document.getElementById("home-lang-select");
-  if (langSel) {
-    const selectedLangs = Array.from(langSel.selectedOptions).map(o => o.value).filter(v => v !== "");
-    if (selectedLangs.length > 0) {
-      params.delete("lang");
-      selectedLangs.forEach(v => params.append("lang", v));
-    }
-  }
-
-  // home-label multi-select — carry selected labels as fields.label params
-  // (parity with searchOptions.jsp:85-97, parity-r3 Task 2).
-  const labelSel = document.getElementById("home-label-select");
-  if (labelSel && !labelSel.classList.contains("d-none")) {
-    const selectedLabels = Array.from(labelSel.selectedOptions).map(o => o.value).filter(v => v !== "");
-    if (selectedLabels.length > 0) {
-      params.delete("fields.label");
-      selectedLabels.forEach(v => params.append("fields.label", v));
-    }
-  }
-
-  return params;
 }
 
 /**
@@ -2028,13 +1911,6 @@ function resetOptionsDOM() {
     if (sel.multiple) { Array.from(sel.options).forEach(o => { o.selected = false; }); }
     else { sel.selectedIndex = 0; }
   });
-  // Home-view up-front option selects (same treatment as drawer selects).
-  ["home-sort-select", "home-num-select", "home-lang-select", "home-label-select"].forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    if (sel.multiple) { Array.from(sel.options).forEach(o => { o.selected = false; }); }
-    else { sel.selectedIndex = 0; }
-  });
 }
 
 /**
@@ -2047,7 +1923,6 @@ function resetOptionsDOM() {
  *  - module-level `state` to initial values
  *  - geo inputs (#geo-lat, #geo-lon, #geo-distance)
  *  - drawer selects (#numSearchOption, #sortSearchOption, #langSearchOption, #labelSearchOption)
- *  - home up-front selects (#home-sort-select, #home-num-select, #home-lang-select, #home-label-select)
  *  - both query inputs via syncSearchInputs("") (#query + #contentQuery)
  */
 export function clearSearchState() {
