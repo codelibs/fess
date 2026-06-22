@@ -1155,6 +1155,14 @@ export function runFromUrl() {
   } else { state.geo = { lat: "", lon: "", distance: "" }; }
   // ADV-2: hydrate lang / fields.* / ex_q from URL (forwarded by advance search submit)
   state.lang = params.getAll("lang").filter(v => v !== "");
+  // Facet selections (sidebar label facets and facet query views) live only
+  // in memory and are never written to the URL. Every navigation re-derives filter
+  // state from the URL, so these in-memory stores must be cleared too; otherwise a
+  // previously clicked facet survives a search-options submit (which navigates with
+  // only fields.* in the URL) and gets merged back into the request, applying both
+  // the old facet label and the new one.
+  state.facets = {};
+  state.facetQueries = [];
   state.fields = {};
   for (const [key, value] of params.entries()) {
     if (key.startsWith("fields.") && value !== "") {
