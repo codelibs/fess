@@ -1163,6 +1163,9 @@ export function runFromUrl() {
   // the old facet label and the new one.
   state.facets = {};
   state.facetQueries = [];
+  // The similar-docs hash (sdh) is likewise memory-only and merged into the
+  // request, so it must be cleared on navigation too.
+  state.sdh = "";
   state.fields = {};
   for (const [key, value] of params.entries()) {
     if (key.startsWith("fields.") && value !== "") {
