@@ -1116,6 +1116,22 @@ export function attach() {
       for (const key of [...params.keys()]) {
         if (key.startsWith("fields.") || key === "ex_q") params.delete(key);
       }
+      // JSP parity: apply the current sort / num / lang drawer selections rather
+      // than only carrying over the previous URL values, so a manual change to these
+      // selects takes effect when the header Search button is pressed (the selects no
+      // longer auto-run a search on change). Guarded on config so the selects are
+      // populated before we read them.
+      if (api.getConfig()) {
+        const sortSel = document.getElementById("sortSearchOption");
+        if (sortSel) { if (sortSel.value) params.set("sort", sortSel.value); else params.delete("sort"); }
+        const numSel = document.getElementById("numSearchOption");
+        if (numSel && numSel.value) params.set("num", numSel.value);
+        const langSel = document.getElementById("langSearchOption");
+        if (langSel) {
+          params.delete("lang");
+          Array.from(langSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("lang", v));
+        }
+      }
       navigate("/search?" + params.toString());
       // JSP parity: disable the submit button for 3s after the search has been
       // triggered, to prevent rapid double-submits.
@@ -1123,22 +1139,16 @@ export function attach() {
     });
   }
   // Search-options "Clear" button (searchOptions.jsp #searchOptionsClearButton):
-  // reset the drawer option controls (num/sort/lang/label + geo) to their defaults,
-  // then dispatch change events so the existing select handlers re-run the search.
+  // reset the drawer option controls (num/sort/lang/label + geo) to their defaults.
+  // JSP parity: this is a purely visual reset — it does NOT re-run the search.
+  // The reset values are applied on the next Search-button press, matching searchOptions.jsp
+  // whose Clear button only resets the select indices and never submits the form. (The geo
+  // inputs are cleared visually here too; the in-memory geo filter is dropped on the next
+  // search when the now-empty geo inputs are read.)
   const optClearBtn = document.getElementById("searchOptionsClearButton");
   if (optClearBtn) {
     optClearBtn.addEventListener("click", () => {
-      // Silent DOM reset (no change dispatch, no re-search).
       resetOptionsDOM();
-      // geo has no change handler that syncs state, so reset state.geo explicitly here
-      // before the change dispatches below trigger a re-search (parity: facet-clear handler).
-      state.geo = { lat: "", lon: "", distance: "" };
-      // Dispatch change on each drawer select so the existing handlers (sort/num/lang)
-      // pick up the reset value and re-run the search — preserving original behaviour.
-      ["numSearchOption", "sortSearchOption", "langSearchOption", "labelSearchOption"].forEach(id => {
-        const sel = document.getElementById(id);
-        if (sel) sel.dispatchEvent(new Event("change", { bubbles: true }));
-      });
     });
   }
   // Search-options drawer "Search" button. It is form="search-form" (the header form),
@@ -1251,31 +1261,13 @@ export function attach() {
   // Geo filter apply/clear is handled by the drawer's main Search / Clear buttons
   // (geo inputs were migrated into #searchOptions); no separate geo buttons.
 
-  // Sort select — options are populated by renderSortOptions() after config loads
-  const sortSelect = document.getElementById("sortSearchOption");
-  if (sortSelect) sortSelect.addEventListener("change", () => {
-    state.sort = sortSelect.value || "";
-    state.start = 0;
-    runSearch();
-  });
-
-  // Num select
-  const numSelect = document.getElementById("numSearchOption");
-  if (numSelect) numSelect.addEventListener("change", () => {
-    state.num = Number(numSelect.value) || 10;
-    state.start = 0;
-    runSearch();
-  });
-
-  // Lang multi-select: collect all selected option values; when "All" (value="")
-  // is selected or nothing is selected, reset to empty array.
-  const langSelect = document.getElementById("langSearchOption");
-  if (langSelect) langSelect.addEventListener("change", () => {
-    const selected = Array.from(langSelect.selectedOptions).map(o => o.value).filter(v => v !== "");
-    state.lang = selected;
-    state.start = 0;
-    runSearch();
-  });
+  // JSP parity: the sort / num / lang drawer selects do NOT auto-run a search on
+  // change. The default JSP search screen only applies these options when a Search button
+  // is pressed, so changing a select here is a no-op until the user submits — either via
+  // the header form (#search-form, which reads these selects in its submit handler above)
+  // or the drawer's own Search button (#searchOptions button[type="submit"], wired above).
+  // Re-introducing a `change -> runSearch()` handler here would resurrect the reported bug
+  // where results changed before the Search button was pressed.
 
   // Populate search option selects once config is available.
   // api.init() is awaited by app.js before attach() is called, so getConfig()

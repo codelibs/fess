@@ -1277,4 +1277,52 @@ public class BundledBootstrapThemeTest {
         assertFalse(js.contains("submitOnSelect"),
                 "advance.js must NOT pass submitOnSelect — advanced search suggestion clicks must remain fill-only");
     }
+
+    // ── sort/num/lang apply on Search-button press, not on select change ──────────
+
+    /**
+     * The sort / num / lang drawer selects must NOT auto-run a search on change.
+     * The default JSP search screen only applies these options when a Search button is
+     * pressed, so the SPA must do the same: no {@code change -> runSearch()} wiring on the
+     * selects, and the Clear button must not dispatch synthetic change events to re-search.
+     */
+    @Test
+    public void test_searchJs_optionSelectsDoNotAutoSearchOnChange() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertFalse(js.contains("sortSelect.addEventListener(\"change\""),
+                "search.js must not auto-run a search when the sort select changes");
+        assertFalse(js.contains("numSelect.addEventListener(\"change\""),
+                "search.js must not auto-run a search when the num select changes");
+        assertFalse(js.contains("langSelect.addEventListener(\"change\""),
+                "search.js must not auto-run a search when the lang select changes");
+        // The Clear button must not dispatch synthetic change events to trigger a re-search.
+        assertFalse(js.contains("new Event(\"change\""), "search.js Clear button must not dispatch change events to re-run the search");
+    }
+
+    /**
+     * The header form (#search-form) submit must apply the current sort / num / lang
+     * drawer selections so a manual change to a select is honoured when the Search button is
+     * pressed (since the selects no longer auto-run a search on change).
+     */
+    @Test
+    public void test_searchJs_headerSubmitAppliesOptionSelects() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        // Sort is set when chosen and cleared when the placeholder is selected.
+        assertTrue(js.contains("params.delete(\"sort\")"),
+                "search.js header submit must clear the sort param when the sort select is unset");
+        // Lang params are rebuilt from the current multi-select selection.
+        assertTrue(js.contains("params.delete(\"lang\")"), "search.js header submit must rebuild lang params from the lang select");
+    }
+
+    /**
+     * The home form (home-search-form) submit must carry the shared drawer's
+     * sort / num / lang selections into the first search.
+     */
+    @Test
+    public void test_appJs_homeSubmitCarriesOptionSelects() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("getElementById(\"sortSearchOption\")"), "app.js home submit must read the sort select");
+        assertTrue(js.contains("getElementById(\"numSearchOption\")"), "app.js home submit must read the num select");
+        assertTrue(js.contains("getElementById(\"langSearchOption\")"), "app.js home submit must read the lang select");
+    }
 }
