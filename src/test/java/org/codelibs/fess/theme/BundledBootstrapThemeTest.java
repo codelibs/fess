@@ -447,9 +447,12 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
-    public void test_searchJs_populatesHomeOptions() throws Exception {
+    public void test_searchJs_populatesLabelOption() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("home-sort-select"), "search.js must populate the home option controls");
+        // The home and results views share one #searchOptions drawer; search.js dynamically
+        // populates its label multi-select (#labelSearchOption) from the config label options
+        // (renderLabelOptions). The sort/num/lang selects are static in index.html.
+        assertTrue(js.contains("labelSearchOption"), "search.js must populate the shared label option control");
     }
 
     @Test
