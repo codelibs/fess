@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "검색 결과로 돌아가기",
   "labels.cache_not_found": "캐시된 콘텐츠를 사용할 수 없습니다.",
   "labels.cache_loading": "캐시된 콘텐츠를 불러오는 중…",
+  "labels.search_loading": "검색 중…",
   "labels.search_result_cache": "캐시",
   "labels.search_cache_msg": "이 페이지는 {0}의 캐시입니다. {1}에 존재했던 페이지의 스냅샷입니다.",
   "labels.search_unknown": "알 수 없음",

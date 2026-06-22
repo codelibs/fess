@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Zurück zu den Ergebnissen",
   "labels.cache_not_found": "Der zwischengespeicherte Inhalt ist nicht verfügbar.",
   "labels.cache_loading": "Lade zwischengespeicherten Inhalt…",
+  "labels.search_loading": "Suche läuft…",
   "labels.search_result_cache": "Cache",
   "labels.search_cache_msg": "Dies ist ein Cache von {0}. Es ist ein Schnappschuss der Seite, wie sie am {1} erschien.",
   "labels.search_unknown": "Unbekannt",

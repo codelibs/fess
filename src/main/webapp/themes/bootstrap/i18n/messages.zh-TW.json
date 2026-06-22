@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "返回搜尋結果",
   "labels.cache_not_found": "快取內容無法使用。",
   "labels.cache_loading": "正在載入快取內容…",
+  "labels.search_loading": "正在搜尋…",
   "labels.search_result_cache": "快取",
   "labels.search_cache_msg": "此頁面是 {0} 的快取。它是 {1} 時頁面的快照。",
   "labels.search_unknown": "未知",
