@@ -1095,7 +1095,17 @@ export function runFromUrl() {
   const hasFields = Object.keys(state.fields).length > 0;
   const hasGeo = !!(state.geo.lat && state.geo.lon && state.geo.distance);
   const hasExQ = state.exQ.length > 0;
-  if (!state.q && !hasFields && !hasGeo && !hasExQ) return;
+  if (!state.q && !hasFields && !hasGeo && !hasExQ) {
+    // A blank query with no conditions (e.g. a sort/num/lang-only URL such as
+    // /search?num=10) is not a search. JSP parity: SearchAction.doSearch() redirects
+    // such requests to the top page via redirectToRoot(), so mirror that here. Without
+    // this, the results view keeps showing the PREVIOUS query's results, because the
+    // results DOM is re-rendered only when runSearch() runs and neither showView() nor
+    // clearSearchState() clears it. Use replace: true so the empty /search entry does
+    // not linger in history (matching the server-side redirect).
+    navigate("/", { replace: true });
+    return;
+  }
   runSearch();
 }
 
