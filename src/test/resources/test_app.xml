@@ -11,4 +11,10 @@
 	<!-- Stateless helper used by v2 chat API handlers/tests (its getUserId DI path is exercised
 	     only in production; handler tests override the handler getUserId seam). -->
 	<component name="chatApiHelper" class="org.codelibs.fess.helper.ChatApiHelper" />
+	<component name="v2EnvelopeWriter" class="org.codelibs.fess.api.v2.V2EnvelopeWriter" />
+	<component name="v2JsonBody" class="org.codelibs.fess.api.v2.handlers.V2JsonBody" />
+	<component name="v2UserPayloads" class="org.codelibs.fess.api.v2.handlers.UserPayloads" />
+	<component name="v2CsrfRequirement" class="org.codelibs.fess.api.v2.handlers.CsrfRequirement" />
+	<component name="v2DocIdValidator" class="org.codelibs.fess.api.v2.handlers.DocIdValidator" />
+	<component name="sseResponseHelper" class="org.codelibs.fess.helper.SseResponseHelper" />
 </components>

@@ -427,6 +427,71 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * Role-filter fail-open invariant (Excessive Data Exposure / OWASP API3:2023 Broken Object
+     * Property Level Authorization). The role filter in {@code QueryHelper#buildRoleQuery} and
+     * {@code SearchHelper} is applied only when {@code !roleSet.isEmpty()} (the
+     * {@code if (!roleSet.isEmpty())} guard at QueryHelper.java:170-177 / SearchHelper.java:409-413).
+     * If {@code RoleQueryHelper#build} ever returned an empty set in an anonymous context, that
+     * guard would skip the ACL filter entirely and the v2 search API would expose every document
+     * (ACL fully open). This test pins the invariant that an anonymous (no userBean) v2/JSON
+     * request always yields a non-empty role set seeded with the configured guest role(s), so the
+     * guard always engages.
+     *
+     * <p>The anonymous context here is a request with no cached {@code userRoles} attribute, no
+     * presented access token, and no logged-in {@code FessUserBean}; with
+     * {@code api.access.token.required=false} (see MockFessConfig#getApiAccessTokenRequiredAsBoolean)
+     * the helper falls into the guest-role backfill branch (RoleQueryHelper.java:186-193).
+     * {@code processAccessToken} is overridden to return {@code false} (no token) so the test does
+     * not require the OpenSearch-backed {@code AccessTokenService} / {@code AccessTokenBhv}, while
+     * still exercising the real guest-backfill logic.
+     */
+    @Test
+    public void test_build_anonymousJson_isNonEmptyWithGuestRole() {
+        final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+                // Anonymous request: no access token presented.
+                return false;
+            }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                // Anonymous request: no logged-in user. Returning empty keeps this test off the shared
+                // container's FessLoginAssist/UserBhv resolution path, which intermittently throws
+                // AutoBindingFailureException when a concurrent test clears ComponentUtil.componentMap
+                // under surefire parallel-class execution. The orElse branch (guest-role backfill) is
+                // exactly what this test asserts.
+                return org.dbflute.optional.OptionalThing.empty();
+            }
+        };
+        roleQueryHelper.init();
+
+        // Anonymous v2/JSON request: a request exists but no userRoles attribute and no userBean.
+        getMockRequest();
+
+        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.JSON);
+
+        // The core invariant: never empty, otherwise the role filter guard fails open.
+        assertFalse(roleSet.isEmpty(), "anonymous JSON role set must never be empty (role filter would fail open): " + roleSet);
+
+        // Every configured guest role backfilled by build() (RoleQueryHelper.java:191) must be
+        // present. We compare against the live getSearchGuestRoleList() that build() itself reads,
+        // so the assertion is independent of how guest roles are encoded/prefixed in this harness.
+        final List<String> guestRoleList = ComponentUtil.getFessConfig().getSearchGuestRoleList();
+        // Defense-in-depth: the underlying invariant the backfill depends on must itself be non-empty.
+        assertFalse(guestRoleList.isEmpty(), "search.guest.role must be non-empty; emptying it fails the role filter open");
+        for (final String guestRole : guestRoleList) {
+            assertTrue(roleSet.contains(guestRole), "anonymous JSON role set must contain guest role '" + guestRole + "': " + roleSet);
+        }
+    }
+
     @Test
     public void test_build_withRequest() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {

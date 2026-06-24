@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "返回搜索结果",
   "labels.cache_not_found": "缓存内容不可用。",
   "labels.cache_loading": "正在加载缓存内容…",
+  "labels.search_loading": "正在搜索…",
   "labels.search_result_cache": "缓存",
   "labels.search_cache_msg": "此页面是 {0} 的缓存。它是 {1} 时页面的快照。",
   "labels.search_unknown": "未知",

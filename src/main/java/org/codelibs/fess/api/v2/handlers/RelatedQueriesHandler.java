@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -73,7 +72,7 @@ public class RelatedQueriesHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
@@ -88,9 +87,9 @@ public class RelatedQueriesHandler {
             }
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("queries", queries);
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/related-queries");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/related-queries");
         }
     }
 }

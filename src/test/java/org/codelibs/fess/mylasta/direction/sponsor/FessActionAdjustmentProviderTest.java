@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -89,5 +91,48 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
                 return text;
             }
         };
+    }
+
+    // --- CORS deny-set tests ---
+
+    @Test
+    public void test_parse_stripsCorsHeaders_global() {
+        final FessConfig fessConfig =
+                createFessConfigWithResponseHeaders("*=Access-Control-Allow-Origin:https://evil\n*=X-Custom:ok\n*=Timing-Allow-Origin:*");
+        final FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
+        final List<String> emitted = collectHeaders(provider, "application/json");
+        assertEquals(List.of("X-Custom=ok"), emitted);
+    }
+
+    @Test
+    public void test_parse_stripsCorsHeaders_perMime() {
+        final FessConfig fessConfig = createFessConfigWithResponseHeaders(
+                "text/html=Access-Control-Allow-Credentials:true\ntext/html=X-Frame-Options:SAMEORIGIN");
+        final FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
+        final List<String> emitted = collectHeaders(provider, "text/html");
+        assertEquals(List.of("X-Frame-Options=SAMEORIGIN"), emitted);
+    }
+
+    @Test
+    public void test_parse_keepsNonCorsHeaders() {
+        final FessConfig fessConfig = createFessConfigWithResponseHeaders("*=Referrer-Policy:strict-origin-when-cross-origin");
+        final FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
+        final List<String> emitted = collectHeaders(provider, "application/json");
+        assertEquals(List.of("Referrer-Policy=strict-origin-when-cross-origin"), emitted);
+    }
+
+    @Test
+    public void test_parse_varyIsKept_forMergeByContainer() {
+        // Vary is NOT in the deny set; it is allowed through so the container merges it with CorsFilter's Vary: Origin.
+        final FessConfig fessConfig = createFessConfigWithResponseHeaders("*=Vary:Accept-Encoding");
+        final FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
+        final List<String> emitted = collectHeaders(provider, "application/json");
+        assertEquals(List.of("Vary=Accept-Encoding"), emitted);
+    }
+
+    private List<String> collectHeaders(final FessActionAdjustmentProvider provider, final String mimeType) {
+        final List<String> emitted = new ArrayList<>();
+        provider.adjustActionResponseHeaders(mimeType, (k, v) -> emitted.add(k + "=" + v));
+        return emitted;
     }
 }

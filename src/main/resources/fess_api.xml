@@ -9,6 +9,14 @@
 
 	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager"/>
 
+	<!-- v2 shared components. -->
+	<component name="v2EnvelopeWriter" class="org.codelibs.fess.api.v2.V2EnvelopeWriter"/>
+	<component name="v2JsonBody" class="org.codelibs.fess.api.v2.handlers.V2JsonBody"/>
+	<component name="v2UserPayloads" class="org.codelibs.fess.api.v2.handlers.UserPayloads"/>
+	<component name="v2CsrfRequirement" class="org.codelibs.fess.api.v2.handlers.CsrfRequirement"/>
+	<component name="v2DocIdValidator" class="org.codelibs.fess.api.v2.handlers.DocIdValidator"/>
+	<component name="sseResponseHelper" class="org.codelibs.fess.helper.SseResponseHelper"/>
+
 	<!-- v2 request handlers, injected into searchApiV2Manager by field name. -->
 	<component name="searchHandler" class="org.codelibs.fess.api.v2.handlers.SearchHandler"/>
 	<component name="scrollSearchHandler" class="org.codelibs.fess.api.v2.handlers.ScrollSearchHandler"/>
@@ -24,9 +32,15 @@
 	<component name="chatStreamHandler" class="org.codelibs.fess.api.v2.handlers.ChatStreamHandler"/>
 	<component name="chatSessionClearHandler" class="org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler"/>
 	<component name="cacheHandler" class="org.codelibs.fess.api.v2.handlers.CacheHandler"/>
+	<component name="healthHandler" class="org.codelibs.fess.api.v2.handlers.HealthHandler"/>
+	<component name="suggestWordsHandler" class="org.codelibs.fess.api.v2.handlers.SuggestWordsHandler"/>
+	<component name="labelsHandler" class="org.codelibs.fess.api.v2.handlers.LabelsHandler"/>
+	<component name="popularWordsHandler" class="org.codelibs.fess.api.v2.handlers.PopularWordsHandler"/>
 	<component name="loginHandler" class="org.codelibs.fess.api.v2.handlers.LoginHandler"/>
 	<component name="relatedQueriesHandler" class="org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler"/>
 	<component name="relatedContentHandler" class="org.codelibs.fess.api.v2.handlers.RelatedContentHandler"/>
+	<component name="targetOriginResolver" class="org.codelibs.fess.api.v2.handlers.TargetOriginResolver"/>
+	<component name="originValidator" class="org.codelibs.fess.api.v2.handlers.OriginValidator"/>
 
 	<component name="searchApiV2Manager" class="org.codelibs.fess.api.v2.SearchApiV2Manager">
 	</component>

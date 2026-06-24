@@ -91,6 +91,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.SessionTrackingMode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -228,10 +229,9 @@ public class ViewHelper {
         }
         try {
             final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
-            servletContext.setSessionTrackingModes(
-                    fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf).collect(Collectors.toSet()));
+            configureSessionCookie(servletContext, fessConfig);
         } catch (final Throwable t) {
-            logger.warn("Failed to set SessionTrackingMode.", t);
+            logger.warn("Failed to configure the session cookie.", t);
         }
 
         split(fessConfig.getQueryFacetQueries(), "\n").of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> {
@@ -262,6 +262,24 @@ public class ViewHelper {
 
         split(fessConfig.getResponseInlineMimetypes(), ",")
                 .of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(inlineMimeTypeSet::add));
+    }
+
+    /**
+     * Configures the session cookie ({@code JSESSIONID}) on the given servlet context.
+     * Applies the configured session tracking modes and, when {@code session.cookie.secure}
+     * is enabled, adds the {@code Secure} attribute (recommended for HTTPS deployments).
+     * Must be called while the servlet context is still starting (i.e. before it becomes
+     * available), which is the only state in which {@link SessionCookieConfig} may be mutated.
+     *
+     * @param servletContext the servlet context to configure
+     * @param fessConfig the configuration holding the session cookie settings
+     */
+    protected void configureSessionCookie(final ServletContext servletContext, final FessConfig fessConfig) {
+        servletContext.setSessionTrackingModes(
+                fessConfig.getSessionTrackingModesAsSet().stream().map(SessionTrackingMode::valueOf).collect(Collectors.toSet()));
+        if (fessConfig.isSessionCookieSecureEnabled()) {
+            servletContext.getSessionCookieConfig().setSecure(true);
+        }
     }
 
     /**

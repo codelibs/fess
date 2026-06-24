@@ -115,7 +115,7 @@ public class MeHandlerTest extends UnitFessTestCase {
 
         @Override
         public String[] getRoleNames() {
-            return null; // intentionally null — UserPayloads.toJson must handle this
+            return null; // intentionally null — ComponentUtil.getV2UserPayloads().toJson must handle this
         }
 
         @Override

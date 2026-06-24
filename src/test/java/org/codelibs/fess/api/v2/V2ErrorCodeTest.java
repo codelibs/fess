@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>The enum is part of the {@code /api/v2} wire contract — its string codes
  * are emitted into the {@code error.code} field of every error envelope, and
- * its HTTP statuses drive {@code V2EnvelopeWriter.writeError}'s
+ * its HTTP statuses drive {@code new V2EnvelopeWriter().writeError}'s
  * {@code res.setStatus} call. Locking down both surfaces here prevents an
  * accidental rename or status flip from silently breaking SPA clients.</p>
  */

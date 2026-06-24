@@ -21,10 +21,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -77,6 +79,19 @@ public class ClickHandler {
      */
     private static final AtomicBoolean userInfoHelperWarned = new AtomicBoolean(false);
 
+    /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
+    private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
+
+    /** Maximum length of {@code query_id} as declared in the OpenAPI spec. */
+    private static final int QUERY_ID_MAX_LENGTH = 100;
+
+    /**
+     * Upper bound for the 1-based click rank; aligns with OpenSearch default
+     * {@code index.max_result_window}; values above this (including ones that
+     * overflow int) are rejected to limit analytics forgery (L-5).
+     */
+    private static final int MAX_RANK = 10000;
+
     /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
@@ -98,11 +113,11 @@ public class ClickHandler {
      * @param epochMs epoch millis
      * @return UTC-anchored {@link LocalDateTime}
      */
-    static LocalDateTime epochMsToUtcLocalDateTime(final long epochMs) {
+    LocalDateTime epochMsToUtcLocalDateTime(final long epochMs) {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMs), ZoneOffset.UTC);
     }
 
-    private static String stringOrNull(final Map<String, Object> body, final String key) {
+    private String stringOrNull(final Map<String, Object> body, final String key) {
         final Object v = body.get(key);
         if (v == null) {
             return null;
@@ -123,13 +138,13 @@ public class ClickHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig cfg = ComponentUtil.getFessConfig();
         if (!cfg.isSearchLog()) {
             // Feature disabled — succeed without doing anything (fire-and-forget contract).
-            V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", false));
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, Map.of("ok", true, "logged", false));
             return;
         }
         // m-15: check session BEFORE parsing the body so anonymous callers short-circuit
@@ -150,34 +165,78 @@ public class ClickHandler {
         if (userSessionId == null) {
             // Anonymous caller: a click log without a session id is meaningless,
             // so report success with logged:false rather than failing the request.
-            V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", false));
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, Map.of("ok", true, "logged", false));
             return;
         }
         final Map<String, Object> body;
         try {
-            body = V2JsonBody.read(req, MAX_BODY_BYTES);
+            body = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
             return;
         } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
             return;
         } catch (final V2JsonBody.MalformedJsonException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
         final String docId = stringOrNull(body, "doc_id");
         final String queryId = stringOrNull(body, "query_id");
-        if (!DocIdValidator.isValid(docId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
+        if (!ComponentUtil.getV2DocIdValidator().isValid(docId)) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
+        }
+        if (queryId != null) {
+            if (queryId.length() > QUERY_ID_MAX_LENGTH) {
+                ComponentUtil.getV2EnvelopeWriter()
+                        .writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id exceeds the maximum length of " + QUERY_ID_MAX_LENGTH);
+                return;
+            }
+            if (!QUERY_ID_PATTERN.matcher(queryId).matches()) {
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id contains invalid characters");
+                return;
+            }
+        }
+        final Object rt = body.get("rt");
+        final Object rank = body.get("rank");
+        if (rt instanceof Number && ((Number) rt).longValue() < 0) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt must not be negative");
+            return;
+        }
+        if (rt instanceof Number && ((Number) rt).longValue() > cfg.getApiV2ClickMaxRtAsLong()) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt exceeds the maximum");
+            return;
+        }
+        if (rank instanceof Number && ((Number) rank).intValue() < 0) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank must not be negative");
+            return;
+        }
+        // rank upper-bound guard (L-5): evaluate as long to also catch int-overflow values.
+        if (rank instanceof Number && ((Number) rank).longValue() > MAX_RANK) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rank exceeds the maximum");
+            return;
+        }
+        // query_id membership (L-5, best-effort): only reject a provable mismatch; skip when the
+        // per-session result set is unknown/empty so logging is never broken in default deployments.
+        if (StringUtil.isNotBlank(queryId)) {
+            String[] resultDocIds;
+            try {
+                resultDocIds = ComponentUtil.getUserInfoHelper().getResultDocIds(queryId);
+            } catch (final RuntimeException e) {
+                resultDocIds = null; // unverifiable; do not break logging
+            }
+            if (resultDocIds != null && resultDocIds.length > 0 && !ArrayUtils.contains(resultDocIds, docId)) {
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not in search result");
+                return;
+            }
         }
         try {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final OptionalEntity<Map<String, Object>> docOpt = searchHelper.getDocumentByDocId(docId,
                     new String[] { cfg.getIndexFieldId(), cfg.getIndexFieldUrl() }, OptionalThing.empty());
             if (!docOpt.isPresent()) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
                 return;
             }
             final Map<String, Object> doc = docOpt.get();
@@ -187,7 +246,6 @@ public class ClickHandler {
             clickLog.setUrlId((String) doc.get(cfg.getIndexFieldId()));
             clickLog.setUrl(url);
             clickLog.setRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-            final Object rt = body.get("rt");
             if (rt instanceof Number) {
                 // m-8: use UTC so the same epoch-ms yields the same LocalDateTime regardless of
                 // host timezone; click logs are stored consistently across mixed-TZ clusters.
@@ -198,7 +256,6 @@ public class ClickHandler {
             clickLog.setUserSessionId(userSessionId);
             clickLog.setDocId(docId);
             clickLog.setQueryId(queryId);
-            final Object rank = body.get("rank");
             if (rank instanceof Number) {
                 clickLog.setOrder(((Number) rank).intValue());
             }
@@ -206,9 +263,9 @@ public class ClickHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("logged click: docId={}, queryId={}, url={}", docId, queryId, url);
             }
-            V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", true));
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, Map.of("ok", true, "logged", true));
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/click");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/click");
         }
     }
 }

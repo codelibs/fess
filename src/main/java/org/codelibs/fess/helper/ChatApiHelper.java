@@ -15,18 +15,23 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.api.v2.handlers.ChatRequestBody;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -50,6 +55,8 @@ import org.codelibs.fess.util.ComponentUtil;
 public class ChatApiHelper {
 
     private static final Logger logger = LogManager.getLogger(ChatApiHelper.class);
+
+    private static final Pattern SESSION_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._-]+$");
 
     /**
      * Default constructor for ChatApiHelper.
@@ -75,8 +82,10 @@ public class ChatApiHelper {
      * @param raw the raw request body map
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return a map of validated field filters, or an empty map when none are present
+     * @throws IOException if {@code fields.label} exceeds the configured maximum array size or per-element length
      */
-    public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
+    public Map<String, String[]> parseFieldFilters(final Map<String, Object> raw, final Map<String, List<String>> warnings)
+            throws IOException {
         // Support nested fields object: {"fields": {"label": ... }}
         Object labelsRaw = null;
         final Object fieldsObj = raw.get("fields");
@@ -93,6 +102,17 @@ public class ChatApiHelper {
         }
 
         final List<String> labelValues = toStringList(labelsRaw);
+        final org.codelibs.fess.mylasta.direction.FessConfig cfg = ComponentUtil.getFessConfig();
+        final int maxArraySize = cfg.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxElementLen = cfg.getApiV2ParamMaxLengthAsInteger();
+        if (labelValues.size() > maxArraySize) {
+            throw new ChatRequestBody.TooManyValuesException("fields.label exceeds the maximum number of values: " + maxArraySize);
+        }
+        for (final String v : labelValues) {
+            if (v != null && v.length() > maxElementLen) {
+                throw new ChatRequestBody.TooManyValuesException("fields.label element exceeds the maximum length: " + maxElementLen);
+            }
+        }
         if (labelValues.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -129,14 +149,26 @@ public class ChatApiHelper {
      * @param raw the raw request body map
      * @param warnings mutable map to collect rejected values (keyed by field name)
      * @return array of validated extra query strings; empty array when none present
+     * @throws IOException if {@code extra_queries} exceeds the configured maximum array size or per-element length
      */
-    public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
+    public String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) throws IOException {
         final Object exqRaw = raw.get("extra_queries");
         if (exqRaw == null) {
             return new String[0];
         }
 
         final List<String> values = toStringList(exqRaw);
+        final org.codelibs.fess.mylasta.direction.FessConfig cfg2 = ComponentUtil.getFessConfig();
+        final int maxArraySize2 = cfg2.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxElementLen2 = cfg2.getApiV2ParamMaxLengthAsInteger();
+        if (values.size() > maxArraySize2) {
+            throw new ChatRequestBody.TooManyValuesException("extra_queries exceeds the maximum number of values: " + maxArraySize2);
+        }
+        for (final String v : values) {
+            if (v != null && v.length() > maxElementLen2) {
+                throw new ChatRequestBody.TooManyValuesException("extra_queries element exceeds the maximum length: " + maxElementLen2);
+            }
+        }
         if (values.isEmpty()) {
             return new String[0];
         }
@@ -156,6 +188,59 @@ public class ChatApiHelper {
     }
 
     /**
+     * Parses a raw v2 chat JSON body into a validated {@link ChatRequestBody}.
+     *
+     * @param raw the parsed JSON request body
+     * @param maxMessageLength upper bound on the {@code message} length, in characters
+     * @return a validated request body
+     * @throws ChatRequestBody.InvalidSessionIdException if {@code session_id} exceeds 100 characters or contains invalid characters
+     * @throws ChatRequestBody.MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
+     * @throws ChatRequestBody.TooManyValuesException if {@code extra_queries} or {@code fields.label} exceeds the count or per-element length limit
+     * @throws IOException if validation reports an unrecoverable error
+     */
+    public ChatRequestBody parseRequestBody(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
+        final String message = trimmedOrNull(raw.get("message"));
+        final String sessionId = trimmedOrNull(raw.get("session_id"));
+        if (sessionId != null) {
+            if (sessionId.length() > 100) {
+                throw new ChatRequestBody.InvalidSessionIdException("session_id exceeds the maximum length of 100");
+            }
+            if (!SESSION_ID_PATTERN.matcher(sessionId).matches()) {
+                throw new ChatRequestBody.InvalidSessionIdException("session_id contains invalid characters");
+            }
+        }
+        if (message != null && message.length() > maxMessageLength) {
+            throw new ChatRequestBody.MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
+        }
+        final Map<String, List<String>> warnings = new HashMap<>();
+        final Map<String, String[]> fields = parseFieldFilters(raw, warnings);
+        final String[] extraQueries = parseExtraQueries(raw, warnings);
+        return new ChatRequestBody(message, sessionId, fields, extraQueries, warnings);
+    }
+
+    /**
+     * Converts chat sources to the v2 API response shape.
+     *
+     * @param sources list of chat sources to convert
+     * @return list of snake_case maps, one per source
+     */
+    public List<Map<String, Object>> toSourceMaps(final List<ChatSource> sources) {
+        final List<Map<String, Object>> result = new ArrayList<>(sources.size());
+        for (final ChatSource src : sources) {
+            final Map<String, Object> m = new LinkedHashMap<>();
+            m.put("rank", src.getIndex());
+            putIfNotNull(m, "title", src.getTitle());
+            putIfNotNull(m, "url", src.getUrl());
+            putIfNotNull(m, "doc_id", src.getDocId());
+            putIfNotNull(m, "snippet", src.getSnippet());
+            putIfNotNull(m, "url_link", src.getUrlLink());
+            putIfNotNull(m, "go_url", src.getGoUrl());
+            result.add(m);
+        }
+        return result;
+    }
+
+    /**
      * Coerces a raw request value into a list of strings: each element of a {@link List} is
      * converted via {@code toString()} (skipping nulls); any other non-null value yields a
      * single-element list. A {@code null} input yields an empty list.
@@ -163,7 +248,7 @@ public class ChatApiHelper {
      * @param raw the raw value (a {@code List}, a scalar, or {@code null})
      * @return the coerced string values (never {@code null})
      */
-    private static List<String> toStringList(final Object raw) {
+    private List<String> toStringList(final Object raw) {
         final List<String> values = new ArrayList<>();
         if (raw instanceof List<?> l) {
             for (final Object o : l) {
@@ -177,6 +262,20 @@ public class ChatApiHelper {
         return values;
     }
 
+    private String trimmedOrNull(final Object v) {
+        if (v == null) {
+            return null;
+        }
+        final String s = v.toString().trim();
+        return s.isEmpty() ? null : s;
+    }
+
+    private void putIfNotNull(final Map<String, Object> map, final String key, final Object value) {
+        if (value != null) {
+            map.put(key, value);
+        }
+    }
+
     /**
      * Partitions {@code values} against an allowlist, returning the accepted values and recording
      * rejected ones under {@code warningKey} in {@code warnings} (only when non-empty).
@@ -187,7 +286,7 @@ public class ChatApiHelper {
      * @param warnings mutable map collecting rejected values
      * @return the values present in {@code allowed} (never {@code null})
      */
-    private static List<String> partitionAllowed(final List<String> values, final Set<String> allowed, final String warningKey,
+    private List<String> partitionAllowed(final List<String> values, final Set<String> allowed, final String warningKey,
             final Map<String, List<String>> warnings) {
         final List<String> valid = new ArrayList<>();
         final List<String> rejected = new ArrayList<>();
@@ -233,6 +332,42 @@ public class ChatApiHelper {
             return username;
         }
         return guestUserCodeSupplier.get();
+    }
+
+    /**
+     * Resolves a rate-limit key for the chat endpoints that an anonymous caller cannot rotate.
+     *
+     * <p>Unlike {@link #getUserId()} (which keys chat-session continuity and intentionally falls
+     * back to the cookie-bound, client-supplied userCode for guests), this key must be robust
+     * against abuse: the guest userCode is only validated by regex/length, so a malicious client
+     * could forge and rotate it per request to obtain a fresh throttle bucket and bypass the limit.
+     * Authenticated (non-guest) callers are keyed by their server-validated username
+     * ({@code "u:"+username}); all other callers (guest / anonymous / forged / rotated / blank
+     * userCode) are keyed by the proxy-aware client IP ({@code "ip:"+clientIp}), which an anonymous
+     * attacker cannot freely rotate. The client-IP supplier is evaluated lazily so the IP is only
+     * resolved for guest visitors.</p>
+     *
+     * <p>The returned key is namespaced ({@code "u:"} for usernames, {@code "ip:"} for client IPs)
+     * so the two key spaces never collide, and is always non-blank so the chat throttle always
+     * applies.</p>
+     *
+     * <p>The client IP is resolved by the caller (the v2 chat handlers, via
+     * {@code RateLimitHelper#getClientIp}) rather than here, so this helper carries no servlet-API
+     * dependency and stays loadable by non-web Fess processes (e.g. the crawler) whose DI container
+     * also instantiates it. Behind a reverse proxy the per-IP key is only as trustworthy as the
+     * proxy setup: {@code rate.limit.trusted.proxies} gates which proxies' {@code X-Forwarded-For} /
+     * {@code X-Real-IP} headers are honored, so the fronting proxy must be trusted and must sanitize
+     * any inbound forwarded headers for the per-IP key to resist rotation.</p>
+     *
+     * @param username the authenticated username (may be {@link Constants#GUEST_USER})
+     * @param clientIpSupplier supplies the proxy-aware client IP for guest visitors
+     * @return the namespaced chat rate-limit key (never null/blank)
+     */
+    public String resolveChatRateLimitKey(final String username, final java.util.function.Supplier<String> clientIpSupplier) {
+        if (!Constants.GUEST_USER.equals(username)) {
+            return "u:" + username;
+        }
+        return "ip:" + clientIpSupplier.get();
     }
 
     /**

@@ -38,9 +38,15 @@ import java.util.Locale;
  * {@code CsrfRequirementCompleteCoverageTest} to pin the decision. Failing to do so is safe
  * (the new path is CSRF-required by default), but the coverage test will flag the omission.</p>
  */
-public final class CsrfRequirement {
+public class CsrfRequirement {
 
-    private CsrfRequirement() {
+    /**
+     * Creates a CSRF requirement evaluator. Registered as the DI component
+     * {@code v2CsrfRequirement} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getV2CsrfRequirement()}.
+     */
+    public CsrfRequirement() {
+        // default constructor
     }
 
     /**
@@ -59,7 +65,7 @@ public final class CsrfRequirement {
      * @param method the HTTP method (case-insensitive)
      * @return {@code true} if a valid CSRF token must accompany the request
      */
-    public static boolean requiresCsrf(final String subPath, final String method) {
+    public boolean requiresCsrf(final String subPath, final String method) {
         if (method == null) {
             return false;
         }
@@ -98,5 +104,27 @@ public final class CsrfRequirement {
         // If a new endpoint is added to SearchApiV2Manager.process and not listed here,
         // it inherits CSRF enforcement rather than being silently exempt.
         return true;
+    }
+
+    /**
+     * Returns whether the given HTTP method is a state-changing ("unsafe") method
+     * for the purposes of the baseline Origin check.
+     *
+     * <p>{@code GET}, {@code HEAD}, and {@code OPTIONS} are safe (idempotent, no
+     * state change) and therefore not subject to the Origin check; every other
+     * method ({@code POST}, {@code PUT}, {@code DELETE}, {@code PATCH}, …) is
+     * unsafe. Unlike {@link #requiresCsrf}, this does NOT exempt
+     * {@code /auth/login}: the Origin layer covers login CSRF as well (a missing
+     * Origin still allows the request, preserving non-browser auto-login).</p>
+     *
+     * @param method the HTTP method (case-insensitive); {@code null} is treated as safe
+     * @return {@code true} if the method is state-changing and must pass the Origin check
+     */
+    public static boolean isUnsafeMethod(final String method) {
+        if (method == null) {
+            return false;
+        }
+        final String m = method.toUpperCase(Locale.ROOT);
+        return !"GET".equals(m) && !"HEAD".equals(m) && !"OPTIONS".equals(m);
     }
 }

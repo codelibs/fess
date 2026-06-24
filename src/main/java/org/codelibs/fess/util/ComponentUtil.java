@@ -27,7 +27,12 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
+import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
+import org.codelibs.fess.api.v2.handlers.DocIdValidator;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
+import org.codelibs.fess.api.v2.handlers.UserPayloads;
+import org.codelibs.fess.api.v2.handlers.V2JsonBody;
 import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatContentFetcher;
@@ -76,6 +81,7 @@ import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
+import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ThemeHelper;
@@ -151,6 +157,18 @@ public final class ComponentUtil {
     private static final String LOGIN_RATE_LIMITER = "loginRateLimiter";
 
     private static final String SESSION_CSRF_TOKEN_MANAGER = "sessionCsrfTokenManager";
+
+    private static final String V2_ENVELOPE_WRITER = "v2EnvelopeWriter";
+
+    private static final String V2_JSON_BODY = "v2JsonBody";
+
+    private static final String V2_USER_PAYLOADS = "v2UserPayloads";
+
+    private static final String V2_CSRF_REQUIREMENT = "v2CsrfRequirement";
+
+    private static final String V2_DOC_ID_VALIDATOR = "v2DocIdValidator";
+
+    private static final String SSE_RESPONSE_HELPER = "sseResponseHelper";
 
     private static final String THEME_REGISTRY = "themeRegistry";
 
@@ -779,6 +797,54 @@ public final class ComponentUtil {
      */
     public static SessionCsrfTokenManager getSessionCsrfTokenManager() {
         return getComponent(SESSION_CSRF_TOKEN_MANAGER);
+    }
+
+    /**
+     * Gets the v2 envelope writer component.
+     * @return The v2 envelope writer.
+     */
+    public static V2EnvelopeWriter getV2EnvelopeWriter() {
+        return getComponent(V2_ENVELOPE_WRITER);
+    }
+
+    /**
+     * Gets the v2 JSON body reader component.
+     * @return The v2 JSON body reader.
+     */
+    public static V2JsonBody getV2JsonBody() {
+        return getComponent(V2_JSON_BODY);
+    }
+
+    /**
+     * Gets the v2 user payload builder component.
+     * @return The v2 user payload builder.
+     */
+    public static UserPayloads getV2UserPayloads() {
+        return getComponent(V2_USER_PAYLOADS);
+    }
+
+    /**
+     * Gets the v2 CSRF requirement component.
+     * @return The v2 CSRF requirement component.
+     */
+    public static CsrfRequirement getV2CsrfRequirement() {
+        return getComponent(V2_CSRF_REQUIREMENT);
+    }
+
+    /**
+     * Gets the v2 document id validator component.
+     * @return The v2 document id validator.
+     */
+    public static DocIdValidator getV2DocIdValidator() {
+        return getComponent(V2_DOC_ID_VALIDATOR);
+    }
+
+    /**
+     * Gets the SSE response helper component.
+     * @return The SSE response helper.
+     */
+    public static SseResponseHelper getSseResponseHelper() {
+        return getComponent(SSE_RESPONSE_HELPER);
     }
 
     /**

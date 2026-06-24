@@ -302,6 +302,13 @@ public class SearchEngineApiManager extends BaseApiManager {
 
     @Override
     protected void writeHeaders(final HttpServletResponse response) {
-        ComponentUtil.getFessConfig().getApiDashboardResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
+        // Vary is merged (addHeader) so it does not clobber CorsFilter's `Vary: Origin`.
+        ComponentUtil.getFessConfig().getApiDashboardResponseHeaderList().forEach(e -> {
+            if ("Vary".equalsIgnoreCase(e.getFirst())) {
+                response.addHeader(e.getFirst(), e.getSecond());
+            } else {
+                response.setHeader(e.getFirst(), e.getSecond());
+            }
+        });
     }
 }

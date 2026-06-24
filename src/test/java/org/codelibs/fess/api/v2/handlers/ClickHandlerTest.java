@@ -25,9 +25,17 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.helper.SearchLogHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -126,13 +134,14 @@ public class ClickHandlerTest extends UnitFessTestCase {
     @Test
     public void test_epochMsToUtcLocalDateTime_isTimezoneInvariant() {
         final java.util.TimeZone original = java.util.TimeZone.getDefault();
+        final ClickHandler handler = new ClickHandler();
         try {
             // 2024-06-15T12:34:56.789Z — picked so PST and JST land on different calendar days.
             final long epochMs = 1718454896789L;
             java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("America/Los_Angeles"));
-            final java.time.LocalDateTime pst = ClickHandler.epochMsToUtcLocalDateTime(epochMs);
+            final java.time.LocalDateTime pst = handler.epochMsToUtcLocalDateTime(epochMs);
             java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Tokyo"));
-            final java.time.LocalDateTime jst = ClickHandler.epochMsToUtcLocalDateTime(epochMs);
+            final java.time.LocalDateTime jst = handler.epochMsToUtcLocalDateTime(epochMs);
             // Same epoch must yield the same LocalDateTime irrespective of default zone.
             assertEquals(pst, jst);
             // And that LocalDateTime must be the UTC wall-clock for the epoch.
@@ -146,7 +155,7 @@ public class ClickHandlerTest extends UnitFessTestCase {
     public void test_epochMsToUtcLocalDateTime_handlesEpochZero() {
         // Defensive sanity: epoch 0 → 1970-01-01T00:00:00 UTC. Was prone to off-by-hours
         // drift under the old systemDefault() conversion in non-UTC test environments.
-        assertEquals(java.time.LocalDateTime.of(1970, 1, 1, 0, 0, 0), ClickHandler.epochMsToUtcLocalDateTime(0L));
+        assertEquals(java.time.LocalDateTime.of(1970, 1, 1, 0, 0, 0), new ClickHandler().epochMsToUtcLocalDateTime(0L));
     }
 
     @Test
@@ -217,6 +226,404 @@ public class ClickHandlerTest extends UnitFessTestCase {
             assertTrue(body.contains("\"code\":\"not_found\""), body);
         } else {
             assertTrue(body.contains("\"code\":\"internal_error\""), body);
+        }
+    }
+
+    @Test
+    public void test_negativeRt_returns400() throws Exception {
+        // rt < 0 must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":-1,\"rank\":1}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_negativeRank_returns400() throws Exception {
+        // rank < 0 must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":0,\"rank\":-1}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_positiveRtAndRank_areAccepted() throws Exception {
+        // Positive rt and rank must pass validation (may still get 404/500 from backend).
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":1000,\"rank\":3}"),
+                    res);
+            // 400 invalid_request must NOT be returned for valid rt/rank values.
+            assertFalse(res.status == 400 && res.body().contains("invalid_request"),
+                    "positive rt/rank must not yield 400 invalid_request: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_rtOverMax_returns400() throws Exception {
+        // rt above the configured maximum must be rejected with 400 invalid_request.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            // Default max is 9999999999999; one above the limit must be rejected.
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":10000000000000,\"rank\":1}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_rtAtMax_isAccepted() throws Exception {
+        // rt exactly at the configured maximum must pass validation (may still get 404/500 from backend).
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            // Default max is 9999999999999; the at-limit value must not yield 400 invalid_request.
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rt\":9999999999999,\"rank\":1}"), res);
+            assertFalse(res.status == 400 && res.body().contains("invalid_request"),
+                    "at-limit rt must not yield 400 invalid_request: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Fix 2: query_id maxLength / pattern enforcement
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void test_queryId_tooLong_returns400() throws Exception {
+        // query_id exceeding 100 characters must be rejected with 400.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final String longId = "a".repeat(101);
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"" + longId + "\"}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_queryId_invalidChars_returns400() throws Exception {
+        // query_id with '/' must be rejected with 400.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"bad/id\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_queryId_valid_proceeds() throws Exception {
+        // A valid query_id passes format checks; downstream may return 404/500 from backend.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"abc123-_Valid\"}"), res);
+            // Must not be a query_id-specific 400 rejection.
+            assertFalse(res.status == 400 && res.body().contains("query_id"),
+                    "valid query_id must not yield 400 with query_id error: " + res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // L-5: query_id membership (best-effort) and rank upper-bound enforcement
+    // -----------------------------------------------------------------------
+
+    /**
+     * Registers the full collaborator graph the click success path touches so a
+     * well-formed POST reaches {@code addClickLog} and returns {@code logged:true}.
+     * The {@code resultDocIds}/{@code throwResultDocIds} knobs drive the L-5
+     * membership branch; everything else is a happy-path no-op stub.
+     *
+     * @param userCode the user session code returned by the stub UserInfoHelper
+     * @param resultDocIds the per-session result docIds (ignored when {@code throwResultDocIds})
+     * @param throwResultDocIds when true, {@code getResultDocIds} throws to exercise the best-effort skip
+     */
+    private static void registerClickSuccessStubs(final String userCode, final String[] resultDocIds, final boolean throwResultDocIds) {
+        final FessConfig cfgStub = new SearchLogEnabledFessConfig();
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return userCode;
+            }
+
+            @Override
+            public String[] getResultDocIds(final String queryId) {
+                if (throwResultDocIds) {
+                    throw new RuntimeException("forced getResultDocIds failure");
+                }
+                return resultDocIds;
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+
+        final SearchHelper searchHelperStub = new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> ub) {
+                final Map<String, Object> doc = new HashMap<>();
+                doc.put("url", "http://example.com/" + docId);
+                doc.put("_id", docId + "-id");
+                return OptionalEntity.of(doc);
+            }
+        };
+        ComponentUtil.register(searchHelperStub, "searchHelper");
+        ComponentUtil.register(searchHelperStub, SearchHelper.class.getCanonicalName());
+
+        final SearchLogHelper searchLogStub = new SearchLogHelper() {
+            @Override
+            public void addClickLog(final ClickLog clickLog) {
+                // no-op: skip the real log store in the unit harness
+            }
+        };
+        ComponentUtil.register(searchLogStub, "searchLogHelper");
+        ComponentUtil.register(searchLogStub, SearchLogHelper.class.getCanonicalName());
+
+        final SystemHelper systemHelperStub = new SystemHelper() {
+            @Override
+            public java.time.LocalDateTime getCurrentTimeAsLocalDateTime() {
+                return java.time.LocalDateTime.now();
+            }
+        };
+        ComponentUtil.register(systemHelperStub, "systemHelper");
+        ComponentUtil.register(systemHelperStub, SystemHelper.class.getCanonicalName());
+    }
+
+    /** Restores fresh default components so registrations do not leak across tests. */
+    private static void resetClickSuccessStubs() {
+        ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
+    }
+
+    @Test
+    public void test_queryIdMembership_contains_logsClick() throws Exception {
+        // L-5: query_id present and the result set CONTAINS docId -> success, logged:true.
+        registerClickSuccessStubs("test-user-code", new String[] { "abc" }, false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":3}"), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"logged\":true"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_queryIdMembership_notContains_returnsNotFound() throws Exception {
+        // L-5: query_id present but the result set does NOT contain docId -> NOT_FOUND.
+        registerClickSuccessStubs("test-user-code", new String[] { "other" }, false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":3}"), res);
+            assertEquals(404, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+            assertTrue(res.body().contains("doc not in search result"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_queryIdMembership_emptyResultSet_skipsCheckAndLogs() throws Exception {
+        // L-5 best-effort: an EMPTY result set is unverifiable -> skip the check, still log.
+        registerClickSuccessStubs("test-user-code", new String[0], false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":3}"), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"logged\":true"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_queryIdMembership_lookupThrows_skipsCheckAndLogs() throws Exception {
+        // L-5 best-effort: getResultDocIds THROWS -> treat as unverifiable, do not break logging.
+        registerClickSuccessStubs("test-user-code", null, true);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":3}"), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"logged\":true"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_noQueryId_skipsMembershipAndLogs() throws Exception {
+        // L-5 regression: no query_id -> membership check is skipped, click is logged.
+        registerClickSuccessStubs("test-user-code", new String[] { "other" }, false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"rank\":3}"), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"logged\":true"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_rankOverMax_returns400() throws Exception {
+        // L-5: rank above MAX_RANK (10000) must be rejected with 400 invalid_request.
+        registerClickSuccessStubs("test-user-code", new String[] { "abc" }, false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":10001}"), res);
+            assertEquals(400, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("rank exceeds the maximum"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_rankOverflowsInt_returns400() throws Exception {
+        // L-5: a rank that overflows int (2^32 = 4294967296) must still be caught via longValue().
+        registerClickSuccessStubs("test-user-code", new String[] { "abc" }, false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":4294967296}"),
+                    res);
+            assertEquals(400, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("rank exceeds the maximum"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    @Test
+    public void test_rankWithinRange_logsClick() throws Exception {
+        // L-5: a rank within range (5) with otherwise-valid setup -> success, logged:true.
+        registerClickSuccessStubs("test-user-code", new String[] { "abc" }, false);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(
+                    new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":5}"), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"logged\":true"), res.body());
+        } finally {
+            resetClickSuccessStubs();
+        }
+    }
+
+    /**
+     * Minimal {@link FessConfig} stub that enables the search-log feature and supplies the
+     * index-field names the click path accesses. Everything else delegates to {@code SimpleImpl}.
+     */
+    private static class SearchLogEnabledFessConfig extends FessConfig.SimpleImpl {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean isSearchLog() {
+            return true;
+        }
+
+        @Override
+        public String getIndexFieldId() {
+            return "_id";
+        }
+
+        @Override
+        public String getIndexFieldUrl() {
+            return "url";
         }
     }
 

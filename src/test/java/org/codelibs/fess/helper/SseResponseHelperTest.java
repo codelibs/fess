@@ -37,7 +37,7 @@ public class SseResponseHelperTest extends UnitFessTestCase {
         // F2: ensure the centralised SSE header set matches the previously inlined
         // 5-line block in v1 ChatApiManager and v2 ChatStreamHandler exactly.
         final CapturingResponse res = new CapturingResponse();
-        SseResponseHelper.applySseHeaders(res);
+        new SseResponseHelper().applySseHeaders(res);
         // Content-Type and charset
         assertEquals("text/event-stream; charset=UTF-8", res.contentType);
         assertEquals("UTF-8", res.characterEncoding);
@@ -53,8 +53,8 @@ public class SseResponseHelperTest extends UnitFessTestCase {
         // F2: calling twice (e.g. due to a re-dispatch retry) must yield the same final
         // header values; setHeader semantics mean each call overwrites the previous.
         final CapturingResponse res = new CapturingResponse();
-        SseResponseHelper.applySseHeaders(res);
-        SseResponseHelper.applySseHeaders(res);
+        new SseResponseHelper().applySseHeaders(res);
+        new SseResponseHelper().applySseHeaders(res);
         assertEquals("text/event-stream; charset=UTF-8", res.contentType);
         assertEquals("UTF-8", res.characterEncoding);
         assertEquals("no-cache", res.headers.get("Cache-Control"));

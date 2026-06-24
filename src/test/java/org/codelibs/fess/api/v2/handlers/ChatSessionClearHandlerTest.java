@@ -144,8 +144,8 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     @Test
     public void test_sessionIdTooLong_returns400() throws Exception {
         enableRagChat();
-        // 129 characters — one over the 128-character cap
-        final String tooLong = "a".repeat(129);
+        // 101 characters — one over the 100-character cap
+        final String tooLong = "a".repeat(101);
         final CapturingResponse res = new CapturingResponse();
         new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, tooLong);
         assertEquals(400, res.status);
@@ -154,16 +154,39 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_validSessionIdBoundary_acceptsMaxLength() throws Exception {
-        // 128 characters — exactly at the cap; should pass pattern validation.
+        // 100 characters — exactly at the cap; should pass pattern validation.
         // With RAG enabled, the next gate is the rate limiter. In the test harness
         // the limiter DI is absent, so we expect INTERNAL_ERROR (500) — confirming
         // the session_id was accepted and processing continued past the pattern check.
         enableRagChat();
-        final String maxId = "a".repeat(128);
+        final String maxId = "a".repeat(100);
         final CapturingResponse res = new CapturingResponse();
         handlerForUser("test-user").handle(new StubRequest("DELETE"), res, maxId);
         // Must NOT be a 400 invalid_request from the pattern guard
-        assertFalse(res.body().contains("invalid session_id"), "128-char session_id must pass pattern validation, got: " + res.body());
+        assertFalse(res.body().contains("invalid session_id"), "100-char session_id must pass pattern validation, got: " + res.body());
+    }
+
+    @Test
+    public void test_sessionId100Chars_accepted() throws Exception {
+        // Exactly 100 characters — at the new cap; should pass pattern validation.
+        enableRagChat();
+        final String maxId = "a".repeat(100);
+        final CapturingResponse res = new CapturingResponse();
+        handlerForUser("test-user").handle(new StubRequest("DELETE"), res, maxId);
+        // Must NOT be a 400 invalid_request from the pattern guard
+        assertFalse("100-char session_id must pass pattern validation, got: " + res.body(), res.body().contains("invalid session_id"));
+    }
+
+    @Test
+    public void test_sessionId101Chars_returns400() throws Exception {
+        // 101 characters — one over the new 100-character cap; must be rejected.
+        enableRagChat();
+        final String tooLong = "a".repeat(101);
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, tooLong);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("invalid session_id"), res.body());
     }
 
     @Test
@@ -182,11 +205,11 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     public void test_rateLimited_returns429() throws Exception {
         enableRagChat();
         final LoginRateLimiter rl = new LoginRateLimiter();
-        // Pre-saturate the CHAT bucket for the "test-user" userId returned by handlerForUser(...).
+        // Pre-saturate the CHAT bucket for the "u:test-user" key returned by handlerForUser(...).
         // LoginRateLimiter.allow() denies empty/null keys (MJ-6), so the bucket key must match
-        // the non-empty user id the handler resolves.
+        // the non-empty key the handler resolves.
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "test-user", 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, "u:test-user", 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
@@ -204,15 +227,18 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_anonymousUser_nullUserId_notRateLimited() throws Exception {
-        // When getUserId returns null, StringUtil.isNotBlank(null) is false, so the per-user
-        // throttle is skipped entirely — even with a saturated limiter and a positive chat limit.
-        // Register a ChatSessionManager that clears successfully so the handler reaches 200,
-        // proving the rate-limit gate was bypassed (not rejected with 429).
+    public void test_anonymousUser_rateLimitedByClientIp() throws Exception {
+        // Regression for L-1: anonymous DELETE callers used to bypass the throttle entirely because
+        // the guard skipped a blank userId and keyed on the forgeable guest userCode. Now the handler
+        // keys anonymous traffic by the client IP ("ip:<clientIp>"), so an anonymous caller from the
+        // same IP that exceeds the limit IS rate-limited (429). Rotating/forging a userCode per
+        // request does not change the IP-based key, so the throttle still applies.
         enableRagChat();
+        final String clientIp = "203.0.113.7";
+        final String key = "ip:" + clientIp;
         final LoginRateLimiter rl = new LoginRateLimiter();
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, key, 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
@@ -229,84 +255,21 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
             final ChatSessionClearHandler handler = new ChatSessionClearHandler() {
                 @Override
                 protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return null;
+                    // A forged guest userCode — irrelevant to the IP-based throttle key below.
+                    return "forged-guest";
                 }
-            };
-            handler.handle(new StubRequest("DELETE"), res, "valid-session-1");
-            assertFalse("anonymous null userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
-            assertTrue("anonymous null userId must not yield 429 status, was: " + res.status, res.status != 429);
-        } finally {
-            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
-            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
-        }
-    }
 
-    @Test
-    public void test_anonymousUser_blankUserId_notRateLimited() throws Exception {
-        // When getUserId returns a blank string, StringUtil.isNotBlank is false,
-        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
-        enableRagChat();
-        final LoginRateLimiter rl = new LoginRateLimiter();
-        for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
-        }
-        ComponentUtil.register(rl, "loginRateLimiter");
-        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
-        final org.codelibs.fess.chat.ChatSessionManager okManager = new org.codelibs.fess.chat.ChatSessionManager() {
-            @Override
-            public boolean clearSession(final String sessionId, final String userId) {
-                return true;
-            }
-        };
-        ComponentUtil.register(okManager, "chatSessionManager");
-        ComponentUtil.register(okManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
-        try {
-            final CapturingResponse res = new CapturingResponse();
-            final ChatSessionClearHandler handler = new ChatSessionClearHandler() {
                 @Override
-                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return "   ";
+                protected String getRateLimitKey(final jakarta.servlet.http.HttpServletRequest req) {
+                    return key;
                 }
             };
             handler.handle(new StubRequest("DELETE"), res, "valid-session-1");
-            assertFalse("anonymous blank userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
-            assertTrue("anonymous blank userId must not yield 429 status, was: " + res.status, res.status != 429);
-        } finally {
-            ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
-            ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
-        }
-    }
-
-    @Test
-    public void test_anonymousUser_emptyStringUserId_notRateLimited() throws Exception {
-        // When getUserId returns an empty string, StringUtil.isNotBlank("") is false,
-        // so the per-user throttle is skipped — the handler must NOT return 429/rate_limited.
-        enableRagChat();
-        final LoginRateLimiter rl = new LoginRateLimiter();
-        for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "some-user", 30, 60);
-        }
-        ComponentUtil.register(rl, "loginRateLimiter");
-        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
-        final org.codelibs.fess.chat.ChatSessionManager okManager = new org.codelibs.fess.chat.ChatSessionManager() {
-            @Override
-            public boolean clearSession(final String sessionId, final String userId) {
-                return true;
-            }
-        };
-        ComponentUtil.register(okManager, "chatSessionManager");
-        ComponentUtil.register(okManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
-        try {
-            final CapturingResponse res = new CapturingResponse();
-            final ChatSessionClearHandler handler = new ChatSessionClearHandler() {
-                @Override
-                protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
-                    return "";
-                }
-            };
-            handler.handle(new StubRequest("DELETE"), res, "valid-session-1");
-            assertFalse("anonymous empty userId must not yield 429, got: " + res.body(), res.body().contains("\"code\":\"rate_limited\""));
-            assertTrue("anonymous empty userId must not yield 429 status, was: " + res.status, res.status != 429);
+            // The IP bucket is pre-saturated (30/30), so this anonymous request must be 429.
+            assertEquals(429, res.status);
+            assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+            assertTrue(res.body().contains("too many chat requests"), res.body());
+            assertEquals("Retry-After header must be set", "60", res.getHeader("Retry-After"));
         } finally {
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
             ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
@@ -463,6 +426,14 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
             @Override
             protected String getUserId(final jakarta.servlet.http.HttpServletRequest req) {
                 return userId;
+            }
+
+            @Override
+            protected String getRateLimitKey(final jakarta.servlet.http.HttpServletRequest req) {
+                // Treat the fixed user as authenticated for throttle purposes: key by "u:<userId>".
+                // Pinning the rate-limit key keeps these tests off the real
+                // SystemHelper/RateLimitHelper DI path (smart-deploy components unreliable to stub).
+                return "u:" + userId;
             }
         };
     }

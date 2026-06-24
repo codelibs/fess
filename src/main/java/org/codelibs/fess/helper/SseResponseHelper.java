@@ -31,13 +31,18 @@ import jakarta.servlet.http.HttpServletResponse;
  * stream is buffered until the connection closes, which defeats the purpose of SSE
  * and breaks the chat UX.</p>
  *
- * <p>This is a stateless utility — {@code final} class with a private constructor.
- * No DI registration is required; callers invoke the static method directly.</p>
+ * <p>This is a DI-managed singleton helper; obtain it through
+ * {@link org.codelibs.fess.util.ComponentUtil#getSseResponseHelper()}.</p>
  */
-public final class SseResponseHelper {
+public class SseResponseHelper {
 
-    private SseResponseHelper() {
-        // Utility class — no instances.
+    /**
+     * Creates the SSE response helper. Registered as the DI component
+     * {@code sseResponseHelper} and obtained via
+     * {@link org.codelibs.fess.util.ComponentUtil#getSseResponseHelper()}.
+     */
+    public SseResponseHelper() {
+        // default constructor
     }
 
     /**
@@ -56,7 +61,7 @@ public final class SseResponseHelper {
      *
      * @param response the HTTP response to configure; must not be {@code null}
      */
-    public static void applySseHeaders(final HttpServletResponse response) {
+    public void applySseHeaders(final HttpServletResponse response) {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/event-stream; charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache");

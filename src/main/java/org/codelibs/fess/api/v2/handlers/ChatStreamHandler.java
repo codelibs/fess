@@ -195,46 +195,46 @@ public class ChatStreamHandler {
      */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         // --- Gate checks: ALL validation runs before any SSE headers are set. ---
-        // Pre-stream failures return proper HTTP status via V2EnvelopeWriter.writeError
+        // Pre-stream failures return proper HTTP status via ComponentUtil.getV2EnvelopeWriter().writeError
         // (application/json). SSE headers are only committed after every gate passes.
 
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
             return;
         }
 
         final Map<String, Object> raw;
         try {
-            raw = V2JsonBody.read(req, MAX_BODY_BYTES);
+            raw = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
             return;
         } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
             return;
         } catch (final V2JsonBody.MalformedJsonException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
 
         final int maxLen = ComponentUtil.getChatApiHelper().getMaxMessageLength(fessConfig);
         final ChatRequestBody body;
         try {
-            body = ChatRequestBody.from(raw, maxLen);
-        } catch (final ChatRequestBody.MessageTooLongException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            body = ComponentUtil.getChatApiHelper().parseRequestBody(raw, maxLen);
+        } catch (final ChatRequestBody.InvalidRequestException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
 
         if (StringUtil.isBlank(body.message())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "message is required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "message is required");
             return;
         }
 
@@ -246,17 +246,17 @@ public class ChatStreamHandler {
         } catch (final RuntimeException e) {
             // Limiter DI not available (e.g. slim test harness); log and surface as 500.
             logger.warn("[RAG] /api/v2/chat/stream rate-limit lookup failed", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
         final int chatLimit = fessConfig.getChatRateLimitPerMinute();
-        // Skip the per-user throttle for anonymous callers with no resolvable user id
-        // (e.g. a guest whose session is not yet established): a null/blank key would
-        // otherwise hit the limiter's null-key deny path and 429 the first request.
-        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(userId)
-                && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+        // Throttle by a key an anonymous caller cannot rotate (see ChatApiHelper#resolveChatRateLimitKey);
+        // the key is always non-blank so the throttle always applies. userId above stays for chat-session binding.
+        final String rateLimitKey = getRateLimitKey(req);
+        if (limiter != null && chatLimit > 0 && StringUtil.isNotBlank(rateLimitKey)
+                && !limiter.allow(LoginRateLimiter.Scope.CHAT, rateLimitKey, chatLimit, 60)) {
             res.setHeader("Retry-After", "60");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
         }
 
@@ -298,7 +298,7 @@ public class ChatStreamHandler {
             final List<ChatSource> sources = result.getMessage().getSources();
             if (sources != null && !sources.isEmpty()) {
                 synchronized (writeLock) {
-                    sendSseEvent(writer, "sources", Map.of("sources", ChatHandler.toSourceMaps(sources)));
+                    sendSseEvent(writer, "sources", Map.of("sources", ComponentUtil.getChatApiHelper().toSourceMaps(sources)));
                 }
             }
 
@@ -349,6 +349,22 @@ public class ChatStreamHandler {
      */
     protected String getUserId(final HttpServletRequest req) {
         return ComponentUtil.getChatApiHelper().getUserId();
+    }
+
+    /**
+     * Resolves the chat rate-limit key (server-validated username for authenticated callers, else the
+     * proxy-aware client IP). Exposed as a seam so unit tests can pin the throttle key deterministically;
+     * the underlying {@code SystemHelper}/{@code RateLimitHelper} are smart-deploy components that are
+     * unreliable to stub via {@code ComponentUtil.register} once the shared test container has resolved
+     * the real ones (same rationale as {@link #getUserId}).
+     *
+     * @param req the incoming HTTP request
+     * @return the rate-limit key (never null/blank)
+     */
+    protected String getRateLimitKey(final HttpServletRequest req) {
+        final String username = ComponentUtil.getSystemHelper().getUsername();
+        return ComponentUtil.getChatApiHelper()
+                .resolveChatRateLimitKey(username, () -> ComponentUtil.getRateLimitHelper().getClientIp(req));
     }
 
     /**
@@ -449,7 +465,7 @@ public class ChatStreamHandler {
      * @param res the HTTP response to set headers on
      */
     protected void setSseHeaders(final HttpServletResponse res) {
-        SseResponseHelper.applySseHeaders(res);
+        ComponentUtil.getSseResponseHelper().applySseHeaders(res);
     }
 
     /**
@@ -660,7 +676,7 @@ public class ChatStreamHandler {
      * @param key key
      * @param value value to add when non-null
      */
-    protected static void putIfNotNull(final Map<String, Object> data, final String key, final Object value) {
+    protected void putIfNotNull(final Map<String, Object> data, final String key, final Object value) {
         if (value != null) {
             data.put(key, value);
         }

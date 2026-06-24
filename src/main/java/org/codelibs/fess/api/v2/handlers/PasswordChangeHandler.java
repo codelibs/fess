@@ -22,7 +22,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -147,7 +146,7 @@ public class PasswordChangeHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         // M-17: split DI-binding/lookup failure from "no user bean present". A genuine
@@ -159,7 +158,7 @@ public class PasswordChangeHandler {
             assist = ComponentUtil.getComponent(FessLoginAssist.class);
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/auth/password: could not acquire FessLoginAssist", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
         final OptionalThing<FessUserBean> userBean;
@@ -167,42 +166,57 @@ public class PasswordChangeHandler {
             userBean = assist.getSavedUserBean();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/auth/password: getSavedUserBean failed", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
         if (!userBean.isPresent()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
             return;
         }
         final Map<String, Object> body;
         try {
-            body = V2JsonBody.read(req, MAX_BODY_BYTES);
+            body = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
             return;
         } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
             return;
         } catch (final V2JsonBody.MalformedJsonException e) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
         final String currentPw = stringOrNull(body.get("current_password"));
         final String newPw = stringOrNull(body.get("new_password"));
         final String confirm = stringOrNull(body.get("confirm_password"));
         if (StringUtil.isBlank(currentPw)) {
-            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "current_password is required",
-                    Map.of("reason", "current_password_required"));
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "current_password is required",
+                            Map.of("reason", "current_password_required"));
+            return;
+        }
+        try {
+            final int maxPwLen = ComponentUtil.getFessConfig().getPasswordMaxLengthAsInteger();
+            if (currentPw.length() > maxPwLen) {
+                throw new InvalidRequestParameterException("current_password exceeds the maximum length of " + maxPwLen);
+            }
+            if (confirm != null && confirm.length() > maxPwLen) {
+                throw new InvalidRequestParameterException("confirm_password exceeds the maximum length of " + maxPwLen);
+            }
+        } catch (final InvalidRequestParameterException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
         if (newPw == null || newPw.isBlank()) {
-            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "new_password is required",
-                    Map.of("reason", "new_password_required"));
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "new_password is required",
+                            Map.of("reason", "new_password_required"));
             return;
         }
         if (!newPw.equals(confirm)) {
-            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "passwords do not match",
-                    Map.of("reason", "password_mismatch"));
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "passwords do not match",
+                            Map.of("reason", "password_mismatch"));
             return;
         }
         final String userId = userBean.get().getUserId();
@@ -229,7 +243,7 @@ public class PasswordChangeHandler {
         if (rate != null && userLimit > 0 && !rate.peek(LoginRateLimiter.Scope.USER, userId, userLimit, 60)) {
             rate.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec);
             res.setHeader("Retry-After", Integer.toString(Math.max(lockoutSec, 1)));
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
             return;
         }
 
@@ -242,7 +256,7 @@ public class PasswordChangeHandler {
             verified = assist.findLoginUser(new LocalUserCredential(userId, currentPw));
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/auth/password: findLoginUser failed", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
             return;
         }
         if (verified == null || !verified.isPresent()) {
@@ -251,11 +265,12 @@ public class PasswordChangeHandler {
             if (rate != null && userLimit > 0 && !rate.allow(LoginRateLimiter.Scope.USER, userId, userLimit, 60)) {
                 rate.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec);
                 res.setHeader("Retry-After", Integer.toString(Math.max(lockoutSec, 1)));
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
+                ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
                 return;
             }
-            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.AUTH_REQUIRED, "invalid current password",
-                    Map.of("reason", "invalid_current_password"));
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.AUTH_REQUIRED, "invalid current password",
+                            Map.of("reason", "invalid_current_password"));
             return;
         }
         final String validationError = ComponentUtil.getSystemHelper().validatePassword(newPw);
@@ -268,14 +283,15 @@ public class PasswordChangeHandler {
                     details.put("min_length", minLength);
                 }
             }
-            V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "weak password: " + validationError, details);
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, V2ErrorCode.INVALID_REQUEST, "weak password: " + validationError, details);
             return;
         }
         try {
             ComponentUtil.getComponent(UserService.class).changePassword(userId, newPw);
         } catch (final Exception e) {
             logger.warn("/api/v2/auth/password: changePassword failed", e);
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
             return;
         }
         // C-3: successful change resets the per-user bucket so any earlier failed attempts
@@ -320,7 +336,7 @@ public class PasswordChangeHandler {
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("ok", true);
         payload.put("re_login_required", true);
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 
     /**
@@ -329,7 +345,7 @@ public class PasswordChangeHandler {
      * stringified by {@code v.toString()} and could mask bugs in callers; treat any
      * non-string value as missing instead.
      */
-    private static String stringOrNull(final Object v) {
+    private String stringOrNull(final Object v) {
         return v instanceof final String s ? s : null;
     }
 }

@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "परिणामों पर वापस जाएं",
   "labels.cache_not_found": "कैश्ड सामग्री उपलब्ध नहीं है।",
   "labels.cache_loading": "कैश्ड सामग्री लोड हो रही है…",
+  "labels.search_loading": "खोज रहे हैं…",
   "labels.search_result_cache": "कैश",
   "labels.search_cache_msg": "यह {0} का कैश है। यह पृष्ठ का एक स्नैपशॉट है जैसा कि यह {1} पर दिखाई दिया था।",
   "labels.search_unknown": "अज्ञात",

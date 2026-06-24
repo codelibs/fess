@@ -113,12 +113,12 @@ public class ScrollSearchHandler {
     public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
             response.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isApiSearchScroll()) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, "scroll search is not available");
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, "scroll search is not available");
             return;
         }
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
@@ -152,13 +152,13 @@ public class ScrollSearchHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded {} documents", count);
             }
-        } catch (final V2JsonRequestParams.InvalidPageSizeException e) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+        } catch (final InvalidRequestParameterException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/documents/all request", e);
             }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final UncheckedIOException e) {
             // Surface the underlying IOException so the servlet container can log/respond.
             throw e.getCause();
@@ -183,7 +183,7 @@ public class ScrollSearchHandler {
                     logger.warn("/api/v2/documents/all: could not write error terminator", flushEx);
                 }
             } else {
-                V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/documents/all");
+                ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/documents/all");
             }
         }
     }

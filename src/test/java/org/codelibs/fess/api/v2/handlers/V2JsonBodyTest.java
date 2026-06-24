@@ -59,54 +59,54 @@ public class V2JsonBodyTest {
     @Test
     public void test_parsesJsonObject() throws Exception {
         final HttpServletRequest req = stub("{\"username\":\"alice\",\"password\":\"x\"}", "application/json");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("alice", body.get("username"));
     }
 
     @Test
     public void test_emptyBodyReturnsEmptyMap() throws Exception {
         final HttpServletRequest req = stub("", "application/json");
-        assertTrue(V2JsonBody.read(req, 1024).isEmpty());
+        assertTrue(new V2JsonBody().read(req, 1024).isEmpty());
     }
 
     @Test
     public void test_rejectsOversizedBody() {
         final byte[] big = new byte[2048];
         final HttpServletRequest req = stub(new String(big), "application/json");
-        assertThrows(V2JsonBody.PayloadTooLargeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.PayloadTooLargeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
     public void test_rejectsNonJsonContentType() {
         final HttpServletRequest req = stub("{\"k\":1}", "text/plain");
-        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
     public void test_rejectsMalformedJson() {
         final HttpServletRequest req = stub("{not json", "application/json");
-        assertThrows(V2JsonBody.MalformedJsonException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
     public void test_rejectsNullContentType() {
         // A null Content-Type (header absent) must be rejected — callers cannot assume JSON.
         final HttpServletRequest req = stub("{\"k\":1}", null);
-        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
     public void test_rejectsNonUtf8Charset() {
         // application/json with an explicit non-UTF-8 charset must be rejected.
         final HttpServletRequest req = stub("{\"k\":1}", "application/json; charset=Shift_JIS");
-        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
     public void test_acceptsExplicitUtf8Charset() throws Exception {
         // Explicit charset=utf-8 is acceptable (common from curl/Postman).
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=utf-8");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -120,7 +120,7 @@ public class V2JsonBodyTest {
         withBom[2] = (byte) 0xBF;
         System.arraycopy(json, 0, withBom, 3, json.length);
         final HttpServletRequest req = stubBytes(withBom, "application/json");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals(Boolean.TRUE, body.get("bom"));
     }
 
@@ -130,7 +130,7 @@ public class V2JsonBodyTest {
     public void test_acceptsJsonWithUtf8Charset() throws Exception {
         // application/json; charset=utf-8 → accepted (the standard case).
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=utf-8");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -138,14 +138,14 @@ public class V2JsonBodyTest {
     public void test_rejectsUtf16Charset() {
         // application/json; charset=utf-16 → rejected (non-UTF-8 charset).
         final HttpServletRequest req = stub("{\"k\":1}", "application/json; charset=utf-16");
-        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
     public void test_rejectsIso88591Charset() {
         // application/json; charset=iso-8859-1 → rejected.
         final HttpServletRequest req = stub("{\"k\":1}", "application/json; charset=iso-8859-1");
-        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class V2JsonBodyTest {
         // should do so. The old indexOf("charset=") scan would falsely reject this.
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; x-charset=utf-16");
         // Must NOT throw UnsupportedMediaTypeException — "x-charset" is a different param.
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -163,7 +163,7 @@ public class V2JsonBodyTest {
     public void test_acceptsQuotedUtf8Charset() throws Exception {
         // charset="utf-8" (quoted value) is acceptable; the parser strips quotes.
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=\"utf-8\"");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -172,7 +172,7 @@ public class V2JsonBodyTest {
         // charset=UTF-8 (uppercase) must be accepted because the code lower-cases the
         // full Content-Type before splitting on ';'.
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=UTF-8");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -181,7 +181,7 @@ public class V2JsonBodyTest {
         // A parameter with no '=' (e.g. "something") must be silently skipped —
         // no crash, no false rejection.
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; something");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -189,7 +189,7 @@ public class V2JsonBodyTest {
     public void test_multipleParamsIncludingCharset_accepted() throws Exception {
         // Multi-param ordering: charset appears after another param — must still be found.
         final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; boundary=x; charset=utf-8");
-        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        final Map<String, Object> body = new V2JsonBody().read(req, 1024);
         assertEquals("v", body.get("k"));
     }
 
@@ -197,7 +197,7 @@ public class V2JsonBodyTest {
     public void test_multipleParamsIncludingCharset_rejected() {
         // Multi-param ordering: non-UTF-8 charset after another param — must be rejected.
         final HttpServletRequest req = stub("{\"k\":1}", "application/json; boundary=x; charset=utf-16");
-        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> new V2JsonBody().read(req, 1024));
     }
 
     @Test
@@ -212,7 +212,7 @@ public class V2JsonBodyTest {
             sb.append("}");
         }
         final HttpServletRequest req = stub(sb.toString(), "application/json");
-        assertThrows(V2JsonBody.MalformedJsonException.class, () -> V2JsonBody.read(req, 1 << 20));
+        assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1 << 20));
     }
 
     private static HttpServletRequest stubBytes(final byte[] body, final String contentType) {

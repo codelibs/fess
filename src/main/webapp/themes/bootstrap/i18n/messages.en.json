@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Back to results",
   "labels.cache_not_found": "The cached content is not available.",
   "labels.cache_loading": "Loading cached content…",
+  "labels.search_loading": "Searching…",
   "labels.search_result_cache": "Cache",
   "labels.search_cache_msg": "This is a cache of {0}. It is a snapshot of the page as it appeared on {1}.",
   "labels.search_unknown": "Unknown",

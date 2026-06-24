@@ -194,11 +194,17 @@ function attachHomeView() {
       const input = document.getElementById("contentQuery");
       const q = input ? input.value.trim() : "";
       if (q) {
-        // Carry the up-front home option selections (sort / num / lang) into the
-        // search URL so the executed search honours them. runFromUrl() parses them.
         const params = new URLSearchParams();
         params.set("q", q);
-        search.applyHomeOptions(params);
+        // JSP parity: carry the shared drawer's sort / num / lang selections into
+        // the first search so options set on the home view before searching are applied
+        // (these selects no longer auto-run a search on change).
+        const sortSel = document.getElementById("sortSearchOption");
+        if (sortSel && sortSel.value) params.set("sort", sortSel.value);
+        const numSel = document.getElementById("numSearchOption");
+        if (numSel && numSel.value) params.set("num", numSel.value);
+        const langSel = document.getElementById("langSearchOption");
+        if (langSel) Array.from(langSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("lang", v));
         router.navigate("/search?" + params.toString());
         // JSP parity: disable the submit button for 3s after navigation has been
         // triggered, to prevent rapid double-submits.
@@ -426,10 +432,10 @@ function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("home-view");
-      // JSP parity (index.jsp): the home query box starts empty — clear any value the
-      // SPA carried over from a previous search (syncSearchInputs keeps both inputs in sync).
-      const cq = document.getElementById("contentQuery");
-      if (cq) cq.value = "";
+      // JSP parity (index.jsp): home view is re-rendered on every request in the
+      // default theme, so all search state is gone.  Replicate that by doing a full
+      // silent reset — clears module state, option selects, and both query inputs.
+      search.clearSearchState();
       attachHomeView();
     }
   );

@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import org.codelibs.fess.cors.CorsHandler;
 import org.codelibs.fess.cors.CorsHandlerFactory;
+import org.codelibs.fess.cors.CorsMatchType;
+import org.codelibs.fess.cors.CorsResolution;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -71,7 +73,7 @@ public class CorsFilterTest extends UnitFessTestCase {
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertTrue(mockFilterChain.wasDoFilterCalled());
-        assertFalse(corsHandlerFactory.wasGetCalled());
+        assertFalse(corsHandlerFactory.wasResolveCalled());
     }
 
     // Test with blank Origin header
@@ -82,7 +84,7 @@ public class CorsFilterTest extends UnitFessTestCase {
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertTrue(mockFilterChain.wasDoFilterCalled());
-        assertFalse(corsHandlerFactory.wasGetCalled());
+        assertFalse(corsHandlerFactory.wasResolveCalled());
     }
 
     // Test with whitespace-only Origin header
@@ -93,7 +95,7 @@ public class CorsFilterTest extends UnitFessTestCase {
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertTrue(mockFilterChain.wasDoFilterCalled());
-        assertFalse(corsHandlerFactory.wasGetCalled());
+        assertFalse(corsHandlerFactory.wasResolveCalled());
     }
 
     // Test with valid Origin but no CorsHandler found
@@ -105,7 +107,7 @@ public class CorsFilterTest extends UnitFessTestCase {
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertTrue(mockFilterChain.wasDoFilterCalled());
-        assertTrue(corsHandlerFactory.wasGetCalled());
+        assertTrue(corsHandlerFactory.wasResolveCalled());
         assertEquals("http://example.com", corsHandlerFactory.getLastOrigin());
     }
 
@@ -121,7 +123,7 @@ public class CorsFilterTest extends UnitFessTestCase {
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertTrue(mockFilterChain.wasDoFilterCalled());
-        assertTrue(corsHandlerFactory.wasGetCalled());
+        assertTrue(corsHandlerFactory.wasResolveCalled());
         assertTrue(handler.wasProcessCalled());
         assertEquals(origin, handler.getLastOrigin());
         assertSame(mockRequest, handler.getLastRequest());
@@ -177,11 +179,12 @@ public class CorsFilterTest extends UnitFessTestCase {
         assertEquals(0, mockResponse.getStatus());
     }
 
-    // Test with OPTIONS request (preflight)
+    // Test with OPTIONS request (preflight) - with Access-Control-Request-Method
     @Test
     public void test_doFilter_withCorsHandler_options() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
+        mockRequest.setHeader("Access-Control-Request-Method", "GET");
         mockRequest.setMethod("OPTIONS");
         TestCorsHandler handler = new TestCorsHandler();
         corsHandlerFactory.setHandler(handler);
@@ -189,25 +192,26 @@ public class CorsFilterTest extends UnitFessTestCase {
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertFalse(mockFilterChain.wasDoFilterCalled()); // Chain should not continue for OPTIONS
-        assertTrue(corsHandlerFactory.wasGetCalled());
+        assertTrue(corsHandlerFactory.wasResolveCalled());
         assertTrue(handler.wasProcessCalled());
         assertEquals(origin, handler.getLastOrigin());
         assertEquals(HttpServletResponse.SC_ACCEPTED, mockResponse.getStatus());
     }
 
-    // Test with OPTIONS request but no CorsHandler
+    // Test with OPTIONS request but no CorsHandler (genuine preflight with no handler -> 403)
     @Test
     public void test_doFilter_options_noCorsHandler() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
+        mockRequest.setHeader("Access-Control-Request-Method", "GET");
         mockRequest.setMethod("OPTIONS");
         corsHandlerFactory.setHandler(null);
 
         corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
-        assertTrue(mockFilterChain.wasDoFilterCalled()); // Chain should continue if no handler
-        assertTrue(corsHandlerFactory.wasGetCalled());
-        assertEquals(0, mockResponse.getStatus()); // Status not set when no handler
+        assertFalse(mockFilterChain.wasDoFilterCalled()); // Chain should NOT continue for disallowed preflight
+        assertTrue(corsHandlerFactory.wasResolveCalled());
+        assertEquals(HttpServletResponse.SC_FORBIDDEN, mockResponse.getStatus());
     }
 
     // Test with different origin formats
@@ -243,12 +247,131 @@ public class CorsFilterTest extends UnitFessTestCase {
         assertEquals("OPTIONS", CorsFilter.OPTIONS);
     }
 
+    // EXACT preflight: ACAO reflects origin, credentials present, Vary: Origin, 202
+    @Test
+    public void test_doFilter_preflight_exact() throws IOException, ServletException {
+        final String origin = "https://app.example.com";
+        mockRequest.setHeader("Origin", origin);
+        mockRequest.setHeader("Access-Control-Request-Method", "POST");
+        mockRequest.setMethod("OPTIONS");
+        final TestCorsHandler handler = new TestCorsHandler();
+        corsHandlerFactory.setHandler(handler);
+        corsHandlerFactory.setMatchType(CorsMatchType.EXACT);
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertFalse(mockFilterChain.wasDoFilterCalled());
+        assertEquals(HttpServletResponse.SC_ACCEPTED, mockResponse.getStatus());
+        assertEquals(CorsMatchType.EXACT, handler.getLastMatchType());
+        assertEquals(java.util.List.of(origin), new java.util.ArrayList<>(mockResponse.getHeaders("Access-Control-Allow-Origin")));
+        assertEquals(java.util.List.of("true"), new java.util.ArrayList<>(mockResponse.getHeaders("Access-Control-Allow-Credentials")));
+        assertEquals(java.util.List.of("Origin"), new java.util.ArrayList<>(mockResponse.getHeaders("Vary")));
+        assertEquals(1, mockResponse.getHeaders("Access-Control-Allow-Origin").size());
+    }
+
+    // WILDCARD preflight: literal "*", no credentials, Vary: Origin, 202
+    @Test
+    public void test_doFilter_preflight_wildcard() throws IOException, ServletException {
+        mockRequest.setHeader("Origin", "https://anything.example");
+        mockRequest.setHeader("Access-Control-Request-Method", "GET");
+        mockRequest.setMethod("OPTIONS");
+        final TestCorsHandler handler = new TestCorsHandler();
+        corsHandlerFactory.setHandler(handler);
+        corsHandlerFactory.setMatchType(CorsMatchType.WILDCARD);
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertFalse(mockFilterChain.wasDoFilterCalled());
+        assertEquals(HttpServletResponse.SC_ACCEPTED, mockResponse.getStatus());
+        assertEquals(java.util.List.of("*"), new java.util.ArrayList<>(mockResponse.getHeaders("Access-Control-Allow-Origin")));
+        assertNull(mockResponse.getHeader("Access-Control-Allow-Credentials"));
+        assertEquals(java.util.List.of("Origin"), new java.util.ArrayList<>(mockResponse.getHeaders("Vary")));
+    }
+
+    // NONE preflight: no handler -> no CORS headers, Vary: Origin present, 403, chain NOT called
+    @Test
+    public void test_doFilter_preflight_none_shortCircuits403() throws IOException, ServletException {
+        mockRequest.setHeader("Origin", "https://evil.example");
+        mockRequest.setHeader("Access-Control-Request-Method", "POST");
+        mockRequest.setMethod("OPTIONS");
+        corsHandlerFactory.setHandler(null); // resolve() -> null
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertFalse(mockFilterChain.wasDoFilterCalled());
+        assertEquals(HttpServletResponse.SC_FORBIDDEN, mockResponse.getStatus());
+        assertNull(mockResponse.getHeader("Access-Control-Allow-Origin"));
+        assertNull(mockResponse.getHeader("Access-Control-Allow-Credentials"));
+        assertEquals(java.util.List.of("Origin"), new java.util.ArrayList<>(mockResponse.getHeaders("Vary")));
+    }
+
+    // Non-preflight disallowed origin: no CORS headers, Vary present, chain continues
+    @Test
+    public void test_doFilter_nonPreflight_disallowedOrigin_continues() throws IOException, ServletException {
+        mockRequest.setHeader("Origin", "https://evil.example");
+        mockRequest.setMethod("GET");
+        corsHandlerFactory.setHandler(null);
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertTrue(mockFilterChain.wasDoFilterCalled());
+        assertNull(mockResponse.getHeader("Access-Control-Allow-Origin"));
+        assertEquals(java.util.List.of("Origin"), new java.util.ArrayList<>(mockResponse.getHeaders("Vary")));
+    }
+
+    // Regression: evil origin under "*" must not be reflected and must not carry credentials
+    @Test
+    public void test_doFilter_evilOrigin_wildcard_notReflected() throws IOException, ServletException {
+        mockRequest.setHeader("Origin", "https://evil.example");
+        mockRequest.setMethod("GET");
+        final TestCorsHandler handler = new TestCorsHandler();
+        corsHandlerFactory.setHandler(handler);
+        corsHandlerFactory.setMatchType(CorsMatchType.WILDCARD);
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertTrue(mockFilterChain.wasDoFilterCalled());
+        assertEquals("*", mockResponse.getHeader("Access-Control-Allow-Origin"));
+        assertNull(mockResponse.getHeader("Access-Control-Allow-Credentials"));
+    }
+
+    // Origin: null is a normal origin string; under "*" it is WILDCARD, never credentialed
+    @Test
+    public void test_doFilter_originNull_wildcard_noCredentials() throws IOException, ServletException {
+        mockRequest.setHeader("Origin", "null");
+        mockRequest.setMethod("GET");
+        final TestCorsHandler handler = new TestCorsHandler();
+        corsHandlerFactory.setHandler(handler);
+        corsHandlerFactory.setMatchType(CorsMatchType.WILDCARD);
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertEquals("*", mockResponse.getHeader("Access-Control-Allow-Origin"));
+        assertNull(mockResponse.getHeader("Access-Control-Allow-Credentials"));
+    }
+
+    // No duplicate Vary on a single dispatch
+    @Test
+    public void test_doFilter_singleVaryHeader() throws IOException, ServletException {
+        mockRequest.setHeader("Origin", "https://app.example.com");
+        mockRequest.setMethod("GET");
+        final TestCorsHandler handler = new TestCorsHandler();
+        corsHandlerFactory.setHandler(handler);
+        corsHandlerFactory.setMatchType(CorsMatchType.EXACT);
+
+        corsFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
+
+        assertEquals(1, mockResponse.getHeaders("Vary").size());
+    }
+
     // Helper classes for testing
 
     private static class TestCorsHandlerFactory extends CorsHandlerFactory {
         private boolean getCalled = false;
+        private boolean resolveCalled = false;
         private String lastOrigin = null;
         private CorsHandler handler = null;
+        private CorsMatchType matchType = CorsMatchType.WILDCARD;
 
         @Override
         public CorsHandler get(String origin) {
@@ -257,12 +380,27 @@ public class CorsFilterTest extends UnitFessTestCase {
             return handler;
         }
 
+        @Override
+        public CorsResolution resolve(String origin) {
+            resolveCalled = true;
+            lastOrigin = origin;
+            return handler == null ? null : new CorsResolution(handler, matchType);
+        }
+
         public void setHandler(CorsHandler handler) {
             this.handler = handler;
         }
 
+        public void setMatchType(CorsMatchType matchType) {
+            this.matchType = matchType;
+        }
+
         public boolean wasGetCalled() {
             return getCalled;
+        }
+
+        public boolean wasResolveCalled() {
+            return resolveCalled;
         }
 
         public String getLastOrigin() {
@@ -273,15 +411,24 @@ public class CorsFilterTest extends UnitFessTestCase {
     private static class TestCorsHandler extends CorsHandler {
         private boolean processCalled = false;
         private String lastOrigin = null;
+        private CorsMatchType lastMatchType = null;
         private ServletRequest lastRequest = null;
         private ServletResponse lastResponse = null;
 
         @Override
-        public void process(String origin, ServletRequest request, ServletResponse response) {
+        public void process(String origin, CorsMatchType matchType, ServletRequest request, ServletResponse response) {
             processCalled = true;
             lastOrigin = origin;
+            lastMatchType = matchType;
             lastRequest = request;
             lastResponse = response;
+            final HttpServletResponse httpResponse = (HttpServletResponse) response;
+            if (matchType == CorsMatchType.EXACT) {
+                httpResponse.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+                httpResponse.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            } else {
+                httpResponse.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOW_ORIGIN_ALL);
+            }
         }
 
         public boolean wasProcessCalled() {
@@ -290,6 +437,10 @@ public class CorsFilterTest extends UnitFessTestCase {
 
         public String getLastOrigin() {
             return lastOrigin;
+        }
+
+        public CorsMatchType getLastMatchType() {
+            return lastMatchType;
         }
 
         public ServletRequest getLastRequest() {
@@ -303,29 +454,23 @@ public class CorsFilterTest extends UnitFessTestCase {
 
     private static class TestHttpServletRequest implements HttpServletRequest {
         private String method = "GET";
-        private String originHeader = null;
+        private final java.util.Map<String, String> headerMap = new java.util.HashMap<>();
 
         public void setMethod(String method) {
             this.method = method;
         }
 
-        @Override
-        public String getMethod() {
-            return method;
-        }
-
         public void setHeader(String name, String value) {
-            if ("Origin".equals(name)) {
-                originHeader = value;
+            if (value == null) {
+                headerMap.remove(name);
+            } else {
+                headerMap.put(name, value);
             }
         }
 
         @Override
         public String getHeader(String name) {
-            if ("Origin".equals(name)) {
-                return originHeader;
-            }
-            return null;
+            return headerMap.get(name);
         }
 
         // Minimal implementations for other required methods
@@ -357,6 +502,11 @@ public class CorsFilterTest extends UnitFessTestCase {
         @Override
         public int getIntHeader(String name) {
             return -1;
+        }
+
+        @Override
+        public String getMethod() {
+            return method;
         }
 
         @Override
@@ -667,34 +817,54 @@ public class CorsFilterTest extends UnitFessTestCase {
 
     private static class TestHttpServletResponse implements HttpServletResponse {
         private int status = 0;
+        private final java.util.Map<String, java.util.List<String>> headers = new java.util.LinkedHashMap<>();
 
         @Override
         public void setStatus(int sc) {
             this.status = sc;
         }
 
+        @Override
         public int getStatus() {
             return status;
         }
 
         @Override
-        public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+        public void setHeader(String name, String value) {
+            final java.util.List<String> list = new java.util.ArrayList<>();
+            list.add(value);
+            headers.put(name, list);
+        }
+
+        @Override
+        public void addHeader(String name, String value) {
+            headers.computeIfAbsent(name, k -> new java.util.ArrayList<>()).add(value);
+        }
+
+        @Override
+        public boolean containsHeader(String name) {
+            return headers.containsKey(name);
+        }
+
+        @Override
+        public String getHeader(String name) {
+            final java.util.List<String> list = headers.get(name);
+            return list != null && !list.isEmpty() ? list.get(0) : null;
         }
 
         @Override
         public java.util.Collection<String> getHeaders(String name) {
-            return java.util.Collections.emptyList();
+            return headers.getOrDefault(name, java.util.Collections.emptyList());
+        }
+
+        @Override
+        public java.util.Collection<String> getHeaderNames() {
+            return headers.keySet();
         }
 
         // Minimal implementations for other required methods
         @Override
         public void addCookie(jakarta.servlet.http.Cookie cookie) {
-        }
-
-        @Override
-        public boolean containsHeader(String name) {
-            return false;
         }
 
         @Override
@@ -732,24 +902,11 @@ public class CorsFilterTest extends UnitFessTestCase {
         }
 
         @Override
-        public void setHeader(String name, String value) {
-        }
-
-        @Override
-        public void addHeader(String name, String value) {
-        }
-
-        @Override
         public void setIntHeader(String name, int value) {
         }
 
         @Override
         public void addIntHeader(String name, int value) {
-        }
-
-        @Override
-        public String getHeader(String name) {
-            return null;
         }
 
         @Override

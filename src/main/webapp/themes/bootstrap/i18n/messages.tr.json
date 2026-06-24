@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Sonuçlara dön",
   "labels.cache_not_found": "Önbelleğe alınmış içerik mevcut değil.",
   "labels.cache_loading": "Önbelleğe alınmış içerik yükleniyor…",
+  "labels.search_loading": "Aranıyor…",
   "labels.search_result_cache": "Önbellek",
   "labels.search_cache_msg": "Bu, {0} adresinin önbelleğidir. {1} tarihinde göründüğü şekliyle sayfanın bir anlık görüntüsüdür.",
   "labels.search_unknown": "Bilinmeyen",

@@ -22,11 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.service.FavoriteLogService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -76,6 +76,12 @@ public class FavoritesListHandler {
 
     private static final Logger logger = LogManager.getLogger(FavoritesListHandler.class);
 
+    /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
+    private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
+
+    /** Maximum length of {@code query_id} as declared in the OpenAPI spec. */
+    private static final int QUERY_ID_MAX_LENGTH = 100;
+
     /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
@@ -94,12 +100,12 @@ public class FavoritesListHandler {
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isUserFavorite()) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "favorite feature is not available");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "favorite feature is not available");
             return;
         }
         // query_id arrives as a query parameter; treat it as opaque (do not URL-decode).
@@ -107,7 +113,16 @@ public class FavoritesListHandler {
         // set previously cached in the session by the search handler.
         final String queryId = req.getParameter("query_id");
         if (StringUtil.isBlank(queryId)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id is required");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id is required");
+            return;
+        }
+        if (queryId.length() > QUERY_ID_MAX_LENGTH) {
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id exceeds the maximum length of " + QUERY_ID_MAX_LENGTH);
+            return;
+        }
+        if (!QUERY_ID_PATTERN.matcher(queryId).matches()) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "query_id contains invalid characters");
             return;
         }
         // Resolve the session-bound user code BEFORE doing any expensive work — anonymous
@@ -115,7 +130,7 @@ public class FavoritesListHandler {
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
         final String userCode = userInfoHelper == null ? null : userInfoHelper.getUserCode();
         if (StringUtil.isBlank(userCode)) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "no user session");
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "no user session");
             return;
         }
         try {
@@ -160,9 +175,9 @@ public class FavoritesListHandler {
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("record_count", data.size());
             payload.put("data", data);
-            V2EnvelopeWriter.writeSuccess(res, payload);
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
-            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/favorites GET");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/favorites GET");
         }
     }
 
@@ -171,10 +186,10 @@ public class FavoritesListHandler {
      * {@code record_count: 0}. Used when the {@code query_id} matches no cached
      * result set in the session.
      */
-    private static void writeEmpty(final HttpServletResponse res) throws IOException {
+    private void writeEmpty(final HttpServletResponse res) throws IOException {
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("record_count", 0);
         payload.put("data", new ArrayList<Map<String, Object>>());
-        V2EnvelopeWriter.writeSuccess(res, payload);
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 }

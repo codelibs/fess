@@ -2094,17 +2094,34 @@ public interface FessProp {
 
     String getApiGsaResponseHeaders();
 
+    /**
+     * Parses a newline-separated {@code Name:Value} header configuration into pairs,
+     * excluding headers that control CORS / cross-origin disclosure. Excluded (silently,
+     * since an interface cannot hold a logger): any header whose name starts with
+     * {@code "access-control-"} (case-insensitive) or {@code "timing-allow-origin"}.
+     * CORS is controlled exclusively by {@code api.cors.*} / CorsFilter.
+     *
+     * @param value the raw configured header lines
+     * @return the sanitized list of header name/value pairs
+     */
+    private static List<Pair<String, String>> parseResponseHeaderList(final String value) {
+        return split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+            final String[] values = s.split(":", 2);
+            if (values.length == 2) {
+                return new Pair<>(values[0], values[1]);
+            }
+            return new Pair<>(values[0], StringUtil.EMPTY);
+        }).filter(pair -> {
+            final String name = pair.getFirst().trim().toLowerCase(Locale.ROOT);
+            return !name.startsWith("access-control-") && !"timing-allow-origin".equals(name);
+        }).collect(Collectors.toList()));
+    }
+
     default List<Pair<String, String>> getApiGsaResponseHeaderList() {
         @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_GSA_RESPONSE_HEADER_LIST);
         if (list == null) {
-            list = split(getApiGsaResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                final String[] values = s.split(":", 2);
-                if (values.length == 2) {
-                    return new Pair<>(values[0], values[1]);
-                }
-                return new Pair<>(values[0], StringUtil.EMPTY);
-            }).collect(Collectors.toList()));
+            list = parseResponseHeaderList(getApiGsaResponseHeaders());
             propMap.put(API_GSA_RESPONSE_HEADER_LIST, list);
         }
         return list;
@@ -2116,13 +2133,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_JSON_RESPONSE_HEADER_LIST);
         if (list == null) {
-            list = split(getApiJsonResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                final String[] values = s.split(":", 2);
-                if (values.length == 2) {
-                    return new Pair<>(values[0], values[1]);
-                }
-                return new Pair<>(values[0], StringUtil.EMPTY);
-            }).collect(Collectors.toList()));
+            list = parseResponseHeaderList(getApiJsonResponseHeaders());
             propMap.put(API_JSON_RESPONSE_HEADER_LIST, list);
         }
         return list;
@@ -2134,13 +2145,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(API_DASHBOARD_RESPONSE_HEADER_LIST);
         if (list == null) {
-            list = split(getApiDashboardResponseHeaders(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                final String[] values = s.split(":", 2);
-                if (values.length == 2) {
-                    return new Pair<>(values[0], values[1]);
-                }
-                return new Pair<>(values[0], StringUtil.EMPTY);
-            }).collect(Collectors.toList()));
+            list = parseResponseHeaderList(getApiDashboardResponseHeaders());
             propMap.put(API_DASHBOARD_RESPONSE_HEADER_LIST, list);
         }
         return list;
@@ -2152,8 +2157,10 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         List<String> list = (List<String>) propMap.get(CORS_ALLOW_ORIGIN);
         if (list == null) {
-            list = split(getApiCorsAllowOrigin(), "\n")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toList()));
+            list = split(getApiCorsAllowOrigin(), "[\\n,]").get(stream -> stream.map(String::trim)
+                    .filter(StringUtil::isNotEmpty)
+                    .filter(s -> !"null".equalsIgnoreCase(s))
+                    .collect(Collectors.toList()));
             propMap.put(CORS_ALLOW_ORIGIN, list);
         }
         return list;
@@ -2171,6 +2178,12 @@ public interface FessProp {
     default Set<String> getSessionTrackingModesAsSet() {
         return split(getSessionTrackingModes(), ",")
                 .get(stream -> stream.map(s -> s.trim().toUpperCase(Locale.ENGLISH)).collect(Collectors.toSet()));
+    }
+
+    String getSessionCookieSecure();
+
+    default boolean isSessionCookieSecureEnabled() {
+        return Constants.TRUE.equalsIgnoreCase(getSessionCookieSecure());
     }
 
     String getQueryTrackTotalHits();
@@ -2410,12 +2423,32 @@ public interface FessProp {
         return set;
     }
 
+    String THEME_API_CSRF_SERVER_ORIGINS_SET = "themeApiCsrfServerOriginsSet";
+
+    String getThemeApiCsrfServerOrigins();
+
+    default Set<String> getThemeApiCsrfServerOriginsAsSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> set = (Set<String>) propMap.get(THEME_API_CSRF_SERVER_ORIGINS_SET);
+        if (set == null) {
+            set = split(getThemeApiCsrfServerOrigins(), "[\\n,]")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            propMap.put(THEME_API_CSRF_SERVER_ORIGINS_SET, set);
+        }
+        return set;
+    }
+
     /**
      * Resolves {@code api.v2.chat.rate.limit.per.user.per.minute} from the system
      * properties, defaulting to {@code 30} on absence or parse failure. A return
-     * value &le; 0 disables the per-user chat rate limit entirely.
+     * value &le; 0 disables the chat rate limit entirely.
      *
-     * @return max chat requests per minute per user, or {@code <= 0} to disable
+     * <p>This single threshold governs both chat throttle buckets: authenticated callers
+     * are limited per server-validated username, while guest / anonymous callers are
+     * limited per client IP (see {@code ChatApiHelper#resolveChatRateLimitKey}). The
+     * property name keeps its {@code per.user} form for backward compatibility.</p>
+     *
+     * @return max chat requests per minute per throttle key, or {@code <= 0} to disable
      */
     default int getChatRateLimitPerMinute() {
         try {
@@ -2423,5 +2456,88 @@ public interface FessProp {
         } catch (final NumberFormatException e) {
             return 30;
         }
+    }
+
+    /**
+     * Returns the maximum allowed length for a v2 API string query parameter
+     * (e.g. {@code q}, {@code sort}, {@code sdh}). Enforced server-side per
+     * OWASP API4:2023 guidance.
+     *
+     * @return maximum character length; defaults to {@code 1000}
+     */
+    default int getApiV2ParamMaxLengthAsInteger() {
+        final Integer value = getAsInteger("api.v2.param.max.length");
+        return value != null ? value.intValue() : 1000;
+    }
+
+    /**
+     * Returns the maximum number of values allowed for a v2 API repeatable
+     * query parameter (e.g. array-typed fields).
+     *
+     * @return maximum item count; defaults to {@code 100}
+     */
+    default int getApiV2ParamMaxArraySizeAsInteger() {
+        final Integer value = getAsInteger("api.v2.param.max.array.size");
+        return value != null ? value.intValue() : 100;
+    }
+
+    /**
+     * Returns the maximum allowed length for a password field submitted via the
+     * v2 API.
+     *
+     * @return maximum character length; defaults to {@code 100}
+     */
+    default int getPasswordMaxLengthAsInteger() {
+        final Integer value = getAsInteger("password.max.length");
+        return value != null ? value.intValue() : 100;
+    }
+
+    /**
+     * Returns the upper clamp for the {@code facet.size} parameter applied at
+     * the search chokepoint.
+     *
+     * @return maximum facet field size; defaults to {@code 1000}
+     */
+    default int getQueryFacetFieldsSizeMaxAsInteger() {
+        final Integer value = getAsInteger("query.facet.fields.size.max");
+        return value != null ? value.intValue() : 1000;
+    }
+
+    /**
+     * Returns the upper clamp for the {@code facet.minDocCount} parameter applied
+     * at the search chokepoint. Read as a long because the value (and its default)
+     * may exceed the {@code int} range.
+     *
+     * @return maximum facet minimum document count; defaults to {@code 2147483647}
+     */
+    default long getQueryFacetFieldsMinDocCountMaxAsLong() {
+        final String value = get("query.facet.fields.min_doc_count.max");
+        if (value != null) {
+            try {
+                return Long.parseLong(value.trim());
+            } catch (final NumberFormatException e) {
+                // Fall through to the default when the configured value is not a valid long.
+            }
+        }
+        return 2147483647L;
+    }
+
+    /**
+     * Returns the maximum click-log timestamp ({@code rt}, epoch milliseconds)
+     * accepted by the v2 click API. Read as a long because the value (and its
+     * default) exceeds the {@code int} range.
+     *
+     * @return maximum accepted {@code rt}; defaults to {@code 9999999999999}
+     */
+    default long getApiV2ClickMaxRtAsLong() {
+        final String value = get("api.v2.click.max.rt");
+        if (value != null) {
+            try {
+                return Long.parseLong(value.trim());
+            } catch (final NumberFormatException e) {
+                // Fall through to the default when the configured value is not a valid long.
+            }
+        }
+        return 9999999999999L;
     }
 }

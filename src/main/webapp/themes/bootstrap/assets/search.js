@@ -580,6 +580,16 @@ function renderResults(env) {
   if (favEnabled && env.query_id) syncFavorites(env.query_id);
 }
 
+/**
+ * Toggle the in-flight search loading indicator (#search-loading).
+ * Gives sighted users visible feedback during a /search request; cache and chat
+ * already have loading states, search did not.
+ */
+function showSearchLoading(show) {
+  const el = document.getElementById("search-loading");
+  if (el) el.classList.toggle("d-none", !show);
+}
+
 async function runSearch() {
   // Cancel any in-flight request before issuing a new one.
   if (currentSearchAbort) currentSearchAbort.abort();
@@ -592,6 +602,10 @@ async function runSearch() {
   // cards carry the correct rt parameter (mirrors JSP #rt hidden field).
   state.requestedTime = Date.now();
   document.title = state.q ? t("page.search_title").replace("{0}", state.q) : "Fess";
+  // Clear any stale error banner from a previous attempt and show the loading indicator.
+  const prevErr = document.getElementById("search-error");
+  if (prevErr) prevErr.classList.add("d-none");
+  showSearchLoading(true);
   try {
     const params = { q: state.q, start: state.start, num: state.num };
     if (state.sort) params.sort = state.sort;
@@ -673,20 +687,26 @@ async function runSearch() {
     loadRelated(state.q, currentRelatedAbort.signal);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
-    if (e && e.name === "AbortError") return; // request superseded — silently ignore
+    if (e && e.name === "AbortError") return; // request superseded — newer request owns the UI
     const errBox = document.getElementById("search-error");
     if (e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || e.httpStatus === 400)) {
       if (errBox) { errBox.textContent = e.message || t("error.invalid_request"); errBox.classList.remove("d-none"); }
       else { document.getElementById("results-meta").textContent = e.message || t("error.invalid_request"); }
       return;
     }
-    if (errBox) errBox.classList.add("d-none");
-    const meta = document.getElementById("results-meta");
-    if (e && e.name === "NetworkError") {
-      meta.textContent = t("error.network");
-    } else {
-      meta.textContent = e.code === "AUTH_REQUIRED" ? t("error.auth_required") : t("error.server");
-    }
+    // Network/server/auth failures: surface in the VISIBLE banner too. Previously these wrote
+    // only to the screen-reader-only #results-meta sink, so a sighted user saw nothing when a
+    // search failed with a 500 or a dropped connection. Fall back to #results-meta when a
+    // theme has no visible banner.
+    const msg = (e && e.name === "NetworkError") ? t("error.network")
+              : (e && e.code === "AUTH_REQUIRED") ? t("error.auth_required")
+              : t("error.server");
+    if (errBox) { errBox.textContent = msg; errBox.classList.remove("d-none"); }
+    else { const meta = document.getElementById("results-meta"); if (meta) meta.textContent = msg; }
+  } finally {
+    // Only the latest request clears the spinner. If this request was superseded,
+    // currentSearchAbort already points at a newer controller, so leave it running.
+    if (currentSearchAbort && currentSearchAbort.signal === signal) showSearchLoading(false);
   }
 }
 
@@ -978,78 +998,6 @@ function renderLabelOptions() {
 }
 
 /**
- * Parity with searchOptions.jsp — populate the up-front home-view option selects
- * (#home-sort-select / #home-num-select / #home-lang-select / #home-label-select)
- * from the same config that drives the results-view selects.
- *
- * home-lang: multi-select (searchOptions.jsp:75-84 uses multiple="true").
- * home-label: multi-select, shown only when features.display_label_type && label_options non-empty
- *             (parity with searchOptions.jsp:85-97, parity-r3 Task 2).
- */
-function renderHomeOptions() {
-  const copy = (srcId, destId) => {
-    const src = document.getElementById(srcId);
-    const dest = document.getElementById(destId);
-    if (!src || !dest) return dest;
-    // Clear then clone each option (no innerHTML — matches the clear idiom in
-    // renderNumOptions/renderLangOptions and avoids the no-unsanitized rule).
-    while (dest.firstChild) dest.removeChild(dest.firstChild);
-    for (const o of src.options) dest.appendChild(o.cloneNode(true));
-    return dest;
-  };
-
-  const homeSort = copy("sortSearchOption", "home-sort-select");
-  if (homeSort) homeSort.value = state.sort || "";
-
-  const homeNum = copy("numSearchOption", "home-num-select");
-  if (homeNum) homeNum.value = String(state.num || 10);
-
-  // Home lang is multi-select (parity with searchOptions.jsp multiple="true").
-  // Copy options from the drawer lang select; restore selected state from state.lang.
-  const homeLang = copy("langSearchOption", "home-lang-select");
-  if (homeLang) {
-    const selected = Array.isArray(state.lang) ? state.lang : (state.lang ? [state.lang] : []);
-    for (const o of homeLang.options) {
-      o.selected = selected.includes(o.value);
-    }
-    // Ensure multi-select attributes are present (the HTML already has them,
-    // but guard against any copy-induced attribute loss).
-    homeLang.setAttribute("multiple", "");
-    // Match the size set by renderLangOptions for the results select.
-    homeLang.setAttribute("size", "4");
-  }
-
-  // Home label multi-select — parity with searchOptions.jsp:85-97.
-  // Show only when display_label_type feature is enabled and options are non-empty.
-  const cfg = api.getConfig() || {};
-  const labelOpts = cfg.label_options || [];
-  const showLabel = !!(cfg.features && cfg.features.display_label_type) && labelOpts.length > 0;
-
-  const homeLabelSel = document.getElementById("home-label-select");
-  const homeLabelLbl = homeLabelSel && homeLabelSel.previousElementSibling;
-  if (homeLabelSel) {
-    if (!showLabel) {
-      homeLabelSel.classList.add("d-none");
-      if (homeLabelLbl && homeLabelLbl.tagName === "LABEL") homeLabelLbl.classList.add("d-none");
-    } else {
-      homeLabelSel.classList.remove("d-none");
-      if (homeLabelLbl && homeLabelLbl.tagName === "LABEL") homeLabelLbl.classList.remove("d-none");
-
-      // Rebuild options from cfg.label_options.
-      while (homeLabelSel.firstChild) homeLabelSel.removeChild(homeLabelSel.firstChild);
-      const selectedLabels = state.fields.label || [];
-      for (const lo of labelOpts) {
-        const opt = document.createElement("option");
-        opt.value = lo.value != null ? lo.value : "";
-        opt.textContent = lo.label || lo.value || "";
-        opt.selected = selectedLabels.includes(opt.value);
-        homeLabelSel.appendChild(opt);
-      }
-    }
-  }
-}
-
-/**
  * (Re-)initialise all search option selects from config. Safe to call multiple times.
  * Listeners are attached once in attach(); this only repopulates the options.
  */
@@ -1058,8 +1006,6 @@ function renderSearchOptions() {
   renderNumOptions();
   renderLangOptions();
   renderLabelOptions();
-  // Mirror the rendered options into the home-view option panel.
-  renderHomeOptions();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1084,49 +1030,6 @@ function syncSearchInputs(q) {
 }
 
 /**
- * Parity with index.jsp — apply the up-front home-view option selections onto a
- * search query string. Reads #home-sort-select / #home-num-select /
- * #home-lang-select and appends the corresponding params (sort / num / lang) so
- * the executed search honours the home panel choices. Only non-empty values are
- * applied so an unset option never clobbers the server defaults. The resulting
- * params flow through runFromUrl(), which already parses sort / num / lang.
- *
- * @param {URLSearchParams} params query params to mutate in place
- * @returns {URLSearchParams} the same params object, for chaining
- */
-export function applyHomeOptions(params) {
-  const sortSel = document.getElementById("home-sort-select");
-  if (sortSel && sortSel.value) params.set("sort", sortSel.value);
-
-  const numSel = document.getElementById("home-num-select");
-  if (numSel && numSel.value) params.set("num", numSel.value);
-
-  // home-lang is multi-select (parity with searchOptions.jsp multiple="true");
-  // collect all selected options and emit repeated lang= params.
-  const langSel = document.getElementById("home-lang-select");
-  if (langSel) {
-    const selectedLangs = Array.from(langSel.selectedOptions).map(o => o.value).filter(v => v !== "");
-    if (selectedLangs.length > 0) {
-      params.delete("lang");
-      selectedLangs.forEach(v => params.append("lang", v));
-    }
-  }
-
-  // home-label multi-select — carry selected labels as fields.label params
-  // (parity with searchOptions.jsp:85-97, parity-r3 Task 2).
-  const labelSel = document.getElementById("home-label-select");
-  if (labelSel && !labelSel.classList.contains("d-none")) {
-    const selectedLabels = Array.from(labelSel.selectedOptions).map(o => o.value).filter(v => v !== "");
-    if (selectedLabels.length > 0) {
-      params.delete("fields.label");
-      selectedLabels.forEach(v => params.append("fields.label", v));
-    }
-  }
-
-  return params;
-}
-
-/**
  * A.8: Read URL search parameters into state and run a fresh search.
  * Called by app.js on every route dispatch (including popstate / back-forward)
  * so the results always reflect the current URL.
@@ -1134,9 +1037,7 @@ export function applyHomeOptions(params) {
 export function runFromUrl() {
   const params = new URLSearchParams(location.search);
   const q = params.get("q");
-  // Only run a search when a query is present in the URL.
-  if (!q) return;
-  state.q = q;
+  state.q = q || "";
   state.start = Number(params.get("start")) || 0;
   const numVal = Number(params.get("num"));
   if (numVal > 0) state.num = numVal;
@@ -1155,6 +1056,17 @@ export function runFromUrl() {
   } else { state.geo = { lat: "", lon: "", distance: "" }; }
   // ADV-2: hydrate lang / fields.* / ex_q from URL (forwarded by advance search submit)
   state.lang = params.getAll("lang").filter(v => v !== "");
+  // Facet selections (sidebar label facets and facet query views) live only
+  // in memory and are never written to the URL. Every navigation re-derives filter
+  // state from the URL, so these in-memory stores must be cleared too; otherwise a
+  // previously clicked facet survives a search-options submit (which navigates with
+  // only fields.* in the URL) and gets merged back into the request, applying both
+  // the old facet label and the new one.
+  state.facets = {};
+  state.facetQueries = [];
+  // The similar-docs hash (sdh) is likewise memory-only and merged into the
+  // request, so it must be cleared on navigation too.
+  state.sdh = "";
   state.fields = {};
   for (const [key, value] of params.entries()) {
     if (key.startsWith("fields.") && value !== "") {
@@ -1163,6 +1075,37 @@ export function runFromUrl() {
     }
   }
   state.exQ = params.getAll("ex_q").filter(v => v !== "");
+  // Re-sync the search-options drawer selects (sort / num / lang / label) to the
+  // freshly hydrated state. attach() renders them only once, so without this a
+  // navigation (link click, back/forward, facet submit) would leave the selects
+  // showing stale values. That matters now that the selects are applied on the
+  // Search button: a stale displayed value would otherwise be written back into the
+  // URL on the next submit, silently reverting the user's actual sort/num/lang.
+  // Guarded on config so the option lists exist before we re-render them.
+  if (api.getConfig()) {
+    renderSearchOptions();
+  }
+  // Run a search when a keyword OR any active filter is present in the URL (label /
+  // other fields, geo, or ex_q). The classic JSP theme issues the request for
+  // filter-only URLs such as /search?fields.label=foo, so mirror that here instead
+  // of bailing on an empty keyword. sort/num/lang are query modifiers, not a search
+  // on their own. Hydrating state above before this check also sets state.q to "" for
+  // a filter-only URL, so a previous keyword can't leak into the next search:
+  // runSearch() reads state.q, and the option-drawer Search button omits an empty q.
+  const hasFields = Object.keys(state.fields).length > 0;
+  const hasGeo = !!(state.geo.lat && state.geo.lon && state.geo.distance);
+  const hasExQ = state.exQ.length > 0;
+  if (!state.q && !hasFields && !hasGeo && !hasExQ) {
+    // A blank query with no conditions (e.g. a sort/num/lang-only URL such as
+    // /search?num=10) is not a search. JSP parity: SearchAction.doSearch() redirects
+    // such requests to the top page via redirectToRoot(), so mirror that here. Without
+    // this, the results view keeps showing the PREVIOUS query's results, because the
+    // results DOM is re-rendered only when runSearch() runs and neither showView() nor
+    // clearSearchState() clears it. Use replace: true so the empty /search entry does
+    // not linger in history (matching the server-side redirect).
+    navigate("/", { replace: true });
+    return;
+  }
   runSearch();
 }
 
@@ -1213,6 +1156,24 @@ export function attach() {
       for (const key of [...params.keys()]) {
         if (key.startsWith("fields.") || key === "ex_q") params.delete(key);
       }
+      // JSP parity: apply the current sort / num / lang drawer selections rather
+      // than only carrying over the previous URL values, so a manual change to these
+      // selects takes effect when the header Search button is pressed (the selects no
+      // longer auto-run a search on change). Guarded on config so the selects are
+      // populated before we read them.
+      if (api.getConfig()) {
+        const sortSel = document.getElementById("sortSearchOption");
+        if (sortSel) { if (sortSel.value) params.set("sort", sortSel.value); else params.delete("sort"); }
+        const numSel = document.getElementById("numSearchOption");
+        // Unlike sort, the num select has no empty placeholder option, so its value is always
+        // present; there is no empty case to delete here.
+        if (numSel && numSel.value) params.set("num", numSel.value);
+        const langSel = document.getElementById("langSearchOption");
+        if (langSel) {
+          params.delete("lang");
+          Array.from(langSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("lang", v));
+        }
+      }
       navigate("/search?" + params.toString());
       // JSP parity: disable the submit button for 3s after the search has been
       // triggered, to prevent rapid double-submits.
@@ -1221,23 +1182,17 @@ export function attach() {
   }
   // Search-options "Clear" button (searchOptions.jsp #searchOptionsClearButton):
   // reset the drawer option controls (num/sort/lang/label + geo) to their defaults.
+  // JSP parity: this is a purely visual reset — it does NOT re-run the search.
+  // The reset values are applied on the next Search-button press, matching searchOptions.jsp
+  // whose Clear button only resets the select indices and never submits the form. (The geo
+  // inputs are cleared visually here too; the geo filter is dropped only when the drawer's own
+  // Search button is pressed and reads the now-empty inputs. A header-form submit instead
+  // preserves the geo params already in the URL, matching the JSP theme whose header form
+  // carries geo forward via hidden inputs.)
   const optClearBtn = document.getElementById("searchOptionsClearButton");
   if (optClearBtn) {
     optClearBtn.addEventListener("click", () => {
-      // Geo filter (migrated into the drawer): clear inputs + state first so the
-      // select-change handlers below re-run the search with geo already cleared.
-      ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
-      state.geo = { lat: "", lon: "", distance: "" };
-      ["numSearchOption", "sortSearchOption", "langSearchOption", "labelSearchOption"].forEach(id => {
-        const sel = document.getElementById(id);
-        if (!sel) return;
-        if (sel.multiple) {
-          Array.from(sel.options).forEach(o => { o.selected = false; });
-        } else {
-          sel.selectedIndex = 0;
-        }
-        sel.dispatchEvent(new Event("change", { bubbles: true }));
-      });
+      resetOptionsDOM();
     });
   }
   // Search-options drawer "Search" button. It is form="search-form" (the header form),
@@ -1350,31 +1305,13 @@ export function attach() {
   // Geo filter apply/clear is handled by the drawer's main Search / Clear buttons
   // (geo inputs were migrated into #searchOptions); no separate geo buttons.
 
-  // Sort select — options are populated by renderSortOptions() after config loads
-  const sortSelect = document.getElementById("sortSearchOption");
-  if (sortSelect) sortSelect.addEventListener("change", () => {
-    state.sort = sortSelect.value || "";
-    state.start = 0;
-    runSearch();
-  });
-
-  // Num select
-  const numSelect = document.getElementById("numSearchOption");
-  if (numSelect) numSelect.addEventListener("change", () => {
-    state.num = Number(numSelect.value) || 10;
-    state.start = 0;
-    runSearch();
-  });
-
-  // Lang multi-select: collect all selected option values; when "All" (value="")
-  // is selected or nothing is selected, reset to empty array.
-  const langSelect = document.getElementById("langSearchOption");
-  if (langSelect) langSelect.addEventListener("change", () => {
-    const selected = Array.from(langSelect.selectedOptions).map(o => o.value).filter(v => v !== "");
-    state.lang = selected;
-    state.start = 0;
-    runSearch();
-  });
+  // JSP parity: the sort / num / lang drawer selects do NOT auto-run a search on
+  // change. The default JSP search screen only applies these options when a Search button
+  // is pressed, so changing a select here is a no-op until the user submits — either via
+  // the header form (#search-form, which reads these selects in its submit handler above)
+  // or the drawer's own Search button (#searchOptions button[type="submit"], wired above).
+  // Re-introducing a `change -> runSearch()` handler here would resurrect the reported bug
+  // where results changed before the Search button was pressed.
 
   // Populate search option selects once config is available.
   // api.init() is awaited by app.js before attach() is called, so getConfig()
@@ -1993,6 +1930,58 @@ async function toggleFavorite(docId, btn, queryId) {
       }
     }
   }
+}
+
+/**
+ * HOME-RESET: Silently reset drawer option controls (num/sort/lang/label + geo) to
+ * their default DOM state without dispatching change events or triggering a re-search.
+ * Shared by clearSearchState() and the #searchOptionsClearButton handler (SRCH-6681).
+ */
+function resetOptionsDOM() {
+  // Geo inputs.
+  ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const e = document.getElementById(id); if (e) e.value = ""; });
+  // Drawer selects: single → selectedIndex 0; multiple → deselect all.
+  ["numSearchOption", "sortSearchOption", "langSearchOption", "labelSearchOption"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    if (sel.multiple) { Array.from(sel.options).forEach(o => { o.selected = false; }); }
+    else { sel.selectedIndex = 0; }
+  });
+}
+
+/**
+ * HOME-RESET (SRCH-6681): Authoritatively reset all search state and option controls
+ * when navigating back to the home view.  This is a *silent* reset — no change events
+ * are dispatched and no re-search is triggered.  app.js calls this from the home route
+ * handler so the SPA matches JSP parity (index.jsp is re-rendered on every request).
+ *
+ * Resets:
+ *  - module-level `state` to initial values
+ *  - geo inputs (#geo-lat, #geo-lon, #geo-distance)
+ *  - drawer selects (#numSearchOption, #sortSearchOption, #langSearchOption, #labelSearchOption)
+ *  - both query inputs via syncSearchInputs("") (#query + #contentQuery)
+ */
+export function clearSearchState() {
+  // Reset module-level state to initial values.
+  state.q             = "";
+  state.start         = 0;
+  state.num           = 10;
+  state.sort          = "";
+  state.lang          = [];
+  state.sdh           = "";
+  state.facets        = {};
+  state.fields        = {};
+  state.facetQueries  = [];
+  state.exQ           = [];
+  state.geo           = { lat: "", lon: "", distance: "" };
+  state.requestedTime = 0;
+  state.highlightParams = "";
+
+  // Reset DOM controls silently (no change dispatch).
+  resetOptionsDOM();
+
+  // Clear both query inputs (header #query + home #contentQuery).
+  syncSearchInputs("");
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.

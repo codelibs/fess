@@ -253,6 +253,7 @@
   "labels.cache_back_to_results": "Вернуться к результатам",
   "labels.cache_not_found": "Кэшированное содержимое недоступно.",
   "labels.cache_loading": "Загрузка кэшированного содержимого…",
+  "labels.search_loading": "Поиск…",
   "labels.search_result_cache": "Кэш",
   "labels.search_cache_msg": "Это кэш {0}. Это снимок страницы, как она выглядела {1}.",
   "labels.search_unknown": "Неизвестно",

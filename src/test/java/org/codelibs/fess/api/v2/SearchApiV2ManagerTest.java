@@ -246,19 +246,18 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_handleHealth_does_not_leak_exception_message() throws Exception {
-        // Source-level assertion: the handleHealth catch block must not pass e.getMessage()
+        // Source-level assertion: the HealthHandler catch block must not pass e.getMessage()
         // to writeError. Uses writeInternalError which logs and emits a generic message.
-        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/SearchApiV2Manager.java");
+        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/handlers/HealthHandler.java");
         org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
                 "skipping: source file not present at runtime cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
         final String source = java.nio.file.Files.readString(src);
-        // Find handleHealth and look for the catch block
-        final int healthIdx = source.indexOf("private void handleHealth");
-        assertTrue(healthIdx >= 0, "handleHealth not found in source");
+        final int healthIdx = source.indexOf("public void handle");
+        assertTrue(healthIdx >= 0, "HealthHandler.handle not found in source");
         final String healthSection = source.substring(healthIdx, Math.min(source.length(), healthIdx + 2000));
         // The catch must use writeInternalError, not writeError with e.getMessage()
-        assertTrue(healthSection.contains("writeInternalError"), "handleHealth catch must use writeInternalError: " + healthSection);
-        assertFalse(healthSection.contains("e.getMessage()"), "handleHealth must not leak e.getMessage(): " + healthSection);
+        assertTrue(healthSection.contains("writeInternalError"), "HealthHandler catch must use writeInternalError: " + healthSection);
+        assertFalse(healthSection.contains("e.getMessage()"), "HealthHandler must not leak e.getMessage(): " + healthSection);
     }
 
     @Test
@@ -266,18 +265,20 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/health"), res, new NopChain());
-        // The /health route writes its envelope through handleHealth(). The engine may or
+        // The /health route writes its envelope through HealthHandler. The engine may or
         // may not be reachable from the unit harness; success / service_unavailable (red) /
         // internal_error are all accepted as long as the v2 envelope shape is preserved.
         // C-9 invariant: envelope.status >= 1 iff HTTP >= 400 — red clusters now emit a
         // service_unavailable error envelope (status:9) instead of a success envelope.
         final String body = res.body();
         assertFalse(body.contains("\"version\""), body);
+        // cluster_name is intentionally not exposed by the anonymous health endpoint to avoid
+        // leaking the OpenSearch cluster name; verify on every path (success / 503 / 500).
+        assertFalse(body.contains("\"cluster_name\""), body);
         if (res.status == 200) {
             // green or yellow — success envelope with engine details.
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"engine\""), body);
-            assertTrue(body.contains("\"cluster_name\""), body);
         } else if (res.status == 503) {
             // red cluster — error envelope; engine details embedded under error.details.
             assertTrue(body.contains("\"status\":9"), body);
@@ -291,21 +292,21 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_handleHealth_clusterRedMapsTo503_sourceLevel() throws Exception {
-        // Source-level assertion: the handleHealth method must check for "red" cluster status
+        // Source-level assertion: the HealthHandler must check for "red" cluster status
         // and set response.setStatus(503). This test reads the source to confirm the pattern.
-        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/SearchApiV2Manager.java");
+        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/handlers/HealthHandler.java");
         org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
                 "skipping: source not available at cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
         final String source = java.nio.file.Files.readString(src);
-        final int healthIdx = source.indexOf("private void handleHealth");
-        assertTrue(healthIdx >= 0, "handleHealth not found in source");
+        final int healthIdx = source.indexOf("public void handle");
+        assertTrue(healthIdx >= 0, "HealthHandler.handle not found in source");
         final String healthSection = source.substring(healthIdx, Math.min(source.length(), healthIdx + 2500));
         // Must reference SERVICE_UNAVAILABLE (the 503 code added by MJ-26 fix).
         assertTrue(healthSection.contains("SERVICE_UNAVAILABLE"),
-                "handleHealth must map red cluster to SERVICE_UNAVAILABLE: " + healthSection);
+                "HealthHandler must map red cluster to SERVICE_UNAVAILABLE: " + healthSection);
         // Must check for "red" cluster status.
         assertTrue(healthSection.contains("\"red\"") || healthSection.contains("red"),
-                "handleHealth must check for red cluster status: " + healthSection);
+                "HealthHandler must check for red cluster status: " + healthSection);
     }
 
     @Test
@@ -495,7 +496,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // user identity on /auth/me and /auth/login, and role-filtered hits on /search.
         // process() must therefore default every v2 response to Cache-Control: no-store
         // before dispatch so shared proxies never store them. The error path already gets
-        // the header from V2EnvelopeWriter.writeErrorWithDetails, so this asserts the
+        // the header from new V2EnvelopeWriter().writeErrorWithDetails, so this asserts the
         // success path via a stub handler that does NOT set the header itself.
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final org.codelibs.fess.api.v2.handlers.LoginHandler stub =

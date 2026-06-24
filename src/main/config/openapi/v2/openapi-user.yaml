@@ -21,7 +21,7 @@ info:
     State-changing endpoints (`POST` / `PUT` / `DELETE`) require the
     `X-Fess-CSRF-Token` header. Acquire the token from
     `POST /auth/login` (in the `csrf_token` field) or from
-    `GET /ui/config` when `csrf_required=true`. The token rotates on
+    `GET /ui/config`. The token rotates on
     login, logout, and password change.
 
     CSRF verification runs **before** authentication, so a state-changing
@@ -116,46 +116,49 @@ paths:
         - { $ref: '#/components/parameters/Q' }
         - name: start
           in: query
-          description: 0-based start position.
+          description: |-
+            0-based start position. Depends on `query.max.search.result.offset`.
           required: false
-          schema: { type: integer, minimum: 0, default: 0 }
+          schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
         - name: offset
           in: query
-          description: Offset from `start`.
+          description: |-
+            Offset from `start`. Depends on `query.max.search.result.offset`.
           required: false
-          schema: { type: integer, minimum: 0, default: 0 }
+          schema: { type: integer, minimum: 0, maximum: 100000, default: 0 }
         - name: num
           in: query
           description: |-
             Page size. Values `<= 0` produce `invalid_request`. Values above
             the configured maximum are silently clamped — clients can detect
             clamping by comparing the request `num` with the response
-            `page_size` field.
+            `page_size` field. Effective upper bound is clamped by
+            `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 1, default: 20 }
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
         - name: sort
           in: query
           required: false
-          schema: { type: string, example: score }
+          schema: { type: string, maxLength: 1000, example: score }
         - name: lang
           in: query
           description: Repeatable.
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string }, example: [en] }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 }, example: [en] }
         - name: ex_q
           in: query
           description: Extra query expression; repeatable.
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: sdh
           in: query
           description: Similar-document hash.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
         - name: fields.label
           in: query
           description: |-
@@ -166,7 +169,7 @@ paths:
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string }, example: [news] }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 }, example: [news] }
         - name: as.*
           in: query
           description: |-
@@ -174,7 +177,7 @@ paths:
             `as.q`, `as.filetype`) is forwarded to the advanced-search
             condition builder. Repeatable per name.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
         - name: track_total_hits
           in: query
           description: |-
@@ -182,29 +185,31 @@ paths:
             (e.g. `true` or an integer threshold). Affects whether
             `record_count_relation` is `eq` or `gte`.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 100 }
         - name: facet.field
           in: query
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: facet.query
           in: query
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: facet.size
           in: query
-          description: Maximum number of facet terms to return.
+          description: |-
+            Maximum number of facet terms to return. Effective upper bound is
+            clamped by the configuration `query.facet.fields.size.max`.
           required: false
-          schema: { type: integer }
+          schema: { type: integer, minimum: 0, maximum: 1000 }
         - name: facet.minDocCount
           in: query
           description: Minimum document count for a facet term to be included.
           required: false
-          schema: { type: integer, format: int64 }
+          schema: { type: integer, format: int64, minimum: 0, maximum: 2147483647 }
         - name: facet.sort
           in: query
           required: false
@@ -256,25 +261,27 @@ paths:
         - name: sort
           in: query
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
         - name: num
           in: query
-          description: Page (scroll batch) size. Values `<= 0` produce `invalid_request`.
+          description: |-
+            Page (scroll batch) size. Values `<= 0` produce `invalid_request`.
+            Effective upper bound is clamped by `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 1 }
+          schema: { type: integer, minimum: 1, maximum: 100 }
         - name: lang
           in: query
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: ex_q
           in: query
           description: Extra query expression; repeatable.
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: fields.label
           in: query
           description: |-
@@ -283,19 +290,33 @@ paths:
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
         - name: sdh
           in: query
           description: Similar-document hash.
           required: false
-          schema: { type: string }
+          schema: { type: string, maxLength: 1000 }
       responses:
         '200':
-          description: NDJSON stream.
+          description: |-
+            NDJSON stream. Each successful line is a `{"data": <SearchHit>}`
+            object whose document fields follow the same server-side allowlist
+            (`QueryFieldConfig#isApiResponseField`) as `GET /search`; see the
+            `SearchHit` schema for the exact fields and types. The collapse-only
+            fields `similar_docs_count` / `similar_docs_hash` are never present
+            on this scroll endpoint. If a failure occurs mid-stream the handler
+            emits a final
+            `{"error":{"code":"internal_error","message":"stream error"}}` line
+            and flushes; clients MUST inspect the last line's first key to
+            distinguish stream-complete from server-crashed.
           content:
             application/x-ndjson:
               schema:
                 type: string
+                description: |-
+                  Newline-delimited JSON. Each line is either
+                  `{"data": <SearchHit>}` (see the `SearchHit` schema) or, as the
+                  final line on mid-stream failure, `{"error":{...}}`.
                 example: |
                   {"data":{"url":"https://example.com/","title":"Example"}}
                   {"data":{"url":"https://example.org/","title":"Example Org"}}
@@ -318,8 +339,11 @@ paths:
         - { $ref: '#/components/parameters/Q' }
         - name: num
           in: query
+          description: |-
+            Number of suggestions to return. Effective upper bound is clamped
+            by `paging.search.page.max.size`.
           required: false
-          schema: { type: integer, minimum: 0, default: 10 }
+          schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
         - name: fn
           in: query
           description: Suggest field name(s); repeatable.
@@ -488,8 +512,14 @@ paths:
       description: |-
         On success, the servlet session id is rotated, a fresh CSRF token
         is issued, and the rate-limit buckets for the caller IP and the
-        target user are cleared. On rate-limit, a `Retry-After` header
-        carries the cooldown in seconds.
+        target user are cleared.
+
+        Rate limiting has two scopes. The per-IP gate returns `429
+        rate_limited` with a `Retry-After` header. The per-user gate is
+        scoped to `(client IP, username)`; when it trips, the response is a
+        generic `401 auth_required` with no `Retry-After` — identical to a
+        credential rejection — so it does not disclose per-user rate-limit
+        state.
 
         An already-authenticated session does not short-circuit; the
         supplied credentials are always verified.
@@ -523,10 +553,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '401':
+          description: |-
+            Authentication is required or credentials were invalid. The
+            per-user rate-limit gate (scoped to client IP + username) also
+            returns this status, with no `Retry-After`, so user-scope
+            throttling is indistinguishable from a credential rejection.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '429':
-          description: Rate limited; the `Retry-After` header carries the cooldown in seconds.
+          description: |-
+            Per-IP rate limit exceeded. The `Retry-After` header carries the
+            cooldown in seconds. (The per-user gate does NOT use this status;
+            it returns 401 — see above.)
           headers:
             Retry-After:
               description: Seconds the caller should wait before retrying.
@@ -665,7 +706,6 @@ paths:
                 $ref: '#/components/schemas/ChatResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
-        '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
@@ -723,7 +763,7 @@ paths:
                 type: string
                 example: |
                   event: phase
-                  data: {"phase":"retrieval","status":"start"}
+                  data: {"phase":"search","status":"start","message":"Searching documents..."}
 
                   event: chunk
                   data: {"content":"Fess is "}
@@ -757,7 +797,7 @@ paths:
           in: path
           required: true
           description: Identifies the session to clear.
-          schema: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9._-]+$' }
+          schema: { type: string, minLength: 1, maxLength: 100, pattern: '^[A-Za-z0-9._-]+$' }
       responses:
         '200':
           description: Session cleared.
@@ -766,7 +806,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatClearResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
@@ -793,7 +832,7 @@ paths:
           in: query
           description: Opaque `query_id` echoed by `/search`.
           required: true
-          schema: { type: string }
+          schema: { type: string, maxLength: 100, pattern: '^[A-Za-z0-9_-]+$' }
       responses:
         '200':
           description: Favorited document ids returned.
@@ -869,7 +908,7 @@ paths:
           required: false
           style: form
           explode: true
-          schema: { type: array, items: { type: string } }
+          schema: { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
       responses:
         '200':
           description: Cached content returned.
@@ -890,20 +929,19 @@ components:
       in: query
       description: Search query string.
       required: false
-      schema: { type: string, example: Fess }
+      schema: { type: string, maxLength: 1000, example: Fess }
     DocId:
       name: docId
       in: path
       description: Document identifier (matches `[A-Za-z0-9_-]+`).
       required: true
-      schema: { type: string, pattern: '^[A-Za-z0-9_-]+$' }
+      schema: { type: string, minLength: 1, maxLength: 512, pattern: '^[A-Za-z0-9_-]+$' }
     CsrfHeader:
       name: X-Fess-CSRF-Token
       in: header
       description: |-
         CSRF token issued by `POST /auth/login` or `GET /ui/config`.
-        Required for all state-changing requests when
-        `theme.api.csrf.required=true` (the default).
+        Required for all state-changing requests.
       required: true
       schema: { type: string }
 
@@ -1064,9 +1102,8 @@ components:
               properties:
                 engine:
                   type: object
-                  required: [cluster_name, status, ping_status]
+                  required: [status, ping_status]
                   properties:
-                    cluster_name: { type: string }
                     status:
                       type: string
                       enum: [green, yellow, red]
@@ -1113,13 +1150,9 @@ components:
                   items: { type: string }
                 data:
                   type: array
-                  description: |-
-                    One entry per document. Only fields permitted by
-                    `QueryFieldConfig#isApiResponseField` are present; nulls
-                    and blank keys are dropped.
+                  description: One entry per matching document.
                   items:
-                    type: object
-                    additionalProperties: true
+                    $ref: '#/components/schemas/SearchHit'
                 facet_field:
                   type: array
                   description: Present only when facet fields were requested.
@@ -1145,6 +1178,64 @@ components:
                     properties:
                       value: { type: string }
                       count: { type: integer, format: int64 }
+
+    SearchHit:
+      type: object
+      description: |-
+        A single search hit derived from an indexed document. This object
+        describes the `data[]` entries only (the sibling `related_query` /
+        `related_contents` fields are a different, non-document channel).
+        The set of emitted fields is server-side allowlisted by
+        `QueryFieldConfig#isApiResponseField` (authoritative). ACL / role /
+        internal fields (for example `role`, `virtual_host`, the raw
+        `content` body) are never emitted. Null values and blank keys are
+        dropped, so any given field MAY be absent (fields are therefore
+        optional and never `null`). Operators can expose additional crawled
+        fields via `query.additional.api.response.fields` (and dynamic
+        language-template fields such as `*_ja` / `*_en` may pass through),
+        which is why `additionalProperties` is `true`.
+      properties:
+        url: { type: string }
+        title: { type: string }
+        digest: { type: string }
+        content_description: { type: string }
+        content_title: { type: string }
+        site: { type: string }
+        site_path: { type: string }
+        url_link: { type: string }
+        host: { type: string }
+        mimetype: { type: string }
+        filetype: { type: string }
+        filename: { type: string }
+        content_length: { type: integer, format: int64 }
+        last_modified: { type: string, format: date-time }
+        timestamp: { type: string, format: date-time }
+        created: { type: string, format: date-time }
+        score: { type: number, format: float }
+        boost: { type: number, format: float }
+        doc_id: { type: string }
+        _id:
+          type: string
+          description: OpenSearch document `_id` (the only metadata field exposed).
+        thumbnail: { type: string }
+        has_cache:
+          type: string
+          enum: ['true', 'false']
+          description: Stored as the string `"true"`/`"false"`, not a JSON boolean.
+        click_count: { type: integer, format: int64 }
+        favorite_count: { type: integer, format: int64 }
+        similar_docs_count:
+          type: integer
+          format: int64
+          description: |-
+            Present only when result collapsing is enabled and the group has
+            duplicates. Never present on `/documents/all`.
+        similar_docs_hash:
+          type: string
+          description: |-
+            Present only when result collapsing is enabled. Never present on
+            `/documents/all`.
+      additionalProperties: true
 
     # --- Suggest / labels / popular ---------------------------------
     SuggestWordsResponse:
@@ -1423,8 +1514,8 @@ components:
                 csrf_token:
                   type: string
                   description: |-
-                    Empty string when `csrf_required` is `false`; otherwise a
-                    fresh token bound to the current session.
+                    A fresh CSRF token bound to the current session
+                    (`csrf_required` is always `true`).
 
     # --- Auth --------------------------------------------------------
     AuthMeResponse:
@@ -1447,10 +1538,11 @@ components:
       type: object
       required: [username, password]
       properties:
-        username: { type: string, minLength: 1 }
-        password: { type: string, minLength: 1 }
+        username: { type: string, minLength: 1, maxLength: 100 }
+        password: { type: string, minLength: 1, maxLength: 100 }
         return_to:
           type: string
+          maxLength: 10000
           description: |-
             Optional post-login redirect target. Must be a relative path
             matching `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Additionally
@@ -1482,14 +1574,16 @@ components:
       type: object
       required: [current_password, new_password, confirm_password]
       properties:
-        current_password: { type: string, minLength: 1 }
+        current_password: { type: string, minLength: 1, maxLength: 100 }
         new_password:
           type: string
           minLength: 1
+          maxLength: 100
           description: Must satisfy the configured password policy.
         confirm_password:
           type: string
           minLength: 1
+          maxLength: 100
           description: Must equal `new_password`.
 
     PasswordChangeResponse:
@@ -1517,15 +1611,27 @@ components:
       properties:
         doc_id:
           type: string
+          minLength: 1
+          maxLength: 512
           pattern: '^[A-Za-z0-9_-]+$'
-        query_id: { type: string }
+        query_id:
+          type: string
+          maxLength: 100
+          pattern: '^[A-Za-z0-9_-]+$'
         rank:
           type: integer
-          minimum: 1
-          description: 1-based position in the result list.
+          minimum: 0
+          maximum: 10000
+          description: |-
+            Position in the result list. The current implementation rejects
+            negative values and values above the OpenSearch default
+            `index.max_result_window`; ranks above it are rejected with
+            `invalid_request` (400).
         rt:
           type: integer
           format: int64
+          minimum: 0
+          maximum: 9999999999999
           description: |-
             Epoch milliseconds of the originating search request. Defaults
             to the server's current time when absent.
@@ -1559,21 +1665,37 @@ components:
       type: object
       required: [message]
       properties:
-        message: { type: string }
-        session_id: { type: string }
+        message:
+          type: string
+          maxLength: 4000
+          description: |-
+            The user message. The maximum length is bounded by
+            `rag.chat.message.max.length` (default 4000); exceeding it
+            returns `invalid_request` (HTTP 400).
+        session_id:
+          type: string
+          maxLength: 100
+          pattern: '^[A-Za-z0-9._-]+$'
         fields:
           type: object
           description: Optional filter fields for the retrieval step.
           properties:
             label:
               oneOf:
-                - { type: string }
-                - { type: array, items: { type: string } }
+                - { type: string, maxLength: 1000 }
+                - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
               description: Restricts retrieval to allowlisted labels.
+        fields.label:
+          oneOf:
+            - { type: string, maxLength: 1000 }
+            - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
+          description: |-
+            Legacy dotted-key alias for `fields.label`. Accepted for
+            compatibility when the nested `fields.label` value is absent.
         extra_queries:
           oneOf:
-            - { type: string }
-            - { type: array, items: { type: string } }
+            - { type: string, maxLength: 1000 }
+            - { type: array, maxItems: 100, items: { type: string, maxLength: 1000 } }
           description: Allowlisted facet query expressions.
 
     ChatSource:
@@ -1649,6 +1771,7 @@ components:
                   items:
                     type: object
                     required: [doc_id]
+                    additionalProperties: false
                     properties:
                       doc_id: { type: string }
 
@@ -1672,6 +1795,8 @@ components:
       properties:
         query_id:
           type: string
+          maxLength: 100
+          pattern: '^[A-Za-z0-9_-]+$'
           description: Opaque `query_id` echoed by `/search`.
 
     FavoritePostResponse:
@@ -1720,7 +1845,15 @@ components:
                 mimetype:
                   type: string
                   enum: [text/html]
-                content: { type: string }
+                content:
+                  type: string
+                  description: |-
+                    Cached document body for the requested document. The
+                    document is fetched role-filtered via
+                    `getDocumentByDocId(userBean)`, so a caller only receives
+                    content they are authorized to see. The fetch field set
+                    (`getCacheResponseFields()`) contains no ACL or internal
+                    fields.
                 url:
                   type: string
                   description: |-

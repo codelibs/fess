@@ -719,6 +719,63 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * Guards that PasswordChangeHandler keeps using a bare {@code userId} key for its
+     * {@code Scope.USER} rate-limit bucket, independent of LoginHandler's (clientIp, username)
+     * composite keying. The two handlers share {@code Scope.USER} but must NOT share key shape.
+     */
+    @Test
+    public void passwordChangeUserBucket_isKeyedByBareUserId_notCompositeWithIp() {
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final String userId = "alice";
+        // Saturate the bare-userId bucket the way PasswordChangeHandler does.
+        for (int i = 0; i < 5; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userId, 5, 60));
+        }
+        // The bare-userId bucket is exhausted...
+        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, userId, 5, 60));
+        // ...while the LoginHandler-style composite key for the same user is a DIFFERENT bucket
+        // and remains available. This proves the two key shapes do not collide.
+        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, new LoginHandler().userScopeKey("10.0.0.7", userId), 5, 60));
+    }
+
+    @Test
+    public void passwordChange_currentPasswordExceedsMaxLength_returns400() throws Exception {
+        // current_password over 100 chars must be rejected with 400 before auth lookup.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final String longPw = "a".repeat(101);
+            new PasswordChangeHandler().handle(
+                    new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                            "{\"current_password\":\"" + longPw + "\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_confirmPasswordExceedsMaxLength_returns400() throws Exception {
+        // confirm_password over 100 chars must be rejected with 400.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            final String longPw = "a".repeat(101);
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"" + longPw + "\"}"),
+                    res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /**
      * Stub FessLoginAssist that returns a populated entity only when the supplied
      * LocalUserCredential carries {@code expectedPw}. Used by the password-change
      * tests above to exercise the wrong/right current-password branches without

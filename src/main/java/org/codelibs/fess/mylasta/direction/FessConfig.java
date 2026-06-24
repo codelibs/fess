@@ -304,7 +304,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3600 */
     String API_CORS_MAX_AGE = "api.cors.max.age";
 
-    /** The key of the configuration. e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With */
+    /** The key of the configuration. e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With, X-Fess-CSRF-Token */
     String API_CORS_ALLOW_HEADERS = "api.cors.allow.headers";
 
     /** The key of the configuration. e.g. true */
@@ -1332,6 +1332,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. cookie */
     String SESSION_TRACKING_MODES = "session.tracking.modes";
 
+    /** The key of the configuration. e.g.  */
+    String SESSION_COOKIE_SECURE = "session.cookie.secure";
+
     /** The key of the configuration. e.g. q,num,sort */
     String COOKIE_SEARCH_PARAMETER_KEYS = "cookie.search.parameter.keys";
 
@@ -2088,8 +2091,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String THEME_ASSETS_PRECOMPRESSED = "theme.assets.precompressed";
 
-    /** The key of the configuration. e.g. true */
-    String THEME_API_CSRF_REQUIRED = "theme.api.csrf.required";
+    /** The key of the configuration. e.g.  */
+    String THEME_API_CSRF_SERVER_ORIGINS = "theme.api.csrf.server.origins";
 
     /** The key of the configuration. e.g. 10 */
     String THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE = "theme.api.login.rate.limit.per.ip.per.minute";
@@ -2941,8 +2944,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.cors.allow.headers'. <br>
-     * The value is, e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With <br>
-     * comment: Allowed headers for CORS.
+     * The value is, e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With, X-Fess-CSRF-Token <br>
+     * comment: Allowed request headers for CORS preflight. A static list is returned (Access-Control-Request-Headers is not reflected). Includes X-Fess-CSRF-Token for cross-origin SPAs sending the CSRF token.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowHeaders();
@@ -6900,6 +6903,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSessionTrackingModes();
 
     /**
+     * Get the value for the key 'session.cookie.secure'. <br>
+     * The value is, e.g.  <br>
+     * comment: Whether to add the Secure attribute to the session cookie (JSESSIONID) at startup.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSessionCookieSecure();
+
+    /**
      * Get the value for the key 'cookie.search.parameter.keys'. <br>
      * The value is, e.g. q,num,sort <br>
      * comment: Comma-separated list of request parameter keys to store in cookies before SSO login.
@@ -10015,18 +10026,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isThemeAssetsPrecompressed();
 
     /**
-     * Get the value for the key 'theme.api.csrf.required'. <br>
-     * The value is, e.g. true <br>
+     * Get the value for the key 'theme.api.csrf.server.origins'. <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getThemeApiCsrfRequired();
-
-    /**
-     * Is the property for the key 'theme.api.csrf.required' true? <br>
-     * The value is, e.g. true <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isThemeApiCsrfRequired();
+    String getThemeApiCsrfServerOrigins();
 
     /**
      * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute'. <br>
@@ -12328,6 +12332,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.SESSION_TRACKING_MODES);
         }
 
+        public String getSessionCookieSecure() {
+            return get(FessConfig.SESSION_COOKIE_SECURE);
+        }
+
         public String getCookieSearchParameterKeys() {
             return get(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS);
         }
@@ -13840,12 +13848,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.THEME_ASSETS_PRECOMPRESSED);
         }
 
-        public String getThemeApiCsrfRequired() {
-            return get(FessConfig.THEME_API_CSRF_REQUIRED);
-        }
-
-        public boolean isThemeApiCsrfRequired() {
-            return is(FessConfig.THEME_API_CSRF_REQUIRED);
+        public String getThemeApiCsrfServerOrigins() {
+            return get(FessConfig.THEME_API_CSRF_SERVER_ORIGINS);
         }
 
         public String getThemeApiLoginRateLimitPerIpPerMinute() {
@@ -13956,7 +13960,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
-            defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization, X-Requested-With");
+            defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS,
+                    "Origin, Content-Type, Accept, Authorization, X-Requested-With, X-Fess-CSRF-Token");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
             defaultMap.put(FessConfig.API_PING_search_engine_FIELDS, "status,timed_out");
@@ -14270,6 +14275,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.COOKIE_DEFAULT_PATH, "/");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
             defaultMap.put(FessConfig.SESSION_TRACKING_MODES, "cookie");
+            defaultMap.put(FessConfig.SESSION_COOKIE_SECURE, "");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS, "q,num,sort");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_required_keys, "q");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH, "1000");
@@ -14523,7 +14529,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS, "zip");
             defaultMap.put(FessConfig.THEME_ASSETS_CACHE_MAX_AGE, "86400");
             defaultMap.put(FessConfig.THEME_ASSETS_PRECOMPRESSED, "true");
-            defaultMap.put(FessConfig.THEME_API_CSRF_REQUIRED, "true");
+            defaultMap.put(FessConfig.THEME_API_CSRF_SERVER_ORIGINS, "");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
             defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");

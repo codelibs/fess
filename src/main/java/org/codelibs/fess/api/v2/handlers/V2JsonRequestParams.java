@@ -73,47 +73,65 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public String getTrackTotalHits() {
-        return request.getParameter(Constants.TRACK_TOTAL_HITS);
+        return V2ParamValidator.checkMaxLength(request.getParameter(Constants.TRACK_TOTAL_HITS), 100, "track_total_hits");
     }
 
     @Override
     public String getQuery() {
-        return request.getParameter("q");
+        return V2ParamValidator.checkMaxLength(request.getParameter("q"), fessConfig.getApiV2ParamMaxLengthAsInteger(), "q");
     }
 
     @Override
     public String[] getExtraQueries() {
+        V2ParamValidator.checkArray(request.getParameterValues("ex_q"), fessConfig.getApiV2ParamMaxArraySizeAsInteger(),
+                fessConfig.getApiV2ParamMaxLengthAsInteger(), "ex_q");
         return getParamValueArray(request, "ex_q");
     }
 
     @Override
     public Map<String, String[]> getFields() {
+        final int maxItems = fessConfig.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxLen = fessConfig.getApiV2ParamMaxLengthAsInteger();
         final Map<String, String[]> fields = new HashMap<>();
         for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith("fields.")) {
+                final String name = key.substring("fields.".length());
                 final String[] value = simplifyArray(entry.getValue());
-                fields.put(key.substring("fields.".length()), value);
+                V2ParamValidator.checkArray(value, maxItems, maxLen, "fields." + name);
+                fields.put(name, value);
             }
+        }
+        if (fields.size() > maxItems) {
+            throw new InvalidRequestParameterException("fields exceeds the maximum number of distinct names: " + maxItems);
         }
         return fields;
     }
 
     @Override
     public Map<String, String[]> getConditions() {
+        final int maxItems = fessConfig.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxLen = fessConfig.getApiV2ParamMaxLengthAsInteger();
         final Map<String, String[]> conditions = new HashMap<>();
         for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith("as.")) {
+                final String name = key.substring("as.".length());
                 final String[] value = simplifyArray(entry.getValue());
-                conditions.put(key.substring("as.".length()), value);
+                V2ParamValidator.checkArray(value, maxItems, maxLen, "as." + name);
+                conditions.put(name, value);
             }
+        }
+        if (conditions.size() > maxItems) {
+            throw new InvalidRequestParameterException("conditions exceeds the maximum number of distinct names: " + maxItems);
         }
         return conditions;
     }
 
     @Override
     public String[] getLanguages() {
+        V2ParamValidator.checkArray(request.getParameterValues("lang"), fessConfig.getApiV2ParamMaxArraySizeAsInteger(),
+                fessConfig.getApiV2ParamMaxLengthAsInteger(), "lang");
         return getParamValueArray(request, "lang");
     }
 
@@ -124,12 +142,16 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public FacetInfo getFacetInfo() {
+        final int maxItems = fessConfig.getApiV2ParamMaxArraySizeAsInteger();
+        final int maxLen = fessConfig.getApiV2ParamMaxLengthAsInteger();
+        V2ParamValidator.checkArray(request.getParameterValues("facet.field"), maxItems, maxLen, "facet.field");
+        V2ParamValidator.checkArray(request.getParameterValues("facet.query"), maxItems, maxLen, "facet.query");
         return createFacetInfo(request);
     }
 
     @Override
     public String getSort() {
-        return request.getParameter("sort");
+        return V2ParamValidator.checkMaxLength(request.getParameter("sort"), fessConfig.getApiV2ParamMaxLengthAsInteger(), "sort");
     }
 
     /**
@@ -264,7 +286,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
      * {@code <= 0}. Handlers should catch this and map it to
      * {@link org.codelibs.fess.api.v2.V2ErrorCode#INVALID_REQUEST}.
      */
-    public static class InvalidPageSizeException extends RuntimeException {
+    public static class InvalidPageSizeException extends InvalidRequestParameterException {
         private static final long serialVersionUID = 1L;
 
         /**
@@ -320,7 +342,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     @Override
     public String getSimilarDocHash() {
-        return request.getParameter("sdh");
+        return V2ParamValidator.checkMaxLength(request.getParameter("sdh"), fessConfig.getApiV2ParamMaxLengthAsInteger(), "sdh");
     }
 
     @Override

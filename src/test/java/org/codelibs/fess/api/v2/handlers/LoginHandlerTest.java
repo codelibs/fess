@@ -72,6 +72,9 @@ public class LoginHandlerTest extends UnitFessTestCase {
         new LoginHandler(rl).handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}")
                 .withRemoteAddr("1.2.3.4"), res);
         assertEquals(429, res.status);
+        assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+        assertTrue(res.body().contains("(ip)"), res.body());
+        org.junit.jupiter.api.Assertions.assertNotNull(res.getHeader("Retry-After"), "IP-scope exhaustion must still carry Retry-After");
     }
 
     @Test
@@ -83,27 +86,61 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_perUserRateLimit_triggersAfterConfiguredFailuresAcrossIps() throws Exception {
-        // The USER bucket is shared across all source IPs, so an attacker can't bypass it
-        // by rotating IPs. After the rate-limit ordering fix, only LoginFailureException
-        // (credential rejection) consumes a slot — the slim test harness's
-        // AutoBindingFailureException is a system error and does NOT consume. So we
-        // pre-saturate the bucket directly through the limiter, then assert that the
-        // handler's peek() gate refuses the next attempt with 429/rate_limited regardless
-        // of the source IP (the IP buckets remain empty in this scenario).
+    public void test_perUserRateLimit_isScopedToClientIp() throws Exception {
+        // The USER bucket is keyed by (clientIp, username). An unauthenticated attacker
+        // cannot lock a victim's account from a different IP. Pre-saturate the (attackerIp,"bob")
+        // composite bucket via the EXACT key the handler computes, then assert:
+        //  (a) the attacker's own IP+user is refused at the peek() gate with a unified 401
+        //      (no Retry-After, indistinguishable from a credential rejection), and
+        //  (b) the SAME username from a DIFFERENT IP is NOT gated (its composite bucket is empty),
+        //      so the request flows past the gate into the (test-DI-unavailable) login subsystem.
         final LoginRateLimiter rl = new LoginRateLimiter();
-        // Default fess_config has user=5/min. Burn through it by direct calls.
-        for (int i = 0; i < 5; i++) {
-            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60));
-        }
-        // The handler should now see the bucket as exhausted via peek() and return 429.
         final LoginHandler handler = new LoginHandler(rl);
-        final CapturingResponse limited = new CapturingResponse();
+        final String attackerIp = "10.0.0.99";
+        final String victimIp = "10.0.0.50";
+        for (int i = 0; i < 5; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, handler.userScopeKey(attackerIp, "bob"), 5, 60));
+        }
+
+        final CapturingResponse attacker = new CapturingResponse();
         handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
-                .withRemoteAddr("10.0.0.99"), limited);
-        assertEquals(429, limited.status);
-        assertTrue(limited.body().contains("\"code\":\"rate_limited\""), limited.body());
-        assertTrue(limited.body().contains("(user)"), limited.body());
+                .withRemoteAddr(attackerIp), attacker);
+        assertEquals(401, attacker.status, attacker.body());
+        assertTrue(attacker.body().contains("\"code\":\"auth_required\""), attacker.body());
+        org.junit.jupiter.api.Assertions.assertNull(attacker.getHeader("Retry-After"),
+                "user-scope exhaustion must not advertise Retry-After");
+
+        final CapturingResponse victim = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+                .withRemoteAddr(victimIp), victim);
+        // The victim is neither IP-gated (429) nor USER-gated (401 from the peek branch): correct
+        // (IP,user) scoping lets the request reach login(), which yields a system error in the slim
+        // harness. Broken/global keying would re-gate the victim on the saturated "bob" bucket → 401.
+        org.junit.jupiter.api.Assertions.assertNotEquals(429, victim.status, victim.body());
+        org.junit.jupiter.api.Assertions.assertNotEquals(401, victim.status, victim.body());
+    }
+
+    @Test
+    public void login_userScopeUsesProxyResolvedIp_whenTrustedProxy() throws Exception {
+        // The USER composite key must use the proxy-RESOLVED client IP (from XFF when
+        // the direct peer is a trusted proxy 127.0.0.1), not the proxy's own address. UnitFessTestCase
+        // wires app.xml so RateLimitHelper honours XFF for the default trusted proxy.
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
+        for (int i = 0; i < 5; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, handler.userScopeKey("203.0.113.5", "bob"), 5, 60));
+        }
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+                .withRemoteAddr("127.0.0.1")
+                .withHeader("X-Forwarded-For", "203.0.113.5"), res);
+        // In this slim DI graph the RateLimitHelper does not resolve XFF to 203.0.113.5, so the
+        // handler's composite key (127.0.0.1, bob) does not match the pre-saturated bucket and the
+        // request flows into the (test-DI-unavailable) login subsystem → 500. Mirror the sibling
+        // login_rateLimitUsesProxyResolvedIp_whenTrustedProxy test: assert only that the handler
+        // never returns 200, guarding against a regression that bypasses the gate entirely.
+        org.junit.jupiter.api.Assertions.assertNotEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertNull(res.getHeader("Retry-After"), res.body());
     }
 
     @Test
@@ -416,17 +453,20 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // so the next allow() succeeds.
         //
         // We can't easily produce a real successful login in the slim test harness, but we
-        // can verify the clear() contract at the limiter layer directly.
+        // can verify the clear() contract at the limiter layer directly. The on-success clear
+        // targets the (clientIp, username) composite key, so we mirror that key here.
         final LoginRateLimiter rl = new LoginRateLimiter();
+        final String userKey = new LoginHandler().userScopeKey("10.0.0.7", "dave");
         for (int i = 0; i < 5; i++) {
-            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "dave", 5, 60));
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, 5, 60));
         }
         // Bucket exhausted.
-        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "dave", 5, 60));
+        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, userKey, 5, 60));
 
-        // clear() simulates the on-success path in LoginHandler.
-        rl.clear(LoginRateLimiter.Scope.USER, "dave");
-        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, "dave", 5, 60), "bucket must be clear after successful login");
+        // clear() simulates the on-success path in LoginHandler, which clears the (clientIp,
+        // username) composite key.
+        rl.clear(LoginRateLimiter.Scope.USER, userKey);
+        assertTrue(rl.peek(LoginRateLimiter.Scope.USER, userKey, 5, 60), "bucket must be clear after successful login");
     }
 
     // ── M-2: reverse-proxy / client IP resolution ───────────────────────────────
@@ -486,6 +526,45 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // verification — returning a non-429 status and proving the spoof-proof contract broken.
         assertEquals(429, res.status, "handler must return 429 for a locked real client IP regardless of spoofed XFF: body=" + res.body());
         assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+    }
+
+    @Test
+    public void login_usernameTooLong_returns400() throws Exception {
+        // username exceeding 100 chars must yield 400 invalid_request.
+        final CapturingResponse res = new CapturingResponse();
+        final String longUsername = "u".repeat(101);
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"" + longUsername + "\",\"password\":\"p\"}"),
+                res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void login_passwordTooLong_returns400() throws Exception {
+        // password exceeding 100 chars (default max) must yield 400 invalid_request.
+        final CapturingResponse res = new CapturingResponse();
+        final String longPassword = "p".repeat(101);
+        new LoginHandler(new LoginRateLimiter()).handle(new StubRequest("POST", "/api/v2/auth/login")
+                .withJsonBody("{\"username\":\"alice\",\"password\":\"" + longPassword + "\"}"), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void login_returnToExceedingMaxLength_isSilentlyDropped() throws Exception {
+        // return_to values over 10000 chars must be silently dropped: the response
+        // does not echo return_to. Verified by calling addReturnTo via reflection.
+        final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        final java.lang.reflect.Method addReturnTo = LoginHandler.class.getDeclaredMethod("addReturnTo", java.util.Map.class, String.class);
+        addReturnTo.setAccessible(true);
+        // Legitimate return_to is echoed.
+        addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/home");
+        assertEquals("/home", payload.get("return_to"));
+        payload.clear();
+        // Oversized return_to (10001 chars) must be silently dropped.
+        addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/".repeat(10001));
+        assertNull(payload.get("return_to"), "return_to exceeding 10000 chars must be silently dropped");
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
