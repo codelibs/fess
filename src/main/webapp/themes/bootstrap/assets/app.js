@@ -370,10 +370,9 @@ function hasSearchQuery() {
 }
 
 /**
- * Forward the current query AND paging/state params to the "Advanced" links so
- * navigating to /advance carries ?q= plus the relevant state (num/sort/lang/labels).
- * JSP parity: header.jsp:119 uses fe:pagingQuery(null) which forwards q + paging
- * state; advance.js can consume these to pre-seed the form (parity-r3 A8).
+ * Forward the current search state to the "Advanced" links so navigating to
+ * /advance carries q, num, sort, lang, and fields.label from the current view.
+ * advance.js consumes these to pre-seed the form (parity-r3 A8).
  *
  * The query is taken from whichever search box is populated (header or home),
  * falling back to the current URL's q= param.
@@ -384,16 +383,9 @@ function updateAdvanceLinks() {
   const urlParams = new URLSearchParams(location.search);
   const urlQ = urlParams.get("q") || "";
   const q = (headerVal || homeVal || urlQ || "").trim();
-  if (!q) {
-    document.querySelectorAll('a[href^="/search/advance"]').forEach(a => {
-      a.setAttribute("href", "/search/advance");
-    });
-    return;
-  }
-
   // Build paging/state params from URL (populated by runFromUrl on results view).
   const advParams = new URLSearchParams();
-  advParams.set("q", q);
+  if (q) advParams.set("q", q);
   // num / sort — forward if present and non-empty in URL
   const num = urlParams.get("num");
   if (num) advParams.set("num", num);
@@ -404,7 +396,8 @@ function updateAdvanceLinks() {
   // fields.label — multi-valued; forward all
   urlParams.getAll("fields.label").filter(v => v !== "").forEach(v => advParams.append("fields.label", v));
 
-  const href = "/search/advance?" + advParams.toString();
+  const qs = advParams.toString();
+  const href = "/search/advance" + (qs ? "?" + qs : "");
   document.querySelectorAll('a[href^="/search/advance"]').forEach(a => {
     a.setAttribute("href", href);
   });
