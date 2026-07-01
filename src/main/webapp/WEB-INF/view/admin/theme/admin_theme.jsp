@@ -50,8 +50,6 @@ ${fe:html(true)}
                                     <div class="alert alert-success">${msg}</div>
                                 </la:info>
                                 <la:errors/>
-                                <la:errors property="_global"/>
-                                <la:errors property="name"/>
                             </div>
                             <%-- Default theme selector --%>
                             <c:if test="${editable}">
