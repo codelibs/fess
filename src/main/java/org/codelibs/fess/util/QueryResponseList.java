@@ -137,9 +137,17 @@ public class QueryResponseList implements List<Map<String, Object>> {
             startWithOffset = 0;
         }
         allPageCount = (int) ((allRecordCount - 1) / pageSize) + 1;
-        existPrevPage = startWithOffset > 0;
-        existNextPage = startWithOffset < (long) (allPageCount - 1) * (long) pageSize;
         currentPageNumber = start / pageSize + 1;
+        // A previous page exists when the offset-adjusted start is positive, or simply
+        // when we are past the first page. The second term guards the rank-fusion case
+        // where the main searcher returns few/zero hits: offset inflates to ~the full
+        // result count and would otherwise clamp startWithOffset to 0 on pages 2..N.
+        existPrevPage = startWithOffset > 0 || currentPageNumber > 1;
+        // Next-page detection uses the raw start so it stays consistent with
+        // allPageCount (derived from allRecordCount). Using the offset-deflated
+        // startWithOffset here produced a spurious next page one page past the end,
+        // which the collapse logic below then turned into an inflated allPageCount.
+        existNextPage = start < (long) (allPageCount - 1) * (long) pageSize;
         if (existNextPage && size() < pageSize) {
             // collapsing
             existNextPage = false;
