@@ -763,6 +763,60 @@ public class QueryResponseListTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_calculatePageInfo_rankFusionZeroMainMultiPage() {
+        // Rank-fusion scenario: the main (BM25/default) searcher returns ~0 hits while a
+        // secondary searcher returns many, inflating offset to ~the full result count
+        // (37 total results, pageSize 10, offset 37).
+
+        // Page 2 (start=10): startWithOffset clamps to 0, but a previous page still exists.
+        QueryResponseList qrList = new QueryResponseList(null, 10, 10, 37) {
+            @Override
+            public int size() {
+                return 10;
+            }
+        };
+        qrList.allRecordCount = 37;
+        qrList.calculatePageInfo();
+        assertTrue(qrList.isExistPrevPage());
+
+        // Page 4 (start=30, last page with 7 remaining records): prev page exists, no next page,
+        // and allPageCount must be 4 (not inflated).
+        qrList = new QueryResponseList(null, 30, 10, 37) {
+            @Override
+            public int size() {
+                return 7;
+            }
+        };
+        qrList.allRecordCount = 37;
+        qrList.calculatePageInfo();
+        assertTrue(qrList.isExistPrevPage());
+        assertFalse(qrList.isExistNextPage());
+        assertEquals(4, qrList.getAllPageCount());
+
+        // Page 5 (start=40, past the end, no records): allPageCount must stay 4, not balloon to 5.
+        qrList = new QueryResponseList(null, 40, 10, 37) {
+            @Override
+            public int size() {
+                return 0;
+            }
+        };
+        qrList.allRecordCount = 37;
+        qrList.calculatePageInfo();
+        assertEquals(4, qrList.getAllPageCount());
+
+        // Page 1 guard (start=0): no previous page should exist.
+        qrList = new QueryResponseList(null, 0, 10, 37) {
+            @Override
+            public int size() {
+                return 10;
+            }
+        };
+        qrList.allRecordCount = 37;
+        qrList.calculatePageInfo();
+        assertFalse(qrList.isExistPrevPage());
+    }
+
+    @Test
     public void test_calculatePageInfo_pageNumberList_edgeCases() {
         // Test when current page is at the beginning
         QueryResponseList qrList = new QueryResponseList(null, 0, 10, 0) {
