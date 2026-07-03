@@ -885,16 +885,6 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="spnegoExcludeDirs"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.spnego_exclude_dirs"/></label>
-                                    <div class="col-sm-9">
-                                        <la:errors property="spnegoExcludeDirs"/>
-                                        <la:text styleId="spnegoExcludeDirs" property="spnegoExcludeDirs"
-                                                 styleClass="form-control"/>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
                                     <label for="spnegoLoggerLevel"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.spnego_logger_level"/></label>

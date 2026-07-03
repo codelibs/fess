@@ -284,7 +284,6 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSystemProperty("spnego.prompt.ntlm", String.valueOf(isCheckboxEnabled(form.spnegoPromptNtlm)));
         fessConfig.setSystemProperty("spnego.allow.localhost", String.valueOf(isCheckboxEnabled(form.spnegoAllowLocalhost)));
         fessConfig.setSystemProperty("spnego.allow.delegation", String.valueOf(isCheckboxEnabled(form.spnegoAllowDelegation)));
-        fessConfig.setSystemProperty("spnego.exclude.dirs", form.spnegoExcludeDirs);
         fessConfig.setSystemProperty("spnego.logger.level", form.spnegoLoggerLevel);
 
         // Entra ID
@@ -424,19 +423,18 @@ public class AdminGeneralAction extends FessAdminAction {
                 Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.basic", Constants.TRUE)) ? Constants.TRUE
                         : Constants.FALSE;
         form.spnegoAllowUnsecureBasic =
-                Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.unsecure.basic", Constants.TRUE))
+                Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.unsecure.basic", Constants.FALSE))
                         ? Constants.TRUE
                         : Constants.FALSE;
         form.spnegoPromptNtlm =
                 Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.prompt.ntlm", Constants.TRUE)) ? Constants.TRUE
                         : Constants.FALSE;
         form.spnegoAllowLocalhost =
-                Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.localhost", Constants.TRUE)) ? Constants.TRUE
+                Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.localhost", Constants.FALSE)) ? Constants.TRUE
                         : Constants.FALSE;
         form.spnegoAllowDelegation =
                 Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.delegation", Constants.FALSE)) ? Constants.TRUE
                         : Constants.FALSE;
-        form.spnegoExcludeDirs = fessConfig.getSystemProperty("spnego.exclude.dirs", StringUtil.EMPTY);
         form.spnegoLoggerLevel = fessConfig.getSystemProperty("spnego.logger.level", StringUtil.EMPTY);
 
         // Entra ID

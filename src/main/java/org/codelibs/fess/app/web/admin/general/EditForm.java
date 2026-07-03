@@ -574,10 +574,6 @@ public class EditForm {
     @Size(max = 10)
     public String spnegoAllowDelegation;
 
-    /** SPNEGO directories to exclude from authentication. */
-    @Size(max = 1000)
-    public String spnegoExcludeDirs;
-
     /** SPNEGO logger level (0-7, auto-detected if empty). */
     @Size(max = 10)
     public String spnegoLoggerLevel;

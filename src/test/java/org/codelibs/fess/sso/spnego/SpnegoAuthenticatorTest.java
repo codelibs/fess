@@ -15,7 +15,13 @@
  */
 package org.codelibs.fess.sso.spnego;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -28,6 +34,10 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
+        // Ensure spnego.* system properties possibly set by a test do not leak.
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        systemProperties.remove("spnego.logger.level");
+        systemProperties.remove("spnego.allowed.realms");
         super.tearDown(testInfo);
     }
 
@@ -40,38 +50,111 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
 
     @Test
     public void test_spnegoConfigClass() {
-        // Verify the inner class is named correctly: SpnegoConfig (not SpengoConfig)
-        // This test verifies the typo fix by ensuring the class compiles
-        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
-        assertNotNull(authenticator);
+        // Verify the inner SpnegoConfig class can be instantiated directly.
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        assertNotNull(config);
 
-        // The typo fix (SpengoConfig -> SpnegoConfig) is verified at compile time
-        // If the class name was wrong, this test file wouldn't compile
-        assertTrue(true);
+        // The filter name should be the fully qualified name of the outer class.
+        assertEquals(SpnegoAuthenticator.class.getName(), config.getFilterName());
     }
 
     @Test
     public void test_securitySettings_allowBasic() throws Exception {
-        // Test that ALLOW_BASIC security setting can be accessed
-        // This verifies the security warnings are properly documented in code
-        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
-        assertNotNull(authenticator);
-
-        // The constant should be accessible and properly named
-        // We can't easily test the actual configuration without full DI setup,
-        // but we verify the class structure is correct
-        assertTrue(true);
+        // Basic authentication remains enabled by default for compatibility.
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        assertEquals("true", config.getInitParameter(Constants.ALLOW_BASIC));
     }
 
     @Test
     public void test_securitySettings_allowUnsecureBasic() throws Exception {
-        // Verify the ALLOW_UNSEC_BASIC setting is documented with security warnings
-        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
-        assertNotNull(authenticator);
+        // Unsecure basic authentication (basic over plain HTTP) is disabled by default.
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        assertEquals("false", config.getInitParameter(Constants.ALLOW_UNSEC_BASIC));
+    }
 
-        // The security warning comments should guide users to disable this in production
-        // This is a compile-time check that the code structure is correct
-        assertTrue(true);
+    @Test
+    public void test_getInitParameter_secureDefaults() {
+        // Verify the security-hardened defaults returned by SpnegoConfig#getInitParameter.
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+
+        // Localhost bypass must be off by default.
+        assertEquals("false", config.getInitParameter(Constants.ALLOW_LOCALHOST));
+        // Unsecure basic auth over plain HTTP must be off by default.
+        assertEquals("false", config.getInitParameter(Constants.ALLOW_UNSEC_BASIC));
+        // No pre-authentication credentials by default (keytab-based server login).
+        assertEquals("", config.getInitParameter(Constants.PREAUTH_USERNAME));
+        assertEquals("", config.getInitParameter(Constants.PREAUTH_PASSWORD));
+        // Basic auth stays enabled for compatibility.
+        assertEquals("true", config.getInitParameter(Constants.ALLOW_BASIC));
+        // Delegation must be off by default.
+        assertEquals("false", config.getInitParameter(Constants.ALLOW_DELEGATION));
+    }
+
+    @Test
+    public void test_getInitParameter_loggerLevel_nonNumericFallsBack() {
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // A non-numeric level must be ignored and auto-detection used instead.
+            systemProperties.setProperty("spnego.logger.level", "abc");
+            String level = config.getInitParameter(Constants.LOGGER_LEVEL);
+            assertNotNull(level);
+            assertFalse("abc".equals(level));
+            // Auto-detection always yields a numeric level string.
+            assertTrue(level.chars().allMatch(Character::isDigit));
+
+            // A numeric level must be passed through unchanged.
+            systemProperties.setProperty("spnego.logger.level", "5");
+            assertEquals("5", config.getInitParameter(Constants.LOGGER_LEVEL));
+        } finally {
+            systemProperties.remove("spnego.logger.level");
+        }
+    }
+
+    @Test
+    public void test_getResourcePath_throwsWhenMissing() {
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        // A missing resource must raise SsoLoginException rather than returning null.
+        assertThrows(SsoLoginException.class, () -> config.getResourcePath("this-file-does-not-exist-xyz.conf"));
+    }
+
+    @Test
+    public void test_isAllowedRealm_serverRealmMatches() {
+        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+        // The server's own realm is always allowed.
+        assertTrue(authenticator.isAllowedRealm("CORP.EXAMPLE", "CORP.EXAMPLE"));
+        // Realm comparison is case-insensitive.
+        assertTrue(authenticator.isAllowedRealm("corp.example", "CORP.EXAMPLE"));
+    }
+
+    @Test
+    public void test_isAllowedRealm_rejectsForeignRealm() {
+        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+        // A realm other than the server realm is rejected when no allow list is configured.
+        assertFalse(authenticator.isAllowedRealm("EVIL.EXAMPLE", "CORP.EXAMPLE"));
+    }
+
+    @Test
+    public void test_isAllowedRealm_allowlistPermitsForeignRealm() {
+        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            systemProperties.setProperty("spnego.allowed.realms", "TRUSTED.EXAMPLE");
+            // A realm explicitly listed in spnego.allowed.realms is permitted.
+            assertTrue(authenticator.isAllowedRealm("TRUSTED.EXAMPLE", "CORP.EXAMPLE"));
+            // A realm neither on the allow list nor the server realm is still rejected.
+            assertFalse(authenticator.isAllowedRealm("OTHER.EXAMPLE", "CORP.EXAMPLE"));
+        } finally {
+            systemProperties.remove("spnego.allowed.realms");
+        }
+    }
+
+    @Test
+    public void test_isAllowedRealm_backwardCompatWhenUndeterminable() {
+        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+        // When neither the server realm nor an allow list can be determined, any realm is
+        // accepted for backward compatibility (a warning is logged by the implementation).
+        assertTrue(authenticator.isAllowedRealm("ANY.EXAMPLE", ""));
     }
 
     @Test
