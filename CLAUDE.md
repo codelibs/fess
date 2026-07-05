@@ -4,205 +4,95 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Project Overview
 
-Fess is an Enterprise Search Server built on OpenSearch. It's a Java-based web application that crawls and indexes documents from various sources and provides full-text search capabilities. Licensed under Apache License 2.0.
+Fess is an enterprise search server built on OpenSearch. It is a Java web application that crawls and indexes documents from web sites, file systems, and data stores, and provides full-text search through a web UI and a REST API. Licensed under Apache License 2.0.
 
-**Key Capabilities:**
-- Full-text search with OpenSearch backend
-- Web, file system, and data store crawling
-- Multi-format document support (Office, PDF, etc.)
-- Admin GUI for configuration
-- REST API for programmatic access
-- SSO integration (OIDC, SAML, SPNEGO, Entra ID)
-- i18n support (20+ languages)
+Key capabilities: full-text search, multi-source crawling, multi-format document support (Office, PDF, etc.), an admin GUI, SSO (LDAP, OIDC, SAML, SPNEGO, Entra ID), and i18n (20+ languages).
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Web Framework | LastaFlute (MVC framework) |
-| DI Container | Lasta Di |
-| Data Access | DBFlute (type-safe ORM for OpenSearch) |
-| Search Engine | OpenSearch |
-| App Server | Embedded Tomcat |
-| Crawler | fess-crawler library |
+| Web framework | LastaFlute (MVC) |
+| DI container | Lasta Di |
+| Data access | DBFlute (type-safe access to OpenSearch) |
+| Search engine | OpenSearch |
+| App server | Embedded Tomcat |
+| Crawler | fess-crawler |
 | Scheduler | Lasta Job |
-| Logging | Log4j2 |
 | Testing | JUnit 4/5, UTFlute, REST Assured |
 
 ## Development Commands
 
-### Setup
 ```bash
+# Setup
 mvn antrun:run          # Download OpenSearch plugins (required before first build)
-mvn dbflute:download    # One-time setup for DBFlute
-mvn dbflute:freegen     # Generate DBFlute source code
-mvn license:format      # Add license headers
-```
+mvn dbflute:download    # One-time DBFlute setup
+mvn dbflute:freegen     # Regenerate DBFlute source
 
-### Build
-```bash
-mvn package             # Standard build
-mvn clean package       # Clean build
+# Build
+mvn package             # Build (use `mvn clean package` for a clean build)
 mvn rpm:rpm             # Build .rpm package
 mvn jdeb:jdeb           # Build .deb package
-```
 
-### Testing
-```bash
-mvn test                                    # Run unit tests (*Test.java)
-mvn test -Dtest=ClassName                   # Run single unit test
-
-# To install fess jar for plugin dependency resolution:
-# Change pom.xml <packaging>war</packaging> to <packaging>jar</packaging> first
-mvn clean install -DskipTests               # Then revert packaging back to war
-
-# Integration tests (*Tests.java) - requires running Fess server
+# Test
+mvn test                            # Unit tests (*Test.java)
+mvn test -Dtest=ClassName           # Single unit test
 mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
+
+# Format (run before committing)
+mvn formatter:format
+mvn license:format
+
+# Run
+./bin/fess              # From a built package, or run org.codelibs.fess.FessBoot from the IDE
+# Access http://localhost:8080/ (admin UI: admin/admin)
 ```
 
-### Running
-```bash
-./bin/fess              # From command line
-# Or run org.codelibs.fess.FessBoot from IDE
-# Access: http://localhost:8080/ (Admin: admin/admin)
-```
+Fess is packaged as a WAR. To install it as a jar so plugins can resolve it as a dependency, temporarily change `<packaging>war</packaging>` to `jar` in pom.xml, run `mvn clean install -DskipTests`, then revert.
 
-### Code Formatting
-```bash
-mvn formatter:format    # Format code
-mvn license:format      # Add license headers
-```
+## Architecture
 
-## Directory Structure
+Source lives under `src/main/java/org/codelibs/fess/`. `FessBoot` is the entry point. Notable packages: `app/web` (Actions and Forms, with `admin/` and `api/` controllers), `app/service` (business logic), `opensearch/` (DBFlute integration for the `config`, `log`, and `user` indices), `helper/` (stateless utilities), and `crawler/`, `sso/`, `auth/`, `ldap/`. Configuration and i18n resources live under `src/main/resources/` (`fess_config.properties`, `*.xml` DI files, `fess_label_*`/`fess_message_*` properties, `fess_indices/` mappings). JSP views are under `src/main/webapp/WEB-INF/view/`.
 
-```
-src/main/java/org/codelibs/fess/
-├── FessBoot.java              # Application entry point
-├── Constants.java             # Central application constants
-├── app/
-│   ├── web/                   # Controllers (Actions)
-│   │   ├── base/              # Base action classes (FessBaseAction, FessAdminAction)
-│   │   ├── admin/             # Admin controllers ({feature}/ with Action, Forms)
-│   │   └── api/               # API controllers
-│   ├── service/               # Business logic services
-│   ├── pager/                 # Pagination handlers
-│   └── job/                   # Background jobs
-├── api/                       # REST API infrastructure
-├── opensearch/                # DBFlute integration for OpenSearch
-│   ├── config/                # Config index (crawl configs, schedules)
-│   ├── log/                   # Log index (search logs, click logs)
-│   └── user/                  # User index (users, groups, roles)
-├── helper/                    # Cross-cutting utilities (~40+ helpers)
-├── crawler/                   # Crawling engine (processor, transformer, service)
-├── sso/                       # SSO implementations (oic, saml, spnego, entraid)
-├── auth/                      # Authentication management
-├── ldap/                      # LDAP integration
-├── filter/                    # Servlet filters
-├── validation/                # Custom validators
-├── dict/                      # Dictionary management
-└── ds/                        # Data store connectors
-
-src/main/resources/
-├── fess_config.properties     # Main configuration
-├── app.xml, fess.xml          # DI configuration
-├── fess_*.xml                 # Feature-specific DI
-├── fess_label_*.properties    # UI labels (i18n)
-├── fess_message_*.properties  # Validation messages (i18n)
-└── fess_indices/              # OpenSearch index mappings
-
-src/main/webapp/WEB-INF/view/  # JSP templates
-src/test/java/.../it/          # Integration tests (*Tests.java)
-```
-
-## Architecture Patterns
-
-### Action (Controller)
-- Hierarchy: `TypicalAction` → `FessBaseAction` → `FessAdminAction`/`FessSearchAction`
-- `@Execute` marks web endpoints
-- `@Resource` for DI
-- `@Secured({ "role", "role-view" })` for authorization
+### Action (controller)
+- Hierarchy: `TypicalAction` → `FessBaseAction` → `FessAdminAction` / `FessSearchAction`
+- `@Execute` marks endpoints; `@Resource` for DI; `@Secured({ "role", "role-view" })` for authorization
 - Return `HtmlResponse` for JSP, `JsonResponse` for APIs
 
-### Service
-- Inject behaviors (Bhv) for data access
-- Use `OptionalEntity<T>` for nullable returns
-- Plain classes (no extends/implements)
+### Service and Helper
+- Services are plain classes; inject behaviors (Bhv) for data access; use `OptionalEntity<T>` for nullable returns
+- Helpers are stateless utilities named with a `Helper` suffix, accessed via `ComponentUtil.getXyzHelper()`
 
-### Helper
-- Stateless utility classes
-- Access via `ComponentUtil.getXyzHelper()`
-- Named with "Helper" suffix
+### DBFlute (OpenSearch access)
+- Under `opensearch/{index}/`: `bsentity`/`bsbhv` are generated base classes — do not edit; customize in `exentity`/`exbhv`; `cbean` holds condition beans (query builders)
+- Use Bhv classes for data access rather than the OpenSearch client directly
 
-### DBFlute Generated Code
-```
-opensearch/{index}/
-├── bsentity/, bsbhv/    # Base classes (DO NOT EDIT)
-├── exentity/, exbhv/    # Extended classes (customize here)
-└── cbean/               # Condition beans (query builders)
-```
-
-### Form Classes
+### Form classes
 - POJOs with public fields (no getters/setters)
-- Validation: `@Required`, `@Size`, `@ValidateTypeFailure`, `@Pattern`
-- Include `crudMode` field for CRUD operations
+- Validate with `@Required`, `@Size`, `@ValidateTypeFailure`, `@Pattern`; include a `crudMode` field for CRUD operations
 
 ## Security and Authentication
 
-- `@Secured` annotation with role array (`"admin-user"`, `"admin-user-view"`)
-- Role-based query filtering via `RoleQueryHelper`
-- Authentication: Local (UserService), LDAP, OIDC, SAML, SPNEGO, Entra ID
-- Security features: AES encryption, LDAP injection prevention, password policy, rate limiting
-- Password hashing: BCrypt (`{bcrypt}$2a$10$...`, Spring Security v5.8 compatible) via `PasswordHashHelper` helper. Configure with `app.password.algorithm` / `app.password.bcrypt.cost`. Legacy SHA-256/512/MD5 hashes without prefix are verified via `app.digest.algorithm` for backward compatibility and re-hashed on next successful login when `app.password.upgrade.enabled=true` (default). **Downgrading to a pre-BCrypt Fess release will invalidate `{bcrypt}`-encoded passwords** — document this in release notes and plan for admin password reset.
-- Password write paths (`UserService.changePassword`, `AdminUserAction`, `SearchEngineClient` initial admin) must call `ComponentUtil.getPasswordHashHelper().encode(plain)` — do not call `FessLoginAssist.encryptPassword` from new code.
+- `@Secured` with a role array; role-based result filtering via `RoleQueryHelper`
+- Authentication: local (UserService), LDAP, OIDC, SAML, SPNEGO, Entra ID
+- Password hashing: BCrypt (`{bcrypt}$2a$10$...`, Spring Security 5.8 compatible) via `PasswordHashHelper`, configured with `app.password.algorithm` / `app.password.bcrypt.cost`. Legacy unprefixed SHA-256/512/MD5 hashes are verified via `app.digest.algorithm` and re-hashed on next login when `app.password.upgrade.enabled=true` (default). Downgrading to a pre-BCrypt release invalidates `{bcrypt}` passwords — note this in release notes. New password-write paths must call `ComponentUtil.getPasswordHashHelper().encode(plain)`, not `FessLoginAssist.encryptPassword`.
 
-## Naming Conventions
+## i18n
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Classes | PascalCase | `UserService`, `FessBaseAction` |
-| Methods | camelCase + verb | `getUserList()`, `setupHtmlData()` |
-| Constants | UPPER_SNAKE_CASE | `DEFAULT_PAGE_SIZE` |
-| Fields | camelCase | `userPager`, `fessConfig` |
+The project supports 20+ languages. When changing user-facing strings, labels, or error codes, propagate the change to all `fess_label_*.properties` and `fess_message_*.properties` files (and frontend i18n files).
 
-## Log Message Guidelines
+## Conventions
 
-- Logger: `LogManager.getLogger(ClassName.class)`
-- Format: `key=value` (e.g., `userId={}`, `url={}`)
-- Prefix with `[name]` when context identification is needed
-- Mask sensitive values (passwords, tokens)
-
-## i18n / Localization
-- This project supports up to 21 languages. When modifying user-facing strings, error codes, or labels, always propagate changes to ALL language files (fess_label_*.properties and frontend i18n files).
-
-## Important Patterns for AI Assistants
-
-### Do's
-1. Use `@Resource` for field injection (not constructor injection)
-2. Access helpers via `ComponentUtil.getXyzHelper()`
-3. Use `OptionalEntity<T>` for nullable entity returns
-4. Use DBFlute behavior classes (Bhv) for data access
-5. Put user-facing strings in `fess_label_*.properties`
-6. Run `mvn formatter:format` and `mvn license:format` before committing
-
-### Don'ts
-1. Don't edit files in `bsentity/` or `bsbhv/` (generated code)
-2. Don't use direct OpenSearch client in business code (use Bhv classes)
-3. Don't hardcode strings that should be internationalized
-4. Don't skip validation in form processing
-5. Don't log sensitive data (passwords, tokens, credentials)
-
-### Common Files to Check
-| Task | Files to Review |
-|------|-----------------|
-| Add admin feature | `app/web/admin/*/`, `app/service/`, `webapp/WEB-INF/view/admin/` |
-| Add API endpoint | `api/`, `app/web/api/` |
-| Modify search | `helper/SearchHelper.java`, `helper/QueryHelper.java` |
-| Add crawl config | `opensearch/config/`, `crawler/` |
-| Add SSO | `sso/`, `fess_sso.xml` |
-| Add i18n | `fess_label_*.properties`, `fess_message_*.properties` |
+- Use `@Resource` field injection (not constructor injection); access helpers via `ComponentUtil.getXyzHelper()`
+- Use Bhv classes for data access; use `OptionalEntity<T>` for nullable entities
+- Put user-facing strings in `fess_label_*.properties`; do not hardcode strings that should be internationalized
+- Do not edit generated code (`bsentity`/`bsbhv`); do not use the OpenSearch client directly in business code
+- Do not skip form validation; do not log secrets (passwords, tokens, credentials)
+- Loggers: `LogManager.getLogger(ClassName.class)`; log as `key=value`, masking sensitive values
+- Run `mvn formatter:format` and `mvn license:format` before committing
 
 ## External Resources
 
-- **Documentation**: https://fess.codelibs.org/
-- **GitHub**: https://github.com/codelibs/fess
-- **Issues**: https://github.com/codelibs/fess/issues
+- Documentation: https://fess.codelibs.org/
+- Repository: https://github.com/codelibs/fess
+- Issues: https://github.com/codelibs/fess/issues
