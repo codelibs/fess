@@ -91,8 +91,7 @@ Fess can be extended with plugins. In addition to the data store connectors abov
 
 ### Theme
 
- - [Simple](https://github.com/codelibs/fess-theme-simple)
- - [Classic](https://github.com/codelibs/fess-theme-classic)
+ - [fess-themes](https://github.com/codelibs/fess-themes): a collection of static themes, each a self-contained single-page app installed by uploading a ZIP in the admin UI
 
 ### Ingest
 
