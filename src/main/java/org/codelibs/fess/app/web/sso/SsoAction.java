@@ -28,6 +28,7 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.app.web.search.SearchAction;
 import org.codelibs.fess.entity.RequestParameter;
+import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.sso.SsoResponseType;
@@ -85,7 +86,18 @@ public class SsoAction extends FessLoginAction {
             });
         }
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
-        final LoginCredential loginCredential = ssoManager.getLoginCredential();
+        final LoginCredential loginCredential;
+        try {
+            loginCredential = ssoManager.getLoginCredential();
+        } catch (final SsoLoginException e) {
+            if (ssoManager.available()) {
+                logger.warn("Failed to process SSO login.", e);
+                saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Failed to process SSO login.", e);
+            }
+            return redirect(LoginAction.class);
+        }
         if (loginCredential == null) {
             if (ssoManager.available()) {
                 if (logger.isDebugEnabled()) {

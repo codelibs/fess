@@ -3750,9 +3750,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Allow Delegation */
     public static final String LABELS_spnego_allow_delegation = "{labels.spnego_allow_delegation}";
 
-    /** The key of the message: Exclude Directories */
-    public static final String LABELS_spnego_exclude_dirs = "{labels.spnego_exclude_dirs}";
-
     /** The key of the message: Logger Level */
     public static final String LABELS_spnego_logger_level = "{labels.spnego_logger_level}";
 

@@ -18,6 +18,8 @@ package org.codelibs.fess.sso.spnego;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +30,6 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResol
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -45,6 +46,7 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,14 +67,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SpnegoAuthenticator.class);
 
-    /** Configuration key for SPNEGO initialization status. */
-    protected static final String SPNEGO_INITIALIZED = "spnego.initialized";
-
     /** Configuration key for directories to exclude from SPNEGO authentication. */
     protected static final String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";
 
     /** Configuration key for enabling delegation in SPNEGO authentication. */
     protected static final String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
+
+    /** Configuration key for the comma-separated list of additionally allowed Kerberos realms. */
+    protected static final String SPNEGO_ALLOWED_REALMS = "spnego.allowed.realms";
 
     /** Configuration key for allowing localhost authentication bypass. */
     protected static final String SPNEGO_ALLOW_LOCALHOST = "spnego.allow.localhost";
@@ -130,29 +132,42 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Releases the SPNEGO server credentials and login context on shutdown.
+     */
+    @PreDestroy
+    public void destroy() {
+        if (authenticator != null) {
+            try {
+                authenticator.dispose();
+            } catch (final Exception e) {
+                logger.warn("Failed to dispose SPNEGO authenticator.", e);
+            } finally {
+                authenticator = null;
+            }
+        }
+    }
+
+    /**
      * Gets or creates the SPNEGO authenticator instance.
      *
      * This method implements lazy initialization with synchronization to ensure
-     * the authenticator is only created once. It configures the authenticator
-     * with the appropriate SPNEGO settings and marks initialization as complete.
+     * the authenticator is only created once per JVM. Because the underlying
+     * SpnegoFilterConfig is a JVM-wide singleton, the configuration is cached for
+     * the lifetime of the process and a Fess restart is required to apply changes.
      *
      * @return The configured SPNEGO authenticator instance
      * @throws SsoLoginException if SPNEGO initialization fails
      */
     protected synchronized org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (authenticator != null && fessConfig.getSystemPropertyAsBoolean(SPNEGO_INITIALIZED, false)) {
+        if (authenticator != null) {
             return authenticator;
         }
         try {
-            // set some System properties
+            // NOTE: The underlying SpnegoFilterConfig is a JVM-wide singleton, so the SPNEGO
+            // configuration is effectively cached for the lifetime of the process. Changes to the
+            // spnego.* settings therefore require a Fess restart to take effect.
             final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpnegoConfig());
-
-            // pre-authenticate
             authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
-
-            fessConfig.setSystemPropertyAsBoolean(SPNEGO_INITIALIZED, true);
-            fessConfig.storeSystemProperties();
             return authenticator;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to initialize SPNEGO.", e);
@@ -225,13 +240,12 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 throw new SsoLoginException(msg);
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("principal={}", principal);
-            }
-
             final String[] username = principal.getName().split("@", 2);
             if (logger.isDebugEnabled()) {
                 logger.debug("username={}", Arrays.toString(username));
+            }
+            if (username.length == 2 && StringUtil.isNotBlank(username[1]) && !isAllowedRealm(username[1])) {
+                throw new SsoLoginException("Kerberos realm is not allowed: realm=" + username[1]);
             }
             return new SpnegoCredential(username[0]);
         }).orElse(null);
@@ -291,7 +305,10 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
                 final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
                 if (StringUtil.isNotBlank(logLevel)) {
-                    return logLevel;
+                    if (logLevel.chars().allMatch(Character::isDigit)) {
+                        return logLevel;
+                    }
+                    logger.warn("Invalid spnego.logger.level (must be numeric): {}. Falling back to auto-detection.", logLevel);
                 }
                 if (logger.isDebugEnabled()) {
                     return "3";
@@ -320,10 +337,13 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");
             }
             if (SpnegoHttpFilter.Constants.PREAUTH_USERNAME.equals(name)) {
-                return getProperty(SPNEGO_PREAUTH_USERNAME, "username");
+                // Empty by default so that keytab-based server login is used when the server login
+                // module is configured for it (the library only uses a keytab when both preauth
+                // username and password are empty).
+                return getProperty(SPNEGO_PREAUTH_USERNAME, StringUtil.EMPTY);
             }
             if (SpnegoHttpFilter.Constants.PREAUTH_PASSWORD.equals(name)) {
-                return getProperty(SPNEGO_PREAUTH_PASSWORD, "password");
+                return getProperty(SPNEGO_PREAUTH_PASSWORD, StringUtil.EMPTY);
             }
             if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
                 // SECURITY NOTE: Basic authentication is enabled by default for compatibility.
@@ -331,17 +351,19 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 return getProperty(SPNEGO_ALLOW_BASIC, "true");
             }
             if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
-                // SECURITY WARNING: Unsecure basic authentication is enabled by default.
-                // This sends credentials in Base64 encoding over potentially unencrypted connections.
-                // For production, it is STRONGLY RECOMMENDED to set spnego.allow.unsecure.basic to false
-                // and use HTTPS or more secure authentication methods.
-                return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "true");
+                // SECURITY: unsecure basic authentication is disabled by default so that basic
+                // credentials are never offered over plain HTTP. When false, basic auth is only
+                // offered over HTTPS. Enable only if you fully understand the risk.
+                return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "false");
             }
             if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");
             }
             if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
-                return getProperty(SPNEGO_ALLOW_LOCALHOST, "true");
+                // SECURITY: localhost bypass is disabled by default. When enabled, the spnego library
+                // authenticates same-host requests as the server OS user without Kerberos verification,
+                // which is unsafe behind a same-host reverse proxy. Opt in explicitly if required.
+                return getProperty(SPNEGO_ALLOW_LOCALHOST, "false");
             }
             if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
@@ -367,14 +389,15 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          * Resolves a resource path to an absolute file path.
          *
          * @param path The resource path to resolve
-         * @return The absolute file path of the resource, or null if not found
+         * @return The resolved absolute file path of the resource
+         * @throws SsoLoginException if the file cannot be found
          */
         protected String getResourcePath(final String path) {
             final File file = ResourceUtil.getResourceAsFileNoException(path);
             if (file != null) {
                 return file.getAbsolutePath();
             }
-            return null;
+            throw new SsoLoginException("SPNEGO configuration file not found: " + path);
         }
 
         /**
@@ -388,6 +411,47 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             throw new UnsupportedOperationException("getInitParameterNames() is not supported in SpnegoFilterConfig");
         }
 
+    }
+
+    /**
+     * Determines whether the given Kerberos realm is permitted to log in.
+     * The server's own realm is always allowed.
+     *
+     * @param realm the Kerberos realm extracted from the client principal
+     * @return true if the realm is allowed
+     */
+    protected boolean isAllowedRealm(final String realm) {
+        return isAllowedRealm(realm, getAuthenticator().getServerRealm());
+    }
+
+    /**
+     * Determines whether the given Kerberos realm is permitted, considering the server realm and
+     * the comma-separated {@code spnego.allowed.realms} system property (for intentional cross-realm
+     * trust setups). When neither the server realm nor an allow list can be determined, the realm is
+     * accepted to preserve backward compatibility (a warning is logged).
+     *
+     * @param realm the Kerberos realm extracted from the client principal
+     * @param serverRealm the Kerberos realm of the SPNEGO server principal (may be blank)
+     * @return true if the realm is allowed
+     */
+    protected boolean isAllowedRealm(final String realm, final String serverRealm) {
+        final Set<String> allowedRealms = new HashSet<>();
+        if (StringUtil.isNotBlank(serverRealm)) {
+            allowedRealms.add(serverRealm);
+        }
+        final String configured = ComponentUtil.getSystemProperties().getProperty(SPNEGO_ALLOWED_REALMS, StringUtil.EMPTY);
+        if (StringUtil.isNotBlank(configured)) {
+            for (final String r : configured.split(",")) {
+                if (StringUtil.isNotBlank(r)) {
+                    allowedRealms.add(r.trim());
+                }
+            }
+        }
+        if (allowedRealms.isEmpty()) {
+            logger.warn("No allowed Kerberos realm could be determined; accepting realm={} without validation.", realm);
+            return true;
+        }
+        return allowedRealms.stream().anyMatch(r -> r.equalsIgnoreCase(realm));
     }
 
     /**
