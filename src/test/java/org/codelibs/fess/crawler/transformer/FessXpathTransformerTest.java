@@ -16,6 +16,7 @@
 package org.codelibs.fess.crawler.transformer;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -66,7 +67,6 @@ import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.nekohtml.parsers.DOMParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -89,17 +89,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
         fessXpathTransformer.init();
-        SingletonLaContainerFactory.getContainer().register(CrawlingInfoHelper.class, "crawlingInfoHelper");
-        SingletonLaContainerFactory.getContainer().register(PathMappingHelper.class, "pathMappingHelper");
-        SingletonLaContainerFactory.getContainer().register(CrawlingConfigHelper.class, "crawlingConfigHelper");
-        SingletonLaContainerFactory.getContainer().register(SystemHelper.class, "systemHelper");
-        SingletonLaContainerFactory.getContainer().register(FileTypeHelper.class, "fileTypeHelper");
-        SingletonLaContainerFactory.getContainer().register(DocumentHelper.class, "documentHelper");
-        SingletonLaContainerFactory.getContainer().register(LabelTypeHelper.class, "labelTypeHelper");
-
-        WebConfig webConfig = new WebConfig();
-        ComponentUtil.getCrawlingConfigHelper().store("test", webConfig);
-        setValueToObject(ComponentUtil.getLabelTypeHelper(), "labelTypePatternList", new ArrayList<LabelTypePattern>());
+        final String sessionId = registerCrawlingHelpers();
 
         System.gc();
         long current = MemoryUtil.getUsedMemory();
@@ -117,7 +107,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             responseData.setMimeType("text/html");
             responseData.setParentUrl("http://fess.codelibs.org/");
             responseData.setResponseBody(data.getBytes());
-            responseData.setSessionId("test-1");
+            responseData.setSessionId(sessionId);
             responseData.setStatus(0);
             responseData.setUrl("http://fess.codelibs.org/test.html");
             /*ResultData resultData =*/fessXpathTransformer.transform(responseData);
@@ -141,6 +131,191 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         Field field = ClassUtil.getDeclaredField(obj.getClass(), name);
         field.setAccessible(true);
         FieldUtil.set(field, obj, value);
+    }
+
+    /** Guards the one-time container registration in {@link #registerCrawlingHelpers()}; the
+     *  LastaDi container is a JVM-wide singleton that is not reset between test methods, and
+     *  registering the same component name into it twice throws TooManyRegistrationComponentException. */
+    private static boolean crawlingHelpersRegistered = false;
+
+    /**
+     * Registers the helpers needed to run a full {@link FessXpathTransformer#transform(ResponseData)}
+     * call (mirrors the original setup in {@link #test_transform()}), and returns a fresh session id
+     * to use with {@link ResponseData#setSessionId(String)} so {@code getCrawlingConfig(responseData)}
+     * resolves a freshly-stored {@link WebConfig}. Safe to call from multiple test methods.
+     */
+    private String registerCrawlingHelpers() {
+        if (!crawlingHelpersRegistered) {
+            SingletonLaContainerFactory.getContainer().register(CrawlingInfoHelper.class, "crawlingInfoHelper");
+            SingletonLaContainerFactory.getContainer().register(PathMappingHelper.class, "pathMappingHelper");
+            SingletonLaContainerFactory.getContainer().register(CrawlingConfigHelper.class, "crawlingConfigHelper");
+            SingletonLaContainerFactory.getContainer().register(SystemHelper.class, "systemHelper");
+            SingletonLaContainerFactory.getContainer().register(FileTypeHelper.class, "fileTypeHelper");
+            SingletonLaContainerFactory.getContainer().register(DocumentHelper.class, "documentHelper");
+            SingletonLaContainerFactory.getContainer().register(LabelTypeHelper.class, "labelTypeHelper");
+            crawlingHelpersRegistered = true;
+        }
+
+        final WebConfig webConfig = new WebConfig();
+        // A real crawl always stores a WebConfig with a DB-assigned id; give it one here too, since
+        // CrawlingConfig#getConfigId() (used by FessXpathTransformer#pruneNode's cache key) returns
+        // null for an id-less WebConfig, and the field-rule loop's default branch only catches
+        // XPathExpressionException - not the NullPointerException that a null cache key triggers.
+        webConfig.setId("1");
+        final String sessionId = ComponentUtil.getCrawlingConfigHelper().store("test", webConfig);
+        setValueToObject(ComponentUtil.getLabelTypeHelper(), "labelTypePatternList", new ArrayList<LabelTypePattern>());
+        return sessionId;
+    }
+
+    private ResponseData createHtmlResponseData(final String sessionId, final String url, final String html) {
+        final ResponseData responseData = new ResponseData();
+        responseData.setCharSet("UTF-8");
+        responseData.setContentLength(html.length());
+        responseData.setExecutionTime(1000L);
+        responseData.setHttpStatusCode(200);
+        responseData.setLastModified(new Date());
+        responseData.setMethod("GET");
+        responseData.setMimeType("text/html");
+        responseData.setParentUrl("http://fess.codelibs.org/");
+        responseData.setResponseBody(html.getBytes());
+        responseData.setSessionId(sessionId);
+        responseData.setStatus(0);
+        responseData.setUrl(url);
+        return responseData;
+    }
+
+    @Test
+    public void test_transform_linkUnderPrunedHeading_isDiscovered() throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+
+        // The page1 link sits inside a <NAV>, which is itself nested inside an <H1>. The <H1> is
+        // pruned (as "important_content") by the default Fess field-rule wiring (see
+        // crawler/transformer.xml), and <NAV> is one of the default crawler.document.html.pruned.tags
+        // (see fess_config.properties: "noscript,script,style,header,footer,aside,nav,a[rel=nofollow]").
+        // pruneNode/pruneNodeByTags (FessXpathTransformer) only remove descendants that match a
+        // configured pruned-tag pattern - a bare <A> matches none of them, so it is never actually
+        // removed by pruning. Nesting the link under a genuinely-pruned <NAV> is what makes this
+        // fixture exercise the clone-before-prune fix: reverting to pruning the live H1 node removes
+        // the <NAV> (and the page1 link inside it) from the shared document before child-URL
+        // extraction runs.
+        final String html = "<html><head><title>Test</title></head><body>"
+                + "<h1>Heading Text<nav><a href=\"http://example.com/page1.html\">Nav Link</a></nav></h1>" //
+                + "<p><a href=\"http://example.com/page2.html\">Body Link</a></p>" //
+                + "</body></html>";
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+        // Mirrors the production field rules registered in crawler/transformer.xml.
+        transformer.addFieldRule("title", "//TITLE", true);
+        transformer.addFieldRule("important_content", "//*[self::H1 or self::H2 or self::H3]", true);
+
+        final ResponseData responseData = createHtmlResponseData(sessionId, "http://example.com/", html);
+
+        final ResultData resultData = transformer.transform(responseData);
+
+        // Without the clone-before-prune fix, pruning the LIVE H1 node in storeData's field-rule
+        // loop would remove the nested <NAV> - and the page1 link inside it - from the shared
+        // document before child-URL extraction runs, silently dropping this link. This assertion
+        // fails without that fix.
+        final Set<String> childUrls = resultData.getChildUrlSet().stream().map(RequestData::getUrl).collect(Collectors.toSet());
+        assertEquals(2, childUrls.size(), "child URLs: " + childUrls);
+        assertTrue(childUrls.contains("http://example.com/page1.html"),
+                "child URL nested under a pruned <NAV> inside a pruned H1 was lost: " + childUrls);
+        assertTrue(childUrls.contains("http://example.com/page2.html"), "missing page2: " + childUrls);
+
+        // The pruned field value itself must have the <NAV> content removed, proving pruning
+        // actually occurred on the (cloned) H1 node.
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> dataMap = (Map<String, Object>) resultData.getRawData();
+        final String importantContent = (String) dataMap.get("important_content");
+        assertEquals("Heading Text", importantContent.trim());
+        assertFalse(importantContent.contains("Nav Link"), "important_content should not contain pruned nav text: " + importantContent);
+    }
+
+    @Test
+    public void test_transform_parsesBodyOnce() throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+
+        final String html = "<html><head><title>Test</title></head><body>" //
+                + "<p>Welcome. <a href=\"http://example.com/page1.html\">Link1</a></p>" //
+                + "</body></html>";
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+        transformer.addFieldRule("title", "//TITLE", true);
+
+        final int[] bodyReadCount = { 0 };
+        final ResponseData responseData = new ResponseData() {
+            @Override
+            public InputStream getResponseBody() {
+                bodyReadCount[0]++;
+                return super.getResponseBody();
+            }
+        };
+        responseData.setCharSet("UTF-8");
+        responseData.setContentLength(html.length());
+        responseData.setExecutionTime(1000L);
+        responseData.setHttpStatusCode(200);
+        responseData.setLastModified(new Date());
+        responseData.setMethod("GET");
+        responseData.setMimeType("text/html");
+        responseData.setParentUrl("http://fess.codelibs.org/");
+        responseData.setResponseBody(html.getBytes());
+        responseData.setSessionId(sessionId);
+        responseData.setStatus(0);
+        responseData.setUrl("http://example.com/");
+
+        transformer.transform(responseData);
+
+        // The response body is read exactly 3 times per transform() call:
+        //   1) HtmlTransformer.updateCharset(...) sniffs the charset (base class, before storeData)
+        //   2) FessXpathTransformer.storeData(...) parses the DOM - this is the Document that gets
+        //      reused for child-URL/anchor extraction
+        //   3) processAdditionalData(...) reads the raw bytes again to populate the "cache" field
+        //      (crawler.document.cache.enabled=true by default for text/html)
+        // Crucially, there is NO 4th read: storeChildUrls(responseData, resultData) reuses the
+        // Document stashed by storeData instead of re-parsing the body via a fresh DOMParser -
+        // that removed 4th read is exactly what this test guards against regressing.
+        assertEquals(3, bodyReadCount[0]);
+    }
+
+    @Test
+    public void test_transform_normalPage_fieldsAndChildUrlsUnaffected() throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+
+        final String html = "<html><head><title>Test Page</title></head><body>" //
+                + "<p>Welcome. <a href=\"http://example.com/page1.html\">Link1</a></p>" //
+                + "<p><a href=\"http://example.com/page2.html\">Link2</a></p>" //
+                + "</body></html>";
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+        transformer.addFieldRule("title", "//TITLE", true);
+        transformer.addFieldRule("important_content", "//*[self::H1 or self::H2 or self::H3]", true);
+
+        final ResponseData responseData = createHtmlResponseData(sessionId, "http://example.com/", html);
+
+        final ResultData resultData = transformer.transform(responseData);
+
+        final Set<String> childUrls = resultData.getChildUrlSet().stream().map(RequestData::getUrl).collect(Collectors.toSet());
+        assertEquals(2, childUrls.size());
+        assertTrue(childUrls.contains("http://example.com/page1.html"), "missing page1: " + childUrls);
+        assertTrue(childUrls.contains("http://example.com/page2.html"), "missing page2: " + childUrls);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> dataMap = (Map<String, Object>) resultData.getRawData();
+        assertEquals("Test Page", dataMap.get("title"));
+        // No H1/H2/H3 present on this page.
+        assertNull(dataMap.get("important_content"));
     }
 
     @Test
@@ -681,12 +856,20 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
 
+        // Absent or self-referential canonical URLs must never trigger a ChildUrlsException
+        // redirect. processAdditionalData() continues past the canonical check into code that
+        // needs other DI components not set up in this narrow unit test; whether that surfaces
+        // as ComponentNotFoundException or (if a sibling test has since registered those
+        // components into the shared, JVM-wide container) another exception like
+        // NullPointerException is incidental environment noise, not the behavior under test.
         String data = "<html><body>aaa</body></html>";
         Document document = getDocument(data);
         try {
             transformer.processAdditionalData(dataMap, responseData, document);
             fail();
-        } catch (final ComponentNotFoundException e) {
+        } catch (final ChildUrlsException e) {
+            fail("Unexpected canonical redirect: " + e.getChildUrlList());
+        } catch (final Exception e) {
             // ignore
         }
 
@@ -695,7 +878,9 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         try {
             transformer.processAdditionalData(dataMap, responseData, document);
             fail();
-        } catch (final ComponentNotFoundException e) {
+        } catch (final ChildUrlsException e) {
+            fail("Unexpected canonical redirect: " + e.getChildUrlList());
+        } catch (final Exception e) {
             // ignore
         }
 
