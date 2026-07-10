@@ -145,6 +145,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     private final Map<String, Pattern> convertUrlPatternCache = new ConcurrentHashMap<>();
 
     /**
+     * Thread-local holder for the {@link Document} parsed by {@link #storeData(ResponseData, ResultData)}.
+     * Reusing it in {@link #storeChildUrls(ResponseData, ResultData)} avoids parsing the same HTML body twice.
+     * The bean is a shared singleton across crawler threads, so an instance field would not be thread-safe.
+     */
+    private final ThreadLocal<Document> currentDocument = new ThreadLocal<>();
+
+    /**
      * Default constructor.
      */
     public FessXpathTransformer() {
@@ -185,6 +192,28 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     /**
+     * Transforms the response data, ensuring the thread-local parsed document is cleared afterward.
+     * <p>
+     * Delegates the actual transformation to the base {@link org.codelibs.fess.crawler.transformer.impl.HtmlTransformer#transform(ResponseData)},
+     * which calls {@link #storeData(ResponseData, ResultData)} (stashing the parsed {@link Document} into
+     * {@link #currentDocument}) and then {@link #storeChildUrls(ResponseData, ResultData)} (reusing it). The
+     * stashed document is removed in a finally block so a pooled crawler thread never leaks a DOM reference
+     * between pages.
+     * </p>
+     *
+     * @param responseData the response data from crawling
+     * @return the transformed result data
+     */
+    @Override
+    public ResultData transform(final ResponseData responseData) {
+        try {
+            return super.transform(responseData);
+        } finally {
+            currentDocument.remove();
+        }
+    }
+
+    /**
      * Stores parsed data from response into result data.
      * Processes HTML content using XPath expressions and handles robots tags.
      *
@@ -211,6 +240,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         final Document document = parser.getDocument();
+        // Stash the parsed document so storeChildUrls (called later, possibly from
+        // applyRobotsDirective for the noindex case) can reuse it instead of re-parsing.
+        currentDocument.set(document);
 
         processMetaRobots(responseData, resultData, document);
         processXRobotsTag(responseData, resultData);
@@ -237,7 +269,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     final Boolean isPruned = fieldPrunedRuleMap.get(entry.getKey());
                     Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
                     if (value != null && isPruned != null && isPruned.booleanValue()) {
-                        value = pruneNode(value, getCrawlingConfig(responseData));
+                        // Prune a deep clone, not the live node, since document is shared with
+                        // child-URL/anchor extraction (see currentDocument) - pruning in place would
+                        // silently drop <A> links nested under pruned nodes (e.g. //H1, //H2, //H3).
+                        value = pruneNode(value.cloneNode(true), getCrawlingConfig(responseData));
                     }
                     putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
                     break;
@@ -974,6 +1009,36 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             urlSet.add(requestData.getUrl());
         }
         return new ArrayList<>(urlSet);
+    }
+
+    /**
+     * Stores child URLs found in the HTML content, reusing the {@link Document} already parsed by
+     * {@link #storeData(ResponseData, ResultData)} instead of re-parsing the response body.
+     * <p>
+     * Falls back to the base (re-parsing) implementation if no document was stashed, which should not
+     * happen on the normal {@code transform()} path but guards against direct callers.
+     * </p>
+     *
+     * @param responseData the response data containing the HTML content
+     * @param resultData the result data to store child URLs in
+     */
+    @Override
+    protected void storeChildUrls(final ResponseData responseData, final ResultData resultData) {
+        final Document document = currentDocument.get();
+        if (document == null) {
+            super.storeChildUrls(responseData, resultData);
+            return;
+        }
+        // Mirror the exception handling of the base storeChildUrls(ResponseData, ResultData) so callers
+        // observe the same behavior: rethrow CrawlerSystemException as-is, wrap anything else (including
+        // the MalformedURLException the three-arg overload declares) in a CrawlerSystemException.
+        try {
+            storeChildUrls(responseData, resultData, document);
+        } catch (final CrawlerSystemException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new CrawlerSystemException("Could not store data.", e);
+        }
     }
 
     /**
