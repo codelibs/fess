@@ -23,7 +23,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.BooleanFunction;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -141,6 +149,82 @@ public class ScrollSearchHandlerTest extends UnitFessTestCase {
         } else {
             assertTrue(res.contentType == null || res.contentType.startsWith("application/json"),
                     "unexpected content-type " + res.contentType);
+        }
+    }
+
+    /**
+     * Regression: {@code /api/v2/documents/all} must stream <em>every</em> matched
+     * document, not just the first.
+     *
+     * <p>The scroll helper faithfully iterates all N hits and invokes the cursor once per
+     * hit (mirroring {@code SearchEngineClient.scrollSearch}). If the NDJSON writer is
+     * closed after the first line — e.g. by {@code ObjectMapper.writeValue(Writer, …)},
+     * whose {@code AUTO_CLOSE_TARGET} default closes the servlet writer — the remaining
+     * documents are silently dropped ({@code PrintWriter} swallows post-close writes),
+     * so only one line reaches the client while the log still reports all N loaded.</p>
+     *
+     * <p>This test stubs the scroll helper to emit three documents and asserts all three
+     * NDJSON lines are present.</p>
+     */
+    @Test
+    public void test_scroll_writesEveryDocumentNotJustFirst() throws Exception {
+        final FessConfig originalConfig = ComponentUtil.getFessConfig();
+        // The unit container (test_app.xml) defines neither searchHelper nor queryFieldConfig,
+        // so both are supplied as stubs below; UTFlute rebuilds the container per test method,
+        // so the stub registrations do not leak into sibling tests.
+        final int docCount = 3;
+        try {
+            // Reach the streaming branch (api.search.scroll defaults to false).
+            ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public boolean isApiSearchScroll() {
+                    return true;
+                }
+            });
+            // Keep every field so filterDoc does not strip the payload.
+            ComponentUtil.register(new QueryFieldConfig() {
+                @Override
+                public boolean isApiResponseField(final String field) {
+                    return true;
+                }
+            }, "queryFieldConfig");
+            // Emit three documents through the cursor, one per hit.
+            ComponentUtil.register(new SearchHelper() {
+                @Override
+                public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,
+                        final OptionalThing<FessUserBean> userBean) {
+                    long count = 0;
+                    for (int i = 0; i < docCount; i++) {
+                        final Map<String, Object> doc = new HashMap<>();
+                        doc.put("doc_id", "id-" + i);
+                        doc.put("title", "title-" + i);
+                        count++;
+                        if (!cursor.apply(doc)) {
+                            break;
+                        }
+                    }
+                    return count;
+                }
+            }, "searchHelper");
+
+            final ScrollSearchHandler handler = new ScrollSearchHandler();
+            final CapturingResponse res = new CapturingResponse();
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            handler.handle(new StubRequest("/api/v2/documents/all", params), res);
+
+            final String body = res.body();
+            // UnitFessTestCase.assertEquals(String,Object,Object) is message-first.
+            assertEquals(body, "application/x-ndjson; charset=UTF-8", res.contentType);
+            final String[] lines = body.split("\n");
+            assertEquals(docCount, lines.length, "expected " + docCount + " NDJSON lines, got: " + body);
+            assertTrue(body.contains("id-0"), body);
+            assertTrue(body.contains("id-1"), body);
+            assertTrue(body.contains("id-2"), body);
+        } finally {
+            ComponentUtil.setFessConfig(originalConfig);
         }
     }
 
