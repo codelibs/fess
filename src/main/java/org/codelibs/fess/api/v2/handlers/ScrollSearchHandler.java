@@ -137,10 +137,14 @@ public class ScrollSearchHandler {
                 final Map<String, Object> line = new LinkedHashMap<>();
                 line.put("data", filtered);
                 try {
-                    // writeValue(writer, …) leaves the writer open between calls when the
-                    // target is a Writer (not OutputStream) — required so we can keep
-                    // streaming subsequent NDJSON lines.
-                    MAPPER.writeValue(writer, line);
+                    // Serialize to a String first, then write. Passing the servlet writer to
+                    // MAPPER.writeValue(Writer, …) closes it after the first line — Jackson's
+                    // JsonGenerator.Feature.AUTO_CLOSE_TARGET defaults to true, so the generator's
+                    // close() closes the underlying writer. Once closed, PrintWriter silently
+                    // swallows every subsequent write (it never throws, only sets an error flag),
+                    // so only the first document would reach the client while the scroll still
+                    // iterates all N matching documents.
+                    writer.write(MAPPER.writeValueAsString(line));
                     writer.write('\n');
                     wroteAnyLine[0] = true;
                 } catch (final IOException e) {
@@ -176,7 +180,9 @@ public class ScrollSearchHandler {
                     errBody.put("code", "internal_error");
                     errBody.put("message", "stream error");
                     errLine.put("error", errBody);
-                    MAPPER.writeValue(w, errLine);
+                    // Serialize first (see the success-path comment above): writeValue(Writer,…)
+                    // would close the writer before the trailing newline could be written.
+                    w.write(MAPPER.writeValueAsString(errLine));
                     w.write('\n');
                     response.flushBuffer();
                 } catch (final Exception flushEx) {
