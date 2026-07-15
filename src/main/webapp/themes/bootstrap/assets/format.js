@@ -97,6 +97,30 @@ const ALLOWED_TAGS = new Set([
 ]);
 
 /**
+ * Elements dropped whole, children included, rather than unwrapped like an
+ * ordinary disallowed tag. For the raw-text members — SCRIPT, STYLE,
+ * TEXTAREA, TITLE, XMP, PLAINTEXT, NOEMBED, NOFRAMES — and for IFRAME,
+ * OBJECT, EMBED, the child "text" is the element's own source or markup,
+ * not prose: unwrapping would surface that source as visible content (a
+ * <script> body becomes the literal string "alert(1)"). NOSCRIPT is
+ * dropped for a different reason: sanitizeHtml() parses with a <template>
+ * element, which runs with the scripting flag disabled, so a <noscript>'s
+ * children parse as ordinary elements, not raw text — but that content is
+ * a no-JS fallback, meaningless in this JS-required SPA, so it is dropped
+ * rather than unwrapped. TEMPLATE is kept mainly for foreign content:
+ * inside <svg>, a <template> has real childNodes and no `.content`
+ * fragment, so it would otherwise leak its text like the raw-text members
+ * above; in ordinary HTML content its children live in `.content`, a
+ * fragment this function never traverses, so dropping it here is usually
+ * a no-op.
+ */
+const DROP_WITH_CONTENT = new Set([
+  "SCRIPT", "STYLE", "TEXTAREA", "TITLE", "NOSCRIPT",
+  "IFRAME", "OBJECT", "EMBED", "TEMPLATE", "XMP",
+  "PLAINTEXT", "NOEMBED", "NOFRAMES"
+]);
+
+/**
  * Allowed attributes per tag (lowercase tag name → Set of lowercase attr names).
  * Attributes not listed here are stripped.
  */
@@ -155,6 +179,12 @@ function sanitizeNode(node) {
 
   if (node.nodeType === Node.ELEMENT_NODE) {
     const tag = node.tagName.toUpperCase();
+
+    if (DROP_WITH_CONTENT.has(tag)) {
+      // See the DROP_WITH_CONTENT comment above for why each member is
+      // dropped whole here instead of being unwrapped.
+      return null;
+    }
 
     if (!ALLOWED_TAGS.has(tag)) {
       // Disallowed tag: unwrap — keep its sanitized children in a fragment.
