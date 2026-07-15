@@ -605,6 +605,45 @@ public class ViewHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_replaceHighlightQueries_highlightQueryWithDollar() {
+        // ViewHelper:805/814 called replaceAll() without Matcher.quoteReplacement, so
+        // a query containing '$' was parsed as a group reference and threw
+        // IndexOutOfBoundsException -> CacheHandler mapped it to HTTP 500.
+        // Search and cache-highlighting use different matching: search is
+        // token-based (the analyzer turns "$12" into token "12"), while
+        // replaceHighlightQueries matches the raw substring via Pattern.quote.
+        // So a query like "$12" against a page containing the literal "$12"
+        // both hits search (token "12") and reaches this method, whose own
+        // "$1" prefix is then read by replaceAll() as a group reference into
+        // the (group-less) quoted pattern. Verified against a released Fess
+        // image, not just this unit test. (createCacheContent is not used
+        // here because it resolves a real WEB-INF/view path via the servlet
+        // context before reaching the highlight code, which is not available
+        // in this unit test harness; replaceHighlightQueries is the protected
+        // method that actually contains the bug and is directly reachable
+        // from this test.)
+        String text = "Price is $1 per unit.";
+        String[] queries = { "$1" };
+        assertEquals("Price is <strong>$1</strong> per unit.", viewHelper.replaceHighlightQueries(text, queries));
+
+        // The real-world trigger: "$12" on a pricing FAQ hits search (token
+        // "12") and its raw substring is matched by the highlighter, whose
+        // "$1" prefix used to be read as a group reference.
+        String priceText = "Plans start at $12 per month.";
+        String[] priceQueries = { "$12" };
+        assertEquals("Plans start at <strong>$12</strong> per month.", viewHelper.replaceHighlightQueries(priceText, priceQueries));
+
+        // A '$' NOT followed by a digit takes a different path through
+        // Matcher.appendReplacement (IllegalArgumentException: "Illegal group
+        // reference", instead of IndexOutOfBoundsException) but is fixed the
+        // same way by Matcher.quoteReplacement(); verified with a scratch
+        // regex repro before asserting this.
+        String noDigitText = "Contact us at $support for help.";
+        String[] noDigitQueries = { "$support" };
+        assertEquals("Contact us at <strong>$support</strong> for help.", viewHelper.replaceHighlightQueries(noDigitText, noDigitQueries));
+    }
+
+    @Test
     public void test_getClientIp() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();

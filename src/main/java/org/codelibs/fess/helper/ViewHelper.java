@@ -802,7 +802,9 @@ public class ViewHelper {
             m.appendReplacement(segBuf, StringUtil.EMPTY);
             String segment = segBuf.toString();
             for (int i = 0; i < queries.length; i++) {
-                segment = Pattern.compile(regexQueries[i], Pattern.CASE_INSENSITIVE).matcher(segment).replaceAll(hlQueries[i]);
+                segment = Pattern.compile(regexQueries[i], Pattern.CASE_INSENSITIVE)
+                        .matcher(segment)
+                        .replaceAll(Matcher.quoteReplacement(hlQueries[i]));
             }
             buf.append(segment);
             buf.append(m.group(0));
@@ -811,7 +813,9 @@ public class ViewHelper {
         m.appendTail(segBuf);
         String segment = segBuf.toString();
         for (int i = 0; i < queries.length; i++) {
-            segment = Pattern.compile(regexQueries[i], Pattern.CASE_INSENSITIVE).matcher(segment).replaceAll(hlQueries[i]);
+            segment = Pattern.compile(regexQueries[i], Pattern.CASE_INSENSITIVE)
+                    .matcher(segment)
+                    .replaceAll(Matcher.quoteReplacement(hlQueries[i]));
         }
         buf.append(segment);
         return buf.toString();
