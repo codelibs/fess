@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 // Minimal in-repo Markdown renderer for the Fess bootstrap SPA.
-// Produces HTML from a safe subset of Markdown. All input is HTML-escaped
-// before pattern substitution — no raw user strings appear in output.
+// Produces HTML from a safe subset of Markdown. Every user-derived string is
+// HTML-escaped — inline text by inlineMarkdown() before pattern substitution,
+// fenced-code content at extraction time — so only renderer-generated markup
+// reaches the output unescaped.
 // The caller MUST pass the return value through sanitizeHtml() before
 // appending to the live DOM (defense-in-depth).
 
 import { escapeHtml, isSafeHref } from "./format.js";
+
+// Extracted fenced code blocks are parked under a NUL-delimited placeholder
+// (see steps 2/5). Placeholders are the only strings that bypass escaping, so
+// they must be unforgeable: parseMarkdown strips NUL from the input, and these
+// patterns match a whole placeholder rather than a prefix.
+const CODEBLOCK_SPLIT_RE = /(\x00CODEBLOCK\d+\x00)/;
+const CODEBLOCK_ONLY_RE = /^\x00CODEBLOCK\d+\x00$/;
 
 /**
  * Parse a limited subset of Markdown to HTML.
@@ -27,8 +36,9 @@ import { escapeHtml, isSafeHref } from "./format.js";
 export function parseMarkdown(text) {
   if (!text || typeof text !== "string") return "";
 
-  // Step 1: Normalise line endings.
-  const normalised = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  // Step 1: Normalise line endings, and drop NUL so input cannot forge one of
+  // the NUL-delimited placeholders used here and by inlineMarkdown().
+  const normalised = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").replace(/\x00/g, "");
 
   // Step 2: Extract fenced code blocks so their contents are not processed by
   // inline rules.  Replace each block with a unique placeholder token.
@@ -61,7 +71,11 @@ export function parseMarkdown(text) {
 // ---------------------------------------------------------------------------
 
 /**
- * Split text into block-level units by one or more blank lines.
+ * Split text into block-level units by one or more blank lines, then split each
+ * of those at code-block placeholder boundaries so a placeholder always stands
+ * alone as its own block.  A fence that is not followed by a blank line would
+ * otherwise share a block with the text after it, and processBlock() cannot
+ * both pass a placeholder through and escape its neighbours.
  * Preserves non-empty blocks only.
  *
  * @param {string} text
@@ -70,6 +84,7 @@ export function parseMarkdown(text) {
 function splitBlocks(text) {
   return text
     .split(/\n{2,}/)
+    .flatMap(b => b.split(CODEBLOCK_SPLIT_RE))
     .map(b => b.trim())
     .filter(b => b.length > 0);
 }
@@ -241,8 +256,9 @@ function renderBlockquote(lines) {
  * @returns {string} HTML string.
  */
 function processBlock(block) {
-  // Code block placeholder — pass through.
-  if (block.startsWith("\x00CODEBLOCK")) return block;
+  // Code block placeholder — pass through.  Tested against the whole block: a
+  // prefix test would also return anything sharing the block with it unescaped.
+  if (CODEBLOCK_ONLY_RE.test(block)) return block;
 
   const lines = block.split("\n");
 
