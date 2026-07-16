@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.go;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -120,7 +121,7 @@ public class GoAction extends FessSearchAction {
                 clickLog.setUrlId((String) doc.get(fessConfig.getIndexFieldId()));
                 clickLog.setUrl(url);
                 clickLog.setRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-                clickLog.setQueryRequestedAt(DfTypeUtil.toLocalDateTime(Long.parseLong(form.rt)));
+                clickLog.setQueryRequestedAt(parseQueryRequestedAt(form.rt));
                 clickLog.setUserSessionId(userSessionId);
                 clickLog.setDocId(form.docId);
                 clickLog.setQueryId(form.queryId);
@@ -183,6 +184,35 @@ public class GoAction extends FessSearchAction {
             saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
             return redirect(ErrorAction.class);
         }
+    }
+
+    /**
+     * Resolves the click log's query-requested timestamp from the {@code rt} request parameter.
+     *
+     * <p>{@code rt} carries the epoch millis of the originating search, but it is a plain
+     * request parameter and therefore arbitrary user input: {@link GoForm} declares no numeric
+     * constraint on it. A value that is absent or not a number is treated as absent and falls
+     * back to the current time, so that a malformed parameter degrades click telemetry instead
+     * of failing the user's navigation with an error.</p>
+     *
+     * <p>This matches the v2 API's {@code ClickHandler}, which likewise falls back to the
+     * current time whenever {@code rt} is not a number.</p>
+     *
+     * @param rt the raw {@code rt} parameter, epoch millis in string form (NullAllowed)
+     * @return the originating search time, or the current time if {@code rt} is absent or malformed
+     */
+    protected LocalDateTime parseQueryRequestedAt(final String rt) {
+        if (rt != null) {
+            try {
+                return DfTypeUtil.toLocalDateTime(Long.parseLong(rt));
+            } catch (final NumberFormatException e) {
+                // Attacker-controlled input: log at debug only so a malformed rt cannot flood logs.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid rt parameter: {}", rt, e);
+                }
+            }
+        }
+        return systemHelper.getCurrentTimeAsLocalDateTime();
     }
 
     /**

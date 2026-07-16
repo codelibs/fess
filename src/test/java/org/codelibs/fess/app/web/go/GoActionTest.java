@@ -15,10 +15,16 @@
  */
 package org.codelibs.fess.app.web.go;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.system.DBFluteSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -50,6 +56,7 @@ public class GoActionTest extends UnitFessTestCase {
         ComponentUtil.register(protocolHelper, "protocolHelper");
 
         goAction = new TestableGoAction();
+        goAction.setSystemHelper(new FixedSystemHelper());
     }
 
     @Override
@@ -58,12 +65,90 @@ public class GoActionTest extends UnitFessTestCase {
         super.tearDown(testInfo);
     }
 
-    // Test class to expose protected method for testing
+    // Test class to expose protected methods for testing
     private static class TestableGoAction extends GoAction {
         @Override
         public boolean isFileSystemPath(final String url) {
             return super.isFileSystemPath(url);
         }
+
+        @Override
+        public LocalDateTime parseQueryRequestedAt(final String rt) {
+            return super.parseQueryRequestedAt(rt);
+        }
+
+        // systemHelper is injected via @Resource in production; set it directly for unit tests.
+        void setSystemHelper(final SystemHelper systemHelper) {
+            this.systemHelper = systemHelper;
+        }
+    }
+
+    /** Fixed instant used as "now" so the fallback is deterministic. */
+    private static final LocalDateTime FIXED_NOW = LocalDateTime.of(2020, 1, 2, 3, 4, 5);
+
+    /** SystemHelper returning a fixed "current time" so the fallback branch is assertable. */
+    private static class FixedSystemHelper extends SystemHelper {
+        @Override
+        public LocalDateTime getCurrentTimeAsLocalDateTime() {
+            return FIXED_NOW;
+        }
+    }
+
+    // ==================================================================================
+    //                                                            parseQueryRequestedAt Tests
+    //                                                            ===========================
+
+    /**
+     * Regression test: {@code rt} is an unconstrained request parameter, so a non-numeric
+     * value used to reach {@code Long.parseLong} unguarded and raise NumberFormatException,
+     * failing the user's navigation with an HTTP 500. A malformed value must instead be
+     * treated as absent and fall back to the current time.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_malformed_fallsBackToCurrentTime() {
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("not-a-number"));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt(""));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt(" "));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("123abc"));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("1.5"));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("1,000"));
+        // Numeric but outside long range: parseLong also rejects these.
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("99999999999999999999999"));
+    }
+
+    /**
+     * A missing {@code rt} must not throw either. {@code @Required} normally rejects this before
+     * the action body runs, so this guards the method's own contract rather than the request flow.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_null_fallsBackToCurrentTime() {
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt(null));
+    }
+
+    /**
+     * A well-formed {@code rt} must still be honoured, not silently replaced by the fallback.
+     *
+     * <p>DfTypeUtil converts via {@code DBFluteSystem.getFinalTimeZone()} (Fess registers a
+     * provider for it in FessCurtainBeforeHook), not via TimeZone.getDefault() at call time,
+     * so the expectation is read back through that same zone to keep this test independent of
+     * the host's time zone. That conversion zone differs from the v2 ClickHandler's UTC
+     * conversion; aligning the two would change stored timestamps and is out of scope here.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_valid_usesRtValue() {
+        final long rtMs = 1718454896789L; // 2024-06-15T12:34:56.789Z (mid-year: no DST-overlap ambiguity)
+        final LocalDateTime actual = goAction.parseQueryRequestedAt(Long.toString(rtMs));
+        assertFalse(FIXED_NOW.equals(actual));
+        final ZoneId zone = DBFluteSystem.getFinalTimeZone().toZoneId();
+        assertEquals(rtMs, ZonedDateTime.of(actual, zone).toInstant().toEpochMilli());
+    }
+
+    /**
+     * Epoch 0 is a valid timestamp and must be parsed, not treated as absent.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_zero_isParsed() {
+        assertFalse(FIXED_NOW.equals(goAction.parseQueryRequestedAt("0")));
     }
 
     // ==================================================================================
