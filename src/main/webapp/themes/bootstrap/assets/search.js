@@ -235,24 +235,37 @@ function buildResultCard(d, queryId, order) {
   const site = el("div", { className: "site text-truncate" });
   if (features.clipboard_copy_icon) {
     const rawUrl = d.url_link || d.url || "";
+    // A real <button>, not an <i> carrying role="button": the element that takes
+    // focus has to be the one that carries the role and the accessible name, and
+    // only a button gets keyboard activation (Enter/Space) without hand-rolling a
+    // keydown handler. The previous markup also set aria-hidden="true" on the same
+    // element as role/aria-label, which removed the control from the accessibility
+    // tree entirely — so it was both invisible to assistive tech and unreachable by
+    // keyboard. The glyph inside stays aria-hidden and keeps the url-copy /
+    // url-copied classes, so each theme's existing colour rules apply unchanged.
     const copyIcon = el("i", {
-      className: "far fa-copy url-copy d-print-none",
-      attrs: { "aria-hidden": "true", "data-clipboard-text": rawUrl, role: "button", "aria-label": t("result.copy_url") + ": " + rawUrl }
+      className: "far fa-copy url-copy",
+      attrs: { "aria-hidden": "true" }
     });
-    copyIcon.addEventListener("click", () => {
+    const copyBtn = el("button", {
+      className: "url-copy-btn d-print-none",
+      attrs: { type: "button", "data-clipboard-text": rawUrl, "aria-label": t("result.copy_url") + ": " + rawUrl }
+    });
+    copyBtn.appendChild(copyIcon);
+    copyBtn.addEventListener("click", () => {
       copyToClipboard(rawUrl).then(() => {
         // JSP parity (js/search.js): swap the copy icon to a green checkmark for ~2s.
         copyIcon.classList.remove("url-copy", "far", "fa-copy");
         copyIcon.classList.add("url-copied", "fas", "fa-check");
-        copyIcon.setAttribute("aria-label", t("result.copied"));
+        copyBtn.setAttribute("aria-label", t("result.copied"));
         setTimeout(() => {
           copyIcon.classList.remove("url-copied", "fas", "fa-check");
           copyIcon.classList.add("url-copy", "far", "fa-copy");
-          copyIcon.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
+          copyBtn.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
         }, 2000);
       }).catch(() => { /* clipboard not available */ });
     });
-    site.appendChild(copyIcon);
+    site.appendChild(copyBtn);
     // JSP has whitespace between the copy icon and the cite — keep them from touching.
     site.appendChild(document.createTextNode(" "));
   }
