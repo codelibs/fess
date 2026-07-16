@@ -171,7 +171,9 @@ public class AdminGeneralAction extends FessAdminAction {
      */
     public static void updateConfig(final FessConfig fessConfig, final EditForm form) {
         fessConfig.setLoginRequired(isCheckboxEnabled(form.loginRequired));
-        fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
+        if (isResultCollapsedEditable(fessConfig)) {
+            fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
+        }
         fessConfig.setLoginLinkEnabled(isCheckboxEnabled(form.loginLink));
         fessConfig.setThumbnailEnabled(isCheckboxEnabled(form.thumbnail));
         fessConfig.setIncrementalCrawling(isCheckboxEnabled(form.incrementalCrawling));
@@ -505,6 +507,21 @@ public class AdminGeneralAction extends FessAdminAction {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if the result collapsing checkbox is rendered for the given search engine type.
+     * The checkbox is omitted from the form for cloud and aws types, so its request parameter
+     * is always absent there and must not be applied to the configuration.
+     *
+     * @param fessConfig the Fess configuration to check
+     * @return true if the checkbox is rendered and its value can be applied
+     */
+    private static boolean isResultCollapsedEditable(final FessConfig fessConfig) {
+        return switch (fessConfig.getFesenType()) {
+        case Constants.FESEN_TYPE_CLOUD, Constants.FESEN_TYPE_AWS -> false;
+        default -> true;
+        };
     }
 
 }
