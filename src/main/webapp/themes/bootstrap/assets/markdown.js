@@ -57,10 +57,12 @@ export function parseMarkdown(text) {
   // Step 4: Process each block.
   const parts = blocks.map(block => processBlock(block));
 
-  // Step 5: Restore code blocks.
+  // Step 5: Restore code blocks. The replacement is a function so that `$&`,
+  // "$`", `$'` and `$1` in the code content are inserted literally instead of
+  // being read as substitution patterns.
   let html = parts.join("\n");
   codeBlocks.forEach((cb, idx) => {
-    html = html.replace("\x00CODEBLOCK" + idx + "\x00", cb);
+    html = html.replace("\x00CODEBLOCK" + idx + "\x00", () => cb);
   });
 
   return html;
@@ -395,9 +397,10 @@ function inlineMarkdown(text) {
     return '<a href="' + url + '" target="_blank" rel="nofollow noopener noreferrer">' + url + "</a>";
   });
 
-  // Restore inline code placeholders.
+  // Restore inline code placeholders. As in step 5 of parseMarkdown, the
+  // replacement is a function so `$&` and friends in the code are literal.
   inlineCodes.forEach((ic, idx) => {
-    s = s.replace("\x00IC" + idx + "\x00", ic);
+    s = s.replace("\x00IC" + idx + "\x00", () => ic);
   });
 
   return s;
