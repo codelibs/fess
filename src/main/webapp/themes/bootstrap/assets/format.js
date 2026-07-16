@@ -98,26 +98,37 @@ const ALLOWED_TAGS = new Set([
 
 /**
  * Elements dropped whole, children included, rather than unwrapped like an
- * ordinary disallowed tag. For the raw-text members — SCRIPT, STYLE,
- * TEXTAREA, TITLE, XMP, PLAINTEXT, NOEMBED, NOFRAMES — and for IFRAME,
- * OBJECT, EMBED, the child "text" is the element's own source or markup,
- * not prose: unwrapping would surface that source as visible content (a
- * <script> body becomes the literal string "alert(1)"). NOSCRIPT is
- * dropped for a different reason: sanitizeHtml() parses with a <template>
- * element, which runs with the scripting flag disabled, so a <noscript>'s
- * children parse as ordinary elements, not raw text — but that content is
- * a no-JS fallback, meaningless in this JS-required SPA, so it is dropped
- * rather than unwrapped. TEMPLATE is kept mainly for foreign content:
- * inside <svg>, a <template> has real childNodes and no `.content`
- * fragment, so it would otherwise leak its text like the raw-text members
- * above; in ordinary HTML content its children live in `.content`, a
- * fragment this function never traverses, so dropping it here is usually
- * a no-op.
+ * ordinary disallowed tag. For the raw-text members — IFRAME, NOEMBED,
+ * NOFRAMES, PLAINTEXT, SCRIPT, STYLE, TEXTAREA, TITLE, XMP — the child
+ * "text" is the element's own source, not prose: unwrapping would surface
+ * that source as visible content (a <script> body becomes the literal
+ * string "alert(1)"). NOSCRIPT is dropped for a different reason:
+ * sanitizeHtml() parses with a <template> element, which runs with the
+ * scripting flag disabled, so a <noscript>'s children parse as ordinary
+ * elements, not raw text — but that content is a no-JS fallback,
+ * meaningless in this JS-required SPA, so it is dropped rather than
+ * unwrapped. TEMPLATE is kept mainly for foreign content: inside <svg>, a
+ * <template> has real childNodes and no `.content` fragment, so it would
+ * otherwise leak its text like the raw-text members above; in ordinary
+ * HTML content its children live in `.content`, a fragment this function
+ * never traverses, so dropping it here is usually a no-op.
+ *
+ * This is a denylist over unwrap-by-default, not an exhaustive one: the
+ * foreign-content text holders <svg desc>, <svg metadata>, <math
+ * annotation> and <math annotation-xml> leak the same way but are left
+ * out, their leak being cosmetic. <svg><title> and <svg><style> are
+ * covered only because those names case-fold onto the HTML members above —
+ * incidental, not foreign-content handling.
+ *
+ * OBJECT and EMBED are deliberately absent. An <object>'s children are its
+ * fallback prose, which the unwrap path already sanitizes recursively;
+ * dropping them would only discard content this theme should render.
+ * <embed> is a void element, so it never has children to drop.
  */
 const DROP_WITH_CONTENT = new Set([
   "SCRIPT", "STYLE", "TEXTAREA", "TITLE", "NOSCRIPT",
-  "IFRAME", "OBJECT", "EMBED", "TEMPLATE", "XMP",
-  "PLAINTEXT", "NOEMBED", "NOFRAMES"
+  "IFRAME", "TEMPLATE", "XMP", "PLAINTEXT",
+  "NOEMBED", "NOFRAMES"
 ]);
 
 /**
