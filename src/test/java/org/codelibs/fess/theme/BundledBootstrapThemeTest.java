@@ -1171,6 +1171,36 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * format.js must drop raw-text elements whole instead of unwrapping them:
+     * their child text is the element's own source, so unwrapping surfaces that
+     * source as visible prose. Guards the nine HTML raw-text elements plus
+     * NOSCRIPT and TEMPLATE, which are dropped for their own documented reasons.
+     */
+    @Test
+    public void test_formatJs_sanitizerDropsRawTextElementsWithContent() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("const DROP_WITH_CONTENT = new Set(["), "format.js must define the DROP_WITH_CONTENT set");
+        for (final String tag : new String[] { "IFRAME", "NOEMBED", "NOFRAMES", "PLAINTEXT", "SCRIPT", "STYLE", "TEXTAREA", "TITLE", "XMP",
+                "NOSCRIPT", "TEMPLATE" }) {
+            assertTrue(js.contains("\"" + tag + "\""), "format.js DROP_WITH_CONTENT must contain \"" + tag + "\"");
+        }
+    }
+
+    /**
+     * OBJECT and EMBED must stay out of DROP_WITH_CONTENT. An &lt;object&gt;'s
+     * children are fallback prose that the unwrap path already sanitizes
+     * recursively, so dropping them buys no safety and only discards content;
+     * &lt;embed&gt; is a void element, so it never has children and the entry
+     * would be inert. Re-adding either is a regression, not a hardening.
+     */
+    @Test
+    public void test_formatJs_sanitizerDoesNotDropObjectOrEmbedContent() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        assertFalse(js.contains("\"OBJECT\""), "format.js must not drop <object> fallback prose: the unwrap path already sanitizes it");
+        assertFalse(js.contains("\"EMBED\""), "format.js must not list \"EMBED\": it is a void element, so the entry can never fire");
+    }
+
+    /**
      * R4-9: advance.js per-page fallback list must match JSP parity ([10,20,30,40,50,100]).
      * The shorter legacy list ([10,20,50,100]) must not appear as the fallback.
      */
