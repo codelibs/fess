@@ -135,25 +135,21 @@ public class GoAction extends FessSearchAction {
         final String targetUrl = pathMappingHelper.replaceUrl(url);
 
         String hash;
-        if (StringUtil.isNotBlank(form.hash)) {
-            final String value = URLUtil.decode(form.hash, Constants.UTF_8);
-            if (targetUrl.indexOf('#') == -1) {
-                final StringBuilder buf = new StringBuilder(value.length() + 100);
-                for (final char c : value.toCharArray()) {
-                    if (CharUtil.isUrlChar(c) || c == ' ') {
-                        buf.append(c);
-                    } else {
-                        try {
-                            buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
-                        } catch (final UnsupportedEncodingException e) {
-                            // NOP
-                        }
+        final String value = decodeHash(form.hash);
+        if (value != null && targetUrl.indexOf('#') == -1) {
+            final StringBuilder buf = new StringBuilder(value.length() + 100);
+            for (final char c : value.toCharArray()) {
+                if (CharUtil.isUrlChar(c) || c == ' ') {
+                    buf.append(c);
+                } else {
+                    try {
+                        buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                    } catch (final UnsupportedEncodingException e) {
+                        // NOP
                     }
                 }
-                hash = buf.toString();
-            } else {
-                hash = StringUtil.EMPTY;
             }
+            hash = buf.toString();
         } else {
             hash = StringUtil.EMPTY;
         }
@@ -213,6 +209,31 @@ public class GoAction extends FessSearchAction {
             }
         }
         return systemHelper.getCurrentTimeAsLocalDateTime();
+    }
+
+    /**
+     * Resolves the URL fragment to append to the redirect target from the {@code hash} request parameter.
+     *
+     * <p>{@code hash} carries the fragment of the originating result URL in URL-encoded form, but it is
+     * a plain request parameter and therefore arbitrary user input: {@link GoForm} declares no format
+     * constraint on it. A value that is absent, blank or not decodable is treated as absent, so that a
+     * malformed parameter drops the fragment instead of failing the user's navigation with an error.</p>
+     *
+     * @param hash the raw {@code hash} parameter, a URL-encoded fragment (NullAllowed)
+     * @return the decoded fragment, or {@literal null} if {@code hash} is absent, blank or malformed
+     */
+    protected String decodeHash(final String hash) {
+        if (StringUtil.isNotBlank(hash)) {
+            try {
+                return URLUtil.decode(hash, Constants.UTF_8);
+            } catch (final IllegalArgumentException e) {
+                // Attacker-controlled input: log at debug only so a malformed hash cannot flood logs.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid hash parameter: {}", hash, e);
+                }
+            }
+        }
+        return null;
     }
 
     /**
