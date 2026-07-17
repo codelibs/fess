@@ -1201,6 +1201,43 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * renderHighlightedSnippet must PARSE the server snippet, never escape it a
+     * second time. ViewHelper.getContentDescription()/.getContentTitle() already
+     * run LaFunctions.h() over the whole field and splice only the highlight tags
+     * back in, so a source <code>"</code> arrives as the entity &amp;#034;.
+     * Escaping again turns that entity's &amp; into &amp;amp; and the browser
+     * paints the literal text &amp;#034; -- the double-escape this guards.
+     */
+    @Test
+    public void test_formatJs_snippetIsParsedNotEscapedAgain() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        assertFalse(js.contains("const escaped = escapeHtml(raw);"),
+                "renderHighlightedSnippet must not escape the already-escaped server snippet again (double-escape: &#034; renders literally)");
+        assertFalse(js.contains(".replaceAll(\"&lt;strong&gt;\", \"<strong>\")"),
+                "the escape-then-restore approach is what double-escaped; the snippet must be parsed instead");
+        assertTrue(js.contains("const SNIPPET_TAGS = new Set([\"STRONG\", \"EM\"]);"),
+                "format.js must define SNIPPET_TAGS, the narrow allowlist of tags a snippet may carry as live markup");
+        assertTrue(js.contains("sanitizeFragment(tpl.content, SNIPPET_TAGS)"),
+                "renderHighlightedSnippet must parse in an inert <template> and keep only SNIPPET_TAGS");
+    }
+
+    /**
+     * The raw <code>digest</code> field must be escaped at the call site before it
+     * reaches renderHighlightedSnippet. content_description is server-escaped HTML,
+     * but digest is the raw index field and the server never escapes it -- feeding
+     * it in unescaped makes the parser eat any &lt;...&gt; it contains (a digest
+     * like "Michael Froh &lt;msfroh@example.com&gt;" silently loses the address).
+     */
+    @Test
+    public void test_searchJs_escapesRawDigestBeforeRendering() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("escapeHtml(d.digest || \"\")"),
+                "search.js must escape the raw digest field before renderHighlightedSnippet parses it");
+        assertFalse(js.contains("renderHighlightedSnippet(d.content_description || d.digest"),
+                "the raw digest must not be passed to renderHighlightedSnippet unescaped");
+    }
+
+    /**
      * R4-9: advance.js per-page fallback list must match JSP parity ([10,20,30,40,50,100]).
      * The shorter legacy list ([10,20,50,100]) must not appear as the fallback.
      */
