@@ -46,16 +46,19 @@ public class GoForm {
     public String docId;
 
     /**
-     * Redirect target or return URL parameter.
-     * This is required and limited to 10000 characters to accommodate long URLs.
+     * Requested time of the originating search, in epoch milliseconds, recorded on the click log
+     * so that a click can be correlated with the search it came from.
+     * This is required and limited to 10000 characters. A malformed value is treated as absent
+     * and falls back to the time the click is handled.
      */
     @Size(max = 10000)
     @Required
     public String rt;
 
     /**
-     * Hash value for security or validation purposes.
-     * This field is optional and used for request verification.
+     * URL fragment of the target document, in URL-encoded form, appended to the redirect target.
+     * This field is optional. It is ignored when the target URL already carries a fragment, and a
+     * value that cannot be decoded is treated as absent.
      */
     public String hash;
 

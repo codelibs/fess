@@ -15,10 +15,16 @@
  */
 package org.codelibs.fess.app.web.go;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.system.DBFluteSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -50,6 +56,7 @@ public class GoActionTest extends UnitFessTestCase {
         ComponentUtil.register(protocolHelper, "protocolHelper");
 
         goAction = new TestableGoAction();
+        goAction.setSystemHelper(new FixedSystemHelper());
     }
 
     @Override
@@ -58,12 +65,151 @@ public class GoActionTest extends UnitFessTestCase {
         super.tearDown(testInfo);
     }
 
-    // Test class to expose protected method for testing
+    // Test class to expose protected methods for testing
     private static class TestableGoAction extends GoAction {
         @Override
         public boolean isFileSystemPath(final String url) {
             return super.isFileSystemPath(url);
         }
+
+        @Override
+        public LocalDateTime parseQueryRequestedAt(final String rt) {
+            return super.parseQueryRequestedAt(rt);
+        }
+
+        @Override
+        public String decodeHash(final String hash) {
+            return super.decodeHash(hash);
+        }
+
+        // systemHelper is injected via @Resource in production; set it directly for unit tests.
+        void setSystemHelper(final SystemHelper systemHelper) {
+            this.systemHelper = systemHelper;
+        }
+    }
+
+    /** Fixed instant used as "now" so the fallback is deterministic. */
+    private static final LocalDateTime FIXED_NOW = LocalDateTime.of(2020, 1, 2, 3, 4, 5);
+
+    /** SystemHelper returning a fixed "current time" so the fallback branch is assertable. */
+    private static class FixedSystemHelper extends SystemHelper {
+        @Override
+        public LocalDateTime getCurrentTimeAsLocalDateTime() {
+            return FIXED_NOW;
+        }
+    }
+
+    // ==================================================================================
+    //                                                            parseQueryRequestedAt Tests
+    //                                                            ===========================
+
+    /**
+     * Regression test: {@code rt} is an unconstrained request parameter, so a non-numeric
+     * value used to reach {@code Long.parseLong} unguarded and raise NumberFormatException,
+     * failing the user's navigation with an HTTP 500. A malformed value must instead be
+     * treated as absent and fall back to the current time.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_malformed_fallsBackToCurrentTime() {
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("not-a-number"));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt(""));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt(" "));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("123abc"));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("1.5"));
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("1,000"));
+        // Numeric but outside long range: parseLong also rejects these.
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt("99999999999999999999999"));
+    }
+
+    /**
+     * A missing {@code rt} must not throw either. {@code @Required} normally rejects this before
+     * the action body runs, so this guards the method's own contract rather than the request flow.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_null_fallsBackToCurrentTime() {
+        assertEquals(FIXED_NOW, goAction.parseQueryRequestedAt(null));
+    }
+
+    /**
+     * A well-formed {@code rt} must still be honoured, not silently replaced by the fallback.
+     *
+     * <p>DfTypeUtil converts via {@code DBFluteSystem.getFinalTimeZone()} (Fess registers a
+     * provider for it in FessCurtainBeforeHook), not via TimeZone.getDefault() at call time,
+     * so the expectation is read back through that same zone to keep this test independent of
+     * the host's time zone. That conversion zone differs from the v2 ClickHandler's UTC
+     * conversion; aligning the two would change stored timestamps and is out of scope here.
+     */
+    @Test
+    public void test_parseQueryRequestedAt_valid_usesRtValue() {
+        final long rtMs = 1718454896789L; // 2024-06-15T12:34:56.789Z (mid-year: no DST-overlap ambiguity)
+        final LocalDateTime actual = goAction.parseQueryRequestedAt(Long.toString(rtMs));
+        assertFalse(FIXED_NOW.equals(actual));
+        final ZoneId zone = DBFluteSystem.getFinalTimeZone().toZoneId();
+        assertEquals(rtMs, ZonedDateTime.of(actual, zone).toInstant().toEpochMilli());
+    }
+
+    /**
+     * Epoch 0 is a valid timestamp and must be parsed, not treated as absent.
+     *
+     * <p>The exact epoch is asserted rather than merely "not the fallback": the latter alone also
+     * holds for any wrong-but-different instant, so it would not detect the value being mangled.
+     * As above, the expectation is read back through {@code DBFluteSystem.getFinalTimeZone()} to
+     * stay independent of the host's time zone.</p>
+     */
+    @Test
+    public void test_parseQueryRequestedAt_zero_isParsed() {
+        final LocalDateTime actual = goAction.parseQueryRequestedAt("0");
+        assertFalse(FIXED_NOW.equals(actual));
+        final ZoneId zone = DBFluteSystem.getFinalTimeZone().toZoneId();
+        assertEquals(0L, ZonedDateTime.of(actual, zone).toInstant().toEpochMilli());
+    }
+
+    // ==================================================================================
+    //                                                                       decodeHash Tests
+    //                                                                       ================
+
+    /**
+     * Regression test: {@code hash} is an unconstrained request parameter, so a value with a
+     * malformed escape used to reach {@code URLDecoder} unguarded and raise
+     * IllegalArgumentException, failing the user's navigation with an HTTP 500. A malformed value
+     * must instead be treated as absent, which drops the fragment and leaves the redirect intact.
+     *
+     * <p>These are the values the container hands to {@code GoForm.hash} after decoding the query
+     * string of {@code /go?...&hash=%25}, {@code %25zz}, {@code %252} and {@code abc%25}: each
+     * {@code %25} is a well-formed escape, so the container decodes it to a bare {@code %}, which
+     * this action then decodes a second time. That double decode is what raised the error.</p>
+     */
+    @Test
+    public void test_decodeHash_malformed_treatedAsAbsent() {
+        assertNull(goAction.decodeHash("%")); // request: hash=%25
+        assertNull(goAction.decodeHash("%zz")); // request: hash=%25zz
+        assertNull(goAction.decodeHash("%2")); // request: hash=%252
+        assertNull(goAction.decodeHash("abc%")); // request: hash=abc%25
+    }
+
+    /**
+     * A well-formed {@code hash} must still be decoded, not dropped by the new guard.
+     */
+    @Test
+    public void test_decodeHash_valid_isDecoded() {
+        assertEquals("#", goAction.decodeHash("%23"));
+        assertEquals("#section", goAction.decodeHash("#section"));
+        assertEquals("a b", goAction.decodeHash("a%20b"));
+    }
+
+    /**
+     * An absent {@code hash} is optional and must be reported as absent rather than throwing.
+     *
+     * <p>The blank check is load-bearing for whitespace alone: {@code URLUtil.decode(" ")} returns
+     * {@code " "} rather than failing, so without it a blank fragment would be appended. A null or
+     * empty argument instead raises EmptyArgumentException, which is an IllegalArgumentException
+     * and so is already absorbed by the same catch that handles a malformed escape.</p>
+     */
+    @Test
+    public void test_decodeHash_blank_treatedAsAbsent() {
+        assertNull(goAction.decodeHash(null));
+        assertNull(goAction.decodeHash(""));
+        assertNull(goAction.decodeHash(" "));
     }
 
     // ==================================================================================
