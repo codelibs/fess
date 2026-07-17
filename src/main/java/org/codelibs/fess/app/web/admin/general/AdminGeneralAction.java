@@ -510,12 +510,16 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     /**
-     * Checks if the result collapsing checkbox is rendered for the given search engine type.
-     * The checkbox is omitted from the form for cloud and aws types, so its request parameter
-     * is always absent there and must not be applied to the configuration.
+     * Checks if a submitted result collapsing value may be written back to the configuration.
+     * For cloud and aws types {@link FessConfig#isResultCollapsed()} forces false instead of
+     * reading the stored property, so no form value derived from it can observe what is stored.
+     * Writing such a value would silently discard the stored setting: the admin form omits the
+     * checkbox and submits nothing, and any API request whose body comes from
+     * {@link #updateForm(FessConfig, EditForm)} carries the forced false. Neither path may be
+     * applied, so the stored value is left untouched for those types.
      *
      * @param fessConfig the Fess configuration to check
-     * @return true if the checkbox is rendered and its value can be applied
+     * @return true if the submitted value can be applied
      */
     private static boolean isResultCollapsedEditable(final FessConfig fessConfig) {
         return switch (fessConfig.getFesenType()) {

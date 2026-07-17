@@ -15,35 +15,93 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
-import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AdminGeneralActionTest extends UnitFessTestCase {
 
-    @Test
-    public void test_isResultCollapsedEditable_cloud() throws Exception {
-        assertFalse(invokeIsResultCollapsedEditable("cloud"));
+    /**
+     * updateConfig writes every general setting to the shared system properties, so this test
+     * needs its own container to keep those values from leaking into other test classes.
+     *
+     * @return true to create the container for each test
+     */
+    @Override
+    protected boolean isUseOneTimeContainer() {
+        return true;
+    }
+
+    @Override
+    public void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        ComponentUtil.register(new LdapManager(), "ldapManager");
+        // updateConfig refreshes design files and re-reads app values, which are unrelated to
+        // the stored properties under test and pull in further components.
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public List<Path> refreshDesignJspFiles() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void updateSystemProperties() {
+                // nothing
+            }
+        }, "systemHelper");
     }
 
     @Test
-    public void test_isResultCollapsedEditable_aws() throws Exception {
-        assertFalse(invokeIsResultCollapsedEditable("aws"));
+    public void test_updateConfig_resultCollapsed_cloud_keepsStoredValueWhenAbsent() {
+        assertResultCollapsedAfterUpdate(Constants.FESEN_TYPE_CLOUD, Constants.TRUE, null, Constants.TRUE);
     }
 
     @Test
-    public void test_isResultCollapsedEditable_default() throws Exception {
-        assertTrue(invokeIsResultCollapsedEditable("default"));
+    public void test_updateConfig_resultCollapsed_cloud_keepsStoredValueWhenFalse() {
+        assertResultCollapsedAfterUpdate(Constants.FESEN_TYPE_CLOUD, Constants.TRUE, Constants.FALSE, Constants.TRUE);
     }
 
     @Test
-    public void test_isResultCollapsedEditable_other() throws Exception {
-        assertTrue(invokeIsResultCollapsedEditable("unknown"));
+    public void test_updateConfig_resultCollapsed_aws_keepsStoredValueWhenAbsent() {
+        assertResultCollapsedAfterUpdate(Constants.FESEN_TYPE_AWS, Constants.TRUE, null, Constants.TRUE);
     }
 
-    private boolean invokeIsResultCollapsedEditable(final String fesenType) throws Exception {
+    @Test
+    public void test_updateConfig_resultCollapsed_default_appliesUncheckedValue() {
+        assertResultCollapsedAfterUpdate("default", Constants.TRUE, null, Constants.FALSE);
+    }
+
+    @Test
+    public void test_updateConfig_resultCollapsed_default_appliesCheckedValue() {
+        assertResultCollapsedAfterUpdate("default", Constants.FALSE, Constants.TRUE, Constants.TRUE);
+    }
+
+    @Test
+    public void test_updateConfig_resultCollapsed_unknownType_appliesUncheckedValue() {
+        assertResultCollapsedAfterUpdate("unknown", Constants.TRUE, null, Constants.FALSE);
+    }
+
+    /**
+     * Runs updateConfig for the given search engine type and asserts the stored property value.
+     * The stored property is read back directly because isResultCollapsed() forces false for
+     * cloud and aws and therefore cannot observe what was actually written.
+     *
+     * @param fesenType the search engine type
+     * @param storedValue the property value before updateConfig
+     * @param formValue the resultCollapsed request parameter (null when absent)
+     * @param expectedValue the expected property value after updateConfig
+     */
+    private void assertResultCollapsedAfterUpdate(final String fesenType, final String storedValue, final String formValue,
+            final String expectedValue) {
         final FessConfig fessConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
@@ -52,8 +110,30 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
                 return fesenType;
             }
         };
-        final Method method = AdminGeneralAction.class.getDeclaredMethod("isResultCollapsedEditable", FessConfig.class);
-        method.setAccessible(true);
-        return ((Boolean) method.invoke(null, fessConfig)).booleanValue();
+        ComponentUtil.getSystemProperties().setProperty(Constants.RESULT_COLLAPSED_PROPERTY, storedValue);
+
+        final EditForm form = createEditForm();
+        form.resultCollapsed = formValue;
+        AdminGeneralAction.updateConfig(fessConfig, form);
+
+        assertEquals("fesenType=" + fesenType + ", resultCollapsed=" + formValue, expectedValue,
+                ComponentUtil.getSystemProperties().getProperty(Constants.RESULT_COLLAPSED_PROPERTY));
+    }
+
+    /**
+     * Creates a form with the numeric fields filled in, since updateConfig unboxes them.
+     *
+     * @return the form to pass to updateConfig
+     */
+    private EditForm createEditForm() {
+        final EditForm form = new EditForm();
+        form.dayForCleanup = 0;
+        form.crawlingThreadCount = 1;
+        form.failureCountThreshold = 0;
+        form.purgeSearchLogDay = 0;
+        form.purgeJobLogDay = 0;
+        form.purgeUserInfoDay = 0;
+        form.purgeSuggestSearchLogDay = 0;
+        return form;
     }
 }
