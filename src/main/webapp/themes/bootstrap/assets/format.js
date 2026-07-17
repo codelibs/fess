@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Common formatting utilities for the Fess bootstrap SPA.
-// No DOM access — pure functions, safe to import from any module.
+// Importing is DOM-free; calling is not. Only formatFileSize / formatDate /
+// escapeHtml are pure — sanitizeHtml and renderHighlightedSnippet parse via
+// document, and isSafeHref needs window.location.
 
 const UNITS = ["B", "KB", "MB", "GB", "TB", "PB"];
 
@@ -111,8 +113,10 @@ const ALLOWED_TAGS = new Set([
  * / .post, whose default is <strong>; <em> is accepted because deployments
  * override the pair to it. A pair configured to anything else is unwrapped
  * like any other disallowed tag — the text survives, only the highlight is
- * lost. Deliberately far narrower than ALLOWED_TAGS: everything else in a
- * snippet arrived escaped and must stay text.
+ * lost — unless it names a DROP_WITH_CONTENT member, which is dropped whole
+ * and takes the highlighted text with it. Deliberately far narrower than
+ * ALLOWED_TAGS: everything else in a snippet arrived escaped and must stay
+ * text.
  */
 const SNIPPET_TAGS = new Set(["STRONG", "EM"]);
 
