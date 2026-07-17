@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Common formatting utilities for the Fess bootstrap SPA.
+// Common formatting utilities for the Fess static theme SPA.
 // Importing is DOM-free; calling is not. Only formatFileSize / formatDate /
 // escapeHtml are pure — sanitizeHtml, renderHighlightedSnippet and
 // renderSnippetText parse via document, and isSafeHref needs window.location.
@@ -228,9 +228,17 @@ export function isSafeHref(value) {
   if (cleaned === "") return false;
   try {
     return SAFE_HREF_SCHEMES.has(new URL(cleaned, window.location.href).protocol);
-  } catch {
-    // Malformed URL — treat as unsafe.
-    return false;
+  } catch (e) {
+    // Malformed URL — treat as unsafe. new URL() reports an unparseable input
+    // as a TypeError and nothing else, so catching only that keeps every real
+    // browser input on this branch while letting an unexpected failure through.
+    if (e instanceof TypeError) return false;
+    // Anything else means the precondition this file's header states — a DOM
+    // with window.location — was not met: outside a browser, resolving the
+    // base throws ReferenceError. Swallowing it would answer "unsafe" for
+    // every URL, including safe ones, and a caller cannot tell that apart from
+    // a real verdict. Fail loudly instead of silently rejecting everything.
+    throw e;
   }
 }
 

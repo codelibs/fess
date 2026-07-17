@@ -1280,6 +1280,52 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * isSafeHref resolves its argument against {@code window.location}, so calling
+     * it without a DOM throws ReferenceError. A blanket catch turned that into
+     * {@code false} -- the very answer it gives for {@code javascript:}, and
+     * indistinguishable from it: every URL, safe or not, is reported unsafe and
+     * nothing says why.
+     * <p>
+     * new URL() reports an unparseable input as a TypeError and nothing else, so
+     * catching only TypeError keeps every real browser input on the "unsafe"
+     * branch while a broken environment surfaces instead of failing closed in
+     * silence.
+     */
+    @Test
+    public void test_formatJs_isSafeHrefSurfacesAMissingDomInsteadOfReportingUnsafe() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        final int start = js.indexOf("export function isSafeHref(value) {");
+        assertTrue(start >= 0, "format.js must export isSafeHref");
+        final String fn = js.substring(start, js.indexOf("\n}\n", start));
+        assertTrue(fn.contains("if (e instanceof TypeError) return false;"),
+                "isSafeHref must treat only a TypeError -- what new URL() throws for a malformed URL -- as an unsafe verdict");
+        assertTrue(fn.contains("throw e;"),
+                "isSafeHref must rethrow what is not a URL parse failure, so a missing DOM cannot masquerade as an unsafe-URL verdict");
+        assertFalse(fn.contains("} catch {"),
+                "isSafeHref must not blanket-catch: that reports the ReferenceError from a missing window.location as an unsafe URL");
+    }
+
+    /**
+     * format.js and markdown.js are duplicated verbatim into every derived static
+     * theme, so the copies can only be kept honest by byte-comparing them against
+     * these. Line 2 was the one line that named the theme, forcing a "compare from
+     * line 3 onward" convention -- brittle, because it silently stops covering
+     * line 2 the moment a header line is added or removed. Keeping the shared
+     * headers theme-neutral lets the whole file be compared as-is.
+     */
+    @Test
+    public void test_sharedAssetHeadersNameNoSpecificTheme() throws Exception {
+        for (final String asset : new String[] { "format.js", "markdown.js" }) {
+            final String js = Files.readString(THEME_DIR.resolve("assets/" + asset), StandardCharsets.UTF_8);
+            final String line2 = js.lines().skip(1).findFirst().orElse("");
+            assertTrue(line2.contains("Fess static theme SPA"),
+                    asset + " line 2 must describe the file theme-neutrally so every derived copy stays byte-identical, but was: " + line2);
+            assertFalse(line2.contains("bootstrap"), asset
+                    + " line 2 must not name the bootstrap theme: the derived copies differ only here, and a theme-specific name is what forces the brittle compare-from-line-3 convention");
+        }
+    }
+
+    /**
      * sanitizeNode's DROP_WITH_CONTENT check must stay AHEAD of the unwrap branch.
      * No member of the set appears in ALLOWED_TAGS or SNIPPET_TAGS, so running the
      * unwrap branch first would claim every one of them and leave the drop branch
