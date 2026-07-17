@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -1355,6 +1356,27 @@ public class BundledBootstrapThemeTest {
                 "search.js must not put role=\"button\" + aria-label on the copy glyph");
         assertFalse(js.contains("\"aria-hidden\": \"true\", \"data-clipboard-text\": rawUrl"),
                 "search.js must not put aria-hidden on the element that carries the clipboard data");
+        // Order-independent guard: the two assertFalse checks above pin an exact byte order, so a
+        // mutation that keeps the <button> but reorders its attrs to smuggle aria-hidden back onto
+        // it evades them while reintroducing the exact WCAG 4.1.2 aria-hidden-focus defect. Extract
+        // the button's own option object and assert it never carries aria-hidden, in any order.
+        final Matcher copyBtnDef = Pattern.compile("const copyBtn = el\\(\"button\", \\{(.*?)\\}\\);", Pattern.DOTALL).matcher(js);
+        assertTrue(copyBtnDef.find(), "search.js must define the copy control via const copyBtn = el(\"button\", { ... })");
+        assertFalse(copyBtnDef.group(1).contains("aria-hidden"),
+                "the focusable copy <button> must never itself be aria-hidden (WCAG 4.1.2), regardless of attribute order");
+    }
+
+    /**
+     * R4-13 (CSS half): the copy control is a real {@code <button>}, so styles.css must strip the
+     * user-agent button chrome via {@code #result .url-copy-btn}. Without that reset the glyph renders
+     * inside a grey bordered box instead of as a bare icon — a visible regression that the JS-only
+     * a11y test above cannot catch.
+     */
+    @Test
+    public void test_stylesCss_copyButtonChromeReset() throws Exception {
+        final String css = Files.readString(THEME_DIR.resolve("assets/styles.css"), StandardCharsets.UTF_8);
+        assertTrue(css.contains("#result .url-copy-btn"),
+                "styles.css must reset the copy <button> chrome via #result .url-copy-btn (parity R4-13)");
     }
 
     /**
