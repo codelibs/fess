@@ -16,6 +16,8 @@
 package org.codelibs.fess.webapp;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashSet;
@@ -56,6 +58,16 @@ public class ErrorRedirectJspTest extends UnitFessTestCase {
      * scanned anyway because it is a second copy of the same redirect table and can drift.
      */
     private static final String ORIG_REDIRECT_JSP_PATH = "src/main/webapp/WEB-INF/orig/view/error/redirect.jsp";
+
+    /** The class the badAuth branch calls, spelled out because a JSP has no imports. */
+    private static final String API_CHECK_CLASS = "org.codelibs.fess.util.WebApiUtil";
+
+    /** The method the badAuth branch calls on {@link #API_CHECK_CLASS}. */
+    private static final String API_CHECK_METHOD = "isApiRequestUri";
+
+    /** Matches the JSP's fully-qualified call, up to and including its opening parenthesis. */
+    private static final Pattern API_CHECK_CALL_PATTERN =
+            Pattern.compile(Pattern.quote(API_CHECK_CLASS + "." + API_CHECK_METHOD) + "\\s*\\(");
 
     private String readJsp(final String path) throws Exception {
         final File file = new File(path);
@@ -128,13 +140,40 @@ public class ErrorRedirectJspTest extends UnitFessTestCase {
 
     /**
      * The badAuth branch is the 401 error page. Redirecting an API client's 401 turns it into
-     * a 302 to an HTML page and destroys the status the client needs, so the branch must
-     * decide per client rather than redirecting unconditionally.
+     * a 302 to an HTML page and destroys the status the client needs, so the branch decides per
+     * client, by calling {@code WebApiUtil.isApiRequestUri} as an {@code if} condition.
+     *
+     * <p>That call is the only reference to a Fess class from any JSP in this webapp, and nothing
+     * in the build compiles the JSPs. So renaming the method, changing its parameters or return
+     * type, or dropping its {@code static} leaves the build and the rest of this suite green while
+     * the branch fails at runtime -- and it fails for every status code, since {@code web.xml} maps
+     * all seven of them to this one page.
+     *
+     * <p>Pins both ends of that link: the call literal in the JSP, and the exact method shape the
+     * JSP's {@code if} needs. The shape takes more than {@code getMethod}, which ignores the return
+     * type and matches instance methods too. Only the {@code view} copy is scanned -- the
+     * {@code orig} copy predates the check and has no such call.
+     *
+     * <p>Where the call sits is deliberately not asserted; that would pin the JSP's formatting.
      */
     @Test
-    public void test_badAuthBranchDoesNotRedirectApiClients() throws Exception {
+    public void test_apiClientCheckInJspResolvesToTheJavaMethod() throws Exception {
         final String jsp = readJsp(REDIRECT_JSP_PATH);
-        assertTrue("the badAuth branch should tell an API client from a browser before redirecting", jsp.contains("isApiRequestUri"));
+        assertTrue(REDIRECT_JSP_PATH + " should call " + API_CHECK_CLASS + "." + API_CHECK_METHOD
+                + " to tell an API client from a browser before redirecting", API_CHECK_CALL_PATTERN.matcher(jsp).find());
         assertTrue("an API client should still receive the plain-text body that preserves its 401", jsp.contains("Bad Authentication."));
+
+        try {
+            final Method method = Class.forName(API_CHECK_CLASS).getMethod(API_CHECK_METHOD, String.class, String.class);
+            assertEquals(API_CHECK_METHOD + " should return boolean, because the JSP calls it as an if condition", boolean.class,
+                    method.getReturnType());
+            assertTrue(API_CHECK_METHOD + " should be public, because the JSP calls it from outside its package",
+                    Modifier.isPublic(method.getModifiers()));
+            assertTrue(API_CHECK_METHOD + " should be static, because the JSP calls it on the class rather than an instance",
+                    Modifier.isStatic(method.getModifiers()));
+        } catch (final ClassNotFoundException | NoSuchMethodException e) {
+            fail(REDIRECT_JSP_PATH + " calls " + API_CHECK_CLASS + "." + API_CHECK_METHOD
+                    + "(String, String), but that method does not exist: " + e);
+        }
     }
 }

@@ -64,7 +64,7 @@ public final class WebApiUtil {
      * prefix reads as a browser request. Both are tolerable because the only caller decides
      * whether to replace an error status with an HTML page: every manager that can reach a
      * container error page issues {@code sendError} under {@code /admin/server_}, and a miss
-     * merely falls back to the redirect that preceded this check.
+     * merely takes the browser arm, as this branch did unconditionally before.
      *
      * <p>Deliberately dependency-free: it performs no component lookup and reads no
      * configuration, so it stays safe to call while rendering an error response.
