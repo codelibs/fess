@@ -171,7 +171,9 @@ public class AdminGeneralAction extends FessAdminAction {
      */
     public static void updateConfig(final FessConfig fessConfig, final EditForm form) {
         fessConfig.setLoginRequired(isCheckboxEnabled(form.loginRequired));
-        fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
+        if (isResultCollapsedEditable(fessConfig)) {
+            fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
+        }
         fessConfig.setLoginLinkEnabled(isCheckboxEnabled(form.loginLink));
         fessConfig.setThumbnailEnabled(isCheckboxEnabled(form.thumbnail));
         fessConfig.setIncrementalCrawling(isCheckboxEnabled(form.incrementalCrawling));
@@ -505,6 +507,25 @@ public class AdminGeneralAction extends FessAdminAction {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if a submitted result collapsing value may be written back to the configuration.
+     * For cloud and aws types {@link FessConfig#isResultCollapsed()} forces false instead of
+     * reading the stored property, so no form value derived from it can observe what is stored.
+     * Writing such a value would silently discard the stored setting: the admin form omits the
+     * checkbox and submits nothing, and any API request whose body comes from
+     * {@link #updateForm(FessConfig, EditForm)} carries the forced false. Neither path may be
+     * applied, so the stored value is left untouched for those types.
+     *
+     * @param fessConfig the Fess configuration to check
+     * @return true if the submitted value can be applied
+     */
+    private static boolean isResultCollapsedEditable(final FessConfig fessConfig) {
+        return switch (fessConfig.getFesenType()) {
+        case Constants.FESEN_TYPE_CLOUD, Constants.FESEN_TYPE_AWS -> false;
+        default -> true;
+        };
     }
 
 }
