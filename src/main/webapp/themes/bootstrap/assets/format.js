@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Common formatting utilities for the Fess bootstrap SPA.
-// No DOM access — pure functions, safe to import from any module.
+// Importing is DOM-free; calling is not. Only formatFileSize / formatDate /
+// escapeHtml are pure — sanitizeHtml, renderHighlightedSnippet and
+// renderSnippetText parse via document, and isSafeHref needs window.location.
 
 const UNITS = ["B", "KB", "MB", "GB", "TB", "PB"];
 
@@ -41,8 +43,9 @@ export function formatDate(isoString) {
 
 /**
  * Escape HTML special characters so a plain string is safe to assign to
- * element.textContent is always preferred, but this function is provided
- * for cases where a sanitized string must be embedded in a larger context.
+ * element.innerHTML. Assigning to element.textContent is always preferred,
+ * but this function is provided for cases where a string must be embedded in
+ * a larger HTML context.
  *
  * @param {string|null|undefined} s
  * @returns {string}
@@ -60,23 +63,62 @@ export function escapeHtml(s) {
 /**
  * Sanitize a server-supplied search snippet for safe innerHTML assignment.
  *
- * The server wraps matched terms in <strong> or <em>. This function escapes
- * all HTML first, then selectively restores only those two tag pairs.
- * All other markup (including any injected tags) remains escaped.
+ * `raw` is already HTML, not plain text. ViewHelper.getContentDescription()
+ * and .getContentTitle() run LaFunctions.h() over the whole field and then
+ * splice the highlight tags back in, so a `"` in the source arrives as the
+ * entity `&#034;` while <strong> arrives live. Escaping again here would turn
+ * that entity's `&` into `&amp;` and the browser would paint the literal text
+ * `&#034;`, so parse instead: entities decode back to their characters and
+ * only SNIPPET_TAGS survive as markup.
+ *
+ * Callers holding a field the server does NOT escape — `digest` — must
+ * escapeHtml() it first so it meets the same already-escaped contract.
  *
  * The return value is safe to assign to element.innerHTML.
  *
- * @param {string|null|undefined} raw
+ * @param {string|null|undefined} raw - server snippet HTML
  * @returns {string} sanitized HTML string
  */
 export function renderHighlightedSnippet(raw) {
   if (!raw) return "";
-  const escaped = escapeHtml(raw);
-  return escaped
-    .replaceAll("&lt;strong&gt;", "<strong>")
-    .replaceAll("&lt;/strong&gt;", "</strong>")
-    .replaceAll("&lt;em&gt;", "<em>")
-    .replaceAll("&lt;/em&gt;", "</em>");
+  const tpl = document.createElement("template");
+  // Safe for the same reason sanitizeHtml()'s assignment is: <template>
+  // content is inert, and sanitizeFragment() strips everything but
+  // SNIPPET_TAGS before the string is handed back for innerHTML.
+  tpl.innerHTML = String(raw); // eslint-disable-line no-unsanitized/property
+  sanitizeFragment(tpl.content, SNIPPET_TAGS);
+  return tpl.innerHTML;
+}
+
+/**
+ * Reduce a server-supplied search snippet to plain text.
+ *
+ * Runs renderHighlightedSnippet()'s exact parse-and-sanitize path and differs
+ * only in what it hands back: the fragment's text instead of its HTML. Callers
+ * needing the text-only form of a field the UI also renders — an aria-label
+ * beside the visible snippet — must use this rather than stripping the
+ * highlight tags themselves, so the two can never disagree about what the
+ * server sent. A hand-rolled strip leaves the entities behind (`&#034;` reaches
+ * a screen reader literally) and keeps text the sanitizer drops whole (the
+ * DROP_WITH_CONTENT members), both of which the shared path gets right.
+ *
+ * `raw` must meet the same already-escaped contract renderHighlightedSnippet()
+ * documents. Fields the server does NOT escape — `title`, `url`, `digest` —
+ * are plain text already and must not be passed here: parsing would decode
+ * entities the server never wrote, turning a title that literally reads
+ * "AT&amp;T" into "AT&T".
+ *
+ * @param {string|null|undefined} raw - server snippet HTML
+ * @returns {string} plain text, entities decoded and markup removed
+ */
+export function renderSnippetText(raw) {
+  if (!raw) return "";
+  const tpl = document.createElement("template");
+  // Inert for the same reason renderHighlightedSnippet()'s assignment is, and
+  // the parsed string is never handed back as HTML here — only as text.
+  tpl.innerHTML = String(raw); // eslint-disable-line no-unsanitized/property
+  sanitizeFragment(tpl.content, SNIPPET_TAGS);
+  return tpl.content.textContent;
 }
 
 // ---------------------------------------------------------------------------
@@ -95,6 +137,20 @@ const ALLOWED_TAGS = new Set([
   "DL", "DT", "DD",
   "HR"
 ]);
+
+/**
+ * Tags a search snippet may carry as live markup, for renderHighlightedSnippet().
+ *
+ * The server escapes the whole field and restores only query.highlight.tag.pre
+ * / .post, whose default is <strong>; <em> is accepted because deployments
+ * override the pair to it. A pair configured to anything else is unwrapped
+ * like any other disallowed tag — the text survives, only the highlight is
+ * lost — unless it names a DROP_WITH_CONTENT member, which is dropped whole
+ * and takes the highlighted text with it. Deliberately far narrower than
+ * ALLOWED_TAGS: everything else in a snippet arrived escaped and must stay
+ * text.
+ */
+const SNIPPET_TAGS = new Set(["STRONG", "EM"]);
 
 /**
  * Elements dropped whole, children included, rather than unwrapped like an
@@ -183,9 +239,10 @@ export function isSafeHref(value) {
  * Returns the node to keep, or null if the node should be removed entirely.
  *
  * @param {Node} node
+ * @param {Set<string>} allowedTags - uppercase tag names kept as markup
  * @returns {Node|null}
  */
-function sanitizeNode(node) {
+function sanitizeNode(node, allowedTags) {
   if (node.nodeType === Node.TEXT_NODE) return node;
 
   if (node.nodeType === Node.ELEMENT_NODE) {
@@ -194,14 +251,21 @@ function sanitizeNode(node) {
     if (DROP_WITH_CONTENT.has(tag)) {
       // See the DROP_WITH_CONTENT comment above for why each member is
       // dropped whole here instead of being unwrapped.
+      //
+      // This check must stay AHEAD of the unwrap branch below. No member of
+      // the set appears in ALLOWED_TAGS or SNIPPET_TAGS, so running the
+      // unwrap branch first would claim every one of them and leave this
+      // branch unreachable — silently reinstating the defect it fixes, with
+      // each raw-text element's own source promoted to a text node and
+      // painted as visible prose. Nothing else enforces the order.
       return null;
     }
 
-    if (!ALLOWED_TAGS.has(tag)) {
+    if (!allowedTags.has(tag)) {
       // Disallowed tag: unwrap — keep its sanitized children in a fragment.
       const frag = document.createDocumentFragment();
       for (const child of Array.from(node.childNodes)) {
-        const kept = sanitizeNode(child);
+        const kept = sanitizeNode(child, allowedTags);
         if (kept) frag.appendChild(kept);
       }
       return frag.childNodes.length ? frag : null;
@@ -228,7 +292,7 @@ function sanitizeNode(node) {
     }
 
     for (const child of Array.from(node.childNodes)) {
-      const kept = sanitizeNode(child);
+      const kept = sanitizeNode(child, allowedTags);
       if (kept !== child) {
         if (kept) {
           node.replaceChild(kept, child);
@@ -246,6 +310,27 @@ function sanitizeNode(node) {
 }
 
 /**
+ * Sanitize every child of an already-parsed fragment in-place.
+ *
+ * @param {DocumentFragment} frag
+ * @param {Set<string>} allowedTags - uppercase tag names kept as markup
+ * @returns {DocumentFragment} the same fragment
+ */
+function sanitizeFragment(frag, allowedTags) {
+  for (const child of Array.from(frag.childNodes)) {
+    const kept = sanitizeNode(child, allowedTags);
+    if (kept !== child) {
+      if (kept) {
+        frag.replaceChild(kept, child);
+      } else {
+        frag.removeChild(child);
+      }
+    }
+  }
+  return frag;
+}
+
+/**
  * Parse an HTML string and return a sanitized DocumentFragment safe to
  * appendChild into the live DOM.
  *
@@ -258,21 +343,9 @@ function sanitizeNode(node) {
  */
 export function sanitizeHtml(html) {
   const tpl = document.createElement("template");
-  // This is the single intentional innerHTML assignment in the module.
-  // It is safe because <template> content is inert: scripts are not executed
+  // This is safe because <template> content is inert: scripts are not executed
   // and the fragment is not yet part of the live document.
   tpl.innerHTML = html; // eslint-disable-line no-unsanitized/property
 
-  const frag = tpl.content;
-  for (const child of Array.from(frag.childNodes)) {
-    const kept = sanitizeNode(child);
-    if (kept !== child) {
-      if (kept) {
-        frag.replaceChild(kept, child);
-      } else {
-        frag.removeChild(child);
-      }
-    }
-  }
-  return frag;
+  return sanitizeFragment(tpl.content, ALLOWED_TAGS);
 }

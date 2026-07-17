@@ -1201,6 +1201,104 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * renderHighlightedSnippet must PARSE the server snippet, never escape it a
+     * second time. ViewHelper.getContentDescription()/.getContentTitle() already
+     * run LaFunctions.h() over the whole field and splice only the highlight tags
+     * back in, so a source <code>"</code> arrives as the entity &amp;#034;.
+     * Escaping again turns that entity's &amp; into &amp;amp; and the browser
+     * paints the literal text &amp;#034; -- the double-escape this guards.
+     */
+    @Test
+    public void test_formatJs_snippetIsParsedNotEscapedAgain() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        assertFalse(js.contains("const escaped = escapeHtml(raw);"),
+                "renderHighlightedSnippet must not escape the already-escaped server snippet again (double-escape: &#034; renders literally)");
+        assertFalse(js.contains(".replaceAll(\"&lt;strong&gt;\", \"<strong>\")"),
+                "the escape-then-restore approach is what double-escaped; the snippet must be parsed instead");
+        assertTrue(js.contains("const SNIPPET_TAGS = new Set([\"STRONG\", \"EM\"]);"),
+                "format.js must define SNIPPET_TAGS, the narrow allowlist of tags a snippet may carry as live markup");
+        assertTrue(js.contains("sanitizeFragment(tpl.content, SNIPPET_TAGS)"),
+                "renderHighlightedSnippet must parse in an inert <template> and keep only SNIPPET_TAGS");
+    }
+
+    /**
+     * The raw <code>digest</code> field must be escaped at the call site before it
+     * reaches renderHighlightedSnippet. content_description is server-escaped HTML,
+     * but digest is the raw index field and the server never escapes it -- feeding
+     * it in unescaped makes the parser eat any &lt;...&gt; it contains (a digest
+     * like "Michael Froh &lt;msfroh@example.com&gt;" silently loses the address).
+     */
+    @Test
+    public void test_searchJs_escapesRawDigestBeforeRendering() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("escapeHtml(d.digest || \"\")"),
+                "search.js must escape the raw digest field before renderHighlightedSnippet parses it");
+        assertFalse(js.contains("renderHighlightedSnippet(d.content_description || d.digest"),
+                "the raw digest must not be passed to renderHighlightedSnippet unescaped");
+    }
+
+    /**
+     * renderSnippetText must reduce a snippet to text through the SAME parse path
+     * renderHighlightedSnippet uses, so a caller needing the text-only form of a
+     * field the UI also renders cannot drift from what is painted. Sharing
+     * sanitizeFragment + SNIPPET_TAGS is what buys that: the sanitizer's drops
+     * (the DROP_WITH_CONTENT members) are reflected in the text, and the entities
+     * decode exactly once.
+     */
+    @Test
+    public void test_formatJs_snippetTextSharesTheSnippetParsePath() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        assertTrue(js.contains("export function renderSnippetText(raw)"),
+                "format.js must export renderSnippetText, the text-only form of the snippet parse path");
+        assertTrue(js.contains("sanitizeFragment(tpl.content, SNIPPET_TAGS);\n  return tpl.content.textContent;"),
+                "renderSnippetText must return the sanitized fragment's textContent, so it shares renderHighlightedSnippet's parse+sanitize path rather than reimplementing it");
+    }
+
+    /**
+     * plainTitle() supplies the aria-label on each result's "more" link, and
+     * content_title is server-escaped HTML with the highlight tags spliced in.
+     * Stripping only those tags leaves every entity behind, so a title painted as
+     * <code>Tom &amp; Jerry "quoted"</code> in the h3 reached a screen reader as
+     * the literal <code>Tom &amp;amp; Jerry &amp;#034;quoted&amp;#034;</code>.
+     * It must run content_title through the shared parse path instead.
+     * <p>
+     * The title/url fallbacks must NOT be parsed: the server never escapes those
+     * raw index fields, so decoding them would corrupt a title that literally
+     * contains "&amp;amp;". The branch is what keeps both contracts.
+     */
+    @Test
+    public void test_searchJs_plainTitleParsesOnlyTheEscapedContentTitle() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        assertFalse(js.contains("String(raw).replace(/<\\/?(?:strong|em)>/g, \"\")"),
+                "plainTitle must not strip the highlight tags with a regex: it leaves the server's entities undecoded, so the aria-label diverges from the visible title");
+        final String formatImport = js.lines().filter(line -> line.contains("from \"./format.js\"")).findFirst().orElse("");
+        assertTrue(formatImport.contains("renderSnippetText"), "search.js must import renderSnippetText from format.js");
+        assertTrue(js.contains("if (d.content_title) return renderSnippetText(d.content_title);"),
+                "plainTitle must route the server-escaped content_title through renderSnippetText, the same parse path the visible title uses");
+        assertTrue(js.contains("return d.title || d.url || \"\";"),
+                "plainTitle must return the raw title/url fallbacks unparsed -- the server never escapes them, so parsing would decode entities it never wrote");
+    }
+
+    /**
+     * sanitizeNode's DROP_WITH_CONTENT check must stay AHEAD of the unwrap branch.
+     * No member of the set appears in ALLOWED_TAGS or SNIPPET_TAGS, so running the
+     * unwrap branch first would claim every one of them and leave the drop branch
+     * unreachable -- silently reinstating the defect #3187 fixed, with each
+     * raw-text element's own source promoted to a text node and painted as prose.
+     * Nothing but source order enforces this, hence the guard.
+     */
+    @Test
+    public void test_formatJs_dropWithContentPrecedesUnwrap() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
+        final int dropCheck = js.indexOf("if (DROP_WITH_CONTENT.has(tag)) {");
+        final int unwrapCheck = js.indexOf("if (!allowedTags.has(tag)) {");
+        assertTrue(dropCheck > 0, "format.js must keep the DROP_WITH_CONTENT check in sanitizeNode");
+        assertTrue(unwrapCheck > 0, "format.js must keep the disallowed-tag unwrap branch in sanitizeNode");
+        assertTrue(dropCheck < unwrapCheck,
+                "the DROP_WITH_CONTENT check must run before the unwrap branch, or it becomes unreachable and raw-text source resurfaces as visible text");
+    }
+
+    /**
      * R4-9: advance.js per-page fallback list must match JSP parity ([10,20,30,40,50,100]).
      * The shorter legacy list ([10,20,50,100]) must not appear as the fallback.
      */

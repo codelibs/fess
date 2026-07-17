@@ -1,6 +1,6 @@
 import * as api from "./api.js";
 import { t, languageLabel } from "./i18n.js";
-import { formatFileSize, formatDate, renderHighlightedSnippet, sanitizeHtml } from "./format.js";
+import { escapeHtml, formatFileSize, formatDate, renderHighlightedSnippet, renderSnippetText, sanitizeHtml } from "./format.js";
 import { navigate } from "./router.js";
 
 /** Guard: prevent duplicate event-listener registration on hot-reload. */
@@ -140,16 +140,24 @@ function buildGoUrl(originalUrl, docId, queryId, order, rt) {
 }
 
 /**
- * Return the plain-text title for a result document, stripping any
- * server-injected highlight markup (<strong>/<em>) from content_title.
- * Safe to use in aria-label and other text-only contexts.
+ * Return the plain-text title for a result document: entities decoded and the
+ * server-injected highlight markup removed. The result is the same text the
+ * h3 below paints, so it is safe to use in aria-label and other text-only
+ * contexts.
  *
  * @param {Object} d - result document object
  * @returns {string}
  */
 function plainTitle(d) {
-  const raw = d.content_title || d.title || d.url || "";
-  return String(raw).replace(/<\/?(?:strong|em)>/g, "");
+  // content_title is server-escaped HTML with the highlight tags spliced in, so
+  // run it through the same parse path the visible title uses and the accessible
+  // name cannot diverge from what is on screen. title and url are raw index
+  // fields the server never escapes: parsing them would decode entities it never
+  // wrote, so a title literally reading "AT&amp;T" must be left alone. The
+  // branch mirrors buildResultCard()'s, down to an empty content_title falling
+  // through to title.
+  if (d.content_title) return renderSnippetText(d.content_title);
+  return d.title || d.url || "";
 }
 
 function buildResultCard(d, queryId, order) {
@@ -214,7 +222,12 @@ function buildResultCard(d, queryId, order) {
     body.appendChild(thumbWrap);
   }
   const description = el("div", { className: "description" });
-  description.innerHTML = renderHighlightedSnippet(d.content_description || d.digest || "");
+  // content_description is server-escaped HTML; digest is the raw index field,
+  // so escape it here to meet the contract renderHighlightedSnippet() expects.
+  // Without that, a digest like "Michael Froh <msfroh@example.com>" would have
+  // the address parsed as a tag and dropped.
+  description.innerHTML = renderHighlightedSnippet(
+    d.content_description || escapeHtml(d.digest || ""));
   body.appendChild(description);
   li.appendChild(body);
 
