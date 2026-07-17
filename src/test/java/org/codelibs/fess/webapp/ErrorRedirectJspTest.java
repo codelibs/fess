@@ -50,9 +50,10 @@ public class ErrorRedirectJspTest extends UnitFessTestCase {
     private static final String REDIRECT_JSP_PATH = "src/main/webapp/WEB-INF/view/error/redirect.jsp";
 
     /**
-     * The design-editor "Use Default" copy. Not dispatched to -- {@code web.xml} names the
-     * {@code view} copy above at a fixed path -- but kept in step so a broken target cannot
-     * be restored from it.
+     * The design-editor "Use Default" copy. Neither dispatched to -- {@code web.xml} names the
+     * {@code view} copy above at a fixed path -- nor restorable from the editor, which only
+     * addresses the JSPs registered in {@code fess.xml}, and this one is not among them. It is
+     * scanned anyway because it is a second copy of the same redirect table and can drift.
      */
     private static final String ORIG_REDIRECT_JSP_PATH = "src/main/webapp/WEB-INF/orig/view/error/redirect.jsp";
 
