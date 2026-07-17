@@ -22,11 +22,19 @@ if("systemError".equals(type)) {
 	redirectPage.append("/error/busy/");
 	response.sendRedirect(redirectPage.toString());
 } else if("badAuth".equals(type)) {
-	// F.11: Redirect badAuth to the SPA error view so static-theme mode renders a proper
-	// error page instead of leaking this JSP's plain-text "Bad Authentication." output.
-	// The message_key parameter lets the SPA surface a localised error detail.
-	redirectPage.append("/error/system?message_key=errors.bad_authentication");
-	response.sendRedirect(redirectPage.toString());
+	// This branch is reached only from the 401 error-page mapping, so the status the
+	// container is rendering this page for is always 401.
+	if(org.codelibs.fess.util.WebApiUtil.isApiRequestUri(requestUri, ((jakarta.servlet.http.HttpServletRequest)request).getContextPath())) {
+		// An API client needs the status, not a page: issuing no redirect leaves the 401
+		// the container already set intact, and the body below is returned as-is.
+%>Bad Authentication.<%
+	} else {
+		// A browser gets the themed error page instead of the plain-text output above.
+		// message_key lets a static theme surface a localised error detail; the JSP-mode
+		// action simply ignores the unknown parameter.
+		redirectPage.append("/error/systemerror/?message_key=errors.bad_authentication");
+		response.sendRedirect(redirectPage.toString());
+	}
 } else {
 	redirectPage.append("/error/notfound/?url=");
 	redirectPage.append(java.net.URLEncoder.encode(requestUri , "UTF-8"));

@@ -24,12 +24,12 @@ import org.lastaflute.web.response.HtmlResponse;
  * This action displays error pages when a client request contains
  * invalid syntax or cannot be fulfilled due to malformed request parameters.
  */
-public class ErrorBadrequrestAction extends FessSearchAction {
+public class ErrorBadrequestAction extends FessSearchAction {
 
     /**
-     * Default constructor for ErrorBadrequrestAction.
+     * Default constructor for ErrorBadrequestAction.
      */
-    public ErrorBadrequrestAction() {
+    public ErrorBadrequestAction() {
         super();
     }
 

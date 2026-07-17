@@ -31,9 +31,63 @@ public final class WebApiUtil {
     private static final String WEB_API_EXCEPTION = "webApiException";
 
     /**
+     * Path prefix claimed by {@code SearchApiV2Manager}.
+     */
+    private static final String API_V2_PATH_PREFIX = "/api/v2";
+
+    /**
+     * Path prefix claimed by {@code SearchEngineApiManager}.
+     */
+    private static final String SEARCH_ENGINE_API_PATH_PREFIX = "/admin/server_";
+
+    /**
      * Private constructor to prevent instantiation.
      */
     private WebApiUtil() {
+    }
+
+    /**
+     * Determines whether a request URI addresses one of the web API endpoints.
+     *
+     * <p>This approximates the {@code WebApiManager#matches(HttpServletRequest)} implementations,
+     * which are the established way Fess tells an API request from a browser request: each
+     * manager claims a path prefix and matches on the servlet path. This method exists for
+     * callers that cannot consult the managers directly because the servlet path no longer
+     * describes the original request -- notably the container error page, where the path
+     * elements describe the error page itself and only the
+     * {@code jakarta.servlet.error.request_uri} attribute still carries the original URI.
+     *
+     * <p>An approximation, not a faithful copy, in two ways. It knows only the prefixes claimed
+     * by the managers bundled here; plugins register further ones ({@code /api/v1},
+     * {@code /json}, {@code /suggest}, {@code /mcp}) that it cannot see. And it matches the raw,
+     * undecoded URI, whereas the managers compare the decoded servlet path, so a percent-encoded
+     * prefix reads as a browser request. Both are tolerable because the only caller decides
+     * whether to replace an error status with an HTML page: every manager that can reach a
+     * container error page issues {@code sendError} under {@code /admin/server_}, and a miss
+     * merely takes the browser arm, as this branch did unconditionally before.
+     *
+     * <p>Deliberately dependency-free: it performs no component lookup and reads no
+     * configuration, so it stays safe to call while rendering an error response.
+     *
+     * @param requestUri The original request URI, including the context path (may be null)
+     * @param contextPath The context path to strip, as returned by {@code getContextPath()} (may be null)
+     * @return true if the URI addresses a web API endpoint
+     */
+    public static boolean isApiRequestUri(final String requestUri, final String contextPath) {
+        if (requestUri == null) {
+            return false;
+        }
+        String path = requestUri;
+        if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
+            path = path.substring(contextPath.length());
+        }
+        // SearchApiV2Manager#matches accepts the prefix itself or any sub-path of it.
+        if (path.equals(API_V2_PATH_PREFIX) || path.startsWith(API_V2_PATH_PREFIX + "/")) {
+            return true;
+        }
+        // SearchEngineApiManager#matches accepts a plain prefix match: the access token is
+        // appended directly to the prefix, so there is no separator to anchor on.
+        return path.startsWith(SEARCH_ENGINE_API_PATH_PREFIX);
     }
 
     /**

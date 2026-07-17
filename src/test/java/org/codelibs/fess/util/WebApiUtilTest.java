@@ -425,4 +425,61 @@ public class WebApiUtilTest extends UnitFessTestCase {
         // In test environment, some operations might not work due to missing request context
         // but the methods should not throw unexpected exceptions
     }
+
+    @Test
+    public void test_isApiRequestUri_apiV2() {
+        assertTrue("the v2 prefix itself is an API path", WebApiUtil.isApiRequestUri("/api/v2", ""));
+        assertTrue("a v2 sub-path is an API path", WebApiUtil.isApiRequestUri("/api/v2/", ""));
+        assertTrue("a v2 endpoint is an API path", WebApiUtil.isApiRequestUri("/api/v2/documents/all", ""));
+    }
+
+    @Test
+    public void test_isApiRequestUri_searchEngineApi() {
+        // The access token is appended straight onto the prefix, hence a plain prefix match.
+        assertTrue("the search engine API prefix is an API path", WebApiUtil.isApiRequestUri("/admin/server_", ""));
+        assertTrue("a tokenised search engine API path is an API path", WebApiUtil.isApiRequestUri("/admin/server_sometoken/_search", ""));
+    }
+
+    @Test
+    public void test_isApiRequestUri_browserPaths() {
+        assertFalse("the root path is not an API path", WebApiUtil.isApiRequestUri("/", ""));
+        assertFalse("the search UI is not an API path", WebApiUtil.isApiRequestUri("/search/", ""));
+        assertFalse("the login page is not an API path", WebApiUtil.isApiRequestUri("/login/", ""));
+        assertFalse("an admin UI page is not an API path", WebApiUtil.isApiRequestUri("/admin/dashboard/", ""));
+        // Guard the prefix boundaries: neither manager would claim these.
+        assertFalse("a path merely starting with the v2 prefix text is not an API path", WebApiUtil.isApiRequestUri("/api/v2foo", ""));
+        assertFalse("the bare api path is not claimed by any manager", WebApiUtil.isApiRequestUri("/api/", ""));
+    }
+
+    @Test
+    public void test_isApiRequestUri_stripsContextPath() {
+        assertTrue("the context path should be stripped before matching", WebApiUtil.isApiRequestUri("/fess/api/v2/search", "/fess"));
+        assertTrue("the context path should be stripped for the engine API",
+                WebApiUtil.isApiRequestUri("/fess/admin/server_token/_search", "/fess"));
+        assertFalse("a browser path under a context path is not an API path", WebApiUtil.isApiRequestUri("/fess/search/", "/fess"));
+        // Without stripping, "/fess/api/v2" would not match any prefix.
+        assertFalse("an unstripped context path should not match", WebApiUtil.isApiRequestUri("/fess/api/v2/search", null));
+    }
+
+    @Test
+    public void test_isApiRequestUri_nullSafe() {
+        assertFalse("a null request URI is not an API path", WebApiUtil.isApiRequestUri(null, "/fess"));
+        assertFalse("a null request URI is not an API path", WebApiUtil.isApiRequestUri(null, null));
+        assertTrue("a null context path should be tolerated", WebApiUtil.isApiRequestUri("/api/v2/search", null));
+    }
+
+    /**
+     * The prefixes are duplicated from the API managers so that the check stays
+     * dependency-free on the error path. Pin them to the managers' real values so the copies
+     * cannot drift apart silently.
+     */
+    @Test
+    public void test_isApiRequestUri_prefixesMatchTheApiManagers() {
+        final String v2Prefix = new org.codelibs.fess.api.v2.SearchApiV2Manager().getPathPrefix();
+        final String enginePrefix = new org.codelibs.fess.api.engine.SearchEngineApiManager().getPathPrefix();
+        assertEquals("SearchApiV2Manager's path prefix changed; update WebApiUtil.isApiRequestUri", "/api/v2", v2Prefix);
+        assertEquals("SearchEngineApiManager's path prefix changed; update WebApiUtil.isApiRequestUri", "/admin/server_", enginePrefix);
+        assertTrue("the manager's own prefix must be recognised as an API path", WebApiUtil.isApiRequestUri(v2Prefix, ""));
+        assertTrue("the manager's own prefix must be recognised as an API path", WebApiUtil.isApiRequestUri(enginePrefix, ""));
+    }
 }
