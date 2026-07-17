@@ -1318,10 +1318,43 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_searchJs_copyAndCacheArePrintHidden() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        // Copy-URL button: className string must contain both the base class and d-print-none
-        assertTrue(js.contains("url-copy d-print-none"), "search.js copy-url button className must include d-print-none (parity R4 GAP-G)");
+        // Copy-URL button: d-print-none sits on the <button> wrapper; the glyph is its
+        // descendant, so display:none on the button hides the icon with it.
+        assertTrue(js.contains("url-copy-btn d-print-none"),
+                "search.js copy-url button className must include d-print-none (parity R4 GAP-G)");
         // Cache link: className string must contain d-print-none
         assertTrue(js.contains("cache d-print-none"), "search.js cache link className must include d-print-none (parity R4 GAP-G)");
+    }
+
+    /**
+     * R4-13: the copy-URL control must be a real {@code <button type="button">} that carries the
+     * accessible name, with the decorative glyph nested inside and kept aria-hidden.
+     *
+     * <p>The bug fixed here was an {@code <i>} carrying role="button" and aria-label on the same
+     * element as aria-hidden="true": the aria-hidden removed the control from the accessibility
+     * tree, so the role and label were dead, and with no tabindex or keydown handler it was
+     * unreachable by keyboard. Re-introducing that shape is a regression, not a simplification.</p>
+     */
+    @Test
+    public void test_searchJs_copyUrlControlIsARealButton() throws Exception {
+        final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
+        // The focusable element is a real <button type="button"> and owns the accessible name.
+        assertTrue(js.contains("const copyBtn = el(\"button\", {"),
+                "search.js copy-url control must be a real <button>, not an <i> with role=\"button\"");
+        assertTrue(js.contains("attrs: { type: \"button\", \"data-clipboard-text\": rawUrl"),
+                "search.js copy-url button must set type=\"button\" and carry the clipboard data");
+        assertTrue(js.contains("copyBtn.setAttribute(\"aria-label\""),
+                "search.js must retarget the aria-label on the <button>, not on the aria-hidden glyph");
+        // The glyph stays decorative, keeps the bare colour class, and lives inside the button.
+        assertTrue(js.contains("className: \"far fa-copy url-copy\","),
+                "search.js copy glyph must keep the bare url-copy class (colour rules) and not carry d-print-none itself");
+        assertTrue(js.contains("copyBtn.appendChild(copyIcon);"), "search.js copy glyph must be nested inside the button");
+        // Negative guards. A bare role: "button" is legitimate elsewhere (the facet-reset <a> in
+        // buildFacetGroup), so pin the exact contradictory pairs, never the bare token.
+        assertFalse(js.contains("role: \"button\", \"aria-label\": t(\"result.copy_url\")"),
+                "search.js must not put role=\"button\" + aria-label on the copy glyph");
+        assertFalse(js.contains("\"aria-hidden\": \"true\", \"data-clipboard-text\": rawUrl"),
+                "search.js must not put aria-hidden on the element that carries the clipboard data");
     }
 
     /**

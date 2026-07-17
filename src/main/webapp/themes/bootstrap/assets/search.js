@@ -165,9 +165,13 @@ function buildResultCard(d, queryId, order) {
   //   li#result{n}
   //     h3.title.text-truncate > a.link[data-uri,data-id,data-order]
   //     div.body > (div.me-3 > a.link.d-none.d-sm-flex > img.thumbnail)? + div.description
-  //     div.site.text-truncate > (i.far.fa-copy.url-copy)? + cite
+  //     div.site.text-truncate > (button.url-copy-btn > i.far.fa-copy.url-copy)? + cite
   //     div.more > a
   //     div.info > date + (size) + (cache)
+  // Deliberate divergence on the copy control: the JSP still emits it as a bare
+  // <i aria-hidden="true">, which is absent from the accessibility tree and
+  // unreachable by keyboard. This theme wraps the glyph in a real <button>, so
+  // a11y wins over tag-parity for that one row.
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
   const idx0 = order - 1;
