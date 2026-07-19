@@ -1,0 +1,15 @@
+{
+  "name": "fess-theme-js-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Executable unit tests for the bundled bootstrap static theme JavaScript. Not shipped; not part of the Maven build. See README.md.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.10",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.10"
+  }
+}

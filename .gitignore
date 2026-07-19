@@ -41,3 +41,4 @@ src/main/webapp/WEB-INF/project.properties
 /.apt_generated_tests/
 /.serena
 /.claude
+/src/test/js/node_modules/

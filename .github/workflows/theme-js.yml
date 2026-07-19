@@ -1,0 +1,36 @@
+# Runs the executable unit tests for the bundled bootstrap theme JavaScript.
+# These live under src/test/js and are not part of the Maven build (they need
+# Node + jsdom, which the Java CI does not provide), so they get their own job.
+
+name: Theme JS
+
+on:
+  push:
+    branches:
+    - master
+    - "*.x"
+  pull_request:
+    branches:
+    - master
+    - "*.x"
+  workflow_dispatch:
+
+jobs:
+  theme-js:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: src/test/js
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: src/test/js/package-lock.json
+    - name: Install dependencies
+      run: npm ci
+    - name: Run theme JS tests
+      run: npm test

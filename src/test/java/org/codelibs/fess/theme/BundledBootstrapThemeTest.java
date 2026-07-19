@@ -370,13 +370,6 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
-    public void test_markdownTablesBlockquote() throws Exception {
-        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
-        assertTrue(md.contains("<table") && md.contains("<thead>") && md.contains("<tbody>"));
-        assertTrue(md.contains("<blockquote>") && md.contains("TABLE_DELIM_RE"));
-    }
-
-    @Test
     public void test_cacheJs_rendersBannerAndBaseAndCharset() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/cache.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("labels.search_cache_msg"));
@@ -857,17 +850,6 @@ public class BundledBootstrapThemeTest {
         assertTrue(js.contains("resetFilters()"), "chat.js new-chat handler must call resetFilters() (parity-r3 T5 minor resetFilters)");
     }
 
-    /** R3-T5 minor: markdown.js must support nested lists and nested blockquotes. */
-    @Test
-    public void test_markdownJs_nestedListAndBlockquoteHandling() throws Exception {
-        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
-        assertTrue(md.contains("renderList"), "markdown.js must define renderList for nested-list support (parity-r3 T5 minor)");
-        assertTrue(md.contains("indentDepth"),
-                "markdown.js must define indentDepth for nested-list nesting detection (parity-r3 T5 minor)");
-        assertTrue(md.contains("renderBlockquote"),
-                "markdown.js must define renderBlockquote for nested blockquote support (parity-r3 T5 minor)");
-    }
-
     /** R3-T5: all 7 new chat keys (5 phase + 2 fallback) must exist in messages.en.json. */
     @Test
     public void test_i18n_hasChatPhaseAndFallbackKeys() throws Exception {
@@ -1009,14 +991,6 @@ public class BundledBootstrapThemeTest {
                 "chat.js must no longer keep the strip visible after completion (parity #C)");
     }
 
-    @Test
-    public void test_markdownJs_h1ThroughH6() throws Exception {
-        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
-        assertTrue(md.contains("/^(#{1,6}) (.+)$/"), "markdown.js HEADING_RE must accept # (h1) through ###### (h6) (parity #E)");
-        assertTrue(md.contains("Math.min(hm[1].length, 6)"), "markdown.js must clamp heading level to 6 (parity #E)");
-        assertFalse(md.contains("/^(#{2,4}) (.+)$/"), "markdown.js must no longer restrict headings to h2-h4 (parity #E)");
-    }
-
     // ── Parity Round 4 regression tests ────────────────────────────────────────
 
     /**
@@ -1142,62 +1116,6 @@ public class BundledBootstrapThemeTest {
         assertTrue(html.contains("id=\"labelSearchOption\""), "index.html must preserve id=\"labelSearchOption\" (parity R4 GAP-C)");
         assertTrue(html.contains("id=\"geoSearchOptionFieldset\""),
                 "index.html must preserve id=\"geoSearchOptionFieldset\" (parity R4 GAP-C)");
-    }
-
-    /**
-     * R4-7: markdown.js must handle horizontal rules (<hr>) and angle-bracket autolinks.
-     * HR_RE is the horizontal-rule line regex; the autolink regex operates on post-escape
-     * form (&lt;https?:…&gt;).
-     */
-    @Test
-    public void test_markdownJs_horizontalRuleAndAutolink() throws Exception {
-        final String md = Files.readString(THEME_DIR.resolve("assets/markdown.js"), StandardCharsets.UTF_8);
-        // Horizontal rule output
-        assertTrue(md.contains("<hr>"), "markdown.js must render horizontal rules as <hr> (parity R4 GAP-D2)");
-        // HR_RE constant name
-        assertTrue(md.contains("HR_RE"), "markdown.js must define HR_RE for horizontal-rule detection (parity R4 GAP-D2)");
-        // Autolink marker: the regex matches the post-escape form &lt;https?:
-        assertTrue(md.contains("&lt;(https?:"), "markdown.js autolink regex must match post-escape &lt;(https?: (parity R4 GAP-D2)");
-    }
-
-    /**
-     * R4-8: format.js ALLOWED_TAGS whitelist must include "HR" so sanitizeHtml
-     * does not strip horizontal rules produced by the markdown renderer.
-     */
-    @Test
-    public void test_formatJs_sanitizerAllowsHr() throws Exception {
-        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("\"HR\""), "format.js ALLOWED_TAGS must contain \"HR\" (parity R4 GAP-D2)");
-    }
-
-    /**
-     * format.js must drop raw-text elements whole instead of unwrapping them:
-     * their child text is the element's own source, so unwrapping surfaces that
-     * source as visible prose. Guards the nine HTML raw-text elements plus
-     * NOSCRIPT and TEMPLATE, which are dropped for their own documented reasons.
-     */
-    @Test
-    public void test_formatJs_sanitizerDropsRawTextElementsWithContent() throws Exception {
-        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("const DROP_WITH_CONTENT = new Set(["), "format.js must define the DROP_WITH_CONTENT set");
-        for (final String tag : new String[] { "IFRAME", "NOEMBED", "NOFRAMES", "PLAINTEXT", "SCRIPT", "STYLE", "TEXTAREA", "TITLE", "XMP",
-                "NOSCRIPT", "TEMPLATE" }) {
-            assertTrue(js.contains("\"" + tag + "\""), "format.js DROP_WITH_CONTENT must contain \"" + tag + "\"");
-        }
-    }
-
-    /**
-     * OBJECT and EMBED must stay out of DROP_WITH_CONTENT. An &lt;object&gt;'s
-     * children are fallback prose that the unwrap path already sanitizes
-     * recursively, so dropping them buys no safety and only discards content;
-     * &lt;embed&gt; is a void element, so it never has children and the entry
-     * would be inert. Re-adding either is a regression, not a hardening.
-     */
-    @Test
-    public void test_formatJs_sanitizerDoesNotDropObjectOrEmbedContent() throws Exception {
-        final String js = Files.readString(THEME_DIR.resolve("assets/format.js"), StandardCharsets.UTF_8);
-        assertFalse(js.contains("\"OBJECT\""), "format.js must not drop <object> fallback prose: the unwrap path already sanitizes it");
-        assertFalse(js.contains("\"EMBED\""), "format.js must not list \"EMBED\": it is a void element, so the entry can never fire");
     }
 
     /**

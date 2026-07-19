@@ -2,7 +2,7 @@ apiVersion: fess.codelibs.org/v1
 kind: StaticTheme
 name: bootstrap
 displayName: "Bootstrap"
-version: "1.0.2"
+version: "1.0.3"
 author: "CodeLibs Project"
 description: "Reference static theme for Fess. Bootstrap 5-based vanilla-JS SPA exercising /api/v2/*."
 license: "Apache-2.0"

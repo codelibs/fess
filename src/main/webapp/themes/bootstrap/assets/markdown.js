@@ -373,6 +373,11 @@ function inlineMarkdown(text) {
   s = s.replace(/&lt;(https?:\/\/[^\s]+?)&gt;/g, (_m, url) => {
     // url is already HTML-escaped (& -> &amp;); restore for the scheme check only.
     const raw = url.replace(/&amp;/g, "&").trim().toLowerCase();
+    // Defensive scheme re-check. Unreachable while the capturing regex above
+    // requires an http(s):// prefix (raw can never begin with javascript:/data:);
+    // kept as a safety net should that regex ever widen, and excluded from
+    // coverage because no input can drive it today.
+    /* v8 ignore next 3 */
     if (/^javascript\s*:/i.test(raw) || /^data\s*:/i.test(raw)) {
       return "&lt;" + url + "&gt;";
     }

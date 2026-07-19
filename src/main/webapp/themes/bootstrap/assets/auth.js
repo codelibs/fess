@@ -7,7 +7,7 @@ import { t } from "./i18n.js";
  * The `login_link` feature flag (from /api/v2/ui/config) can be false to
  * hide login UI entirely. Defaults to true when missing.
  */
-function isLoginLinkEnabled() {
+export function isLoginLinkEnabled() {
   const features = api.getConfig()?.features || {};
   return features.login_link !== false;
 }
@@ -57,7 +57,7 @@ export async function probeMe() {
  * @param {object} user - user payload from /api/v2/auth/me
  * @returns {HTMLElement} the dropdown wrapper div
  */
-function buildUserDropdown(user) {
+export function buildUserDropdown(user) {
   // Tag-parity with header.jsp logged-in block:
   //   div.dropdown
   //     > a#userMenu.nav-link.dropdown-toggle > i.fa.fa-fw.fa-user + span(name)
@@ -138,7 +138,7 @@ function buildUserDropdown(user) {
  * header.jsp parity: a.nav-link[/login] > i.fa.fa-fw.fa-sign-in + span(Login).
  * Default action opens the SPA login modal; with SSO it is a direct link.
  */
-function buildLoginLink() {
+export function buildLoginLink() {
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
   const a = document.createElement("a");
@@ -220,7 +220,7 @@ function setLoggedOut() {
  * @param {object|null} logoutEnv - the parsed response envelope from /auth/logout,
  *   or null when not available. May carry a csrf_token field if the server is new.
  */
-async function rotateCsrf(logoutEnv) {
+export async function rotateCsrf(logoutEnv) {
   // Prefer a token returned directly in the logout response body (no extra round-trip).
   if (logoutEnv && logoutEnv.csrf_token) {
     api.setCsrfToken(logoutEnv.csrf_token);

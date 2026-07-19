@@ -2002,4 +2002,4 @@ export const _state = state;
 // renderPopularWords is exported inline at its declaration (line ~1515); do NOT
 // re-export it here — a duplicate export is a module-level SyntaxError that aborts
 // the entire SPA bootstrap (app.js never runs, so the home view never renders).
-export { runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs };
+export { safeHref, runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs };

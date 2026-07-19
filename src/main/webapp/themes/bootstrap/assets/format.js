@@ -131,7 +131,7 @@ const ALLOWED_TAGS = new Set([
   "TABLE", "THEAD", "TBODY", "TR", "TH", "TD",
   "CODE", "PRE",
   "STRONG", "EM",
-  "H2", "H3", "H4",
+  "H1", "H2", "H3", "H4", "H5", "H6",
   "A",
   "DIV", "SPAN", "BLOCKQUOTE",
   "DL", "DT", "DD",

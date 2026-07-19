@@ -40,7 +40,7 @@ const PATH_TO_CODE = {
  * @param {string} pathname - e.g. "/error/404", "/error/not_found", "/error/notFound"
  * @returns {string} - one of "400", "404", "429", "500", "503"
  */
-function codeFromPath(pathname) {
+export function codeFromPath(pathname) {
   const segments = pathname.split("/").filter(Boolean);
   for (let i = segments.length - 1; i >= 0; i--) {
     // Normalise: lowercase and remove underscores so snake_case and camelCase

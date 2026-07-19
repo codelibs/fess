@@ -17,7 +17,7 @@ import { sanitizeHtml } from "./format.js";
  * @param {string} locale - e.g. "en" or "ja"
  * @returns {Promise<{sections: Array<{id:string, title:string, html:string}>}>}
  */
-async function fetchHelpContent(locale) {
+export async function fetchHelpContent(locale) {
   const url = `/themes/bootstrap/help/${locale}.json`;
   try {
     const r = await fetch(url, { credentials: "same-origin" });
@@ -40,7 +40,7 @@ async function fetchHelpContent(locale) {
  * @param {HTMLElement} container
  * @param {{id:string, title:string, html:string}} section
  */
-function renderSection(container, section) {
+export function renderSection(container, section) {
   const sec = document.createElement("section");
   sec.id = `help-${section.id}`;
   sec.className = "help-section";

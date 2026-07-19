@@ -99,7 +99,7 @@ const BACKSLASH = String.fromCharCode(92);
  * @param {string} s
  * @returns {string}
  */
-function quoteIfNeeded(s) {
+export function quoteIfNeeded(s) {
   s = s.trim();
   if (!s) return "";
   if (s.startsWith('"') && s.endsWith('"')) return s;
@@ -113,7 +113,7 @@ function quoteIfNeeded(s) {
  * @param {string} s
  * @returns {string[]}
  */
-function tokenize(s) {
+export function tokenize(s) {
   const tokens = [];
   const str = s.trim();
   let i = 0;
@@ -148,7 +148,7 @@ function tokenize(s) {
  *            site?:string, filetype?:string, occt?:string }} parts
  * @returns {string}
  */
-function compose(parts) {
+export function compose(parts) {
   const out = [];
 
   if (parts.all) {
@@ -217,7 +217,7 @@ const TIME_RANGES = [
  * server (QueryStringBuilder:242-244; advance.jsp:242-253).
  * Field is "timestamp"; values are appended to q as "timestamp:<value>".
  */
-const TIME_RANGE_QUERY = {
+export const TIME_RANGE_QUERY = {
   "1day":   "timestamp:[now-1d/d TO *]",
   "1week":  "timestamp:[now-1w/d TO *]",
   "1month": "timestamp:[now-1M/d TO *]",
@@ -238,7 +238,7 @@ const FILETYPE_OPTIONS_FALLBACK = [
   { value: "others",     labelKey: "labels.facet_filetype_others" },
 ];
 
-function buildFiletypeOptions(serverConfig) {
+export function buildFiletypeOptions(serverConfig) {
   const fromServer = serverConfig && Array.isArray(serverConfig.filetype_options) ? serverConfig.filetype_options : null;
   if (fromServer && fromServer.length > 0) {
     return [{ value: "", labelKey: "advance.any_filetype" },
