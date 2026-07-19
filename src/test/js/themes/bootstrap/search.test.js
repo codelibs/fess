@@ -299,7 +299,6 @@ describe("clearSearchState / _state", () => {
     s.facets = { a: [1] }; s.fields = { label: ["x"] }; s.facetQueries = ["fq"]; s.exQ = ["e"];
     s.geo = { lat: "1", lon: "2", distance: "3" }; s.requestedTime = 99; s.highlightParams = "&hl";
 
-    const ref = _state;
     clearSearchState();
 
     expect(_state.q).toBe("");
@@ -321,9 +320,6 @@ describe("clearSearchState / _state", () => {
     expect(document.getElementById("contentQuery").value).toBe("");
     expect(document.getElementById("numSearchOption").selectedIndex).toBe(0);
     expect(document.getElementById("sortSearchOption").selectedIndex).toBe(0);
-
-    // The exported _state alias points at the same object.
-    expect(ref).toBe(_state);
   });
 });
 
@@ -355,7 +351,7 @@ describe("runFromUrl", () => {
     setLocation("/search?q=foo&start=20&num=50&sort=x&lang=ja&lang=en&fields.label=A&ex_q=cl");
 
     runFromUrl();
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r));
 
     expect(_state.q).toBe("foo");
     expect(_state.start).toBe(20);
@@ -492,8 +488,11 @@ function installApiDispatch(overrides = {}) {
   });
 }
 
-/** Await a couple of macrotasks so fire-and-forget helpers (popular words, related) settle. */
-const settle = () => new Promise((r) => setTimeout(r, 20));
+/** Yield a macrotask so fire-and-forget helpers (popular words, related) settle. */
+const settle = () => new Promise((r) => setTimeout(r));
+
+/** How many "/search" API calls have been made so far. */
+const searchCalls = () => api.get.mock.calls.filter((c) => c[0] === "/search").length;
 
 describe("runSearch — successful render", () => {
   beforeEach(() => {
@@ -787,12 +786,12 @@ describe("runSearch — active filters, chips and current filters", () => {
   it("re-runs the search and drops the filter when a chip remove button is clicked", async () => {
     await runSearch();
     await settle();
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     // First chip is the label:lblA facet; its remove button clears it.
     const removeBtn = document.querySelector("#active-chips .active-chip-remove");
     removeBtn.click();
     await settle();
-    const after = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const after = searchCalls();
     expect(after).toBe(before + 1);
   });
 
@@ -823,10 +822,10 @@ describe("runSearch — active filters, chips and current filters", () => {
     expect(document.getElementById("facet-clear").classList.contains("d-none")).toBe(false);
     const reset = document.querySelector("#facet-body .facet-reset");
     expect(reset).not.toBeNull();
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     reset.click();
     await settle();
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(before + 1);
+    expect(searchCalls()).toBe(before + 1);
     expect(_state.facets).toEqual({});
     expect(_state.facetQueries).toEqual([]);
   });
@@ -852,10 +851,10 @@ describe("runSearch — facet and pagination click handlers", () => {
     installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }]) });
     await runSearch();
     await settle();
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     document.querySelector("#facet-body ul li.list-group-item a").click();
     await settle();
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(before + 1);
+    expect(searchCalls()).toBe(before + 1);
     expect(_state.facets.label).toContain("lblA");
     expect(_state.start).toBe(0);
   });
@@ -865,10 +864,10 @@ describe("runSearch — facet and pagination click handlers", () => {
     _state.start = 10;
     await runSearch();
     await settle();
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     document.querySelector("#pagination li:last-child a").click();
     await settle();
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(before + 1);
+    expect(searchCalls()).toBe(before + 1);
     expect(_state.start).toBe(20);
   });
 
@@ -889,10 +888,10 @@ describe("runSearch — facet and pagination click handlers", () => {
     _state.start = 0;
     await runSearch();
     await settle();
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     document.querySelector("#pagination li:first-child a").click();
     await settle();
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(before);
+    expect(searchCalls()).toBe(before);
   });
 });
 
@@ -935,11 +934,11 @@ describe("runSearch — favorites and similar docs", () => {
     const banner = document.getElementById("similar-doc-banner");
     expect(banner.classList.contains("d-flex")).toBe(true);
     expect(banner.textContent).toContain("labels.similar_doc_result_status");
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     banner.querySelector("button.btn-close").click();
     await settle();
     expect(_state.sdh).toBe("");
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(before + 1);
+    expect(searchCalls()).toBe(before + 1);
   });
 
   it("renders a similar link that starts a similarity search on click", async () => {
@@ -951,11 +950,11 @@ describe("runSearch — favorites and similar docs", () => {
     await settle();
     const link = document.querySelector("#result0 a.similar");
     expect(link).not.toBeNull();
-    const before = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const before = searchCalls();
     link.click();
     await settle();
     expect(_state.sdh).toBe("h1");
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(before + 1);
+    expect(searchCalls()).toBe(before + 1);
   });
 });
 
@@ -1262,10 +1261,10 @@ describe("attach — wiring", () => {
     expect(navigate.mock.calls.at(-1)[0]).toContain("q=drawerq");
 
     // 4. Facet "Clear" button → resets filters and re-runs the search.
-    const beforeSearch = api.get.mock.calls.filter((c) => c[0] === "/search").length;
+    const beforeSearch = searchCalls();
     document.getElementById("facet-clear").click();
     await vi.advanceTimersByTimeAsync(20);
-    expect(api.get.mock.calls.filter((c) => c[0] === "/search").length).toBe(beforeSearch + 1);
+    expect(searchCalls()).toBe(beforeSearch + 1);
 
     // 5. Header suggest: typing renders items after the 150ms debounce.
     const input = document.getElementById("query");

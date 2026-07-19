@@ -14,7 +14,7 @@
 // stub, so text assertions target the caller-supplied string / i18n key.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { resetDom } from "../../helpers/dom.js";
+import { resetDom, setLocation } from "../../helpers/dom.js";
 
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
   init: vi.fn(async () => {}),
@@ -90,11 +90,6 @@ const { renderHomeFlash, hasSearchQuery, updateAdvanceLinks, registerRoutes, mai
   "../../../../main/webapp/themes/bootstrap/assets/app.js"
 );
 
-/** Set the current URL (search string) without a reload, so location.search reads it. */
-function setSearch(url) {
-  window.history.replaceState({}, "", url);
-}
-
 /** Let queued microtasks (deferred focus, async awaits) settle. */
 const flush = () => new Promise((r) => setTimeout(r));
 
@@ -148,7 +143,7 @@ beforeEach(() => {
   i18n.init.mockResolvedValue(undefined);
   auth.attach.mockResolvedValue(null);
   help.attach.mockResolvedValue(undefined);
-  setSearch("/");
+  setLocation("/");
 });
 afterEach(resetDom);
 
@@ -210,27 +205,27 @@ describe("renderHomeFlash", () => {
 
 describe("hasSearchQuery", () => {
   it("returns true for a non-empty q= parameter", () => {
-    setSearch("/?q=hello");
+    setLocation("/?q=hello");
     expect(hasSearchQuery()).toBe(true);
   });
 
   it("returns false when q= is absent", () => {
-    setSearch("/");
+    setLocation("/");
     expect(hasSearchQuery()).toBe(false);
   });
 
   it("returns false when q= is present but whitespace-only", () => {
-    setSearch("/?q=%20%20");
+    setLocation("/?q=%20%20");
     expect(hasSearchQuery()).toBe(false);
   });
 
   it("returns false when q= is empty", () => {
-    setSearch("/?q=");
+    setLocation("/?q=");
     expect(hasSearchQuery()).toBe(false);
   });
 
   it("returns true even when other params precede q=", () => {
-    setSearch("/?num=20&q=abc");
+    setLocation("/?num=20&q=abc");
     expect(hasSearchQuery()).toBe(true);
   });
 });
@@ -243,7 +238,7 @@ describe("updateAdvanceLinks", () => {
   it("forwards the header query and URL paging state onto the advance link", () => {
     document.body.innerHTML =
       '<input id="query" value="hello"><a class="adv" href="/search/advance">A</a>';
-    setSearch("/?num=20&sort=score&lang=en&fields.label=foo");
+    setLocation("/?num=20&sort=score&lang=en&fields.label=foo");
     updateAdvanceLinks();
     const href = document.querySelector("a.adv").getAttribute("href");
     expect(href.startsWith("/search/advance?")).toBe(true);
@@ -257,7 +252,7 @@ describe("updateAdvanceLinks", () => {
 
   it("falls back to the URL q= when no input is populated", () => {
     document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
-    setSearch("/?q=urlq");
+    setLocation("/?q=urlq");
     updateAdvanceLinks();
     expect(document.querySelector("a.adv").getAttribute("href")).toBe("/search/advance?q=urlq");
   });
@@ -266,7 +261,7 @@ describe("updateAdvanceLinks", () => {
     document.body.innerHTML =
       '<input id="query" value="fromHeader"><input id="contentQuery" value="fromHome">' +
       '<a class="adv" href="/search/advance">A</a>';
-    setSearch("/");
+    setLocation("/");
     updateAdvanceLinks();
     const qs = new URLSearchParams(
       document.querySelector("a.adv").getAttribute("href").split("?")[1]
@@ -276,14 +271,14 @@ describe("updateAdvanceLinks", () => {
 
   it("emits a bare /search/advance href when there is no query at all", () => {
     document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
-    setSearch("/");
+    setLocation("/");
     updateAdvanceLinks();
     expect(document.querySelector("a.adv").getAttribute("href")).toBe("/search/advance");
   });
 
   it("forwards multiple lang and fields.label values", () => {
     document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
-    setSearch("/?q=x&lang=en&lang=ja&fields.label=a&fields.label=b");
+    setLocation("/?q=x&lang=en&lang=ja&fields.label=a&fields.label=b");
     updateAdvanceLinks();
     const qs = new URLSearchParams(
       document.querySelector("a.adv").getAttribute("href").split("?")[1]
@@ -315,14 +310,14 @@ describe("registerRoutes", () => {
 
   it("registers a home route matching '/' only when there is no q=", () => {
     const calls = registered();
-    setSearch("/");
+    setLocation("/");
     const homeRoute = calls.find(([p]) => p("/") === true);
     expect(homeRoute).toBeTruthy();
     // The home predicate must reject '/' once a q= is present (results take over).
     const homePredicate = calls[0][0];
-    setSearch("/");
+    setLocation("/");
     expect(homePredicate("/")).toBe(true);
-    setSearch("/?q=x");
+    setLocation("/?q=x");
     expect(homePredicate("/")).toBe(false);
   });
 
@@ -360,62 +355,57 @@ describe("registerRoutes", () => {
   it("route handlers reveal the matching view and hide the rest (no throw)", async () => {
     mountFullDom();
     const calls = registered();
-    const hiddenState = () =>
-      Object.fromEntries(
-        ["home-view", "results-view", "advance-view", "profile-view", "help-view", "chat-view", "cache-view", "error-view"].map(
-          (id) => [id, document.getElementById(id).hasAttribute("hidden")]
-        )
-      );
+    const isHidden = (id) => document.getElementById(id).hasAttribute("hidden");
 
     // Home handler (index 0) reveals home-view and clears search state.
-    setSearch("/");
+    setLocation("/");
     expect(() => calls[0][1]()).not.toThrow();
     await flush();
-    expect(hiddenState()["home-view"]).toBe(false);
-    expect(hiddenState()["results-view"]).toBe(true);
+    expect(isHidden("home-view")).toBe(false);
+    expect(isHidden("results-view")).toBe(true);
     expect(search.clearSearchState).toHaveBeenCalled();
 
     // Results handler (index 1) reveals results-view and runs the URL search.
     calls[1][1]();
-    expect(hiddenState()["results-view"]).toBe(false);
-    expect(hiddenState()["home-view"]).toBe(true);
+    expect(isHidden("results-view")).toBe(false);
+    expect(isHidden("home-view")).toBe(true);
     expect(search.attach).toHaveBeenCalled();
     expect(search.runFromUrl).toHaveBeenCalled();
 
     // Profile handler.
     calls[2][1]();
-    expect(hiddenState()["profile-view"]).toBe(false);
+    expect(isHidden("profile-view")).toBe(false);
     expect(profile.attach).toHaveBeenCalled();
 
     // Advance handler.
     calls[3][1]();
-    expect(hiddenState()["advance-view"]).toBe(false);
+    expect(isHidden("advance-view")).toBe(false);
     expect(advance.attach).toHaveBeenCalled();
 
     // Help handler.
     calls[4][1]();
-    expect(hiddenState()["help-view"]).toBe(false);
+    expect(isHidden("help-view")).toBe(false);
     expect(help.attach).toHaveBeenCalled();
 
     // Chat handler puts the nav link into "Search" mode and mounts standalone chat.
     calls[5][1]();
-    expect(hiddenState()["chat-view"]).toBe(false);
+    expect(isHidden("chat-view")).toBe(false);
     expect(chat.attachStandalone).toHaveBeenCalled();
     expect(document.getElementById("chat-nav-link").getAttribute("href")).toBe("/");
 
     // Cache handler.
     calls[6][1]();
-    expect(hiddenState()["cache-view"]).toBe(false);
+    expect(isHidden("cache-view")).toBe(false);
     expect(cache.attach).toHaveBeenCalled();
 
     // Error handler.
     calls[7][1]();
-    expect(hiddenState()["error-view"]).toBe(false);
+    expect(isHidden("error-view")).toBe(false);
     expect(errorView.attach).toHaveBeenCalled();
 
     // Fallback handler (index 8) also lands on the error view.
     calls[8][1]();
-    expect(hiddenState()["error-view"]).toBe(false);
+    expect(isHidden("error-view")).toBe(false);
   });
 });
 

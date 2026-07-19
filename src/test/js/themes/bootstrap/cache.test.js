@@ -12,7 +12,7 @@
 // the .catch — a false pass rendering the error view — so the stub is load-bearing.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { setLocation } from "../../helpers/dom.js";
+import { resetDom, setLocation } from "../../helpers/dom.js";
 
 const API = "../../../../main/webapp/themes/bootstrap/assets/api.js";
 const CACHE = "../../../../main/webapp/themes/bootstrap/assets/cache.js";
@@ -39,7 +39,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   setLocation("/");
-  document.body.innerHTML = "";
+  resetDom();
 });
 
 describe("attach: guards", () => {

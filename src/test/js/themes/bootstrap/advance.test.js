@@ -31,7 +31,7 @@ import {
   attach,
 } from "../../../../main/webapp/themes/bootstrap/assets/advance.js";
 import { navigate } from "../../../../main/webapp/themes/bootstrap/assets/router.js";
-import { setLocation } from "../../helpers/dom.js";
+import { resetDom, setLocation } from "../../helpers/dom.js";
 
 // ---------------------------------------------------------------------------
 // compose(parts) — the query builder
@@ -189,7 +189,7 @@ describe("attach: submit builds the /search URL", () => {
   afterEach(() => {
     navigate.mockClear();
     setLocation("/");
-    document.body.innerHTML = "";
+    resetDom();
   });
 
   it("does nothing when #advance-view is absent", () => {

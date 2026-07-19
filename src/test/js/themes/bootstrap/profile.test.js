@@ -64,12 +64,14 @@ describe("localizePasswordError", () => {
 // ---------------------------------------------------------------------------
 // attach(): DOM scaffold.
 // ---------------------------------------------------------------------------
-describe("attach (structure)", () => {
-  const mountProfile = () => {
-    document.body.innerHTML = '<div id="profile-view"></div>';
-    attach();
-  };
 
+// Mount the #profile-view container and run attach(); shared by both attach blocks.
+const mountProfile = () => {
+  document.body.innerHTML = '<div id="profile-view"></div>';
+  attach();
+};
+
+describe("attach (structure)", () => {
   it("does nothing (and does not throw) when #profile-view is absent", () => {
     expect(() => attach()).not.toThrow();
     expect(document.getElementById("password-form")).toBeNull();
@@ -99,10 +101,6 @@ describe("attach (structure)", () => {
 // assertions flush via vi.waitFor / fake-timer advance.
 // ---------------------------------------------------------------------------
 describe("attach (submit)", () => {
-  const mountProfile = () => {
-    document.body.innerHTML = '<div id="profile-view"></div>';
-    attach();
-  };
   const setPasswords = (oldP, newP, confP) => {
     document.getElementById("old-password").value = oldP;
     document.getElementById("new-password").value = newP;

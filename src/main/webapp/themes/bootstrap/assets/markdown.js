@@ -372,13 +372,14 @@ function inlineMarkdown(text) {
   // Matches the legacy marked.js gfm autolink behaviour.
   s = s.replace(/&lt;(https?:\/\/[^\s]+?)&gt;/g, (_m, url) => {
     // url is already HTML-escaped (& -> &amp;); restore for the scheme check only.
-    const raw = url.replace(/&amp;/g, "&").trim().toLowerCase();
-    // Defensive scheme re-check. Unreachable while the capturing regex above
-    // requires an http(s):// prefix (raw can never begin with javascript:/data:);
-    // kept as a safety net should that regex ever widen, and excluded from
-    // coverage because no input can drive it today.
+    const raw = url.replace(/&amp;/g, "&");
+    // Defensive scheme re-check via the shared allowlist, mirroring the
+    // [text](url) path above. Unreachable while the capturing regex requires an
+    // http(s):// prefix, but kept as a safety net should that regex ever widen —
+    // isSafeHref (allowlist + URL normalisation) stays correct where a denylist
+    // would not. Excluded from coverage: no input can drive the false branch today.
     /* v8 ignore next 3 */
-    if (/^javascript\s*:/i.test(raw) || /^data\s*:/i.test(raw)) {
+    if (!isSafeHref(raw)) {
       return "&lt;" + url + "&gt;";
     }
     return '<a href="' + url + '" target="_blank" rel="nofollow noopener noreferrer">' + url + "</a>";
