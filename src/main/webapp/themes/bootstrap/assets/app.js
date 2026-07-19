@@ -365,7 +365,7 @@ function attachBackToTop() {
 }
 
 /** Returns true when the current URL contains a non-empty q= parameter. */
-function hasSearchQuery() {
+export function hasSearchQuery() {
   return new URLSearchParams(location.search).get("q")?.trim().length > 0;
 }
 
@@ -377,7 +377,7 @@ function hasSearchQuery() {
  * The query is taken from whichever search box is populated (header or home),
  * falling back to the current URL's q= param.
  */
-function updateAdvanceLinks() {
+export function updateAdvanceLinks() {
   const headerVal = (document.getElementById("query") || {}).value;
   const homeVal = (document.getElementById("contentQuery") || {}).value;
   const urlParams = new URLSearchParams(location.search);
@@ -417,7 +417,7 @@ function attachAdvanceLinkSync() {
   updateAdvanceLinks();
 }
 
-function registerRoutes() {
+export function registerRoutes() {
   // Home route — "/" with no q= parameter shows the centered home view.
   router.register(
     path => (path === "/" || path === "/index" || path === "/index.html") && !hasSearchQuery(),
@@ -530,7 +530,7 @@ function registerRoutes() {
   );
 }
 
-async function main() {
+export async function main() {
   try {
     await api.init();
   } catch (e) {

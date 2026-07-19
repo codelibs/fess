@@ -37,7 +37,7 @@ let standaloneMounted = false;
  * @param {string} u
  * @returns {string}
  */
-function safeHref(u) {
+export function safeHref(u) {
   if (!u) return "#";
   try {
     const parsed = new URL(String(u), window.location.origin);
@@ -95,7 +95,7 @@ const PHASE_ORDER = ["intent", "search", "evaluate", "fetch", "answer"];
  *
  * @returns {{ strip: HTMLElement, advanceTo: (phase: string, hitCount?: number) => void, reset: () => void }}
  */
-function buildPhaseStrip() {
+export function buildPhaseStrip() {
   const strip = el("div", { className: "chat-phase-strip d-flex gap-2 align-items-center mb-2 flex-wrap" });
   const badges = {};
 
@@ -173,7 +173,7 @@ function buildPhaseStrip() {
  *
  * @returns {{ panel: HTMLElement, getFilters: () => { fields: string[], extraQ: string[] } }}
  */
-function buildFilterPanel(opts) {
+export function buildFilterPanel(opts) {
   // When embedded in the standalone card, the card-header already provides the
   // filter toggle, so the panel's own toggle/clear header row is suppressed to
   // avoid a duplicate "Filter" button (JSP parity: chat.jsp toggles from the header).
@@ -406,7 +406,7 @@ function buildWelcomeState() {
  * @param {string} [mimetype]
  * @returns {string}
  */
-function sourceIcon(url, mimetype) {
+export function sourceIcon(url, mimetype) {
   if (mimetype) {
     if (mimetype.indexOf("pdf") !== -1) return "fa-file-pdf-o";
     if (mimetype.indexOf("word") !== -1 || mimetype.indexOf("document") !== -1) return "fa-file-word-o";
@@ -438,7 +438,7 @@ function sourceIcon(url, mimetype) {
  * @param {string} [mimetype]
  * @returns {string}
  */
-function sourceTypeLabel(url, mimetype) {
+export function sourceTypeLabel(url, mimetype) {
   if (mimetype) {
     if (mimetype.indexOf("pdf") !== -1) return "PDF";
     if (mimetype.indexOf("word") !== -1 || mimetype.indexOf("document") !== -1) return "Word";
@@ -722,7 +722,7 @@ function buildStatusLozenge() {
 // Map SSE error_code → i18n text
 // ---------------------------------------------------------------------------
 
-function errorCodeToText(code) {
+export function errorCodeToText(code) {
   if (KNOWN_ERROR_CODES.includes(code)) {
     return t("error." + code);
   }

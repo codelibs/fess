@@ -73,7 +73,7 @@ function makePasswordField(labelText, inputId, inputAttrs = {}) {
  * @param {object} err - ApiError (code/httpStatus/details) or NetworkError
  * @returns {string} a localized message safe to render via textContent
  */
-function localizePasswordError(err) {
+export function localizePasswordError(err) {
   if (err && err.name === "NetworkError") return t("error.network");
   const code = err && err.code;
   const httpStatus = err && err.httpStatus;

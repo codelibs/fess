@@ -5,7 +5,7 @@ const SUPPORTED = ["de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "
 let messages = {};
 let locale = "en";
 
-function pickLocale() {
+export function pickLocale() {
   const raw = (navigator.language || "en");
   // Case-insensitive exact match first (e.g. "pt-BR", "zh-CN").
   const lower = raw.toLowerCase();
