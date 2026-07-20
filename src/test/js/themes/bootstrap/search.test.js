@@ -62,6 +62,15 @@ describe("buildGoUrl", () => {
     expect(buildGoUrl("data:text/html,x", "d1", "q1", 3, 1)).toBe("#");
   });
 
+  it("builds a /go/ URL for file:, smb: and s3: (file-system crawl results)", () => {
+    expect(buildGoUrl("file:///data/report.pdf", "d1", "q1", 2, 1700000000000))
+      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=2");
+    expect(buildGoUrl("smb://host/share/file.docx", "d2", "q2", 1, 1700000000000))
+      .toBe("/go/?rt=1700000000000&docId=d2&queryId=q2&order=1");
+    expect(buildGoUrl("s3://bucket/key.txt", "d3", "q3", 1, 1700000000000))
+      .toBe("/go/?rt=1700000000000&docId=d3&queryId=q3&order=1");
+  });
+
   it("returns # for empty, null and non-string originalUrl", () => {
     expect(buildGoUrl("", "d1", "q1", 3, 1)).toBe("#");
     expect(buildGoUrl(null, "d1", "q1", 3, 1)).toBe("#");
@@ -85,6 +94,15 @@ describe("safeHref", () => {
     expect(safeHref("http://x.com")).toBe("http://x.com");
     expect(safeHref("ftp://x.com")).toBe("ftp://x.com");
     expect(safeHref("ftps://x.com")).toBe("ftps://x.com");
+  });
+
+  it("returns the URL for file/smb/smb1/storage/s3/gcs schemes (file-system crawls)", () => {
+    expect(safeHref("file:///data/report.pdf")).toBe("file:///data/report.pdf");
+    expect(safeHref("smb://host/share/f.docx")).toBe("smb://host/share/f.docx");
+    expect(safeHref("smb1://host/share/f.docx")).toBe("smb1://host/share/f.docx");
+    expect(safeHref("storage://area/obj")).toBe("storage://area/obj");
+    expect(safeHref("s3://bucket/key")).toBe("s3://bucket/key");
+    expect(safeHref("gcs://bucket/key")).toBe("gcs://bucket/key");
   });
 
   it("returns relative and fragment URLs unchanged (resolve to the page scheme)", () => {

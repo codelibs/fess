@@ -39,16 +39,20 @@ const FILETYPE_VALUES = [
 // passed to innerHTML.
 
 /**
- * Return `url` only when its scheme is in the http/https/ftp/ftps allowlist.
- * Any other scheme (e.g. javascript:, data:, vbscript:) returns "#" so that
- * setAttribute("href", safeHref(u)) can never inject executable content.
+ * Return `url` only when its scheme is one Fess serves: the web schemes plus the
+ * file-system schemes ProtocolHelper.isFileSystemPath() recognises
+ * (file/smb/smb1/storage/s3/gcs). Any other scheme (e.g. javascript:, data:,
+ * vbscript:, mailto:) returns "#" so that setAttribute("href", safeHref(u)) can
+ * never inject executable content.
  */
 function safeHref(url) {
   if (!url || typeof url !== "string") return "#";
   try {
     const u = new URL(url, location.href);
     if (u.protocol === "https:" || u.protocol === "http:" ||
-        u.protocol === "ftp:" || u.protocol === "ftps:") {
+        u.protocol === "ftp:" || u.protocol === "ftps:" ||
+        u.protocol === "file:" || u.protocol === "smb:" || u.protocol === "smb1:" ||
+        u.protocol === "storage:" || u.protocol === "s3:" || u.protocol === "gcs:") {
       return url;
     }
   } catch (e) {
@@ -101,9 +105,10 @@ function copyToClipboard(text) {
  * Build the /go/ click-tracking URL for a result link.
  *
  * Mirrors the JSP mousedown handler in src/main/webapp/js/search.js:111-127.
- * Returns "#" when the original URL is not in the http/https/ftp/ftps allowlist
- * so that safeHref semantics are preserved — the /go/ redirect would fail anyway
- * for unsafe schemes.
+ * Returns "#" only for schemes Fess never serves (javascript:, data:, vbscript:,
+ * mailto:, …). File-system schemes (file/smb/smb1/storage/s3/gcs) build a /go/
+ * link so GoAction's File Proxy can serve the document — the emitted href is
+ * always the same-origin /go/ path, never the raw URL.
  *
  * @param {string} originalUrl - the document's url_link / url value
  * @param {string} docId       - document identifier
@@ -113,12 +118,14 @@ function copyToClipboard(text) {
  * @returns {string} the /go/ redirect URL, or "#" for unsafe schemes
  */
 function buildGoUrl(originalUrl, docId, queryId, order, rt) {
-  // Validate scheme — same rules as safeHref; only build /go/ for safe schemes.
+  // Validate scheme — same rules as safeHref; only build /go/ for served schemes.
   if (!originalUrl || typeof originalUrl !== "string") return "#";
   try {
     const u = new URL(originalUrl, location.href);
     if (u.protocol !== "https:" && u.protocol !== "http:" &&
-        u.protocol !== "ftp:" && u.protocol !== "ftps:") {
+        u.protocol !== "ftp:" && u.protocol !== "ftps:" &&
+        u.protocol !== "file:" && u.protocol !== "smb:" && u.protocol !== "smb1:" &&
+        u.protocol !== "storage:" && u.protocol !== "s3:" && u.protocol !== "gcs:") {
       return "#";
     }
   } catch (e) {
