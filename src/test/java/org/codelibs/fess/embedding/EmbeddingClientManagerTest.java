@@ -55,6 +55,47 @@ public class EmbeddingClientManagerTest extends UnitFessTestCase {
         assertNull(manager.getClient(), "should return null when no client matches");
     }
 
+    // ===================================================================================
+    //                                        hasConfiguredClient (quiet probe, Phase C)
+    //                                        ================================================
+    // The chunk-only mode resolution probes for a configured client on EVERY run, so the probe
+    // must never route through getClient() (which WARNs on each miss).
+
+    @Test
+    public void test_hasConfiguredClient_falseWhenNameIsNone() {
+        final FakeEmbeddingClient fake = new FakeEmbeddingClient("none");
+        manager.register(fake);
+        manager.setTestEmbeddingType("none");
+        assertFalse(manager.hasConfiguredClient(),
+                "content_chunker.embedding.name=none means embedding is configured off, even if a client named \"none\" exists");
+    }
+
+    @Test
+    public void test_hasConfiguredClient_falseWhenNoClientRegistered_withoutRoutingThroughWarningGetClient() {
+        final TestableEmbeddingClientManager quietManager = new TestableEmbeddingClientManager() {
+            @Override
+            public EmbeddingClient getClient() {
+                fail("hasConfiguredClient() must not route through getClient(), which WARNs on every miss "
+                        + "-- a chunk-only run probing every execution would spam the log");
+                return null;
+            }
+        };
+        quietManager.setTestEmbeddingType("missing");
+        assertFalse(quietManager.hasConfiguredClient(), "no matching client registered means embedding is not configured");
+    }
+
+    @Test
+    public void test_hasConfiguredClient_trueWhenClientRegistered_evenIfUnavailable() {
+        // Availability (the liveness ping) is deliberately excluded: a registered-but-unreachable
+        // client means "configured but transiently down" (skip the run), NOT "configured off"
+        // (chunk-only) -- a transient outage must never flip processing into chunk-only mode.
+        final FakeEmbeddingClient fake = new FakeEmbeddingClient("ollama");
+        fake.available = false;
+        manager.register(fake);
+        manager.setTestEmbeddingType("ollama");
+        assertTrue(manager.hasConfiguredClient(), "a registered client counts as configured regardless of its liveness");
+    }
+
     @Test
     public void test_available_falseWhenDisabled() {
         final FakeEmbeddingClient fake = new FakeEmbeddingClient("ollama");
@@ -217,7 +258,7 @@ public class EmbeddingClientManagerTest extends UnitFessTestCase {
         }
     }
 
-    private static final class TestableEmbeddingClientManager extends EmbeddingClientManager {
+    private static class TestableEmbeddingClientManager extends EmbeddingClientManager {
         private String testEmbeddingType = "ollama";
         private boolean testEnabled = true;
 

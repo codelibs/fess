@@ -60,16 +60,36 @@ public class EmbeddingClientManager {
         if (!isContentChunkerEnabled()) {
             return false;
         }
-        final EmbeddingClient client = getClient();
+        // resolveClient() (not getClient()) so a merely-unregistered client -- a legitimate
+        // configuration state now that chunk-only mode exists -- does not WARN on every call.
+        final EmbeddingClient client = resolveClient();
         return client != null && client.isAvailable();
     }
 
     /**
-     * Gets the embedding client instance for the configured embedding type.
+     * Gets the embedding client instance for the configured embedding type,
+     * logging a WARN when no client resolves. Use {@link #hasConfiguredClient()}
+     * for a quiet existence probe instead.
      *
      * @return the embedding client instance, or null if not found
      */
     public EmbeddingClient getClient() {
+        final EmbeddingClient client = resolveClient();
+        if (client == null) {
+            logger.warn("[Embedding] EmbeddingClient not found. componentName={}EmbeddingClient", getEmbeddingType());
+        }
+        return client;
+    }
+
+    /**
+     * Resolves the configured embedding client (component lookup by convention, then
+     * registered-list fallback) WITHOUT logging a WARN on a miss -- the quiet core shared by
+     * {@link #getClient()} (which adds the WARN) and {@link #hasConfiguredClient()} (an
+     * existence probe that must not spam WARNs on every chunk-only run).
+     *
+     * @return the embedding client instance, or null if not found
+     */
+    protected EmbeddingClient resolveClient() {
         final String embeddingType = getEmbeddingType();
         final String name = embeddingType + "EmbeddingClient";
         if (ComponentUtil.hasComponent(name)) {
@@ -87,8 +107,25 @@ public class EmbeddingClientManager {
                 return client;
             }
         }
-        logger.warn("[Embedding] EmbeddingClient not found. componentName={}", name);
         return null;
+    }
+
+    /**
+     * Quietly reports whether embedding is configured at all: the configured
+     * {@code content_chunker.embedding.name} is not {@code "none"} AND a matching client is
+     * actually registered. Deliberately does NOT include a liveness ping ({@code isAvailable()}):
+     * this distinguishes "embedding is configured off" (chunk-only mode) from "embedding is
+     * configured but the provider is transiently unreachable" (skip the run) -- a transient outage
+     * must never flip processing into chunk-only mode. Never logs a WARN, unlike
+     * {@link #getClient()}, so a chunk-only run probing this every execution stays quiet.
+     *
+     * @return true if an embedding client is configured and registered
+     */
+    public boolean hasConfiguredClient() {
+        if (Constants.NONE.equals(getEmbeddingType())) {
+            return false;
+        }
+        return resolveClient() != null;
     }
 
     /**

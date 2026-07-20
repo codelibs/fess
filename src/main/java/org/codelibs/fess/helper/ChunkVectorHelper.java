@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +38,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.opensearch.cluster.metadata.MappingMetadata;
+import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
 import jakarta.annotation.PostConstruct;
@@ -41,8 +46,15 @@ import jakarta.annotation.PostConstruct;
 /**
  * Orchestrates the ingestion half of content-chunk vector search: registers
  * the OpenSearch document-mapping rewrite rule that adds the
- * {@code content_chunk_vector} field, and performs the per-document
- * CAS chunk+embed read-modify-write ({@link #processDocument(String)}).
+ * {@code content_chunk_vector} field, performs the per-document
+ * CAS chunk+embed read-modify-write ({@link #processDocument(String)} /
+ * {@link #processBatch(List)}), and owns the whole scheduled processing run
+ * ({@link #executeChunkVectorProcessing()}): pending-document scroll, batch
+ * partitioning, bounded-concurrency fan-out, and the per-run mode resolution
+ * between full embedding, chunk-only mode (embedding configured off:
+ * {@code content_chunker.embedding.name=none} or no client registered), and
+ * skipping the run entirely (embedding configured but transiently
+ * unreachable).
  */
 public class ChunkVectorHelper {
 
@@ -57,11 +69,325 @@ public class ChunkVectorHelper {
     /** Default value of {@link #MAX_CHUNKS_PER_DOCUMENT_PROPERTY}. */
     protected static final int DEFAULT_MAX_CHUNKS_PER_DOCUMENT = 1000;
 
+    /** Number of document IDs fetched per scroll batch. */
+    protected static final int SCROLL_SIZE = 100;
+
+    /**
+     * System property key for the bounded concurrency of the run's embedding calls: the number of
+     * concurrently in-flight batches (each up to {@link #JOB_BULK_SIZE_PROPERTY} documents).
+     */
+    protected static final String JOB_CONCURRENCY_PROPERTY = "content_chunker.job.concurrency";
+
+    /** System property key for the number of documents grouped into a single embedding call. */
+    protected static final String JOB_BULK_SIZE_PROPERTY = "content_chunker.job.bulk_size";
+
+    /**
+     * System property key for the maximum number of pending document IDs collected (and therefore
+     * processed) in a single run; bounds the memory the scroll phase holds.
+     */
+    protected static final String JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY = "content_chunker.job.max_documents_per_run";
+
+    /** Default value of {@link #JOB_CONCURRENCY_PROPERTY}. */
+    protected static final int DEFAULT_JOB_CONCURRENCY = 2;
+
+    /** Default value of {@link #JOB_BULK_SIZE_PROPERTY}. */
+    protected static final int DEFAULT_JOB_BULK_SIZE = 20;
+
+    /** Default value of {@link #JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY}. */
+    protected static final int DEFAULT_JOB_MAX_DOCUMENTS_PER_RUN = 10000;
+
     /**
      * Default constructor.
      */
     public ChunkVectorHelper() {
         // Default constructor
+    }
+
+    /**
+     * Executes one full chunk-vector processing run: resolves the run mode, scroll-collects
+     * pending document IDs, partitions them into {@code content_chunker.job.bulk_size}-sized
+     * batches, then fans those batches out across a bounded thread pool via
+     * {@link #processBatch(List, boolean)}. This is the single entry
+     * {@link org.codelibs.fess.job.ChunkVectorJob#execute()} delegates to.
+     *
+     * <p>Run-mode resolution (only reached when {@link #isContentChunkerEnabled()}):</p>
+     * <ul>
+     * <li><b>chunk-only</b> -- embedding is configured off ({@code content_chunker.embedding.name}
+     * is {@code "none"}, or no matching embedding client is registered; probed quietly via
+     * {@link #isEmbeddingConfigured()}): content is chunked and written back as an array with
+     * {@code content_chunk_status="chunked"}, and NO vector field is written.</li>
+     * <li><b>skip</b> -- embedding is configured but the provider's liveness ping fails right now
+     * (a transient outage): the whole run is skipped so pending documents stay pending. A
+     * transient outage must NEVER flip processing into chunk-only mode, which would rewrite the
+     * corpus without vectors.</li>
+     * <li><b>embedding</b> -- embedding is configured and available: chunk + embed + write vectors
+     * with {@code content_chunk_status="done"}, including the upgrade path for documents a prior
+     * chunk-only run left {@code "chunked"} (their stored array elements are embedded directly,
+     * never re-chunked).</li>
+     * </ul>
+     *
+     * <p>The dimension-consistency and vector-mapping-presence guards
+     * ({@link #checkDimensionConsistency()}, {@link #checkVectorMappingReady()}) run only when
+     * embedding is active -- in chunk-only mode no vector is written, so neither can apply.</p>
+     *
+     * <p>No in-code overlap guard is needed: the scheduler serializes runs of the owning job.
+     * Every scheduled job is registered by {@code JobHelper#register} with {@code uniqueBy(id)}
+     * plus {@code fessConfig.getSchedulerConcurrentExecModeAsEnum()} (default
+     * {@code scheduler.concurrent.exec.mode=QUIT}), and all three {@code JobConcurrentExec} modes
+     * forbid concurrent execution of the same unique job.</p>
+     *
+     * @return a summary result message (processed/succeeded/failed counts, or the skip reason)
+     */
+    public String executeChunkVectorProcessing() {
+        if (!isContentChunkerEnabled()) {
+            // content_chunker.enabled is false: the scheduled run must be a complete no-op -- no
+            // scroll, no fetch, no chunk, no write. Without this early return, enabling the
+            // "Content Chunk Vector Indexer" job (an ordinary Admin > Scheduler action) without also
+            // setting the separate content_chunker.enabled system property would run the full chunk
+            // pipeline. Logged only at DEBUG so a site that simply does not use this feature never
+            // sees WARN/INFO spam on each run.
+            if (logger.isDebugEnabled()) {
+                logger.debug("Content chunking is disabled; skipping chunk-vector processing.");
+            }
+            return "Content chunking is disabled. Skipped.";
+        }
+
+        final boolean embeddingActive = isEmbeddingConfigured();
+        if (embeddingActive) {
+            if (!isEmbeddingClientAvailable()) {
+                // The embedding provider is configured but unreachable (a transient outage). Skip
+                // the whole run WITHOUT scrolling/fetching/processing so pending documents stay
+                // pending -- and, critically, do NOT fall back to chunk-only mode: a transient
+                // outage must never rewrite the corpus without vectors. Logged at WARN so a genuine
+                // outage is visible; the documents are retried once the provider recovers.
+                logger.warn("Embedding provider is not available; skipping chunk-vector processing to keep pending documents pending.");
+                return "Embedding provider is not available. Skipped.";
+            }
+            if (!checkDimensionConsistency()) {
+                // A confirmed embedding-dimension mismatch between the configured provider/model and
+                // the live content_chunk_vector mapping was already logged at ERROR by
+                // checkDimensionConsistency() -- skip this run entirely rather than letting every
+                // pending document independently fail against OpenSearch's k-NN dimension-mismatch
+                // rejection.
+                return "Embedding dimension mismatch detected between the configured embedding provider and the existing "
+                        + "content_chunk_vector mapping; skipping this run. See the ERROR log for details.";
+            }
+            if (!checkVectorMappingReady()) {
+                // The live index confirmedly has no content_chunk_vector knn_vector mapping (e.g. it
+                // was created while embedding was off, so rewriteMapping never spliced it). Writing
+                // vectors now would dynamic-map them as a useless non-knn field -- skip the run; the
+                // WARN with the remediation was already logged by checkVectorMappingReady().
+                return "The live index has no content_chunk_vector (knn_vector) mapping; skipping this run to avoid "
+                        + "dynamic-mapping vectors as a non-knn field. See the WARN log for details.";
+            }
+        } else if (logger.isInfoEnabled()) {
+            logger.info(
+                    "[ChunkVector] Embedding is not configured ({} is \"{}\" or no embedding client is registered); running in "
+                            + "chunk-only mode: content is chunked and marked \"{}\" without vectors.",
+                    AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, Constants.NONE, Constants.CHUNKED);
+        }
+
+        final List<String> idList;
+        try {
+            idList = scrollPendingIds(embeddingActive);
+        } catch (final Exception e) {
+            logger.warn("Failed to scroll-search pending documents.", e);
+            return e.getMessage() + "\n";
+        }
+
+        final AtomicInteger processed = new AtomicInteger();
+        final AtomicInteger succeeded = new AtomicInteger();
+        final AtomicInteger failed = new AtomicInteger();
+
+        final int bulkSize = Math.max(1, getJobBulkSize());
+        final List<List<String>> batches = partitionIds(idList, bulkSize);
+
+        final int concurrency = Math.max(1, getConcurrency());
+        final ExecutorService executor = Executors.newFixedThreadPool(concurrency);
+        try {
+            final List<Future<?>> futures = new ArrayList<>(batches.size());
+            for (final List<String> batch : batches) {
+                futures.add(executor.submit(() -> {
+                    try {
+                        final Map<String, Boolean> results = processBatch(batch, embeddingActive);
+                        for (final String id : batch) {
+                            processed.incrementAndGet();
+                            if (Boolean.TRUE.equals(results.get(id))) {
+                                succeeded.incrementAndGet();
+                            } else {
+                                failed.incrementAndGet();
+                            }
+                        }
+                    } catch (final Exception e) {
+                        for (final String id : batch) {
+                            processed.incrementAndGet();
+                            failed.incrementAndGet();
+                        }
+                        logger.warn("Failed to process a batch of {} document(s). ids={}", batch.size(), batch, e);
+                    }
+                }));
+            }
+            for (final Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (final Exception e) {
+                    logger.warn("Failed to wait for a batch-processing task.", e);
+                }
+            }
+        } finally {
+            executor.shutdown();
+        }
+
+        return "Processed " + processed.get() + " documents. Succeeded: " + succeeded.get() + ", Failed/Skipped: " + failed.get() + ".";
+    }
+
+    /**
+     * Quietly reports whether embedding is configured at all -- {@code content_chunker.embedding.name}
+     * is not {@code "none"} AND a matching client is registered -- WITHOUT a liveness ping and
+     * WITHOUT the per-miss WARN {@code EmbeddingClientManager#getClient()} logs, so a chunk-only
+     * run probing this every execution stays quiet. Deliberately excludes availability: that
+     * distinguishes "configured off" (chunk-only mode) from "configured but transiently down"
+     * (skip the run). Overridable seam for tests.
+     *
+     * @return true if an embedding client is configured and registered
+     */
+    protected boolean isEmbeddingConfigured() {
+        return ComponentUtil.getComponent(EmbeddingClientManager.class).hasConfiguredClient();
+    }
+
+    /**
+     * Partitions {@code idList} into consecutive sub-lists of at most {@code bulkSize} elements
+     * each (the last partition may be smaller).
+     *
+     * @param idList the full list of pending document IDs
+     * @param bulkSize the maximum number of IDs per partition
+     * @return the list of partitions, in order
+     */
+    protected List<List<String>> partitionIds(final List<String> idList, final int bulkSize) {
+        final List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < idList.size(); i += bulkSize) {
+            batches.add(idList.subList(i, Math.min(i + bulkSize, idList.size())));
+        }
+        return batches;
+    }
+
+    /**
+     * Scroll-queries {@code fessConfig.getIndexDocumentUpdateIndex()} for
+     * documents matching {@link #buildPendingQuery(boolean)}, restricted to just
+     * the ID field, and collects matching IDs before returning (the
+     * scroll context is fully closed by the time this method returns). Uses the
+     * update-index alias -- not the search-index alias -- so this run never diverges
+     * from this helper's own read/write index during a blue-green
+     * crawl/reindex swap, matching the sibling {@code PurgeDocJob}/{@code UpdateLabelJob}
+     * convention.
+     *
+     * <p>Collection stops once {@link #getJobMaxDocumentsPerRun()} IDs have been gathered, bounding
+     * the memory a single run holds so a large-corpus first run cannot OOM by materializing the
+     * entire pending-ID set at once. The remaining pending documents stay pending and are picked up
+     * by the next (idempotent) scheduled run. The cap is enforced by throwing a private
+     * {@link ScrollLimitReachedException} from the scroll cursor rather than by returning
+     * {@code false} from it: {@code SearchEngineClient#scrollSearch} only stops iterating the
+     * <em>current</em> page when the cursor returns {@code false} and then keeps fetching further
+     * pages, so a bare {@code false} would drain the whole (potentially millions-of-pages) scroll
+     * instead of stopping it -- the throw exits the scroll immediately, with its {@code finally}
+     * still releasing the scroll context.</p>
+     *
+     * @param embeddingActive whether embedding is active for this run (widens the pending query to
+     *            include {@code "chunked"} upgrade documents)
+     * @return the list of pending document IDs, at most {@link #getJobMaxDocumentsPerRun()} entries
+     */
+    protected List<String> scrollPendingIds(final boolean embeddingActive) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
+        final int maxDocuments = Math.max(1, getJobMaxDocumentsPerRun());
+        final List<String> idList = new ArrayList<>();
+        try {
+            searchEngineClient.scrollSearch(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+                requestBuilder.setQuery(buildPendingQuery(embeddingActive))
+                        .setSize(SCROLL_SIZE)
+                        .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null);
+                return true;
+            }, source -> {
+                final Object idObj = source.get(fessConfig.getIndexFieldId());
+                if (idObj != null) {
+                    idList.add(idObj.toString());
+                }
+                if (idList.size() >= maxDocuments) {
+                    throw new ScrollLimitReachedException();
+                }
+                return true;
+            });
+        } catch (final ScrollLimitReachedException e) {
+            if (logger.isInfoEnabled()) {
+                logger.info("[ChunkVector] Reached the per-run document cap ({}); the remaining pending documents will be "
+                        + "processed on the next scheduled run.", maxDocuments);
+            }
+        }
+        return idList;
+    }
+
+    /**
+     * Builds the query matching documents pending processing for this run's mode:
+     * {@code content_chunk_status} absent always matches; when embedding is active, documents a
+     * prior chunk-only run left {@code content_chunk_status="chunked"} also match, so they are
+     * upgraded in place (their stored chunk arrays embedded directly) once embedding is enabled.
+     * In chunk-only mode {@code "chunked"} documents are already in their terminal state for that
+     * mode and must NOT be reprocessed every run.
+     *
+     * @param embeddingActive whether embedding is active for this run
+     * @return the query builder
+     */
+    protected QueryBuilder buildPendingQuery(final boolean embeddingActive) {
+        final QueryBuilder statusAbsent =
+                QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        if (!embeddingActive) {
+            return statusAbsent;
+        }
+        return QueryBuilders.boolQuery()
+                .should(statusAbsent)
+                .should(QueryBuilders.termQuery(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED))
+                .minimumShouldMatch(1);
+    }
+
+    /**
+     * Internal control-flow signal thrown from {@link #scrollPendingIds(boolean)}'s scroll cursor
+     * once {@link #getJobMaxDocumentsPerRun()} document IDs have been collected, to stop the scroll
+     * early without materializing the whole corpus. Never escapes {@link #scrollPendingIds(boolean)};
+     * stack trace and suppression are disabled since it carries no diagnostic value.
+     */
+    private static final class ScrollLimitReachedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        ScrollLimitReachedException() {
+            super(null, null, false, false);
+        }
+    }
+
+    /**
+     * Gets the configured run concurrency.
+     *
+     * @return the value of {@code content_chunker.job.concurrency} (default 2)
+     */
+    protected int getConcurrency() {
+        return getConfigInt(JOB_CONCURRENCY_PROPERTY, DEFAULT_JOB_CONCURRENCY);
+    }
+
+    /**
+     * Gets the configured number of documents grouped into a single embedding call.
+     *
+     * @return the value of {@code content_chunker.job.bulk_size} (default 20)
+     */
+    protected int getJobBulkSize() {
+        return getConfigInt(JOB_BULK_SIZE_PROPERTY, DEFAULT_JOB_BULK_SIZE);
+    }
+
+    /**
+     * Gets the configured maximum number of pending documents collected (and processed) per run.
+     *
+     * @return the value of {@code content_chunker.job.max_documents_per_run} (default 10000)
+     */
+    protected int getJobMaxDocumentsPerRun() {
+        return getConfigInt(JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY, DEFAULT_JOB_MAX_DOCUMENTS_PER_RUN);
     }
 
     /**
@@ -124,10 +450,10 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Checks if content chunking is enabled. Public so
-     * {@link org.codelibs.fess.job.ChunkVectorJob#execute()} can gate the entire run on the same
-     * flag this helper's own {@link #rewriteMapping}/{@link #checkDimensionConsistency} read, rather
-     * than duplicating the config lookup with a second, potentially divergent default.
+     * Checks if content chunking is enabled. Public so callers (e.g.
+     * {@code DefaultChatContentFetcher}) can gate on the same
+     * flag this helper's own {@link #rewriteMapping}/{@link #executeChunkVectorProcessing} read,
+     * rather than duplicating the config lookup with a second, potentially divergent default.
      *
      * @return the value of {@code content_chunker.enabled} (default false)
      */
@@ -168,7 +494,7 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Fail-fast guard, run ONCE per {@link org.codelibs.fess.job.ChunkVectorJob} execution (not
+     * Fail-fast guard, run ONCE per {@link #executeChunkVectorProcessing()} run (not
      * once per document): compares the currently configured embedding dimension against the
      * dimension already baked into the live {@code content_chunk_vector} mapping. Both
      * {@link #getEmbeddingDimensionConfig()} and every {@code EmbeddingClient#getDimension()}
@@ -231,17 +557,76 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Reads back the {@code dimension} already baked into the live {@code content_chunk_vector}
-     * mapping from OpenSearch, mirroring {@code SearchEngineClient#addMapping}'s own
-     * {@code prepareGetMappings} usage so this reuses the same client/API convention rather than
-     * introducing a new one. Overridable seam for tests (constructing a real
-     * {@link GetMappingsResponse} requires a live cluster, which unit tests here do not stand up).
+     * Fail-fast guard, run once per {@link #executeChunkVectorProcessing()} run and only when
+     * embedding is active: confirms the live index actually carries the
+     * {@code content_chunk_vector} nested knn_vector mapping before any vector is written. That
+     * mapping is only ever spliced by {@link #rewriteMapping(String)} at index-creation time, so an
+     * index created while embedding was off (chunk-only mode, or a pre-feature version) has no such
+     * mapping -- and writing vectors into it would make OpenSearch dynamic-map
+     * {@code content_chunk_vector} as an ordinary (non-knn) object field: useless for kNN search
+     * and unfixable without a reindex. Skipping the run with a clear WARN instead surfaces the real
+     * remediation (recreate/reindex with embedding enabled).
      *
-     * @return the live mapping's vector dimension, or null if the {@code content_chunk_vector}
-     *         field is not present in any concrete index behind the update alias (e.g. no index
-     *         has been created yet)
+     * <p>Fails open (returns true, proceed) whenever presence cannot be confirmed either way --
+     * the mapping readback fails, or no index exists yet behind the update alias (index creation
+     * will splice the mapping, since embedding is enabled). Fails closed (returns false, caller
+     * must skip the run) only when an index's mapping confirmedly lacks a proper knn
+     * {@code content_chunk_vector} field: the field key is absent, or present without an
+     * extractable knn dimension (i.e. already dynamic-mapped junk).</p>
+     *
+     * @return true if the run may write vectors; false if the mapping is confirmedly absent or
+     *         malformed and the caller must skip this run entirely
      */
-    protected Integer readLiveMappingDimension() {
+    public boolean checkVectorMappingReady() {
+        if (!isContentChunkerEnabled()) {
+            return true;
+        }
+        final Map<String, MappingMetadata> mappings;
+        try {
+            mappings = readLiveMappings();
+        } catch (final Exception e) {
+            logger.warn("[ChunkVector] Failed to read back the live document mapping; skipping the {} mapping-presence check for "
+                    + "this run.", Constants.CONTENT_CHUNK_VECTOR_FIELD, e);
+            return true;
+        }
+        if (mappings == null || mappings.isEmpty()) {
+            // No index exists yet behind the update alias: index creation will splice the vector
+            // mapping via rewriteMapping (embedding is active on this run), so nothing to guard.
+            return true;
+        }
+        boolean confirmedNotReady = false;
+        for (final MappingMetadata metadata : mappings.values()) {
+            if (extractDimension(metadata) != null) {
+                // A proper nested knn_vector mapping with a dimension is present.
+                return true;
+            }
+            if (metadata != null && metadata.getSourceAsMap().get("properties") instanceof Map) {
+                // This index has a real properties map but no extractable knn vector dimension:
+                // the field is either absent or present as non-knn junk -- a confirmed miss, not
+                // an unknown.
+                confirmedNotReady = true;
+            }
+        }
+        if (confirmedNotReady) {
+            logger.warn("[ChunkVector] The live index has no usable {} knn_vector mapping (the index was likely created while "
+                    + "embedding was disabled/chunk-only, or by a version without this feature). Writing vectors now would "
+                    + "dynamic-map them as a non-knn field, so this run is skipped. Recreate or reindex the index with "
+                    + "embedding enabled so the mapping is created, then re-run.", Constants.CONTENT_CHUNK_VECTOR_FIELD);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Reads back the live document mappings for the update-index alias from OpenSearch, mirroring
+     * {@code SearchEngineClient#addMapping}'s own {@code prepareGetMappings} usage so this reuses
+     * the same client/API convention rather than introducing a new one. Overridable seam for tests
+     * (constructing a real {@link GetMappingsResponse} requires a live cluster, which unit tests
+     * here do not stand up).
+     *
+     * @return the per-index mapping metadata behind the update alias, possibly empty
+     */
+    protected Map<String, MappingMetadata> readLiveMappings() {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final GetMappingsResponse response = searchEngineClient.admin()
@@ -249,7 +634,19 @@ public class ChunkVectorHelper {
                 .prepareGetMappings(fessConfig.getIndexDocumentUpdateIndex())
                 .execute()
                 .actionGet(fessConfig.getIndexIndicesTimeout());
-        final Map<String, MappingMetadata> mappings = response.mappings();
+        return response.mappings();
+    }
+
+    /**
+     * Reads back the {@code dimension} already baked into the live {@code content_chunk_vector}
+     * mapping. Overridable seam for tests.
+     *
+     * @return the live mapping's vector dimension, or null if the {@code content_chunk_vector}
+     *         field is not present in any concrete index behind the update alias (e.g. no index
+     *         has been created yet)
+     */
+    protected Integer readLiveMappingDimension() {
+        final Map<String, MappingMetadata> mappings = readLiveMappings();
         if (mappings == null) {
             return null;
         }
@@ -466,6 +863,29 @@ public class ChunkVectorHelper {
      *         {@link #processDocument(String)}'s return value
      */
     public Map<String, Boolean> processBatch(final List<String> ids) {
+        return processBatch(ids, true);
+    }
+
+    /**
+     * Processes a batch of documents in the given run mode. With {@code embeddingActive} this is
+     * the full chunk+embed pipeline described on {@link #processBatch(List)}, plus the upgrade
+     * path: a document a prior chunk-only run left {@code content_chunk_status="chunked"} already
+     * stores its chunks as the content array, so those array elements are embedded DIRECTLY --
+     * never re-chunked, never joined ({@link #extractExistingChunks}). Without
+     * {@code embeddingActive} (chunk-only mode: embedding configured off), each document's content
+     * is chunked and written back as an array with {@code content_chunk_status="chunked"} and NO
+     * vector field, and no embedding call is ever made; a per-document failure is marked
+     * {@code "fail"} immediately (the mid-run provider-outage leniency in
+     * {@link #handleFailure(SearchEngineClient, FessConfig, Map, String, boolean)} cannot apply --
+     * there is no provider involved whose transient outage could explain the failure).
+     *
+     * @param ids the OpenSearch document {@code _id}s to process as one batch
+     * @param embeddingActive whether embedding is active for this run; false selects chunk-only mode
+     * @return a map from each input ID to whether it was successfully processed (or a terminal
+     *         failure durably recorded), using the same boolean semantics as
+     *         {@link #processDocument(String)}'s return value
+     */
+    public Map<String, Boolean> processBatch(final List<String> ids, final boolean embeddingActive) {
         final FessConfig fessConfig = getFessConfigForContentField();
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final Map<String, Boolean> results = new HashMap<>();
@@ -490,15 +910,24 @@ public class ChunkVectorHelper {
             }
             final List<String> chunks;
             try {
-                chunks = extractChunks(fessConfig, doc, id);
-                if (chunks == null) {
-                    results.put(id, markSkipped(searchEngineClient, fessConfig, doc, id));
-                    continue;
+                // Upgrade path (embedding runs only): a document a prior chunk-only run left
+                // status="chunked" already stores its chunks as the content array -- embed those
+                // elements directly, never re-chunk (chunk boundaries could shift) and never join.
+                final List<String> existingChunks = embeddingActive ? extractExistingChunks(fessConfig, doc) : null;
+                if (existingChunks != null) {
+                    chunks = existingChunks;
+                } else {
+                    final List<String> freshChunks = extractChunks(fessConfig, doc, id);
+                    if (freshChunks == null) {
+                        results.put(id, markSkipped(searchEngineClient, fessConfig, doc, id));
+                        continue;
+                    }
+                    chunks = freshChunks;
                 }
             } catch (final Exception e) {
                 logger.warn("[ChunkVector] Failed to process document. id={}", id, e);
                 try {
-                    results.put(id, handleFailure(searchEngineClient, fessConfig, doc, id));
+                    results.put(id, handleFailure(searchEngineClient, fessConfig, doc, id, embeddingActive));
                 } catch (final Exception inner) {
                     logger.warn("[ChunkVector] Failed to record failure state for document; giving up for this run. id={}", id, inner);
                     results.put(id, false);
@@ -513,6 +942,16 @@ public class ChunkVectorHelper {
         }
 
         if (entries.isEmpty()) {
+            return results;
+        }
+
+        if (!embeddingActive) {
+            // Chunk-only mode: write each document's chunk array with status="chunked" -- no
+            // vector field, no embedding call. A later embedding-enabled run picks these documents
+            // up via the pending query's status="chunked" clause and embeds the stored array.
+            for (final BatchEntry entry : entries) {
+                results.put(entry.id, storeChunkOnlyDocument(searchEngineClient, fessConfig, entry));
+            }
             return results;
         }
 
@@ -561,10 +1000,67 @@ public class ChunkVectorHelper {
                 results.put(entry.id, storeChunkedDocument(searchEngineClient, fessConfig, entry, entry.vectors));
             } catch (final Exception e) {
                 logger.warn("[ChunkVector] Failed to store document after batch embedding. id={}", entry.id, e);
-                results.put(entry.id, recordFailure(searchEngineClient, fessConfig, entry));
+                results.put(entry.id, recordFailure(searchEngineClient, fessConfig, entry, true));
             }
         }
         return results;
+    }
+
+    /**
+     * Extracts the already-stored chunk array from a document a prior chunk-only run left
+     * {@code content_chunk_status="chunked"}: for such a document the stored content array
+     * elements ARE the chunks, so an embedding-enabled run must embed them directly rather than
+     * re-chunking (chunk boundaries could shift) or joining them back into one string.
+     *
+     * @param fessConfig the fess config
+     * @param doc the fetched document map
+     * @return the stored chunk list, or null if this document is not an upgradable chunked
+     *         document (status not {@code "chunked"}, or -- defensively -- its content is not a
+     *         non-empty array, in which case the caller falls back to normal re-chunking)
+     */
+    private List<String> extractExistingChunks(final FessConfig fessConfig, final Map<String, Object> doc) {
+        if (!Constants.CHUNKED.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD))) {
+            return null;
+        }
+        final Object contentObj = doc.get(fessConfig.getIndexFieldContent());
+        if (!(contentObj instanceof List<?>) || ((List<?>) contentObj).isEmpty()) {
+            return null;
+        }
+        final List<?> contentList = (List<?>) contentObj;
+        final List<String> chunks = new ArrayList<>(contentList.size());
+        for (final Object element : contentList) {
+            chunks.add(String.valueOf(element));
+        }
+        return chunks;
+    }
+
+    /**
+     * CAS-writes one document back in chunk-only mode: content replaced by its chunk array,
+     * {@code content_chunk_status="chunked"}, and deliberately NO {@code content_chunk_vector}
+     * key -- no vector mapping may exist in this mode, and writing one would dynamic-map it as
+     * non-knn junk. Mirrors {@link #storeChunkedDocument}'s copy-then-mutate discipline so a store
+     * failure's {@link #handleFailure} write still operates on the originally-fetched content. A
+     * non-conflict store failure is marked {@code "fail"} immediately (embedding inactive: the
+     * provider-outage leniency cannot apply); even that failure write is guarded so this always
+     * resolves to a plain boolean.
+     *
+     * @param searchEngineClient the search engine client
+     * @param fessConfig the fess config
+     * @param entry the batch entry (originally-fetched doc + its own chunk list)
+     * @return true if the chunk-only write succeeded (or a terminal failure was durably
+     *         recorded); false if it lost a CAS race or even the failure write failed
+     */
+    private boolean storeChunkOnlyDocument(final SearchEngineClient searchEngineClient, final FessConfig fessConfig,
+            final BatchEntry entry) {
+        try {
+            final Map<String, Object> updatedDoc = new HashMap<>(entry.doc);
+            updatedDoc.put(fessConfig.getIndexFieldContent(), entry.chunks);
+            updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
+            return storeSafely(searchEngineClient, fessConfig, updatedDoc, entry.id);
+        } catch (final Exception e) {
+            logger.warn("[ChunkVector] Failed to store chunk-only document. id={}", entry.id, e);
+            return recordFailure(searchEngineClient, fessConfig, entry, false);
+        }
     }
 
     /**
@@ -610,7 +1106,7 @@ public class ChunkVectorHelper {
             return storeChunkedDocument(searchEngineClient, fessConfig, entry, vectors);
         } catch (final Exception e) {
             logger.warn("[ChunkVector] Failed to embed/store document individually after batch embedding failed. id={}", entry.id, e);
-            return recordFailure(searchEngineClient, fessConfig, entry);
+            return recordFailure(searchEngineClient, fessConfig, entry, true);
         }
     }
 
@@ -645,18 +1141,22 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Records a per-document processing failure via {@link #handleFailure} (its own CAS write),
-     * never letting handleFailure's own write failure escape --
-     * {@link #processBatch} must resolve every document to a plain boolean.
+     * Records a per-document processing failure via
+     * {@link #handleFailure(SearchEngineClient, FessConfig, Map, String, boolean)} (its own CAS
+     * write), never letting handleFailure's own write failure escape --
+     * {@link #processBatch(List, boolean)} must resolve every document to a plain boolean.
      *
      * @param searchEngineClient the search engine client
      * @param fessConfig the fess config
      * @param entry the batch entry whose failure is being recorded
-     * @return the result of {@link #handleFailure}, or false if even that write failed
+     * @param embeddingActive whether embedding is active for this run (gates the mid-run
+     *            provider-outage leniency in handleFailure)
+     * @return the result of handleFailure, or false if even that write failed
      */
-    private boolean recordFailure(final SearchEngineClient searchEngineClient, final FessConfig fessConfig, final BatchEntry entry) {
+    private boolean recordFailure(final SearchEngineClient searchEngineClient, final FessConfig fessConfig, final BatchEntry entry,
+            final boolean embeddingActive) {
         try {
-            return handleFailure(searchEngineClient, fessConfig, entry.doc, entry.id);
+            return handleFailure(searchEngineClient, fessConfig, entry.doc, entry.id, embeddingActive);
         } catch (final Exception inner) {
             logger.warn("[ChunkVector] Failed to record failure state for document; giving up for this run. id={}", entry.id, inner);
             return false;
@@ -745,13 +1245,32 @@ public class ChunkVectorHelper {
      */
     protected boolean handleFailure(final SearchEngineClient searchEngineClient, final FessConfig fessConfig, final Map<String, Object> doc,
             final String id) {
-        if (!isEmbeddingClientAvailable()) {
+        return handleFailure(searchEngineClient, fessConfig, doc, id, true);
+    }
+
+    /**
+     * Mode-aware variant of {@link #handleFailure(SearchEngineClient, FessConfig, Map, String)}:
+     * the mid-run provider-outage leniency (leave the document pending, no write) only applies
+     * when embedding is active -- in chunk-only mode no embedding provider is involved, so a
+     * transient provider outage can never explain a failure and every failure is a genuine
+     * per-document one, marked {@code content_chunk_status="fail"} immediately.
+     *
+     * @param searchEngineClient the search engine client
+     * @param fessConfig the fess config
+     * @param doc the document map read before the failure occurred
+     * @param id the document ID
+     * @param embeddingActive whether embedding is active for this run
+     * @return the result of {@link #storeSafely}
+     */
+    protected boolean handleFailure(final SearchEngineClient searchEngineClient, final FessConfig fessConfig, final Map<String, Object> doc,
+            final String id, final boolean embeddingActive) {
+        if (embeddingActive && !isEmbeddingClientAvailable()) {
             // The embedding provider is unreachable RIGHT NOW -- it died mid-run, after
-            // ChunkVectorJob#execute()'s pre-flight availability gate had already passed. Every
-            // pending document's embed call is now failing purely because of this transient outage,
-            // not because the document itself is unprocessable. Marking these outage failures would
-            // durably stamp the whole corpus content_chunk_status=fail (which
-            // ChunkVectorJob#buildPendingQuery then excludes forever, recoverable only by a full
+            // executeChunkVectorProcessing()'s pre-flight availability gate had already passed.
+            // Every pending document's embed call is now failing purely because of this transient
+            // outage, not because the document itself is unprocessable. Marking these outage
+            // failures would durably stamp the whole corpus content_chunk_status=fail (which
+            // the pending query then excludes forever, recoverable only by a full
             // recrawl). Leave the document pending instead -- no status write, no CAS write at all --
             // so it is retried unchanged once the provider recovers; the next run's pre-flight gate
             // then skips the run entirely while the outage persists. A genuine poison document
@@ -776,8 +1295,8 @@ public class ChunkVectorHelper {
      * path keys on "done" to treat {@code content} as a chunk array) — via the same CAS path as the
      * success/failure writes, and never overwrites the document's content, so
      * it stays available to keyword search and display. This takes the document out of
-     * {@code ChunkVectorJob#buildPendingQuery}'s pending set (which excludes any document whose
-     * {@code content_chunk_status} is set), so it is no longer re-fetched every run — preventing
+     * {@link #buildPendingQuery(boolean)}'s pending set (which excludes any document whose
+     * {@code content_chunk_status} is set, other than "chunked" on embedding runs), so it is no longer re-fetched every run — preventing
      * perpetual reprocessing and, once such documents exceed the per-run cap, starvation of genuinely
      * pending documents. A later recrawl clears the status (full {@code _source} replace), so a document
      * whose content later becomes chunkable is reprocessed.
@@ -914,10 +1433,11 @@ public class ChunkVectorHelper {
      * document was already processed by a prior run and its {@code content}
      * is now a chunk array rather than a single string -- joining the
      * elements directly avoids Java's bracket-comma-space {@code List#toString()}
-     * format, which would be nonsense as re-chunking input. This path is not
-     * reachable in practice today ({@code ChunkVectorJob#buildPendingQuery()}
-     * excludes any document with {@code content_chunk_status} set), but is
-     * kept defensive for a future re-embed maintenance job.
+     * format, which would be nonsense as re-chunking input. Documents a chunk-only
+     * run left {@code "chunked"} normally never reach this join on an embedding run
+     * ({@link #processBatch(List, boolean)} embeds their stored array elements directly via its
+     * upgrade path), so this remains a defensive fallback for a malformed chunked document or a
+     * future re-embed maintenance job.
      *
      * @param contentObj the raw {@code content} field value
      * @return the reconstructed content string
@@ -964,7 +1484,7 @@ public class ChunkVectorHelper {
      * {@link #handleFailure} can tell a transient provider outage (leave the document pending) apart
      * from a genuine per-document failure (mark it failed). Delegates to
      * {@link EmbeddingClientManager#available()} -- the same cached availability the RAG read path and
-     * {@link org.codelibs.fess.job.ChunkVectorJob}'s pre-flight gate use. Overridable seam for tests.
+     * {@link #executeChunkVectorProcessing()}'s pre-flight gate use. Overridable seam for tests.
      *
      * @return true if the embedding provider is available
      */

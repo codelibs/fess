@@ -1124,6 +1124,509 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         }
     }
 
+    // ===================================================================================
+    //                                        chunk-only write mode (Phase C)
+    //                                        ================================================
+    // When embedding is configured off (content_chunker.embedding.name=none, or no client
+    // registered), processBatch(ids, false) must chunk the content and write it back as an array
+    // with content_chunk_status="chunked" -- NO vector key, NO embedding call.
+
+    @Test
+    public void test_processBatch_chunkOnly_writesChunkArrayAndChunkedStatusWithoutVectors() {
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", "original content");
+        searchEngineClient.documentToReturn = doc;
+        helper.testChunks = List.of("c1", "c2");
+        helper.testEmbedFailure = new RuntimeException("embedding must never be attempted in chunk-only mode");
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-1"), false);
+
+        assertTrue(results.get("doc-1"), "the chunk-only write must succeed");
+        assertEquals("exactly one (chunk-only) write must happen", 1, searchEngineClient.storeCallCount);
+        final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
+        assertEquals("the content must be replaced by the chunk array", List.of("c1", "c2"), stored.get("content"));
+        assertEquals(Constants.CHUNKED, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD),
+                "chunk-only mode must not write ANY vector key -- no vector mapping exists, and a write would dynamic-map junk");
+        assertTrue(helper.embedCalls.isEmpty(), "chunk-only mode must never call the embedding client");
+    }
+
+    @Test
+    public void test_processBatch_chunkOnly_blankContent_stillMarksSkipped() {
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", "   ");
+        searchEngineClient.documentToReturn = doc;
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-1"), false);
+
+        assertTrue(results.get("doc-1"), "an unchunkable document must be marked skipped in chunk-only mode too");
+        assertEquals(1, searchEngineClient.storeCallCount);
+        assertEquals(Constants.SKIPPED, searchEngineClient.lastStoredDoc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals("blank content must be left intact", "   ", searchEngineClient.lastStoredDoc.get("content"));
+        assertTrue(helper.embedCalls.isEmpty(), "no embedding call in chunk-only mode");
+    }
+
+    @Test
+    public void test_processBatch_chunkOnly_nonConflictStoreFailure_marksFailedDespiteEmbeddingUnavailable() {
+        // In chunk-only mode a store failure is a genuine per-document failure: the mid-run
+        // provider-outage leniency (handleFailure leaving the doc pending when available()==false)
+        // must NOT apply, because no embedding provider is involved at all -- available() is false
+        // by definition in this mode, and treating that as an outage would make chunk-only failures
+        // permanently silent. The failure write must happen immediately.
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", "original content");
+        searchEngineClient.documentToReturn = doc;
+        helper.testChunks = List.of("c1");
+        helper.testEmbeddingAvailable = false; // embedding provider "unavailable" -- irrelevant in chunk-only mode
+        searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
+                new RuntimeException("mapper_parsing_exception: failed to parse field [content]"));
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-1"), false);
+
+        assertTrue(results.get("doc-1"), "the failure-status write should still succeed and return true");
+        assertEquals("the failed chunk-only write must be followed by the failure write", 2, searchEngineClient.storeCallCount);
+        final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
+        assertEquals("a chunk-only failure must be marked failed IMMEDIATELY -- the provider-outage leniency cannot apply", Constants.FAIL,
+                stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals("the failure write must carry the ORIGINAL content, not the chunk array", "original content", stored.get("content"));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD));
+    }
+
+    // ===================================================================================
+    //                                        upgrade path: chunked -> done (Phase C)
+    //                                        ================================================
+
+    @Test
+    public void test_processBatch_upgradeChunkedDoc_embedsStoredArrayDirectlyWithoutRechunking() {
+        // A document a prior chunk-only run left status="chunked": its content array elements ARE
+        // the chunks. An embedding-active run must embed them directly -- the chunker must never
+        // run (re-chunking could shift boundaries out of sync with nothing gained) and the array
+        // must never be joined back into one string.
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", List.of("c1", "c2"));
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
+        searchEngineClient.documentToReturn = doc;
+        helper.testVectorsByChunk.put("c1", new float[] { 1f });
+        helper.testVectorsByChunk.put("c2", new float[] { 2f });
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-1"), true);
+
+        assertTrue(results.get("doc-1"), "the upgrade write must succeed");
+        assertNull(helper.lastSplitInput, "the chunker must NEVER run for a chunked document -- its array elements are the chunks");
+        assertEquals("the stored array elements must be embedded directly, in order", List.of(List.of("c1", "c2")), helper.embedCalls);
+        assertEquals(1, searchEngineClient.storeCallCount);
+        final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
+        assertEquals(Constants.DONE, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals("the chunk array must be preserved unchanged", List.of("c1", "c2"), stored.get("content"));
+        assertVectorMarkers(stored, 1f, 2f);
+    }
+
+    @Test
+    public void test_processBatch_chunkedDocWithNonArrayContent_fallsBackToRechunking() {
+        // Defensive: a status="chunked" document whose content is (unexpectedly) a plain string has
+        // no stored chunk array to embed -- it must fall back to the normal re-chunk pipeline
+        // rather than failing or embedding garbage.
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", "plain string content");
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
+        searchEngineClient.documentToReturn = doc;
+        helper.testChunks = List.of("rechunked");
+        helper.testVectorsByChunk.put("rechunked", new float[] { 9f });
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-1"), true);
+
+        assertTrue(results.get("doc-1"));
+        assertEquals("the malformed chunked document must be re-chunked from its string content", "plain string content",
+                helper.lastSplitInput);
+        assertEquals(Constants.DONE, searchEngineClient.lastStoredDoc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+    }
+
+    // ===================================================================================
+    //                                        pending query per run mode (Phase C)
+    //                                        ================================================
+
+    @Test
+    public void test_buildPendingQuery_chunkOnly_statusAbsentOnly() {
+        final String json = helper.buildPendingQuery(false).toString();
+        assertTrue(json.contains("must_not"), "status-absent condition must be a must_not clause: " + json);
+        assertTrue(json.contains("exists"), "should use an exists query on content_chunk_status: " + json);
+        assertTrue(json.contains("content_chunk_status"), "should reference content_chunk_status: " + json);
+        assertFalse(json.contains("\"chunked\""),
+                "chunk-only runs must NOT pick chunked documents back up -- chunked is their terminal state: " + json);
+        assertFalse(json.contains("content_chunk_retry_count"), "the retry-count clause was removed with the retry counter: " + json);
+    }
+
+    @Test
+    public void test_buildPendingQuery_embeddingActive_alsoMatchesChunkedUpgradeDocs() {
+        final String json = helper.buildPendingQuery(true).toString();
+        assertTrue(json.contains("must_not"), "the status-absent branch must be retained: " + json);
+        assertTrue(json.contains("exists"), json);
+        assertTrue(json.contains("should"), "the two branches must be OR-ed via should clauses: " + json);
+        assertTrue(json.contains("\"chunked\""),
+                "embedding runs must also pick up documents a chunk-only run left status=chunked (the upgrade path): " + json);
+        assertTrue(json.contains("minimum_should_match"), "at least one should branch must be required to match: " + json);
+    }
+
+    // ===================================================================================
+    //                                        vector-mapping-presence guard (Phase C)
+    //                                        ================================================
+    // An index created while embedding was off (chunk-only, or a pre-feature version) never had
+    // the content_chunk_vector knn_vector mapping spliced. Writing vectors into it would
+    // dynamic-map them as useless non-knn junk, so checkVectorMappingReady() must fail closed on
+    // a CONFIRMED miss -- and fail open whenever presence cannot be determined.
+
+    @Test
+    public void test_checkVectorMappingReady_disabled_returnsTrue() {
+        helper.setTestEnabled(false);
+        helper.testLiveMappings = Map.of("fess.20260101", mappingWithoutVectorField());
+        assertTrue(helper.checkVectorMappingReady(), "disabled content chunking must never block a run");
+    }
+
+    @Test
+    public void test_checkVectorMappingReady_readbackFails_failsOpen() {
+        helper.setTestEnabled(true);
+        helper.testReadLiveMappingsFailure = new RuntimeException("cluster unreachable");
+        assertTrue(helper.checkVectorMappingReady(), "a failed mapping readback must fail open, not block the run");
+    }
+
+    @Test
+    public void test_checkVectorMappingReady_noIndexYet_failsOpen() {
+        helper.setTestEnabled(true);
+        helper.testLiveMappings = Map.of(); // no index behind the update alias yet
+        assertTrue(helper.checkVectorMappingReady(),
+                "with no index yet, creation will splice the mapping (embedding active) -- must not block the run");
+    }
+
+    @Test
+    public void test_checkVectorMappingReady_properKnnMappingPresent_returnsTrue() {
+        helper.setTestEnabled(true);
+        helper.testLiveMappings = Map.of("fess.20260101", mappingWithKnnVector(768));
+        assertTrue(helper.checkVectorMappingReady(), "a proper nested knn_vector mapping with a dimension must pass");
+    }
+
+    @Test
+    public void test_checkVectorMappingReady_vectorFieldAbsent_returnsFalse() {
+        // The chunk-only / pre-feature index shape: real properties, no content_chunk_vector at
+        // all. This is a CONFIRMED miss -- the run must be blocked before the first vector write
+        // dynamic-maps the field as non-knn junk.
+        helper.setTestEnabled(true);
+        helper.testLiveMappings = Map.of("fess.20260101", mappingWithoutVectorField());
+        assertFalse(helper.checkVectorMappingReady(),
+                "a confirmed absent content_chunk_vector mapping must block the run (vectors would be dynamic-mapped as non-knn junk)");
+    }
+
+    @Test
+    public void test_checkVectorMappingReady_vectorFieldPresentButNonKnn_returnsFalse() {
+        // The field exists but as already-dynamic-mapped junk (an object field whose vector
+        // sub-field has no knn dimension) -- also a confirmed unusable mapping.
+        final Map<String, Object> vectorSubField = new HashMap<>();
+        vectorSubField.put("type", "float"); // dynamic-mapped, NOT knn_vector, no dimension
+        final Map<String, Object> vectorFieldProperties = new HashMap<>();
+        vectorFieldProperties.put(ChunkVectorHelper.VECTOR_SUBFIELD, vectorSubField);
+        final Map<String, Object> vectorField = new HashMap<>();
+        vectorField.put("properties", vectorFieldProperties);
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorField);
+        properties.put("content", Map.of("type", "text"));
+        final Map<String, Object> source = new HashMap<>();
+        source.put("properties", properties);
+
+        helper.setTestEnabled(true);
+        helper.testLiveMappings = Map.of("fess.20260101", new MappingMetadata("_doc", source));
+
+        assertFalse(helper.checkVectorMappingReady(), "a non-knn (dynamic-mapped junk) content_chunk_vector mapping must block the run");
+    }
+
+    private MappingMetadata mappingWithKnnVector(final int dimension) {
+        final Map<String, Object> vectorSubField = new HashMap<>();
+        vectorSubField.put("type", "knn_vector");
+        vectorSubField.put("dimension", dimension);
+        final Map<String, Object> vectorFieldProperties = new HashMap<>();
+        vectorFieldProperties.put(ChunkVectorHelper.VECTOR_SUBFIELD, vectorSubField);
+        final Map<String, Object> vectorField = new HashMap<>();
+        vectorField.put("type", "nested");
+        vectorField.put("properties", vectorFieldProperties);
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorField);
+        properties.put("content", Map.of("type", "text"));
+        final Map<String, Object> source = new HashMap<>();
+        source.put("properties", properties);
+        return new MappingMetadata("_doc", source);
+    }
+
+    private MappingMetadata mappingWithoutVectorField() {
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put("content", Map.of("type", "text"));
+        final Map<String, Object> source = new HashMap<>();
+        source.put("properties", properties);
+        return new MappingMetadata("_doc", source);
+    }
+
+    // ===================================================================================
+    //                                        executeChunkVectorProcessing: run-mode gates (Phase C)
+    //                                        ================================================
+    // Formerly ChunkVectorJobTest's execute() tests -- the job is now a thin shell delegating to
+    // this helper entry, so the whole run loop (gates, scroll, partition, bounded concurrency) is
+    // asserted here once.
+
+    @Test
+    public void test_executeChunkVectorProcessing_contentChunkerDisabled_isCompleteNoOp() {
+        final RunLoopHelper run = new RunLoopHelper();
+        run.contentChunkerEnabled = false;
+        run.idsToReturn = List.of("doc-1", "doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertFalse(run.checkDimensionConsistencyCalled, "a disabled content chunker must return before even the dimension check");
+        assertFalse(run.scrollPendingIdsCalled, "a disabled content chunker must never scroll for pending documents");
+        assertTrue(run.processedIds.isEmpty(), "no document may be touched when chunking is disabled: " + run.processedIds);
+        assertTrue(result.toLowerCase(java.util.Locale.ROOT).contains("disabled"),
+                "the skip result message must indicate chunking is disabled: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_transientOutage_skipsRunEntirely() {
+        // Embedding is CONFIGURED (a client is registered) but its liveness ping fails -- a
+        // transient outage. The run must be skipped outright: no scroll, no writes -- and it must
+        // NEVER degrade into chunk-only mode, which would rewrite the corpus without vectors.
+        final RunLoopHelper run = new RunLoopHelper();
+        run.embeddingConfigured = true;
+        run.embeddingAvailable = false;
+        run.idsToReturn = List.of("doc-1", "doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertFalse(run.scrollPendingIdsCalled, "a transient provider outage must skip the run entirely -- nothing may be scrolled");
+        assertTrue(run.processedIds.isEmpty(), "no document may be touched (no status written) during a provider outage");
+        assertNull(run.batchEmbeddingActive, "a transient outage must NEVER flip the run into chunk-only processing");
+        assertTrue(result.toLowerCase(java.util.Locale.ROOT).contains("not available"),
+                "the skip result message must indicate the embedding provider is not available: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_embeddingNotConfigured_runsChunkOnly() {
+        // content_chunker.embedding.name=none (or no client registered): the run proceeds in
+        // chunk-only mode -- the availability gate and the two embedding-only guards
+        // (dimension consistency, vector-mapping presence) are all irrelevant and must be skipped.
+        final RunLoopHelper run = new RunLoopHelper();
+        run.embeddingConfigured = false;
+        run.embeddingAvailable = false; // irrelevant: must not even be consulted
+        run.idsToReturn = List.of("doc-1", "doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertFalse(run.embeddingAvailabilityChecked, "the availability gate is embedding-only and must not run in chunk-only mode");
+        assertFalse(run.checkDimensionConsistencyCalled, "the dimension guard is embedding-only and must not run in chunk-only mode");
+        assertFalse(run.checkVectorMappingReadyCalled, "the mapping guard is embedding-only and must not run in chunk-only mode");
+        assertTrue(run.scrollPendingIdsCalled, "chunk-only mode must still scroll and process pending documents");
+        assertEquals("the scroll must use the chunk-only pending query (no chunked upgrade clause)", Boolean.FALSE,
+                run.scrolledEmbeddingActive);
+        assertEquals("every batch must be processed in chunk-only mode", Boolean.FALSE, run.batchEmbeddingActive);
+        assertEquals(2, run.processedIds.size());
+        assertTrue(result.contains("Processed 2"), "should report both documents processed: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_embeddingActive_runsAllGatesAndUpgradeQuery() {
+        final RunLoopHelper run = new RunLoopHelper();
+        run.idsToReturn = List.of("doc-1", "doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertTrue(run.embeddingAvailabilityChecked, "an embedding run must pass the availability gate");
+        assertTrue(run.checkDimensionConsistencyCalled, "an embedding run must run the dimension-consistency check");
+        assertTrue(run.checkVectorMappingReadyCalled, "an embedding run must run the vector-mapping-presence check");
+        assertEquals("the scroll must use the widened pending query including chunked upgrade docs", Boolean.TRUE,
+                run.scrolledEmbeddingActive);
+        assertEquals(Boolean.TRUE, run.batchEmbeddingActive);
+        assertEquals(2, run.processedIds.size());
+        assertTrue(result.contains("Processed 2"), result);
+        assertTrue(result.contains("Succeeded: 2"), result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_dimensionMismatch_skipsRunWithoutScrolling() {
+        final RunLoopHelper run = new RunLoopHelper();
+        run.dimensionOk = false;
+        run.idsToReturn = List.of("doc-1", "doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertFalse(run.scrollPendingIdsCalled, "a confirmed dimension mismatch must skip scrolling entirely");
+        assertTrue(run.processedIds.isEmpty(), "no document may be touched when the run is skipped: " + run.processedIds);
+        assertTrue(result.toLowerCase(java.util.Locale.ROOT).contains("dimension mismatch"),
+                "the skip result message must mention the dimension mismatch: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_vectorMappingAbsent_skipsRunWithoutScrolling() {
+        // The live index confirmedly lacks the content_chunk_vector knn mapping (created while
+        // embedding was off). The embedding run must be skipped -- writing would dynamic-map junk.
+        final RunLoopHelper run = new RunLoopHelper();
+        run.vectorMappingReady = false;
+        run.idsToReturn = List.of("doc-1", "doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertFalse(run.scrollPendingIdsCalled, "an absent vector mapping must skip the embedding run entirely");
+        assertTrue(run.processedIds.isEmpty(), "no document may be touched when the run is skipped: " + run.processedIds);
+        assertTrue(result.contains("content_chunk_vector"), "the skip result message must name the missing mapping: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_aggregatesBatchResultsIntoCounters() {
+        final RunLoopHelper run = new RunLoopHelper();
+        run.idsToReturn = List.of("doc-1", "doc-2", "doc-3", "doc-4");
+        run.batchResult = false;
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertEquals(4, run.processedIds.size());
+        assertTrue(result.contains("Processed 4"), "should report four processed documents: " + result);
+        assertTrue(result.contains("Succeeded: 0"), "batchResult=false should count all as failed: " + result);
+        assertTrue(result.contains("Failed/Skipped: 4"), result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_noPendingDocuments_returnsZeroSummary() {
+        final RunLoopHelper run = new RunLoopHelper();
+        run.idsToReturn = List.of();
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertTrue(result.contains("Processed 0"), "should report zero processed documents: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_boundsConcurrencyUnderRealContention() {
+        final int concurrency = 3;
+        final int taskCount = 15;
+        final ConcurrencyTrackingHelper run = new ConcurrencyTrackingHelper();
+        run.concurrency = concurrency;
+        final List<String> ids = new ArrayList<>();
+        for (int i = 0; i < taskCount; i++) {
+            ids.add("doc-" + i);
+        }
+        run.idsToReturn = ids;
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertTrue(run.maxObserved.get() <= concurrency, "observed concurrency " + run.maxObserved.get()
+                + " must never exceed the configured cap " + concurrency + " -- the pool must be genuinely bounded");
+        assertTrue(run.maxObserved.get() > 1,
+                "expected genuine overlap under contention (maxObserved=" + run.maxObserved.get()
+                        + "); a test that never observes concurrency > 1 cannot distinguish a bounded pool of size " + concurrency
+                        + " from an accidentally-serial implementation");
+        assertTrue(result.contains("Processed " + taskCount), "should report all " + taskCount + " processed: " + result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_isolatesExceptionInOneBatchFromOthers() {
+        final FaultInjectingHelper run = new FaultInjectingHelper();
+        run.idsToReturn = List.of("doc-1", "doc-2", "doc-3");
+        run.failingIds.add("doc-2");
+
+        final String result = run.executeChunkVectorProcessing();
+
+        assertEquals("all three ids should have been attempted despite one throwing: " + run.processedIds, 3, run.processedIds.size());
+        assertTrue(result.contains("Processed 3"), "should report three attempted documents: " + result);
+        assertTrue(result.contains("Succeeded: 2"), "the two non-throwing documents should still succeed: " + result);
+        assertTrue(result.contains("Failed/Skipped: 1"),
+                "the thrown exception must be isolated and counted as failed, not crash the whole run: " + result);
+    }
+
+    // ===================================================================================
+    //                                        scrollPendingIds / partitionIds / defaults (Phase C)
+    //                                        ================================================
+
+    @Test
+    public void test_scrollPendingIds_queriesUpdateIndexNotSearchIndex() {
+        searchEngineClient.scrollSourcesToReturn = List.of(Map.of("id", "doc-1"), Map.of("id", "doc-2"));
+
+        final ScrollTestFessConfig fessConfig = new ScrollTestFessConfig();
+        fessConfig.updateIndex = "fess.update";
+        fessConfig.searchIndex = "fess.search";
+        ComponentUtil.setFessConfig(fessConfig);
+        try {
+            final List<String> ids = helper.scrollPendingIds(true);
+
+            assertEquals(
+                    "must scroll the update-index alias, matching PurgeDocJob/UpdateLabelJob -- not the search-index alias, "
+                            + "which can diverge from the update alias during a blue-green crawl/reindex swap",
+                    "fess.update", searchEngineClient.capturedScrollIndex);
+            assertEquals(List.of("doc-1", "doc-2"), ids);
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_scrollPendingIds_capsAtMaxDocumentsPerRun() {
+        final List<Map<String, Object>> sources = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            sources.add(Map.of("id", "doc-" + i));
+        }
+        searchEngineClient.scrollSourcesToReturn = sources;
+
+        final ScrollTestFessConfig fessConfig = new ScrollTestFessConfig();
+        fessConfig.updateIndex = "fess.update";
+        ComponentUtil.setFessConfig(fessConfig);
+        try {
+            // Cap the per-run collection at 3: a large-corpus scroll must stop accumulating once the
+            // cap is reached rather than materializing every matching ID (the OOM guard).
+            final ChunkVectorHelper capped = new ChunkVectorHelper() {
+                @Override
+                protected int getJobMaxDocumentsPerRun() {
+                    return 3;
+                }
+            };
+
+            final List<String> ids = capped.scrollPendingIds(false);
+
+            assertEquals(3, ids.size(), "scroll collection must stop once the per-run document cap is reached, bounding memory");
+            assertEquals(List.of("doc-0", "doc-1", "doc-2"), ids);
+            assertTrue(searchEngineClient.cursorAppliedCount <= 3,
+                    "the scroll cursor must not keep being invoked after the cap is reached (it was invoked "
+                            + searchEngineClient.cursorAppliedCount
+                            + " times) -- the scroll must actually stop, not drain the whole result set");
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_jobLoopDefaults_matchNamingSummary() {
+        assertEquals(2, helper.getConcurrency());
+        assertEquals(20, helper.getJobBulkSize());
+        assertEquals(10000, helper.getJobMaxDocumentsPerRun());
+    }
+
+    @Test
+    public void test_partitionIds_groupsIntoBulkSizedBatchesWithFinalPartialGroup() {
+        final List<String> ids = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            ids.add("doc-" + i);
+        }
+
+        final List<List<String>> batches = helper.partitionIds(ids, 3);
+
+        assertEquals(3, batches.size(), "7 ids at bulk size 3 should yield 3 batches (3+3+1)");
+        assertEquals(List.of("doc-0", "doc-1", "doc-2"), batches.get(0));
+        assertEquals(List.of("doc-3", "doc-4", "doc-5"), batches.get(1));
+        assertEquals("the final partial group must contain the remainder", List.of("doc-6"), batches.get(2));
+    }
+
+    @Test
+    public void test_partitionIds_exactMultipleOfBulkSize_noPartialGroup() {
+        final List<String> ids = List.of("doc-0", "doc-1", "doc-2", "doc-3");
+
+        final List<List<String>> batches = helper.partitionIds(ids, 2);
+
+        assertEquals(2, batches.size());
+        assertEquals(List.of("doc-0", "doc-1"), batches.get(0));
+        assertEquals(List.of("doc-2", "doc-3"), batches.get(1));
+    }
+
     /**
      * Asserts that a stored document's {@code content_chunk_vector} list has exactly
      * {@code expectedMarkers.length} single-float vectors, equal in order to {@code expectedMarkers}.
@@ -1166,10 +1669,28 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         /** If true, {@link #throwOnStore} fires on every call; otherwise it fires once and is cleared. */
         boolean throwOnStoreAlways = false;
         RuntimeException throwOnGetDocument;
+        /** Captures the index {@link ChunkVectorHelper#scrollPendingIds(boolean)} scrolls, and feeds
+         * back {@link #scrollSourcesToReturn} (mirrors {@code PurgeDocJobTest}'s fake pattern). */
+        String capturedScrollIndex;
+        List<Map<String, Object>> scrollSourcesToReturn = List.of();
+        int cursorAppliedCount = 0;
 
         @Override
         public void addDocumentMappingRewriteRule(final UnaryOperator<String> rule) {
             mappingRules.add(rule);
+        }
+
+        @Override
+        public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+                final org.codelibs.fess.util.BooleanFunction<Map<String, Object>> cursor) {
+            capturedScrollIndex = index;
+            for (final Map<String, Object> source : scrollSourcesToReturn) {
+                cursorAppliedCount++;
+                if (!cursor.apply(source)) {
+                    break;
+                }
+            }
+            return scrollSourcesToReturn.size();
         }
 
         @Override
@@ -1355,6 +1876,11 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         Integer testLiveDimension;
         /** When set, makes {@link #readLiveMappingDimension} throw instead of returning {@link #testLiveDimension}. */
         RuntimeException testReadLiveMappingDimensionFailure;
+        /** Seam value for {@link #readLiveMappings} (the {@code checkVectorMappingReady} readback);
+         * null or empty simulates no index behind the update alias yet. */
+        Map<String, MappingMetadata> testLiveMappings;
+        /** When set, makes {@link #readLiveMappings} throw instead of returning {@link #testLiveMappings}. */
+        RuntimeException testReadLiveMappingsFailure;
 
         @Override
         protected Integer readLiveMappingDimension() {
@@ -1362,6 +1888,14 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
                 throw testReadLiveMappingDimensionFailure;
             }
             return testLiveDimension;
+        }
+
+        @Override
+        protected Map<String, MappingMetadata> readLiveMappings() {
+            if (testReadLiveMappingsFailure != null) {
+                throw testReadLiveMappingsFailure;
+            }
+            return testLiveMappings;
         }
 
         @Override
@@ -1413,6 +1947,173 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         @Override
         protected FessConfig getFessConfigForContentField() {
             return super.getFessConfigForContentField();
+        }
+    }
+
+    /**
+     * A {@link ChunkVectorHelper} whose run-mode inputs (chunker enabled, embedding configured,
+     * embedding available, dimension consistency, vector-mapping presence) and run internals
+     * (scroll, batch processing) are all controlled/observed via plain fields, so
+     * {@link ChunkVectorHelper#executeChunkVectorProcessing()}'s gate ordering and mode
+     * resolution can be asserted independently of the real config, cluster, and providers.
+     */
+    private static class RunLoopHelper extends ChunkVectorHelper {
+        boolean contentChunkerEnabled = true;
+        boolean embeddingConfigured = true;
+        boolean embeddingAvailable = true;
+        boolean dimensionOk = true;
+        boolean vectorMappingReady = true;
+        List<String> idsToReturn = List.of();
+        boolean batchResult = true;
+        boolean scrollPendingIdsCalled = false;
+        Boolean scrolledEmbeddingActive;
+        boolean checkDimensionConsistencyCalled = false;
+        boolean checkVectorMappingReadyCalled = false;
+        boolean embeddingAvailabilityChecked = false;
+        volatile Boolean batchEmbeddingActive;
+        final List<String> processedIds = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+        @Override
+        public boolean isContentChunkerEnabled() {
+            return contentChunkerEnabled;
+        }
+
+        @Override
+        protected boolean isEmbeddingConfigured() {
+            return embeddingConfigured;
+        }
+
+        @Override
+        protected boolean isEmbeddingClientAvailable() {
+            embeddingAvailabilityChecked = true;
+            return embeddingAvailable;
+        }
+
+        @Override
+        public boolean checkDimensionConsistency() {
+            checkDimensionConsistencyCalled = true;
+            return dimensionOk;
+        }
+
+        @Override
+        public boolean checkVectorMappingReady() {
+            checkVectorMappingReadyCalled = true;
+            return vectorMappingReady;
+        }
+
+        @Override
+        protected List<String> scrollPendingIds(final boolean embeddingActive) {
+            scrollPendingIdsCalled = true;
+            scrolledEmbeddingActive = embeddingActive;
+            return idsToReturn;
+        }
+
+        @Override
+        public Map<String, Boolean> processBatch(final List<String> ids, final boolean embeddingActive) {
+            batchEmbeddingActive = embeddingActive;
+            final Map<String, Boolean> results = new HashMap<>();
+            for (final String id : ids) {
+                processedIds.add(id);
+                results.put(id, batchResult);
+            }
+            return results;
+        }
+
+        @Override
+        protected int getConcurrency() {
+            return 2;
+        }
+    }
+
+    /**
+     * Tracks the actual number of concurrently in-flight {@code processBatch} calls via a real
+     * {@code Thread.sleep}, so the concurrency bound can be verified under genuine thread
+     * contention rather than inferred from fast, effectively-sequential calls. Forces
+     * {@code getJobBulkSize()} to 1 so each document becomes its own batch/task.
+     */
+    private static final class ConcurrencyTrackingHelper extends RunLoopHelper {
+        int concurrency = 2;
+        final java.util.concurrent.atomic.AtomicInteger current = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger maxObserved = new java.util.concurrent.atomic.AtomicInteger();
+
+        @Override
+        protected int getConcurrency() {
+            return concurrency;
+        }
+
+        @Override
+        protected int getJobBulkSize() {
+            return 1;
+        }
+
+        @Override
+        public Map<String, Boolean> processBatch(final List<String> ids, final boolean embeddingActive) {
+            final int inFlight = current.incrementAndGet();
+            maxObserved.updateAndGet(prev -> Math.max(prev, inFlight));
+            try {
+                Thread.sleep(50L);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                current.decrementAndGet();
+            }
+            final Map<String, Boolean> results = new HashMap<>();
+            for (final String id : ids) {
+                results.put(id, true);
+            }
+            return results;
+        }
+    }
+
+    /**
+     * Deterministically throws from {@code processBatch} for a configured subset of IDs. Forces
+     * {@code getJobBulkSize()} to 1 so a synthetic whole-batch failure for one document's batch
+     * is isolated from the other (single-document) batches.
+     */
+    private static final class FaultInjectingHelper extends RunLoopHelper {
+        final Set<String> failingIds = new HashSet<>();
+
+        @Override
+        protected int getJobBulkSize() {
+            return 1;
+        }
+
+        @Override
+        public Map<String, Boolean> processBatch(final List<String> ids, final boolean embeddingActive) {
+            final Map<String, Boolean> results = new HashMap<>();
+            for (final String id : ids) {
+                processedIds.add(id);
+                if (failingIds.contains(id)) {
+                    throw new RuntimeException("synthetic failure for " + id);
+                }
+                results.put(id, true);
+            }
+            return results;
+        }
+    }
+
+    /**
+     * Minimal {@link FessConfig} for the {@code scrollPendingIds} tests: distinct update/search
+     * index names so scrolling the wrong alias is detectable, plus the ID field name.
+     */
+    private static final class ScrollTestFessConfig extends FessConfig.SimpleImpl {
+        private static final long serialVersionUID = 1L;
+        String updateIndex;
+        String searchIndex;
+
+        @Override
+        public String getIndexDocumentUpdateIndex() {
+            return updateIndex;
+        }
+
+        @Override
+        public String getIndexDocumentSearchIndex() {
+            return searchIndex;
+        }
+
+        @Override
+        public String getIndexFieldId() {
+            return "id";
         }
     }
 }
