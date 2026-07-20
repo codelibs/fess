@@ -165,9 +165,13 @@ function buildResultCard(d, queryId, order) {
   //   li#result{n}
   //     h3.title.text-truncate > a.link[data-uri,data-id,data-order]
   //     div.body > (div.me-3 > a.link.d-none.d-sm-flex > img.thumbnail)? + div.description
-  //     div.site.text-truncate > (i.far.fa-copy.url-copy)? + cite
+  //     div.site.text-truncate > (button.url-copy-btn > i.far.fa-copy.url-copy)? + cite
   //     div.more > a
   //     div.info > date + (size) + (cache)
+  // Deliberate divergence on the copy control: the JSP still emits it as a bare
+  // <i aria-hidden="true">, which is absent from the accessibility tree and
+  // unreachable by keyboard. This theme wraps the glyph in a real <button>, so
+  // a11y wins over tag-parity for that one row.
   const cfg = api.getConfig() || {};
   const features = cfg.features || {};
   const idx0 = order - 1;
@@ -235,24 +239,37 @@ function buildResultCard(d, queryId, order) {
   const site = el("div", { className: "site text-truncate" });
   if (features.clipboard_copy_icon) {
     const rawUrl = d.url_link || d.url || "";
+    // A real <button>, not an <i> carrying role="button": the element that takes
+    // focus has to be the one that carries the role and the accessible name, and
+    // only a button gets keyboard activation (Enter/Space) without hand-rolling a
+    // keydown handler. The previous markup also set aria-hidden="true" on the same
+    // element as role/aria-label, which removed the control from the accessibility
+    // tree entirely — so it was both invisible to assistive tech and unreachable by
+    // keyboard. The glyph inside stays aria-hidden and keeps the url-copy /
+    // url-copied classes, so each theme's existing colour rules apply unchanged.
     const copyIcon = el("i", {
-      className: "far fa-copy url-copy d-print-none",
-      attrs: { "aria-hidden": "true", "data-clipboard-text": rawUrl, role: "button", "aria-label": t("result.copy_url") + ": " + rawUrl }
+      className: "far fa-copy url-copy",
+      attrs: { "aria-hidden": "true" }
     });
-    copyIcon.addEventListener("click", () => {
+    const copyBtn = el("button", {
+      className: "url-copy-btn d-print-none",
+      attrs: { type: "button", "data-clipboard-text": rawUrl, "aria-label": t("result.copy_url") + ": " + rawUrl }
+    });
+    copyBtn.appendChild(copyIcon);
+    copyBtn.addEventListener("click", () => {
       copyToClipboard(rawUrl).then(() => {
         // JSP parity (js/search.js): swap the copy icon to a green checkmark for ~2s.
         copyIcon.classList.remove("url-copy", "far", "fa-copy");
         copyIcon.classList.add("url-copied", "fas", "fa-check");
-        copyIcon.setAttribute("aria-label", t("result.copied"));
+        copyBtn.setAttribute("aria-label", t("result.copied"));
         setTimeout(() => {
           copyIcon.classList.remove("url-copied", "fas", "fa-check");
           copyIcon.classList.add("url-copy", "far", "fa-copy");
-          copyIcon.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
+          copyBtn.setAttribute("aria-label", t("result.copy_url") + ": " + rawUrl);
         }, 2000);
       }).catch(() => { /* clipboard not available */ });
     });
-    site.appendChild(copyIcon);
+    site.appendChild(copyBtn);
     // JSP has whitespace between the copy icon and the cite — keep them from touching.
     site.appendChild(document.createTextNode(" "));
   }
@@ -1294,27 +1311,6 @@ export function attach() {
       form.dispatchEvent(new Event("submit"));
     });
   }
-  const clearBtn = document.getElementById("facet-clear");
-  if (clearBtn) clearBtn.addEventListener("click", () => {
-    state.facets = {};
-    state.fields = {};
-    state.facetQueries = [];
-    // GEO-1: reset geo state and inputs
-    state.geo = { lat: "", lon: "", distance: "" };
-    ["geo-lat", "geo-lon", "geo-distance"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
-    // Reset selects: label multi-select deselects all (selectedIndex = -1);
-    // sort and num return to their "all / default" first option (selectedIndex = 0).
-    const sortSel = document.getElementById("sortSearchOption");
-    if (sortSel) { sortSel.selectedIndex = 0; state.sort = sortSel.value || ""; }
-    const numSel = document.getElementById("numSearchOption");
-    if (numSel) { numSel.selectedIndex = 0; state.num = Number(numSel.value) || 10; }
-    const langSel = document.getElementById("langSearchOption");
-    if (langSel) { langSel.selectedIndex = -1; state.lang = []; }
-    const labelSel = document.getElementById("labelSearchOption");
-    if (labelSel) { Array.from(labelSel.options).forEach(o => { o.selected = false; }); }
-    runSearch();
-  });
-
   // Geo filter apply/clear is handled by the drawer's main Search / Clear buttons
   // (geo inputs were migrated into #searchOptions); no separate geo buttons.
 
@@ -1402,10 +1398,23 @@ function renderFacetQueryViews(body, env) {
   const views = cfg.facet_views || [];
   const countByValue = {};
   (env.facet_query || []).forEach(fq => { countByValue[fq.value] = fq.count; });
+  // Distinguish "no counts were sent" from "the count is 0": under rank fusion (and
+  // whenever facetResponse is null) the v2 API omits facet_query entirely, so
+  // countByValue is empty. A `> 0` filter would then drop every option and collapse the
+  // group to a bare header. hasOwnProperty (not a truthiness test — a real count of 0 is
+  // falsy) tells the two apart: when every option carries a count we suppress the zero
+  // ones and show badges; when counts are absent we fall back to the full, count-free,
+  // still-clickable list with no badges.
+  const hasCountsFor = queries =>
+    queries.length > 0 && queries.every(qy => Object.prototype.hasOwnProperty.call(countByValue, qy.value));
   views.forEach(view => {
     const groupTitleKey = view.group_name || "";
     const title = groupTitleKey.startsWith("labels.") ? t(groupTitleKey) : groupTitleKey;
-    const queries = (view.queries || []).filter(qy => Number(countByValue[qy.value]) > 0);
+    const allQueries = view.queries || [];
+    const withCounts = hasCountsFor(allQueries);
+    const queries = withCounts
+      ? allQueries.filter(qy => Number(countByValue[qy.value]) > 0 || (state.facetQueries || []).includes(qy.value))
+      : allQueries;
     // ul.list-group.mb-2 > li.list-group-item.text-uppercase(title) + entries.
     // A group with no matching results still renders its title li (JSP parity:
     // the sidebar keeps the group header even when empty).
@@ -1417,7 +1426,9 @@ function renderFacetQueryViews(body, env) {
       const a = el("a", { attrs: { href: "#" } });
       const label = qy.label_key && qy.label_key.startsWith("labels.") ? t(qy.label_key) : (qy.label_key || qy.value);
       a.appendChild(document.createTextNode(label + " "));
-      a.appendChild(el("span", { className: "badge rounded-pill text-bg-secondary float-end", text: String(countByValue[qy.value]) }));
+      if (withCounts) {
+        a.appendChild(el("span", { className: "badge rounded-pill text-bg-secondary float-end", text: String(Number(countByValue[qy.value]) || 0) }));
+      }
       a.addEventListener("click", ev => {
         ev.preventDefault();
         const arr = state.facetQueries ? [...state.facetQueries] : [];
@@ -1436,24 +1447,30 @@ function renderFacetQueryViews(body, env) {
 
 function renderFacets(env, labels) {
   const body = document.getElementById("facet-body");
-  const clearBtn = document.getElementById("facet-clear");
   if (!body) return;
   // Clear existing children without innerHTML = ""
   while (body.firstChild) body.removeChild(body.firstChild);
 
   // ZERO-RESULT: hide the whole facet sidebar (desktop aside + mobile filter button)
-  // when the search returned no documents — there is nothing to refine, so an empty
-  // sidebar is just noise. #facet-body keeps its base "d-none" (mobile-hidden) class;
-  // toggling "d-md-block" controls its desktop visibility. The mobile filter toggle
+  // only when the search returned no documents AND no filter is applied — there is
+  // nothing to refine, so an empty sidebar would be just noise. With a filter applied
+  // the zero may well have been CAUSED by it, and the sidebar carries the only controls
+  // that undo it (the active option itself, plus the reset link at its foot), so it
+  // stays mounted. #facet-body keeps its base "d-none" (mobile-hidden) class; toggling
+  // "d-md-block" controls its desktop visibility. The mobile filter toggle
   // (#facet-toggle-wrap) is hidden outright with "d-none".
   const mobileBody = document.getElementById("facet-body-mobile");
   const toggleWrap = document.getElementById("facet-toggle-wrap");
   const hasResults = (env.data || []).length > 0;
-  body.classList.toggle("d-md-block", hasResults);
-  if (toggleWrap) toggleWrap.classList.toggle("d-none", !hasResults);
-  if (!hasResults) {
+  const anyActive =
+    Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0) ||
+    Object.values(state.fields).some(arr => Array.isArray(arr) && arr.length > 0) ||
+    (Array.isArray(state.facetQueries) && state.facetQueries.length > 0);
+  const showFacets = hasResults || anyActive;
+  body.classList.toggle("d-md-block", showFacets);
+  if (toggleWrap) toggleWrap.classList.toggle("d-none", !showFacets);
+  if (!showFacets) {
     if (mobileBody) while (mobileBody.firstChild) mobileBody.removeChild(mobileBody.firstChild);
-    if (clearBtn) clearBtn.classList.add("d-none");
     return;
   }
 
@@ -1487,13 +1504,6 @@ function renderFacets(env, labels) {
   //    no separate field-based filetype group (that produced a duplicate
   //    "ファイル種別" with no counts).
   renderFacetQueryViews(body, env);
-
-  // Show clear button if any filter is active (optional control; may be absent).
-  const anyActive =
-    Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0) ||
-    Object.values(state.fields).some(arr => Array.isArray(arr) && arr.length > 0) ||
-    (Array.isArray(state.facetQueries) && state.facetQueries.length > 0);
-  if (clearBtn) clearBtn.classList.toggle("d-none", !anyActive);
 
   // Mirror the rendered facet groups into the mobile offcanvas (#facet-body-mobile).
   // The desktop aside (#facet-body) is the source of truth; clone its <ul> groups and

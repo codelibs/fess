@@ -223,6 +223,26 @@ describe("buildResultCard", () => {
     // Escaped, so the address never becomes a child element.
     expect(desc.children.length).toBe(0);
   });
+
+  it("renders the copy-URL control as a real, accessible button", () => {
+    api.getConfig.mockReturnValue({ features: { clipboard_copy_icon: true } });
+    const li = buildResultCard(
+      { doc_id: "d7", title: "T", url: "https://ex.com/p" }, "q1", 1);
+    // The focusable element is a real <button>, in the a11y tree, carrying the
+    // accessible name and the clipboard payload — not an <i> with role="button".
+    const btn = li.querySelector("button.url-copy-btn");
+    expect(btn).toBeTruthy();
+    expect(btn.getAttribute("type")).toBe("button");
+    expect(btn.getAttribute("aria-hidden")).toBeNull();
+    expect(btn.getAttribute("aria-label")).toMatch(/./);
+    expect(btn.getAttribute("data-clipboard-text")).toBeTruthy();
+    expect(btn.classList.contains("d-print-none")).toBe(true);
+    // The glyph inside is purely decorative: aria-hidden, no role.
+    const glyph = btn.querySelector("i.fa-copy");
+    expect(glyph).toBeTruthy();
+    expect(glyph.getAttribute("aria-hidden")).toBe("true");
+    expect(glyph.getAttribute("role")).toBeNull();
+  });
 });
 
 describe("renderPopularWords", () => {
@@ -397,7 +417,6 @@ const SEARCH_FIXTURE = `
   <div id="facet-body" class="d-none"></div>
   <div id="facet-body-mobile"></div>
   <div id="facet-toggle-wrap"></div>
-  <a id="facet-clear" class="d-none"></a>
   <div id="active-chips" class="d-none"></div>
   <ul id="current-filters"></ul>
   <ul id="options-bar"></ul>
@@ -581,8 +600,27 @@ describe("runSearch — successful render", () => {
     // Filetype query view: html kept (count 7), pdf suppressed (count 0).
     expect(groups[1].textContent).toContain("labels.facet_filetype_html");
     expect(groups[1].textContent).not.toContain("labels.facet_filetype_pdf");
-    // No active filter → clear button hidden.
-    expect(document.getElementById("facet-clear").classList.contains("d-none")).toBe(true);
+    // Counts ARE present here, so the shown option carries a count badge.
+    expect(groups[1].querySelector(".badge")).not.toBeNull();
+  });
+
+  it("keeps every filetype query option (and drops badges) when the API omits facet_query", async () => {
+    // Under rank fusion (and whenever facetResponse is null) the v2 API omits
+    // facet_query entirely. The pre-fix code filtered options by `Number(count) > 0`,
+    // so with no counts every option was dropped and the group collapsed to a bare
+    // header. Recoverability fix: absent counts → keep the full clickable list, no badges.
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { facet_query: undefined }) });
+    await runSearch();
+    await settle();
+    const body = document.getElementById("facet-body");
+    const groups = body.querySelectorAll("ul.list-group");
+    const filetype = Array.from(groups).find((g) => g.textContent.includes("labels.facet_filetype_html"));
+    expect(filetype).toBeTruthy();
+    // BOTH options survive (html AND pdf), unlike the counts-present zero-suppress path.
+    expect(filetype.textContent).toContain("labels.facet_filetype_html");
+    expect(filetype.textContent).toContain("labels.facet_filetype_pdf");
+    // No counts were sent → the group renders no badges at all.
+    expect(filetype.querySelector(".badge")).toBeNull();
   });
 
   it("mirrors the facet groups into the mobile offcanvas", async () => {
@@ -816,10 +854,9 @@ describe("runSearch — active filters, chips and current filters", () => {
     expect(document.activeElement).toBe(document.getElementById("sortSearchOption"));
   });
 
-  it("shows the facet clear button and a facet-reset link when filters are active", async () => {
+  it("shows a facet-reset link when filters are active", async () => {
     await runSearch();
     await settle();
-    expect(document.getElementById("facet-clear").classList.contains("d-none")).toBe(false);
     const reset = document.querySelector("#facet-body .facet-reset");
     expect(reset).not.toBeNull();
     const before = searchCalls();
@@ -1212,7 +1249,6 @@ describe("attach — wiring", () => {
     <div id="facet-body" class="d-none"></div>
     <div id="facet-body-mobile"></div>
     <div id="facet-toggle-wrap"></div>
-    <a id="facet-clear" class="d-none"></a>
     <div id="active-chips" class="d-none"></div>
     <ul id="current-filters"></ul>
     <ul id="options-bar"></ul>
@@ -1260,13 +1296,7 @@ describe("attach — wiring", () => {
     expect(navigate).toHaveBeenCalled();
     expect(navigate.mock.calls.at(-1)[0]).toContain("q=drawerq");
 
-    // 4. Facet "Clear" button → resets filters and re-runs the search.
-    const beforeSearch = searchCalls();
-    document.getElementById("facet-clear").click();
-    await vi.advanceTimersByTimeAsync(20);
-    expect(searchCalls()).toBe(beforeSearch + 1);
-
-    // 5. Header suggest: typing renders items after the 150ms debounce.
+    // 4. Header suggest: typing renders items after the 150ms debounce.
     const input = document.getElementById("query");
     input.value = "he";
     input.dispatchEvent(new Event("input"));
@@ -1275,14 +1305,14 @@ describe("attach — wiring", () => {
     expect(dropdown.querySelectorAll(".list-group-item").length).toBe(2);
     expect(dropdown.classList.contains("d-none")).toBe(false);
 
-    // 6. ArrowDown highlights the first item; Escape collapses the dropdown.
+    // 5. ArrowDown highlights the first item; Escape collapses the dropdown.
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
     expect(dropdown.querySelector(".list-group-item.active")).not.toBeNull();
     expect(input.getAttribute("aria-activedescendant")).toBe("suggest-item-0");
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     expect(dropdown.classList.contains("d-none")).toBe(true);
 
-    // 7. Dropdown mousedown selects the item and submits the header form.
+    // 6. Dropdown mousedown selects the item and submits the header form.
     input.value = "he";
     input.dispatchEvent(new Event("input"));
     await vi.advanceTimersByTimeAsync(150);
