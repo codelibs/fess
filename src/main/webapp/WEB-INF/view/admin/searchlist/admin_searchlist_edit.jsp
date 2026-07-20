@@ -178,8 +178,16 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="doc.content" class="col-sm-3 text-sm-right col-form-label">content</label>
                                     <div class="col-sm-9">
-                                        <la:errors property="doc.content"/>
-                                        <la:text styleId="doc.content" property="doc.content" styleClass="form-control"/>
+                                        <c:choose>
+                                            <c:when test="${contentReadOnly}">
+                                                <textarea id="doc.content" class="form-control" rows="8"
+                                                          disabled="disabled">${f:h(contentDisplay)}</textarea>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <la:errors property="doc.content"/>
+                                                <la:text styleId="doc.content" property="doc.content" styleClass="form-control"/>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
                                 <div class="form-group row">

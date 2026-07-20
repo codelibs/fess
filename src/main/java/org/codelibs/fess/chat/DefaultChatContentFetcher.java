@@ -16,18 +16,26 @@
 package org.codelibs.fess.chat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -44,6 +52,19 @@ import org.dbflute.optional.OptionalThing;
 public class DefaultChatContentFetcher implements ChatContentFetcher {
 
     private static final Logger logger = LogManager.getLogger(DefaultChatContentFetcher.class);
+
+    /**
+     * Latches on the first time the embedding provider is found unavailable so the operator sees
+     * a single WARN instead of one per chat request during a sustained outage. Subsequent
+     * occurrences during the same outage degrade to DEBUG.
+     *
+     * <p>Unlike {@link org.codelibs.fess.filter.StaticThemeFilter}'s {@code warnOnce} convention
+     * (a permanent one-time DI-readiness latch that never resets), this latch is reset once the
+     * provider becomes available again -- embedding availability can flap over the process
+     * lifetime (e.g. the provider comes back up), so a later, distinct outage still surfaces its
+     * own WARN instead of silently degrading forever.</p>
+     */
+    private final AtomicBoolean embeddingUnavailableWarned = new AtomicBoolean(false);
 
     /** Per-document content resolution strategy. */
     protected enum Strategy {
@@ -86,13 +107,22 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         // Fallback for large documents that produced no highlight passage: fetch the full content
         // and truncate it to the threshold so the document still contributes a leading excerpt
         // without crowding out the answer context (its short digest is never used as a passage).
+        // A chunked document (content_chunk_status=done) is never in this list -- normalizeHighlightedDocs
+        // preserves it unconditionally so the chunk-selection pass below can choose its content instead.
         final List<String> missingIds = highlightIds.stream().filter(id -> !resultMap.containsKey(id)).collect(Collectors.toList());
         if (!missingIds.isEmpty()) {
             final long maxLength = getFulltextThreshold();
             final List<Map<String, Object>> fallbackDocs = fetchFullContent(missingIds);
-            fallbackDocs.forEach(doc -> truncateContent(doc, maxLength));
+            fallbackDocs.forEach(doc -> {
+                if (!ContentChunkConstants.STATUS_DONE.equals(doc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD))) {
+                    truncateContent(doc, maxLength);
+                }
+                // A chunked document is left raw here; applyChunkSelection() truncates it itself below.
+            });
             putByDocId(resultMap, fallbackDocs);
         }
+
+        applyChunkSelection(resultMap, request.getQuery());
 
         // Reorder to preserve original docIds (search-score) order.
         final List<Map<String, Object>> ordered = new ArrayList<>();
@@ -103,6 +133,371 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             }
         }
         return ordered;
+    }
+
+    /**
+     * Selects the most relevant chunk(s) for every chunked document
+     * ({@code content_chunk_status=done}) present in {@code resultMap}, replacing
+     * its {@code content} field via the semantic-first, keyword-fallback,
+     * whole-array-final-fallback chain. Non-chunked documents are left untouched.
+     *
+     * <p>The chat query is embedded at most once here (not once per document),
+     * and only when at least one chunked document is present.</p>
+     *
+     * @param resultMap the fetched documents, keyed by doc_id (mutated in place)
+     * @param query the chat query (may be null/blank)
+     */
+    protected void applyChunkSelection(final Map<String, Map<String, Object>> resultMap, final String query) {
+        // Defense-in-depth: the real gate is that content_chunk_vector/content_chunk_status are
+        // never fetched in the first place when chunking is disabled (see buildContentFields() /
+        // AnswerHighlightSearchParams#getResponseFields()). This explicit check keeps a stale
+        // content_chunk_status=done left over from when chunking was previously enabled from being
+        // used even if that field-omission mechanism is ever refactored.
+        if (!isContentChunkerEnabled()) {
+            return;
+        }
+        final List<Map<String, Object>> chunkedDocs = resultMap.values()
+                .stream()
+                .filter(doc -> ContentChunkConstants.STATUS_DONE.equals(doc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD)))
+                .collect(Collectors.toList());
+        if (chunkedDocs.isEmpty()) {
+            return;
+        }
+        final float[] queryVector = resolveQueryVector(query);
+        for (final Map<String, Object> doc : chunkedDocs) {
+            selectRelevantChunks(doc, query, queryVector);
+        }
+    }
+
+    /**
+     * Embeds the chat query for semantic chunk selection, tolerating any
+     * failure (embedding client unavailable, provider error, timeout) by
+     * falling back to {@code null} so callers fall through to the
+     * keyword/full-content fallback chain.
+     *
+     * @param query the chat query (may be null/blank)
+     * @return the query embedding vector, or null if unavailable/blank/failed
+     */
+    protected float[] resolveQueryVector(final String query) {
+        if (StringUtil.isBlank(query)) {
+            return null;
+        }
+        try {
+            final EmbeddingClientManager manager = getEmbeddingClientManager();
+            if (!manager.available()) {
+                warnEmbeddingUnavailableOnce();
+                return null;
+            }
+            embeddingUnavailableWarned.set(false);
+            return manager.embedQuery(query);
+        } catch (final Exception e) {
+            logger.warn("[RAG] Failed to embed chat query for chunk selection; falling back to keyword/full content.", e);
+            return null;
+        }
+    }
+
+    /**
+     * Logs a WARN the first time the embedding provider is found unavailable in a given outage,
+     * then degrades subsequent occurrences during the same outage to DEBUG so a persistently
+     * unavailable provider does not spam a WARN on every chat request.
+     */
+    private void warnEmbeddingUnavailableOnce() {
+        if (embeddingUnavailableWarned.compareAndSet(false, true)) {
+            logger.warn("[RAG] Embedding client unavailable; falling back to keyword/full content for chunk selection "
+                    + "until availability is restored.");
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("[RAG] Embedding client still unavailable; falling back to keyword/full content for chunk selection.");
+        }
+    }
+
+    /**
+     * Gets the {@link EmbeddingClientManager}. Overridable seam for tests.
+     *
+     * @return the embedding client manager
+     */
+    protected EmbeddingClientManager getEmbeddingClientManager() {
+        return ComponentUtil.getComponent(EmbeddingClientManager.class);
+    }
+
+    /**
+     * Selects the most relevant chunk(s) of one chunked document for the LLM
+     * context and truncates the result to the fulltext threshold as a final
+     * context-budget guard.
+     *
+     * <p>Fallback chain: (1) semantic similarity against {@code queryVector}, if
+     * available; (2) keyword/highlight-fragment matching against the query, if
+     * there is a query to match; (3) the whole chunk array (existing array-safe
+     * {@link #truncateContent} behavior). A blank query explicitly skips step 2
+     * (there is no query to highlight against) rather than relying on step 2 to
+     * incidentally find nothing.</p>
+     *
+     * @param doc the document map (mutated in place); must have
+     *            {@code content_chunk_status=done}
+     * @param query the chat query (may be null/blank)
+     * @param queryVector the query embedding vector, or null if unavailable
+     */
+    protected void selectRelevantChunks(final Map<String, Object> doc, final String query, final float[] queryVector) {
+        final List<String> chunks = toStringChunks(doc.get("content"));
+        if (!chunks.isEmpty()) {
+            String selected = null;
+            if (queryVector != null) {
+                selected = selectBySemanticSimilarity(chunks, doc, queryVector);
+            }
+            if (selected == null && StringUtil.isNotBlank(query)) {
+                selected = selectByHighlightMatch(chunks, doc);
+            }
+            if (selected != null) {
+                doc.put("content", selected);
+            }
+            // else: leave "content" as the original chunk List; truncateContent below joins+truncates
+            // it as the final fallback (step 3).
+        }
+        truncateContent(doc, getFulltextThreshold());
+    }
+
+    /**
+     * Ranks a chunked document's chunks by cosine similarity to {@code queryVector}
+     * and joins the top {@link #getChatTopK()} chunks (fewer if the document has
+     * fewer chunks), in their original array order.
+     *
+     * @param chunks the document's chunk texts
+     * @param doc the document map (read-only here)
+     * @param queryVector the query embedding vector
+     * @return the joined selected chunk text, or null if no usable chunk vectors were found
+     */
+    protected String selectBySemanticSimilarity(final List<String> chunks, final Map<String, Object> doc, final float[] queryVector) {
+        final Object vectorFieldValue = doc.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        if (!(vectorFieldValue instanceof List<?>)) {
+            return null;
+        }
+        final List<?> vectorEntries = (List<?>) vectorFieldValue;
+        final int n = Math.min(chunks.size(), vectorEntries.size());
+        final List<Map.Entry<Integer, Double>> scored = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            final float[] chunkVector = toFloatArray(extractVectorSubfield(vectorEntries.get(i)));
+            if (chunkVector != null) {
+                scored.add(Map.entry(i, cosineSimilarity(queryVector, chunkVector)));
+            }
+        }
+        if (scored.isEmpty()) {
+            return null;
+        }
+        scored.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        final int topK = Math.max(1, getChatTopK());
+        final Set<Integer> selectedIndexes =
+                scored.stream().limit(topK).map(Map.Entry::getKey).collect(Collectors.toCollection(TreeSet::new));
+        return selectedIndexes.stream().map(chunks::get).collect(Collectors.joining("\n\n"));
+    }
+
+    /**
+     * Extracts the {@link ContentChunkConstants#VECTOR_SUBFIELD} value from one
+     * {@code content_chunk_vector} entry.
+     *
+     * @param entry one {@code content_chunk_vector} list entry
+     * @return the raw vector sub-field value, or null if {@code entry} is not a map
+     */
+    protected Object extractVectorSubfield(final Object entry) {
+        if (entry instanceof Map<?, ?>) {
+            return ((Map<?, ?>) entry).get(ContentChunkConstants.VECTOR_SUBFIELD);
+        }
+        return null;
+    }
+
+    /**
+     * Converts a vector value to a {@code float[]}. Handles both a {@code float[]}
+     * (e.g. a directly-injected test double) and a {@code List} of {@link Number}
+     * (the shape a {@code knn_vector} nested field actually deserializes to from
+     * an OpenSearch {@code _source}, e.g. {@code List<Double>}).
+     *
+     * @param value the raw vector sub-field value
+     * @return the vector as a float[], or null if the value is not a usable vector shape
+     */
+    protected float[] toFloatArray(final Object value) {
+        if (value instanceof float[]) {
+            return (float[]) value;
+        }
+        if (value instanceof List<?>) {
+            final List<?> list = (List<?>) value;
+            final float[] result = new float[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                final Object element = list.get(i);
+                if (!(element instanceof Number)) {
+                    return null;
+                }
+                result[i] = ((Number) element).floatValue();
+            }
+            return result;
+        }
+        return null;
+    }
+
+    /**
+     * Computes the cosine similarity between two vectors. Returns {@code 0.0}
+     * (rather than a numerically-valid-looking but semantically meaningless
+     * score) if the two vectors have different lengths -- a stored chunk
+     * vector is never comparable to a query vector embedded by a different
+     * (or differently-configured) model, so it must score like any other
+     * non-matching chunk rather than being silently truncated to the shorter
+     * length. Also returns {@code 0.0} (rather than dividing by zero /
+     * producing {@code NaN}) if either vector has a zero L2 norm, and also
+     * {@code 0.0} if the result would otherwise be {@code NaN} -- e.g. a
+     * corrupted stored embedding containing a {@code NaN}/{@code Infinity}
+     * component. A raw {@code NaN} score must never reach the caller's
+     * {@code Double.compare}-based top-K sort: {@code NaN} compares
+     * inconsistently there, which could let a corrupted-vector chunk always
+     * win (or always lose) ranking instead of being scored like any other
+     * non-matching chunk.
+     *
+     * @param a the first vector
+     * @param b the second vector
+     * @return the cosine similarity in [-1.0, 1.0], or 0.0 for a length mismatch, a zero-norm
+     *         vector, or a NaN result
+     */
+    private static double cosineSimilarity(final float[] a, final float[] b) {
+        if (a.length != b.length) {
+            return 0.0;
+        }
+        final int n = a.length;
+        double dot = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+        for (int i = 0; i < n; i++) {
+            dot += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+        if (normA == 0.0 || normB == 0.0) {
+            return 0.0;
+        }
+        final double similarity = dot / (Math.sqrt(normA) * Math.sqrt(normB));
+        return Double.isNaN(similarity) ? 0.0 : similarity;
+    }
+
+    /**
+     * Gets the number of top-ranked chunks selected for the RAG chat context.
+     *
+     * @return the value of {@code content_chunker.chat.top_k} (default 3)
+     */
+    protected int getChatTopK() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.CHAT_TOP_K, null);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value.trim());
+            } catch (final NumberFormatException e) {
+                logger.warn("[RAG] Invalid integer for {}: {}", ContentChunkConstants.CHAT_TOP_K, value);
+            }
+        }
+        return ContentChunkConstants.DEFAULT_CHAT_TOP_K;
+    }
+
+    /**
+     * Selects chunks whose text contains a highlight fragment matched against
+     * the query, joined in original array order. This is the keyword-based
+     * fallback used when semantic selection is unavailable or found no usable
+     * vectors.
+     *
+     * @param chunks the document's chunk texts
+     * @param doc the document map; must carry the raw highlight field (i.e. not
+     *            yet normalized into {@code content})
+     * @return the joined matched chunk text, or null if no fragment matched any chunk
+     */
+    protected String selectByHighlightMatch(final List<String> chunks, final Map<String, Object> doc) {
+        final Object snippetValue = doc.get(getHighlightContentField());
+        if (!(snippetValue instanceof String) || StringUtil.isBlank((String) snippetValue)) {
+            return null;
+        }
+        final Set<Integer> matched = new TreeSet<>();
+        for (final String rawFragment : HIGHLIGHT_FRAGMENT_SEPARATOR_PATTERN.split((String) snippetValue)) {
+            final String fragment = stripHighlightTags(rawFragment).trim();
+            if (StringUtil.isBlank(fragment)) {
+                continue;
+            }
+            for (int i = 0; i < chunks.size(); i++) {
+                if (chunks.get(i).contains(fragment)) {
+                    matched.add(i);
+                }
+            }
+        }
+        if (matched.isEmpty()) {
+            return null;
+        }
+        return matched.stream().map(chunks::get).collect(Collectors.joining("\n\n"));
+    }
+
+    /**
+     * Matches the separator {@code ViewHelper#createHighlightText} joins multiple highlight
+     * fragments with (its private {@code ELLIPSIS} constant, always exactly 3 dots) -- as a run
+     * of <b>3 or more</b> consecutive dots, not an exact 3-dot literal.
+     *
+     * <p>When a fragment's own text ends with a sentence-terminating {@code .} (the ASCII entry
+     * of {@code FessConfig#getCrawlerDocumentFullstopChars}), joining it with the 3-dot separator
+     * produces a run of 4+ consecutive dots. Splitting on an exact 3-dot literal only consumes the
+     * first 3 of those, leaving a stray leading {@code .} glued onto the next recovered fragment;
+     * that stray dot then breaks the fragment's {@code contains()} match against its chunk text,
+     * silently dropping the chunk from selection even though OpenSearch's highlighter matched it.
+     * A genuine inter-fragment boundary is always a run of at least 3 dots (the separator itself,
+     * plus any trailing/leading dots contributed by the adjoining fragments), so {@code \.{3,}}
+     * matches every real boundary -- greedily consuming the whole run, including any leading dots
+     * of the next fragment -- while never matching inside a fragment's own legitimate short dot
+     * sequences (e.g. {@code "1..5"}, {@code "Loading.."}), which a looser {@code \.{2,}} would
+     * incorrectly split on. The other three configured fullstop characters ({@code u06d4}
+     * Arabic full stop, {@code u2e3c} stenographic full stop, {@code u3002} ideographic full
+     * stop) are not dots, so they never collide with the separator and need no special handling.
+     */
+    private static final Pattern HIGHLIGHT_FRAGMENT_SEPARATOR_PATTERN = Pattern.compile("\\.{3,}");
+
+    /**
+     * Pre-tag {@link AnswerHighlightSearchParams#getHighlightInfo()} configures for
+     * this query path -- confirmed empty (not {@code <em>}/{@code </em>}), so
+     * stripping is a no-op today; kept keyed off the actual configured value
+     * rather than an assumed tag so it stays correct if that ever changes.
+     */
+    private static final String HIGHLIGHT_PRE_TAG = StringUtil.EMPTY;
+
+    /** Post-tag counterpart of {@link #HIGHLIGHT_PRE_TAG}. */
+    private static final String HIGHLIGHT_POST_TAG = StringUtil.EMPTY;
+
+    /**
+     * Strips the configured highlight pre/post tags from a fragment.
+     *
+     * @param fragment the raw highlight fragment
+     * @return the fragment with highlight tags stripped (a no-op today; see {@link #HIGHLIGHT_PRE_TAG})
+     */
+    protected String stripHighlightTags(final String fragment) {
+        String result = fragment;
+        if (StringUtil.isNotBlank(HIGHLIGHT_PRE_TAG)) {
+            result = result.replace(HIGHLIGHT_PRE_TAG, "");
+        }
+        if (StringUtil.isNotBlank(HIGHLIGHT_POST_TAG)) {
+            result = result.replace(HIGHLIGHT_POST_TAG, "");
+        }
+        return result;
+    }
+
+    /**
+     * Converts a {@code content} field value into a chunk-text list. Only a
+     * {@code List} value (the shape a chunked document's {@code content}
+     * actually has) is usable; anything else (should not occur for a
+     * {@code content_chunk_status=done} document) yields an empty list so
+     * callers leave the document untouched.
+     *
+     * @param value the raw {@code content} field value
+     * @return the chunk texts, or an empty list if not a List
+     */
+    protected List<String> toStringChunks(final Object value) {
+        if (!(value instanceof List<?>)) {
+            return Collections.emptyList();
+        }
+        return ((List<?>) value).stream().map(String::valueOf).collect(Collectors.toList());
+    }
+
+    /**
+     * Checks if content chunking is enabled.
+     *
+     * @return the value of {@code content_chunker.enabled} (default false)
+     */
+    protected boolean isContentChunkerEnabled() {
+        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.ENABLED, "false"));
     }
 
     /**
@@ -138,13 +533,25 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * document that produced no highlight passage so it still contributes a leading
      * excerpt without crowding out the answer context.
      *
+     * <p>A {@code List} value (chunked document content) is first joined into a
+     * single string (chunks separated by a blank line, so boundaries read as
+     * paragraph breaks) and then truncated with the same length check as the
+     * {@code String} case, so chunked documents are still bounded by this
+     * context-window budget.</p>
+     *
      * @param doc the document map (modified in place)
      * @param maxLength the maximum content length in characters
      */
     protected void truncateContent(final Map<String, Object> doc, final long maxLength) {
         final Object value = doc.get("content");
-        if (value instanceof String && ((String) value).length() > maxLength) {
-            doc.put("content", ((String) value).substring(0, (int) maxLength));
+        String text = null;
+        if (value instanceof String) {
+            text = (String) value;
+        } else if (value instanceof List<?>) {
+            text = ((List<?>) value).stream().map(String::valueOf).collect(Collectors.joining("\n\n"));
+        }
+        if (text != null && text.length() > maxLength) {
+            doc.put("content", text.substring(0, (int) maxLength));
         }
     }
 
@@ -200,7 +607,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         }
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String[] fields = fessConfig.getRagChatContentFields().split(",");
+        final String[] fields = buildContentFields(fessConfig);
         try {
             return ComponentUtil.getSearchHelper()
                     .getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
@@ -210,6 +617,29 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
                     System.currentTimeMillis() - startTime);
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Builds the field list for {@link #fetchFullContent}, appending
+     * {@code content_chunk_vector}/{@code content_chunk_status} to the
+     * operator-configured {@code rag.chat.content.fields} so a chunked
+     * document's chunk-selection data is always retrievable, without
+     * requiring the operator to know to add them. A no-op appendage when
+     * content chunking is disabled, so a non-chunking deployment's field list
+     * is completely unchanged.
+     *
+     * @param fessConfig the fess config
+     * @return the field list to fetch
+     */
+    protected String[] buildContentFields(final FessConfig fessConfig) {
+        final String[] configured = fessConfig.getRagChatContentFields().split(",");
+        if (!isContentChunkerEnabled()) {
+            return configured;
+        }
+        final Set<String> fieldSet = new LinkedHashSet<>(Arrays.asList(configured));
+        fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD);
+        return fieldSet.toArray(new String[0]);
     }
 
     /**
@@ -268,6 +698,14 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         final String highlightField = getHighlightContentField();
         final List<Map<String, Object>> normalized = new ArrayList<>();
         for (final Map<String, Object> doc : docs) {
+            if (ContentChunkConstants.STATUS_DONE.equals(doc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD))) {
+                // Chunked document: preserve its raw content/vector/highlight fields untouched --
+                // never overwrite "content" with the snippet, never drop on a highlight miss. The
+                // chunk-selection pass in fetchContent() decides its final content via the
+                // semantic/keyword/full fallback chain instead of this FULL-vs-HIGHLIGHT dispatch.
+                normalized.add(doc);
+                continue;
+            }
             final String snippet = (String) doc.get(highlightField);
             if (StringUtil.isNotBlank(snippet)) {
                 doc.put("content", snippet); // normalize: buildContext is content-first
@@ -329,6 +767,44 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
                     .numOfFragments(numOfFragments)
                     .preTags(StringUtil.EMPTY)
                     .postTags(StringUtil.EMPTY);
+        }
+
+        /**
+         * Appends {@code content}/{@code content_chunk_vector}/{@code content_chunk_status}
+         * to the standard response fields so a chunked large document's chunk-selection
+         * data is retrievable from this highlight search too. A no-op appendage when
+         * content chunking is disabled, so a non-chunking deployment's highlight-search
+         * {@code _source} filter (and its fetch cost) is completely unchanged -- otherwise
+         * this would needlessly pull full content for every large document, defeating the
+         * highlight path's purpose. Returns a new array; never mutates the shared
+         * {@link org.codelibs.fess.query.QueryFieldConfig} array returned by the super call.
+         *
+         * <p><b>Known tradeoff:</b> this is an all-or-nothing toggle keyed on
+         * {@code content_chunker.enabled}, not on whether a given batch of large documents
+         * is actually chunked. In a mixed corpus (chunking enabled, but only some documents
+         * have been chunk-processed), every large document in the batch pays the cost of
+         * fetching full {@code content} here, even the non-chunked ones whose
+         * {@code content_chunk_status} will come back unset -- for those,
+         * {@link #normalizeHighlightedDocs} discards the fetched {@code content} in favor of
+         * the {@code hl_content} snippet, so the fetch was wasted. Avoiding this would require
+         * knowing which docIds are chunked <em>before</em> issuing this search (e.g. a
+         * cheap {@code content_chunk_status}-only pre-check, or restructuring into a two-phase
+         * fetch), which isn't done today: {@code docIds} here come from {@link #decideStrategy}
+         * sizing alone, with no chunk-status lookup beforehand. This is accepted as a
+         * documented tradeoff rather than a bug -- it only over-fetches for large, not-yet-chunked
+         * documents, and only while content chunking is enabled.</p>
+         */
+        @Override
+        public String[] getResponseFields() {
+            final String[] base = super.getResponseFields();
+            if (!Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.ENABLED, "false"))) {
+                return base;
+            }
+            final Set<String> fieldSet = new LinkedHashSet<>(Arrays.asList(base));
+            fieldSet.add(ComponentUtil.getFessConfig().getIndexFieldContent());
+            fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+            fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD);
+            return fieldSet.toArray(new String[0]);
         }
     }
 }

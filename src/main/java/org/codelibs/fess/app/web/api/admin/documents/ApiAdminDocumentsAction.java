@@ -138,6 +138,13 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
                 doc.put(indexFieldTimestamp, now);
             }
             AdminSearchlistAction.validateFields(doc, this::throwValidationErrorApi);
+            // Strip content_chunk_vector/content_chunk_status/content_chunk_retry_count from the
+            // client-supplied map before indexing: these system-managed fields may only ever be
+            // written by the ChunkVectorHelper CAS pipeline, and a stale/fabricated value here would
+            // permanently desync a document from its real content and exclude it from the
+            // reconciliation job. Mirrors the create/update and searchlist doc endpoints; the null
+            // entity is fine here (bulk has no fetched entity, so no already-chunked content check).
+            AdminSearchlistAction.stripSystemManagedFields(null, doc);
             final Map<String, Object> newDoc = fessConfig.convertToStorableDoc(doc);
             newDoc.put(indexFieldId, crawlingInfoHelper.generateId(newDoc));
             newDoc.put(indexFieldDocId, systemHelper.generateDocId(newDoc));

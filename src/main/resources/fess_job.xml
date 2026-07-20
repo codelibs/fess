@@ -31,4 +31,6 @@
 	</component>
 	<component name="logNotificationJob" class="org.codelibs.fess.job.LogNotificationJob" instance="prototype">
 	</component>
+	<component name="chunkVectorJob" class="org.codelibs.fess.job.ChunkVectorJob" instance="prototype">
+	</component>
 </components>

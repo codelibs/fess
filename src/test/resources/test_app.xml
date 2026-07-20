@@ -4,9 +4,11 @@
 <components>
 	<include path="convention.xml" />
 	<include path="lastaflute.xml" />
-	
+
 	<!-- Register systemProperties for test environment -->
 	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
+
+	<component name="chunkVectorJob" class="org.codelibs.fess.job.ChunkVectorJob" instance="prototype"></component>
 
 	<!-- Stateless helper used by v2 chat API handlers/tests (its getUserId DI path is exercised
 	     only in production; handler tests override the handler getUserId seam). -->

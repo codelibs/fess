@@ -1162,7 +1162,7 @@ public abstract class AbstractLlmClient implements LlmClient {
         boolean truncated = false;
         for (final Map<String, Object> doc : documents) {
             final String title = (String) doc.get("title");
-            final String content = (String) doc.get("content");
+            final String content = getStringValue(doc, "content");
             final String url = (String) doc.get("url");
 
             final StringBuilder docEntry = new StringBuilder();
@@ -1173,7 +1173,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             if (url != null) {
                 docEntry.append("URL: ").append(sanitizeDocumentContent(url)).append("\n");
             }
-            if (content != null) {
+            if (StringUtil.isNotBlank(content)) {
                 docEntry.append("Content:\n").append(sanitizeDocumentContent(stripHtmlTags(content))).append("\n\n");
             }
 
@@ -1887,7 +1887,10 @@ public abstract class AbstractLlmClient implements LlmClient {
     }
 
     /**
-     * Gets a string value from a map.
+     * Gets a string value from a map. A {@code List} value (e.g. chunked
+     * document content) is joined with a blank line between elements so
+     * chunk boundaries read as paragraph breaks in the LLM prompt, instead
+     * of Java's bracket-comma collection format.
      *
      * @param map the map to get the value from
      * @param key the key to look up
@@ -1895,7 +1898,22 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected String getStringValue(final Map<String, Object> map, final String key) {
         final Object value = map.get(key);
-        return value != null ? value.toString() : "";
+        if (value == null) {
+            return "";
+        }
+        if (value instanceof List<?>) {
+            final StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (final Object element : (List<?>) value) {
+                if (!first) {
+                    sb.append("\n\n");
+                }
+                sb.append(String.valueOf(element));
+                first = false;
+            }
+            return sb.toString();
+        }
+        return value.toString();
     }
 
     /**

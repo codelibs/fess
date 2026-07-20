@@ -8,10 +8,14 @@
 
 	<include path="fess.xml"/>
 	<include path="fess_api.xml"/>
+	<include path="fess_chunk.xml"/>
+	<include path="fess_content_chunk.xml"/>
 	<include path="fess_cors.xml"/>
 	<include path="fess_dict.xml"/>
+	<include path="fess_embedding.xml"/>
 	<include path="fess_job.xml"/>
 	<include path="fess_ldap.xml"/>
+	<include path="fess_llm.xml"/>
 	<include path="fess_query.xml"/>
 	<include path="fess_rankfusion.xml"/>
 	<include path="fess_score.xml"/>

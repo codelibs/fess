@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.searchlist;
 
 import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.getDoc;
+import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.stripSystemManagedFields;
 import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.validateFields;
 
 import java.util.Map;
@@ -160,6 +161,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         body.crudMode = CrudMode.CREATE;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             try {
+                stripSystemManagedFields(entity, body.doc);
                 entity.putAll(fessConfig.convertToStorableDoc(body.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
@@ -199,6 +201,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             final String index = fessConfig.getIndexDocumentUpdateIndex();
             try {
+                stripSystemManagedFields(entity, body.doc);
                 entity.putAll(fessConfig.convertToStorableDoc(body.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);

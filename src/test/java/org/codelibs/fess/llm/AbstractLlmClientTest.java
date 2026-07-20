@@ -335,6 +335,60 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         assertFalse(systemMsg.contains("..."));
     }
 
+    // ========== P7: List-valued content (chunked documents) tests ==========
+
+    @Test
+    public void test_buildContext_listContentJoinsWithoutBrackets() {
+        final List<Map<String, Object>> documents = new ArrayList<>();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "Chunked Doc");
+        doc.put("url", "http://example.com/chunked");
+        doc.put("content", List.of("chunk one", "chunk two", "chunk three"));
+        documents.add(doc);
+
+        final String result = client.testBuildContext(documents);
+        assertTrue(result.contains("chunk one"));
+        assertTrue(result.contains("chunk two"));
+        assertTrue(result.contains("chunk three"));
+        assertFalse(result.contains("[chunk one"));
+        assertFalse(result.contains("chunk three]"));
+    }
+
+    @Test
+    public void test_generateSummaryResponse_listContentDoesNotThrowAndJoinsCleanly() {
+        client.setTestContextMaxChars(10000);
+        client.setTestSystemPrompt("system");
+        client.setTestSummarySystemPrompt("{{systemPrompt}}\n{{documentContent}}\n{{languageInstruction}}");
+
+        final List<Map<String, Object>> documents = new ArrayList<>();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "Chunked Doc");
+        doc.put("url", "http://example.com/chunked");
+        doc.put("content", List.of("first chunk", "second chunk"));
+        documents.add(doc);
+
+        final List<LlmMessage> history = Collections.emptyList();
+        final StringBuilder captured = new StringBuilder();
+
+        client.setStreamChatCapture((request, callback) -> {
+            for (final LlmMessage msg : request.getMessages()) {
+                if ("system".equals(msg.getRole())) {
+                    captured.append(msg.getContent());
+                }
+            }
+            callback.onChunk("response", true);
+        });
+
+        // Must not throw ClassCastException when content is a List<String>.
+        client.generateSummaryResponse("summarize", documents, history, (chunk, done) -> {});
+
+        final String systemMsg = captured.toString();
+        assertTrue(systemMsg.contains("first chunk"));
+        assertTrue(systemMsg.contains("second chunk"));
+        assertFalse(systemMsg.contains("[first chunk"));
+        assertFalse(systemMsg.contains("second chunk]"));
+    }
+
     // ========== stripHtmlTags tests ==========
 
     @Test
