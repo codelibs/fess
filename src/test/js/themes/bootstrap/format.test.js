@@ -4,6 +4,8 @@
 // returns a DocumentFragment (not a string), so it is serialised through a
 // detached <div> to inspect the resulting markup — exactly how callers append it.
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, it, expect } from "vitest";
 import {
   escapeHtml,
@@ -219,5 +221,20 @@ describe("renderSnippetText: server snippet reduced to plain text", () => {
   it("returns empty string for empty input", () => {
     expect(renderSnippetText("")).toBe("");
     expect(renderSnippetText(null)).toBe("");
+  });
+});
+
+describe("shared-asset header comment is theme-neutral", () => {
+  const read = (rel) =>
+    readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8").split("\n");
+  it("format.js line 2 names no specific theme", () => {
+    const line2 = read("../../../../main/webapp/themes/bootstrap/assets/format.js")[1];
+    expect(line2).toContain("Fess static theme SPA");
+    expect(line2).not.toContain("bootstrap");
+  });
+  it("markdown.js line 2 names no specific theme", () => {
+    const line2 = read("../../../../main/webapp/themes/bootstrap/assets/markdown.js")[1];
+    expect(line2).toContain("Fess static theme SPA");
+    expect(line2).not.toContain("bootstrap");
   });
 });

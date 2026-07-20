@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Minimal in-repo Markdown renderer for the Fess bootstrap SPA.
+// Minimal in-repo Markdown renderer for the Fess static theme SPA.
 // Produces HTML from a safe subset of Markdown. All input is HTML-escaped
 // before pattern substitution — no raw user strings appear in output.
 // The caller MUST pass the return value through sanitizeHtml() before

@@ -28,7 +28,11 @@ export default defineConfig({
       // test drags coverage down and trips the gate, not just the loaded ones.
       all: true,
       include: [`${assets}/*.js`],
-      reporter: ["text", "text-summary"],
+      // skipFull:false so fully-covered files (e.g. format.js, router.js at 100%)
+      // still print in the text table. Vitest 4's text reporter defaults to
+      // skipFull:true, which hides them — making an instrumented, gated file look
+      // like it was excluded when it is actually covered.
+      reporter: [["text", { skipFull: false }], "text-summary"],
       // Regression gate: kept a few points below the achieved numbers so honest
       // refactors don't trip it, while a real coverage drop fails the build.
       thresholds: {
