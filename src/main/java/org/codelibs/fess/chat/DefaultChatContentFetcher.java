@@ -114,14 +114,15 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         // Fallback for large documents that produced no highlight passage: fetch the full content
         // and truncate it to the threshold so the document still contributes a leading excerpt
         // without crowding out the answer context (its short digest is never used as a passage).
-        // A chunked document (content_chunk_status=done) is never in this list -- normalizeHighlightedDocs
-        // preserves it unconditionally so the chunk-selection pass below can choose its content instead.
+        // A chunked document (content_chunk_status=done/chunked) returned by the highlight search
+        // is never in this list -- normalizeHighlightedDocs preserves it unconditionally so the
+        // chunk-selection pass below can choose its content instead.
         final List<String> missingIds = highlightIds.stream().filter(id -> !resultMap.containsKey(id)).collect(Collectors.toList());
         if (!missingIds.isEmpty()) {
             final long maxLength = getFulltextThreshold();
             final List<Map<String, Object>> fallbackDocs = fetchFullContent(missingIds);
             fallbackDocs.forEach(doc -> {
-                if (!Constants.DONE.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD))) {
+                if (!isChunkedStatus(doc)) {
                     truncateContent(doc, maxLength);
                 }
                 // A chunked document is left raw here; applyChunkSelection() truncates it itself below.
@@ -129,6 +130,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             putByDocId(resultMap, fallbackDocs);
         }
 
+        enrichChunkedDocsWithHighlight(resultMap, request.getQuery(), highlightIds);
         applyChunkSelection(resultMap, request.getQuery());
 
         // Reorder to preserve original docIds (search-score) order.
@@ -144,12 +146,16 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
 
     /**
      * Selects the most relevant chunk(s) for every chunked document
-     * ({@code content_chunk_status=done}) present in {@code resultMap}, replacing
-     * its {@code content} field via the semantic-first, keyword-fallback,
-     * whole-array-final-fallback chain. Non-chunked documents are left untouched.
+     * ({@code content_chunk_status=done} or {@code =chunked}) present in
+     * {@code resultMap}, replacing its {@code content} field via the
+     * semantic-first, keyword-fallback, whole-array-final-fallback chain.
+     * Non-chunked documents are left untouched.
      *
      * <p>The chat query is embedded at most once here (not once per document),
-     * and only when at least one chunked document is present.</p>
+     * and only when at least one chunked document actually carries usable chunk
+     * vectors -- a vector-less batch (e.g. every doc is {@code status=chunked},
+     * written when embedding is configured off) can only select by keyword, so
+     * embedding the query for it would be a wasted provider round-trip.</p>
      *
      * @param resultMap the fetched documents, keyed by doc_id (mutated in place)
      * @param query the chat query (may be null/blank)
@@ -158,21 +164,104 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         // Defense-in-depth: the real gate is that content_chunk_vector/content_chunk_status are
         // never fetched in the first place when chunking is disabled (see buildContentFields() /
         // AnswerHighlightSearchParams#getResponseFields()). This explicit check keeps a stale
-        // content_chunk_status=done left over from when chunking was previously enabled from being
+        // content_chunk_status left over from when chunking was previously enabled from being
         // used even if that field-omission mechanism is ever refactored.
         if (!isContentChunkerEnabled()) {
             return;
         }
-        final List<Map<String, Object>> chunkedDocs = resultMap.values()
-                .stream()
-                .filter(doc -> Constants.DONE.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD)))
-                .collect(Collectors.toList());
+        final List<Map<String, Object>> chunkedDocs =
+                resultMap.values().stream().filter(this::isChunkedStatus).collect(Collectors.toList());
         if (chunkedDocs.isEmpty()) {
             return;
         }
-        final float[] queryVector = resolveQueryVector(query);
+        final float[] queryVector = chunkedDocs.stream().anyMatch(this::hasUsableChunkVectors) ? resolveQueryVector(query) : null;
         for (final Map<String, Object> doc : chunkedDocs) {
             selectRelevantChunks(doc, query, queryVector);
+        }
+    }
+
+    /**
+     * Checks whether a document is a chunked document -- one whose {@code content} field holds a
+     * chunk array rather than a raw string. Matches both chunk statuses: {@link Constants#DONE}
+     * (chunks with vectors) and {@link Constants#CHUNKED} (chunks written without vectors, e.g.
+     * when embedding is configured off). Statuses {@code skipped}/{@code fail} -- and an absent
+     * status -- mean the {@code content} field is a raw string, so they are not chunked here.
+     *
+     * @param doc the document map
+     * @return true if the document carries a chunk-array {@code content}
+     */
+    protected boolean isChunkedStatus(final Map<String, Object> doc) {
+        final Object status = doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD);
+        return Constants.DONE.equals(status) || Constants.CHUNKED.equals(status);
+    }
+
+    /**
+     * Checks whether a chunked document carries at least one chunk vector usable for semantic
+     * selection (the same entry shape {@link #selectBySemanticSimilarity} consumes). False for a
+     * {@code status=chunked} document (no vector field) and, defensively, for a {@code status=done}
+     * document whose vector field is missing or malformed.
+     *
+     * @param doc the document map
+     * @return true if at least one usable chunk vector is present
+     */
+    protected boolean hasUsableChunkVectors(final Map<String, Object> doc) {
+        final Object vectorFieldValue = doc.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
+        if (!(vectorFieldValue instanceof List<?>)) {
+            return false;
+        }
+        for (final Object entry : (List<?>) vectorFieldValue) {
+            if (toFloatArray(extractVectorSubfield(entry)) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Fetches the highlight snippet for chunked documents that cannot use semantic selection --
+     * no usable chunk vectors (typically {@code content_chunk_status=chunked}, written when
+     * embedding is configured off) -- and have no {@code hl_content} yet, so
+     * {@link #selectByHighlightMatch} still has a snippet to select chunks with on the FULL
+     * (small-document) path. One additional doc_id-restricted highlight search covers all such
+     * documents; only the raw highlight field is copied onto the already-fetched document maps --
+     * their {@code content} (the chunk array) is never replaced here.
+     *
+     * <p>Documents in {@code alreadyHighlightedIds} had their highlight opportunity in the primary
+     * highlight fetch (a chunked document returned there is preserved with its {@code hl_content}
+     * by {@link #normalizeHighlightedDocs}; one missing from its results entirely would miss an
+     * identical re-query too), so they are excluded. Skipped entirely for a blank query (nothing
+     * to highlight against -- the summary path falls through to the whole-array truncate) and when
+     * content chunking is disabled (zero extra cost for non-chunking deployments).</p>
+     *
+     * @param resultMap the fetched documents, keyed by doc_id (mutated in place)
+     * @param query the chat query (may be null/blank)
+     * @param alreadyHighlightedIds doc ids already covered by the primary highlight fetch
+     */
+    protected void enrichChunkedDocsWithHighlight(final Map<String, Map<String, Object>> resultMap, final String query,
+            final List<String> alreadyHighlightedIds) {
+        if (StringUtil.isBlank(query) || !isContentChunkerEnabled()) {
+            return;
+        }
+        final String highlightField = getHighlightContentField();
+        final List<String> targetIds = resultMap.entrySet().stream().filter(e -> {
+            final Map<String, Object> doc = e.getValue();
+            final Object snippet = doc.get(highlightField);
+            return isChunkedStatus(doc) && doc.get("content") instanceof List<?> && !hasUsableChunkVectors(doc)
+                    && !(snippet instanceof String && StringUtil.isNotBlank((String) snippet))
+                    && !alreadyHighlightedIds.contains(e.getKey());
+        }).map(Map.Entry::getKey).collect(Collectors.toList());
+        if (targetIds.isEmpty()) {
+            return;
+        }
+        for (final Map<String, Object> hlDoc : fetchHighlightedContent(targetIds, query)) {
+            final Object docId = hlDoc.get("doc_id");
+            final Object snippet = hlDoc.get(highlightField);
+            if (docId instanceof String && snippet instanceof String && StringUtil.isNotBlank((String) snippet)) {
+                final Map<String, Object> target = resultMap.get(docId);
+                if (target != null) {
+                    target.put(highlightField, snippet);
+                }
+            }
         }
     }
 
@@ -239,7 +328,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * incidentally find nothing.</p>
      *
      * @param doc the document map (mutated in place); must have
-     *            {@code content_chunk_status=done}
+     *            {@code content_chunk_status=done} or {@code =chunked}
      * @param query the chat query (may be null/blank)
      * @param queryVector the query embedding vector, or null if unavailable
      */
@@ -485,7 +574,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * Converts a {@code content} field value into a chunk-text list. Only a
      * {@code List} value (the shape a chunked document's {@code content}
      * actually has) is usable; anything else (should not occur for a
-     * {@code content_chunk_status=done} document) yields an empty list so
+     * chunked-status document) yields an empty list so
      * callers leave the document untouched.
      *
      * @param value the raw {@code content} field value
@@ -707,7 +796,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         final String highlightField = getHighlightContentField();
         final List<Map<String, Object>> normalized = new ArrayList<>();
         for (final Map<String, Object> doc : docs) {
-            if (Constants.DONE.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD))) {
+            if (isChunkedStatus(doc)) {
                 // Chunked document: preserve its raw content/vector/highlight fields untouched --
                 // never overwrite "content" with the snippet, never drop on a highlight miss. The
                 // chunk-selection pass in fetchContent() decides its final content via the

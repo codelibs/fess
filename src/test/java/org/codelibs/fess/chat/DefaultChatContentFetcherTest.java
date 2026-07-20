@@ -86,6 +86,16 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         return m;
     }
 
+    /**
+     * Builds a chunk-only ({@code content_chunk_status=chunked}) document map -- a chunk array
+     * written WITHOUT vectors (the write mode used when embedding is configured off).
+     */
+    private static Map<String, Object> chunkOnlyDoc(final String docId, final List<String> chunks) {
+        final Map<String, Object> m = chunkedDoc(docId, chunks, null);
+        m.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
+        return m;
+    }
+
     /** Fake {@link EmbeddingClientManager} seam for tests; counts embedQuery() invocations. */
     private static class FakeEmbeddingClientManager extends EmbeddingClientManager {
         boolean available = true;
@@ -156,6 +166,9 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
 
         @Override
         protected List<Map<String, Object>> fetchFullContent(final List<String> docIds) {
+            if (docIds.isEmpty()) {
+                return new ArrayList<>(); // mirror the real method's empty-docIds early return
+            }
             fullCalledWith.addAll(docIds);
             if (fullResult != null) {
                 return new ArrayList<>(fullResult);
@@ -169,6 +182,9 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
 
         @Override
         protected List<Map<String, Object>> fetchHighlightedContent(final List<String> docIds, final String query) {
+            if (docIds.isEmpty()) {
+                return new ArrayList<>(); // mirror the real method's empty-docIds early return
+            }
             highlightCalledWith.addAll(docIds);
             if (highlightResult != null) {
                 return new ArrayList<>(highlightResult);
@@ -1045,6 +1061,281 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         assertEquals(0, manager.embedQueryCallCount); // no chunked docs present -> never embeds
         assertEquals("FULL:small", out.get(0).get("content"));
         assertEquals("HL:big", out.get(1).get("content"));
+    }
+
+    // ===== Vector-less chunked docs (content_chunk_status=chunked / done-without-vectors) =====
+
+    @Test
+    public void test_fetchContent_smallChunkOnlyDoc_selectsByHighlightViaSecondaryFetch() {
+        // State 2, FULL path: a small chunk-array doc without vectors has no hl_content after the
+        // full fetch; one additional highlight fetch supplies the snippet for keyword selection.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        f.fullResult = new ArrayList<>(List.of(chunkOnlyDoc("small", List.of("about apples", "about bananas"))));
+        final Map<String, Object> hlDoc = new LinkedHashMap<>();
+        hlDoc.put("doc_id", "small");
+        hlDoc.put("hl_content", "about bananas");
+        f.highlightResult = new ArrayList<>(List.of(hlDoc));
+        final ChatContentRequest req = new ChatContentRequest(List.of("small"), List.of(doc("small", 100L)), "bananas");
+
+        final List<Map<String, Object>> out = f.fetchContent(req);
+
+        assertEquals(1, out.size());
+        assertEquals("about bananas", out.get(0).get("content")); // highlight-based chunk selection
+        assertEquals(List.of("small"), f.highlightCalledWith); // exactly one secondary highlight fetch
+        assertEquals("a vector-less batch must not embed the query", 0, manager.embedQueryCallCount);
+    }
+
+    @Test
+    public void test_fetchContent_largeChunkOnlyDoc_selectsByExistingHlContentWithoutSecondaryFetch() {
+        // State 2, HIGHLIGHT path: a large chunk-only doc comes back from the primary highlight
+        // fetch preserved raw WITH its hl_content (normalizeHighlightedDocs preserve branch); the
+        // existing snippet drives keyword selection -- no additional highlight fetch is issued.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        final Map<String, Object> chunked = chunkOnlyDoc("big", List.of("about apples", "about bananas"));
+        chunked.put("hl_content", "about bananas");
+        f.highlightResult = new ArrayList<>(List.of(chunked));
+        final ChatContentRequest req = new ChatContentRequest(List.of("big"), List.of(doc("big", 99999L)), "bananas");
+
+        final List<Map<String, Object>> out = f.fetchContent(req);
+
+        assertEquals(1, out.size());
+        assertEquals("about bananas", out.get(0).get("content"));
+        assertEquals(List.of("big"), f.highlightCalledWith); // primary fetch only, no secondary
+        assertTrue(f.fullCalledWith.isEmpty());
+        assertEquals(0, manager.embedQueryCallCount);
+    }
+
+    @Test
+    public void test_fetchContent_largeChunkOnlyDocHighlightMiss_noSecondaryFetch_wholeArrayTruncate() {
+        // A large chunk-only doc entirely missing from the primary highlight results is reconciled
+        // via the full-fetch fallback WITHOUT being truncated there (isChunkedStatus guard), and is
+        // NOT re-queried (an identical re-query would miss again); it falls to the whole-array
+        // join+truncate last resort.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        f.threshold = 5L;
+        f.highlightResult = new ArrayList<>(); // primary highlight miss
+        f.fullResult = new ArrayList<>(List.of(chunkOnlyDoc("big", List.of("chunk-a", "chunk-b"))));
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f };
+        f.embeddingManager = manager;
+        final ChatContentRequest req = new ChatContentRequest(List.of("big"), List.of(doc("big", 99999L)), "q");
+
+        final List<Map<String, Object>> out = f.fetchContent(req);
+
+        assertEquals(1, out.size());
+        assertEquals("chunk", out.get(0).get("content")); // "chunk-a\n\nchunk-b" truncated to 5
+        assertEquals("no secondary highlight fetch for an already-missed doc", List.of("big"), f.highlightCalledWith);
+        assertEquals(0, manager.embedQueryCallCount);
+    }
+
+    @Test
+    public void test_fetchContent_smallDoneDocWithVectors_semanticSelectionWithoutSecondaryFetch() {
+        // State 3, FULL path: DONE with usable vectors keeps the existing cosine top-K selection;
+        // the secondary highlight fetch must not fire for it.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        f.chatTopKOverride = 1;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        final Map<String, Object> chunked =
+                chunkedDoc("small", List.of("about cats", "about dogs"), List.of(List.of(0.0, 1.0), List.of(1.0, 0.0)));
+        f.fullResult = new ArrayList<>(List.of(chunked));
+        final ChatContentRequest req = new ChatContentRequest(List.of("small"), List.of(doc("small", 100L)), "tell me about dogs");
+
+        final List<Map<String, Object>> out = f.fetchContent(req);
+
+        assertEquals(1, out.size());
+        assertEquals("about dogs", out.get(0).get("content"));
+        assertEquals(1, manager.embedQueryCallCount);
+        assertTrue("no secondary highlight fetch when vectors are usable", f.highlightCalledWith.isEmpty());
+    }
+
+    @Test
+    public void test_fetchContent_largeDoneDocWithVectors_semanticSelectionUnchanged() {
+        // State 3, HIGHLIGHT path: a large DONE doc preserved raw by the highlight phase still
+        // selects by cosine similarity; no secondary fetch.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        f.chatTopKOverride = 1;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        final Map<String, Object> chunked =
+                chunkedDoc("big", List.of("about cats", "about dogs"), List.of(List.of(0.0, 1.0), List.of(1.0, 0.0)));
+        f.highlightResult = new ArrayList<>(List.of(chunked));
+        final ChatContentRequest req = new ChatContentRequest(List.of("big"), List.of(doc("big", 99999L)), "tell me about dogs");
+
+        final List<Map<String, Object>> out = f.fetchContent(req);
+
+        assertEquals(1, out.size());
+        assertEquals("about dogs", out.get(0).get("content"));
+        assertEquals(1, manager.embedQueryCallCount);
+        assertEquals(List.of("big"), f.highlightCalledWith); // primary fetch only
+    }
+
+    @Test
+    public void test_fetchContent_doneDocWithoutUsableVectors_fallsBackToKeywordWithoutEmbedding() {
+        // Defensive state: status=done but the vector field is missing/unusable. The secondary
+        // highlight fetch supplies the snippet for keyword selection, and the query is NOT
+        // embedded (no doc in the batch can use the vector).
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        f.fullResult = new ArrayList<>(List.of(chunkedDoc("small", List.of("about apples", "about bananas"), null))); // done, no vectors
+        final Map<String, Object> hlDoc = new LinkedHashMap<>();
+        hlDoc.put("doc_id", "small");
+        hlDoc.put("hl_content", "about apples");
+        f.highlightResult = new ArrayList<>(List.of(hlDoc));
+        final ChatContentRequest req = new ChatContentRequest(List.of("small"), List.of(doc("small", 100L)), "apples");
+
+        final List<Map<String, Object>> out = f.fetchContent(req);
+
+        assertEquals(1, out.size());
+        assertEquals("about apples", out.get(0).get("content"));
+        assertEquals(List.of("small"), f.highlightCalledWith);
+        assertEquals("done-without-vectors must not embed the query", 0, manager.embedQueryCallCount);
+    }
+
+    @Test
+    public void test_fetchContent_nullQueryChunkOnlyDoc_wholeArrayTruncateWithoutSecondaryFetch() {
+        // Null-query summary path: chunked docs fall straight to the whole-array truncate; no
+        // secondary highlight fetch, no embedding, no NPE.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        f.threshold = 5L;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f };
+        f.embeddingManager = manager;
+        f.fullResult = new ArrayList<>(List.of(chunkOnlyDoc("small", List.of("chunk-a", "chunk-b"))));
+
+        final List<Map<String, Object>> out = f.fetchContent(new ChatContentRequest(List.of("small"), List.of(), null));
+
+        assertEquals(1, out.size());
+        assertEquals("chunk", out.get(0).get("content")); // "chunk-a\n\nchunk-b" truncated to 5
+        assertTrue("blank query must skip the secondary highlight fetch", f.highlightCalledWith.isEmpty());
+        assertEquals(0, manager.embedQueryCallCount);
+    }
+
+    @Test
+    public void test_fetchContent_chunkerDisabled_noChunkProcessingForChunkOnlyDoc() {
+        // Chunker disabled: no chunk selection and no secondary fetch, even for a doc that still
+        // carries a stale chunk array + status from when chunking was enabled.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = false;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f };
+        f.embeddingManager = manager;
+        f.fullResult = new ArrayList<>(List.of(chunkOnlyDoc("small", List.of("chunk-a", "chunk-b"))));
+
+        final List<Map<String, Object>> out = f.fetchContent(new ChatContentRequest(List.of("small"), List.of(doc("small", 100L)), "q"));
+
+        assertEquals(1, out.size());
+        assertEquals(List.of("chunk-a", "chunk-b"), out.get(0).get("content")); // untouched
+        assertTrue(f.highlightCalledWith.isEmpty());
+        assertEquals(0, manager.embedQueryCallCount);
+    }
+
+    @Test
+    public void test_applyChunkSelection_chunkedStatusSelectsByKeywordWithoutEmbedding() {
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        final Map<String, Map<String, Object>> resultMap = new LinkedHashMap<>();
+        final Map<String, Object> chunkOnly = chunkOnlyDoc("a", List.of("about apples", "about bananas"));
+        chunkOnly.put("hl_content", "about bananas");
+        resultMap.put("a", chunkOnly);
+        f.applyChunkSelection(resultMap, "bananas");
+        assertEquals("no embedding round-trip when no doc has usable vectors", 0, manager.embedQueryCallCount);
+        assertEquals("about bananas", resultMap.get("a").get("content"));
+    }
+
+    @Test
+    public void test_applyChunkSelection_mixedVectorAndVectorlessDocs() {
+        // One done-with-vectors doc and one chunk-only doc in the same batch: the query is
+        // embedded once (for the vector doc); the vector-less doc still selects by keyword.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        f.chatTopKOverride = 1;
+        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
+        manager.available = true;
+        manager.queryVector = new float[] { 1.0f, 0.0f };
+        f.embeddingManager = manager;
+        final Map<String, Map<String, Object>> resultMap = new LinkedHashMap<>();
+        resultMap.put("d1", chunkedDoc("d1", List.of("c1a", "c1b"), List.of(List.of(0.0, 1.0), List.of(1.0, 0.0))));
+        final Map<String, Object> chunkOnly = chunkOnlyDoc("d2", List.of("c2a", "c2b"));
+        chunkOnly.put("hl_content", "c2a");
+        resultMap.put("d2", chunkOnly);
+        f.applyChunkSelection(resultMap, "query");
+        assertEquals(1, manager.embedQueryCallCount);
+        assertEquals("c1b", resultMap.get("d1").get("content")); // semantic
+        assertEquals("c2a", resultMap.get("d2").get("content")); // keyword
+    }
+
+    @Test
+    public void test_normalizeHighlightedDocs_preservesChunkOnlyDocRawKeepingSnippetField() {
+        final TestableFetcher f = new TestableFetcher();
+        final Map<String, Object> chunkOnly = chunkOnlyDoc("a", List.of("x", "y"));
+        chunkOnly.put("hl_content", "some snippet");
+        final Map<String, Object> chunkOnlyNoSnippet = chunkOnlyDoc("b", List.of("p", "q"));
+        final List<Map<String, Object>> out = f.normalizeHighlightedDocs(new ArrayList<>(List.of(chunkOnly, chunkOnlyNoSnippet)));
+        // status=chunked docs are preserved raw like status=done ones: content is never overwritten
+        // with the snippet, the raw hl_content stays available for keyword chunk selection, and a
+        // highlight miss does not drop the doc.
+        assertEquals(2, out.size());
+        assertEquals(List.of("x", "y"), out.get(0).get("content"));
+        assertEquals("some snippet", out.get(0).get("hl_content"));
+        assertEquals(List.of("p", "q"), out.get(1).get("content"));
+    }
+
+    @Test
+    public void test_hasUsableChunkVectors() {
+        final TestableFetcher f = new TestableFetcher();
+        assertTrue(f.hasUsableChunkVectors(chunkedDoc("a", List.of("x"), List.of(List.of(1.0, 0.0)))));
+        assertFalse(f.hasUsableChunkVectors(chunkedDoc("a", List.of("x"), null))); // no vector field
+        assertFalse(f.hasUsableChunkVectors(chunkOnlyDoc("a", List.of("x"))));
+        final Map<String, Object> malformed = chunkedDoc("a", List.of("x"), null);
+        malformed.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, "not-a-list");
+        assertFalse(f.hasUsableChunkVectors(malformed));
+        final Map<String, Object> badEntries = chunkedDoc("a", List.of("x"), null);
+        badEntries.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, List.of("not-a-map"));
+        assertFalse(f.hasUsableChunkVectors(badEntries));
+    }
+
+    @Test
+    public void test_isChunkedStatus() {
+        final TestableFetcher f = new TestableFetcher();
+        assertTrue(f.isChunkedStatus(chunkedDoc("a", List.of("x"), null))); // done
+        assertTrue(f.isChunkedStatus(chunkOnlyDoc("a", List.of("x")))); // chunked
+        assertFalse(f.isChunkedStatus(contentDoc("a", "raw"))); // no status
+        final Map<String, Object> skipped = contentDoc("a", "raw");
+        skipped.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.SKIPPED);
+        assertFalse(f.isChunkedStatus(skipped));
+        final Map<String, Object> failed = contentDoc("a", "raw");
+        failed.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.FAIL);
+        assertFalse(f.isChunkedStatus(failed));
     }
 
     @Test
