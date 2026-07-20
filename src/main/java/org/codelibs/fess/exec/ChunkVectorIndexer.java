@@ -230,9 +230,19 @@ public class ChunkVectorIndexer {
     }
 
     private int index() {
-        final String summary = ComponentUtil.getComponent(ChunkVectorHelper.class).executeChunkVectorProcessing();
-        logger.info("Chunk vector processing result: {}", summary);
-        return Constants.EXIT_OK;
+        // Same exit-code contract as SuggestCreator#create(): a genuine run failure (an exception
+        // out of the helper, e.g. the pending-document scroll failing) exits non-zero so the parent
+        // ChunkVectorJob throws JobProcessingException; intentional skips (chunker disabled,
+        // transient provider outage, dimension mismatch, mapping not ready) and normal runs --
+        // including runs with per-document failures -- return a summary message and exit 0.
+        try {
+            final String summary = ComponentUtil.getComponent(ChunkVectorHelper.class).executeChunkVectorProcessing();
+            logger.info("Chunk vector processing result: {}", summary);
+            return Constants.EXIT_OK;
+        } catch (final Exception e) {
+            logger.error("Chunk vector processing failed.", e);
+            return Constants.EXIT_FAIL;
+        }
     }
 
 }

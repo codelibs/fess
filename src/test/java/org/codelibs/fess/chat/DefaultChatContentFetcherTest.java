@@ -197,6 +197,13 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         }
     }
 
+    // Literal pin: this system-property key is external operator configuration; the raw VALUE is
+    // pinned so silent drift reddens a test instead of orphaning existing config.
+    @Test
+    public void test_externalContractLiterals() {
+        assertEquals("content_chunker.chat.top_k", DefaultChatContentFetcher.CHAT_TOP_K_PROPERTY);
+    }
+
     @Test
     public void test_decideStrategy_bySize() {
         final TestableFetcher f = new TestableFetcher();

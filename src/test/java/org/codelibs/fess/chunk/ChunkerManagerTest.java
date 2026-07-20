@@ -33,6 +33,13 @@ public class ChunkerManagerTest extends UnitFessTestCase {
         manager = new TestableChunkerManager();
     }
 
+    // Literal pin: this system-property key is external operator configuration; the raw VALUE is
+    // pinned so silent drift reddens a test instead of orphaning existing config.
+    @Test
+    public void test_externalContractLiterals() {
+        assertEquals("content_chunker.chunker.name", ChunkerManager.CHUNKER_NAME_PROPERTY);
+    }
+
     @Test
     public void test_getChunker_resolvesViaComponentByConvention() {
         final FakeChunker fake = new FakeChunker("length");

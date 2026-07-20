@@ -23,6 +23,7 @@ import java.util.List;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.exec.ChunkVectorIndexer;
+import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -42,6 +43,7 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
     private MockProcessHelper mockProcessHelper;
     private MockFessConfig mockFessConfig;
     private MockSystemHelper mockSystemHelper;
+    private StubChunkVectorHelper stubChunkVectorHelper;
     private File tempDir;
 
     @Override
@@ -69,6 +71,11 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
         // createSystemProperties() resolves jobHelper (absent from test_app.xml);
         // register a real JobHelper whose getJobRuntime() returns null here.
         ComponentUtil.register(new org.codelibs.fess.helper.JobHelper(), "jobHelper");
+        // execute()'s parent-side enabled gate resolves ChunkVectorHelper by class; register a
+        // stub (enabled by default, so the spawn-path tests behave as before) instead of mutating
+        // the JVM-lifetime systemProperties singleton, which would leak into other test classes.
+        stubChunkVectorHelper = new StubChunkVectorHelper();
+        ComponentUtil.register(stubChunkVectorHelper, ChunkVectorHelper.class.getCanonicalName());
 
         // Create ChunkVectorJob after all components are registered. The container's
         // UTFlute mock ServletContext (getRealPath() == null) would win over the
@@ -354,6 +361,33 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
     public void test_getExecuteType() {
         assertEquals(Constants.EXECUTE_TYPE_CHUNK, chunkVectorJob.getExecuteType());
         assertEquals("chunk", chunkVectorJob.getExecuteType());
+    }
+
+    // Parent-side enabled gate: a disabled content chunker must not spawn a child JVM at all --
+    // no session, no command assembly, no process. (The child has its own gate, but spawning a
+    // whole JVM only for it to no-op defeats the point of the cheap parent-side check.)
+    @Test
+    public void test_execute_contentChunkerDisabled_skipsWithoutSpawningProcess() {
+        createRequiredDirectories();
+        stubChunkVectorHelper.enabled = false;
+        mockProcessHelper.setExitValue(0);
+        mockProcessHelper.setOutput("Should never run");
+
+        String result = chunkVectorJob.execute();
+
+        assertTrue("the skip message must state the chunker is disabled: " + result, result.contains("Content chunker is disabled."));
+        assertFalse("a disabled run must not allocate a session: " + result, result.contains("Session Id:"));
+        assertNull(chunkVectorJob.sessionId, "a disabled run must return before session-id creation");
+        assertNull(mockProcessHelper.getLastCommandList(), "no child-process command may be assembled when the chunker is disabled");
+    }
+
+    // Literal pin: externally-meaningful raw strings owned by this job. Silent drift of these
+    // values would break existing schedules/configuration without any compile error, so a value
+    // change must redden a test, not just rename a constant.
+    @Test
+    public void test_externalContractLiterals() {
+        assertEquals("chunk", Constants.EXECUTE_TYPE_CHUNK);
+        assertEquals("jvm.chunk.options", FessConfig.JVM_CHUNK_OPTIONS);
     }
 
     // Test session ID generation
@@ -1045,6 +1079,17 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
         @Override
         public String getLdapAttrRoomNumber() {
             return "roomNumber";
+        }
+    }
+
+    // Stub ChunkVectorHelper whose enabled flag is a plain field, so the parent-side gate can be
+    // exercised without touching the JVM-lifetime systemProperties singleton.
+    private static class StubChunkVectorHelper extends ChunkVectorHelper {
+        boolean enabled = true;
+
+        @Override
+        public boolean isContentChunkerEnabled() {
+            return enabled;
         }
     }
 

@@ -131,6 +131,12 @@ public class ChunkVectorHelper {
      * ({@link #checkDimensionConsistency()}, {@link #checkVectorMappingReady()}) run only when
      * embedding is active -- in chunk-only mode no vector is written, so neither can apply.</p>
      *
+     * <p>A pending-document scroll failure is deliberately NOT caught here: it propagates to the
+     * caller so the {@link org.codelibs.fess.exec.ChunkVectorIndexer} child process exits non-zero
+     * and the parent {@link org.codelibs.fess.job.ChunkVectorJob} raises a
+     * {@code JobProcessingException} -- unlike the intentional skips above, which are healthy
+     * outcomes returned as a summary message (exit 0).</p>
+     *
      * <p>No in-code overlap guard is needed: the scheduler serializes runs of the owning job.
      * Every scheduled job is registered by {@code JobHelper#register} with {@code uniqueBy(id)}
      * plus {@code fessConfig.getSchedulerConcurrentExecModeAsEnum()} (default
@@ -188,13 +194,10 @@ public class ChunkVectorHelper {
                     AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, Constants.NONE, Constants.CHUNKED);
         }
 
-        final List<String> idList;
-        try {
-            idList = scrollPendingIds(embeddingActive);
-        } catch (final Exception e) {
-            logger.warn("Failed to scroll-search pending documents.", e);
-            return e.getMessage() + "\n";
-        }
+        // A scroll failure is a genuine run failure, not an intentional skip: let it propagate so
+        // the ChunkVectorIndexer child process exits non-zero and the parent ChunkVectorJob
+        // surfaces it as a JobProcessingException, instead of a healthy-looking summary string.
+        final List<String> idList = scrollPendingIds(embeddingActive);
 
         final AtomicInteger processed = new AtomicInteger();
         final AtomicInteger succeeded = new AtomicInteger();
@@ -697,7 +700,11 @@ public class ChunkVectorHelper {
     /**
      * Processes one document: splits its content into chunks, embeds them,
      * and writes the result back with a CAS (compare-and-swap) guard against
-     * a concurrent recrawl.
+     * a concurrent recrawl. A document a prior chunk-only run left
+     * {@code content_chunk_status="chunked"} already stores its chunks as the
+     * content array, so its stored elements are embedded directly via the same
+     * upgrade path {@link #processBatch(List, boolean)} uses
+     * ({@link #extractExistingChunks}) -- never re-chunked and never joined.
      *
      * @param id the OpenSearch document {@code _id}
      * @return true if the document was successfully processed, or a
@@ -734,9 +741,19 @@ public class ChunkVectorHelper {
             // a pathological Object#toString() on a document field value cannot escape
             // processDocument() uncaught -- every per-document, data-dependent operation is
             // guarded uniformly.
-            final List<String> chunks = extractChunks(fessConfig, doc, id);
-            if (chunks == null) {
-                return markSkipped(searchEngineClient, fessConfig, doc, id);
+            // Upgrade-path parity with processBatch(List, boolean): a status="chunked" document's
+            // stored content-array elements ARE its chunks -- embed them directly rather than
+            // re-chunking the stringifyContent() join (chunk boundaries could shift mid-word).
+            final List<String> existingChunks = extractExistingChunks(fessConfig, doc);
+            final List<String> chunks;
+            if (existingChunks != null) {
+                chunks = existingChunks;
+            } else {
+                final List<String> freshChunks = extractChunks(fessConfig, doc, id);
+                if (freshChunks == null) {
+                    return markSkipped(searchEngineClient, fessConfig, doc, id);
+                }
+                chunks = freshChunks;
             }
             final List<float[]> vectors = embedChunks(chunks);
             if (vectors.size() != chunks.size()) {
@@ -771,8 +788,9 @@ public class ChunkVectorHelper {
             // handleFailure() performs its own CAS write via storeSafely(); if that write
             // hits a genuine (non-version-conflict) OpenSearch error it is rethrown (see
             // storeSafely()'s Javadoc), so this must be guarded too -- processDocument()
-            // must never throw for a single document's processing failure (Task 11's
-            // scroll-query job loop relies on a plain boolean return per document).
+            // must never throw for a single document's processing failure: this class's
+            // processing run (executed by the ChunkVectorIndexer child process) and every
+            // other caller rely on each document resolving to a plain boolean.
             try {
                 return handleFailure(searchEngineClient, fessConfig, doc, id);
             } catch (final Exception inner) {
@@ -1436,9 +1454,10 @@ public class ChunkVectorHelper {
      * elements directly avoids Java's bracket-comma-space {@code List#toString()}
      * format, which would be nonsense as re-chunking input. Documents a chunk-only
      * run left {@code "chunked"} normally never reach this join on an embedding run
-     * ({@link #processBatch(List, boolean)} embeds their stored array elements directly via its
-     * upgrade path), so this remains a defensive fallback for a malformed chunked document or a
-     * future re-embed maintenance job.
+     * (both {@link #processBatch(List, boolean)} and {@link #processDocument(String)} embed their
+     * stored array elements directly via the {@link #extractExistingChunks} upgrade path), so this
+     * remains a defensive fallback for a malformed chunked document or a future re-embed
+     * maintenance job.
      *
      * @param contentObj the raw {@code content} field value
      * @return the reconstructed content string

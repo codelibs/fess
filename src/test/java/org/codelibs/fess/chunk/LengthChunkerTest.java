@@ -36,6 +36,14 @@ public class LengthChunkerTest extends UnitFessTestCase {
         assertEquals("length", chunker.getName());
     }
 
+    // Literal pin: these system-property keys are external operator configuration; the raw VALUES
+    // are pinned so silent drift reddens a test instead of orphaning existing config.
+    @Test
+    public void test_externalContractLiterals() {
+        assertEquals("content_chunker.length.chunk_size", LengthChunker.CHUNK_SIZE_PROPERTY);
+        assertEquals("content_chunker.length.overlap", LengthChunker.OVERLAP_PROPERTY);
+    }
+
     @Test
     public void test_split_nullContent_returnsEmptyList() {
         assertTrue(chunker.split(null).isEmpty(), "null content should yield empty list");

@@ -39,6 +39,16 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         super.setUp(testInfo);
     }
 
+    // Literal pin: these system-property keys are external operator configuration. Renaming a
+    // constant compiles cleanly while silently orphaning existing config, so the raw VALUES are
+    // pinned here and any drift must redden a test.
+    @Test
+    public void test_externalContractLiterals() {
+        assertEquals("content_chunker.enabled", AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY);
+        assertEquals("content_chunker.embedding.name", AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY);
+        assertEquals("content_chunker.embedding.dimension", AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY);
+    }
+
     // ========== Proxy configuration tests ==========
 
     @Test

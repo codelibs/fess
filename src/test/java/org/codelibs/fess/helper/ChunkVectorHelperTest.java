@@ -436,6 +436,31 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_processDocument_chunkedStatusListContent_embedsStoredArrayDirectly() {
+        // Upgrade-path parity with processBatch(List, boolean): a single-document call on a
+        // status="chunked" document (left by a prior chunk-only run) must embed the stored
+        // content-array elements DIRECTLY -- never join them back into one string and re-chunk,
+        // which could shift chunk boundaries away from what a batch run would produce.
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", List.of("stored chunk A", "stored chunk B"));
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
+        searchEngineClient.documentToReturn = doc;
+        helper.testVectorsByChunk.put("stored chunk A", new float[] { 1f });
+        helper.testVectorsByChunk.put("stored chunk B", new float[] { 2f });
+
+        final boolean result = helper.processDocument("doc-1");
+
+        assertTrue(result, "the upgrade of a chunked document should store successfully");
+        assertNull(helper.lastSplitInput, "a status=chunked document must never be re-chunked via the stringified join");
+        assertEquals("the stored array elements themselves must be embedded, in order",
+                List.of(List.of("stored chunk A", "stored chunk B")), helper.embedCalls);
+        final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
+        assertEquals("the stored chunk array must be preserved as-is", List.of("stored chunk A", "stored chunk B"), stored.get("content"));
+        assertEquals(Constants.DONE, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertVectorMarkers(stored, 1f, 2f);
+    }
+
+    @Test
     public void test_processDocument_versionConflict_returnsFalseWithoutRethrowing() {
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "original content");
@@ -1535,6 +1560,29 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
                 "the thrown exception must be isolated and counted as failed, not crash the whole run: " + result);
     }
 
+    @Test
+    public void test_executeChunkVectorProcessing_scrollFailure_propagatesAsRunFailure() {
+        // A pending-document scroll failure is a genuine run failure, not an intentional skip: it
+        // must propagate out of executeChunkVectorProcessing() so ChunkVectorIndexer.index() maps
+        // it to EXIT_FAIL and the parent ChunkVectorJob raises JobProcessingException. Swallowing
+        // it into a returned summary string would make a failed run look healthy to the scheduler.
+        final RunLoopHelper run = new RunLoopHelper() {
+            @Override
+            protected List<String> scrollPendingIds(final boolean embeddingActive) {
+                scrollPendingIdsCalled = true;
+                throw new RuntimeException("simulated scroll failure");
+            }
+        };
+        try {
+            run.executeChunkVectorProcessing();
+            fail("a scroll failure must propagate, not be swallowed into a summary string");
+        } catch (final RuntimeException e) {
+            assertEquals("simulated scroll failure", e.getMessage());
+        }
+        assertTrue(run.scrollPendingIdsCalled, "the run must have reached (and failed in) the scroll phase");
+        assertTrue(run.processedIds.isEmpty(), "no batch may be processed after a scroll failure");
+    }
+
     // ===================================================================================
     //                                        scrollPendingIds / partitionIds / defaults (Phase C)
     //                                        ================================================
@@ -1625,6 +1673,34 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals(2, batches.size());
         assertEquals(List.of("doc-0", "doc-1"), batches.get(0));
         assertEquals(List.of("doc-2", "doc-3"), batches.get(1));
+    }
+
+    // ===================================================================================
+    //                                                    external contract literal pins
+    //                                                    ===============================
+    // These raw strings are external contracts: they are baked into stored documents
+    // (content_chunk_status values), live index mappings (field/sub-field names), and operator
+    // configuration (system-property keys). Renaming a constant would keep every in-code usage
+    // compiling while silently orphaning existing data/config -- so the VALUES are pinned here
+    // and a change must redden a test, not just refactor cleanly.
+
+    @Test
+    public void test_externalContractLiterals_statusValuesAndFieldNames() {
+        assertEquals("done", Constants.DONE);
+        assertEquals("fail", Constants.FAIL);
+        assertEquals("skipped", Constants.SKIPPED);
+        assertEquals("chunked", Constants.CHUNKED);
+        assertEquals("content_chunk_vector", Constants.CONTENT_CHUNK_VECTOR_FIELD);
+        assertEquals("content_chunk_status", Constants.CONTENT_CHUNK_STATUS_FIELD);
+        assertEquals("vector", ChunkVectorHelper.VECTOR_SUBFIELD);
+    }
+
+    @Test
+    public void test_externalContractLiterals_configPropertyKeys() {
+        assertEquals("content_chunker.max_chunks_per_document", ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY);
+        assertEquals("content_chunker.job.concurrency", ChunkVectorHelper.JOB_CONCURRENCY_PROPERTY);
+        assertEquals("content_chunker.job.bulk_size", ChunkVectorHelper.JOB_BULK_SIZE_PROPERTY);
+        assertEquals("content_chunker.job.max_documents_per_run", ChunkVectorHelper.JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY);
     }
 
     /**

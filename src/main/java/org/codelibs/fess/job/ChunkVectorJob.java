@@ -30,6 +30,7 @@ import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.exec.ChunkVectorIndexer;
+import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -61,6 +62,15 @@ public class ChunkVectorJob extends ExecJob {
 
     @Override
     public String execute() {
+        if (!ComponentUtil.getComponent(ChunkVectorHelper.class).isContentChunkerEnabled()) {
+            // Cheap parent-side gate: a scheduled-but-disabled run must not spawn a whole child
+            // JVM only for executeChunkVectorProcessing()'s own enabled gate to no-op inside it.
+            if (logger.isDebugEnabled()) {
+                logger.debug("Content chunking is disabled; skipping the chunk vector indexer process.");
+            }
+            return "Content chunker is disabled.";
+        }
+
         final StringBuilder resultBuf = new StringBuilder();
 
         if (sessionId == null) { // create session id
