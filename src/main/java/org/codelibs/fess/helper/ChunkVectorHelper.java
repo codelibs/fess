@@ -107,8 +107,9 @@ public class ChunkVectorHelper {
      * Executes one full chunk-vector processing run: resolves the run mode, scroll-collects
      * pending document IDs, partitions them into {@code content_chunker.job.bulk_size}-sized
      * batches, then fans those batches out across a bounded thread pool via
-     * {@link #processBatch(List, boolean)}. This is the single entry
-     * {@link org.codelibs.fess.job.ChunkVectorJob#execute()} delegates to.
+     * {@link #processBatch(List, boolean)}. This is the single entry the
+     * {@link org.codelibs.fess.exec.ChunkVectorIndexer} child process (launched by
+     * {@link org.codelibs.fess.job.ChunkVectorJob}) runs.
      *
      * <p>Run-mode resolution (only reached when {@link #isContentChunkerEnabled()}):</p>
      * <ul>

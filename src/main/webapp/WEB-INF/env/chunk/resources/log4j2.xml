@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+	<Properties>
+		<Property name="domain.name" value="${sys:fess.log.name:-fess}" />
+		<Property name="log.level" value="${sys:fess.log.level:-info}" />
+		<Property name="root.log.level" value="${sys:fess.log.level:-warn}" />
+		<Property name="log.pattern" value="%d [%t] %-5p %msg%n" />
+		<Property name="log.file.basedir" value="${sys:fess.log.path:-target/logs}" />
+		<Property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
+		<Property name="backup.max.history" value="10" />
+	</Properties>
+
+	<Appenders>
+		<RollingFile name="AppFile" fileName="${log.file.basedir}/${domain.name}.log"
+			filePattern="${log.file.basedir}/${domain.name}${backup.date.suffix}-%i.log.gz">
+			<PatternLayout><Pattern>${log.pattern}</Pattern></PatternLayout><!-- <EcsLayout serviceName="fess" eventDataset="chunk" /> -->
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy fileIndex="max" min="1"
+				max="${backup.max.history}" compressionLevel="9" />
+		</RollingFile>
+		<LogNotificationAppender name="LogNotification"
+			minLevel="${sys:fess.log.notification.level:-ERROR}" />
+	</Appenders>
+
+	<Loggers>
+		<Logger name="org.codelibs.fess" additivity="false" level="${log.level}">
+			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
+		</Logger>
+		<Root level="${root.log.level}">
+			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
+		</Root>
+	</Loggers>
+</Configuration>

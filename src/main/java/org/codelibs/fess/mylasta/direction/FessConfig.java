@@ -166,6 +166,37 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * -XX:+UseTLAB<br>
      * -XX:+DisableExplicitGC<br>
      * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=30<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     *  */
+    String JVM_CHUNK_OPTIONS = "jvm.chunk.options";
+
+    /** The key of the configuration. e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
      * -XX:-OmitStackTraceInFastThrow<br>
      * -XX:+UnlockExperimentalVMOptions<br>
      * -XX:+UseG1GC<br>
@@ -2451,6 +2482,42 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
+
+    /**
+     * Get the value for the key 'jvm.chunk.options'. <br>
+     * The value is, e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=30<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     *  <br>
+     * comment: JVM options for the chunk vector indexer process.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJvmChunkOptions();
 
     /**
      * Get the value for the key 'jvm.thumbnail.options'. <br>
@@ -10256,6 +10323,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.JVM_SUGGEST_OPTIONS);
         }
 
+        public String getJvmChunkOptions() {
+            return get(FessConfig.JVM_CHUNK_OPTIONS);
+        }
+
         public String getJvmThumbnailOptions() {
             return get(FessConfig.JVM_THUMBNAIL_OPTIONS);
         }
@@ -13918,6 +13989,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.JVM_CRAWLER_OPTIONS,
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JVM_SUGGEST_OPTIONS,
+                    "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j.skipJansi=true\n");
+            defaultMap.put(FessConfig.JVM_CHUNK_OPTIONS,
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j.skipJansi=true\n");
             defaultMap.put(FessConfig.JVM_THUMBNAIL_OPTIONS,
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");

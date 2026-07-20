@@ -872,6 +872,9 @@ public class Constants extends CoreLibConstants {
     /** Execution type for suggest operations. */
     public static final String EXECUTE_TYPE_SUGGEST = "suggest";
 
+    /** Execution type for content chunk vector indexing operations. */
+    public static final String EXECUTE_TYPE_CHUNK = "chunk";
+
     /** Default script type (Groovy). */
     public static final String DEFAULT_SCRIPT = "groovy";
 
