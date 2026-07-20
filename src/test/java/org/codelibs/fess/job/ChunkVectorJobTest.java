@@ -30,23 +30,14 @@ import org.opensearch.index.query.QueryBuilder;
 public class ChunkVectorJobTest extends UnitFessTestCase {
 
     @Test
-    public void test_buildPendingQuery_excludesDoneAndFailedStatus() {
+    public void test_buildPendingQuery_excludesAnyStatus() {
         final ChunkVectorJob job = new ChunkVectorJob();
-        final QueryBuilder query = job.buildPendingQuery(3);
+        final QueryBuilder query = job.buildPendingQuery();
         final String json = query.toString();
         assertTrue(json.contains("must_not"), "status-absent condition must be a must_not clause: " + json);
         assertTrue(json.contains("exists"), "should use an exists query on content_chunk_status: " + json);
         assertTrue(json.contains("content_chunk_status"), "should reference content_chunk_status: " + json);
-    }
-
-    @Test
-    public void test_buildPendingQuery_includesRetryCountBelowMax() {
-        final ChunkVectorJob job = new ChunkVectorJob();
-        final QueryBuilder query = job.buildPendingQuery(3);
-        final String json = query.toString();
-        assertTrue(json.contains("content_chunk_retry_count"), "should reference content_chunk_retry_count: " + json);
-        assertTrue(json.contains("range"), "should use a range query for the retry-count bound: " + json);
-        assertTrue(json.contains("should"), "retry-count-absent OR retry-count<max must be a should clause: " + json);
+        assertFalse(json.contains("content_chunk_retry_count"), "the retry-count clause was removed with the retry counter: " + json);
     }
 
     // ===================================================================================
@@ -165,7 +156,6 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
     public void test_defaults_matchNamingSummary() {
         final ChunkVectorJob job = new ChunkVectorJob();
         assertEquals(2, job.getConcurrency());
-        assertEquals(3, job.getJobMaxRetry());
         assertEquals(20, job.getJobBulkSize());
     }
 
@@ -401,9 +391,9 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
         final AvailabilityAwareJob job = new AvailabilityAwareJob();
         job.embeddingAvailable = false;
         // If the run were not gated, these ids would be scrolled and flow into processBatch(), whose
-        // per-document embed failures during the outage would advance content_chunk_retry_count and,
-        // after content_chunker.job.max_retry runs, durably stamp the corpus content_chunk_status=failed
-        // (which buildPendingQuery then excludes forever). The gate must keep them pending instead.
+        // per-document embed failures during the outage would durably stamp the corpus
+        // content_chunk_status=fail (which buildPendingQuery then excludes forever). The gate must
+        // keep them pending instead.
         job.idsToReturn = java.util.List.of("doc-1", "doc-2");
 
         final String result = job.execute();
@@ -411,7 +401,7 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
         assertFalse(job.scrollPendingIdsCalled,
                 "an unavailable embedding provider must skip scrolling entirely -- no document may be fetched/processed");
         assertTrue(job.processedIds.isEmpty(),
-                "no document may be touched (retry counts must not advance) during a provider outage: " + job.processedIds);
+                "no document may be touched (no status may be written) during a provider outage: " + job.processedIds);
         assertTrue(result.toLowerCase(java.util.Locale.ROOT).contains("not available"),
                 "the skip result message must indicate the embedding provider is not available: " + result);
     }

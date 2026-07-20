@@ -25,13 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.helper.ChunkVectorHelper;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
@@ -60,6 +59,30 @@ public class ChunkVectorJob {
 
     /** Number of document IDs fetched per scroll batch. */
     protected static final int SCROLL_SIZE = 100;
+
+    /**
+     * System property key for the bounded concurrency of the job's embedding calls: the number of
+     * concurrently in-flight batches (each up to {@link #JOB_BULK_SIZE_PROPERTY} documents).
+     */
+    protected static final String JOB_CONCURRENCY_PROPERTY = "content_chunker.job.concurrency";
+
+    /** System property key for the number of documents grouped into a single embedding call. */
+    protected static final String JOB_BULK_SIZE_PROPERTY = "content_chunker.job.bulk_size";
+
+    /**
+     * System property key for the maximum number of pending document IDs collected (and therefore
+     * processed) in a single job run; bounds the memory the scroll phase holds.
+     */
+    protected static final String JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY = "content_chunker.job.max_documents_per_run";
+
+    /** Default value of {@link #JOB_CONCURRENCY_PROPERTY}. */
+    protected static final int DEFAULT_JOB_CONCURRENCY = 2;
+
+    /** Default value of {@link #JOB_BULK_SIZE_PROPERTY}. */
+    protected static final int DEFAULT_JOB_BULK_SIZE = 20;
+
+    /** Default value of {@link #JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY}. */
+    protected static final int DEFAULT_JOB_MAX_DOCUMENTS_PER_RUN = 10000;
 
     /**
      * Default constructor.
@@ -94,9 +117,8 @@ public class ChunkVectorJob {
             // "Content Chunk Vector Indexer" job (an ordinary Admin > Scheduler action) without also
             // setting the separate content_chunker.enabled system property would let every pending
             // document run the full chunk pipeline and fail only at the embedding step (no available
-            // client when disabled), which ChunkVectorHelper#handleFailure would count toward the
-            // retry budget and, after content_chunker.job.max_retry runs, durably stamp every
-            // document content_chunk_status=failed via a real CAS write. Logged only at DEBUG so a
+            // client when disabled), which ChunkVectorHelper#handleFailure would durably stamp
+            // content_chunk_status=fail via a real CAS write. Logged only at DEBUG so a
             // site that simply does not use this feature never sees WARN/INFO spam on each run.
             if (logger.isDebugEnabled()) {
                 logger.debug("Content chunking is disabled; skipping ChunkVectorJob.");
@@ -106,14 +128,13 @@ public class ChunkVectorJob {
 
         if (!isEmbeddingClientAvailable()) {
             // The embedding provider is unreachable (e.g. a transient outage). Skip the whole run
-            // WITHOUT scrolling/fetching/processing so pending documents keep their retry budget:
-            // otherwise every batch's embed call would throw, the per-document fallback would throw,
-            // and handleFailure would increment content_chunk_retry_count -- after
-            // content_chunker.job.max_retry outage-affected runs stamping the entire corpus
-            // content_chunk_status=failed (which buildPendingQuery then excludes forever, recoverable
-            // only by a full recrawl). Logged at WARN so a genuine outage is visible; the documents
-            // stay pending and are retried once the provider recovers.
-            logger.warn("Embedding provider is not available; skipping ChunkVectorJob to preserve pending documents' retry budget.");
+            // WITHOUT scrolling/fetching/processing so pending documents stay pending: otherwise
+            // every batch's embed call would throw, the per-document fallback would throw, and
+            // handleFailure would stamp the entire corpus content_chunk_status=fail (which
+            // buildPendingQuery then excludes forever, recoverable only by a full recrawl). Logged
+            // at WARN so a genuine outage is visible; the documents stay pending and are retried
+            // once the provider recovers.
+            logger.warn("Embedding provider is not available; skipping ChunkVectorJob to keep pending documents pending.");
             return "Embedding provider is not available. Skipped.";
         }
 
@@ -122,8 +143,8 @@ public class ChunkVectorJob {
             // A confirmed embedding-dimension mismatch between the configured provider/model and
             // the live content_chunk_vector mapping was already logged at ERROR by
             // checkDimensionConsistency() -- skip this run entirely rather than letting every
-            // pending document independently burn its retry budget against OpenSearch's k-NN
-            // dimension-mismatch rejection.
+            // pending document independently fail against OpenSearch's k-NN dimension-mismatch
+            // rejection.
             resultBuf.append("Embedding dimension mismatch detected between the configured embedding provider and the existing ")
                     .append("content_chunk_vector mapping; skipping this run. See the ERROR log for details.");
             return resultBuf.toString();
@@ -209,7 +230,7 @@ public class ChunkVectorJob {
 
     /**
      * Scroll-queries {@code fessConfig.getIndexDocumentUpdateIndex()} for
-     * documents matching {@link #buildPendingQuery(int)}, restricted to just
+     * documents matching {@link #buildPendingQuery()}, restricted to just
      * the ID field, and collects matching IDs before returning (the
      * scroll context is fully closed by the time this method returns). Uses the
      * update-index alias -- not the search-index alias -- so this job never diverges
@@ -237,7 +258,7 @@ public class ChunkVectorJob {
         final List<String> idList = new ArrayList<>();
         try {
             searchEngineClient.scrollSearch(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
-                requestBuilder.setQuery(buildPendingQuery(getJobMaxRetry()))
+                requestBuilder.setQuery(buildPendingQuery())
                         .setSize(SCROLL_SIZE)
                         .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null);
                 return true;
@@ -276,21 +297,12 @@ public class ChunkVectorJob {
 
     /**
      * Builds the query matching documents pending chunk/embedding
-     * generation: {@code content_chunk_status} absent AND
-     * ({@code content_chunk_retry_count} absent OR
-     * {@code content_chunk_retry_count < maxRetry}).
+     * generation: {@code content_chunk_status} absent.
      *
-     * @param maxRetry the configured max retry count
      * @return the query builder
      */
-    protected QueryBuilder buildPendingQuery(final int maxRetry) {
-        final BoolQueryBuilder retryOrAbsent = QueryBuilders.boolQuery()
-                .should(QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD)))
-                .should(QueryBuilders.rangeQuery(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD).lt(maxRetry))
-                .minimumShouldMatch(1);
-        return QueryBuilders.boolQuery()
-                .mustNot(QueryBuilders.existsQuery(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD))
-                .must(retryOrAbsent);
+    protected QueryBuilder buildPendingQuery() {
+        return QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     /**
@@ -320,16 +332,7 @@ public class ChunkVectorJob {
      * @return the value of {@code content_chunker.job.concurrency} (default 2)
      */
     protected int getConcurrency() {
-        return getConfigInt(ContentChunkConstants.JOB_CONCURRENCY, ContentChunkConstants.DEFAULT_JOB_CONCURRENCY);
-    }
-
-    /**
-     * Gets the configured max retry count.
-     *
-     * @return the value of {@code content_chunker.job.max_retry} (default 3)
-     */
-    protected int getJobMaxRetry() {
-        return getConfigInt(ContentChunkConstants.JOB_MAX_RETRY, ContentChunkConstants.DEFAULT_JOB_MAX_RETRY);
+        return getConfigInt(JOB_CONCURRENCY_PROPERTY, DEFAULT_JOB_CONCURRENCY);
     }
 
     /**
@@ -338,7 +341,7 @@ public class ChunkVectorJob {
      * @return the value of {@code content_chunker.job.bulk_size} (default 20)
      */
     protected int getJobBulkSize() {
-        return getConfigInt(ContentChunkConstants.JOB_BULK_SIZE, ContentChunkConstants.DEFAULT_JOB_BULK_SIZE);
+        return getConfigInt(JOB_BULK_SIZE_PROPERTY, DEFAULT_JOB_BULK_SIZE);
     }
 
     /**
@@ -347,7 +350,7 @@ public class ChunkVectorJob {
      * @return the value of {@code content_chunker.job.max_documents_per_run} (default 10000)
      */
     protected int getJobMaxDocumentsPerRun() {
-        return getConfigInt(ContentChunkConstants.JOB_MAX_DOCUMENTS_PER_RUN, ContentChunkConstants.DEFAULT_JOB_MAX_DOCUMENTS_PER_RUN);
+        return getConfigInt(JOB_MAX_DOCUMENTS_PER_RUN_PROPERTY, DEFAULT_JOB_MAX_DOCUMENTS_PER_RUN);
     }
 
     private int getConfigInt(final String key, final int defaultValue) {

@@ -31,11 +31,12 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
-import org.codelibs.fess.helper.ContentChunkConstants;
+import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -52,6 +53,12 @@ import org.dbflute.optional.OptionalThing;
 public class DefaultChatContentFetcher implements ChatContentFetcher {
 
     private static final Logger logger = LogManager.getLogger(DefaultChatContentFetcher.class);
+
+    /** System property key for the number of top-ranked chunks selected for the RAG chat context. */
+    protected static final String CHAT_TOP_K_PROPERTY = "content_chunker.chat.top_k";
+
+    /** Default value of {@link #CHAT_TOP_K_PROPERTY}. */
+    protected static final int DEFAULT_CHAT_TOP_K = 3;
 
     /**
      * Latches on the first time the embedding provider is found unavailable so the operator sees
@@ -114,7 +121,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             final long maxLength = getFulltextThreshold();
             final List<Map<String, Object>> fallbackDocs = fetchFullContent(missingIds);
             fallbackDocs.forEach(doc -> {
-                if (!ContentChunkConstants.STATUS_DONE.equals(doc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD))) {
+                if (!Constants.DONE.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD))) {
                     truncateContent(doc, maxLength);
                 }
                 // A chunked document is left raw here; applyChunkSelection() truncates it itself below.
@@ -158,7 +165,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         }
         final List<Map<String, Object>> chunkedDocs = resultMap.values()
                 .stream()
-                .filter(doc -> ContentChunkConstants.STATUS_DONE.equals(doc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD)))
+                .filter(doc -> Constants.DONE.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD)))
                 .collect(Collectors.toList());
         if (chunkedDocs.isEmpty()) {
             return;
@@ -266,7 +273,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * @return the joined selected chunk text, or null if no usable chunk vectors were found
      */
     protected String selectBySemanticSimilarity(final List<String> chunks, final Map<String, Object> doc, final float[] queryVector) {
-        final Object vectorFieldValue = doc.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final Object vectorFieldValue = doc.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         if (!(vectorFieldValue instanceof List<?>)) {
             return null;
         }
@@ -290,7 +297,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
     }
 
     /**
-     * Extracts the {@link ContentChunkConstants#VECTOR_SUBFIELD} value from one
+     * Extracts the {@link ChunkVectorHelper#VECTOR_SUBFIELD} value from one
      * {@code content_chunk_vector} entry.
      *
      * @param entry one {@code content_chunk_vector} list entry
@@ -298,7 +305,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      */
     protected Object extractVectorSubfield(final Object entry) {
         if (entry instanceof Map<?, ?>) {
-            return ((Map<?, ?>) entry).get(ContentChunkConstants.VECTOR_SUBFIELD);
+            return ((Map<?, ?>) entry).get(ChunkVectorHelper.VECTOR_SUBFIELD);
         }
         return null;
     }
@@ -379,15 +386,15 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * @return the value of {@code content_chunker.chat.top_k} (default 3)
      */
     protected int getChatTopK() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.CHAT_TOP_K, null);
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(CHAT_TOP_K_PROPERTY, null);
         if (value != null) {
             try {
                 return Integer.parseInt(value.trim());
             } catch (final NumberFormatException e) {
-                logger.warn("[RAG] Invalid integer for {}: {}", ContentChunkConstants.CHAT_TOP_K, value);
+                logger.warn("[RAG] Invalid integer for {}: {}", CHAT_TOP_K_PROPERTY, value);
             }
         }
-        return ContentChunkConstants.DEFAULT_CHAT_TOP_K;
+        return DEFAULT_CHAT_TOP_K;
     }
 
     /**
@@ -492,12 +499,14 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
     }
 
     /**
-     * Checks if content chunking is enabled.
+     * Checks if content chunking is enabled, delegating to
+     * {@link ChunkVectorHelper#isContentChunkerEnabled()} so the read path shares the
+     * ingestion pipeline's single config lookup instead of re-reading the property.
      *
      * @return the value of {@code content_chunker.enabled} (default false)
      */
     protected boolean isContentChunkerEnabled() {
-        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.ENABLED, "false"));
+        return ComponentUtil.getComponent(ChunkVectorHelper.class).isContentChunkerEnabled();
     }
 
     /**
@@ -637,8 +646,8 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             return configured;
         }
         final Set<String> fieldSet = new LinkedHashSet<>(Arrays.asList(configured));
-        fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
-        fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD);
+        fieldSet.add(Constants.CONTENT_CHUNK_VECTOR_FIELD);
+        fieldSet.add(Constants.CONTENT_CHUNK_STATUS_FIELD);
         return fieldSet.toArray(new String[0]);
     }
 
@@ -698,7 +707,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         final String highlightField = getHighlightContentField();
         final List<Map<String, Object>> normalized = new ArrayList<>();
         for (final Map<String, Object> doc : docs) {
-            if (ContentChunkConstants.STATUS_DONE.equals(doc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD))) {
+            if (Constants.DONE.equals(doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD))) {
                 // Chunked document: preserve its raw content/vector/highlight fields untouched --
                 // never overwrite "content" with the snippet, never drop on a highlight miss. The
                 // chunk-selection pass in fetchContent() decides its final content via the
@@ -797,13 +806,13 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         @Override
         public String[] getResponseFields() {
             final String[] base = super.getResponseFields();
-            if (!Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.ENABLED, "false"))) {
+            if (!ComponentUtil.getComponent(ChunkVectorHelper.class).isContentChunkerEnabled()) {
                 return base;
             }
             final Set<String> fieldSet = new LinkedHashSet<>(Arrays.asList(base));
             fieldSet.add(ComponentUtil.getFessConfig().getIndexFieldContent());
-            fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
-            fieldSet.add(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD);
+            fieldSet.add(Constants.CONTENT_CHUNK_VECTOR_FIELD);
+            fieldSet.add(Constants.CONTENT_CHUNK_STATUS_FIELD);
             return fieldSet.toArray(new String[0]);
         }
     }

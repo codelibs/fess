@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -38,6 +37,12 @@ public class LengthChunker implements Chunker {
 
     /** The name identifier for this chunker. */
     protected static final String NAME = "length";
+
+    /** System property key for the chunk size in characters. */
+    protected static final String CHUNK_SIZE_PROPERTY = "content_chunker.length.chunk_size";
+
+    /** System property key for the overlap size in characters. */
+    protected static final String OVERLAP_PROPERTY = "content_chunker.length.overlap";
 
     /** Fallback chunk size used when the configured value is not a positive integer. */
     protected static final int DEFAULT_CHUNK_SIZE = 800;
@@ -141,7 +146,7 @@ public class LengthChunker implements Chunker {
      * @return the value of {@code content_chunker.length.chunk_size} (default 800)
      */
     protected int getChunkSize() {
-        return getConfigInt(ContentChunkConstants.LENGTH_CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
+        return getConfigInt(CHUNK_SIZE_PROPERTY, DEFAULT_CHUNK_SIZE);
     }
 
     /**
@@ -150,7 +155,7 @@ public class LengthChunker implements Chunker {
      * @return the value of {@code content_chunker.length.overlap} (default 0)
      */
     protected int getOverlap() {
-        return getConfigInt(ContentChunkConstants.LENGTH_OVERLAP, 0);
+        return getConfigInt(OVERLAP_PROPERTY, 0);
     }
 
     private int getConfigInt(final String key, final int defaultValue) {

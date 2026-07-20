@@ -101,6 +101,12 @@ public class Constants extends CoreLibConstants {
     /** Status constant representing stopped state. */
     public static final String STOP = "stop";
 
+    /** Status constant representing a document intentionally skipped by content chunking. */
+    public static final String SKIPPED = "skipped";
+
+    /** Status constant representing a document chunked without embedding vectors. */
+    public static final String CHUNKED = "chunked";
+
     /** Constant representing automatic mode. */
     public static final String AUTO = "auto";
 
@@ -119,6 +125,12 @@ public class Constants extends CoreLibConstants {
 
     /** Item property key for name field. */
     public static final String ITEM_NAME = "name";
+
+    /** Document field holding one nested entry per content chunk vector. */
+    public static final String CONTENT_CHUNK_VECTOR_FIELD = "content_chunk_vector";
+
+    /** Document field holding the content-chunk processing status. */
+    public static final String CONTENT_CHUNK_STATUS_FIELD = "content_chunk_status";
 
     /** Character encoding constant for Japanese MS932. */
     public static final String MS932 = "MS932";

@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -915,7 +915,6 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         form.doc.put("custom_field", "value");
         form.doc.put("content_chunk_vector", new ArrayList<>());
         form.doc.put("content_chunk_status", "done");
-        form.doc.put("content_chunk_retry_count", 1);
 
         setCurrentFormAndConfig(action, form);
         final RenderData renderData = invokeRegisterExtraFields(action);
@@ -926,8 +925,6 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         assertTrue(extraFieldNames.contains("custom_field"), "a normal custom field must still be editable");
         assertFalse(extraFieldNames.contains("content_chunk_vector"), "content_chunk_vector must be hidden from the editable walk");
         assertFalse(extraFieldNames.contains("content_chunk_status"), "content_chunk_status must be hidden from the editable walk");
-        assertFalse(extraFieldNames.contains("content_chunk_retry_count"),
-                "content_chunk_retry_count must be hidden from the editable walk");
     }
 
     @Test
@@ -991,17 +988,14 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         final Map<String, Object> entity = new HashMap<>(); // fresh entity: content is not a List
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "https://example.com");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, new ArrayList<>());
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, "done");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, 2);
+        doc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, new ArrayList<>());
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, "done");
         doc.put("content", "still editable when the fetched entity isn't already chunked");
 
         AdminSearchlistAction.stripSystemManagedFields(entity, doc);
 
-        assertFalse(doc.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD), "content_chunk_vector must always be stripped");
-        assertFalse(doc.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "content_chunk_status must always be stripped");
-        assertFalse(doc.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "content_chunk_retry_count must always be stripped");
+        assertFalse(doc.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "content_chunk_vector must always be stripped");
+        assertFalse(doc.containsKey(Constants.CONTENT_CHUNK_STATUS_FIELD), "content_chunk_status must always be stripped");
         assertTrue(doc.containsKey("content"), "content must survive when the fetched entity is not already chunked");
         assertEquals("https://example.com", doc.get("url"));
     }
@@ -1012,12 +1006,12 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         entity.put("content", List.of("chunk-a", "chunk-b")); // already-chunked signal
         final Map<String, Object> doc = new HashMap<>();
         doc.put("content", "attacker-supplied replacement content");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, "failed");
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, "fail");
 
         AdminSearchlistAction.stripSystemManagedFields(entity, doc);
 
         assertFalse(doc.containsKey("content"), "content must be stripped when the FETCHED entity is already chunked");
-        assertFalse(doc.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(doc.containsKey(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -1053,8 +1047,8 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         fetchedEntity.put("_id", "chunked-doc-1-original-id");
         fetchedEntity.put("url", "https://example.com/chunked");
         fetchedEntity.put("content", new ArrayList<>(List.of("chunk-a", "chunk-b"))); // already-chunked signal
-        fetchedEntity.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_DONE);
-        fetchedEntity.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, List.of(Map.of("vector", List.of(0.1, 0.2))));
+        fetchedEntity.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
+        fetchedEntity.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, List.of(Map.of("vector", List.of(0.1, 0.2))));
         fetchedEntity.put("_seq_no", 5L);
         fetchedEntity.put("_primary_term", 1L);
         client.documentToReturn = fetchedEntity;
@@ -1073,9 +1067,8 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         // A direct POST/API call attempting to overwrite already-chunked content and smuggle
         // system-managed fields -- exactly what the JSP's disabled/hidden rendering cannot stop.
         form.doc.put("content", "attacker-supplied replacement content");
-        form.doc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, "failed");
-        form.doc.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, new ArrayList<>());
-        form.doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, 99);
+        form.doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, "fail");
+        form.doc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, new ArrayList<>());
         form.q = "test-query";
 
         action.update(form);
@@ -1084,15 +1077,12 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         assertNotNull(stored, "update() must have reached the store() call");
         org.junit.jupiter.api.Assertions.assertEquals(List.of("chunk-a", "chunk-b"), stored.get("content"),
                 "the original chunk array must survive; the client's replacement string must be dropped");
-        org.junit.jupiter.api.Assertions.assertEquals(ContentChunkConstants.STATUS_DONE,
-                stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD),
+        org.junit.jupiter.api.Assertions.assertEquals(Constants.DONE, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD),
                 "the fetched entity's own status must survive; the client's smuggled value must be dropped");
         @SuppressWarnings("unchecked")
-        final List<Object> storedVector = (List<Object>) stored.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Object> storedVector = (List<Object>) stored.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         assertFalse(storedVector.isEmpty(),
                 "the fetched entity's own vector must survive; the client's smuggled empty list must be dropped");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "the client's smuggled retry_count must never reach storage (the fetched entity had none either)");
     }
 
     @Test
@@ -1114,8 +1104,8 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         form.doc.put("boost", "1.0");
         form.doc.put("content", "a brand-new document's own content");
         // An attempt to smuggle system-managed fields into a brand-new document too.
-        form.doc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, "done");
-        form.doc.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, List.of(Map.of("vector", List.of(9.9))));
+        form.doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, "done");
+        form.doc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, List.of(Map.of("vector", List.of(9.9))));
 
         action.create(form);
 
@@ -1123,9 +1113,9 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         assertNotNull(stored, "create() must have reached the store() call");
         org.junit.jupiter.api.Assertions.assertEquals("a brand-new document's own content", stored.get("content"),
                 "a fresh (non-chunked) entity must keep the client's own content string");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD),
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_STATUS_FIELD),
                 "system-managed fields must never be smuggled into a brand-new document either");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD));
     }
 
     /**

@@ -45,6 +45,15 @@ import org.codelibs.fess.util.ComponentUtil;
  */
 public abstract class AbstractEmbeddingClient implements EmbeddingClient {
 
+    /** System property key for the content-chunking feature toggle. */
+    public static final String CONTENT_CHUNKER_ENABLED_PROPERTY = "content_chunker.enabled";
+
+    /** System property key for the active {@link EmbeddingClient} name. */
+    public static final String EMBEDDING_NAME_PROPERTY = "content_chunker.embedding.name";
+
+    /** System property key for the vector dimension of the configured embedding provider. */
+    public static final String EMBEDDING_DIMENSION_PROPERTY = "content_chunker.embedding.dimension";
+
     private static final Logger logger = LogManager.getLogger(AbstractEmbeddingClient.class);
 
     /** The HTTP client used for API communication. */

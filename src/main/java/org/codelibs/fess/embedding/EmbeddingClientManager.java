@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -98,7 +97,7 @@ public class EmbeddingClientManager {
      * @return the embedding type string (e.g. "ollama")
      */
     protected String getEmbeddingType() {
-        return ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.EMBEDDING_NAME, "ollama");
+        return ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, "ollama");
     }
 
     /**
@@ -107,7 +106,8 @@ public class EmbeddingClientManager {
      * @return true if enabled
      */
     protected boolean isContentChunkerEnabled() {
-        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.ENABLED, "false"));
+        return Boolean.parseBoolean(
+                ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY, "false"));
     }
 
     /**

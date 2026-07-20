@@ -138,7 +138,7 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
                 doc.put(indexFieldTimestamp, now);
             }
             AdminSearchlistAction.validateFields(doc, this::throwValidationErrorApi);
-            // Strip content_chunk_vector/content_chunk_status/content_chunk_retry_count from the
+            // Strip content_chunk_vector/content_chunk_status from the
             // client-supplied map before indexing: these system-managed fields may only ever be
             // written by the ChunkVectorHelper CAS pipeline, and a stale/fabricated value here would
             // permanently desync a document from its real content and exclude it from the

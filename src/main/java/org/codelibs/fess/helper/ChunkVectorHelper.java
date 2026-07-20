@@ -23,7 +23,9 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.chunk.ChunkerManager;
+import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.embedding.EmbeddingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -38,14 +40,22 @@ import jakarta.annotation.PostConstruct;
 
 /**
  * Orchestrates the ingestion half of content-chunk vector search: registers
- * the OpenSearch document-mapping rewrite rule that adds
- * {@code content_chunk_vector}/{@code content_chunk_status}/
- * {@code content_chunk_retry_count} fields, and performs the per-document
+ * the OpenSearch document-mapping rewrite rule that adds the
+ * {@code content_chunk_vector} field, and performs the per-document
  * CAS chunk+embed read-modify-write ({@link #processDocument(String)}).
  */
 public class ChunkVectorHelper {
 
     private static final Logger logger = LogManager.getLogger(ChunkVectorHelper.class);
+
+    /** Sub-field of {@link Constants#CONTENT_CHUNK_VECTOR_FIELD} holding the knn_vector value. */
+    public static final String VECTOR_SUBFIELD = "vector";
+
+    /** System property key for the maximum number of chunks a single document may produce. */
+    protected static final String MAX_CHUNKS_PER_DOCUMENT_PROPERTY = "content_chunker.max_chunks_per_document";
+
+    /** Default value of {@link #MAX_CHUNKS_PER_DOCUMENT_PROPERTY}. */
+    protected static final int DEFAULT_MAX_CHUNKS_PER_DOCUMENT = 1000;
 
     /**
      * Default constructor.
@@ -73,9 +83,10 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Splices {@code content_chunk_vector}/{@code content_chunk_status}/
-     * {@code content_chunk_retry_count} field definitions immediately before
-     * the literal {@code "content":} key in the document mapping JSON. A
+     * Splices the {@code content_chunk_vector} field definition immediately
+     * before the literal {@code "content":} key in the document mapping JSON
+     * ({@code content_chunk_status} is mapped statically in {@code doc.json};
+     * only the config-dependent knn_vector dimension needs a rewrite). A
      * no-op when {@code content_chunker.enabled} is false or
      * {@code content_chunker.embedding.dimension} is unset -- this reads the
      * static config value only, never a live {@code EmbeddingClient} call,
@@ -97,23 +108,17 @@ public class ChunkVectorHelper {
             // creating the entire index with no proper mapping. Skip the rewrite unchanged instead,
             // mirroring the isBlank fail-open above.
             logger.warn("[ChunkVector] {} is unset or not a positive integer ({}); skipping content_chunk_vector mapping rewrite.",
-                    ContentChunkConstants.EMBEDDING_DIMENSION, getEmbeddingDimensionConfig());
+                    AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY, getEmbeddingDimensionConfig());
             return source;
         }
-        final String fieldDef = "\"" + ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD + "\": {\n" //
+        final String fieldDef = "\"" + Constants.CONTENT_CHUNK_VECTOR_FIELD + "\": {\n" //
                 + "  \"type\": \"nested\",\n" //
                 + "  \"properties\": {\n" //
-                + "    \"" + ContentChunkConstants.VECTOR_SUBFIELD + "\": {\n" //
+                + "    \"" + VECTOR_SUBFIELD + "\": {\n" //
                 + "      \"type\": \"knn_vector\",\n" //
                 + "      \"dimension\": " + dimension + "\n" //
                 + "    }\n" //
                 + "  }\n" //
-                + "},\n" //
-                + "\"" + ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD + "\": {\n" //
-                + "  \"type\": \"keyword\"\n" //
-                + "},\n" //
-                + "\"" + ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD + "\": {\n" //
-                + "  \"type\": \"integer\"\n" //
                 + "},";
         return source.replace("\"content\":", fieldDef + "\n\"content\":");
     }
@@ -127,7 +132,8 @@ public class ChunkVectorHelper {
      * @return the value of {@code content_chunker.enabled} (default false)
      */
     public boolean isContentChunkerEnabled() {
-        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.ENABLED, "false"));
+        return Boolean.parseBoolean(
+                ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY, "false"));
     }
 
     /**
@@ -136,7 +142,7 @@ public class ChunkVectorHelper {
      * @return the configured dimension string, or null if unset
      */
     protected String getEmbeddingDimensionConfig() {
-        return ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.EMBEDDING_DIMENSION, null);
+        return ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY, null);
     }
 
     /**
@@ -171,9 +177,9 @@ public class ChunkVectorHelper {
      * operator switching the embedding provider/model (and therefore its native dimension)
      * without recreating the index, so the mapping baked in at index-creation time silently goes
      * stale relative to the now-current config. Without this check every pending document would
-     * independently burn its full retry budget against OpenSearch's k-NN dimension-mismatch
-     * rejection before ending up {@code content_chunk_status=failed}, with the real cause visible
-     * only in a per-document WARN log line.
+     * independently fail against OpenSearch's k-NN dimension-mismatch rejection and end up
+     * {@code content_chunk_status=fail}, with the real cause visible only in a per-document WARN
+     * log line.
      *
      * <p>Fails open (returns true, proceed) whenever the check cannot meaningfully run --
      * chunking disabled, dimension unset, mapping not created yet, or the mapping readback itself
@@ -195,7 +201,8 @@ public class ChunkVectorHelper {
         try {
             configuredDimension = Integer.parseInt(configuredDimensionStr.trim());
         } catch (final NumberFormatException e) {
-            logger.warn("[ChunkVector] Invalid integer for {}: {}", ContentChunkConstants.EMBEDDING_DIMENSION, configuredDimensionStr);
+            logger.warn("[ChunkVector] Invalid integer for {}: {}", AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY,
+                    configuredDimensionStr);
             return true;
         }
         final Integer liveDimension;
@@ -203,7 +210,7 @@ public class ChunkVectorHelper {
             liveDimension = readLiveMappingDimension();
         } catch (final Exception e) {
             logger.warn("[ChunkVector] Failed to read back the live {} mapping dimension; skipping the fail-fast dimension "
-                    + "consistency check for this run.", ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, e);
+                    + "consistency check for this run.", Constants.CONTENT_CHUNK_VECTOR_FIELD, e);
             return true;
         }
         if (liveDimension == null) {
@@ -216,7 +223,7 @@ public class ChunkVectorHelper {
                     "[ChunkVector] Embedding dimension mismatch: configured {}={} but the live {} mapping was created with "
                             + "dimension={}. This looks like the embedding provider/model was switched without recreating the index. "
                             + "Skipping this job run -- recreate the index (or restore the prior dimension) before re-running.",
-                    ContentChunkConstants.EMBEDDING_DIMENSION, configuredDimension, ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD,
+                    AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY, configuredDimension, Constants.CONTENT_CHUNK_VECTOR_FIELD,
                     liveDimension);
             return false;
         }
@@ -270,7 +277,7 @@ public class ChunkVectorHelper {
         if (!(properties instanceof Map)) {
             return null;
         }
-        final Object vectorField = ((Map<?, ?>) properties).get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final Object vectorField = ((Map<?, ?>) properties).get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         if (!(vectorField instanceof Map)) {
             return null;
         }
@@ -278,7 +285,7 @@ public class ChunkVectorHelper {
         if (!(vectorFieldProperties instanceof Map)) {
             return null;
         }
-        final Object vectorSubField = ((Map<?, ?>) vectorFieldProperties).get(ContentChunkConstants.VECTOR_SUBFIELD);
+        final Object vectorSubField = ((Map<?, ?>) vectorFieldProperties).get(VECTOR_SUBFIELD);
         if (!(vectorSubField instanceof Map)) {
             return null;
         }
@@ -296,8 +303,8 @@ public class ChunkVectorHelper {
      *
      * @param id the OpenSearch document {@code _id}
      * @return true if the document was successfully processed, or a
-     *         terminal failure was durably recorded (retry count incremented
-     *         or marked failed); false if the document was not found, had
+     *         terminal failure was durably recorded (marked failed); false
+     *         if the document was not found, had
      *         blank/unchunkable content, the document could not be fetched,
      *         or a CAS write lost a race to a concurrent recrawl (or, on
      *         persistent write failure, could not even record the failure)
@@ -341,27 +348,25 @@ public class ChunkVectorHelper {
             final List<Map<String, Object>> vectorList = new ArrayList<>(vectors.size());
             for (final float[] vector : vectors) {
                 final Map<String, Object> vectorMap = new HashMap<>();
-                vectorMap.put(ContentChunkConstants.VECTOR_SUBFIELD, vector);
+                vectorMap.put(VECTOR_SUBFIELD, vector);
                 vectorList.add(vectorMap);
             }
             // Mutate a COPY, never the shared `doc` map read above -- if storeSafely() below
             // throws (a genuine, non-conflict SearchEngineClientException; see its Javadoc),
             // the outer catch falls into handleFailure(doc, ...), which must operate on a
-            // document whose content/retry-count are still exactly as originally fetched. If
-            // these success-path fields were applied to `doc` itself, a document whose
+            // document whose content is still exactly as originally fetched. If these
+            // success-path fields were applied to `doc` itself, a document whose
             // content_chunk_status never reached "done" could still end up with its `content`
-            // permanently overwritten by the chunk array (plus a premature content_chunk_vector,
-            // and a retry count reset to 1 instead of correctly incremented) once handleFailure's
-            // own write succeeds.
+            // permanently overwritten by the chunk array (plus a premature content_chunk_vector)
+            // once handleFailure's own write succeeds.
             final Map<String, Object> updatedDoc = new HashMap<>(doc);
             // Stored as the native List<String> (not joined into one string): LengthChunker's
             // fixed-character-count splitting has no word-boundary awareness, so a separator
             // joined between chunks would frequently land mid-word. OpenSearch/Elasticsearch
             // text-type fields natively accept a JSON array value for the same field.
             updatedDoc.put(fessConfig.getIndexFieldContent(), chunks);
-            updatedDoc.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
-            updatedDoc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_DONE);
-            updatedDoc.remove(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD);
+            updatedDoc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
+            updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
             return storeSafely(searchEngineClient, fessConfig, updatedDoc, id);
         } catch (final Exception e) {
             logger.warn("[ChunkVector] Failed to process document. id={}", id, e);
@@ -417,8 +422,7 @@ public class ChunkVectorHelper {
             logger.warn(
                     "[ChunkVector] Document produced {} chunks, exceeding the {}={} cap; marking it skipped and leaving "
                             + "its content intact for keyword search. Raise {} and recrawl to include it in semantic chunking. id={}",
-                    chunks.size(), ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, maxChunks, ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT,
-                    id);
+                    chunks.size(), MAX_CHUNKS_PER_DOCUMENT_PROPERTY, maxChunks, MAX_CHUNKS_PER_DOCUMENT_PROPERTY, id);
             return null;
         }
         return chunks;
@@ -440,10 +444,9 @@ public class ChunkVectorHelper {
      * <p>If the single {@link #embedChunks(List)} call spanning the whole batch throws, the batch is
      * not failed as a unit: each document is retried with its own {@link #embedChunks(List)} call
      * ({@link #embedAndStoreIndividually}), so a provider limit tripped by one oversized (or one
-     * malformed) document does not drag its healthy siblings to {@code failed}. Only a document that
-     * still fails on its individual retry is counted toward its own retry budget via
-     * {@link #handleFailure}, mirroring {@link #processDocument(String)}'s own catch block per
-     * document.</p>
+     * malformed) document does not drag its healthy siblings to {@code fail}. Only a document that
+     * still fails on its individual retry is marked failed via {@link #handleFailure}, mirroring
+     * {@link #processDocument(String)}'s own catch block per document.</p>
      *
      * <p>The request text list sent to {@link #embedChunks(List)} is derived directly from a single
      * ordered {@link ChunkRef} list built while chunking (one entry per chunk, in send order,
@@ -529,7 +532,7 @@ public class ChunkVectorHelper {
             // request-size / token / timeout limit can make one oversized (or one malformed) document
             // fail the whole combined call, so do NOT drag every document in the batch into a shared
             // failure. Fall back to embedding each document on its own: healthy documents still
-            // succeed, and only a genuinely failing document is counted toward its own retry budget.
+            // succeed, and only a genuinely failing document is marked failed.
             // Each fallback store goes through the same CAS-aware storeSafely() path, so a real
             // version conflict on an individual retry is handled coherently rather than bypassed.
             logger.warn("[ChunkVector] Batch embedding of {} document(s) failed; retrying each document individually.", entries.size(), e);
@@ -629,22 +632,21 @@ public class ChunkVectorHelper {
         final List<Map<String, Object>> vectorList = new ArrayList<>(vectors.size());
         for (final float[] vector : vectors) {
             final Map<String, Object> vectorMap = new HashMap<>();
-            vectorMap.put(ContentChunkConstants.VECTOR_SUBFIELD, vector);
+            vectorMap.put(VECTOR_SUBFIELD, vector);
             vectorList.add(vectorMap);
         }
         // Mutate a COPY, never the shared entry.doc map -- see processDocument()'s identical rationale
         // for why the failure path must operate on the original fetch.
         final Map<String, Object> updatedDoc = new HashMap<>(entry.doc);
         updatedDoc.put(fessConfig.getIndexFieldContent(), entry.chunks);
-        updatedDoc.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
-        updatedDoc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_DONE);
-        updatedDoc.remove(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD);
+        updatedDoc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
+        updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
         return storeSafely(searchEngineClient, fessConfig, updatedDoc, entry.id);
     }
 
     /**
-     * Records a per-document processing failure via {@link #handleFailure} (retry-count accounting
-     * and its own CAS write), never letting handleFailure's own write failure escape --
+     * Records a per-document processing failure via {@link #handleFailure} (its own CAS write),
+     * never letting handleFailure's own write failure escape --
      * {@link #processBatch} must resolve every document to a plain boolean.
      *
      * @param searchEngineClient the search engine client
@@ -729,11 +731,11 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Increments {@code content_chunk_retry_count} and, once it reaches
-     * {@link #getJobMaxRetry()}, sets {@code content_chunk_status="failed"};
-     * otherwise leaves the status field absent so the document is retried on
-     * the next job run (design doc §8.3). Writes via the same CAS path as
-     * the success path.
+     * Marks a document terminally failed ({@code content_chunk_status="fail"})
+     * after a processing failure, writing via the same CAS path as the success
+     * path -- unless the embedding provider is unreachable right now, in which
+     * case the document is left pending (no write at all) so a transient
+     * outage never stamps the corpus failed.
      *
      * @param searchEngineClient the search engine client
      * @param fessConfig the fess config
@@ -747,32 +749,23 @@ public class ChunkVectorHelper {
             // The embedding provider is unreachable RIGHT NOW -- it died mid-run, after
             // ChunkVectorJob#execute()'s pre-flight availability gate had already passed. Every
             // pending document's embed call is now failing purely because of this transient outage,
-            // not because the document itself is unprocessable. Counting these outage failures toward
-            // content_chunk_retry_count would, across content_chunker.job.max_retry outage-affected
-            // runs, durably stamp the whole corpus content_chunk_status=failed (which
+            // not because the document itself is unprocessable. Marking these outage failures would
+            // durably stamp the whole corpus content_chunk_status=fail (which
             // ChunkVectorJob#buildPendingQuery then excludes forever, recoverable only by a full
-            // recrawl). Leave the document pending instead -- no retry increment, no status write, no
-            // CAS write at all -- so it is retried unchanged once the provider recovers; the next
-            // run's pre-flight gate then skips the run entirely while the outage persists. A genuine
-            // poison document (HTTP 400, count/dimension mismatch) fails while the provider is still
-            // reachable, so available() is true and it still flows through the retry-count accounting
-            // below. Re-probing the same cached availability the pre-flight gate reads keeps the two
-            // gates consistent; the periodic refresher bounds how long the cache can lag a real outage.
+            // recrawl). Leave the document pending instead -- no status write, no CAS write at all --
+            // so it is retried unchanged once the provider recovers; the next run's pre-flight gate
+            // then skips the run entirely while the outage persists. A genuine poison document
+            // (HTTP 400, count/dimension mismatch) fails while the provider is still reachable, so
+            // available() is true and it still flows through the failure write below. Re-probing the
+            // same cached availability the pre-flight gate reads keeps the two gates consistent; the
+            // periodic refresher bounds how long the cache can lag a real outage.
             if (logger.isInfoEnabled()) {
-                logger.info("[ChunkVector] Embedding provider is unavailable; leaving document pending without counting a retry. id={}",
+                logger.info("[ChunkVector] Embedding provider is unavailable; leaving document pending without marking it failed. id={}",
                         id);
             }
             return false;
         }
-        final int maxRetry = getJobMaxRetry();
-        final int currentRetry = toInt(doc.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        final int nextRetry = currentRetry + 1;
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, nextRetry);
-        if (nextRetry >= maxRetry) {
-            doc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_FAILED);
-        } else {
-            doc.remove(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD);
-        }
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.FAIL);
         return storeSafely(searchEngineClient, fessConfig, doc, id);
     }
 
@@ -781,7 +774,7 @@ public class ChunkVectorHelper {
      * zero chunks, or produced more chunks than {@link #getMaxChunksPerDocument()}. Writes
      * {@code content_chunk_status="skipped"} — a DISTINCT terminal status, never "done" (the RAG read
      * path keys on "done" to treat {@code content} as a chunk array) — via the same CAS path as the
-     * success/failure writes, removes any retry count, and never overwrites the document's content, so
+     * success/failure writes, and never overwrites the document's content, so
      * it stays available to keyword search and display. This takes the document out of
      * {@code ChunkVectorJob#buildPendingQuery}'s pending set (which excludes any document whose
      * {@code content_chunk_status} is set), so it is no longer re-fetched every run — preventing
@@ -790,7 +783,7 @@ public class ChunkVectorHelper {
      * whose content later becomes chunkable is reprocessed.
      *
      * <p>Never throws and never routes into {@link #handleFailure}: "skipped" is a permanent property of
-     * the document's current content, not a transient failure, so it must not accrue retries. A lost CAS
+     * the document's current content, not a transient failure, so it must not be marked failed. A lost CAS
      * race (concurrent recrawl) or any other store error simply leaves the document pending, to be
      * re-evaluated on the next run.</p>
      *
@@ -803,8 +796,7 @@ public class ChunkVectorHelper {
     protected boolean markSkipped(final SearchEngineClient searchEngineClient, final FessConfig fessConfig, final Map<String, Object> doc,
             final String id) {
         final Map<String, Object> updatedDoc = new HashMap<>(doc);
-        updatedDoc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_SKIPPED);
-        updatedDoc.remove(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD);
+        updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.SKIPPED);
         try {
             return storeSafely(searchEngineClient, fessConfig, updatedDoc, id);
         } catch (final Exception e) {
@@ -827,9 +819,8 @@ public class ChunkVectorHelper {
      * version conflict ({@link #isVersionConflict}) is swallowed here; any
      * other {@link SearchEngineClientException} is rethrown so it reaches
      * the same failure-handling path as a chunking/embedding error (i.e.
-     * counted toward {@code content_chunk_retry_count} via
-     * {@link #handleFailure}, logged at WARN) instead of being silently
-     * treated as benign forever.
+     * marked failed via {@link #handleFailure}, logged at WARN) instead of
+     * being silently treated as benign forever.
      *
      * @param searchEngineClient the search engine client
      * @param fessConfig the fess config
@@ -917,13 +908,6 @@ public class ChunkVectorHelper {
         return false;
     }
 
-    private int toInt(final Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-        return 0;
-    }
-
     /**
      * Converts a {@code content} field value read back from OpenSearch into a
      * plain string suitable for re-chunking. Handles the case where the
@@ -978,7 +962,7 @@ public class ChunkVectorHelper {
     /**
      * Reports whether the configured embedding provider is currently available, so
      * {@link #handleFailure} can tell a transient provider outage (leave the document pending) apart
-     * from a genuine per-document failure (count it toward the retry budget). Delegates to
+     * from a genuine per-document failure (mark it failed). Delegates to
      * {@link EmbeddingClientManager#available()} -- the same cached availability the RAG read path and
      * {@link org.codelibs.fess.job.ChunkVectorJob}'s pre-flight gate use. Overridable seam for tests.
      *
@@ -992,9 +976,9 @@ public class ChunkVectorHelper {
      * Fails the document loudly if any embedding vector's length does not match the configured
      * {@code content_chunker.embedding.dimension} (when that dimension is a valid positive integer).
      * Without this, a provider that returns a wrong-length vector (a model/config mismatch) would be
-     * stored and rejected by OpenSearch's {@code knn_vector} dimension check on every retry with only
-     * a cryptic mapping error, burning the whole retry budget; failing here instead produces a clear
-     * diagnostic and still routes the document through the normal retry-count accounting (the caller's
+     * stored and rejected by OpenSearch's {@code knn_vector} dimension check with only
+     * a cryptic mapping error; failing here instead produces a clear
+     * diagnostic and still routes the document through the normal failure handling (the caller's
      * catch -> {@code handleFailure}/{@code recordFailure} path). Fails open (no check) when the
      * dimension is unset/unparsable, mirroring {@link #rewriteMapping(String)} and
      * {@link #checkDimensionConsistency()}. Complements the {@code vectors.size() != chunks.size()}
@@ -1018,28 +1002,18 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Gets the maximum per-document retry count before marking a document permanently failed.
-     *
-     * @return the value of {@code content_chunker.job.max_retry} (default 3)
-     */
-    protected int getJobMaxRetry() {
-        return getConfigInt(ContentChunkConstants.JOB_MAX_RETRY, ContentChunkConstants.DEFAULT_JOB_MAX_RETRY);
-    }
-
-    /**
      * Parses {@code content_chunker.max_chunks_per_document} (default
-     * {@link ContentChunkConstants#DEFAULT_MAX_CHUNKS_PER_DOCUMENT}), clamped to at least 1. A document
+     * {@link #DEFAULT_MAX_CHUNKS_PER_DOCUMENT}), clamped to at least 1. A document
      * that splits into more chunks than this is marked terminally skipped by {@link #extractChunks}
      * (its content preserved for keyword search) rather than embedded and stored as one enormous
      * document: {@code content_chunk_vector} is a nested field, so more than the index's
      * nested_objects limit (OpenSearch default 10000) of chunks would be rejected at store time and
-     * burn the document's whole retry budget into a permanent failure.
+     * turn into a permanent failure.
      *
      * @return the configured cap, at least 1
      */
     protected int getMaxChunksPerDocument() {
-        return Math.max(1,
-                getConfigInt(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, ContentChunkConstants.DEFAULT_MAX_CHUNKS_PER_DOCUMENT));
+        return Math.max(1, getConfigInt(MAX_CHUNKS_PER_DOCUMENT_PROPERTY, DEFAULT_MAX_CHUNKS_PER_DOCUMENT));
     }
 
     private int getConfigInt(final String key, final int defaultValue) {

@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -35,6 +34,9 @@ import org.codelibs.fess.util.ComponentUtil;
 public class ChunkerManager {
 
     private static final Logger logger = LogManager.getLogger(ChunkerManager.class);
+
+    /** System property key for the active {@link Chunker} name. */
+    protected static final String CHUNKER_NAME_PROPERTY = "content_chunker.chunker.name";
 
     /** The list of registered chunkers. */
     protected final List<Chunker> chunkerList = new CopyOnWriteArrayList<>();
@@ -79,7 +81,7 @@ public class ChunkerManager {
      * @return the chunker type string (e.g. "length")
      */
     protected String getChunkerType() {
-        return ComponentUtil.getFessConfig().getSystemProperty(ContentChunkConstants.CHUNKER_NAME, "length");
+        return ComponentUtil.getFessConfig().getSystemProperty(CHUNKER_NAME_PROPERTY, "length");
     }
 
     /**

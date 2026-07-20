@@ -35,7 +35,6 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -83,15 +82,15 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     /**
      * System-managed fields written by the content-chunk embedding pipeline
-     * ({@link ChunkVectorHelper}). They are never editable in this raw-document screen: the
+     * ({@link org.codelibs.fess.helper.ChunkVectorHelper}). They are never editable in this raw-document screen: the
      * {@code content_chunk_vector} field is a {@code nested} mapping that OpenSearch would reject if
-     * a scalar string were posted into it, and all three are kept consistent with {@code content}
+     * a scalar string were posted into it, and both are kept consistent with {@code content}
      * only by the pipeline. They are hidden from the editable-field walk and stripped from any
      * client-supplied doc map (server-side, regardless of transport) by {@link #stripSystemManagedFields}
      * before it is overlaid onto the fetched entity in {@link #create}/{@link #update}.
      */
-    private static final Set<String> SYSTEM_MANAGED_FIELDS = Set.of(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD,
-            ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD);
+    private static final Set<String> SYSTEM_MANAGED_FIELDS =
+            Set.of(Constants.CONTENT_CHUNK_VECTOR_FIELD, Constants.CONTENT_CHUNK_STATUS_FIELD);
 
     /**
      * Strips {@link #SYSTEM_MANAGED_FIELDS} (and, when the FETCHED entity's existing {@code content}

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
@@ -57,7 +58,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         // into another test in this class run.
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig != null) {
-            fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, null);
+            fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, null);
         }
         super.tearDown(testInfo);
     }
@@ -112,7 +113,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_rewriteMapping_splicesFieldsBeforeContent() {
+    public void test_rewriteMapping_splicesVectorFieldBeforeContent() {
         helper.setTestEnabled(true);
         helper.setTestDimension("768");
         final String source = "{\"properties\":{\"title\":{\"type\":\"text\"},\"content\":{\"type\":\"text\"}}}";
@@ -121,10 +122,11 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("\"nested\""), "content_chunk_vector should be nested: " + result);
         assertTrue(result.contains("\"knn_vector\""), "vector sub-field should be knn_vector: " + result);
         assertTrue(result.contains("\"dimension\": 768"), "dimension should come from config: " + result);
-        assertTrue(result.contains("\"content_chunk_status\""), "should splice in content_chunk_status: " + result);
-        assertTrue(result.contains("\"content_chunk_retry_count\""), "should splice in content_chunk_retry_count: " + result);
+        assertFalse(result.contains("\"content_chunk_status\""),
+                "content_chunk_status is mapped statically in doc.json, not spliced: " + result);
+        assertFalse(result.contains("\"content_chunk_retry_count\""), "the retry-count field was removed: " + result);
         assertTrue(result.indexOf("\"content_chunk_vector\"") < result.indexOf("\"content\":"),
-                "new fields must be spliced before the content field: " + result);
+                "the vector field must be spliced before the content field: " + result);
         assertTrue(result.contains("\"content\":{\"type\":\"text\"}"), "original content field must be preserved: " + result);
     }
 
@@ -198,12 +200,12 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         vectorSubField.put("type", "knn_vector");
         vectorSubField.put("dimension", 768);
         final Map<String, Object> vectorFieldProperties = new HashMap<>();
-        vectorFieldProperties.put(ContentChunkConstants.VECTOR_SUBFIELD, vectorSubField);
+        vectorFieldProperties.put(ChunkVectorHelper.VECTOR_SUBFIELD, vectorSubField);
         final Map<String, Object> vectorField = new HashMap<>();
         vectorField.put("type", "nested");
         vectorField.put("properties", vectorFieldProperties);
         final Map<String, Object> properties = new HashMap<>();
-        properties.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, vectorField);
+        properties.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorField);
         properties.put("content", Map.of("type", "text"));
         final Map<String, Object> source = new HashMap<>();
         source.put("properties", properties);
@@ -257,19 +259,16 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals("exactly one (skip status) write must happen", 1, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
         assertNotNull(stored, "the skip status must be persisted");
-        assertEquals(ContentChunkConstants.STATUS_SKIPPED, stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.SKIPPED, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
         assertEquals("blank content must be left intact for keyword search, never replaced", "   ", stored.get("content"));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
-                "a skipped document must not persist any vectors");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "skipping is terminal, not a retry -- no retry count may be written");
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "a skipped document must not persist any vectors");
         assertTrue(helper.embedCalls.isEmpty(), "embedding must never be attempted for blank content");
     }
 
     @Test
     public void test_processDocument_chunkCountOverCap_marksSkippedWithContentPreserved() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, "3");
+        fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, "3");
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "original full content");
         searchEngineClient.documentToReturn = doc;
@@ -280,12 +279,10 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertTrue(result, "a document producing more chunks than the cap must be marked skipped");
         assertEquals("only the skip write -- no embed, no done write", 1, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
-        assertEquals(ContentChunkConstants.STATUS_SKIPPED, stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.SKIPPED, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
         assertEquals("the ORIGINAL content must be preserved for keyword search, NOT replaced by the chunk array", "original full content",
                 stored.get("content"));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
-                "an over-cap document must not persist any vectors");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD), "skipping is terminal, not a retry");
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "an over-cap document must not persist any vectors");
         assertTrue(helper.embedCalls.isEmpty(), "an over-cap document must be skipped BEFORE any embedding call");
     }
 
@@ -293,7 +290,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     public void test_processDocument_chunkCountExactlyAtCap_proceedsNormally() {
         // Boundary: > cap skips, but == cap must be processed normally (embedded + stored as done).
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, "3");
+        fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, "3");
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "original content");
         searchEngineClient.documentToReturn = doc;
@@ -305,9 +302,9 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertTrue(result, "a document at exactly the cap must be processed normally, not skipped");
         assertEquals(1, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
-        assertEquals(ContentChunkConstants.STATUS_DONE, stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
         assertEquals("the done path replaces content with the chunk array", List.of("c1", "c2", "c3"), stored.get("content"));
-        assertTrue(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD), "the done path must persist vectors");
+        assertTrue(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "the done path must persist vectors");
         assertEquals("the batch of exactly the cap must have been embedded", List.of(List.of("c1", "c2", "c3")), helper.embedCalls);
     }
 
@@ -329,12 +326,11 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals(2, searchEngineClient.storedDocs.size(), "both the skip write and the done write must be persisted");
 
         final Map<String, Object> storedA = findStoredDocByContent("   ");
-        assertEquals(ContentChunkConstants.STATUS_SKIPPED, storedA.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertFalse(storedA.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD), "the skipped document must not persist vectors");
-        assertFalse(storedA.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD), "skipping is terminal, not a retry");
+        assertEquals(Constants.SKIPPED, storedA.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(storedA.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "the skipped document must not persist vectors");
 
         final Map<String, Object> storedB = findStoredDocByContent(List.of("b1"));
-        assertEquals(ContentChunkConstants.STATUS_DONE, storedB.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, storedB.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
         assertEquals("only the healthy document's chunks may be embedded", List.of(List.of("b1")), helper.embedCalls);
     }
 
@@ -361,9 +357,8 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "   ");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, 2);
         // A genuine (non-conflict) store error -- storeSafely rethrows it. markSkipped must swallow it
-        // and return false (never let it escape, never route into the retry-count accounting): a store
+        // and return false (never let it escape, never route into the failure marking): a store
         // error on a skip write just leaves the document pending, to be re-evaluated next run.
         searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
                 new RuntimeException("cluster_block_exception: index read-only-allow-delete"));
@@ -375,27 +370,25 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals("the skip write must have been attempted exactly once -- skipping never retries", 1,
                 searchEngineClient.storeCallCount);
         assertNull(searchEngineClient.lastStoredDoc, "nothing may be persisted when the skip write failed");
-        assertEquals("skipping must never touch the retry count on the original document", 2,
-                doc.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
     }
 
     @Test
     public void test_getMaxChunksPerDocument_defaultConfiguredAndClamped() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        assertEquals("the default cap is 1000 when unset", ContentChunkConstants.DEFAULT_MAX_CHUNKS_PER_DOCUMENT,
+        assertEquals("the default cap is 1000 when unset", ChunkVectorHelper.DEFAULT_MAX_CHUNKS_PER_DOCUMENT,
                 helper.getMaxChunksPerDocument());
 
-        fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, "50");
+        fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, "50");
         assertEquals("a configured cap is honored", 50, helper.getMaxChunksPerDocument());
 
-        fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, "not-a-number");
-        assertEquals("a non-numeric cap falls back to the default", ContentChunkConstants.DEFAULT_MAX_CHUNKS_PER_DOCUMENT,
+        fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, "not-a-number");
+        assertEquals("a non-numeric cap falls back to the default", ChunkVectorHelper.DEFAULT_MAX_CHUNKS_PER_DOCUMENT,
                 helper.getMaxChunksPerDocument());
 
-        fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, "0");
+        fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, "0");
         assertEquals("a zero cap clamps up to at least 1", 1, helper.getMaxChunksPerDocument());
 
-        fessConfig.setSystemProperty(ContentChunkConstants.MAX_CHUNKS_PER_DOCUMENT, "-5");
+        fessConfig.setSystemProperty(ChunkVectorHelper.MAX_CHUNKS_PER_DOCUMENT_PROPERTY, "-5");
         assertEquals("a negative cap clamps up to at least 1", 1, helper.getMaxChunksPerDocument());
     }
 
@@ -413,15 +406,13 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals(1, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
         assertEquals(List.of("chunk-a", "chunk-b"), stored.get("content"));
-        assertEquals(ContentChunkConstants.STATUS_DONE, stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD), "retry count should be cleared on success");
+        assertEquals(Constants.DONE, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
         @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> vectorList =
-                (List<Map<String, Object>>) stored.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Map<String, Object>> vectorList = (List<Map<String, Object>>) stored.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         assertEquals(2, vectorList.size());
         // assertEquals(Object, Object) compares float[] by reference identity, not
         // contents, so use JUnit 5's delta-based float[] comparison directly.
-        final float[] v0 = (float[]) vectorList.get(0).get(ContentChunkConstants.VECTOR_SUBFIELD);
+        final float[] v0 = (float[]) vectorList.get(0).get(ChunkVectorHelper.VECTOR_SUBFIELD);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 1f, 2f }, v0, 0.0f);
     }
 
@@ -499,24 +490,23 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         searchEngineClient.documentToReturn = doc;
         helper.testChunks = List.of("chunk-a");
         helper.testVectors = List.of(new float[] { 1f });
-        helper.setTestMaxRetry(3);
         // The OUTER SearchEngineClientException's own message happens to embed the literal
         // substring "version_conflict_engine_exception" -- simulating SearchEngineClient#store()'s
         // real "Failed to store: " + doc message-building, where the document's own (crawled)
         // content could coincidentally contain this substring. The CAUSE is a genuine, unrelated,
         // non-conflict error whose class name and message do NOT match. isVersionConflict() must
         // not be fooled by the outer frame's message -- only the cause chain (getCause() onward)
-        // is message-checked -- so this must flow into the retry-count path, not be swallowed.
+        // is message-checked -- so this must flow into the failure path, not be swallowed.
         searchEngineClient.throwOnStore = new SearchEngineClientException(
                 "Failed to store: {content=... version_conflict_engine_exception ...}", new RuntimeException("mapper_parsing_exception"));
 
         final boolean result = helper.processDocument("doc-1");
 
         assertTrue(result, "a substring coincidence in the outer wrapper message must not cause a misclassification");
-        assertEquals("must attempt both the failed success write and the successful retry write", 2, searchEngineClient.storeCallCount);
+        assertEquals("must attempt both the failed success write and the successful failure write", 2, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
         assertNotNull(stored, "the genuine failure must be recorded, not silently swallowed as a benign conflict");
-        assertEquals(1, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
+        assertEquals(Constants.FAIL, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -526,13 +516,12 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         searchEngineClient.documentToReturn = doc;
         helper.testChunks = List.of("chunk-a");
         helper.testVectors = List.of(new float[] { 1f });
-        helper.setTestMaxRetry(3);
         // A GENUINE non-conflict store error (mapper_parsing_exception) whose server reason string
         // echoes crawled document content that merely MENTIONS the bare word
         // "version_conflict_engine_exception" -- but NOT the structured
         // "type=version_conflict_engine_exception" token OpenSearch actually emits for a real
         // conflict. isVersionConflict() matches only the structured token, so this must flow into the
-        // retry-count path rather than be swallowed as a benign conflict (which would livelock the
+        // failure path rather than be swallowed as a benign conflict (which would livelock the
         // document, retried forever). The class-name-suffix branch alone cannot save this: over the
         // HTTP client a real conflict is a generic OpenSearchStatusException, so the message check is
         // the load-bearing one and must be the narrower structured-token form.
@@ -543,10 +532,10 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         final boolean result = helper.processDocument("doc-1");
 
         assertTrue(result, "a bare conflict-word mention in an unrelated error's reason must not be misclassified as a conflict");
-        assertEquals("must attempt both the failed success write and the successful retry write", 2, searchEngineClient.storeCallCount);
+        assertEquals("must attempt both the failed success write and the successful failure write", 2, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
         assertNotNull(stored, "the genuine failure must be recorded, not silently swallowed as a benign conflict");
-        assertEquals(1, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
+        assertEquals(Constants.FAIL, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -565,66 +554,36 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_processDocument_nonConflictStoreFailure_flowsToRetryCountPathNotSwallowed() {
+    public void test_processDocument_nonConflictStoreFailure_flowsToFailurePathNotSwallowed() {
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "original content");
         searchEngineClient.documentToReturn = doc;
         helper.testChunks = List.of("chunk-a");
         helper.testVectors = List.of(new float[] { 1f });
-        helper.setTestMaxRetry(3);
         // A generic OpenSearch write failure (mapping error / read-only index / timeout /
         // circuit breaker) -- NOT a version conflict: neither the class name nor the message
         // matches. Single-use: the first store() attempt (the success-path write) fails, but
-        // the second attempt (handleFailure()'s retry-accounting write) succeeds, mirroring a
+        // the second attempt (handleFailure()'s failure-status write) succeeds, mirroring a
         // transient systemic error.
         searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
                 new RuntimeException("mapper_parsing_exception: failed to parse field [content_chunk_vector]"));
 
         final boolean result = helper.processDocument("doc-1");
 
-        assertTrue(result, "the retry-accounting write should still succeed and return true");
-        assertEquals("must attempt: 1) the success write (fails), 2) the retry write (succeeds)", 2, searchEngineClient.storeCallCount);
+        assertTrue(result, "the failure-status write should still succeed and return true");
+        assertEquals("must attempt: 1) the success write (fails), 2) the failure write (succeeds)", 2, searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
         assertNotNull(stored, "a non-conflict failure must not be silently swallowed as a benign skip");
-        // a non-conflict store failure must be counted toward the retry budget, exactly like a chunk/embed failure
-        assertEquals(1, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
+        // a non-conflict store failure must be marked failed, exactly like a chunk/embed failure
+        assertEquals(Constants.FAIL, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
         // Invariant: a document whose content_chunk_status never reached "done" must never have
         // its content field permanently changed from the original -- the failed success-path
         // write must not have leaked its half-applied chunk/vector mutations into the document
         // that handleFailure() ultimately persists.
         assertEquals("original content must survive a recovered non-conflict store failure unchanged", "original content",
                 stored.get("content"));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD),
                 "a premature content_chunk_vector must not be persisted when content_chunk_status never reached done");
-    }
-
-    @Test
-    public void test_processDocument_nonConflictStoreFailure_withExistingRetryCount_advancesNotResets() {
-        final Map<String, Object> doc = baseDoc();
-        doc.put("content", "original content");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, 2);
-        searchEngineClient.documentToReturn = doc;
-        helper.testChunks = List.of("chunk-a");
-        helper.testVectors = List.of(new float[] { 1f });
-        helper.setTestMaxRetry(3);
-        // Same bug class as the content-preservation invariant above, on the adjacent
-        // content_chunk_retry_count field: the success path's own doc.remove(RETRY_COUNT_FIELD)
-        // mutation must not leak into what handleFailure() reads. If it did, a document already
-        // at retry_count=2 that hits a recovered non-conflict store failure would incorrectly
-        // reset to 1 (looping forever, never reaching max_retry) instead of correctly advancing
-        // to 3 and being marked failed.
-        searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
-                new RuntimeException("mapper_parsing_exception: failed to parse field [content_chunk_vector]"));
-
-        helper.processDocument("doc-1");
-
-        final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
-        assertNotNull(stored, "a non-conflict failure must not be silently swallowed as a benign skip");
-        assertEquals("retry_count must advance from its existing value (2 -> 3), not reset to 1", 3,
-                stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertEquals(ContentChunkConstants.STATUS_FAILED, stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertEquals("original content must survive unchanged here too", "original content", stored.get("content"));
     }
 
     @Test
@@ -634,9 +593,8 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         searchEngineClient.documentToReturn = doc;
         helper.testChunks = List.of("chunk-a");
         helper.testVectors = List.of(new float[] { 1f });
-        helper.setTestMaxRetry(3);
         // Every store() attempt fails with a genuine (non-conflict) OpenSearch error -- including
-        // handleFailure()'s own retry-accounting write. processDocument() must still return a
+        // handleFailure()'s own failure-status write. processDocument() must still return a
         // plain boolean rather than letting the second failure escape uncaught.
         searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
                 new RuntimeException("cluster_block_exception: index read-only-allow-delete"));
@@ -645,29 +603,28 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         final boolean result = helper.processDocument("doc-1");
 
         assertFalse(result, "a persistent non-conflict failure must resolve to false, not throw");
-        assertEquals("both the success write and the retry write must have been attempted", 2, searchEngineClient.storeCallCount);
+        assertEquals("both the success write and the failure write must have been attempted", 2, searchEngineClient.storeCallCount);
         assertNull(searchEngineClient.lastStoredDoc, "neither write succeeded, so nothing should have been persisted");
     }
 
     @Test
-    public void test_processDocument_embeddingFailure_incrementsRetryCountAndLeavesStatusAbsent() {
+    public void test_processDocument_embeddingFailure_marksFailedImmediately() {
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "original content");
         searchEngineClient.documentToReturn = doc;
         helper.testChunks = List.of("chunk-a");
         helper.testEmbedFailure = new RuntimeException("embedding API down");
-        helper.setTestMaxRetry(3);
 
         final boolean result = helper.processDocument("doc-1");
 
         assertTrue(result, "storeSafely succeeding on the failure-path write should still return true");
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
-        assertEquals(1, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
+        assertEquals(Constants.FAIL, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "a failed document must not persist vectors");
     }
 
     // ===================================================================================
-    //                                        mid-run provider outage preserves retry budget (MED-4)
+    //                                        mid-run provider outage leaves documents pending (MED-4)
     //                                        ================================================
 
     @Test
@@ -676,23 +633,22 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         doc.put("content", "original content");
         searchEngineClient.documentToReturn = doc;
         helper.testChunks = List.of("chunk-a");
-        helper.setTestMaxRetry(3);
         // Identical failing-embed setup to
-        // test_processDocument_embeddingFailure_incrementsRetryCountAndLeavesStatusAbsent above, EXCEPT
+        // test_processDocument_embeddingFailure_marksFailedImmediately above, EXCEPT
         // the embedding provider has died mid-run (available() == false, after ChunkVectorJob's
         // pre-flight gate had already passed). This is a transient outage, not a poison document:
-        // counting it toward content_chunk_retry_count would, across max_retry outage-affected runs,
-        // durably stamp the whole corpus content_chunk_status=failed. The document must instead stay
-        // pending -- no CAS write at all -- so it is retried unchanged once the provider recovers.
+        // marking it failed would durably stamp the whole corpus content_chunk_status=fail. The
+        // document must instead stay pending -- no CAS write at all -- so it is retried unchanged
+        // once the provider recovers.
         helper.testEmbedFailure = new RuntimeException("connection refused");
         helper.testEmbeddingAvailable = false;
 
         final boolean result = helper.processDocument("doc-1");
 
         assertFalse(result, "an outage failure must resolve to a pending skip, not a durably-recorded terminal state");
-        assertEquals("no failure state may be written during a provider outage -- the retry budget must be preserved", 0,
+        assertEquals("no failure state may be written during a provider outage -- the document must stay pending", 0,
                 searchEngineClient.storeCallCount);
-        assertNull(searchEngineClient.lastStoredDoc, "the document must stay pending: no content_chunk_retry_count / status write");
+        assertNull(searchEngineClient.lastStoredDoc, "the document must stay pending: no status write");
     }
 
     @Test
@@ -705,10 +661,9 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.testDocumentsById.put("doc-B", docB);
         helper.testChunksByContent.put("content-A", List.of("a1"));
         helper.testChunksByContent.put("content-B", List.of("b1"));
-        helper.setTestMaxRetry(3);
         // The provider dies mid-run: the batched embed call throws, each per-document fallback embed
         // call throws too, and available() reports the outage. The real job path (processBatch) must
-        // therefore advance no document's retry count -- every document stays pending.
+        // therefore mark no document failed -- every document stays pending.
         helper.testEmbedFailure = new RuntimeException("connection refused");
         helper.testEmbeddingAvailable = false;
 
@@ -719,23 +674,6 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals("no store may be attempted for any document during a provider outage", 0, searchEngineClient.storeCallCount);
     }
 
-    @Test
-    public void test_processDocument_embeddingFailure_marksFailedAtMaxRetry() {
-        final Map<String, Object> doc = baseDoc();
-        doc.put("content", "original content");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, 2);
-        searchEngineClient.documentToReturn = doc;
-        helper.testChunks = List.of("chunk-a");
-        helper.testEmbedFailure = new RuntimeException("embedding API down");
-        helper.setTestMaxRetry(3);
-
-        helper.processDocument("doc-1");
-
-        final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
-        assertEquals(3, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertEquals(ContentChunkConstants.STATUS_FAILED, stored.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-    }
-
     // ===================================================================================
     //                                        per-vector dimension validation on ingest (Minor A)
     //                                        ================================================
@@ -744,10 +682,10 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     public void test_processDocument_vectorLengthMismatch_recordsFailureNotStoredAsDone() {
         // The provider returns a vector whose LENGTH does not match the configured embedding
         // dimension (a model/config mismatch). Without the ingest-side length guard this vector would
-        // be stored and then rejected by OpenSearch's knn_vector dimension check on every retry with
-        // only a cryptic mapping error, burning the whole retry budget. The guard must instead fail
+        // be stored and then rejected by OpenSearch's knn_vector dimension check with
+        // only a cryptic mapping error. The guard must instead fail
         // the document loudly BEFORE the (doomed) success store, routing it through the normal
-        // retry-count accounting -- so exactly one (failure-path) store happens, no vector is
+        // failure handling -- so exactly one (failure-path) store happens, no vector is
         // persisted, and the content is left unchanged.
         final Map<String, Object> doc = baseDoc();
         doc.put("content", "original content");
@@ -755,18 +693,16 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.setTestDimension("3"); // configured dimension = 3
         helper.testChunks = List.of("chunk-a");
         helper.testVectors = List.of(new float[] { 1f, 2f }); // length 2 != 3
-        helper.setTestMaxRetry(3);
 
         final boolean result = helper.processDocument("doc-1");
 
-        assertTrue(result, "the retry-accounting write should still succeed and return true");
-        assertEquals("only the failure-path retry write should have been attempted (no doomed success store)", 1,
+        assertTrue(result, "the failure-status write should still succeed and return true");
+        assertEquals("only the failure-path write should have been attempted (no doomed success store)", 1,
                 searchEngineClient.storeCallCount);
         final Map<String, Object> stored = searchEngineClient.lastStoredDoc;
         assertNotNull(stored, "a wrong-length vector must be recorded as a failure, not silently stored");
-        assertEquals(1, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD), "a wrong-length vector must never be persisted");
+        assertEquals(Constants.FAIL, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "a wrong-length vector must never be persisted");
         assertEquals("original content must survive unchanged", "original content", stored.get("content"));
     }
 
@@ -785,8 +721,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
         assertTrue(result, "a correct-length vector must store successfully");
         assertEquals(1, searchEngineClient.storeCallCount);
-        assertEquals(ContentChunkConstants.STATUS_DONE,
-                searchEngineClient.lastStoredDoc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, searchEngineClient.lastStoredDoc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -801,16 +736,14 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.setTestDimension("3"); // configured dimension = 3
         helper.testChunksByContent.put("content-A", List.of("a1"));
         helper.testVectorsByChunk.put("a1", new float[] { 1f, 2f }); // length 2 != 3
-        helper.setTestMaxRetry(3);
 
         final Map<String, Boolean> results = helper.processBatch(List.of("doc-A"));
 
-        assertTrue(results.get("doc-A"), "the retry-accounting write should still succeed and return true");
+        assertTrue(results.get("doc-A"), "the failure-status write should still succeed and return true");
         assertEquals(1, searchEngineClient.storedDocs.size(), "only the failure write should have been persisted");
         final Map<String, Object> stored = searchEngineClient.storedDocs.get(0);
-        assertEquals(1, stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
-        assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
+        assertEquals(Constants.FAIL, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD),
                 "a wrong-length vector must never be persisted on the batch path either");
     }
 
@@ -854,7 +787,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertTrue(cas.lastFetchRequestedSeqNoAndPrimaryTerm, "the real fetchDocument path must have requested seq_no/primary_term");
         assertEquals("exactly one store, no failure-path retry", 1, cas.storeCallCount);
         assertNotNull(cas.lastStoredDoc);
-        assertEquals(ContentChunkConstants.STATUS_DONE, cas.lastStoredDoc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, cas.lastStoredDoc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -871,7 +804,6 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         ComponentUtil.register(cas, "searchEngineClient");
         helper.testChunks = List.of("chunk-a");
         helper.testVectors = List.of(new float[] { 1f });
-        helper.setTestMaxRetry(3);
         helper.onEmbed = () -> cas.currentSeqNo++;
 
         final boolean result = helper.processDocument("doc-1");
@@ -908,29 +840,27 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         final Map<String, Object> storedA = findStoredDocByContent(List.of("a1", "a2", "a3"));
         final Map<String, Object> storedB = findStoredDocByContent(List.of("b1"));
         @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> vectorsA =
-                (List<Map<String, Object>>) storedA.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Map<String, Object>> vectorsA = (List<Map<String, Object>>) storedA.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> vectorsB =
-                (List<Map<String, Object>>) storedB.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Map<String, Object>> vectorsB = (List<Map<String, Object>>) storedB.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         assertEquals(3, vectorsA.size(), "doc-A has 3 chunks and must get exactly 3 sliced vectors");
         assertEquals(1, vectorsB.size(), "doc-B has 1 chunk and must get exactly 1 sliced vector");
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 1f },
-                (float[]) vectorsA.get(0).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
+                (float[]) vectorsA.get(0).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 2f },
-                (float[]) vectorsA.get(1).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
+                (float[]) vectorsA.get(1).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 3f },
-                (float[]) vectorsA.get(2).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
+                (float[]) vectorsA.get(2).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 100f },
-                (float[]) vectorsB.get(0).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
-        assertEquals(ContentChunkConstants.STATUS_DONE, storedA.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertEquals(ContentChunkConstants.STATUS_DONE, storedB.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+                (float[]) vectorsB.get(0).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
+        assertEquals(Constants.DONE, storedA.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, storedB.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
     public void test_processBatch_batchEmbedFails_retriesEachDocumentIndividually_allStillFail() {
         // When the batched embed call fails AND every per-document retry also fails, each document is
-        // still retry-counted on its own. The key new-behavior assertion is embedCalls: the batched call
+        // still marked failed on its own. The key new-behavior assertion is embedCalls: the batched call
         // is followed by one per-document fallback call each (it is NOT failed as a single unit).
         final Map<String, Object> docA = baseDoc();
         docA.put("content", "content-A");
@@ -941,20 +871,18 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.testChunksByContent.put("content-A", List.of("a1"));
         helper.testChunksByContent.put("content-B", List.of("b1"));
         helper.testEmbedFailure = new RuntimeException("embedding API down");
-        helper.setTestMaxRetry(3);
 
         final Map<String, Boolean> results = helper.processBatch(List.of("doc-A", "doc-B"));
 
-        assertTrue(results.get("doc-A"), "the retry-accounting write should still succeed and return true");
-        assertTrue(results.get("doc-B"), "the retry-accounting write should still succeed and return true");
+        assertTrue(results.get("doc-A"), "the failure-status write should still succeed and return true");
+        assertTrue(results.get("doc-B"), "the failure-status write should still succeed and return true");
         assertEquals("the batched call must be followed by one per-document fallback call each",
                 List.of(List.of("a1", "b1"), List.of("a1"), List.of("b1")), helper.embedCalls);
         assertEquals(2, searchEngineClient.storedDocs.size(), "each document's failure must be recorded independently");
         for (final Map<String, Object> stored : searchEngineClient.storedDocs) {
-            assertEquals("a still-failing document must be counted toward its own retry budget", 1,
-                    stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-            assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
-            assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
+            assertEquals("a still-failing document must be marked failed on its own", Constants.FAIL,
+                    stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+            assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD),
                     "no vector should be persisted when neither the batch nor the individual retry embedded successfully");
         }
     }
@@ -962,9 +890,9 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     @Test
     public void test_processBatch_batchEmbedFails_fallsBackToPerDocumentEmbedding_bothSucceed() {
         // The discriminating test for Fix 2: the batched call (2 chunks) trips a provider size limit and
-        // throws, but each document embeds fine on its own. Both documents must end up STATUS_DONE with
-        // their vectors and NO retry increment. Against the old processBatch (which failed the whole batch
-        // as a unit) both documents would instead be retry-counted with no vectors -- so this test is red
+        // throws, but each document embeds fine on its own. Both documents must end up status=done with
+        // their vectors. Against the old processBatch (which failed the whole batch
+        // as a unit) both documents would instead be marked failed with no vectors -- so this test is red
         // without the fix.
         final Map<String, Object> docA = baseDoc();
         docA.put("content", "content-A");
@@ -977,7 +905,6 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.testVectorsByChunk.put("a1", new float[] { 1f });
         helper.testVectorsByChunk.put("b1", new float[] { 2f });
         helper.embedFailIfSizeAtLeast = 2; // the combined [a1, b1] call fails; each single-chunk call succeeds
-        helper.setTestMaxRetry(3);
 
         final Map<String, Boolean> results = helper.processBatch(List.of("doc-A", "doc-B"));
 
@@ -988,19 +915,15 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals(2, searchEngineClient.storedDocs.size(), "both documents must be stored");
         final Map<String, Object> storedA = findStoredDocByContent(List.of("a1"));
         final Map<String, Object> storedB = findStoredDocByContent(List.of("b1"));
-        assertEquals(ContentChunkConstants.STATUS_DONE, storedA.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertEquals(ContentChunkConstants.STATUS_DONE, storedB.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertFalse(storedA.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "a recovered document must not be retry-counted");
-        assertFalse(storedB.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "a recovered document must not be retry-counted");
+        assertEquals(Constants.DONE, storedA.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, storedB.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
-    public void test_processBatch_batchEmbedFails_onlyGenuinelyFailingDocIncrementsRetry() {
+    public void test_processBatch_batchEmbedFails_onlyGenuinelyFailingDocMarkedFailed() {
         // One poisoned document (docB) fails both in the batch (dragging the combined call down) and on its
         // own retry, while its healthy sibling (docA) succeeds via the fallback. Only docB may be
-        // retry-counted; docA must be fully processed. Old behavior would have retry-counted BOTH.
+        // marked failed; docA must be fully processed. Old behavior would have failed BOTH.
         final Map<String, Object> docA = baseDoc();
         docA.put("content", "content-A");
         final Map<String, Object> docB = baseDoc();
@@ -1011,24 +934,20 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.testChunksByContent.put("content-B", List.of("b1"));
         helper.testVectorsByChunk.put("a1", new float[] { 1f });
         helper.poisonChunks.add("b1"); // b1 fails the batch and its own retry; a1 is fine on its own
-        helper.setTestMaxRetry(3);
 
         final Map<String, Boolean> results = helper.processBatch(List.of("doc-A", "doc-B"));
 
         assertTrue(results.get("doc-A"), "the healthy document must not be dragged down by its poisoned sibling");
-        assertTrue(results.get("doc-B"), "docB's retry-accounting write still succeeds and returns true");
+        assertTrue(results.get("doc-B"), "docB's failure-status write still succeeds and returns true");
         assertEquals(2, searchEngineClient.storedDocs.size(), "docA's success and docB's failure are both persisted");
 
         final Map<String, Object> storedA = findStoredDocByContent(List.of("a1"));
-        assertEquals(ContentChunkConstants.STATUS_DONE, storedA.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
-        assertFalse(storedA.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "the healthy document must not be retry-counted");
+        assertEquals(Constants.DONE, storedA.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
 
         final Map<String, Object> storedB = findStoredDocByContent("content-B");
-        assertEquals("only the genuinely failing document is retry-counted", 1,
-                storedB.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-        assertFalse(storedB.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
-        assertFalse(storedB.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD), "a failed document must not persist vectors");
+        assertEquals("only the genuinely failing document is marked failed", Constants.FAIL,
+                storedB.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertFalse(storedB.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "a failed document must not persist vectors");
     }
 
     @Test
@@ -1056,19 +975,17 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         final Map<String, Object> storedA = findStoredDocByContent(List.of("a1", "a2"));
         final Map<String, Object> storedC = findStoredDocByContent(List.of("c1"));
         @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> vectorsA =
-                (List<Map<String, Object>>) storedA.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Map<String, Object>> vectorsA = (List<Map<String, Object>>) storedA.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> vectorsC =
-                (List<Map<String, Object>>) storedC.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Map<String, Object>> vectorsC = (List<Map<String, Object>>) storedC.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         assertEquals(2, vectorsA.size(), "doc-A's slice must not be shifted by the skipped document in between");
         assertEquals(1, vectorsC.size());
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 1f },
-                (float[]) vectorsA.get(0).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
+                (float[]) vectorsA.get(0).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 2f },
-                (float[]) vectorsA.get(1).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
+                (float[]) vectorsA.get(1).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 9f },
-                (float[]) vectorsC.get(0).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f);
+                (float[]) vectorsC.get(0).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f);
     }
 
     @Test
@@ -1089,8 +1006,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertEquals("only the blank doc's skip status write may happen; embedding must never be attempted", 1,
                 searchEngineClient.storeCallCount);
         assertTrue(helper.embedCalls.isEmpty(), "embedding must never be attempted when no document produced chunks");
-        assertEquals(ContentChunkConstants.STATUS_SKIPPED,
-                searchEngineClient.lastStoredDoc.get(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.SKIPPED, searchEngineClient.lastStoredDoc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -1192,20 +1108,18 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         // individual fallback call) -- simulating a provider that returns the wrong COUNT without
         // throwing, at both the combined AND per-document-retry stages.
         helper.testVectors = List.of(new float[] { 9f }, new float[] { 8f }, new float[] { 7f });
-        helper.setTestMaxRetry(3);
 
         final Map<String, Boolean> results = helper.processBatch(List.of("doc-A", "doc-B"));
 
-        assertTrue(results.get("doc-A"), "the retry-accounting write should still succeed and return true");
-        assertTrue(results.get("doc-B"), "the retry-accounting write should still succeed and return true");
+        assertTrue(results.get("doc-A"), "the failure-status write should still succeed and return true");
+        assertTrue(results.get("doc-B"), "the failure-status write should still succeed and return true");
         assertEquals("the batched call must be followed by one per-document fallback call each",
                 List.of(List.of("a1", "b1"), List.of("a1"), List.of("b1")), helper.embedCalls);
         assertEquals(2, searchEngineClient.storedDocs.size(), "each document's failure must be recorded independently");
         for (final Map<String, Object> stored : searchEngineClient.storedDocs) {
-            assertEquals("a still-mismatched document must be counted toward its own retry budget", 1,
-                    stored.get(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD));
-            assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD), "status must stay absent below max_retry");
-            assertFalse(stored.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
+            assertEquals("a still-mismatched document must be marked failed", Constants.FAIL,
+                    stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+            assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD),
                     "no vector should be persisted when the embedding count never matched");
         }
     }
@@ -1218,12 +1132,11 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
      */
     private void assertVectorMarkers(final Map<String, Object> stored, final float... expectedMarkers) {
         @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> vectorList =
-                (List<Map<String, Object>>) stored.get(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD);
+        final List<Map<String, Object>> vectorList = (List<Map<String, Object>>) stored.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         assertEquals(expectedMarkers.length, vectorList.size(), "unexpected vector count for stored doc content=" + stored.get("content"));
         for (int i = 0; i < expectedMarkers.length; i++) {
             org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { expectedMarkers[i] },
-                    (float[]) vectorList.get(i).get(ContentChunkConstants.VECTOR_SUBFIELD), 0.0f,
+                    (float[]) vectorList.get(i).get(ChunkVectorHelper.VECTOR_SUBFIELD), 0.0f,
                     "vector at index " + i + " for stored doc content=" + stored.get("content"));
         }
     }
@@ -1379,10 +1292,9 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     private static final class TestableChunkVectorHelper extends ChunkVectorHelper {
         private boolean testEnabled = false;
         private String testDimension = null;
-        private int testMaxRetry = ContentChunkConstants.DEFAULT_JOB_MAX_RETRY;
         /**
          * Seam for {@link #isEmbeddingClientAvailable()}. Defaults to {@code true} so every existing
-         * failure-path test keeps its retry-count-accounting behavior; a test sets it false to
+         * failure-path test keeps its mark-failed behavior; a test sets it false to
          * simulate a mid-run provider outage (handleFailure must then leave the document pending).
          */
         boolean testEmbeddingAvailable = true;
@@ -1422,10 +1334,6 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
         void setTestDimension(final String dimension) {
             this.testDimension = dimension;
-        }
-
-        void setTestMaxRetry(final int maxRetry) {
-            this.testMaxRetry = maxRetry;
         }
 
         @Override
@@ -1500,11 +1408,6 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
                 return vectors;
             }
             return testVectors;
-        }
-
-        @Override
-        protected int getJobMaxRetry() {
-            return testMaxRetry;
         }
 
         @Override

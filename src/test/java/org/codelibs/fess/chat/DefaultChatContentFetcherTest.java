@@ -26,12 +26,26 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
-import org.codelibs.fess.helper.ContentChunkConstants;
+import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DefaultChatContentFetcherTest extends UnitFessTestCase {
+
+    @Override
+    public void setUp(final TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        // DefaultChatContentFetcher#isContentChunkerEnabled (and AnswerHighlightSearchParams#
+        // getResponseFields) now delegate to the ChunkVectorHelper component; the minimal
+        // test_app.xml DI set does not wire it, so register a real instance under its canonical
+        // class name for ComponentUtil.getComponent(ChunkVectorHelper.class)'s fallback lookup.
+        ComponentUtil.register(new ChunkVectorHelper(), ChunkVectorHelper.class.getCanonicalName());
+    }
 
     private static Map<String, Object> doc(final String docId, final Object contentLength) {
         final Map<String, Object> m = new LinkedHashMap<>();
@@ -59,15 +73,15 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         final Map<String, Object> m = new LinkedHashMap<>();
         m.put("doc_id", docId);
         m.put("content", new ArrayList<Object>(chunks));
-        m.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_DONE);
+        m.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
         if (vectors != null) {
             final List<Map<String, Object>> vectorEntries = new ArrayList<>();
             for (final List<Double> v : vectors) {
                 final Map<String, Object> entry = new LinkedHashMap<>();
-                entry.put(ContentChunkConstants.VECTOR_SUBFIELD, v);
+                entry.put(ChunkVectorHelper.VECTOR_SUBFIELD, v);
                 vectorEntries.add(entry);
             }
-            m.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, vectorEntries);
+            m.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorEntries);
         }
         return m;
     }
@@ -922,7 +936,7 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         f.contentChunkerEnabledOverride = true;
         final Map<String, Map<String, Object>> resultMap = new LinkedHashMap<>();
         final Map<String, Object> failedDoc = chunkedDoc("a", List.of("x", "y"), null);
-        failedDoc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, ContentChunkConstants.STATUS_FAILED);
+        failedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.FAIL);
         resultMap.put("a", failedDoc);
         f.applyChunkSelection(resultMap, "query");
         assertEquals(List.of("x", "y"), resultMap.get("a").get("content")); // untouched -- not STATUS_DONE
@@ -993,8 +1007,8 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         f.contentChunkerEnabledOverride = true;
         final org.codelibs.fess.mylasta.direction.FessConfig fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
         final List<String> fields = List.of(f.buildContentFields(fessConfig));
-        assertTrue(fields.contains(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD));
-        assertTrue(fields.contains(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+        assertTrue(fields.contains(Constants.CONTENT_CHUNK_VECTOR_FIELD));
+        assertTrue(fields.contains(Constants.CONTENT_CHUNK_STATUS_FIELD));
     }
 
     @Test
@@ -1047,16 +1061,16 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
     public void test_answerHighlightSearchParams_getResponseFields_appendsChunkFieldsWhenEnabled() {
         final org.codelibs.fess.mylasta.direction.FessConfig fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
         registerQueryFieldConfig();
-        fessConfig.setSystemProperty(ContentChunkConstants.ENABLED, "true");
+        fessConfig.setSystemProperty(AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY, "true");
         try {
             final DefaultChatContentFetcher.AnswerHighlightSearchParams params =
                     new DefaultChatContentFetcher.AnswerHighlightSearchParams("q", 1, fessConfig, new String[0]);
             final List<String> fields = List.of(params.getResponseFields());
             assertTrue(fields.contains(fessConfig.getIndexFieldContent()));
-            assertTrue(fields.contains(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD));
-            assertTrue(fields.contains(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD));
+            assertTrue(fields.contains(Constants.CONTENT_CHUNK_VECTOR_FIELD));
+            assertTrue(fields.contains(Constants.CONTENT_CHUNK_STATUS_FIELD));
         } finally {
-            fessConfig.setSystemProperty(ContentChunkConstants.ENABLED, null);
+            fessConfig.setSystemProperty(AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY, null);
         }
     }
 

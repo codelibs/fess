@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessBaseAction;
-import org.codelibs.fess.helper.ContentChunkConstants;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.LanguageHelper;
@@ -59,9 +59,8 @@ public class ApiAdminDocumentsActionTest extends UnitFessTestCase {
         // exactly what only the ChunkVectorHelper CAS pipeline may ever write. Non-empty values are
         // used deliberately: convertToStorableDoc() drops empty values on its own, so an empty
         // smuggled value would be removed even without the fix, making the test vacuous.
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD, "failed");
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD, List.of(Map.of("vector", List.of(0.1, 0.2))));
-        doc.put(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD, 99);
+        doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, "fail");
+        doc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, List.of(Map.of("vector", List.of(0.1, 0.2))));
 
         final BulkBody body = new BulkBody();
         body.documents = new ArrayList<>();
@@ -72,12 +71,10 @@ public class ApiAdminDocumentsActionTest extends UnitFessTestCase {
         org.junit.jupiter.api.Assertions.assertEquals(1, client.capturedDocs.size(),
                 "the single document must reach searchEngineClient.addAll");
         final Map<String, Object> indexed = client.capturedDocs.get(0);
-        assertFalse(indexed.containsKey(ContentChunkConstants.CONTENT_CHUNK_STATUS_FIELD),
+        assertFalse(indexed.containsKey(Constants.CONTENT_CHUNK_STATUS_FIELD),
                 "content_chunk_status must be stripped before the document reaches addAll: " + indexed);
-        assertFalse(indexed.containsKey(ContentChunkConstants.CONTENT_CHUNK_VECTOR_FIELD),
+        assertFalse(indexed.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD),
                 "content_chunk_vector must be stripped before the document reaches addAll: " + indexed);
-        assertFalse(indexed.containsKey(ContentChunkConstants.CONTENT_CHUNK_RETRY_COUNT_FIELD),
-                "content_chunk_retry_count must be stripped before the document reaches addAll: " + indexed);
         // The strip must be surgical: the client's own legitimate fields must still be indexed.
         org.junit.jupiter.api.Assertions.assertEquals("legitimate client content", indexed.get("content"),
                 "the client's legitimate content must survive the strip");
