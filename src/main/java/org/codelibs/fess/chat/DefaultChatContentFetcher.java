@@ -382,6 +382,14 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         final int topK = Math.max(1, getChatTopK());
         final Set<Integer> selectedIndexes =
                 scored.stream().limit(topK).map(Map.Entry::getKey).collect(Collectors.toCollection(TreeSet::new));
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG] Selected chunks by semantic similarity. docId={}, selectedIndexes={}, scores={}",
+                    doc.get(ComponentUtil.getFessConfig().getIndexFieldDocId()), selectedIndexes,
+                    scored.stream()
+                            .limit(topK)
+                            .map(e -> e.getKey() + ":" + String.format(java.util.Locale.ROOT, "%.4f", e.getValue()))
+                            .collect(Collectors.joining(",")));
+        }
         return selectedIndexes.stream().map(chunks::get).collect(Collectors.joining("\n\n"));
     }
 
