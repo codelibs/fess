@@ -462,7 +462,12 @@ public class ChunkVectorHelper {
             // strict duplicate-key detection would otherwise fail the whole index creation.
             return source;
         }
-        return source.replace("\"codec\":", "\"knn\": true,\"codec\":");
+        // knn.derived_source (default true on OpenSearch 3.x) strips knn_vector values out of
+        // the stored _source and reconstructs them on read -- but the reconstruction is broken
+        // for _source-FILTERED reads of nested vectors (observed on 3.7: content_chunk_vector
+        // entries come back as {"vector": 1}). Fess reads chunk vectors through _source
+        // filtering (e.g. the RAG chat's chunk selection), so keep vectors stored verbatim.
+        return source.replace("\"codec\":", "\"knn\": true,\"knn.derived_source.enabled\": false,\"codec\":");
     }
 
     /**

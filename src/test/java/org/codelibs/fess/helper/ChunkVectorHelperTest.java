@@ -123,7 +123,20 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.setTestDimension("768");
         helper.testSemanticSearchEnabled = true;
         final String result = helper.rewriteSetting("{\"index\":{\"codec\":\"best_compression\"}}");
-        assertTrue(result.contains("\"knn\": true,\"codec\":"), "index.knn must be spliced before codec: " + result);
+        assertTrue(result.contains("\"knn\": true,\"knn.derived_source.enabled\": false,\"codec\":"),
+                "index.knn must be spliced before codec with derived source disabled: " + result);
+        // derived_source reconstruction is broken for _source-filtered reads of nested vectors
+        // (OpenSearch 3.7 returns {"vector": 1}); vectors must stay verbatim in _source
+        assertTrue(result.contains("\"knn.derived_source.enabled\": false"), "derived source must be disabled: " + result);
+    }
+
+    @Test
+    public void test_rewriteSetting_idempotentWhenKnnAlreadyPresent() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = true;
+        final String source = "{\"index\":{\"knn\": true,\"codec\":\"best_compression\"}}";
+        assertEquals(source, helper.rewriteSetting(source));
     }
 
     @Test
