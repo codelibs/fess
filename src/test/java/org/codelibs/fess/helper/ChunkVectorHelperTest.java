@@ -70,6 +70,63 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_registerSettingRewriteRule_addsOneRule() {
+        helper.registerSettingRewriteRule();
+        assertEquals(1, searchEngineClient.settingRules.size());
+    }
+
+    @Test
+    public void test_rewriteMapping_noMethodBlockWithoutSemanticSearch() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = false;
+        final String result = helper.rewriteMapping("{\"properties\":{\"content\":{\"type\":\"text\"}}}");
+        assertTrue(result.contains("\"knn_vector\""));
+        assertFalse(result.contains("\"method\""), "no ANN method block when semantic search is disabled: " + result);
+    }
+
+    @Test
+    public void test_rewriteMapping_methodBlockWithSemanticSearch() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = true;
+        final String result = helper.rewriteMapping("{\"properties\":{\"content\":{\"type\":\"text\"}}}");
+        assertTrue(result.contains("\"method\""), "ANN method block expected: " + result);
+        assertTrue(result.contains("\"name\": \"hnsw\""), "default method is hnsw: " + result);
+        assertTrue(result.contains("\"engine\": \"lucene\""), "default engine is lucene: " + result);
+        assertTrue(result.contains("\"space_type\": \"cosinesimil\""), "default space type is cosinesimil: " + result);
+        assertTrue(result.contains("\"m\": 16"), "default m is 16: " + result);
+        assertTrue(result.contains("\"ef_construction\": 100"), "default ef_construction is 100: " + result);
+    }
+
+    @Test
+    public void test_rewriteSetting_noopWhenSemanticSearchDisabled() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = false;
+        final String source = "{\"index\":{\"codec\":\"best_compression\"}}";
+        assertEquals(source, helper.rewriteSetting(source));
+    }
+
+    @Test
+    public void test_rewriteSetting_noopWhenChunkerDisabled() {
+        helper.setTestEnabled(false);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = true;
+        final String source = "{\"index\":{\"codec\":\"best_compression\"}}";
+        assertEquals(source, helper.rewriteSetting(source));
+    }
+
+    @Test
+    public void test_rewriteSetting_splicesKnnFlag() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = true;
+        final String result = helper.rewriteSetting("{\"index\":{\"codec\":\"best_compression\"}}");
+        assertTrue(result.contains("\"knn\": true,\"codec\":"), "index.knn must be spliced before codec: " + result);
+    }
+
+    @Test
     public void test_rewriteMapping_noopWhenDisabled() {
         helper.setTestEnabled(false);
         helper.setTestDimension("768");
@@ -1736,6 +1793,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
     private static final class CapturingSearchEngineClient extends SearchEngineClient {
         final List<UnaryOperator<String>> mappingRules = new ArrayList<>();
+        final List<UnaryOperator<String>> settingRules = new ArrayList<>();
         Map<String, Object> documentToReturn;
         Map<String, Object> lastStoredDoc;
         /** Every stored doc, in call order -- {@link #processBatch} tests need more than just the last. */
@@ -1754,6 +1812,11 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         @Override
         public void addDocumentMappingRewriteRule(final UnaryOperator<String> rule) {
             mappingRules.add(rule);
+        }
+
+        @Override
+        public void addDocumentSettingRewriteRule(final UnaryOperator<String> rule) {
+            settingRules.add(rule);
         }
 
         @Override
@@ -1925,6 +1988,8 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         /** Per-exact-chunk-text vectors for {@link #processBatch} tests; falls back to {@link #testVectors} when empty. */
         final Map<String, float[]> testVectorsByChunk = new HashMap<>();
 
+        boolean testSemanticSearchEnabled = false;
+
         void setTestEnabled(final boolean enabled) {
             this.testEnabled = enabled;
         }
@@ -1936,6 +2001,11 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         @Override
         public boolean isContentChunkerEnabled() {
             return testEnabled;
+        }
+
+        @Override
+        public boolean isSemanticSearchEnabled() {
+            return testSemanticSearchEnabled;
         }
 
         @Override

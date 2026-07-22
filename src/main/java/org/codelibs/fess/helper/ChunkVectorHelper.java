@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -62,6 +63,24 @@ public class ChunkVectorHelper {
 
     /** Sub-field of {@link Constants#CONTENT_CHUNK_VECTOR_FIELD} holding the knn_vector value. */
     public static final String VECTOR_SUBFIELD = "vector";
+
+    /** System property key enabling the semantic chunk search integration. */
+    public static final String SEMANTIC_SEARCH_ENABLED_PROPERTY = "content_chunker.search.enabled";
+
+    /** System property key for the ANN method name baked into the knn_vector mapping. */
+    public static final String KNN_METHOD_PROPERTY = "content_chunker.search.knn.method";
+
+    /** System property key for the ANN engine baked into the knn_vector mapping. */
+    public static final String KNN_ENGINE_PROPERTY = "content_chunker.search.knn.engine";
+
+    /** System property key for the ANN space type baked into the knn_vector mapping. */
+    public static final String KNN_SPACE_TYPE_PROPERTY = "content_chunker.search.knn.space_type";
+
+    /** System property key for the HNSW m parameter baked into the knn_vector mapping. */
+    public static final String KNN_PARAM_M_PROPERTY = "content_chunker.search.knn.param.m";
+
+    /** System property key for the HNSW ef_construction parameter baked into the knn_vector mapping. */
+    public static final String KNN_PARAM_EF_CONSTRUCTION_PROPERTY = "content_chunker.search.knn.param.ef_construction";
 
     /** System property key for the maximum number of chunks a single document may produce. */
     protected static final String MAX_CHUNKS_PER_DOCUMENT_PROPERTY = "content_chunker.max_chunks_per_document";
@@ -400,6 +419,7 @@ public class ChunkVectorHelper {
     @PostConstruct
     public void init() {
         registerMappingRewriteRule();
+        registerSettingRewriteRule();
     }
 
     /**
@@ -410,6 +430,39 @@ public class ChunkVectorHelper {
     protected void registerMappingRewriteRule() {
         final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
         client.addDocumentMappingRewriteRule(this::rewriteMapping);
+    }
+
+    /**
+     * Registers the document-setting rewrite rule that turns on {@code index.knn}
+     * when semantic chunk search is enabled, so knn_vector fields are indexed into
+     * an ANN structure (HNSW) and the {@code knn} query can be used at scale.
+     * Mirrors {@code SemanticSearchHelper.init()}'s {@code addDocumentSettingRewriteRule}
+     * string-splice pattern.
+     */
+    protected void registerSettingRewriteRule() {
+        final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
+        client.addDocumentSettingRewriteRule(this::rewriteSetting);
+    }
+
+    /**
+     * Splices {@code "knn": true} immediately before the literal {@code "codec":}
+     * key in the document index settings JSON. A no-op unless content chunking,
+     * a valid embedding dimension, and {@code content_chunker.search.enabled} are
+     * all configured — plain chunk/RAG deployments keep the stock settings and pay
+     * no ANN indexing cost.
+     *
+     * @param source the original document settings JSON source
+     * @return the rewritten settings JSON source
+     */
+    protected String rewriteSetting(final String source) {
+        if (!isContentChunkerEnabled() || !isSemanticSearchEnabled() || getConfiguredEmbeddingDimension() <= 0
+                || source.contains("\"knn\": true")) {
+            // The contains-guard keeps this rule idempotent and avoids emitting a duplicate
+            // "knn" key when another rule (e.g. fess-webapp-semantic-search) already enabled it --
+            // strict duplicate-key detection would otherwise fail the whole index creation.
+            return source;
+        }
+        return source.replace("\"codec\":", "\"knn\": true,\"codec\":");
     }
 
     /**
@@ -446,11 +499,126 @@ public class ChunkVectorHelper {
                 + "  \"properties\": {\n" //
                 + "    \"" + VECTOR_SUBFIELD + "\": {\n" //
                 + "      \"type\": \"knn_vector\",\n" //
-                + "      \"dimension\": " + dimension + "\n" //
+                + "      \"dimension\": " + dimension + buildKnnMethodDef() + "\n" //
                 + "    }\n" //
                 + "  }\n" //
                 + "},";
         return source.replace("\"content\":", fieldDef + "\n\"content\":");
+    }
+
+    /**
+     * Builds the ANN {@code method} block appended to the knn_vector field mapping
+     * when semantic chunk search is enabled, so vectors are indexed into an HNSW
+     * graph and the {@code knn} query stays fast on large indexes. Returns an empty
+     * string when semantic search is disabled (vectors are stored for the RAG chat
+     * only) or when any configured value fails validation — an invalid value must
+     * never be spliced into the mapping JSON.
+     *
+     * @return the {@code ,"method": {...}} JSON fragment, or an empty string
+     */
+    protected String buildKnnMethodDef() {
+        if (!isSemanticSearchEnabled()) {
+            return "";
+        }
+        final String method = getKnnMethod();
+        final String engine = getKnnEngine();
+        final String spaceType = getKnnSpaceType();
+        final int m = getKnnConfigInt(KNN_PARAM_M_PROPERTY, 16);
+        final int efConstruction = getKnnConfigInt(KNN_PARAM_EF_CONSTRUCTION_PROPERTY, 100);
+        return ",\n" //
+                + "      \"method\": {\n" //
+                + "        \"name\": \"" + method + "\",\n" //
+                + "        \"engine\": \"" + engine + "\",\n" //
+                + "        \"space_type\": \"" + spaceType + "\",\n" //
+                + "        \"parameters\": {\n" //
+                + "          \"m\": " + m + ",\n" //
+                + "          \"ef_construction\": " + efConstruction + "\n" //
+                + "        }\n" //
+                + "      }";
+    }
+
+    /**
+     * Checks whether the semantic chunk search integration is enabled
+     * ({@code content_chunker.search.enabled}). Owned here rather than in the
+     * searcher so the index-creation-time rewrite rules and the search-time
+     * consumer read one flag.
+     *
+     * @return true if semantic chunk search is enabled
+     */
+    public boolean isSemanticSearchEnabled() {
+        return Constants.TRUE
+                .equalsIgnoreCase(ComponentUtil.getFessConfig().getSystemProperty(SEMANTIC_SEARCH_ENABLED_PROPERTY, Constants.FALSE));
+    }
+
+    /**
+     * Gets the configured ANN method name for the knn_vector mapping.
+     *
+     * @return the method name (default {@code hnsw})
+     */
+    public String getKnnMethod() {
+        return getKnnConfigToken(KNN_METHOD_PROPERTY, "hnsw", Set.of("hnsw", "ivf"));
+    }
+
+    /**
+     * Gets the configured ANN engine for the knn_vector mapping.
+     *
+     * @return the engine name (default {@code lucene})
+     */
+    public String getKnnEngine() {
+        return getKnnConfigToken(KNN_ENGINE_PROPERTY, "lucene", Set.of("lucene", "faiss", "nmslib"));
+    }
+
+    /**
+     * Gets the configured ANN space type for the knn_vector mapping.
+     *
+     * @return the space type (default {@code cosinesimil})
+     */
+    public String getKnnSpaceType() {
+        return getKnnConfigToken(KNN_SPACE_TYPE_PROPERTY, "cosinesimil",
+                Set.of("cosinesimil", "innerproduct", "l2", "l1", "linf", "hamming"));
+    }
+
+    /**
+     * Reads a token-style knn mapping config value, rejecting anything outside the
+     * allowed set — an unknown token would be spliced into the mapping JSON and make
+     * the whole document mapping fail at index creation (surfaced only at WARN).
+     *
+     * @param key the system property key
+     * @param defaultValue the fallback value
+     * @param allowedValues the accepted values
+     * @return the validated value, or the default when unset or invalid
+     */
+    protected String getKnnConfigToken(final String key, final String defaultValue, final Set<String> allowedValues) {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(key, defaultValue);
+        if (value == null || !allowedValues.contains(value)) {
+            logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * Reads a positive-integer knn mapping config value.
+     *
+     * @param key the system property key
+     * @param defaultValue the fallback value
+     * @return the parsed value, or the default when unset, non-numeric, or not positive
+     */
+    protected int getKnnConfigInt(final String key, final int defaultValue) {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(key, null);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            final int parsed = Integer.parseInt(value.trim());
+            if (parsed > 0) {
+                return parsed;
+            }
+        } catch (final NumberFormatException e) {
+            // fall through
+        }
+        logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+        return defaultValue;
     }
 
     /**
@@ -604,7 +772,7 @@ public class ChunkVectorHelper {
                 // A proper nested knn_vector mapping with a dimension is present.
                 return true;
             }
-            if (metadata != null && metadata.getSourceAsMap().get("properties") instanceof Map) {
+            if (resolveMappingFields(metadata) != null) {
                 // This index has a real properties map but no extractable knn vector dimension:
                 // the field is either absent or present as non-knn junk -- a confirmed miss, not
                 // an unknown.
@@ -671,14 +839,11 @@ public class ChunkVectorHelper {
      * @return the vector dimension, or null if the field is absent from this mapping
      */
     protected Integer extractDimension(final MappingMetadata metadata) {
-        if (metadata == null) {
+        final Map<?, ?> properties = resolveMappingFields(metadata);
+        if (properties == null) {
             return null;
         }
-        final Object properties = metadata.getSourceAsMap().get("properties");
-        if (!(properties instanceof Map)) {
-            return null;
-        }
-        final Object vectorField = ((Map<?, ?>) properties).get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
+        final Object vectorField = properties.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
         if (!(vectorField instanceof Map)) {
             return null;
         }
@@ -693,6 +858,35 @@ public class ChunkVectorHelper {
         final Object dimensionObj = ((Map<?, ?>) vectorSubField).get("dimension");
         if (dimensionObj instanceof Number) {
             return ((Number) dimensionObj).intValue();
+        }
+        return null;
+    }
+
+    /**
+     * Resolves the field-name map ({@code properties} level) of one index's mapping
+     * metadata, handling both mapping shapes seen at runtime: the native transport
+     * keys metadata by index/type and nests the fields under {@code properties},
+     * while fesen-httpclient's {@code GetMappingsResponse} parsing keys metadata by
+     * top-level mapping section and hands the section value back directly — its
+     * {@code "properties"} entry's source map IS the field map.
+     *
+     * @param metadata one index's mapping metadata
+     * @return the field-name map, or null when no field map is present
+     */
+    public Map<?, ?> resolveMappingFields(final MappingMetadata metadata) {
+        if (metadata == null) {
+            return null;
+        }
+        final Map<String, Object> sourceMap = metadata.getSourceAsMap();
+        if (sourceMap == null) {
+            return null;
+        }
+        final Object properties = sourceMap.get("properties");
+        if (properties instanceof Map) {
+            return (Map<?, ?>) properties;
+        }
+        if ("properties".equals(metadata.type())) {
+            return sourceMap;
         }
         return null;
     }
