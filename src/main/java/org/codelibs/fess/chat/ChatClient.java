@@ -179,18 +179,22 @@ public class ChatClient {
             }
 
             final List<Map<String, Object>> searchResults = searchResult.getDocuments();
-            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, historyForAnswer);
+            final List<Map<String, Object>> answerDocs = fetchContentForAnswer(searchResults, finalSearchQuery);
+            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, answerDocs, historyForAnswer);
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
-            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
+            for (final Map<String, Object> doc : answerDocs) {
+                populateUrlLink(doc);
+            }
+            addSourcesToMessage(assistantMessage, answerDocs, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
             assistantMessage.setSearchQuery(finalSearchQuery);
 
             session.addMessage(assistantMessage);
 
             logger.info("[RAG] Chat completed. sessionId={}, intent={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    intentResult.getIntent(), searchResults.size(), System.currentTimeMillis() - startTime);
+                    intentResult.getIntent(), answerDocs.size(), System.currentTimeMillis() - startTime);
 
-            return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
+            return new ChatResult(session.getSessionId(), assistantMessage, answerDocs);
         } catch (final Exception e) {
             if (e instanceof LlmException) {
                 logger.warn("[RAG] LLM error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
@@ -937,6 +941,38 @@ public class ChatClient {
      */
     protected List<Map<String, Object>> fetchFullContent(final List<String> docIds) {
         return ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, Collections.emptyList(), null));
+    }
+
+    /**
+     * Resolves the answer-context documents for the non-streaming chat path through
+     * {@link ChatContentFetcher}, so chunked documents ({@code content_chunk_status=done/chunked})
+     * get the same semantic/keyword chunk selection as the streaming path's fetch phase
+     * instead of feeding the raw search-result content to the LLM.
+     *
+     * <p>Falls back to the raw {@code searchResults} when no doc ids can be extracted or the
+     * fetcher returns nothing, so an OpenSearch hiccup degrades to the previous behavior
+     * rather than an empty context.</p>
+     *
+     * @param searchResults the search result documents
+     * @param query the final search query (may be null for the SUMMARY intent)
+     * @return the documents to build the answer context and sources from
+     */
+    protected List<Map<String, Object>> fetchContentForAnswer(final List<Map<String, Object>> searchResults, final String query) {
+        if (searchResults.isEmpty()) {
+            return searchResults;
+        }
+        final String docIdField = ComponentUtil.getFessConfig().getIndexFieldDocId();
+        final List<String> docIds = searchResults.stream()
+                .map(doc -> doc.get(docIdField))
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .collect(Collectors.toList());
+        if (docIds.isEmpty()) {
+            return searchResults;
+        }
+        final List<Map<String, Object>> fullDocs =
+                ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, searchResults, query));
+        return fullDocs.isEmpty() ? searchResults : fullDocs;
     }
 
     /**
