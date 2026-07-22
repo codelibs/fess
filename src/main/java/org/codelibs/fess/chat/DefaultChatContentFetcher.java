@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -387,7 +388,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
                     doc.get(ComponentUtil.getFessConfig().getIndexFieldDocId()), selectedIndexes,
                     scored.stream()
                             .limit(topK)
-                            .map(e -> e.getKey() + ":" + String.format(java.util.Locale.ROOT, "%.4f", e.getValue()))
+                            .map(e -> e.getKey() + ":" + String.format(Locale.ROOT, "%.4f", e.getValue()))
                             .collect(Collectors.joining(",")));
         }
         return selectedIndexes.stream().map(chunks::get).collect(Collectors.joining("\n\n"));

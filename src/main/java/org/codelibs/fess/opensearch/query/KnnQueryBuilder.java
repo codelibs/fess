@@ -32,13 +32,14 @@ import org.opensearch.index.query.QueryShardContext;
  * query (approximate nearest-neighbor search over a {@code knn_vector} field
  * indexed with an ANN method such as HNSW). The transport client has no builder
  * for plugin-provided queries, so this class only serializes the query body —
- * mirroring the {@code NeuralQueryBuilder} pattern in fess-webapp-semantic-search;
+ * following the same serialization-only pattern as {@code StoredLtrQueryBuilder};
  * {@link #doToQuery(QueryShardContext)} is unsupported because the query is
  * evaluated server-side.
  */
 public class KnnQueryBuilder extends AbstractQueryBuilder<KnnQueryBuilder> {
 
-    private static final String NAME = "knn";
+    /** The query name registered by the OpenSearch k-NN plugin. */
+    public static final String NAME = "knn";
 
     /** The target knn_vector field name. */
     protected final String fieldName;

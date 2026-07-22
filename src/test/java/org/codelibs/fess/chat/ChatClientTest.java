@@ -1040,6 +1040,22 @@ public class ChatClientTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_fetchContentForAnswer_fallsBackWhenFetcherThrows() {
+        final RecordingContentFetcher fetcher = new RecordingContentFetcher() {
+            @Override
+            public List<Map<String, Object>> fetchContent(final ChatContentRequest request) {
+                throw new RuntimeException("fetch boom");
+            }
+        };
+        ComponentUtil.register(fetcher, "chatContentFetcher");
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "id1");
+        final List<Map<String, Object>> results = List.of(doc);
+        // a fetcher failure must degrade to the raw search results, not propagate
+        assertSame(results, chatClient.fetchContentForAnswer(results, "q"));
+    }
+
+    @Test
     public void test_fetchContentForAnswer_fallsBackWhenFetcherReturnsEmpty() {
         final RecordingContentFetcher fetcher = new RecordingContentFetcher();
         ComponentUtil.register(fetcher, "chatContentFetcher");

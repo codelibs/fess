@@ -455,19 +455,26 @@ public class ChunkVectorHelper {
      * @return the rewritten settings JSON source
      */
     protected String rewriteSetting(final String source) {
-        if (!isContentChunkerEnabled() || !isSemanticSearchEnabled() || getConfiguredEmbeddingDimension() <= 0
-                || source.contains("\"knn\": true")) {
-            // The contains-guard keeps this rule idempotent and avoids emitting a duplicate
-            // "knn" key when another rule (e.g. fess-webapp-semantic-search) already enabled it --
-            // strict duplicate-key detection would otherwise fail the whole index creation.
+        if (!isContentChunkerEnabled() || !isSemanticSearchEnabled() || getConfiguredEmbeddingDimension() <= 0) {
             return source;
+        }
+        // Each splice is guarded independently so the rule stays idempotent and composes with
+        // another rule (e.g. an older plugin) that already enabled index.knn -- strict
+        // duplicate-key detection would otherwise fail the whole index creation, and skipping
+        // both splices together would leave derived source enabled on such indexes.
+        String result = source;
+        if (!result.contains("\"knn\": true")) {
+            result = result.replace("\"codec\":", "\"knn\": true,\"codec\":");
         }
         // knn.derived_source (default true on OpenSearch 3.x) strips knn_vector values out of
         // the stored _source and reconstructs them on read -- but the reconstruction is broken
         // for _source-FILTERED reads of nested vectors (observed on 3.7: content_chunk_vector
         // entries come back as {"vector": 1}). Fess reads chunk vectors through _source
         // filtering (e.g. the RAG chat's chunk selection), so keep vectors stored verbatim.
-        return source.replace("\"codec\":", "\"knn\": true,\"knn.derived_source.enabled\": false,\"codec\":");
+        if (!result.contains("\"knn.derived_source.enabled\"")) {
+            result = result.replace("\"codec\":", "\"knn.derived_source.enabled\": false,\"codec\":");
+        }
+        return result;
     }
 
     /**
@@ -551,8 +558,7 @@ public class ChunkVectorHelper {
      * @return true if semantic chunk search is enabled
      */
     public boolean isSemanticSearchEnabled() {
-        return Constants.TRUE
-                .equalsIgnoreCase(ComponentUtil.getFessConfig().getSystemProperty(SEMANTIC_SEARCH_ENABLED_PROPERTY, Constants.FALSE));
+        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(SEMANTIC_SEARCH_ENABLED_PROPERTY, "false"));
     }
 
     /**

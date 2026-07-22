@@ -131,12 +131,25 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_rewriteSetting_idempotentWhenKnnAlreadyPresent() {
+    public void test_rewriteSetting_knnAlreadyPresent_stillDisablesDerivedSource() {
         helper.setTestEnabled(true);
         helper.setTestDimension("768");
         helper.testSemanticSearchEnabled = true;
+        // another rewrite rule (e.g. an older plugin) already enabled index.knn: the knn splice
+        // must be skipped (no duplicate key) but derived source must still be disabled
         final String source = "{\"index\":{\"knn\": true,\"codec\":\"best_compression\"}}";
-        assertEquals(source, helper.rewriteSetting(source));
+        final String result = helper.rewriteSetting(source);
+        assertFalse(result.contains("\"knn\": true,\"knn\": true"), "no duplicate knn key: " + result);
+        assertTrue(result.contains("\"knn.derived_source.enabled\": false,\"codec\":"), "derived source still disabled: " + result);
+    }
+
+    @Test
+    public void test_rewriteSetting_fullyIdempotent() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = true;
+        final String once = helper.rewriteSetting("{\"index\":{\"codec\":\"best_compression\"}}");
+        assertEquals(once, helper.rewriteSetting(once));
     }
 
     @Test

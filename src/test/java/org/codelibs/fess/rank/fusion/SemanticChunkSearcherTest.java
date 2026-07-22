@@ -117,6 +117,134 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertTrue(Math.abs(searcher.resolveEngineMinScore(0.4f, true).get() - 0.7f) < 0.0001f);
     }
 
+    @Test
+    public void test_search_skipsWhenSimilarDocHashPresent() {
+        final GuardedSearcher guarded = new GuardedSearcher();
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getSimilarDocHash() {
+                return "somehash";
+            }
+        };
+        final SearchResult result = guarded.search("plain query", params, org.dbflute.optional.OptionalThing.empty());
+        assertEquals(0, result.getAllRecordCount());
+        assertFalse(guarded.managerTouched, "the semantic branch must be skipped before consulting the embedding provider");
+    }
+
+    @Test
+    public void test_search_skipsWhenGeoInfoPresent() {
+        final org.dbflute.utflute.mocklet.MockletHttpServletRequest request = getMockRequest();
+        request.setParameter("geo.location.point", "34,150");
+        request.setParameter("geo.location.distance", "10km");
+        final org.codelibs.fess.entity.GeoInfo geoInfo = new org.codelibs.fess.entity.GeoInfo(request);
+        final GuardedSearcher guarded = new GuardedSearcher();
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public org.codelibs.fess.entity.GeoInfo getGeoInfo() {
+                return geoInfo;
+            }
+        };
+        final SearchResult result = guarded.search("plain query", params, org.dbflute.optional.OptionalThing.empty());
+        assertEquals(0, result.getAllRecordCount());
+        assertFalse(guarded.managerTouched, "a geo-constrained request must skip the semantic branch");
+    }
+
+    @Test
+    public void test_search_skipsWhenSyntaxQuery() {
+        final GuardedSearcher guarded = new GuardedSearcher();
+        final SearchResult result =
+                guarded.search("title:fess", new StubSearchRequestParams(0, 10), org.dbflute.optional.OptionalThing.empty());
+        assertEquals(0, result.getAllRecordCount());
+        assertFalse(guarded.managerTouched);
+    }
+
+    @Test
+    public void test_search_fallsBackWhenEmbeddingUnavailable() {
+        final GuardedSearcher guarded = new GuardedSearcher();
+        guarded.available = false;
+        // twice: the warn latch must not change the degradation behavior
+        for (int i = 0; i < 2; i++) {
+            final SearchResult result =
+                    guarded.search("plain query", new StubSearchRequestParams(0, 10), org.dbflute.optional.OptionalThing.empty());
+            assertEquals(0, result.getAllRecordCount());
+        }
+    }
+
+    @Test
+    public void test_search_degradesToEmptyWhenEngineCallFails() {
+        final GuardedSearcher guarded = new GuardedSearcher() {
+            @Override
+            protected org.dbflute.optional.OptionalEntity<org.opensearch.action.search.SearchResponse> sendRequest(final String query,
+                    final org.codelibs.fess.entity.SearchRequestParams params,
+                    final org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> userBean) {
+                throw new RuntimeException("engine boom");
+            }
+        };
+        guarded.available = true;
+        final SearchResult result =
+                guarded.search("plain query", new StubSearchRequestParams(0, 10), org.dbflute.optional.OptionalThing.empty());
+        // an engine failure must degrade to an empty semantic result, not propagate
+        assertEquals(0, result.getAllRecordCount());
+    }
+
+    @Test
+    public void test_register_gatedByEnabledFlag() {
+        final CapturingRankFusionProcessor processor = new CapturingRankFusionProcessor();
+        org.codelibs.fess.util.ComponentUtil.register(processor, "rankFusionProcessor");
+        final GuardedSearcher disabled = new GuardedSearcher();
+        disabled.enabled = false;
+        disabled.register();
+        assertFalse(processor.registered, "a disabled searcher must not register with the rank fusion processor");
+        final GuardedSearcher enabled = new GuardedSearcher();
+        enabled.register();
+        assertTrue(processor.registered);
+    }
+
+    private static class CapturingRankFusionProcessor extends RankFusionProcessor {
+        boolean registered = false;
+
+        @Override
+        public void register(final RankFusionSearcher searcher) {
+            registered = true;
+        }
+    }
+
+    /**
+     * Searcher stub: enabled by default, provider available by default, ann probe off,
+     * and flags when the embedding provider is consulted.
+     */
+    private static class GuardedSearcher extends SemanticChunkSearcher {
+        boolean enabled = true;
+        boolean available = true;
+        boolean managerTouched = false;
+
+        @Override
+        protected boolean isSearchEnabled() {
+            return enabled;
+        }
+
+        @Override
+        protected boolean isKnnIndexReady() {
+            return false;
+        }
+
+        @Override
+        protected org.codelibs.fess.embedding.EmbeddingClientManager getEmbeddingClientManager() {
+            managerTouched = true;
+            return new org.codelibs.fess.embedding.EmbeddingClientManager() {
+                @Override
+                public boolean available() {
+                    return available;
+                }
+
+                @Override
+                public float[] embedQuery(final String query) {
+                    return new float[] { 0.1f, 0.2f };
+                }
+            };
+        }
+    }
+
     private static class StubSearchRequestParams extends org.codelibs.fess.entity.SearchRequestParams {
         private final int start;
         private final int size;

@@ -970,9 +970,16 @@ public class ChatClient {
         if (docIds.isEmpty()) {
             return searchResults;
         }
-        final List<Map<String, Object>> fullDocs =
-                ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, searchResults, query));
-        return fullDocs.isEmpty() ? searchResults : fullDocs;
+        try {
+            final List<Map<String, Object>> fullDocs =
+                    ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, searchResults, query));
+            return fullDocs.isEmpty() ? searchResults : fullDocs;
+        } catch (final Exception e) {
+            // The fetcher is an enrichment step: a failure must degrade this chat to the raw
+            // search-result content (previous behavior), not fail the whole request.
+            logger.warn("[RAG] Failed to fetch answer content; using raw search results. docIds={}, error={}", docIds, e.getMessage());
+            return searchResults;
+        }
     }
 
     /**
