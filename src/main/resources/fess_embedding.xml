@@ -6,5 +6,11 @@
 	<component name="embeddingClientManager" class="org.codelibs.fess.embedding.EmbeddingClientManager">
 	</component>
 
-	<!-- Embedding client components are provided by fess-llm-* plugins via fess_llm++.xml -->
+	<!-- External embedding providers are contributed by fess-llm-* plugins via
+	     fess_llm++.xml; the opensearch (ML Commons) provider below is built-in. -->
+	<component name="opensearchEmbeddingClient" class="org.codelibs.fess.embedding.opensearch.OpenSearchEmbeddingClient">
+		<postConstruct name="register"/>
+		<postConstruct name="init"/>
+		<preDestroy name="destroy"/>
+	</component>
 </components>
