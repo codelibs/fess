@@ -16,7 +16,15 @@
 package org.codelibs.fess.chunk;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -42,6 +50,34 @@ public class LengthChunkerTest extends UnitFessTestCase {
     public void test_externalContractLiterals() {
         assertEquals("content_chunker.length.chunk_size", LengthChunker.CHUNK_SIZE_PROPERTY);
         assertEquals("content_chunker.length.overlap", LengthChunker.OVERLAP_PROPERTY);
+    }
+
+    @Test
+    public void test_warnOnOverlapSideEffect_warnsWhenOverlapPositive() {
+        // Overlapped text is duplicated inside the searchable content array (BM25
+        // term-frequency inflation + repeated highlights); a positive overlap must
+        // emit a one-time WARN at registration so operators enable it knowingly.
+        chunker.setTestOverlap(3);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(LengthChunker.class);
+        try {
+            chunker.warnOnOverlapSideEffect();
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains(LengthChunker.OVERLAP_PROPERTY) && m.contains("BM25")),
+                    "a positive overlap must WARN about the BM25/highlight duplication side effect: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_warnOnOverlapSideEffect_silentWhenOverlapZero() {
+        chunker.setTestOverlap(0);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(LengthChunker.class);
+        try {
+            chunker.warnOnOverlapSideEffect();
+            assertTrue(capture.warnings().isEmpty(), "no WARN expected for the default overlap of 0: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
     }
 
     @Test
@@ -202,6 +238,42 @@ public class LengthChunkerTest extends UnitFessTestCase {
         @Override
         protected int getOverlap() {
             return testOverlap;
+        }
+    }
+
+    /**
+     * Minimal in-memory log4j2 appender for asserting on emitted log messages.
+     * Mirrors {@code OpenSearchEmbeddingClientTest.LogCapturingAppender}.
+     */
+    static final class LogCapturingAppender extends AbstractAppender {
+        private final List<LogEvent> events = new CopyOnWriteArrayList<>();
+        private final Logger boundLogger;
+
+        private LogCapturingAppender(final Logger logger) {
+            super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
+            this.boundLogger = logger;
+        }
+
+        static LogCapturingAppender attach(final Class<?> targetClass) {
+            final Logger logger = (Logger) LogManager.getLogger(targetClass);
+            final LogCapturingAppender appender = new LogCapturingAppender(logger);
+            appender.start();
+            logger.addAppender(appender);
+            return appender;
+        }
+
+        void detach() {
+            boundLogger.removeAppender(this);
+            stop();
+        }
+
+        @Override
+        public void append(final LogEvent event) {
+            events.add(event.toImmutable());
+        }
+
+        List<String> warnings() {
+            return events.stream().filter(e -> e.getLevel() == Level.WARN).map(e -> e.getMessage().getFormattedMessage()).toList();
         }
     }
 }

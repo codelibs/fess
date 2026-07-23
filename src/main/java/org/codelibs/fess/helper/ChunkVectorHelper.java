@@ -156,11 +156,17 @@ public class ChunkVectorHelper {
      * {@code JobProcessingException} -- unlike the intentional skips above, which are healthy
      * outcomes returned as a summary message (exit 0).</p>
      *
-     * <p>No in-code overlap guard is needed: the scheduler serializes runs of the owning job.
-     * Every scheduled job is registered by {@code JobHelper#register} with {@code uniqueBy(id)}
-     * plus {@code fessConfig.getSchedulerConcurrentExecModeAsEnum()} (default
-     * {@code scheduler.concurrent.exec.mode=QUIT}), and all three {@code JobConcurrentExec} modes
-     * forbid concurrent execution of the same unique job.</p>
+     * <p>No in-code overlap guard is present, and the scheduler serializes runs of the owning job
+     * only within a single JVM. Every scheduled job is registered by {@code JobHelper#register}
+     * with {@code uniqueBy(id)} plus {@code fessConfig.getSchedulerConcurrentExecModeAsEnum()}
+     * (default {@code scheduler.concurrent.exec.mode=QUIT}), and all three
+     * {@code JobConcurrentExec} modes forbid concurrent execution of the same unique job -- but
+     * that registry is per-process. In a multi-node deployment where the job's scheduler target is
+     * {@code all}, every Fess node starts its own run concurrently: the CAS write
+     * ({@code _seq_no}/{@code _primary_term} conditional index) keeps the outcome correct, yet
+     * each node still chunks and embeds the same pending documents, multiplying embedding-provider
+     * spend. When running multiple Fess nodes, pin this job to a single node via its scheduler
+     * target setting.</p>
      *
      * @return a summary result message (processed/succeeded/failed counts, or the skip reason)
      */
@@ -464,7 +470,15 @@ public class ChunkVectorHelper {
         // both splices together would leave derived source enabled on such indexes.
         String result = source;
         if (!result.contains("\"knn\": true")) {
-            result = result.replace("\"codec\":", "\"knn\": true,\"codec\":");
+            final String spliced = result.replace("\"codec\":", "\"knn\": true,\"codec\":");
+            if (spliced.equals(result)) {
+                // String.replace is silent when the anchor is absent (e.g. a customized fess.json
+                // without a "codec" key): the index would be created with index.knn off and every
+                // ANN query would fail later with no hint why. Surface the miss loudly instead.
+                logger.warn(
+                        "[ChunkVector] Setting rewrite anchor \"codec\": not found in the index settings source; \"knn\": true was NOT added. ANN (knn) queries will fail on indexes created from this settings file. Fix the settings file (fess.json) and recreate the index.");
+            }
+            result = spliced;
         }
         // knn.derived_source (default true on OpenSearch 3.x) strips knn_vector values out of
         // the stored _source and reconstructs them on read -- but the reconstruction is broken
@@ -472,7 +486,12 @@ public class ChunkVectorHelper {
         // entries come back as {"vector": 1}). Fess reads chunk vectors through _source
         // filtering (e.g. the RAG chat's chunk selection), so keep vectors stored verbatim.
         if (!result.contains("\"knn.derived_source.enabled\"")) {
-            result = result.replace("\"codec\":", "\"knn.derived_source.enabled\": false,\"codec\":");
+            final String spliced = result.replace("\"codec\":", "\"knn.derived_source.enabled\": false,\"codec\":");
+            if (spliced.equals(result)) {
+                logger.warn(
+                        "[ChunkVector] Setting rewrite anchor \"codec\": not found in the index settings source; \"knn.derived_source.enabled\": false was NOT added. _source-filtered reads of chunk vectors may return corrupted values on indexes created from this settings file. Fix the settings file (fess.json) and recreate the index.");
+            }
+            result = spliced;
         }
         return result;
     }
@@ -495,6 +514,12 @@ public class ChunkVectorHelper {
         if (!isContentChunkerEnabled()) {
             return source;
         }
+        if (source.contains("\"" + Constants.CONTENT_CHUNK_VECTOR_FIELD + "\"")) {
+            // Idempotence/coexistence guard, mirroring rewriteSetting's contains-guards: the
+            // field is already mapped (e.g. a customized doc.json that defines it statically, or
+            // another rewrite rule ran first). Splicing again would emit a duplicate key.
+            return source;
+        }
         final int dimension = getConfiguredEmbeddingDimension();
         if (dimension <= 0) {
             // Guard the raw config value against being spliced verbatim into the whole doc.json
@@ -515,7 +540,17 @@ public class ChunkVectorHelper {
                 + "    }\n" //
                 + "  }\n" //
                 + "},";
-        return source.replace("\"content\":", fieldDef + "\n\"content\":");
+        final String result = source.replace("\"content\":", fieldDef + "\n\"content\":");
+        if (result.equals(source)) {
+            // String.replace is silent when the anchor is absent (e.g. a customized doc.json
+            // whose content field is renamed or formatted differently): the index would be
+            // created without the chunk vector mapping and every vector write would fail later
+            // with no hint why. Surface the miss loudly instead.
+            logger.warn(
+                    "[ChunkVector] Mapping rewrite anchor \"content\": not found in the document mapping source; the {} mapping was NOT added. Chunk vectors cannot be indexed into indexes created from this mapping file. Fix the mapping file (doc.json) and recreate the index.",
+                    Constants.CONTENT_CHUNK_VECTOR_FIELD);
+        }
+        return result;
     }
 
     /**

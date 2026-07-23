@@ -84,6 +84,33 @@ public class LengthChunker implements Chunker {
         if (ComponentUtil.hasComponent("chunkerManager")) {
             ComponentUtil.getComponent(ChunkerManager.class).register(this);
         }
+        warnOnOverlapSideEffect();
+    }
+
+    /**
+     * Emits a one-time WARN at registration time when a positive overlap is
+     * configured: the chunks are stored as the searchable {@code content} array,
+     * so overlapped text is duplicated in the index -- inflating BM25 term
+     * frequencies for terms in the overlapped regions and repeating those
+     * regions in highlights. This is a deliberate trade-off (overlap preserves
+     * context across chunk boundaries for embeddings), but operators should
+     * enable it knowingly.
+     */
+    protected void warnOnOverlapSideEffect() {
+        try {
+            final int overlap = getOverlap();
+            if (overlap > 0) {
+                logger.warn(
+                        "[Chunk] {}={} duplicates the overlapped text inside the searchable content array: "
+                                + "BM25 term frequencies are inflated and highlights may repeat the overlapped regions.",
+                        OVERLAP_PROPERTY, overlap);
+            }
+        } catch (final Exception e) {
+            // Diagnostics only; never let a config-read failure break component registration.
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Chunk] Skipping overlap diagnostic.", e);
+            }
+        }
     }
 
     @Override

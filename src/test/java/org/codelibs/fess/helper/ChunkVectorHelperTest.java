@@ -21,8 +21,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.UnaryOperator;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
@@ -150,6 +158,55 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         helper.testSemanticSearchEnabled = true;
         final String once = helper.rewriteSetting("{\"index\":{\"codec\":\"best_compression\"}}");
         assertEquals(once, helper.rewriteSetting(once));
+    }
+
+    @Test
+    public void test_rewriteSetting_missingCodecAnchor_warnsAndReturnsSourceUnchanged() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        helper.testSemanticSearchEnabled = true;
+        // A customized fess.json without a "codec" key: String.replace finds no anchor, so
+        // neither index.knn nor the derived-source override can be spliced. The rewrite must
+        // return the source unchanged AND emit one WARN per dropped splice naming the anchor.
+        final String source = "{\"index\":{\"number_of_shards\":1}}";
+        final LogCapturingAppender capture = LogCapturingAppender.attach(ChunkVectorHelper.class);
+        try {
+            assertEquals(source, helper.rewriteSetting(source));
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("codec") && m.contains("\"knn\": true")),
+                    "a WARN must name the missing codec anchor for the index.knn splice: " + capture.warnings());
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("codec") && m.contains("knn.derived_source.enabled")),
+                    "a WARN must name the missing codec anchor for the derived-source splice: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_rewriteMapping_missingContentAnchor_warnsAndReturnsSourceUnchanged() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        // A customized doc.json without a "content": key: the splice anchor is missing, so the
+        // chunk vector mapping cannot be added. The rewrite must return the source unchanged
+        // AND emit a WARN naming the anchor and the consequence instead of failing silently.
+        final String source = "{\"properties\":{\"title\":{\"type\":\"text\"}}}";
+        final LogCapturingAppender capture = LogCapturingAppender.attach(ChunkVectorHelper.class);
+        try {
+            assertEquals(source, helper.rewriteMapping(source));
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("content") && m.contains("content_chunk_vector")),
+                    "a WARN must name the missing content anchor and the dropped field: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_rewriteMapping_alreadyContainsVectorField_returnsSourceUnchanged() {
+        helper.setTestEnabled(true);
+        helper.setTestDimension("768");
+        // The field is already mapped (customized doc.json or another rule ran first): splicing
+        // again would emit a duplicate key, so the guard must skip the rewrite entirely.
+        final String source = "{\"properties\":{\"content_chunk_vector\":{\"type\":\"nested\"},\"content\":{\"type\":\"text\"}}}";
+        assertEquals(source, helper.rewriteMapping(source));
     }
 
     @Test
@@ -2286,6 +2343,42 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         @Override
         public String getIndexFieldId() {
             return "id";
+        }
+    }
+
+    /**
+     * Minimal in-memory log4j2 appender for asserting on emitted log messages.
+     * Mirrors {@code OpenSearchEmbeddingClientTest.LogCapturingAppender}.
+     */
+    static final class LogCapturingAppender extends AbstractAppender {
+        private final List<LogEvent> events = new CopyOnWriteArrayList<>();
+        private final Logger boundLogger;
+
+        private LogCapturingAppender(final Logger logger) {
+            super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
+            this.boundLogger = logger;
+        }
+
+        static LogCapturingAppender attach(final Class<?> targetClass) {
+            final Logger logger = (Logger) LogManager.getLogger(targetClass);
+            final LogCapturingAppender appender = new LogCapturingAppender(logger);
+            appender.start();
+            logger.addAppender(appender);
+            return appender;
+        }
+
+        void detach() {
+            boundLogger.removeAppender(this);
+            stop();
+        }
+
+        @Override
+        public void append(final LogEvent event) {
+            events.add(event.toImmutable());
+        }
+
+        List<String> warnings() {
+            return events.stream().filter(e -> e.getLevel() == Level.WARN).map(e -> e.getMessage().getFormattedMessage()).toList();
         }
     }
 }

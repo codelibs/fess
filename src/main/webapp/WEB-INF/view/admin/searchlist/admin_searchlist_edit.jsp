@@ -182,6 +182,8 @@ ${fe:html(true)}
                                             <c:when test="${contentReadOnly}">
                                                 <textarea id="doc.content" class="form-control" rows="8"
                                                           disabled="disabled">${f:h(contentDisplay)}</textarea>
+                                                <small class="form-text text-muted"><la:message
+                                                        key="labels.searchlist_content_chunk_managed"/></small>
                                             </c:when>
                                             <c:otherwise>
                                                 <la:errors property="doc.content"/>
