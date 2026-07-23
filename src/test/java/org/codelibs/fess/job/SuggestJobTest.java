@@ -193,6 +193,9 @@ public class SuggestJobTest extends UnitFessTestCase {
     @Test
     public void test_executeSuggestCreator_windows() {
         createRequiredDirectories();
+        // Restore (not clear) os.name afterwards: clearing it poisons later
+        // OpenSearch static initializers that read the property.
+        String originalOsName = System.getProperty("os.name");
         System.setProperty("os.name", "Windows 10");
 
         mockProcessHelper.setExitValue(0);
@@ -203,7 +206,7 @@ public class SuggestJobTest extends UnitFessTestCase {
         } catch (Exception e) {
             // May fail in test environment
         } finally {
-            System.clearProperty("os.name");
+            System.setProperty("os.name", originalOsName);
         }
 
         List<String> cmdList = mockProcessHelper.getLastCommandList();
@@ -216,6 +219,9 @@ public class SuggestJobTest extends UnitFessTestCase {
     @Test
     public void test_executeSuggestCreator_unix() {
         createRequiredDirectories();
+        // Restore (not clear) os.name afterwards: clearing it poisons later
+        // OpenSearch static initializers that read the property.
+        String originalOsName = System.getProperty("os.name");
         System.setProperty("os.name", "Linux");
 
         mockProcessHelper.setExitValue(0);
@@ -226,7 +232,7 @@ public class SuggestJobTest extends UnitFessTestCase {
         } catch (Exception e) {
             // May fail in test environment
         } finally {
-            System.clearProperty("os.name");
+            System.setProperty("os.name", originalOsName);
         }
 
         List<String> cmdList = mockProcessHelper.getLastCommandList();

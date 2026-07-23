@@ -79,6 +79,47 @@ public class AdminSearchlistAction extends FessAdminAction {
             "filename", "content", "has_cache", "cache", "digest", "host", "site", "segment", "config_id", "parent_id", "content_length",
             "favorite_count", "click_count", "created", "timestamp", "last_modified", "expires", "virtual_host", "doc_id");
 
+    /**
+     * System-managed fields written by the content-chunk embedding pipeline
+     * ({@link org.codelibs.fess.helper.ChunkVectorHelper}). They are never editable in this raw-document screen: the
+     * {@code content_chunk_vector} field is a {@code nested} mapping that OpenSearch would reject if
+     * a scalar string were posted into it, and both are kept consistent with {@code content}
+     * only by the pipeline. They are hidden from the editable-field walk and stripped from any
+     * client-supplied doc map (server-side, regardless of transport) by {@link #stripSystemManagedFields}
+     * before it is overlaid onto the fetched entity in {@link #create}/{@link #update}.
+     */
+    private static final Set<String> SYSTEM_MANAGED_FIELDS =
+            Set.of(Constants.CONTENT_CHUNK_VECTOR_FIELD, Constants.CONTENT_CHUNK_STATUS_FIELD);
+
+    /**
+     * Strips {@link #SYSTEM_MANAGED_FIELDS} (and, when the FETCHED entity's existing {@code content}
+     * value is a {@code List} -- i.e. an already-chunked document -- the {@code content} key too) from
+     * a client-supplied doc map, in place, before it is overlaid onto the freshly-fetched entity via
+     * {@code entity.putAll(...)}.
+     *
+     * <p>{@link #registerContentReadOnly} only renders the {@code content} textarea as {@code disabled}
+     * for an already-chunked document, and the editable-field walk in {@link #registerExtraFields} only
+     * hides {@link #SYSTEM_MANAGED_FIELDS} from that same rendering pass -- neither stops a direct POST
+     * or API call that includes these keys in the submitted map, since a disabled/hidden form control is
+     * purely a client-side rendering convention. This method is the server-side enforcement point,
+     * shared by this action's {@link #create}/{@link #update} and {@code ApiAdminSearchlistAction}'s
+     * {@code post$doc}/{@code put$doc} (via static import, mirroring how {@link #getDoc}/
+     * {@link #validateFields} are already shared between the two).</p>
+     *
+     * @param entity the freshly-fetched entity (read-only here; only its existing {@code content} value
+     *               is inspected, never mutated)
+     * @param doc the client-supplied doc map (mutated in place: system-managed keys removed)
+     */
+    public static void stripSystemManagedFields(final Map<String, Object> entity, final Map<String, Object> doc) {
+        if (doc == null) {
+            return;
+        }
+        SYSTEM_MANAGED_FIELDS.forEach(doc::remove);
+        if (entity != null && entity.get("content") instanceof List<?>) {
+            doc.remove("content");
+        }
+    }
+
     // ===================================================================================
     // Attribute
     // =========
@@ -384,6 +425,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyToken(this::asEditHtml);
         getDoc(form).ifPresent(entity -> {
             try {
+                stripSystemManagedFields(entity, form.doc);
                 entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
@@ -420,6 +462,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         getDoc(form).ifPresent(entity -> {
             final String index = fessConfig.getIndexDocumentUpdateIndex();
             try {
+                stripSystemManagedFields(entity, form.doc);
                 entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
@@ -573,25 +616,81 @@ public class AdminSearchlistAction extends FessAdminAction {
             candidateFields.addAll(doc.keySet());
         }
 
+        registerContentReadOnly(data, doc);
+
         final List<String> extraFieldNames = new ArrayList<>();
         final Map<String, String> extraFieldTypes = new TreeMap<>();
-        candidateFields.stream().filter(key -> !STANDARD_EDIT_FIELDS.contains(key) && !reservedFields.contains(key)).forEach(key -> {
-            final String type;
-            if (arrayFieldSet.contains(key)) {
-                type = "array";
-            } else if (dateFieldSet.contains(key)) {
-                type = "date";
-            } else if (integerFieldSet.contains(key) || longFieldSet.contains(key) || floatFieldSet.contains(key)
-                    || doubleFieldSet.contains(key)) {
-                type = "number";
-            } else {
-                type = "text";
-            }
-            extraFieldNames.add(key);
-            extraFieldTypes.put(key, type);
-        });
+        candidateFields.stream()
+                .filter(key -> !STANDARD_EDIT_FIELDS.contains(key) && !reservedFields.contains(key) && !SYSTEM_MANAGED_FIELDS.contains(key))
+                .forEach(key -> {
+                    final String type;
+                    if (arrayFieldSet.contains(key)) {
+                        type = "array";
+                    } else if (dateFieldSet.contains(key)) {
+                        type = "date";
+                    } else if (integerFieldSet.contains(key) || longFieldSet.contains(key) || floatFieldSet.contains(key)
+                            || doubleFieldSet.contains(key)) {
+                        type = "number";
+                    } else {
+                        type = "text";
+                    }
+                    extraFieldNames.add(key);
+                    extraFieldTypes.put(key, type);
+                });
         RenderDataUtil.register(data, "extraFieldNames", extraFieldNames);
         RenderDataUtil.register(data, "extraFieldTypes", extraFieldTypes);
+    }
+
+    /**
+     * Registers how the {@code content} field is rendered in the edit screen. Three states:
+     * <ul>
+     * <li><b>editable</b> (plain string at or under the size gate, and every create): the normal
+     * {@code doc.content} text input.</li>
+     * <li><b>chunk list</b>: once a document has been processed by the content-chunk pipeline its
+     * {@code content} is a {@code List<String>} of chunks rather than a single string; rendering that
+     * in the editable text input would show Java's bracket-joined {@code List#toString()} and let a
+     * submit overwrite the stored content with that garbage (desyncing it from
+     * {@code content_chunk_vector}). Instead the chunks are registered as {@code contentChunks} and
+     * rendered as a per-chunk collapsible read-only list, omitted from the submitted form so the
+     * fetch-and-overlay in {@link #update} preserves them untouched.</li>
+     * <li><b>too large</b>: when the total content length (string length, or sum of chunk lengths)
+     * exceeds {@code page.searchlist.content.max.length} (default 100000 chars), no content body is
+     * registered at all -- only {@code contentTooLarge} with the length (and chunk count for chunked
+     * documents) for a metadata-only message. The gate is judged by the length of the ACTUALLY
+     * fetched content, not the stored {@code content_length} field, which can be absent or stale.
+     * An oversized plain string is likewise omitted from the form so the fetch-and-overlay preserves
+     * it; {@link #stripSystemManagedFields} is deliberately NOT extended to the string case, so API
+     * callers can still legitimately update large string content.</li>
+     * </ul>
+     *
+     * @param data the render data to populate
+     * @param doc the editable document map, or null
+     */
+    private void registerContentReadOnly(final RenderData data, final Map<String, Object> doc) {
+        // The content field is referred to by the literal "content" throughout this screen (it is a
+        // STANDARD_EDIT_FIELD and the JSP binds doc.content directly), so match that convention here.
+        final Object content = doc != null ? doc.get("content") : null;
+        final int maxLength = fessConfig.getPageSearchlistContentMaxLengthAsInteger();
+        if (content instanceof final List<?> rawChunks) {
+            final List<String> chunks = rawChunks.stream().map(String::valueOf).toList();
+            final long totalLength = chunks.stream().mapToLong(String::length).sum();
+            RenderDataUtil.register(data, "contentReadOnly", true);
+            RenderDataUtil.register(data, "contentChunkCount", chunks.size());
+            RenderDataUtil.register(data, "contentLength", totalLength);
+            if (totalLength > maxLength) {
+                RenderDataUtil.register(data, "contentTooLarge", true);
+            } else {
+                RenderDataUtil.register(data, "contentTooLarge", false);
+                RenderDataUtil.register(data, "contentChunks", chunks);
+            }
+        } else if (content instanceof final String text && text.length() > maxLength) {
+            RenderDataUtil.register(data, "contentReadOnly", true);
+            RenderDataUtil.register(data, "contentTooLarge", true);
+            RenderDataUtil.register(data, "contentLength", (long) text.length());
+        } else {
+            RenderDataUtil.register(data, "contentReadOnly", false);
+            RenderDataUtil.register(data, "contentTooLarge", false);
+        }
     }
 
     /**

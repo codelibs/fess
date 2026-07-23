@@ -516,6 +516,9 @@
       "content_length": {
         "type": "long"
       },
+      "content_chunk_status": {
+        "type": "keyword"
+      },
       "created": {
         "type": "date",
         "format": "date_optional_time"

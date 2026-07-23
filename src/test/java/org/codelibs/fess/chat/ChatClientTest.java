@@ -1004,6 +1004,80 @@ public class ChatClientTest extends UnitFessTestCase {
 
     // ========== Testable subclass ==========
 
+    // ========== fetchContentForAnswer tests ==========
+
+    @Test
+    public void test_fetchContentForAnswer_emptyResults() {
+        final List<Map<String, Object>> results = Collections.emptyList();
+        assertSame(results, chatClient.fetchContentForAnswer(results, "q"));
+    }
+
+    @Test
+    public void test_fetchContentForAnswer_noDocIds() {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "no doc_id here");
+        final List<Map<String, Object>> results = List.of(doc);
+        assertSame(results, chatClient.fetchContentForAnswer(results, "q"));
+    }
+
+    @Test
+    public void test_fetchContentForAnswer_replacesWithFetchedDocs() {
+        final RecordingContentFetcher fetcher = new RecordingContentFetcher();
+        ComponentUtil.register(fetcher, "chatContentFetcher");
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "id1");
+        doc.put("content", "raw search content");
+        final Map<String, Object> fetched = new HashMap<>();
+        fetched.put("doc_id", "id1");
+        fetched.put("content", "chunk-selected content");
+        fetcher.toReturn = List.of(fetched);
+        final List<Map<String, Object>> out = chatClient.fetchContentForAnswer(List.of(doc), "the query");
+        assertEquals(1, out.size());
+        assertEquals("chunk-selected content", out.get(0).get("content"));
+        assertEquals(List.of("id1"), fetcher.lastRequest.getDocIds());
+        assertEquals("the query", fetcher.lastRequest.getQuery());
+        assertEquals(1, fetcher.lastRequest.getSearchResults().size());
+    }
+
+    @Test
+    public void test_fetchContentForAnswer_fallsBackWhenFetcherThrows() {
+        final RecordingContentFetcher fetcher = new RecordingContentFetcher() {
+            @Override
+            public List<Map<String, Object>> fetchContent(final ChatContentRequest request) {
+                throw new RuntimeException("fetch boom");
+            }
+        };
+        ComponentUtil.register(fetcher, "chatContentFetcher");
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "id1");
+        final List<Map<String, Object>> results = List.of(doc);
+        // a fetcher failure must degrade to the raw search results, not propagate
+        assertSame(results, chatClient.fetchContentForAnswer(results, "q"));
+    }
+
+    @Test
+    public void test_fetchContentForAnswer_fallsBackWhenFetcherReturnsEmpty() {
+        final RecordingContentFetcher fetcher = new RecordingContentFetcher();
+        ComponentUtil.register(fetcher, "chatContentFetcher");
+        fetcher.toReturn = Collections.emptyList();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "id1");
+        final List<Map<String, Object>> results = List.of(doc);
+        assertSame(results, chatClient.fetchContentForAnswer(results, null));
+        assertEquals(List.of("id1"), fetcher.lastRequest.getDocIds());
+    }
+
+    static class RecordingContentFetcher implements ChatContentFetcher {
+        ChatContentRequest lastRequest;
+        List<Map<String, Object>> toReturn = Collections.emptyList();
+
+        @Override
+        public List<Map<String, Object>> fetchContent(final ChatContentRequest request) {
+            this.lastRequest = request;
+            return toReturn;
+        }
+    }
+
     static class TestableChatClient extends ChatClient {
 
         private boolean searchDocumentsCalled = false;

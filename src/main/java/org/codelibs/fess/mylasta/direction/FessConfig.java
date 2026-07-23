@@ -166,6 +166,37 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * -XX:+UseTLAB<br>
      * -XX:+DisableExplicitGC<br>
      * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=30<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     *  */
+    String JVM_CHUNK_OPTIONS = "jvm.chunk.options";
+
+    /** The key of the configuration. e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
      * -XX:-OmitStackTraceInFastThrow<br>
      * -XX:+UnlockExperimentalVMOptions<br>
      * -XX:+UseG1GC<br>
@@ -1464,6 +1495,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String PAGE_SEARCHLIST_TRACK_TOTAL_HITS = "page.searchlist.track.total.hits";
 
+    /** The key of the configuration. e.g. 100000 */
+    String PAGE_SEARCHLIST_CONTENT_MAX_LENGTH = "page.searchlist.content.max.length";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
@@ -2451,6 +2485,42 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
+
+    /**
+     * Get the value for the key 'jvm.chunk.options'. <br>
+     * The value is, e.g. -Djava.awt.headless=true<br>
+     * -Dfile.encoding=UTF-8<br>
+     * -Djna.nosys=true<br>
+     * -Djdk.io.permissionsUseCanonicalPath=true<br>
+     * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager<br>
+     * -server<br>
+     * -Xms128m<br>
+     * -Xmx256m<br>
+     * -XX:MaxMetaspaceSize=128m<br>
+     * -XX:CompressedClassSpaceSize=32m<br>
+     * -XX:-UseGCOverheadLimit<br>
+     * -XX:+UseTLAB<br>
+     * -XX:+DisableExplicitGC<br>
+     * -XX:-HeapDumpOnOutOfMemoryError<br>
+     * -XX:+UnlockExperimentalVMOptions<br>
+     * -XX:+UseG1GC<br>
+     * -XX:InitiatingHeapOccupancyPercent=45<br>
+     * -XX:G1HeapRegionSize=1m<br>
+     * -XX:MaxGCPauseMillis=60000<br>
+     * -XX:G1NewSizePercent=5<br>
+     * -XX:G1MaxNewSizePercent=30<br>
+     * -Dio.netty.noUnsafe=true<br>
+     * -Dio.netty.noKeySetOptimization=true<br>
+     * -Dio.netty.recycler.maxCapacityPerThread=0<br>
+     * -Dlog4j.shutdownHookEnabled=false<br>
+     * -Dlog4j2.disable.jmx=true<br>
+     * -Dlog4j2.formatMsgNoLookups=true<br>
+     * -Dlog4j.skipJansi=true<br>
+     *  <br>
+     * comment: JVM options for the chunk vector indexer process.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJvmChunkOptions();
 
     /**
      * Get the value for the key 'jvm.thumbnail.options'. <br>
@@ -7594,6 +7664,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isPageSearchlistTrackTotalHits();
 
     /**
+     * Get the value for the key 'page.searchlist.content.max.length'. <br>
+     * The value is, e.g. 100000 <br>
+     * comment: Maximum content length (in characters) rendered on the search list edit page.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageSearchlistContentMaxLength();
+
+    /**
+     * Get the value for the key 'page.searchlist.content.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 100000 <br>
+     * comment: Maximum content length (in characters) rendered on the search list edit page.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageSearchlistContentMaxLengthAsInteger();
+
+    /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
      * comment: Default start page for search results.
@@ -10256,6 +10343,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.JVM_SUGGEST_OPTIONS);
         }
 
+        public String getJvmChunkOptions() {
+            return get(FessConfig.JVM_CHUNK_OPTIONS);
+        }
+
         public String getJvmThumbnailOptions() {
             return get(FessConfig.JVM_THUMBNAIL_OPTIONS);
         }
@@ -12660,6 +12751,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS);
         }
 
+        public String getPageSearchlistContentMaxLength() {
+            return get(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH);
+        }
+
+        public Integer getPageSearchlistContentMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH);
+        }
+
         public String getPagingSearchPageStart() {
             return get(FessConfig.PAGING_SEARCH_PAGE_START);
         }
@@ -13919,6 +14018,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JVM_SUGGEST_OPTIONS,
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j.skipJansi=true\n");
+            defaultMap.put(FessConfig.JVM_CHUNK_OPTIONS,
+                    "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=30\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j.skipJansi=true\n");
             defaultMap.put(FessConfig.JVM_THUMBNAIL_OPTIONS,
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx256m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=4m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=50\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.disable.jmx=true\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JOB_SYSTEM_JOB_IDS, "default_crawler");
@@ -14319,6 +14420,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_SEARCHLOG_MAX_FETCH_SIZE, "10000");
             defaultMap.put(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS, "true");
+            defaultMap.put(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH, "100000");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");
