@@ -688,11 +688,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
         return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(CONTENT_CHUNKER_ENABLED_PROPERTY, "false"));
     }
 
-    @Override
-    protected String getEmbeddingType() {
-        return ComponentUtil.getFessConfig().getSystemProperty(EMBEDDING_NAME_PROPERTY, "ollama");
-    }
-
     /**
      * Functional interface for the retryable HTTP call body executed by
      * {@link #executeWithRetry(String, HttpCall)}.

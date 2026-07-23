@@ -31,7 +31,7 @@ import org.codelibs.fess.util.ComponentUtil;
  * the configured embedding provider by name (component lookup, then
  * registered-list fallback), selected via the
  * {@code content_chunker.embedding.name} system property (default
- * {@code "ollama"}) — an independent setting from {@code rag.llm.name}.
+ * {@code "opensearch"}) — an independent setting from {@code rag.llm.name}.
  */
 public class EmbeddingClientManager {
 
@@ -131,10 +131,12 @@ public class EmbeddingClientManager {
     /**
      * Gets the configured embedding type from the system configuration.
      *
-     * @return the embedding type string (e.g. "ollama")
+     * @return the embedding type string (e.g. "opensearch", "ollama"; default
+     *         {@value AbstractEmbeddingClient#EMBEDDING_NAME_DEFAULT})
      */
     protected String getEmbeddingType() {
-        return ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, "ollama");
+        return ComponentUtil.getFessConfig()
+                .getSystemProperty(AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, AbstractEmbeddingClient.EMBEDDING_NAME_DEFAULT);
     }
 
     /**

@@ -49,6 +49,18 @@ public class EmbeddingClientManagerTest extends UnitFessTestCase {
         assertSame(fake, manager.getClient());
     }
 
+    // Behavior pin for the shared default: a plain manager (no test override) with no
+    // content_chunker.embedding.name configured must resolve to the built-in "opensearch"
+    // provider, matching AbstractEmbeddingClient.EMBEDDING_NAME_DEFAULT.
+    @Test
+    public void test_getEmbeddingType_defaultsToOpensearchWhenUnset() {
+        assertNull(ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY),
+                "precondition: content_chunker.embedding.name must be unset in the test environment");
+        final EmbeddingClientManager plainManager = new EmbeddingClientManager();
+        assertEquals(AbstractEmbeddingClient.EMBEDDING_NAME_DEFAULT, plainManager.getEmbeddingType());
+        assertEquals("opensearch", plainManager.getEmbeddingType());
+    }
+
     @Test
     public void test_getClient_returnsNullWhenNotFound() {
         manager.setTestEmbeddingType("missing");

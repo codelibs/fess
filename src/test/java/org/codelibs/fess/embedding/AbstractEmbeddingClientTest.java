@@ -29,6 +29,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -47,6 +48,19 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         assertEquals("content_chunker.enabled", AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY);
         assertEquals("content_chunker.embedding.name", AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY);
         assertEquals("content_chunker.embedding.dimension", AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY);
+        assertEquals("opensearch", AbstractEmbeddingClient.EMBEDDING_NAME_DEFAULT);
+    }
+
+    // The base-class getEmbeddingType() is the shared default resolution for every provider
+    // (and mirrored by EmbeddingClientManager): with no content_chunker.embedding.name
+    // configured, the built-in OpenSearch ML Commons provider must be selected.
+    @Test
+    public void test_getEmbeddingType_defaultsToOpensearchWhenUnset() {
+        assertNull(ComponentUtil.getFessConfig().getSystemProperty(AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY),
+                "precondition: content_chunker.embedding.name must be unset in the test environment");
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        assertEquals(AbstractEmbeddingClient.EMBEDDING_NAME_DEFAULT, client.testBaseGetEmbeddingType());
+        assertEquals("opensearch", client.testBaseGetEmbeddingType());
     }
 
     // ========== Proxy configuration tests ==========
@@ -241,6 +255,10 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
 
         void testConfigureProxy(final HttpClientBuilder builder) {
             configureProxy(builder);
+        }
+
+        String testBaseGetEmbeddingType() {
+            return super.getEmbeddingType();
         }
 
         @Override

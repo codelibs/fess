@@ -54,6 +54,12 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
     /** System property key for the vector dimension of the configured embedding provider. */
     public static final String EMBEDDING_DIMENSION_PROPERTY = "content_chunker.embedding.dimension";
 
+    /**
+     * Default value of {@link #EMBEDDING_NAME_PROPERTY}: the built-in OpenSearch
+     * ML Commons provider, which needs no extra infrastructure.
+     */
+    public static final String EMBEDDING_NAME_DEFAULT = "opensearch";
+
     private static final Logger logger = LogManager.getLogger(AbstractEmbeddingClient.class);
 
     /** The HTTP client used for API communication. */
@@ -282,11 +288,14 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
     protected abstract boolean isContentChunkerEnabled();
 
     /**
-     * Gets the configured embedding provider type.
+     * Gets the configured embedding provider type from the
+     * {@value #EMBEDDING_NAME_PROPERTY} system property.
      *
-     * @return the embedding type from configuration
+     * @return the embedding type from configuration (default {@value #EMBEDDING_NAME_DEFAULT})
      */
-    protected abstract String getEmbeddingType();
+    protected String getEmbeddingType() {
+        return ComponentUtil.getFessConfig().getSystemProperty(EMBEDDING_NAME_PROPERTY, EMBEDDING_NAME_DEFAULT);
+    }
 
     /**
      * Gets the configuration prefix for this provider.
