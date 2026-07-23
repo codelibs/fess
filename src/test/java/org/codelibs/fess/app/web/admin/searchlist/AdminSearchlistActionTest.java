@@ -38,64 +38,79 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
+        ComponentUtil.setFessConfig(new TestFessConfig());
+    }
 
-            @Override
-            public String getIndexAdminRequiredFields() {
-                return "url,title,role,boost";
-            }
+    /**
+     * Base test config: index-admin field definitions used by registerExtraFields plus generated
+     * defaults (via SimpleImpl's default map) for everything else, e.g.
+     * page.searchlist.content.max.length. Subclass in a test to override single getters.
+     */
+    private static class TestFessConfig extends FessConfig.SimpleImpl {
+        private static final long serialVersionUID = 1L;
 
-            @Override
-            public String getIndexAdminArrayFields() {
-                return "lang,role,label,anchor,virtual_host";
-            }
+        @Override
+        public Integer getPageSearchlistContentMaxLengthAsInteger() {
+            // SimpleImpl's ObjectiveConfig backing is never initialized in unit tests (a plain
+            // getAsInteger would NPE), so resolve from the generated default map -- which also
+            // proves the hand-spliced defaultMap entry carries the intended generated default.
+            return Integer.valueOf(prepareGeneratedDefaultMap().get(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH));
+        }
 
-            @Override
-            public String getIndexAdminDateFields() {
-                return "expires,created,timestamp,last_modified";
-            }
+        @Override
+        public String getIndexAdminRequiredFields() {
+            return "url,title,role,boost";
+        }
 
-            @Override
-            public String getIndexAdminIntegerFields() {
-                return "";
-            }
+        @Override
+        public String getIndexAdminArrayFields() {
+            return "lang,role,label,anchor,virtual_host";
+        }
 
-            @Override
-            public String getIndexAdminLongFields() {
-                return "content_length,favorite_count,click_count";
-            }
+        @Override
+        public String getIndexAdminDateFields() {
+            return "expires,created,timestamp,last_modified";
+        }
 
-            @Override
-            public String getIndexAdminFloatFields() {
-                return "boost";
-            }
+        @Override
+        public String getIndexAdminIntegerFields() {
+            return "";
+        }
 
-            @Override
-            public String getIndexAdminDoubleFields() {
-                return "";
-            }
+        @Override
+        public String getIndexAdminLongFields() {
+            return "content_length,favorite_count,click_count";
+        }
 
-            @Override
-            public String getIndexFieldId() {
-                return "_id";
-            }
+        @Override
+        public String getIndexAdminFloatFields() {
+            return "boost";
+        }
 
-            @Override
-            public String getIndexFieldVersion() {
-                return "_version";
-            }
+        @Override
+        public String getIndexAdminDoubleFields() {
+            return "";
+        }
 
-            @Override
-            public String getIndexFieldSeqNo() {
-                return "_seq_no";
-            }
+        @Override
+        public String getIndexFieldId() {
+            return "_id";
+        }
 
-            @Override
-            public String getIndexFieldPrimaryTerm() {
-                return "_primary_term";
-            }
-        });
+        @Override
+        public String getIndexFieldVersion() {
+            return "_version";
+        }
+
+        @Override
+        public String getIndexFieldSeqNo() {
+            return "_seq_no";
+        }
+
+        @Override
+        public String getIndexFieldPrimaryTerm() {
+            return "_primary_term";
+        }
     }
 
     // ===================================================================================
@@ -620,7 +635,7 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
 
     @Test
     public void test_registerExtraFields_excludesReservedFields() throws Exception {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+        ComponentUtil.setFessConfig(new TestFessConfig() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -716,7 +731,7 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
 
     @Test
     public void test_registerExtraFields_configFieldsAppearedWithoutDoc() throws Exception {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+        ComponentUtil.setFessConfig(new TestFessConfig() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -809,7 +824,7 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
 
     @Test
     public void test_registerExtraFields_fieldTypeDetection() throws Exception {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+        ComponentUtil.setFessConfig(new TestFessConfig() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -928,24 +943,58 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_registerContentReadOnly_listContent_marksReadOnlyWithJoinedDisplay() throws Exception {
+    public void test_registerContentReadOnly_listContent_underThreshold_registersChunkList() throws Exception {
         final AdminSearchlistAction action = new AdminSearchlistAction();
 
         final CreateForm form = new CreateForm();
         form.doc = new HashMap<>();
         form.doc.put("url", "https://example.com");
-        form.doc.put("content", List.of("chunk-a", "chunk-b"));
+        form.doc.put("content", List.of("chunk-a", "chunk-bb"));
 
         setCurrentFormAndConfig(action, form);
         final RenderData renderData = invokeRegisterExtraFields(action);
 
         assertEquals("chunked (List) content must be rendered read-only", Boolean.TRUE, renderData.getDataMap().get("contentReadOnly"));
-        assertEquals("read-only content must be joined for readable display, not rendered via List.toString()", "chunk-a\nchunk-b",
-                renderData.getDataMap().get("contentDisplay"));
+        assertEquals("chunked content under the threshold must not be flagged too-large", Boolean.FALSE,
+                renderData.getDataMap().get("contentTooLarge"));
+        assertEquals("per-chunk display list must carry the raw chunk strings", List.of("chunk-a", "chunk-bb"),
+                renderData.getDataMap().get("contentChunks"));
+        assertEquals("chunk count must be registered for the summary header", 2, renderData.getDataMap().get("contentChunkCount"));
+        assertEquals("total length must be the sum of the ACTUAL chunk lengths (7+8), not the stored content_length field", 15L,
+                renderData.getDataMap().get("contentLength"));
+        assertNull(renderData.getDataMap().get("contentDisplay"), "the joined-textarea display value was replaced by contentChunks");
     }
 
     @Test
-    public void test_registerContentReadOnly_stringContent_staysEditable() throws Exception {
+    public void test_registerContentReadOnly_listContent_overThreshold_hidesBody() throws Exception {
+        ComponentUtil.setFessConfig(new TestFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPageSearchlistContentMaxLengthAsInteger() {
+                return 10;
+            }
+        });
+        final AdminSearchlistAction action = new AdminSearchlistAction();
+
+        final CreateForm form = new CreateForm();
+        form.doc = new HashMap<>();
+        form.doc.put("url", "https://example.com");
+        form.doc.put("content", List.of("chunk-a", "chunk-bb")); // 15 chars total > 10
+
+        setCurrentFormAndConfig(action, form);
+        final RenderData renderData = invokeRegisterExtraFields(action);
+
+        assertEquals(Boolean.TRUE, renderData.getDataMap().get("contentReadOnly"));
+        assertEquals("over-threshold chunked content must be flagged too-large", Boolean.TRUE,
+                renderData.getDataMap().get("contentTooLarge"));
+        assertNull(renderData.getDataMap().get("contentChunks"), "no content body may be registered when over the threshold");
+        assertEquals("chunk count is still shown in the too-large metadata message", 2, renderData.getDataMap().get("contentChunkCount"));
+        assertEquals(15L, renderData.getDataMap().get("contentLength"));
+    }
+
+    @Test
+    public void test_registerContentReadOnly_stringContent_underThreshold_staysEditable() throws Exception {
         final AdminSearchlistAction action = new AdminSearchlistAction();
 
         final CreateForm form = new CreateForm();
@@ -957,7 +1006,77 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         final RenderData renderData = invokeRegisterExtraFields(action);
 
         assertEquals("plain string content must remain editable", Boolean.FALSE, renderData.getDataMap().get("contentReadOnly"));
+        assertEquals(Boolean.FALSE, renderData.getDataMap().get("contentTooLarge"));
+        assertNull(renderData.getDataMap().get("contentChunks"), "no read-only display value should be produced for editable content");
         assertNull(renderData.getDataMap().get("contentDisplay"), "no read-only display value should be produced for editable content");
+    }
+
+    @Test
+    public void test_registerContentReadOnly_stringContent_overThreshold_hidesBody() throws Exception {
+        ComponentUtil.setFessConfig(new TestFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPageSearchlistContentMaxLengthAsInteger() {
+                return 10;
+            }
+        });
+        final AdminSearchlistAction action = new AdminSearchlistAction();
+
+        final CreateForm form = new CreateForm();
+        form.doc = new HashMap<>();
+        form.doc.put("url", "https://example.com");
+        form.doc.put("content", "0123456789ABCDEF"); // 16 chars > 10
+
+        setCurrentFormAndConfig(action, form);
+        final RenderData renderData = invokeRegisterExtraFields(action);
+
+        assertEquals("over-threshold string content must be read-only", Boolean.TRUE, renderData.getDataMap().get("contentReadOnly"));
+        assertEquals(Boolean.TRUE, renderData.getDataMap().get("contentTooLarge"));
+        assertEquals("length must be the ACTUAL string length, not the stored content_length field", 16L,
+                renderData.getDataMap().get("contentLength"));
+        assertNull(renderData.getDataMap().get("contentChunks"), "no content body may be registered when over the threshold");
+        assertNull(renderData.getDataMap().get("contentChunkCount"), "a plain string document has no chunk count");
+    }
+
+    @Test
+    public void test_registerContentReadOnly_stringContent_exactlyAtThreshold_staysEditable() throws Exception {
+        ComponentUtil.setFessConfig(new TestFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPageSearchlistContentMaxLengthAsInteger() {
+                return 10;
+            }
+        });
+        final AdminSearchlistAction action = new AdminSearchlistAction();
+
+        final CreateForm form = new CreateForm();
+        form.doc = new HashMap<>();
+        form.doc.put("url", "https://example.com");
+        form.doc.put("content", "0123456789"); // exactly 10 chars: not over
+
+        setCurrentFormAndConfig(action, form);
+        final RenderData renderData = invokeRegisterExtraFields(action);
+
+        assertEquals("content exactly at the threshold must remain editable (gate is strictly greater-than)", Boolean.FALSE,
+                renderData.getDataMap().get("contentReadOnly"));
+        assertEquals(Boolean.FALSE, renderData.getDataMap().get("contentTooLarge"));
+    }
+
+    @Test
+    public void test_pageSearchlistContentMaxLength_defaultAndOverride() {
+        assertEquals("default threshold must be 100000 chars", 100000,
+                new TestFessConfig().getPageSearchlistContentMaxLengthAsInteger().intValue());
+        final TestFessConfig overridden = new TestFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPageSearchlistContentMaxLengthAsInteger() {
+                return 1000;
+            }
+        };
+        assertEquals(1000, overridden.getPageSearchlistContentMaxLengthAsInteger().intValue());
     }
 
     @Test
@@ -1171,7 +1290,7 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
      * those production code paths read.
      */
     private FessConfig buildFullFessConfig() {
-        return new FessConfig.SimpleImpl() {
+        return new TestFessConfig() {
             private static final long serialVersionUID = 1L;
 
             @Override

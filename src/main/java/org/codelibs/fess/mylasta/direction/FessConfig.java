@@ -1495,6 +1495,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String PAGE_SEARCHLIST_TRACK_TOTAL_HITS = "page.searchlist.track.total.hits";
 
+    /** The key of the configuration. e.g. 100000 */
+    String PAGE_SEARCHLIST_CONTENT_MAX_LENGTH = "page.searchlist.content.max.length";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
@@ -7661,6 +7664,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isPageSearchlistTrackTotalHits();
 
     /**
+     * Get the value for the key 'page.searchlist.content.max.length'. <br>
+     * The value is, e.g. 100000 <br>
+     * comment: Maximum content length (in characters) rendered on the search list edit page.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageSearchlistContentMaxLength();
+
+    /**
+     * Get the value for the key 'page.searchlist.content.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 100000 <br>
+     * comment: Maximum content length (in characters) rendered on the search list edit page.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageSearchlistContentMaxLengthAsInteger();
+
+    /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
      * comment: Default start page for search results.
@@ -12731,6 +12751,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS);
         }
 
+        public String getPageSearchlistContentMaxLength() {
+            return get(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH);
+        }
+
+        public Integer getPageSearchlistContentMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH);
+        }
+
         public String getPagingSearchPageStart() {
             return get(FessConfig.PAGING_SEARCH_PAGE_START);
         }
@@ -14392,6 +14420,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_SCORE_BOOSTER_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_SEARCHLOG_MAX_FETCH_SIZE, "10000");
             defaultMap.put(FessConfig.PAGE_SEARCHLIST_TRACK_TOTAL_HITS, "true");
+            defaultMap.put(FessConfig.PAGE_SEARCHLIST_CONTENT_MAX_LENGTH, "100000");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");

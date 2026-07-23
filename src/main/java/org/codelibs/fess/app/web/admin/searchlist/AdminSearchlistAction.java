@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -643,14 +642,26 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     /**
-     * Registers whether the {@code content} field must be shown read-only in the edit screen. Once a
-     * document has been processed by the content-chunk pipeline its {@code content} is a
-     * {@code List<String>} of chunks rather than a single string; rendering that in the editable text
-     * input would show Java's bracket-joined {@code List#toString()} and let a submit overwrite the
-     * stored content with that garbage (desyncing it from {@code content_chunk_vector}). In that case
-     * the field is rendered as read-only display text (joined for readability) and omitted from the
-     * submitted form, so the fetch-and-overlay in {@link #update} preserves it untouched. A plain
-     * string {@code content} (the common case, and every create) stays fully editable.
+     * Registers how the {@code content} field is rendered in the edit screen. Three states:
+     * <ul>
+     * <li><b>editable</b> (plain string at or under the size gate, and every create): the normal
+     * {@code doc.content} text input.</li>
+     * <li><b>chunk list</b>: once a document has been processed by the content-chunk pipeline its
+     * {@code content} is a {@code List<String>} of chunks rather than a single string; rendering that
+     * in the editable text input would show Java's bracket-joined {@code List#toString()} and let a
+     * submit overwrite the stored content with that garbage (desyncing it from
+     * {@code content_chunk_vector}). Instead the chunks are registered as {@code contentChunks} and
+     * rendered as a per-chunk collapsible read-only list, omitted from the submitted form so the
+     * fetch-and-overlay in {@link #update} preserves them untouched.</li>
+     * <li><b>too large</b>: when the total content length (string length, or sum of chunk lengths)
+     * exceeds {@code page.searchlist.content.max.length} (default 100000 chars), no content body is
+     * registered at all -- only {@code contentTooLarge} with the length (and chunk count for chunked
+     * documents) for a metadata-only message. The gate is judged by the length of the ACTUALLY
+     * fetched content, not the stored {@code content_length} field, which can be absent or stale.
+     * An oversized plain string is likewise omitted from the form so the fetch-and-overlay preserves
+     * it; {@link #stripSystemManagedFields} is deliberately NOT extended to the string case, so API
+     * callers can still legitimately update large string content.</li>
+     * </ul>
      *
      * @param data the render data to populate
      * @param doc the editable document map, or null
@@ -659,11 +670,26 @@ public class AdminSearchlistAction extends FessAdminAction {
         // The content field is referred to by the literal "content" throughout this screen (it is a
         // STANDARD_EDIT_FIELD and the JSP binds doc.content directly), so match that convention here.
         final Object content = doc != null ? doc.get("content") : null;
-        if (content instanceof final List<?> chunks) {
+        final int maxLength = fessConfig.getPageSearchlistContentMaxLengthAsInteger();
+        if (content instanceof final List<?> rawChunks) {
+            final List<String> chunks = rawChunks.stream().map(String::valueOf).toList();
+            final long totalLength = chunks.stream().mapToLong(String::length).sum();
             RenderDataUtil.register(data, "contentReadOnly", true);
-            RenderDataUtil.register(data, "contentDisplay", chunks.stream().map(String::valueOf).collect(Collectors.joining("\n")));
+            RenderDataUtil.register(data, "contentChunkCount", chunks.size());
+            RenderDataUtil.register(data, "contentLength", totalLength);
+            if (totalLength > maxLength) {
+                RenderDataUtil.register(data, "contentTooLarge", true);
+            } else {
+                RenderDataUtil.register(data, "contentTooLarge", false);
+                RenderDataUtil.register(data, "contentChunks", chunks);
+            }
+        } else if (content instanceof final String text && text.length() > maxLength) {
+            RenderDataUtil.register(data, "contentReadOnly", true);
+            RenderDataUtil.register(data, "contentTooLarge", true);
+            RenderDataUtil.register(data, "contentLength", (long) text.length());
         } else {
             RenderDataUtil.register(data, "contentReadOnly", false);
+            RenderDataUtil.register(data, "contentTooLarge", false);
         }
     }
 
