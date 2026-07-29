@@ -20,13 +20,25 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.exception.LoginFailureException;
+import org.lastaflute.web.login.option.LoginOpCall;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -664,6 +676,243 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // Oversized return_to (10001 chars) must be silently dropped.
         addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/".repeat(10001));
         assertNull(payload.get("return_to"), "return_to exceeding 10000 chars must be silently dropped");
+    }
+
+    // ── audit.log: v2 login must leave the same activity records as LoginAction ──
+
+    @Test
+    public void login_successWritesLoginRecordToAuditLog() throws Exception {
+        // Regression: POST /api/v2/auth/login never called ActivityHelper, so a deployment that
+        // authenticates through the static-theme SPA produced NO audit.log line at all — while
+        // the classic JSP flow writes one from LoginAction.login() (activityHelper.login()).
+        // Assert on the rendered LTSV record rather than "some method was called", so the v2
+        // record is byte-identical to the classic one.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("alice", false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN\tuser:alice\tpermissions:-"), audit,
+                "a successful v2 login must write the same LOGIN activity record as LoginAction");
+    }
+
+    @Test
+    public void login_credentialFailureWritesLoginFailureRecordToAuditLog() throws Exception {
+        // Companion regression for the failure path: LoginAction.login() calls
+        // activityHelper.loginFailure(new LocalUserCredential(username, password)) when the
+        // credentials are rejected. Without the same call on the v2 path, brute-force attempts
+        // against the SPA login endpoint are invisible to audit.log.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("bob", true), FessLoginAssist.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter())
+                .handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"wrong\"}"), res);
+        assertEquals(401, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:bob"), audit,
+                "a rejected v2 login must write the same LOGIN_FAILURE activity record as LoginAction");
+    }
+
+    @Test
+    public void login_auditFailureDoesNotBreakAnAlreadySuccessfulLogin() throws Exception {
+        // The credentials have already been verified when the audit record is written, so a
+        // broken audit sink must not turn an authenticated session into a 500 — it is logged
+        // and the success envelope is still returned.
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void login(final OptionalThing<FessUserBean> user) {
+                throw new IllegalStateException("audit sink is down");
+            }
+        }, "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("alice", false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("csrf_token"), res.body());
+    }
+
+    /**
+     * Builds an {@link ActivityHelper} that renders real LTSV records into {@code sink} instead
+     * of writing to the audit logger. {@code time}/{@code ip} are stripped so the expectation is
+     * deterministic — same approach as {@code ActivityHelperTest}.
+     */
+    private static ActivityHelper recordingActivityHelper(final List<String> sink) {
+        return new ActivityHelper() {
+            @Override
+            protected void printByLtsv(final Map<String, String> valueMap) {
+                valueMap.remove("time");
+                valueMap.remove("ip");
+                super.printByLtsv(valueMap);
+            }
+
+            @Override
+            protected void printLog(final String message) {
+                sink.add(message);
+            }
+
+            @Override
+            protected String getClientIp() {
+                return "";
+            }
+        };
+    }
+
+    /**
+     * {@link FessLoginAssist} stub registered under its canonical name so
+     * {@code ComponentUtil.getComponent(FessLoginAssist.class)} resolves it (the real component
+     * fails auto-binding in the slim test DI graph, which makes {@code componentMap} the
+     * effective lookup). {@code login()} either binds a user bean or raises the same
+     * {@link LoginFailureException} the production flow raises on a wrong password.
+     */
+    private static class StubLoginAssist extends FessLoginAssist {
+        private final String userId;
+        private final boolean rejectCredential;
+        private FessUserBean bound;
+
+        StubLoginAssist(final String userId, final boolean rejectCredential) {
+            this.userId = userId;
+            this.rejectCredential = rejectCredential;
+        }
+
+        @Override
+        public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+            if (rejectCredential) {
+                throw new LoginFailureException("stubbed credential rejection");
+            }
+            bound = new FessUserBean(new StubFessUser(userId));
+        }
+
+        @Override
+        public OptionalThing<FessUserBean> getSavedUserBean() {
+            return bound == null ? OptionalThing.empty() : OptionalThing.of(bound);
+        }
+
+        @Override
+        public void logout() {
+            bound = null;
+        }
+    }
+
+    /** Minimal {@link FessUser} with no roles, groups or permissions. */
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+
+        private final String name;
+
+        StubFessUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
+    }
+
+    /**
+     * {@link StubRequest} variant backed by an in-memory {@link HttpSession} so the post-success
+     * branch (session rotation plus CSRF issue/rotate) can run to completion.
+     */
+    private static class StubRequestWithSession extends StubRequest {
+        private final HttpSession session = new HttpSession() {
+            private final Map<String, Object> attributes = new HashMap<>();
+
+            @Override
+            public long getCreationTime() {
+                return 0L;
+            }
+
+            @Override
+            public String getId() {
+                return "stub-session-id";
+            }
+
+            @Override
+            public long getLastAccessedTime() {
+                return 0L;
+            }
+
+            @Override
+            public ServletContext getServletContext() {
+                return null;
+            }
+
+            @Override
+            public void setMaxInactiveInterval(final int interval) {
+                // no-op
+            }
+
+            @Override
+            public int getMaxInactiveInterval() {
+                return 1800;
+            }
+
+            @Override
+            public Object getAttribute(final String name) {
+                return attributes.get(name);
+            }
+
+            @Override
+            public Enumeration<String> getAttributeNames() {
+                return Collections.enumeration(attributes.keySet());
+            }
+
+            @Override
+            public void setAttribute(final String name, final Object value) {
+                attributes.put(name, value);
+            }
+
+            @Override
+            public void removeAttribute(final String name) {
+                attributes.remove(name);
+            }
+
+            @Override
+            public void invalidate() {
+                attributes.clear();
+            }
+
+            @Override
+            public boolean isNew() {
+                return false;
+            }
+        };
+
+        StubRequestWithSession(final String method, final String uri) {
+            super(method, uri);
+        }
+
+        @Override
+        public HttpSession getSession(final boolean create) {
+            return session;
+        }
+
+        @Override
+        public HttpSession getSession() {
+            return session;
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */

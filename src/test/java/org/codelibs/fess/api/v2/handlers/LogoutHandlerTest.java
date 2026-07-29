@@ -18,12 +18,20 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -85,6 +93,127 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         new LogoutHandler().handle(new StubRequestWithSession("POST", "/api/v2/auth/logout", true), res);
         assertEquals(200, res.status);
         assertTrue(res.body().contains("\"ok\":true"), res.body());
+    }
+
+    // ── audit.log: v2 logout must leave the same activity record as LogoutAction ──
+
+    @Test
+    public void logout_writesLogoutRecordToAuditLog() throws Exception {
+        // Regression: POST /api/v2/auth/logout never called ActivityHelper, so the SPA logout
+        // left no audit.log line while the classic flow writes one from LogoutAction.index()
+        // (activityHelper.logout(userBean)). The record must also be written BEFORE
+        // FessLoginAssist.logout() drops the user bean — otherwise it would degrade to "user:-".
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("carol"), FessLoginAssist.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+        assertEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGOUT\tuser:carol\tpermissions:-"), audit,
+                "a v2 logout must write the same LOGOUT activity record as LogoutAction, with the user still resolved");
+    }
+
+    @Test
+    public void logout_auditFailureStillLogsOutAndReturnsOk() throws Exception {
+        // A broken audit sink must not prevent the actual logout: the endpoint stays idempotent
+        // and FessLoginAssist.logout() must still run.
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void logout(final OptionalThing<FessUserBean> user) {
+                throw new IllegalStateException("audit sink is down");
+            }
+        }, "activityHelper");
+        final StubLoginAssist assist = new StubLoginAssist("carol");
+        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ok\":true"), res.body());
+        assertEquals(1, assist.logoutCount, "logout must still be performed when the audit write fails");
+    }
+
+    /**
+     * Builds an {@link ActivityHelper} that renders real LTSV records into {@code sink} instead
+     * of writing to the audit logger. {@code time}/{@code ip} are stripped so the expectation is
+     * deterministic — same approach as {@code ActivityHelperTest}.
+     */
+    private static ActivityHelper recordingActivityHelper(final List<String> sink) {
+        return new ActivityHelper() {
+            @Override
+            protected void printByLtsv(final Map<String, String> valueMap) {
+                valueMap.remove("time");
+                valueMap.remove("ip");
+                super.printByLtsv(valueMap);
+            }
+
+            @Override
+            protected void printLog(final String message) {
+                sink.add(message);
+            }
+
+            @Override
+            protected String getClientIp() {
+                return "";
+            }
+        };
+    }
+
+    /**
+     * {@link FessLoginAssist} stub registered under its canonical name so
+     * {@code ComponentUtil.getComponent(FessLoginAssist.class)} resolves it (the real component
+     * fails auto-binding in the slim test DI graph, which makes {@code componentMap} the
+     * effective lookup). {@code logout()} clears the bound user bean, mirroring production.
+     */
+    private static class StubLoginAssist extends FessLoginAssist {
+        private FessUserBean bound;
+
+        int logoutCount;
+
+        StubLoginAssist(final String userId) {
+            bound = new FessUserBean(new StubFessUser(userId));
+        }
+
+        @Override
+        public OptionalThing<FessUserBean> getSavedUserBean() {
+            return bound == null ? OptionalThing.empty() : OptionalThing.of(bound);
+        }
+
+        @Override
+        public void logout() {
+            logoutCount++;
+            bound = null;
+        }
+    }
+
+    /** Minimal {@link FessUser} with no roles, groups or permissions. */
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+
+        private final String name;
+
+        StubFessUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */

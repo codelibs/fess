@@ -140,6 +140,12 @@ public class LoginHandler {
 
         if (!limiter.allow(LoginRateLimiter.Scope.IP, clientIp, ipLimit, 60)) {
             limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec);
+            // The rate-limit gates used to be completely silent, so an operator investigating
+            // "login stopped working" had nothing in fess.log to go on. ActivityHelper has no
+            // activity type for a throttled attempt and inventing one would change the audit
+            // schema, so the record goes to the ordinary log instead.
+            logger.warn("[v2/login] refused by the ip rate limit: clientIp={}, limit={}/min, lockoutSeconds={}", clientIp, ipLimit,
+                    lockoutSec);
             res.setHeader("Retry-After", Integer.toString(lockoutSec));
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (ip)");
             return;
@@ -185,6 +191,11 @@ public class LoginHandler {
             // credential rejection, with no Retry-After, so the response cannot be used to probe
             // a per-user counter. The IP-scope gate above still returns 429 + Retry-After.
             limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
+            // The response is deliberately indistinguishable from a credential rejection, so the
+            // server log is the only place the throttling is visible. No LOGIN_FAILURE audit
+            // record is written here: no credential was actually checked.
+            logger.warn("[v2/login] refused by the user rate limit: username={}, clientIp={}, limit={}/min, lockoutSeconds={}", username,
+                    clientIp, userLimit, lockoutSec);
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
         }
@@ -227,6 +238,13 @@ public class LoginHandler {
         try {
             assist.login(new LocalUserCredential(username, password), op -> {});
         } catch (final LoginFailureException e) {
+            // Mirror LoginAction.login(): log the rejection and write the LOGIN_FAILURE record to
+            // audit.log. Without this the v2 endpoint left no trace of failed authentication at
+            // all, so brute-force attempts against the SPA login form were undetectable.
+            if (logger.isInfoEnabled()) {
+                logger.info("[v2/login] login failed: username={}, reason={}", username, e.getMessage());
+            }
+            recordLoginFailureActivity(username, password);
             // Credential rejection consumes the USER slot exactly once, on the failure path
             // (keyed by (clientIp, username)). When the window is exhausted we also stamp a
             // lockUntil so subsequent requests from this (IP,user) are refused even after the
@@ -234,6 +252,8 @@ public class LoginHandler {
             // or not), with no Retry-After, so the per-user counter state never leaks.
             if (!limiter.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
                 limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
+                logger.warn("[v2/login] user rate limit exhausted; locking out: username={}, clientIp={}, limit={}/min, lockoutSeconds={}",
+                        username, clientIp, userLimit, lockoutSec);
             }
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
@@ -246,6 +266,11 @@ public class LoginHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
+
+        // Mirror LoginAction.login(): write the LOGIN record to audit.log as soon as the
+        // credentials are verified — before the session/CSRF work below — so the record survives
+        // a later failure in that machinery.
+        recordLoginActivity(assist);
 
         // A-1: emit account-switch audit log AFTER successful credential verification so
         // that an unauthenticated attacker with a stolen session cookie cannot trigger a
@@ -287,6 +312,44 @@ public class LoginHandler {
             addReturnTo(payload, returnTo);
         }
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
+    }
+
+    /**
+     * Writes the {@code LOGIN} activity record for a just-authenticated user, mirroring
+     * {@code LoginAction.login()} so the v2 endpoint produces the same audit.log line as the
+     * classic flow.
+     *
+     * <p>Audit-sink failures are logged and swallowed: the credentials have already been
+     * verified at this point, so turning a broken audit sink into a {@code 500} would revoke an
+     * authentication that actually succeeded.</p>
+     *
+     * @param assist the login assist holding the freshly bound user bean
+     */
+    private void recordLoginActivity(final FessLoginAssist assist) {
+        try {
+            ComponentUtil.getActivityHelper().login(assist.getSavedUserBean());
+        } catch (final RuntimeException e) {
+            logger.warn("[v2/login] failed to write the LOGIN audit record", e);
+        }
+    }
+
+    /**
+     * Writes the {@code LOGIN_FAILURE} activity record for a rejected credential, mirroring
+     * {@code LoginAction.login()}. Only the credential class and the user id reach the log —
+     * {@code ActivityHelper} never reads the password out of the credential.
+     *
+     * <p>Audit-sink failures are logged and swallowed so the caller still receives the generic
+     * {@code 401} rather than a {@code 500} that would disclose an internal fault.</p>
+     *
+     * @param username the submitted user name
+     * @param password the submitted password (never written to the audit record)
+     */
+    private void recordLoginFailureActivity(final String username, final String password) {
+        try {
+            ComponentUtil.getActivityHelper().loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
+        } catch (final RuntimeException e) {
+            logger.warn("[v2/login] failed to write the LOGIN_FAILURE audit record", e);
+        }
     }
 
     /**

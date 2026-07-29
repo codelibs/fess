@@ -73,7 +73,11 @@ public class LogoutHandler {
             return;
         }
         try {
-            ComponentUtil.getComponent(FessLoginAssist.class).logout();
+            final FessLoginAssist assist = ComponentUtil.getComponent(FessLoginAssist.class);
+            // Mirror LogoutAction.index(): the LOGOUT record must be written BEFORE logout()
+            // drops the user bean, otherwise the audit line degrades to "user:-".
+            recordLogoutActivity(assist);
+            assist.logout();
         } catch (final Exception e) {
             // logout is idempotent — no session or unavailable login subsystem; log WARN for
             // actual logout failures but still respond 200 ok (caller's intent is satisfied).
@@ -88,5 +92,24 @@ public class LogoutHandler {
             }
         }
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, Map.of("ok", true));
+    }
+
+    /**
+     * Writes the {@code LOGOUT} activity record, mirroring {@code LogoutAction.index()} so the
+     * v2 endpoint produces the same audit.log line as the classic flow. When no user is bound
+     * the record still carries {@code user:-}, matching the classic behaviour for an
+     * already-anonymous caller.
+     *
+     * <p>Audit-sink failures are logged and swallowed so the actual logout still runs and the
+     * endpoint stays idempotent.</p>
+     *
+     * @param assist the login assist still holding the user bean to be logged out
+     */
+    private void recordLogoutActivity(final FessLoginAssist assist) {
+        try {
+            ComponentUtil.getActivityHelper().logout(assist.getSavedUserBean());
+        } catch (final RuntimeException e) {
+            logger.warn("[v2/logout] failed to write the LOGOUT audit record", e);
+        }
     }
 }
