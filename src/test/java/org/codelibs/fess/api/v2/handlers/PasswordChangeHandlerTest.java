@@ -470,6 +470,59 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_lockoutIsNotExtendedByRetriesDuringTheLockout() throws Exception {
+        // Regression, driven through handle(): the C-3 gate calls lockOut() on EVERY refused
+        // request while peek() keeps returning false for the whole lockout, so each retry used
+        // to re-stamp the deadline from "now" — the advertised Retry-After was never honoured
+        // and a client that kept polling stayed locked out forever.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+            final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+            final long lockoutMs = lockoutSec * 1_000L;
+            final long[] now = { 1_000_000L };
+            final long t0 = now[0];
+            final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+            final PasswordChangeHandler handler = new PasswordChangeHandler(rl);
+            for (int i = 0; i < userLimit; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, "alice", userLimit, 60);
+            }
+
+            final CapturingResponse first = new CapturingResponse();
+            handler.handle(passwordPost("secret-current"), first);
+            assertEquals(429, first.status, first.body());
+            org.junit.jupiter.api.Assertions.assertEquals(Integer.toString(lockoutSec), first.getHeader("Retry-After"),
+                    "the 429 promises release after lockoutSeconds");
+
+            for (int i = 1; i <= 3; i++) {
+                now[0] = t0 + lockoutMs / 4 * i;
+                final CapturingResponse retry = new CapturingResponse();
+                handler.handle(passwordPost("secret-current"), retry);
+                assertEquals(429, retry.status, "retry " + i + " inside the lockout must still be refused: " + retry.body());
+            }
+
+            // Past the advertised deadline the gate must open again. We deliberately send the
+            // WRONG current password so the flow stops at the credential check (401) instead of
+            // needing UserService/SystemHelper stubs — a 429 here would mean still locked out.
+            now[0] = t0 + lockoutMs + 1_000L;
+            final CapturingResponse after = new CapturingResponse();
+            handler.handle(passwordPost("WRONG"), after);
+            assertEquals(401, after.status, "the lockout must expire " + lockoutSec
+                    + "s after it was applied, even though the client retried meanwhile: " + after.body());
+            assertTrue(after.body().contains("\"code\":\"auth_required\""), after.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /** Builds a well-formed password-change POST carrying {@code currentPw}. */
+    private static StubRequest passwordPost(final String currentPw) {
+        return new StubRequest("POST", "/api/v2/auth/password").withJsonBody("{\"current_password\":\"" + currentPw
+                + "\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}");
+    }
+
+    @Test
     public void passwordChange_successDoesNotConsumeSlot() throws Exception {
         // C-3: a successful change must NOT leave consumed slots behind — the clear()
         // call resets the bucket. We pre-burn 4 of 5 slots to prove the reset is real:

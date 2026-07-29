@@ -135,6 +135,52 @@ public class LoginRateLimiterTest extends UnitFessTestCase {
                 "shorter lockOut call must not shrink existing longer lockout (Math.max guard)");
     }
 
+    // ── Self-extending lockout: an active lockout must never be pushed forward ──
+
+    @Test
+    public void test_lockOut_doesNotExtendAnActiveLockout() {
+        // Regression: every call site (LoginHandler IP gate, LoginHandler USER gate,
+        // PasswordChangeHandler) re-invokes lockOut() on each refused request, and
+        // allow()/peek() keep returning false for the whole lockout. Re-stamping the
+        // deadline from the CURRENT time therefore pushed the release point forward on
+        // every retry, so a client that kept polling was never released — even though the
+        // response advertised "Retry-After: <lockoutSeconds>".
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+
+        rl.lockOut(LoginRateLimiter.Scope.IP, "1.2.3.4", 900);
+
+        // A retry arrives while the lockout is still active; the caller stamps it again.
+        now[0] = t0 + 800_000L;
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "1.2.3.4", 10, 60), "still locked 800s into a 900s lockout");
+        rl.lockOut(LoginRateLimiter.Scope.IP, "1.2.3.4", 900);
+
+        // Past the ORIGINAL deadline (t0 + 900s): the mid-lockout retry must not have moved it.
+        now[0] = t0 + 901_000L;
+        assertTrue(rl.allow(LoginRateLimiter.Scope.IP, "1.2.3.4", 10, 60),
+                "lockOut() during an active lockout must not extend it beyond the advertised Retry-After");
+    }
+
+    @Test
+    public void test_lockOut_reArmsAfterThePreviousLockoutExpired() {
+        // The no-extend guard must not turn lockOut() into a one-shot: once the previous
+        // lockout has elapsed, a fresh lockOut() must arm a new window from "now".
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+
+        rl.lockOut(LoginRateLimiter.Scope.USER, "dave", 900);
+        now[0] = t0 + 901_000L;
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "dave", 10, 60), "the first lockout must have expired");
+
+        // A new abuse burst locks the key again, armed from the current time.
+        rl.lockOut(LoginRateLimiter.Scope.USER, "dave", 900);
+        assertFalse(rl.allow(LoginRateLimiter.Scope.USER, "dave", 10, 60), "a fresh lockout must arm after the previous one expired");
+        now[0] += 901_000L;
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "dave", 10, 60), "the second lockout must expire on schedule as well");
+    }
+
     // ── Sweep schedule: verify the periodic task wires correctly ────────────────
 
     @Test

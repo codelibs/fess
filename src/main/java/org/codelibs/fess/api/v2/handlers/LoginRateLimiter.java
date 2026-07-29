@@ -355,8 +355,22 @@ public class LoginRateLimiter {
     }
 
     /**
-     * m-21: uses Math.max so that a shorter lockoutSeconds value supplied in a second
-     * call never shrinks an existing longer lockout — the stricter deadline always wins.
+     * Locks out (scope, key) for {@code lockoutSeconds}, starting now.
+     *
+     * <p><b>An already-active lockout is never extended.</b> Every caller re-invokes this
+     * method on each refused request, and {@link #allow}/{@link #peek} keep returning
+     * {@code false} for the whole lockout — so re-stamping the deadline from the current
+     * time would push the release point forward on every retry and a client that kept
+     * polling would never be released, contradicting the {@code Retry-After:
+     * lockoutSeconds} header the callers advertise (RFC 9110). Calls that arrive while
+     * {@code now < lockUntilEpochMs} are therefore no-ops; a fresh lockout is armed only
+     * once the previous one has elapsed.</p>
+     *
+     * <p>m-21: a shorter {@code lockoutSeconds} value supplied in a second call still never
+     * shrinks an existing longer lockout — the stricter deadline always wins. The guard
+     * above subsumes the former {@code Math.max}: an active lockout is left untouched, and
+     * when no lockout is active the stored deadline is already in the past, so
+     * {@code now + lockoutSeconds} is unconditionally the larger value.</p>
      *
      * @param scope rate-limit scope (e.g. IP, USER, CHAT) that the lockout applies to
      * @param key bucket key being locked out (e.g. IP address or username); ignored when {@code null} or empty
@@ -377,7 +391,12 @@ public class LoginRateLimiter {
             e = existing;
         }
         synchronized (e) {
-            e.lockUntilEpochMs = Math.max(e.lockUntilEpochMs, now + (long) lockoutSeconds * 1_000L);
+            if (now < e.lockUntilEpochMs) {
+                // Already locked out: keep the original deadline so the advertised
+                // Retry-After stays truthful instead of self-extending on every retry.
+                return;
+            }
+            e.lockUntilEpochMs = now + (long) lockoutSeconds * 1_000L;
         }
     }
 

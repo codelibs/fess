@@ -247,6 +247,105 @@ public class LoginHandlerTest extends UnitFessTestCase {
         assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60));
     }
 
+    // ── Self-extending lockout: driven end-to-end through handle() ───────────────
+
+    /** Builds a well-formed login POST from {@code remoteAddr} for {@code username}. */
+    private static StubRequest loginPost(final String remoteAddr, final String username) {
+        return new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"" + username + "\",\"password\":\"p\"}")
+                .withRemoteAddr(remoteAddr);
+    }
+
+    @Test
+    public void login_ipLockoutIsNotExtendedByRetriesDuringTheLockout() throws Exception {
+        // Regression, driven through handle(): the IP gate calls lockOut() on EVERY refused
+        // request, and allow() keeps returning false for the whole lockout — so each retry
+        // used to re-stamp the deadline from "now", pushing the release point forward
+        // indefinitely. The 429 advertises "Retry-After: <lockoutSeconds>"; that promise must
+        // hold even when the client keeps POSTing before it elapses.
+        //
+        // The sibling test_userLockoutResetsAfterWindowExpires only pokes the limiter
+        // directly (allow()/lockOut()), so it never observes the handler's re-stamping and
+        // stayed green while this defect was live. This test drives the real handler.
+        final int ipLimit = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int lockoutSec = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.7";
+        // Saturate the IP bucket so the very next request trips the IP gate.
+        for (int i = 0; i < ipLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
+        }
+
+        final CapturingResponse first = new CapturingResponse();
+        handler.handle(loginPost(ip, "u"), first);
+        assertEquals(429, first.status, first.body());
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.toString(lockoutSec), first.getHeader("Retry-After"),
+                "the 429 promises release after lockoutSeconds");
+
+        // The client keeps retrying inside the lockout window (quarter-window apart).
+        for (int i = 1; i <= 3; i++) {
+            now[0] = t0 + lockoutMs / 4 * i;
+            final CapturingResponse retry = new CapturingResponse();
+            handler.handle(loginPost(ip, "u"), retry);
+            assertEquals(429, retry.status, "retry " + i + " inside the lockout must still be refused: " + retry.body());
+        }
+
+        // Just past the advertised deadline the client MUST be admitted through the IP gate
+        // again (it then falls through to the test-DI-unavailable login subsystem).
+        now[0] = t0 + lockoutMs + 1_000L;
+        final CapturingResponse after = new CapturingResponse();
+        handler.handle(loginPost(ip, "u"), after);
+        org.junit.jupiter.api.Assertions.assertNotEquals(429, after.status, "the IP lockout must expire " + lockoutSec
+                + "s after it was applied, even though the client retried meanwhile: " + after.body());
+        org.junit.jupiter.api.Assertions.assertNull(after.getHeader("Retry-After"), after.body());
+    }
+
+    @Test
+    public void login_userLockoutIsNotExtendedByRetriesDuringTheLockout() throws Exception {
+        // Same defect on the USER gate, which is worse for the victim: it answers with a
+        // generic 401 "invalid credentials" and no Retry-After, so a locked-out user cannot
+        // even tell they are locked out — they just retry, and every retry used to push the
+        // release point another lockoutSeconds into the future.
+        final int userLimit = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.9";
+        // Saturate the (clientIp, username) composite bucket the handler computes.
+        final String userKey = handler.userScopeKey(ip, "erin");
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60));
+        }
+
+        final CapturingResponse first = new CapturingResponse();
+        handler.handle(loginPost(ip, "erin"), first);
+        assertEquals(401, first.status, first.body());
+        org.junit.jupiter.api.Assertions.assertNull(first.getHeader("Retry-After"), "user-scope exhaustion must not advertise Retry-After");
+
+        for (int i = 1; i <= 3; i++) {
+            now[0] = t0 + lockoutMs / 4 * i;
+            final CapturingResponse retry = new CapturingResponse();
+            handler.handle(loginPost(ip, "erin"), retry);
+            assertEquals(401, retry.status, "retry " + i + " inside the lockout must still be refused: " + retry.body());
+        }
+
+        // Past the lockout the user must get past the USER gate again — the request then
+        // reaches the (test-DI-unavailable) login subsystem, so any status other than the
+        // 401 produced by the gate (and other than a 429 IP-gate trip) proves recovery.
+        now[0] = t0 + lockoutMs + 1_000L;
+        final CapturingResponse after = new CapturingResponse();
+        handler.handle(loginPost(ip, "erin"), after);
+        org.junit.jupiter.api.Assertions.assertNotEquals(429, after.status, after.body());
+        org.junit.jupiter.api.Assertions.assertNotEquals(401, after.status, "the USER lockout must expire " + lockoutSec
+                + "s after it was applied, even though the client retried meanwhile: " + after.body());
+    }
+
     // ── A-1: account-switch audit log must not fire on credential failure ────────
 
     @Test
