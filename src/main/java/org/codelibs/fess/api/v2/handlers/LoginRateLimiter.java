@@ -367,17 +367,40 @@ public class LoginRateLimiter {
      * once the previous one has elapsed.</p>
      *
      * <p>m-21: a shorter {@code lockoutSeconds} value supplied in a second call still never
-     * shrinks an existing longer lockout — the stricter deadline always wins. The guard
-     * above subsumes the former {@code Math.max}: an active lockout is left untouched, and
-     * when no lockout is active the stored deadline is already in the past, so
-     * {@code now + lockoutSeconds} is unconditionally the larger value.</p>
+     * shrinks an existing longer lockout. Note that the guard is <em>first deadline wins</em>,
+     * not "stricter deadline wins": while a lockout is active the incoming
+     * {@code lockoutSeconds} is not consulted at all, so a <em>longer</em> value is ignored
+     * too. Since callers re-read the duration from configuration on every request, raising
+     * {@code theme.api.login.lockout.seconds} does not lengthen a lockout that is already
+     * running; the new value applies from the next lockout onwards. The guard still subsumes
+     * the former {@code Math.max} for the m-21 direction: when no lockout is active the
+     * stored deadline is already in the past, so {@code now + lockoutSeconds} is
+     * unconditionally the larger value.</p>
+     *
+     * <p><b>Release is only as prompt as the sliding window allows.</b> {@link #allow} and
+     * {@link #peek} return early while locked out, <em>before</em> the window-pruning step, so
+     * the recorded hits are frozen for the duration of the lockout. When
+     * {@code lockoutSeconds <= windowSeconds} those hits are therefore still in-window at the
+     * moment the lockout expires, the next request is refused again, and the caller arms a
+     * fresh lockout: effective release is about {@code windowSeconds + lockoutSeconds} and the
+     * advertised {@code Retry-After} <em>understates</em> it. The loop is bounded — a refused
+     * request records no new hit — and at the shipped defaults ({@code lockoutSeconds = 900},
+     * window {@code 60}) it cannot occur. Callers advertise the configured duration rather
+     * than the remaining time, so {@code Retry-After} over-states the wait on every retry
+     * after the first; this class exposes no remaining-time accessor.</p>
      *
      * <p>The return value tells the caller whether this particular call armed the lockout.
      * Callers invoke this method on every refused request, so without it they cannot tell the
      * one request that triggered the lockout from the stream of retries that follow — and
      * logging each refusal at WARN would let a locked-out client generate unbounded log volume.
-     * The decision is taken inside the same synchronized block that stamps the deadline, so
-     * concurrent callers cannot both observe {@code true} for the same lockout window.</p>
+     * It is a best-effort signal for log volume, not an exactly-once guarantee: the entry is
+     * resolved under the {@code entries} monitor and stamped under the entry monitor, so a
+     * concurrent {@link #clear} (successful login), {@link #sweep} or eviction that unmaps the
+     * entry in between can make the stamp land on a detached {@code Entry} — the call then
+     * reports {@code true} although no lockout is in effect, and a second caller can report
+     * {@code true} for the same key. Suppression is also keyed per {@code (scope, key)}, and
+     * both key components are caller-supplied (client IP and user name), so the "one WARN per
+     * lockout" bound holds per bucket, not per client.</p>
      *
      * @param scope rate-limit scope (e.g. IP, USER, CHAT) that the lockout applies to
      * @param key bucket key being locked out (e.g. IP address or username); ignored when {@code null} or empty
