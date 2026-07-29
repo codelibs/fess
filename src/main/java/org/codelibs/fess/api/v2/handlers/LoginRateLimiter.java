@@ -372,13 +372,22 @@ public class LoginRateLimiter {
      * when no lockout is active the stored deadline is already in the past, so
      * {@code now + lockoutSeconds} is unconditionally the larger value.</p>
      *
+     * <p>The return value tells the caller whether this particular call armed the lockout.
+     * Callers invoke this method on every refused request, so without it they cannot tell the
+     * one request that triggered the lockout from the stream of retries that follow — and
+     * logging each refusal at WARN would let a locked-out client generate unbounded log volume.
+     * The decision is taken inside the same synchronized block that stamps the deadline, so
+     * concurrent callers cannot both observe {@code true} for the same lockout window.</p>
+     *
      * @param scope rate-limit scope (e.g. IP, USER, CHAT) that the lockout applies to
      * @param key bucket key being locked out (e.g. IP address or username); ignored when {@code null} or empty
      * @param lockoutSeconds duration of the lockout in seconds; ignored when {@code <= 0}
+     * @return {@code true} if this call armed a new lockout, {@code false} if the call was
+     *         ignored (disabled or missing key) or a lockout was already active
      */
-    public void lockOut(final Scope scope, final String key, final int lockoutSeconds) {
+    public boolean lockOut(final Scope scope, final String key, final int lockoutSeconds) {
         if (key == null || key.isEmpty() || lockoutSeconds <= 0) {
-            return;
+            return false;
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
@@ -394,9 +403,10 @@ public class LoginRateLimiter {
             if (now < e.lockUntilEpochMs) {
                 // Already locked out: keep the original deadline so the advertised
                 // Retry-After stays truthful instead of self-extending on every retry.
-                return;
+                return false;
             }
             e.lockUntilEpochMs = now + (long) lockoutSeconds * 1_000L;
+            return true;
         }
     }
 

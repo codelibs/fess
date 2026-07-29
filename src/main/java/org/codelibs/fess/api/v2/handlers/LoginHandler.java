@@ -139,13 +139,20 @@ public class LoginHandler {
         final String clientIp = resolveClientIp(req);
 
         if (!limiter.allow(LoginRateLimiter.Scope.IP, clientIp, ipLimit, 60)) {
-            limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec);
             // The rate-limit gates used to be completely silent, so an operator investigating
             // "login stopped working" had nothing in fess.log to go on. ActivityHelper has no
             // activity type for a throttled attempt and inventing one would change the audit
             // schema, so the record goes to the ordinary log instead.
-            logger.warn("[v2/login] refused by the ip rate limit: clientIp={}, limit={}/min, lockoutSeconds={}", clientIp, ipLimit,
-                    lockoutSec);
+            //
+            // Only the request that actually arms the lockout is a new security event. Every
+            // later request during the same lockout also reaches this branch, so logging them
+            // all at WARN would let a client that keeps retrying pump the log without bound.
+            if (limiter.lockOut(LoginRateLimiter.Scope.IP, clientIp, lockoutSec)) {
+                logger.warn("[v2/login] ip rate limit exceeded; locking out for {}s: clientIp={}, limit={}/min", lockoutSec, clientIp,
+                        ipLimit);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("[v2/login] refused a retry during the active ip lockout: clientIp={}", clientIp);
+            }
             res.setHeader("Retry-After", Integer.toString(lockoutSec));
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (ip)");
             return;
@@ -190,12 +197,18 @@ public class LoginHandler {
             // NOT disclose the per-user rate-limit state. Return a generic 401 identical to a
             // credential rejection, with no Retry-After, so the response cannot be used to probe
             // a per-user counter. The IP-scope gate above still returns 429 + Retry-After.
-            limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
             // The response is deliberately indistinguishable from a credential rejection, so the
             // server log is the only place the throttling is visible. No LOGIN_FAILURE audit
-            // record is written here: no credential was actually checked.
-            logger.warn("[v2/login] refused by the user rate limit: username={}, clientIp={}, limit={}/min, lockoutSeconds={}", username,
-                    clientIp, userLimit, lockoutSec);
+            // record is written here: no credential was actually checked. As with the ip gate,
+            // only the request that arms the lockout is logged at WARN — and this gate needs
+            // that guard the most, because the client is told nothing about the throttling and
+            // therefore has no reason to back off.
+            if (limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec)) {
+                logger.warn("[v2/login] user rate limit exceeded; locking out for {}s: username={}, clientIp={}, limit={}/min", lockoutSec,
+                        username, clientIp, userLimit);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("[v2/login] refused a retry during the active user lockout: username={}, clientIp={}", username, clientIp);
+            }
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
         }
@@ -251,9 +264,15 @@ public class LoginHandler {
             // sliding window expires. The response is a generic 401 in BOTH cases (exhausted
             // or not), with no Retry-After, so the per-user counter state never leaks.
             if (!limiter.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
-                limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
-                logger.warn("[v2/login] user rate limit exhausted; locking out: username={}, clientIp={}, limit={}/min, lockoutSeconds={}",
-                        username, clientIp, userLimit, lockoutSec);
+                if (limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec)) {
+                    logger.warn("[v2/login] user rate limit exhausted; locking out for {}s: username={}, clientIp={}, limit={}/min",
+                            lockoutSec, username, clientIp, userLimit);
+                } else if (logger.isDebugEnabled()) {
+                    // The peek() gate above admitted this request, so an active lockout here
+                    // means a concurrent request armed it in between — already reported.
+                    logger.debug("[v2/login] user bucket exhausted while a lockout was already active: username={}, clientIp={}", username,
+                            clientIp);
+                }
             }
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;

@@ -27,6 +27,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
@@ -36,6 +44,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.login.option.LoginOpCall;
@@ -676,6 +685,127 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // Oversized return_to (10001 chars) must be silently dropped.
         addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/".repeat(10001));
         assertNull(payload.get("return_to"), "return_to exceeding 10000 chars must be silently dropped");
+    }
+
+    // ── rate-limit logging must not flood: one WARN per lockout, DEBUG for retries ──
+
+    @Test
+    public void login_ipLockoutWarnsOnceAndDebugsTheRetriesInsideTheWindow() throws Throwable {
+        // A client refused by the IP gate keeps POSTing, and every refused request reaches the
+        // logging statement. Logging each one at WARN would let a locked-out attacker generate
+        // unbounded WARN volume. Only the request that actually arms the lockout is a new
+        // security event; the rest are retries against a lockout already reported.
+        final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "203.0.113.77";
+        for (int i = 0; i < ipLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
+        }
+
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(), () -> {
+            for (int i = 0; i < 5; i++) {
+                // Stay well inside the lockout window so no retry can arm a second lockout.
+                now[0] = t0 + lockoutMs / 8 * i;
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(loginPost(ip, "u"), res);
+                assertEquals(429, res.status, res.body());
+            }
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, ip),
+                "exactly one WARN must be emitted per lockout, not one per refused request: " + formatEvents(events));
+        org.junit.jupiter.api.Assertions.assertEquals(4L, countEvents(events, Level.DEBUG, ip),
+                "the four retries inside the lockout must be logged at DEBUG: " + formatEvents(events));
+    }
+
+    @Test
+    public void login_userLockoutWarnsOnceAndDebugsTheRetriesInsideTheWindow() throws Throwable {
+        // Same contract on the USER gate. This one matters more: the response is a generic 401
+        // with no Retry-After, so a locked-out client has no way to know it should back off and
+        // will keep retrying — exactly the pattern that turns a per-refusal WARN into a flood.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "203.0.113.78";
+        final String userKey = handler.userScopeKey(ip, "erin");
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60));
+        }
+
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(), () -> {
+            for (int i = 0; i < 5; i++) {
+                now[0] = t0 + lockoutMs / 8 * i;
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(loginPost(ip, "erin"), res);
+                assertEquals(401, res.status, res.body());
+            }
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, "erin"),
+                "exactly one WARN must be emitted per user lockout: " + formatEvents(events));
+        org.junit.jupiter.api.Assertions.assertEquals(4L, countEvents(events, Level.DEBUG, "erin"),
+                "the four retries inside the user lockout must be logged at DEBUG: " + formatEvents(events));
+    }
+
+    /**
+     * Attaches a DEBUG-level capturing appender to {@code loggerName}, runs {@code body}, then
+     * restores the original appender set and level. Only events emitted by {@code loggerName}
+     * itself are retained, so the surrounding framework chatter is filtered out.
+     */
+    private static List<LogEvent> captureLogEvents(final String loggerName, final Executable body) throws Throwable {
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final LoggerConfig loggerCfg = ctx.getConfiguration().getLoggerConfig(loggerName);
+        final Level originalLevel = loggerCfg.getLevel();
+        final List<LogEvent> captured = new ArrayList<>();
+        final String appenderName = "login-handler-capture";
+        final AbstractAppender appender =
+                new AbstractAppender(appenderName, null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
+                    @Override
+                    public void append(final LogEvent event) {
+                        if (loggerName.equals(event.getLoggerName())) {
+                            captured.add(event.toImmutable());
+                        }
+                    }
+                };
+        appender.start();
+        loggerCfg.addAppender(appender, Level.DEBUG, null);
+        loggerCfg.setLevel(Level.DEBUG);
+        ctx.updateLoggers();
+        try {
+            body.execute();
+        } finally {
+            loggerCfg.removeAppender(appenderName);
+            loggerCfg.setLevel(originalLevel);
+            ctx.updateLoggers();
+            appender.stop();
+        }
+        return captured;
+    }
+
+    /**
+     * Counts captured events at {@code level} whose formatted message mentions {@code marker}.
+     * Matching on the bucket key rather than on fixed wording keeps the assertion robust to
+     * message rewording while still excluding unrelated lines from the same logger.
+     */
+    private static long countEvents(final List<LogEvent> events, final Level level, final String marker) {
+        return events.stream()
+                .filter(e -> level.equals(e.getLevel()))
+                .filter(e -> e.getMessage().getFormattedMessage().contains(marker))
+                .count();
+    }
+
+    /** Renders captured events for assertion failure messages. */
+    private static String formatEvents(final List<LogEvent> events) {
+        return events.stream().map(e -> e.getLevel() + " " + e.getMessage().getFormattedMessage()).toList().toString();
     }
 
     // ── audit.log: v2 login must leave the same activity records as LoginAction ──

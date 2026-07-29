@@ -29,6 +29,43 @@ import org.junit.jupiter.api.Test;
 
 public class LoginRateLimiterTest extends UnitFessTestCase {
 
+    // ── lockOut() reports whether it armed a NEW lockout ────────────────────────
+
+    @Test
+    public void test_lockOut_returnsTrueOnlyWhenArmingANewLockout() {
+        // Callers invoke lockOut() on EVERY refused request, so they need a way to tell the
+        // moment a lockout is armed from the stream of refusals that follow it — otherwise a
+        // per-refusal WARN lets a client locked out of the endpoint generate unbounded log
+        // volume. The decision is taken inside the same synchronized block that stamps the
+        // deadline, so it cannot race.
+        final long[] now = { 1_000_000L };
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+
+        assertTrue(rl.lockOut(LoginRateLimiter.Scope.IP, "198.51.100.1", 900), "the first call must arm a new lockout");
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.IP, "198.51.100.1", 900), "a call during an active lockout must be a no-op");
+
+        // Still inside the window: every retry is a no-op, never a fresh lockout.
+        now[0] += 450_000L;
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.IP, "198.51.100.1", 900), "a mid-window retry must not arm a lockout");
+
+        // Past the deadline the bucket is free again, so the next call arms a genuinely new one.
+        now[0] += 451_000L;
+        assertTrue(rl.lockOut(LoginRateLimiter.Scope.IP, "198.51.100.1", 900), "a lockout armed after the previous one elapsed is new");
+    }
+
+    @Test
+    public void test_lockOut_returnsFalseWhenTheCallIsIgnored() {
+        // The guard clauses make lockOut() a no-op; they must report "nothing armed" rather
+        // than claiming a lockout the limiter never stamped.
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> 1_000_000L);
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.USER, "alice", 0), "lockoutSeconds=0 disables the lockout");
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.USER, "alice", -1), "a negative lockoutSeconds disables the lockout");
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.USER, null, 900), "a null key cannot be locked out");
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.USER, "", 900), "an empty key cannot be locked out");
+        // None of the above may have armed anything.
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "alice", 5, 60), "no lockout must have been stamped for alice");
+    }
+
     // ── MJ-4 / M-4: memory cap ──────────────────────────────────────────────────
 
     @Test

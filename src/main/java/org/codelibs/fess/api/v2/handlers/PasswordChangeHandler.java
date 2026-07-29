@@ -241,7 +241,15 @@ public class PasswordChangeHandler {
             }
         }
         if (rate != null && userLimit > 0 && !rate.peek(LoginRateLimiter.Scope.USER, userId, userLimit, 60)) {
-            rate.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec);
+            // Only the request that arms the lockout is a new security event; every later
+            // request during the same lockout reaches this branch too, so logging them all at
+            // WARN would let a stolen-session attacker pump the log without bound.
+            if (rate.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec)) {
+                logger.warn("/api/v2/auth/password: rate limit exceeded; locking out for {}s: userId={}, limit={}/min", lockoutSec, userId,
+                        userLimit);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("/api/v2/auth/password: refused a retry during the active lockout: userId={}", userId);
+            }
             res.setHeader("Retry-After", Integer.toString(Math.max(lockoutSec, 1)));
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
             return;
@@ -263,7 +271,14 @@ public class PasswordChangeHandler {
             // Wrong current_password: consume one user-bucket slot. If the bucket has just
             // been exhausted, escalate to 429 with Retry-After (same pattern as LoginHandler).
             if (rate != null && userLimit > 0 && !rate.allow(LoginRateLimiter.Scope.USER, userId, userLimit, 60)) {
-                rate.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec);
+                if (rate.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec)) {
+                    logger.warn("/api/v2/auth/password: rate limit exhausted; locking out for {}s: userId={}, limit={}/min", lockoutSec,
+                            userId, userLimit);
+                } else if (logger.isDebugEnabled()) {
+                    // The peek() gate above admitted this request, so an active lockout here
+                    // means a concurrent request armed it in between — already reported.
+                    logger.debug("/api/v2/auth/password: bucket exhausted while a lockout was already active: userId={}", userId);
+                }
                 res.setHeader("Retry-After", Integer.toString(Math.max(lockoutSec, 1)));
                 ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.RATE_LIMITED, "too many password-change attempts");
                 return;
@@ -310,9 +325,12 @@ public class PasswordChangeHandler {
         // Other concurrent sessions for the same user are NOT invalidated — this is a
         // known limitation (requires a Fess-wide session registry, follow-up item).
         //
-        // MINOR-4: call assist.logout() first so that remember-me cookies are cleared and
-        // any audit events are recorded — matching the LogoutHandler pattern. Failures are
-        // swallowed so that session.invalidate() still runs regardless.
+        // MINOR-4: call assist.logout() first so that remember-me cookies are cleared —
+        // matching the LogoutHandler pattern. Failures are swallowed so that
+        // session.invalidate() still runs regardless. Note that assist.logout() writes no
+        // audit record of its own: the LOGOUT activity is emitted by the caller (LogoutAction
+        // in the classic flow, LogoutHandler on the v2 path), and a password change is not a
+        // logout event, so none is written here.
         try {
             assist.logout();
         } catch (final Exception e) {

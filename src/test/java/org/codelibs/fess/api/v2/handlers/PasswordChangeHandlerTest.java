@@ -20,12 +20,22 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
@@ -36,6 +46,7 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.function.Executable;
 import org.lastaflute.web.login.credential.LoginCredential;
 
 import jakarta.servlet.AsyncContext;
@@ -514,6 +525,95 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
         }
+    }
+
+    @Test
+    public void passwordChange_lockoutWarnsOnceAndDebugsTheRetriesInsideTheWindow() throws Throwable {
+        // Same no-flood contract as the login gates: the C-3 gate reaches its logging statement
+        // on every refused request, so only the request that actually arms the lockout may be a
+        // WARN. A stolen-session attacker who keeps hammering must not be able to pump the log.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+            final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+            final long lockoutMs = lockoutSec * 1_000L;
+            final long[] now = { 1_000_000L };
+            final long t0 = now[0];
+            final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+            final PasswordChangeHandler handler = new PasswordChangeHandler(rl);
+            for (int i = 0; i < userLimit; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, "alice", userLimit, 60);
+            }
+
+            final List<LogEvent> events = captureLogEvents(PasswordChangeHandler.class.getName(), () -> {
+                for (int i = 0; i < 4; i++) {
+                    now[0] = t0 + lockoutMs / 8 * i;
+                    final CapturingResponse res = new CapturingResponse();
+                    handler.handle(passwordPost("secret-current"), res);
+                    assertEquals(429, res.status, res.body());
+                }
+            });
+
+            org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, "alice"),
+                    "exactly one WARN must be emitted per lockout, not one per refused request: " + formatEvents(events));
+            org.junit.jupiter.api.Assertions.assertEquals(3L, countEvents(events, Level.DEBUG, "alice"),
+                    "the three retries inside the lockout must be logged at DEBUG: " + formatEvents(events));
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /**
+     * Attaches a DEBUG-level capturing appender to {@code loggerName}, runs {@code body}, then
+     * restores the original appender set and level. Only events emitted by {@code loggerName}
+     * itself are retained, so the surrounding framework chatter is filtered out.
+     */
+    private static List<LogEvent> captureLogEvents(final String loggerName, final Executable body) throws Throwable {
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final LoggerConfig loggerCfg = ctx.getConfiguration().getLoggerConfig(loggerName);
+        final Level originalLevel = loggerCfg.getLevel();
+        final List<LogEvent> captured = new ArrayList<>();
+        final String appenderName = "password-handler-capture";
+        final AbstractAppender appender =
+                new AbstractAppender(appenderName, null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
+                    @Override
+                    public void append(final LogEvent event) {
+                        if (loggerName.equals(event.getLoggerName())) {
+                            captured.add(event.toImmutable());
+                        }
+                    }
+                };
+        appender.start();
+        loggerCfg.addAppender(appender, Level.DEBUG, null);
+        loggerCfg.setLevel(Level.DEBUG);
+        ctx.updateLoggers();
+        try {
+            body.execute();
+        } finally {
+            loggerCfg.removeAppender(appenderName);
+            loggerCfg.setLevel(originalLevel);
+            ctx.updateLoggers();
+            appender.stop();
+        }
+        return captured;
+    }
+
+    /**
+     * Counts captured events at {@code level} whose formatted message mentions {@code marker}.
+     * Matching on the bucket key rather than on fixed wording keeps the assertion robust to
+     * message rewording while still excluding unrelated lines from the same logger.
+     */
+    private static long countEvents(final List<LogEvent> events, final Level level, final String marker) {
+        return events.stream()
+                .filter(e -> level.equals(e.getLevel()))
+                .filter(e -> e.getMessage().getFormattedMessage().contains(marker))
+                .count();
+    }
+
+    /** Renders captured events for assertion failure messages. */
+    private static String formatEvents(final List<LogEvent> events) {
+        return events.stream().map(e -> e.getLevel() + " " + e.getMessage().getFormattedMessage()).toList().toString();
     }
 
     /** Builds a well-formed password-change POST carrying {@code currentPw}. */
