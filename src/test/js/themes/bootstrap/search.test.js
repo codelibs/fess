@@ -789,6 +789,16 @@ describe("runSearch — error handling", () => {
     expect(errBox().textContent).toBe("error.auth_required");
   });
 
+  // This arm has NO httpStatus fallback in search.js, so the code string is the
+  // only thing standing between an authentication failure and a generic
+  // "error.server". The server sends V2ErrorCode.AUTH_REQUIRED's wire code
+  // "auth_required" (lowercase snake_case) and api.js passes it through verbatim.
+  it("shows error.auth_required for the server's lowercase auth_required wire code", async () => {
+    api.get.mockRejectedValueOnce(Object.assign(new Error("auth"), { code: "auth_required" }));
+    await runSearch();
+    expect(errBox().textContent).toBe("error.auth_required");
+  });
+
   it("shows error.server for a generic failure and clears the spinner", async () => {
     api.get.mockRejectedValueOnce(new Error("boom"));
     await runSearch();

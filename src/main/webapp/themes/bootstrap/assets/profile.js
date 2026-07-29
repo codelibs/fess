@@ -77,7 +77,9 @@ export function localizePasswordError(err) {
   if (err && err.name === "NetworkError") return t("error.network");
   const code = err && err.code;
   const httpStatus = err && err.httpStatus;
-  if (code === "RATE_LIMITED" || httpStatus === 429) return t("auth.error_rate_limited");
+  // V2ErrorCode emits lowercase snake_case wire codes ("rate_limited"); the
+  // uppercase spelling is kept alongside it so the branch survives either form.
+  if (code === "rate_limited" || code === "RATE_LIMITED" || httpStatus === 429) return t("auth.error_rate_limited");
   const details = (err && err.details) || {};
   const reason = details.reason;
   if (reason === "invalid_current_password") return t("profile.error_wrong_current");
@@ -104,7 +106,7 @@ export function localizePasswordError(err) {
       break;
   }
   // Fallbacks by HTTP/code when no specific reason is present.
-  if (code === "AUTH_REQUIRED" || httpStatus === 401) return t("profile.error_wrong_current");
+  if (code === "auth_required" || code === "AUTH_REQUIRED" || httpStatus === 401) return t("profile.error_wrong_current");
   return t("error.server");
 }
 

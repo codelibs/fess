@@ -243,7 +243,7 @@ export function attach() {
       host.appendChild(iframe);
     })
     .catch(err => {
-      const isNotFound = err && (err.code === "NOT_FOUND" || err.httpStatus === 404);
+      const isNotFound = err && (err.code === "not_found" || err.code === "NOT_FOUND" || err.httpStatus === 404);
       const msg = isNotFound
         ? t("labels.cache_not_found")
         : t("error.server");

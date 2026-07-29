@@ -188,6 +188,28 @@ describe("probeMe", () => {
     expect(document.getElementById("user-dropdown")).toBeNull();
   });
 
+  // V2ErrorCode.AUTH_REQUIRED puts the wire code "auth_required" (lowercase
+  // snake_case) on the envelope, and api.js copies err.code through verbatim —
+  // nothing in the SPA normalises the case. No httpStatus is supplied here, so
+  // the `|| e.httpStatus === 401` fallback cannot mask a failure to recognise
+  // the code itself. Both the AUTH_REQUIRED branch and the generic fallback log
+  // the user out, so the distinguishing observable is that the expected-and-silent
+  // branch emits no console warning.
+  it("treats the server's lowercase auth_required wire code as logged out, silently", async () => {
+    document.body.innerHTML = '<ul id="auth-controls"></ul>';
+    api.getConfig.mockReturnValue({});
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    api.get.mockRejectedValue({ code: "auth_required" });
+
+    const result = await probeMe();
+
+    expect(result).toBeNull();
+    expect(api.setAuthenticated).toHaveBeenCalledWith(false);
+    expect(document.getElementById("login-btn")).not.toBeNull();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it("surfaces a network/server (5xx) error without flipping auth state", async () => {
     document.body.innerHTML = '<div id="results-meta"></div><ul id="auth-controls"></ul>';
     let networkEvent = null;
@@ -244,6 +266,22 @@ describe("attach — login form submit", () => {
     document.body.innerHTML = LOGIN_FIXTURE;
     await attach();
     api.post.mockRejectedValue({ httpStatus: 429 });
+
+    document.getElementById("login-form").dispatchEvent(new Event("submit"));
+    await flush();
+
+    const err = document.getElementById("login-error");
+    expect(err.textContent).toBe("auth.error_rate_limited");
+    expect(err.classList.contains("d-none")).toBe(false);
+  });
+
+  // The 429 case above is carried by the httpStatus fallback alone. This one pins
+  // the code arm against the string the server actually sends
+  // (V2ErrorCode.RATE_LIMITED → "rate_limited"), with no httpStatus to fall back on.
+  it("shows the rate-limited message for the server's lowercase rate_limited wire code", async () => {
+    document.body.innerHTML = LOGIN_FIXTURE;
+    await attach();
+    api.post.mockRejectedValue({ code: "rate_limited" });
 
     document.getElementById("login-form").dispatchEvent(new Event("submit"));
     await flush();
