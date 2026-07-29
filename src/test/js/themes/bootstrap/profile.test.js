@@ -40,6 +40,10 @@ describe("localizePasswordError", () => {
   it.each([
     [{ name: "NetworkError" }, "error.network"],
     [{ code: "RATE_LIMITED" }, "auth.error_rate_limited"],
+    // The server's actual wire code is lowercase snake_case (V2ErrorCode
+    // .RATE_LIMITED → "rate_limited"); api.js copies err.code through unchanged.
+    // No httpStatus here, so the 429 fallback cannot cover for the code arm.
+    [{ code: "rate_limited" }, "auth.error_rate_limited"],
     [{ httpStatus: 429 }, "auth.error_rate_limited"],
     [{ details: { reason: "invalid_current_password" } }, "profile.error_wrong_current"],
     [{ details: { reason: "errors.password_length", min_length: 8 } }, "profile.error_password_length"],
@@ -53,6 +57,8 @@ describe("localizePasswordError", () => {
     [{ details: { reason: "current_password_required" } }, "profile.error_blank_password"],
     [{ details: { reason: "password_mismatch" } }, "profile.error_mismatch"],
     [{ code: "AUTH_REQUIRED" }, "profile.error_wrong_current"],
+    // Same wire-code contract for V2ErrorCode.AUTH_REQUIRED → "auth_required".
+    [{ code: "auth_required" }, "profile.error_wrong_current"],
     [{ httpStatus: 401 }, "profile.error_wrong_current"],
     [{ code: "SOMETHING_UNMAPPED" }, "error.server"],
     [null, "error.server"],

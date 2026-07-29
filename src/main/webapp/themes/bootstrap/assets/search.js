@@ -736,7 +736,7 @@ async function runSearch() {
     // search failed with a 500 or a dropped connection. Fall back to #results-meta when a
     // theme has no visible banner.
     const msg = (e && e.name === "NetworkError") ? t("error.network")
-              : (e && e.code === "AUTH_REQUIRED") ? t("error.auth_required")
+              : (e && (e.code === "auth_required" || e.code === "AUTH_REQUIRED")) ? t("error.auth_required")
               : t("error.server");
     if (errBox) { errBox.textContent = msg; errBox.classList.remove("d-none"); }
     else { const meta = document.getElementById("results-meta"); if (meta) meta.textContent = msg; }
@@ -1840,7 +1840,7 @@ async function syncFavorites(queryId) {
       setFavoriteUi(btn, favoriteSet.has(docId), Number(btn.dataset.count) || 0);
     });
   } catch (e) {
-    if (e && (e.code === "AUTH_REQUIRED" || e.httpStatus === 401)) return; // unauthenticated — silent
+    if (e && (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401)) return; // unauthenticated — silent
     // other errors: ignore, favorites are best-effort
   }
 }
@@ -1952,7 +1952,7 @@ async function toggleFavorite(docId, btn, queryId) {
     // expired between page load and the click) *before* the auth check runs, so a
     // guest click can surface as 403 instead of 401. Logging in through the modal
     // issues a fresh session + token, so treat both the same.
-    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403) {
+    if (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403) {
       if (!window.bootstrap || !bootstrap.Modal) {
         console.warn("[fess] bootstrap not loaded; skipping modal show");
       } else {

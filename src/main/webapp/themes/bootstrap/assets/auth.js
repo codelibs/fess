@@ -25,8 +25,10 @@ export async function probeMe() {
     setLoggedOut();
     return null;
   } catch (e) {
-    // 401 / AUTH_REQUIRED → not logged in; expected and silent.
-    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
+    // 401 / auth_required → not logged in; expected and silent.
+    // V2ErrorCode emits lowercase snake_case wire codes ("auth_required"); the
+    // uppercase spelling is kept alongside it so the branch survives either form.
+    if (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
       setLoggedOut();
       return null;
     }
@@ -288,7 +290,8 @@ export function attach() {
         }
         document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: env.user }));
       } catch (e) {
-        if (e.code === "RATE_LIMITED" || e.httpStatus === 429) err.textContent = t("auth.error_rate_limited");
+        // V2ErrorCode emits lowercase snake_case wire codes ("rate_limited").
+        if (e.code === "rate_limited" || e.code === "RATE_LIMITED" || e.httpStatus === 429) err.textContent = t("auth.error_rate_limited");
         else err.textContent = t("auth.error_invalid_credentials");
         err.classList.remove("d-none");
       }
