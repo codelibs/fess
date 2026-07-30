@@ -63,7 +63,6 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -2201,7 +2200,7 @@ public class SearchEngineClient implements Client {
          *
          * @return true if the build was successful, false if the query is blank
          * @throws ResultOffsetExceededException if the offset exceeds the maximum allowed
-         * @throws SearchQueryException if facet fields are invalid
+         * @throws InvalidQueryException if a requested facet field is not allowed
          */
         public boolean build() {
             if (StringUtil.isBlank(query)) {
@@ -2298,12 +2297,19 @@ public class SearchEngineClient implements Client {
          * @param queryHelper the query helper
          * @param queryFieldConfig the query field configuration
          * @param fessConfig the Fess configuration
-         * @throws SearchQueryException if facet fields are invalid
+         * @throws InvalidQueryException if a requested facet field is not allowed by
+         *         {@code query.additional.facet.fields}
          */
         protected void buildFacet(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             stream(facetInfo.field).of(stream -> stream.forEach(f -> {
                 if (!queryFieldConfig.isFacetField(f)) {
-                    throw new SearchQueryException("Invalid facet field: " + f);
+                    // InvalidQueryException (not SearchQueryException) so that the caller sees a
+                    // query error: RankFusionProcessor swallows everything else into an empty
+                    // result list, which turns a misconfigured facet field into a search that
+                    // silently returns no documents at all.
+                    throw new InvalidQueryException(
+                            messages -> messages.addErrorsInvalidQueryUnsupportedFacetField(UserMessages.GLOBAL_PROPERTY_KEY, f),
+                            "Unsupported facet field: " + f);
                 }
                 final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                 final TermsAggregationBuilder termsBuilder =
