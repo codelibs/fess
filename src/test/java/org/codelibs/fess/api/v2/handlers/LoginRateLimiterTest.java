@@ -156,10 +156,10 @@ public class LoginRateLimiterTest extends UnitFessTestCase {
         assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "", 10, 60), "empty key must return false (deny)");
     }
 
-    // ── m-21: lockOut Math.max guard ────────────────────────────────────────────
+    // ── m-21: a second call never moves the deadline of an active lockout ───────
 
     @Test
-    public void test_lockOut_mathMaxGuard_shorterCallDoesNotShrinkLockout() {
+    public void test_lockOut_shorterCallDoesNotShrinkAnActiveLockout() {
         final long[] now = { 1_000_000L };
         final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
         // Apply a 900-second lockout.
@@ -169,7 +169,33 @@ public class LoginRateLimiterTest extends UnitFessTestCase {
         // Advance 61 seconds (past the short window, still inside the long one).
         now[0] += 61_000L;
         assertFalse(rl.allow(LoginRateLimiter.Scope.USER, "carol", 5, 60),
-                "shorter lockOut call must not shrink existing longer lockout (Math.max guard)");
+                "a shorter lockOut call must not shrink the lockout that is already running");
+    }
+
+    @Test
+    public void test_lockOut_longerCallDoesNotExtendAnActiveLockout() {
+        // The guard is "first deadline wins", not "stricter deadline wins": while a lockout is
+        // running the incoming lockoutSeconds is not consulted at all, so a LONGER value is
+        // ignored just like a shorter one. This is the direction the sibling shorter-call test
+        // cannot observe, and it is what keeps a raised theme.api.login.lockout.seconds from
+        // silently pushing out a lockout that is already counting down — callers re-read the
+        // duration from configuration on every refused request.
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+
+        assertTrue(rl.lockOut(LoginRateLimiter.Scope.USER, "frank", 60), "the first call arms a 60-second lockout");
+
+        // Mid-lockout, a caller asks for a much longer one; the call must be a no-op.
+        now[0] = t0 + 30_000L;
+        assertFalse(rl.allow(LoginRateLimiter.Scope.USER, "frank", 5, 60), "still locked 30s into a 60s lockout");
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.USER, "frank", 3600), "a call during an active lockout must be a no-op");
+
+        // Past the ORIGINAL 60-second deadline the bucket must be released: had the 3600-second
+        // value applied, the key would stay locked for another hour.
+        now[0] = t0 + 61_000L;
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "frank", 5, 60),
+                "a longer lockoutSeconds supplied mid-lockout must not push the original deadline out");
     }
 
     // ── Self-extending lockout: an active lockout must never be pushed forward ──

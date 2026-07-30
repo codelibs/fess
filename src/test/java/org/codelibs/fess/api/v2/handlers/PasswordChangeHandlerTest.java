@@ -155,12 +155,14 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
      * Registers a stub {@link FessLoginAssist} that pretends a user named {@code alice} is
      * logged in. {@code findLoginUser} returns a populated entity only when the supplied
      * password equals {@code expectedCurrentPw}; otherwise it returns an empty optional so
-     * the handler must short-circuit to {@code AUTH_REQUIRED}.
+     * the handler must short-circuit to {@code AUTH_REQUIRED}. The registered stub is returned
+     * so a caller can attach a verification-time hook.
      */
-    private static void registerStubLoginAssist(final String userId, final String expectedCurrentPw) {
+    private static StubFessLoginAssist registerStubLoginAssist(final String userId, final String expectedCurrentPw) {
         final StubFessLoginAssist stub = new StubFessLoginAssist(userId, expectedCurrentPw);
         ComponentUtil.register(stub, "fessLoginAssist");
         ComponentUtil.register(stub, FessLoginAssist.class.getCanonicalName());
+        return stub;
     }
 
     @Test
@@ -565,6 +567,97 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * Attaches a hook to the registered stub that plays a concurrent request while the handler
+     * is inside {@code findLoginUser}: it drains the remaining USER slots on {@code rl} and,
+     * when {@code armLockout} is set, stamps the lockout as well.
+     *
+     * <p>This is what makes the post-verification escalation reachable single-threaded. The
+     * handler's {@code peek()} gate evaluates the same predicate over the same deque a few
+     * lines earlier, so {@code allow()} can only refuse on the wrong-password path when another
+     * request consumed the remaining slots in between.</p>
+     */
+    private static void attachConcurrentlyDrainingHook(final StubFessLoginAssist assist, final LoginRateLimiter rl, final String userId,
+            final int userLimit, final int lockoutSec, final boolean armLockout) {
+        assist.withConcurrentRequestDuringVerification(() -> {
+            for (int i = 0; i < userLimit; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, userId, userLimit, 60);
+            }
+            if (armLockout) {
+                rl.lockOut(LoginRateLimiter.Scope.USER, userId, lockoutSec);
+            }
+        });
+    }
+
+    @Test
+    public void passwordChange_wrongPasswordArmsTheLockoutWhenAConcurrentRequestDrainedTheBucket() throws Throwable {
+        // The escalation on the wrong-password path is what turns a drained bucket into a 429
+        // plus a lockout; nothing else in the handler reports that transition. Without this test
+        // the branch — Retry-After, WARN and the lockOut() that keeps refusing after the sliding
+        // window expires — was never executed by the suite at all.
+        final StubFessLoginAssist assist = registerStubLoginAssist("alice", "secret-current");
+        try {
+            final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+            final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+            final long[] now = { 1_000_000L };
+            final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+            final PasswordChangeHandler handler = new PasswordChangeHandler(rl);
+            attachConcurrentlyDrainingHook(assist, rl, "alice", userLimit, lockoutSec, false);
+
+            final List<LogEvent> events = captureLogEvents(PasswordChangeHandler.class.getName(), () -> {
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(passwordPost("WRONG"), res);
+                assertEquals(429, res.status, res.body());
+                assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+                org.junit.jupiter.api.Assertions.assertEquals(Integer.toString(lockoutSec), res.getHeader("Retry-After"), res.body());
+            });
+
+            org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, "exhausted"),
+                    "the request that armed the lockout on the wrong-password path must log exactly one WARN: " + formatEvents(events));
+            org.junit.jupiter.api.Assertions.assertEquals(0L, countEvents(events, Level.DEBUG, "alice"),
+                    "nothing may be logged at DEBUG when this call armed the lockout: " + formatEvents(events));
+
+            // Past the sliding window the frozen hits no longer count, so a bucket still
+            // refusing here can only be refusing because the escalation stamped a lockout.
+            now[0] += 61_000L;
+            assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "alice", userLimit, 60),
+                    "the escalation must arm a lockout that outlives the sliding window");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_wrongPasswordDebugsWhenTheConcurrentRequestAlreadyArmedTheLockout() throws Throwable {
+        // Companion of the WARN case: the concurrent request both drained the bucket and armed
+        // the lockout, so this call's lockOut() is a no-op and the refusal has already been
+        // reported. A stolen-session attacker hammering the endpoint must not be able to turn
+        // one lockout into a stream of WARNs.
+        final StubFessLoginAssist assist = registerStubLoginAssist("alice", "secret-current");
+        try {
+            final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+            final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+            final LoginRateLimiter rl = new LoginRateLimiter();
+            final PasswordChangeHandler handler = new PasswordChangeHandler(rl);
+            attachConcurrentlyDrainingHook(assist, rl, "alice", userLimit, lockoutSec, true);
+
+            final List<LogEvent> events = captureLogEvents(PasswordChangeHandler.class.getName(), () -> {
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(passwordPost("WRONG"), res);
+                assertEquals(429, res.status, res.body());
+            });
+
+            org.junit.jupiter.api.Assertions.assertEquals(0L, countEvents(events, Level.WARN, "alice"),
+                    "a lockout armed by the concurrent request must not be reported a second time: " + formatEvents(events));
+            org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.DEBUG, "alice"),
+                    "the already-locked case must be visible at DEBUG: " + formatEvents(events));
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /**
      * Attaches a DEBUG-level capturing appender to {@code loggerName}, runs {@code body}, then
      * restores the original appender set and level. Only events emitted by {@code loggerName}
      * itself are retained, so the surrounding framework chatter is filtered out.
@@ -938,10 +1031,26 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         private static final long serialVersionUID = 1L;
         private final String userId;
         private final String expectedPw;
+        private transient Runnable concurrentRequest = () -> {};
 
         StubFessLoginAssist(final String userId, final String expectedPw) {
             this.userId = userId;
             this.expectedPw = expectedPw;
+        }
+
+        /**
+         * Runs {@code hook} at the start of {@link #findLoginUser}, i.e. while the handler is
+         * between its {@code peek()} gate and the {@code allow()} call on the wrong-password
+         * path. Tests use it to play the concurrent request that drains the bucket in that
+         * window — the only way the post-verification escalation can be reached, and reachable
+         * here without spawning a thread.
+         *
+         * @param hook action simulating a request that arrives during password verification
+         * @return this stub (fluent)
+         */
+        StubFessLoginAssist withConcurrentRequestDuringVerification(final Runnable hook) {
+            this.concurrentRequest = hook;
+            return this;
         }
 
         @Override
@@ -952,6 +1061,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
         @Override
         public OptionalEntity<FessUser> findLoginUser(final LoginCredential credential) {
+            concurrentRequest.run();
             // The handler always passes a LocalUserCredential; defensive-cast and check.
             if (credential instanceof final LocalUserCredential local && expectedPw.equals(local.getPassword())) {
                 return OptionalEntity.of(new StubFessUser(local.getUserId()));
