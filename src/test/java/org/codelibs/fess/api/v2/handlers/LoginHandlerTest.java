@@ -20,13 +20,34 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.exception.LoginFailureException;
+import org.lastaflute.web.login.option.LoginOpCall;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -245,6 +266,223 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // Advance past the lockout window — the next allow() must succeed.
         now[0] += 901_000L;
         assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60));
+    }
+
+    // ── Self-extending lockout: driven end-to-end through handle() ───────────────
+
+    /** Builds a well-formed login POST from {@code remoteAddr} for {@code username}. */
+    private static StubRequest loginPost(final String remoteAddr, final String username) {
+        return new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"" + username + "\",\"password\":\"p\"}")
+                .withRemoteAddr(remoteAddr);
+    }
+
+    /**
+     * Same as {@link #loginPost} but backed by an in-memory session, so the post-success branch
+     * (session rotation plus CSRF issue/rotate) can run to completion.
+     */
+    private static StubRequest loginPostWithSession(final String remoteAddr, final String username) {
+        return new StubRequestWithSession("POST", "/api/v2/auth/login")
+                .withJsonBody("{\"username\":\"" + username + "\",\"password\":\"p\"}")
+                .withRemoteAddr(remoteAddr);
+    }
+
+    /**
+     * Registers everything a run-to-completion login needs: a credential-accepting assist for
+     * {@code username}, the CSRF manager the success branch rotates, and a recording activity
+     * helper writing into {@code audit}.
+     */
+    private static void registerSuccessfulLoginComponents(final String username, final List<String> audit) {
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist(username, false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+    }
+
+    @Test
+    public void login_ipLockoutIsNotExtendedByRetriesDuringTheLockout() throws Exception {
+        // Regression, driven through handle(): the IP gate calls lockOut() on EVERY refused
+        // request, and allow() keeps returning false for the whole lockout — so each retry
+        // used to re-stamp the deadline from "now", pushing the release point forward
+        // indefinitely. The 429 advertises "Retry-After: <lockoutSeconds>"; that promise must
+        // hold even when the client keeps POSTing before it elapses.
+        //
+        // The sibling test_userLockoutResetsAfterWindowExpires only pokes the limiter
+        // directly (allow()/lockOut()), so it never observes the handler's re-stamping and
+        // stayed green while this defect was live. This test drives the real handler.
+        final int ipLimit = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int lockoutSec = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.7";
+        // A credential-rejecting assist plus a recording audit sink turn the final assertion
+        // from "not a 429" into positive proof that the request reached credential verification:
+        // the gates write no activity record, only the credential check does.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("u", true), FessLoginAssist.class.getCanonicalName());
+        // Saturate the IP bucket so the very next request trips the IP gate.
+        for (int i = 0; i < ipLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
+        }
+
+        final CapturingResponse first = new CapturingResponse();
+        handler.handle(loginPost(ip, "u"), first);
+        assertEquals(429, first.status, first.body());
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.toString(lockoutSec), first.getHeader("Retry-After"),
+                "the 429 promises release after lockoutSeconds");
+
+        // The client keeps retrying inside the lockout window (quarter-window apart).
+        for (int i = 1; i <= 3; i++) {
+            now[0] = t0 + lockoutMs / 4 * i;
+            final CapturingResponse retry = new CapturingResponse();
+            handler.handle(loginPost(ip, "u"), retry);
+            assertEquals(429, retry.status, "retry " + i + " inside the lockout must still be refused: " + retry.body());
+        }
+
+        // Just past the advertised deadline the client MUST be admitted through the IP gate
+        // again, all the way into credential verification.
+        now[0] = t0 + lockoutMs + 1_000L;
+        final CapturingResponse after = new CapturingResponse();
+        handler.handle(loginPost(ip, "u"), after);
+        assertEquals(401, after.status, "the IP lockout must expire " + lockoutSec
+                + "s after it was applied, even though the client retried meanwhile: " + after.body());
+        org.junit.jupiter.api.Assertions.assertNull(after.getHeader("Retry-After"), after.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:u"), audit,
+                "only the released request may reach credential verification; the refused ones write nothing");
+    }
+
+    @Test
+    public void login_userLockoutIsNotExtendedByRetriesDuringTheLockout() throws Exception {
+        // Same defect on the USER gate, which is worse for the victim: it answers with a
+        // generic 401 "invalid credentials" and no Retry-After, so a locked-out user cannot
+        // even tell they are locked out — they just retry, and every retry used to push the
+        // release point another lockoutSeconds into the future.
+        final int userLimit = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = org.codelibs.fess.util.ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.9";
+        // The gate and a credential rejection both answer 401, so status alone cannot tell them
+        // apart. The audit sink can: gates write nothing, credential verification writes
+        // LOGIN_FAILURE — which is what turns the closing assertion into positive proof.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("erin", true), FessLoginAssist.class.getCanonicalName());
+        // Saturate the (clientIp, username) composite bucket the handler computes.
+        final String userKey = handler.userScopeKey(ip, "erin");
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60));
+        }
+
+        final CapturingResponse first = new CapturingResponse();
+        handler.handle(loginPost(ip, "erin"), first);
+        assertEquals(401, first.status, first.body());
+        org.junit.jupiter.api.Assertions.assertNull(first.getHeader("Retry-After"), "user-scope exhaustion must not advertise Retry-After");
+
+        for (int i = 1; i <= 3; i++) {
+            now[0] = t0 + lockoutMs / 4 * i;
+            final CapturingResponse retry = new CapturingResponse();
+            handler.handle(loginPost(ip, "erin"), retry);
+            assertEquals(401, retry.status, "retry " + i + " inside the lockout must still be refused: " + retry.body());
+        }
+
+        // Past the lockout the user must get past the USER gate again. The response is still a
+        // 401 — the stub rejects the password — but the LOGIN_FAILURE record proves the request
+        // was refused by the credential check rather than by the gate.
+        now[0] = t0 + lockoutMs + 1_000L;
+        final CapturingResponse after = new CapturingResponse();
+        handler.handle(loginPost(ip, "erin"), after);
+        org.junit.jupiter.api.Assertions.assertNotEquals(429, after.status, after.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:erin"), audit,
+                "the USER lockout must expire " + lockoutSec + "s after it was applied, letting the request through to "
+                        + "credential verification even though the client retried meanwhile: " + after.body());
+    }
+
+    // ── Release: once the window elapses the client can actually log in again ────
+
+    @Test
+    public void login_userRegainsAccessWithASuccessfulLoginAfterTheLockoutElapses() throws Exception {
+        // The headline promise of the no-self-extension fix is that service is RESTORED, and
+        // only a real 200 proves that. The sibling not-extended tests stop at "the gate let the
+        // request through"; this one runs the whole flow to the success envelope, so a
+        // regression that releases the gate but breaks recovery some other way cannot hide.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.21";
+        final List<String> audit = new ArrayList<>();
+        registerSuccessfulLoginComponents("heidi", audit);
+        final String userKey = handler.userScopeKey(ip, "heidi");
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60));
+        }
+
+        // Trip the gate, then retry inside the window — still refused, and (the defect) each
+        // retry used to push the release point another lockoutSeconds away.
+        final CapturingResponse first = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "heidi"), first);
+        assertEquals(401, first.status, first.body());
+        now[0] = t0 + lockoutMs / 2;
+        final CapturingResponse retry = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "heidi"), retry);
+        assertEquals(401, retry.status, retry.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(), audit, "no credential was checked while the gate was refusing: " + audit);
+
+        // Past the deadline the very same credentials must authenticate.
+        now[0] = t0 + lockoutMs + 1_000L;
+        final CapturingResponse after = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "heidi"), after);
+        assertEquals(200, after.status, "the user must be able to log in again once the lockout elapsed: " + after.body());
+        assertTrue(after.body().contains("\"status\":0"), after.body());
+        assertTrue(after.body().contains("csrf_token"), after.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN\tuser:heidi\tpermissions:-"), audit,
+                "the released attempt must be a genuine authentication, not a gate that merely stopped refusing");
+    }
+
+    @Test
+    public void login_ipRegainsAccessWithASuccessfulLoginAfterTheLockoutElapses() throws Exception {
+        // Same release property on the IP gate, which is the one that advertises Retry-After:
+        // the header is a promise that a client honouring it gets served, so the run-to-success
+        // assertion is what actually holds the endpoint to it.
+        final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.22";
+        final List<String> audit = new ArrayList<>();
+        registerSuccessfulLoginComponents("ivan", audit);
+        for (int i = 0; i < ipLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
+        }
+
+        final CapturingResponse first = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "ivan"), first);
+        assertEquals(429, first.status, first.body());
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.toString(lockoutSec), first.getHeader("Retry-After"), first.body());
+        now[0] = t0 + lockoutMs / 2;
+        final CapturingResponse retry = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "ivan"), retry);
+        assertEquals(429, retry.status, retry.body());
+
+        now[0] = t0 + lockoutMs + 1_000L;
+        final CapturingResponse after = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "ivan"), after);
+        assertEquals(200, after.status, "the client must be served once the advertised Retry-After elapsed: " + after.body());
+        assertTrue(after.body().contains("csrf_token"), after.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN\tuser:ivan\tpermissions:-"), audit,
+                "the released attempt must be a genuine authentication");
     }
 
     // ── A-1: account-switch audit log must not fire on credential failure ────────
@@ -565,6 +803,534 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // Oversized return_to (10001 chars) must be silently dropped.
         addReturnTo.invoke(new LoginHandler(new LoginRateLimiter()), payload, "/".repeat(10001));
         assertNull(payload.get("return_to"), "return_to exceeding 10000 chars must be silently dropped");
+    }
+
+    // ── rate-limit logging must not flood: one WARN per lockout, DEBUG for retries ──
+
+    @Test
+    public void login_ipLockoutWarnsOnceAndDebugsTheRetriesInsideTheWindow() throws Throwable {
+        // A client refused by the IP gate keeps POSTing, and every refused request reaches the
+        // logging statement. Logging each one at WARN would let a locked-out attacker generate
+        // unbounded WARN volume. Only the request that actually arms the lockout is a new
+        // security event; the rest are retries against a lockout already reported.
+        final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "203.0.113.77";
+        for (int i = 0; i < ipLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
+        }
+
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(), () -> {
+            for (int i = 0; i < 5; i++) {
+                // Stay well inside the lockout window so no retry can arm a second lockout.
+                now[0] = t0 + lockoutMs / 8 * i;
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(loginPost(ip, "u"), res);
+                assertEquals(429, res.status, res.body());
+            }
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, ip),
+                "exactly one WARN must be emitted per lockout, not one per refused request: " + formatEvents(events));
+        org.junit.jupiter.api.Assertions.assertEquals(4L, countEvents(events, Level.DEBUG, ip),
+                "the four retries inside the lockout must be logged at DEBUG: " + formatEvents(events));
+    }
+
+    @Test
+    public void login_userLockoutWarnsOnceAndDebugsTheRetriesInsideTheWindow() throws Throwable {
+        // Same contract on the USER gate. This one matters more: the response is a generic 401
+        // with no Retry-After, so a locked-out client has no way to know it should back off and
+        // will keep retrying — exactly the pattern that turns a per-refusal WARN into a flood.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long lockoutMs = lockoutSec * 1_000L;
+        final long[] now = { 1_000_000L };
+        final long t0 = now[0];
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "203.0.113.78";
+        final String userKey = handler.userScopeKey(ip, "erin");
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60));
+        }
+
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(), () -> {
+            for (int i = 0; i < 5; i++) {
+                now[0] = t0 + lockoutMs / 8 * i;
+                final CapturingResponse res = new CapturingResponse();
+                handler.handle(loginPost(ip, "erin"), res);
+                assertEquals(401, res.status, res.body());
+            }
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, "erin"),
+                "exactly one WARN must be emitted per user lockout: " + formatEvents(events));
+        org.junit.jupiter.api.Assertions.assertEquals(4L, countEvents(events, Level.DEBUG, "erin"),
+                "the four retries inside the user lockout must be logged at DEBUG: " + formatEvents(events));
+    }
+
+    /**
+     * Registers a credential-rejecting {@link FessLoginAssist} that plays a concurrent request
+     * while the handler is inside {@code assist.login()}: the returned stub drains the remaining
+     * USER slots on {@code rl}, and optionally arms the lockout itself, before rejecting.
+     *
+     * <p>This is what makes the post-failure escalation reachable single-threaded. The handler's
+     * {@code peek()} gate evaluates the same predicate over the same deque a few lines earlier,
+     * so {@code allow()} can only refuse on the failure path when another request consumed the
+     * remaining slots in between.</p>
+     *
+     * @param rl the very limiter instance the handler under test was constructed with
+     * @param userKey the composite (clientIp, username) key the handler computes
+     * @param userLimit per-window slot count to drain
+     * @param armLockout when true the concurrent request also stamps the lockout, so the
+     *                   handler's own {@code lockOut()} finds one already active
+     */
+    private static void registerConcurrentlyDrainingAssist(final LoginRateLimiter rl, final String userKey, final int userLimit,
+            final int lockoutSec, final boolean armLockout) {
+        ComponentUtil.register(new StubLoginAssist("frank", true).withConcurrentRequestDuringLogin(() -> {
+            for (int i = 0; i < userLimit; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60);
+            }
+            if (armLockout) {
+                rl.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
+            }
+        }), FessLoginAssist.class.getCanonicalName());
+    }
+
+    @Test
+    public void login_credentialFailureArmsTheLockoutWhenAConcurrentRequestDrainedTheBucket() throws Throwable {
+        // The escalation inside catch(LoginFailureException) fires when the bucket runs out on
+        // the failure path. Nothing else in the handler logs that transition, so without this
+        // test the branch — WARN plus the lockOut() that backs the "even after the sliding
+        // window expires" promise — was never executed by the suite at all.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final long[] now = { 1_000_000L };
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.31";
+        final String userKey = handler.userScopeKey(ip, "frank");
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        registerConcurrentlyDrainingAssist(rl, userKey, userLimit, lockoutSec, false);
+
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(), () -> {
+            final CapturingResponse res = new CapturingResponse();
+            handler.handle(loginPost(ip, "frank"), res);
+            // The response is the same generic 401 as any credential rejection: the per-user
+            // counter state must never leak, not even once the bucket is exhausted.
+            assertEquals(401, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+            org.junit.jupiter.api.Assertions.assertNull(res.getHeader("Retry-After"), res.body());
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:frank"), audit,
+                "the request must have reached credential verification, not a gate");
+        org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.WARN, "exhausted"),
+                "the request that armed the lockout on the failure path must log exactly one WARN: " + formatEvents(events));
+        org.junit.jupiter.api.Assertions.assertEquals(0L, countEvents(events, Level.DEBUG, "frank"),
+                "nothing may be logged at DEBUG when this call armed the lockout: " + formatEvents(events));
+
+        // Past the sliding window the frozen hits no longer count, so a bucket still refusing
+        // here can only be refusing because the escalation stamped a lockout.
+        now[0] += 61_000L;
+        assertFalse(rl.peek(LoginRateLimiter.Scope.USER, userKey, userLimit, 60),
+                "the escalation must arm a lockout that outlives the sliding window");
+    }
+
+    @Test
+    public void login_credentialFailureDebugsWhenTheConcurrentRequestAlreadyArmedTheLockout() throws Throwable {
+        // Companion of the WARN case: the concurrent request both drained the bucket and armed
+        // the lockout, so the handler's own lockOut() is a no-op and the refusal has already
+        // been reported. Logging it at WARN again would double-count a single lockout.
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final int lockoutSec = ComponentUtil.getFessConfig().getThemeApiLoginLockoutSecondsAsInteger();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.32";
+        final String userKey = handler.userScopeKey(ip, "frank");
+        ComponentUtil.register(recordingActivityHelper(new ArrayList<>()), "activityHelper");
+        registerConcurrentlyDrainingAssist(rl, userKey, userLimit, lockoutSec, true);
+
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(), () -> {
+            final CapturingResponse res = new CapturingResponse();
+            handler.handle(loginPost(ip, "frank"), res);
+            assertEquals(401, res.status, res.body());
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(0L, countEvents(events, Level.WARN, "frank"),
+                "a lockout armed by the concurrent request must not be reported a second time: " + formatEvents(events));
+        org.junit.jupiter.api.Assertions.assertEquals(1L, countEvents(events, Level.DEBUG, "frank"),
+                "the already-locked case must be visible at DEBUG: " + formatEvents(events));
+    }
+
+    /**
+     * Attaches a DEBUG-level capturing appender to {@code loggerName}, runs {@code body}, then
+     * restores the original appender set and level. Only events emitted by {@code loggerName}
+     * itself are retained, so the surrounding framework chatter is filtered out.
+     */
+    private static List<LogEvent> captureLogEvents(final String loggerName, final Executable body) throws Throwable {
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final LoggerConfig loggerCfg = ctx.getConfiguration().getLoggerConfig(loggerName);
+        final Level originalLevel = loggerCfg.getLevel();
+        final List<LogEvent> captured = new ArrayList<>();
+        final String appenderName = "login-handler-capture";
+        final AbstractAppender appender =
+                new AbstractAppender(appenderName, null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
+                    @Override
+                    public void append(final LogEvent event) {
+                        if (loggerName.equals(event.getLoggerName())) {
+                            captured.add(event.toImmutable());
+                        }
+                    }
+                };
+        appender.start();
+        loggerCfg.addAppender(appender, Level.DEBUG, null);
+        loggerCfg.setLevel(Level.DEBUG);
+        ctx.updateLoggers();
+        try {
+            body.execute();
+        } finally {
+            loggerCfg.removeAppender(appenderName);
+            loggerCfg.setLevel(originalLevel);
+            ctx.updateLoggers();
+            appender.stop();
+        }
+        return captured;
+    }
+
+    /**
+     * Counts captured events at {@code level} whose formatted message mentions {@code marker}.
+     * Matching on the bucket key rather than on fixed wording keeps the assertion robust to
+     * message rewording while still excluding unrelated lines from the same logger.
+     */
+    private static long countEvents(final List<LogEvent> events, final Level level, final String marker) {
+        return events.stream()
+                .filter(e -> level.equals(e.getLevel()))
+                .filter(e -> e.getMessage().getFormattedMessage().contains(marker))
+                .count();
+    }
+
+    /** Renders captured events for assertion failure messages. */
+    private static String formatEvents(final List<LogEvent> events) {
+        return events.stream().map(e -> e.getLevel() + " " + e.getMessage().getFormattedMessage()).toList().toString();
+    }
+
+    // ── audit.log: v2 login must leave the same activity records as LoginAction ──
+
+    @Test
+    public void login_successWritesLoginRecordToAuditLog() throws Exception {
+        // Regression: POST /api/v2/auth/login never called ActivityHelper, so a deployment that
+        // authenticates through the static-theme SPA produced NO audit.log line at all — while
+        // the classic JSP flow writes one from LoginAction.login() (activityHelper.login()).
+        // Assert on the rendered LTSV record rather than "some method was called", so the v2
+        // record is byte-identical to the classic one.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("alice", false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN\tuser:alice\tpermissions:-"), audit,
+                "a successful v2 login must write the same LOGIN activity record as LoginAction");
+    }
+
+    @Test
+    public void login_credentialFailureWritesLoginFailureRecordToAuditLog() throws Exception {
+        // Companion regression for the failure path: LoginAction.login() calls
+        // activityHelper.loginFailure(new LocalUserCredential(username, password)) when the
+        // credentials are rejected. Without the same call on the v2 path, brute-force attempts
+        // against the SPA login endpoint are invisible to audit.log.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("bob", true), FessLoginAssist.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter())
+                .handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"wrong\"}"), res);
+        assertEquals(401, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:bob"), audit,
+                "a rejected v2 login must write the same LOGIN_FAILURE activity record as LoginAction");
+    }
+
+    @Test
+    public void login_auditFailureDoesNotBreakAnAlreadySuccessfulLogin() throws Exception {
+        // The credentials have already been verified when the audit record is written, so a
+        // broken audit sink must not turn an authenticated session into a 500 — it is logged
+        // and the success envelope is still returned.
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void login(final OptionalThing<FessUserBean> user) {
+                throw new IllegalStateException("audit sink is down");
+            }
+        }, "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("alice", false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("csrf_token"), res.body());
+    }
+
+    @Test
+    public void login_auditFailureOnCredentialRejectionStillReturnsTheGeneric401() throws Exception {
+        // Third audit sink, same contract as the two above: the LOGIN_FAILURE write happens
+        // inside the catch(LoginFailureException) block, so an exception escaping it would
+        // propagate out of handle() and the container would answer 500 instead of the generic
+        // 401 — telling an attacker that this particular username/IP is interesting, and
+        // handing them a way to distinguish rejected credentials from a healthy rejection.
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void loginFailure(final OptionalThing<LoginCredential> credential) {
+                throw new IllegalStateException("audit sink is down");
+            }
+        }, "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("bob", true), FessLoginAssist.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter())
+                .handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"wrong\"}"), res);
+        assertEquals(401, res.status, res.body());
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+    }
+
+    @Test
+    public void login_throttleGatesWriteNoAuditRecord() throws Exception {
+        // Deliberate decision, pinned so a future change cannot quietly reverse it: a request
+        // refused by the IP gate or by the USER peek() gate had no credential checked, so there
+        // is nothing to report as a LOGIN_FAILURE. Emitting one would let a client that never
+        // guessed a password inflate audit.log and make the trail overstate how many
+        // authentication attempts actually took place. The stub rejects credentials, so a gate
+        // that leaked a request through into verification would show up as a record here.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist("gwen", true), FessLoginAssist.class.getCanonicalName());
+        final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
+
+        final String ipGatedIp = "198.51.100.55";
+        for (int i = 0; i < ipLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ipGatedIp, ipLimit, 60));
+        }
+        final CapturingResponse ipRefused = new CapturingResponse();
+        handler.handle(loginPost(ipGatedIp, "gwen"), ipRefused);
+        assertEquals(429, ipRefused.status, ipRefused.body());
+
+        // A different IP so the IP bucket is fresh and the request reaches the USER gate.
+        final String userGatedIp = "198.51.100.56";
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, handler.userScopeKey(userGatedIp, "gwen"), userLimit, 60));
+        }
+        final CapturingResponse userRefused = new CapturingResponse();
+        handler.handle(loginPost(userGatedIp, "gwen"), userRefused);
+        assertEquals(401, userRefused.status, userRefused.body());
+
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(), audit,
+                "a request refused by a rate-limit gate must leave no activity record: " + audit);
+    }
+
+    /**
+     * Builds an {@link ActivityHelper} that renders real LTSV records into {@code sink} instead
+     * of writing to the audit logger. {@code time}/{@code ip} are stripped so the expectation is
+     * deterministic — same approach as {@code ActivityHelperTest}.
+     */
+    private static ActivityHelper recordingActivityHelper(final List<String> sink) {
+        return new ActivityHelper() {
+            @Override
+            protected void printByLtsv(final Map<String, String> valueMap) {
+                valueMap.remove("time");
+                valueMap.remove("ip");
+                super.printByLtsv(valueMap);
+            }
+
+            @Override
+            protected void printLog(final String message) {
+                sink.add(message);
+            }
+
+            @Override
+            protected String getClientIp() {
+                return "";
+            }
+        };
+    }
+
+    /**
+     * {@link FessLoginAssist} stub registered under its canonical name so
+     * {@code ComponentUtil.getComponent(FessLoginAssist.class)} resolves it (the real component
+     * fails auto-binding in the slim test DI graph, which makes {@code componentMap} the
+     * effective lookup). {@code login()} either binds a user bean or raises the same
+     * {@link LoginFailureException} the production flow raises on a wrong password.
+     */
+    private static class StubLoginAssist extends FessLoginAssist {
+        private final String userId;
+        private final boolean rejectCredential;
+        private transient Runnable concurrentRequest = () -> {};
+        private FessUserBean bound;
+
+        StubLoginAssist(final String userId, final boolean rejectCredential) {
+            this.userId = userId;
+            this.rejectCredential = rejectCredential;
+        }
+
+        /**
+         * Runs {@code hook} at the start of {@link #login}, i.e. while the handler is between
+         * its {@code peek()} gate and the {@code allow()} call on the credential-failure path.
+         * Tests use it to play the concurrent request that drains the bucket in that window —
+         * the only way the post-failure escalation can be reached, and reachable here without
+         * spawning a thread.
+         *
+         * @param hook action simulating a request that arrives during credential verification
+         * @return this stub (fluent)
+         */
+        StubLoginAssist withConcurrentRequestDuringLogin(final Runnable hook) {
+            this.concurrentRequest = hook;
+            return this;
+        }
+
+        @Override
+        public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+            concurrentRequest.run();
+            if (rejectCredential) {
+                throw new LoginFailureException("stubbed credential rejection");
+            }
+            bound = new FessUserBean(new StubFessUser(userId));
+        }
+
+        @Override
+        public OptionalThing<FessUserBean> getSavedUserBean() {
+            return bound == null ? OptionalThing.empty() : OptionalThing.of(bound);
+        }
+
+        @Override
+        public void logout() {
+            bound = null;
+        }
+    }
+
+    /** Minimal {@link FessUser} with no roles, groups or permissions. */
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+
+        private final String name;
+
+        StubFessUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
+    }
+
+    /**
+     * {@link StubRequest} variant backed by an in-memory {@link HttpSession} so the post-success
+     * branch (session rotation plus CSRF issue/rotate) can run to completion.
+     */
+    private static class StubRequestWithSession extends StubRequest {
+        private final HttpSession session = new HttpSession() {
+            private final Map<String, Object> attributes = new HashMap<>();
+
+            @Override
+            public long getCreationTime() {
+                return 0L;
+            }
+
+            @Override
+            public String getId() {
+                return "stub-session-id";
+            }
+
+            @Override
+            public long getLastAccessedTime() {
+                return 0L;
+            }
+
+            @Override
+            public ServletContext getServletContext() {
+                return null;
+            }
+
+            @Override
+            public void setMaxInactiveInterval(final int interval) {
+                // no-op
+            }
+
+            @Override
+            public int getMaxInactiveInterval() {
+                return 1800;
+            }
+
+            @Override
+            public Object getAttribute(final String name) {
+                return attributes.get(name);
+            }
+
+            @Override
+            public Enumeration<String> getAttributeNames() {
+                return Collections.enumeration(attributes.keySet());
+            }
+
+            @Override
+            public void setAttribute(final String name, final Object value) {
+                attributes.put(name, value);
+            }
+
+            @Override
+            public void removeAttribute(final String name) {
+                attributes.remove(name);
+            }
+
+            @Override
+            public void invalidate() {
+                attributes.clear();
+            }
+
+            @Override
+            public boolean isNew() {
+                return false;
+            }
+        };
+
+        StubRequestWithSession(final String method, final String uri) {
+            super(method, uri);
+        }
+
+        @Override
+        public HttpSession getSession(final boolean create) {
+            return session;
+        }
+
+        @Override
+        public HttpSession getSession() {
+            return session;
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
