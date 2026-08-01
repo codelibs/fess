@@ -268,21 +268,27 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertEquals(0, jarFiles.length);
     }
 
+    // WEB-INF/plugin is the drop-in directory for locally installed plugins, so its contents depend on
+    // the machine: empty on a fresh clone, but populated as soon as a plugin is installed. Asserting a
+    // fixed file count therefore only holds on the former. Assert the prefix/filter contract instead.
+
     @Test
     public void test_getPluginJarFiles_withPrefix() {
-        File[] pluginFiles = ResourceUtil.getPluginJarFiles("plugin");
-        assertNotNull(pluginFiles);
-        // Should return empty array when plugin directory doesn't exist
-        assertEquals(0, pluginFiles.length);
+        assertEquals(0, ResourceUtil.getPluginJarFiles("no-such-plugin-prefix-").length);
+
+        for (final File pluginFile : ResourceUtil.getPluginJarFiles("fess-")) {
+            assertTrue(pluginFile.getName() + " must start with the requested prefix", pluginFile.getName().startsWith("fess-"));
+        }
     }
 
     @Test
     public void test_getPluginJarFiles_withFilter() {
-        FilenameFilter filter = (dir, name) -> name.endsWith(".jar");
-        File[] pluginFiles = ResourceUtil.getPluginJarFiles(filter);
-        assertNotNull(pluginFiles);
-        // Should return empty array when plugin directory doesn't exist
-        assertEquals(0, pluginFiles.length);
+        assertEquals(0, ResourceUtil.getPluginJarFiles((dir, name) -> false).length);
+
+        final FilenameFilter filter = (dir, name) -> name.endsWith(".jar");
+        for (final File pluginFile : ResourceUtil.getPluginJarFiles(filter)) {
+            assertTrue(pluginFile.getName() + " must satisfy the filter", pluginFile.getName().endsWith(".jar"));
+        }
     }
 
     @Test
