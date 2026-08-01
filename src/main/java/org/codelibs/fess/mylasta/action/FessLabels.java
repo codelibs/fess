@@ -3840,6 +3840,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Thumbnail */
     public static final String LABELS_theme_thumbnail = "{labels.theme_thumbnail}";
 
+    /** The key of the message: This content is managed by the content chunk pipeline and cannot be edited here. */
+    public static final String LABELS_searchlist_content_chunk_managed = "{labels.searchlist_content_chunk_managed}";
+
+    /** The key of the message: content ({0} chunks / {1} chars total) */
+    public static final String LABELS_searchlist_content_chunk_summary = "{labels.searchlist_content_chunk_summary}";
+
+    /** The key of the message: Chunk {0} ({1} chars) */
+    public static final String LABELS_searchlist_content_chunk_item = "{labels.searchlist_content_chunk_item}";
+
+    /** The key of the message: The content is {0} characters long and too large to display. */
+    public static final String LABELS_searchlist_content_too_large = "{labels.searchlist_content_too_large}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

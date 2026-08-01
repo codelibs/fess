@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -179,16 +180,28 @@ public class ChatClient {
             }
 
             final List<Map<String, Object>> searchResults = searchResult.getDocuments();
-            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, historyForAnswer);
+            final List<Map<String, Object>> answerDocs = fetchContentForAnswer(searchResults, finalSearchQuery);
+            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, answerDocs, historyForAnswer);
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
+            // The sources are built from the SEARCH-phase maps, not from answerDocs: content_title
+            // and content_description do not exist in the index (see fess_indices/fess/doc.json) --
+            // they are injected at render time by the rank-fusion searcher via
+            // ViewHelper#getContentDescription. fetchContentForAnswer re-reads documents through
+            // SearchHelper#getDocumentListByDocIds, a pure _source projection, so those keys can
+            // never come back and sources[].snippet would silently vanish from the API response.
+            // answerDocs stays the LLM answer context (that is the whole point of the fetch).
+            for (final Map<String, Object> doc : searchResults) {
+                populateUrlLink(doc);
+            }
             addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
             assistantMessage.setSearchQuery(finalSearchQuery);
 
             session.addMessage(assistantMessage);
 
-            logger.info("[RAG] Chat completed. sessionId={}, intent={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    intentResult.getIntent(), searchResults.size(), System.currentTimeMillis() - startTime);
+            logger.info("[RAG] Chat completed. sessionId={}, intent={}, sourcesCount={}, answerDocsCount={}, elapsedTime={}ms",
+                    session.getSessionId(), intentResult.getIntent(), searchResults.size(), answerDocs.size(),
+                    System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
@@ -331,7 +344,9 @@ public class ChatClient {
                             .collect(Collectors.toList());
                     final List<Map<String, Object>> fullDocs = fetchFullContent(docIds);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
-                    sources = fullDocs;
+                    // fullDocs stays the LLM context; the sources are resolved back to the
+                    // search-phase maps, which alone carry content_description/content_title.
+                    sources = resolveSourcesFromSearchResults(fullDocs, urlResults);
                     if (logger.isDebugEnabled()) {
                         logger.debug("[RAG] Phase {} completed. docIds={}, fetchedCount={}, phaseElapsedTime={}ms",
                                 ChatPhaseCallback.PHASE_FETCH, docIds, fullDocs.size(), System.currentTimeMillis() - phaseStartTime);
@@ -475,7 +490,9 @@ public class ChatClient {
                         final List<Map<String, Object>> fullDocs = ComponentUtil.getChatContentFetcher()
                                 .fetchContent(new ChatContentRequest(evalResult.getRelevantDocIds(), searchResults, finalSearchQuery));
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
-                        sources = fullDocs;
+                        // fullDocs stays the LLM context; the sources are resolved back to the
+                        // search-phase maps, which alone carry content_description/content_title.
+                        sources = resolveSourcesFromSearchResults(fullDocs, searchResults);
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("[RAG] Phase {} completed. docIds={}, fetchedCount={}, phaseElapsedTime={}ms",
@@ -937,6 +954,100 @@ public class ChatClient {
      */
     protected List<Map<String, Object>> fetchFullContent(final List<String> docIds) {
         return ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, Collections.emptyList(), null));
+    }
+
+    /**
+     * Resolves the answer-context documents for the non-streaming chat path through
+     * {@link ChatContentFetcher}, so chunked documents ({@code content_chunk_status=done/chunked})
+     * get the same semantic/keyword chunk selection as the streaming path's fetch phase
+     * instead of feeding the raw search-result content to the LLM.
+     *
+     * <p>Falls back to the raw {@code searchResults} when no doc ids can be extracted or the
+     * fetcher returns nothing, so an OpenSearch hiccup degrades to the previous behavior
+     * rather than an empty context.</p>
+     *
+     * <p>The returned maps are for the LLM answer context ONLY -- never for the API
+     * {@code sources[]}. They come back from a {@code _source} projection, so the render-time-only
+     * fields the sources need ({@code content_description}, {@code content_title}) are not in them.
+     * The caller builds its sources from the search-phase maps.</p>
+     *
+     * @param searchResults the search result documents
+     * @param query the final search query (may be null for the SUMMARY intent)
+     * @return the documents to build the LLM answer context from
+     */
+    protected List<Map<String, Object>> fetchContentForAnswer(final List<Map<String, Object>> searchResults, final String query) {
+        if (searchResults.isEmpty()) {
+            return searchResults;
+        }
+        final String docIdField = ComponentUtil.getFessConfig().getIndexFieldDocId();
+        final List<String> docIds = searchResults.stream()
+                .map(doc -> doc.get(docIdField))
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .collect(Collectors.toList());
+        if (docIds.isEmpty()) {
+            return searchResults;
+        }
+        try {
+            final List<Map<String, Object>> fullDocs =
+                    ComponentUtil.getChatContentFetcher().fetchContent(new ChatContentRequest(docIds, searchResults, query));
+            return fullDocs.isEmpty() ? searchResults : fullDocs;
+        } catch (final Exception e) {
+            // The fetcher is an enrichment step: a failure must degrade this chat to the raw
+            // search-result content (previous behavior), not fail the whole request.
+            // DefaultChatContentFetcher already catches and degrades every engine-level failure
+            // internally, so reaching here means a programming error (NPE/CCE) in the fetcher --
+            // exactly the case where the stack trace is the entire diagnostic, so log the
+            // Throwable itself, not only its (possibly null) message.
+            logger.warn("[RAG] Failed to fetch answer content; using raw search results. docIds={}, error={}", docIds, e.getMessage(), e);
+            return searchResults;
+        }
+    }
+
+    /**
+     * Resolves the API {@code sources[]} maps for a fetched (LLM-context) document list, by
+     * mapping every fetched document back to its search-phase map.
+     *
+     * <p>{@code content_title} and {@code content_description} do not exist in the index (see
+     * {@code fess_indices/fess/doc.json}); they are injected at render time by the rank-fusion
+     * searcher via {@code ViewHelper#getContentDescription}, as is {@code score}. The fetch phase
+     * re-reads documents through {@code SearchHelper#getDocumentListByDocIds} -- a pure
+     * {@code _source} projection -- or through a doc_id-restricted highlight search, so those keys
+     * are never present on the fetched maps. Publishing the fetched maps as {@code sources[]}
+     * therefore silently drops {@code snippet} (and {@code title}, for a document whose indexed
+     * {@code title} is blank) from the streaming API response.</p>
+     *
+     * <p>Only the maps are swapped: the fetched list keeps feeding the LLM answer context, so the
+     * chunk-selected {@code content} the fetcher produced is unaffected. The returned list keeps
+     * the fetched list's order and cardinality -- i.e. exactly the documents the fetch phase
+     * resolved, not every search hit -- and a fetched document with no search-phase counterpart
+     * (the evaluation phase is LLM-driven and could name a doc id outside the result set) keeps
+     * its fetched map, preserving the previous behavior for that document.</p>
+     *
+     * @param fetchedDocs the fetched (LLM-context) documents
+     * @param searchResults the search-phase result maps the fetch was derived from
+     * @return the source maps, in {@code fetchedDocs} order
+     */
+    protected List<Map<String, Object>> resolveSourcesFromSearchResults(final List<Map<String, Object>> fetchedDocs,
+            final List<Map<String, Object>> searchResults) {
+        if (fetchedDocs.isEmpty() || searchResults == null || searchResults.isEmpty()) {
+            return fetchedDocs;
+        }
+        final String docIdField = ComponentUtil.getFessConfig().getIndexFieldDocId();
+        final Map<String, Map<String, Object>> searchDocsByDocId = new HashMap<>();
+        for (final Map<String, Object> doc : searchResults) {
+            final Object docId = doc.get(docIdField);
+            if (docId instanceof String) {
+                searchDocsByDocId.putIfAbsent((String) docId, doc);
+            }
+        }
+        final List<Map<String, Object>> resolved = new ArrayList<>(fetchedDocs.size());
+        for (final Map<String, Object> fetchedDoc : fetchedDocs) {
+            final Object docId = fetchedDoc.get(docIdField);
+            final Map<String, Object> searchDoc = docId instanceof String ? searchDocsByDocId.get(docId) : null;
+            resolved.add(searchDoc != null ? searchDoc : fetchedDoc);
+        }
+        return resolved;
     }
 
     /**

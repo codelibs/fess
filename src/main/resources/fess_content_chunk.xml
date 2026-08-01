@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<!-- Content chunk + embedding ingestion helper -->
+	<component name="chunkVectorHelper" class="org.codelibs.fess.helper.ChunkVectorHelper">
+		<postConstruct name="init"/>
+	</component>
+</components>

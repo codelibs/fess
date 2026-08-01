@@ -36,6 +36,16 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
     private static final String ID_FIELD = "_id";
 
     @Test
+    public void test_warnsWhenLegacySemanticIsAllowedButChunkIsNot() {
+        final RankFusionProcessor processor = new RankFusionProcessor();
+
+        assertTrue(processor.isLegacySemanticAllowlist(new String[] { "default", "semantic" }));
+        assertFalse(processor.isLegacySemanticAllowlist(new String[] { "default", "semantic", "semantic_chunk" }));
+        assertFalse(processor.isLegacySemanticAllowlist(new String[] { "default" }));
+        assertFalse(processor.isLegacySemanticAllowlist(new String[0]));
+    }
+
+    @Test
     public void test_default_1000docs_10size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;

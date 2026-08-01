@@ -16,6 +16,7 @@
 package org.codelibs.fess.rank.fusion;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,9 +144,33 @@ public class RankFusionProcessor implements AutoCloseable {
             availableSearcherNameSet = StreamUtil.split(value, ",")
                     .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toUnmodifiableSet()));
         }
+        if (isLegacySemanticAllowlist(availableSearcherNameSet.toArray(new String[0]))) {
+            logger.warn("rank.fusion.searchers allows 'semantic' but not 'semantic_chunk', so the built-in semantic chunk searcher "
+                    + "is silently excluded from search. Remove the rank.fusion.searchers setting or add 'semantic_chunk' to it.");
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Available searchers: names={}", availableSearcherNameSet);
         }
+    }
+
+    /**
+     * Determines whether the configured searcher allowlist still names the plugin-era
+     * {@code semantic} searcher without the built-in {@code semantic_chunk} one.
+     *
+     * <p>A {@code rank.fusion.searchers} value carried over from the
+     * {@code fess-webapp-semantic-search} plugin era (e.g. {@code default,semantic}) does not
+     * name the built-in {@code semantic_chunk} searcher, so it is silently excluded from every
+     * search -- with no error, since {@link #getAvailableSearchers()} simply filters it out.</p>
+     *
+     * @param allowlist the configured searcher names
+     * @return {@code true} when the allowlist would silently exclude semantic chunk search
+     */
+    protected boolean isLegacySemanticAllowlist(final String[] allowlist) {
+        if (allowlist == null || allowlist.length == 0) {
+            return false;
+        }
+        final List<String> names = Arrays.asList(allowlist);
+        return names.contains("semantic") && !names.contains("semantic_chunk");
     }
 
     @Override

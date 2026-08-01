@@ -208,7 +208,23 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || "spnego.preauth.password".equals(key) //
                 || "app.cipher.key".equals(key) //
                 || "oic.client.id".equals(key) //
-                || "oic.client.secret".equals(key);
+                || "oic.client.secret".equals(key) //
+                || "content_chunker.embedding.opensearch.password".equals(key) //
+                || isEmbeddingApiKey(key);
+    }
+
+    /**
+     * Checks if a key is an embedding provider's API key, e.g.
+     * {@code content_chunker.embedding.openai.api.key} or
+     * {@code content_chunker.embedding.gemini.api.key}. Matching on the
+     * {@code content_chunker.embedding.<provider>.api.key} shape, instead of listing every
+     * provider by name, means a future embedding provider's API key is masked by default.
+     *
+     * @param key the property key to check
+     * @return true if the key matches the embedding provider API key shape
+     */
+    protected static boolean isEmbeddingApiKey(final String key) {
+        return key != null && key.startsWith("content_chunker.embedding.") && key.endsWith(".api.key");
     }
 
     /**
@@ -224,8 +240,15 @@ public class AdminSysteminfoAction extends FessAdminAction {
 
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
-            if (isBugReportTarget(entry.getKey())) {
-                itemList.add(createItem(entry.getKey(), entry.getValue()));
+            final String k = entry.getKey().toString();
+            if (isBugReportTarget(k)) {
+                final String value;
+                if (isMaskedValue(k)) {
+                    value = MASKED_VALUE;
+                } else {
+                    value = entry.getValue().toString();
+                }
+                itemList.add(createItem(k, value));
             }
         }
 

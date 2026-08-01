@@ -497,6 +497,21 @@
         "search_analyzer": "standard_search_analyzer",
         "term_vector": "with_positions_offsets"
       },
+      "content_chunk_vector": {
+        "type": "nested",
+        "properties": {
+          "vector": {
+            "type": "knn_vector",
+            "dimension": "${fess.content_chunker.embedding.dimension}",
+            "method": {
+              "name": "${fess.content_chunker.search.knn.method}",
+              "engine": "${fess.content_chunker.search.knn.engine}",
+              "space_type": "${fess.content_chunker.search.knn.space_type}",
+              "parameters": { "m": 16, "ef_construction": 100 }
+            }
+          }
+        }
+      },
       "content": {
         "type": "text",
         "analyzer": "standard_analyzer",
@@ -515,6 +530,9 @@
       },
       "content_length": {
         "type": "long"
+      },
+      "content_chunk_status": {
+        "type": "keyword"
       },
       "created": {
         "type": "date",

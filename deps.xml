@@ -5,6 +5,7 @@
 	<property name="crawler.dir" value="${basedir}/src/main/webapp/WEB-INF/env/crawler" />
 	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/env/suggest" />
 	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
+	<property name="chunk.dir" value="${basedir}/src/main/webapp/WEB-INF/env/chunk" />
 	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
 	<property name="kopf.version" value="15.7.0" />
 	<property name="kopf.url" value="https://github.com/codelibs/fess-kopf/archive/refs/tags/v${kopf.version}.zip" />
@@ -25,6 +26,8 @@
 		<mkdir dir="${suggest.dir}/lib" />
 		<delete dir="${thumbnail.dir}/lib" />
 		<mkdir dir="${thumbnail.dir}/lib" />
+		<delete dir="${chunk.dir}/lib" />
+		<mkdir dir="${chunk.dir}/lib" />
 		<!-- annotation-api -->
 		<antcall target="install.env.jar">
 			<param name="repo.url" value="${maven.release.repo.url}" />
@@ -58,5 +61,6 @@
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${crawler.dir}/lib" />
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${suggest.dir}/lib" />
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${thumbnail.dir}/lib" />
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${chunk.dir}/lib" />
 	</target>
 </project>

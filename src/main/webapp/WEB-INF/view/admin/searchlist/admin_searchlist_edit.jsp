@@ -178,8 +178,47 @@ ${fe:html(true)}
                                 <div class="form-group row">
                                     <label for="doc.content" class="col-sm-3 text-sm-right col-form-label">content</label>
                                     <div class="col-sm-9">
-                                        <la:errors property="doc.content"/>
-                                        <la:text styleId="doc.content" property="doc.content" styleClass="form-control"/>
+                                        <c:choose>
+                                            <c:when test="${contentTooLarge}">
+                                                <div class="form-control-plaintext border rounded px-2 py-1 text-muted">
+                                                    <la:message key="labels.searchlist_content_too_large"
+                                                                arg0="${f:h(contentLength)}"/>
+                                                    <c:if test="${not empty contentChunkCount}">
+                                                        <br/>
+                                                        <la:message key="labels.searchlist_content_chunk_summary"
+                                                                    arg0="${f:h(contentChunkCount)}"
+                                                                    arg1="${f:h(contentLength)}"/>
+                                                    </c:if>
+                                                </div>
+                                                <c:if test="${not empty contentChunkCount}">
+                                                    <small class="form-text text-muted"><la:message
+                                                            key="labels.searchlist_content_chunk_managed"/></small>
+                                                </c:if>
+                                            </c:when>
+                                            <c:when test="${contentReadOnly}">
+                                                <div class="form-control-plaintext px-0 py-1">
+                                                    <la:message key="labels.searchlist_content_chunk_summary"
+                                                                arg0="${f:h(contentChunkCount)}"
+                                                                arg1="${f:h(contentLength)}"/>
+                                                </div>
+                                                <c:forEach var="chunk" items="${contentChunks}" varStatus="chunkStatus">
+                                                    <details class="border rounded mb-1">
+                                                        <summary class="px-2 py-1"><la:message
+                                                                key="labels.searchlist_content_chunk_item"
+                                                                arg0="${chunkStatus.count}"
+                                                                arg1="${fn:length(chunk)}"/></summary>
+                                                        <pre class="border-top mb-0 px-2 py-1"
+                                                             style="white-space: pre-wrap; word-break: break-word;">${f:h(chunk)}</pre>
+                                                    </details>
+                                                </c:forEach>
+                                                <small class="form-text text-muted"><la:message
+                                                        key="labels.searchlist_content_chunk_managed"/></small>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <la:errors property="doc.content"/>
+                                                <la:text styleId="doc.content" property="doc.content" styleClass="form-control"/>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
                                 <div class="form-group row">

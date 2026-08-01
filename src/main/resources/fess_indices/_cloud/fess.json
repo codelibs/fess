@@ -1,6 +1,9 @@
 {
   "settings": {
     "index": {
+      "knn": true,
+      "knn.derived_source.enabled": false,
+      "merge": { "policy": { "floor_segment": "16mb", "max_merge_at_once": 30 } },
       "codec": "${fess.index.codec}",
       "refresh_interval": "1s",
       "number_of_shards": "${fess.index.number_of_shards}",

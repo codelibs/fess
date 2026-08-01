@@ -76,6 +76,15 @@
 			<param name="module.version" value="${opensearch.version}" />
 			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
+		<!-- transport-grpc -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="transport-grpc" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
 
 		<antcall target="remove.jars" />
 	</target>
@@ -102,6 +111,8 @@
 				<include name="reindex/httpclient5-*" />
 				<include name="reindex/httpcore5-*" />
 				<include name="reindex/slf4j-api-*" />
+				<include name="transport-grpc/failureaccess-*" />
+				<include name="transport-grpc/guava-*" />
 			</fileset>
 		</delete>
 	</target>

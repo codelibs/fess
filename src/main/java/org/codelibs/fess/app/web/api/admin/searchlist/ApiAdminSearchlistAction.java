@@ -16,9 +16,12 @@
 package org.codelibs.fess.app.web.api.admin.searchlist;
 
 import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.getDoc;
+import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.stripSystemManagedFields;
 import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.validateFields;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -159,7 +162,10 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         validateFields(body.doc, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
+            verifyContentNotChunkManaged(entity, body.doc,
+                    message -> throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, message)));
             try {
+                stripSystemManagedFields(entity, body.doc);
                 entity.putAll(fessConfig.convertToStorableDoc(body.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
@@ -198,7 +204,10 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         body.crudMode = CrudMode.EDIT;
         final Map<String, Object> doc = getDoc(body).map(entity -> {
             final String index = fessConfig.getIndexDocumentUpdateIndex();
+            verifyContentNotChunkManaged(entity, body.doc,
+                    message -> throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, message)));
             try {
+                stripSystemManagedFields(entity, body.doc);
                 entity.putAll(fessConfig.convertToStorableDoc(body.doc));
 
                 final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
@@ -226,6 +235,38 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         });
         return asJson(
                 new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(false).status(Status.OK).result());
+    }
+
+    /**
+     * Refuses a {@code content} update whose value {@code stripSystemManagedFields} would silently
+     * discard -- i.e. one aimed at an already-chunked document, whose fetched {@code content} is a
+     * {@code List} of chunks kept consistent with {@code content_chunk_vector} by the embedding
+     * pipeline.
+     *
+     * <p>Dropping the field is the right behavior for the HTML screen, which renders that document's
+     * {@code content} as a read-only chunk list and never submits it, so a {@code content} key can
+     * only arrive there by a hand-crafted POST. The API has no such rendering pass: a caller that
+     * sends {@code content} in good faith otherwise gets {@code status: 0} back with the field
+     * discarded and nothing -- no error, no warning, no log -- saying so. Failing the request keeps
+     * the write path honest; no legitimate API workflow can update chunked content anyway, since the
+     * chunk array and its vectors are only ever written together by the pipeline.</p>
+     *
+     * <p>The unconditional strip of {@code content_chunk_vector}/{@code content_chunk_status} stays
+     * silent: those keys are never a legitimate client-supplied value on either transport.</p>
+     *
+     * @param entity the freshly-fetched entity (read-only; only its {@code content} value is read)
+     * @param doc the client-supplied doc map (read-only here; not yet stripped)
+     * @param throwError callback invoked with the error detail when the update must be refused
+     */
+    protected void verifyContentNotChunkManaged(final Map<String, Object> entity, final Map<String, Object> doc,
+            final Consumer<String> throwError) {
+        if (entity == null || doc == null || !doc.containsKey("content")) {
+            return;
+        }
+        if (entity.get("content") instanceof List<?>) {
+            logger.warn("Rejected a content update for a chunked document. docId={}", entity.get(fessConfig.getIndexFieldDocId()));
+            throwError.accept("content is managed by the content chunk pipeline for this document and cannot be updated");
+        }
     }
 
     /**
