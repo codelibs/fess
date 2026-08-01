@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,10 +30,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -383,9 +390,50 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals(response, systemHelper.getRedirectResponseToRoot(response));
     }
 
+    /**
+     * Captures the JVM-global state that {@link SystemHelper#setLogLevel(String)} rewrites, and returns
+     * a task that puts it back.
+     *
+     * <p>Restoring with {@code setLogLevel(getLogLevel())} does not work: {@code setLogLevel} pushes the
+     * level into the live log4j2 configuration for every package in {@code logging.app.packages}, while
+     * {@code getLogLevel()} only reads the {@code fess.log.level} system property, which is unset under
+     * tests and falls back to WARN. That "restore" pins those packages to WARN for the rest of the
+     * surefire JVM, so any later test asserting on INFO or DEBUG logs sees nothing. Whether it breaks
+     * depends on test class order, which surefire derives from the filesystem, so it reproduces on some
+     * machines only.</p>
+     */
+    private Runnable captureLogLevelState() {
+        final String originalProperty = System.getProperty(Constants.FESS_LOG_LEVEL);
+        final Configuration configuration = ((LoggerContext) LogManager.getContext(false)).getConfiguration();
+        final Map<String, Level> originalLevels = new LinkedHashMap<>();
+        for (final String pkg : appLogPackages()) {
+            originalLevels.put(pkg, configuration.getLoggerConfig(pkg).getLevel());
+        }
+        return () -> {
+            if (originalProperty == null) {
+                System.clearProperty(Constants.FESS_LOG_LEVEL);
+            } else {
+                System.setProperty(Constants.FESS_LOG_LEVEL, originalProperty);
+            }
+            originalLevels.forEach(Configurator::setLevel);
+        };
+    }
+
+    private List<String> appLogPackages() {
+        return Stream.of(ComponentUtil.getFessConfig().getLoggingAppPackages().split(","))
+                .map(String::trim)
+                .filter(StringUtil::isNotEmpty)
+                .collect(Collectors.toList());
+    }
+
+    private Level currentLogLevel(final String pkg) {
+        final Configuration configuration = ((LoggerContext) LogManager.getContext(false)).getConfiguration();
+        return configuration.getLoggerConfig(pkg).getLevel();
+    }
+
     @Test
     public void test_getLogLevel() {
-        final String logLevel = systemHelper.getLogLevel();
+        final Runnable restoreLogLevel = captureLogLevelState();
         try {
             systemHelper.setLogLevel("DEBUG");
             assertEquals("DEBUG", systemHelper.getLogLevel());
@@ -396,8 +444,27 @@ public class SystemHelperTest extends UnitFessTestCase {
             systemHelper.setLogLevel("ERROR");
             assertEquals("ERROR", systemHelper.getLogLevel());
         } finally {
-            systemHelper.setLogLevel(logLevel);
+            restoreLogLevel.run();
         }
+    }
+
+    @Test
+    public void test_setLogLevel_appliesToAppLogPackages() {
+        final Map<String, Level> before = new LinkedHashMap<>();
+        appLogPackages().forEach(pkg -> before.put(pkg, currentLogLevel(pkg)));
+
+        final Runnable restoreLogLevel = captureLogLevelState();
+        try {
+            // two distinct levels, so the assertion cannot pass merely by matching the ambient level
+            systemHelper.setLogLevel("ERROR");
+            before.keySet().forEach(pkg -> assertEquals(pkg + " must follow the requested level", Level.ERROR, currentLogLevel(pkg)));
+            systemHelper.setLogLevel("DEBUG");
+            before.keySet().forEach(pkg -> assertEquals(pkg + " must follow the requested level", Level.DEBUG, currentLogLevel(pkg)));
+        } finally {
+            restoreLogLevel.run();
+        }
+        // the restore has to undo the log4j2 side effect too, otherwise it leaks into every later test
+        before.forEach((pkg, level) -> assertEquals(pkg + " must be restored to its configured level", level, currentLogLevel(pkg)));
     }
 
     @Test
@@ -819,12 +886,12 @@ public class SystemHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_setLogLevel_invalidLevel() {
-        final String originalLevel = systemHelper.getLogLevel();
+        final Runnable restoreLogLevel = captureLogLevelState();
         try {
             systemHelper.setLogLevel("INVALID_LEVEL");
             assertEquals("WARN", systemHelper.getLogLevel());
         } finally {
-            systemHelper.setLogLevel(originalLevel);
+            restoreLogLevel.run();
         }
     }
 
