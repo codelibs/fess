@@ -12,4 +12,8 @@
 			</arg>
 		</postConstruct>
 	</component>
+	<component name="semanticChunkSearcher"
+		class="org.codelibs.fess.rank.fusion.SemanticChunkSearcher">
+		<postConstruct name="register"></postConstruct>
+	</component>
 </components>

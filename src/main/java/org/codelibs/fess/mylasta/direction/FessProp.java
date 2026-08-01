@@ -849,6 +849,12 @@ public interface FessProp {
         return roles;
     }
 
+    String getJvmChunkOptions();
+
+    default String[] getJvmChunkOptionsAsArray() {
+        return JvmUtil.filterJvmOptions(getJvmChunkOptions().split("\n"));
+    }
+
     String getJvmCrawlerOptions();
 
     default String[] getJvmCrawlerOptionsAsArray() {

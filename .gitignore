@@ -11,6 +11,7 @@
 /src/main/webapp/WEB-INF/env/crawler/lib/
 /src/main/webapp/WEB-INF/env/suggest/lib/
 /src/main/webapp/WEB-INF/env/thumbnail/lib/
+/src/main/webapp/WEB-INF/env/chunk/lib/
 /src/main/webapp/WEB-INF/thumbnails/
 /src/main/webapp/jar/
 /dbflute_fess/extlib/*

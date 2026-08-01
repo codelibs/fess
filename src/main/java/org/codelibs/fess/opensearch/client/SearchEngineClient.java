@@ -63,6 +63,7 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -246,6 +247,9 @@ public class SearchEngineClient implements Client {
     /** Name of the search engine cluster */
     protected String clusterName = "fesen";
 
+    /** The config index whose bulk data is reloaded on startup so newly shipped jobs appear on upgraded installations. */
+    protected static final String SCHEDULED_JOB_CONFIG_INDEX = "fess_config.scheduled_job";
+
     /** List of rewrite rules for document settings */
     protected final List<UnaryOperator<String>> docSettingRewriteRuleList = new ArrayList<>();
 
@@ -402,6 +406,29 @@ public class SearchEngineClient implements Client {
                     httpAddress = "http://localhost:" + port; // Fallback
                 }
                 logger.warn("Embedded OpenSearch is running. This configuration is not recommended for production use.");
+                // Reads the raw system property rather than ChunkVectorHelper#getKnnEngine(): this
+                // runs very early in open() (before the embedded node's HTTP client, waitForYellowStatus,
+                // or any index/mapping machinery), the same @PostConstruct phase whose ordering
+                // sensitivity is this whole branch's origin (Task 2 must bundle the k-NN plugin before
+                // Task 3's static mapping can rely on it). ComponentUtil.getFessConfig() a few lines up
+                // already proves a live component lookup succeeds this early, and ChunkVectorHelper has
+                // no eager dependency back on this class, so a live getKnnEngine() call would likely be
+                // safe too -- but this diagnostic fires before the search cluster exists, so a wrong
+                // guess here is expensive to be wrong about, and unlike the mapping-side substitution
+                // (fixed to require validation), an unvalidated engine value is merely informational
+                // here. Sharing ChunkVectorHelper's key/default constants gets the same "one source of
+                // truth, no silent desync" outcome as calling getKnnEngine() would, without adding a new
+                // component-container lookup at this specific point.
+                final String knnEngine =
+                        fessConfig.getSystemProperty(ChunkVectorHelper.KNN_ENGINE_PROPERTY, ChunkVectorHelper.DEFAULT_KNN_ENGINE);
+                if (isUnsupportedEmbeddedEngine(true, knnEngine)) {
+                    logger.warn(
+                            "content_chunker.search.knn.engine is set to '{}', but the embedded OpenSearch's bundled k-NN plugin "
+                                    + "has no JNI native libraries for it: index creation will succeed, then every document write is "
+                                    + "silently dropped by an uncaught error, and searches will return zero hits. Set "
+                                    + "content_chunker.search.knn.engine=lucene, or use Docker or an external OpenSearch instead.",
+                            knnEngine);
+                }
                 break;
             }
         }
@@ -709,7 +736,7 @@ public class SearchEngineClient implements Client {
 
         final String indexConfigFile = getResourcePath(indexConfigPath, fesenType, "/" + index + ".json");
         try {
-            final String source = readIndexSetting(fesenType, indexConfigFile, numberOfShards, autoExpandReplicas);
+            final String source = readIndexSetting(index, fesenType, indexConfigFile, numberOfShards, autoExpandReplicas);
             final CreateIndexResponse indexResponse = client.admin()
                     .indices()
                     .prepareCreate(indexName)
@@ -724,9 +751,44 @@ public class SearchEngineClient implements Client {
                 logger.debug("Failed to create index: indexName={}", indexName);
             }
         } catch (final Exception e) {
-            logger.warn("Index config file not found: path={}", indexConfigFile, e);
+            if (isMissingKnnPluginError(e)) {
+                logger.warn("Failed to create index: index={}, path={}. This looks like the OpenSearch cluster is missing the "
+                        + "opensearch-knn plugin -- every shipped index now declares \"index.knn\": true and a "
+                        + "\"knn_vector\" field unconditionally. Install opensearch-knn on every node and restart; Fess "
+                        + "cannot start against this cluster otherwise, and the failure this triggers next (loading this "
+                        + "index's mapping) will not repeat this diagnosis.", index, indexConfigFile, e);
+            } else {
+                logger.warn("Failed to create index: index={}, path={}", index, indexConfigFile, e);
+            }
         }
 
+        return false;
+    }
+
+    /**
+     * Detects whether an exception thrown while creating an index (or one of its causes) is
+     * OpenSearch rejecting a k-NN construct because the {@code opensearch-knn} plugin is not
+     * installed on the cluster, rather than some other index-creation failure.
+     *
+     * <p>{@link #createIndex(String, String, String, String, boolean)} only logs this at WARN and
+     * returns {@code false}; the caller ({@code open()}) does not check that return value before
+     * proceeding to {@link #createAlias(String, String)} and then {@link #addMapping(String, String,
+     * String, boolean)}, whose {@code prepareGetMappings} call throws uncaught for a nonexistent
+     * index -- so this diagnostic is the only place in the resulting stack trace that names the
+     * actual, fixable cause; everything after it just reports the index does not exist.</p>
+     *
+     * @param t the exception to inspect, including its cause chain
+     * @return {@code true} when the failure matches one of OpenSearch's k-NN-plugin-missing error
+     *         shapes ({@code unknown setting [index.knn]}, {@code No handler for type [knn_vector]})
+     */
+    protected boolean isMissingKnnPluginError(final Throwable t) {
+        for (Throwable cause = t; cause != null; cause = cause.getCause()) {
+            final String message = cause.getMessage();
+            if (message != null
+                    && (message.contains("unknown setting [index.knn]") || message.contains("No handler for type [knn_vector]"))) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -975,28 +1037,81 @@ public class SearchEngineClient implements Client {
     /**
      * Reads and processes index settings from configuration file.
      *
+     * <p>The document settings rewrite rules are applied to the document index only, mirroring
+     * {@link #addMapping(String, String, String, boolean)}'s guard for the mapping rules: they
+     * anchor on document-index constructs, so running them over the other index config files
+     * only produces anchor-miss warnings naming a file unrelated to the index being created.</p>
+     *
+     * @param index              the index configuration name
      * @param fesenType          the search engine type
      * @param indexConfigFile    the path to the index configuration file
      * @param numberOfShards     the number of primary shards
      * @param autoExpandReplicas the auto expand replicas setting
      * @return the processed index settings JSON
      */
-    protected String readIndexSetting(final String fesenType, final String indexConfigFile, final String numberOfShards,
+    protected String readIndexSetting(final String index, final String fesenType, final String indexConfigFile, final String numberOfShards,
             final String autoExpandReplicas) {
+        String source = substitutePlaceholders(FileUtil.readUTF8(indexConfigFile), numberOfShards, autoExpandReplicas);
+        if (DOC_INDEX.equals(index)) {
+            for (final UnaryOperator<String> rule : docSettingRewriteRuleList) {
+                source = rule.apply(source);
+            }
+        }
+        return source;
+    }
+
+    /**
+     * Substitutes {@code ${fess.*}} placeholders in an index settings or mapping definition.
+     *
+     * <p>The {@code content_chunker.embedding.dimension}/{@code .search.knn.{method,engine,
+     * space_type}} placeholders delegate to {@link ChunkVectorHelper#getKnnDimension()}/
+     * {@link ChunkVectorHelper#getKnnMethod()}/{@link ChunkVectorHelper#getKnnEngine()}/
+     * {@link ChunkVectorHelper#getKnnSpaceType()} rather than reading the underlying system
+     * properties directly. This matters for two reasons: first, an invalid or present-but-empty
+     * value (e.g. an operator clearing a property rather than deleting it -- {@code
+     * FessProp#getSystemProperty}'s default only fires when the key is <em>absent</em>) is rejected
+     * and replaced with the documented default instead of being spliced into the shipped mapping
+     * unvalidated, which would otherwise 400 {@code preparePutMapping} and leave the index with no
+     * proper mapping at all; second, this method and {@link ChunkVectorHelper#getKnnEngine()}/
+     * {@link ChunkVectorHelper#getKnnSpaceType()}'s query-time score-scale conversion then read the
+     * exact same validated values instead of duplicating the literal defaults, so the two sides
+     * cannot silently diverge.</p>
+     *
+     * <p>{@code content_chunker.search.knn.engine}/{@code .space_type} are read again at query time
+     * by those same {@code ChunkVectorHelper} getters, so the {@code content_chunk_vector} mapping's
+     * ANN {@code method} block (baked in here, at index-creation time) and
+     * {@code SemanticChunkSearcher}'s score-scale conversion agree for any index created under the
+     * configuration active right now -- but {@code engine}/{@code space_type} are live-reloadable
+     * while the mapping is not, so an index created under an older configuration keeps its original
+     * values until it is recreated, even after the config changes underneath it.
+     * {@code content_chunker.search.knn.method}, by contrast, has no query-time reader -- it only
+     * feeds the {@code doc.json} placeholder, so {@link ChunkVectorHelper#getKnnMethod()} exists
+     * solely to validate it.</p>
+     *
+     * @param source             the raw JSON read from the index definition file
+     * @param numberOfShards     the number of primary shards
+     * @param autoExpandReplicas the auto expand replicas setting
+     * @return the JSON with all placeholders replaced
+     */
+    protected String substitutePlaceholders(final String source, final String numberOfShards, final String autoExpandReplicas) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String source = FileUtil.readUTF8(indexConfigFile);
+        final ChunkVectorHelper chunkVectorHelper = ComponentUtil.getComponent(ChunkVectorHelper.class);
         String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
         if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
             dictionaryPath = dictionaryPath + "/";
         }
-        source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath)//
+        // dimension/method/engine/space_type are each validated by ChunkVectorHelper before this
+        // splices them in, so the replacement can never carry regex metacharacters ($, \) that
+        // would need Matcher.quoteReplacement -- a validated token is always either a bare positive
+        // integer or a member of a small fixed allow-set.
+        return source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath)//
                 .replaceAll(Pattern.quote("${fess.index.codec}"), fessConfig.getIndexCodec())//
                 .replaceAll(Pattern.quote("${fess.index.number_of_shards}"), numberOfShards)//
-                .replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), autoExpandReplicas);
-        for (final UnaryOperator<String> rule : docSettingRewriteRuleList) {
-            source = rule.apply(source);
-        }
-        return source;
+                .replaceAll(Pattern.quote("${fess.index.auto_expand_replicas}"), autoExpandReplicas)//
+                .replaceAll(Pattern.quote("${fess.content_chunker.embedding.dimension}"), chunkVectorHelper.getKnnDimension())//
+                .replaceAll(Pattern.quote("${fess.content_chunker.search.knn.method}"), chunkVectorHelper.getKnnMethod())//
+                .replaceAll(Pattern.quote("${fess.content_chunker.search.knn.engine}"), chunkVectorHelper.getKnnEngine())//
+                .replaceAll(Pattern.quote("${fess.content_chunker.search.knn.space_type}"), chunkVectorHelper.getKnnSpaceType());
     }
 
     /**
@@ -1053,7 +1168,8 @@ public class SearchEngineClient implements Client {
             String source = null;
             final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
             try {
-                source = FileUtil.readUTF8(mappingFile);
+                source = substitutePlaceholders(FileUtil.readUTF8(mappingFile), fessConfig.getIndexNumberOfShards(),
+                        fessConfig.getIndexAutoExpandReplicas());
                 if (DOC_INDEX.equals(index)) {
                     for (final UnaryOperator<String> rule : docMappingRewriteRuleList) {
                         source = rule.apply(source);
@@ -1092,9 +1208,77 @@ public class SearchEngineClient implements Client {
             } catch (final Exception e) {
                 logger.warn("Failed to create {}/{} mapping.", indexName, docType, e);
             }
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("{}/{} mapping exists.", indexName, docType);
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}/{} mapping exists.", indexName, docType);
+            }
+            if (loadBulkData && isStartupBulkReloadTarget(index) && isWebappProcess()) {
+                final String dataPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
+                if (ResourceUtil.isExist(dataPath)) {
+                    insertBulkData(fessConfig, indexName, dataPath, true);
+                }
+            }
         }
+    }
+
+    /**
+     * Determines whether an already-mapped index should have its bulk data reloaded on startup.
+     *
+     * <p>Bulk data normally loads only when an index is created, so an upgraded installation never
+     * receives documents added by a new release. Reloading is limited to the scheduled job index and
+     * uses create-only semantics, so user-modified rows are preserved and user-deleted rows in other
+     * config indices are not resurrected.</p>
+     *
+     * @param index the index configuration name
+     * @return {@code true} when the index's bulk data should be reloaded
+     */
+    protected boolean isStartupBulkReloadTarget(final String index) {
+        return SCHEDULED_JOB_CONFIG_INDEX.equals(index);
+    }
+
+    /**
+     * Determines whether this JVM is the main webapp process, as opposed to one of the short-lived
+     * child processes ({@code Crawler}, {@code SuggestCreator}, {@code ChunkVectorIndexer},
+     * {@code ThumbnailGenerator}) that also boot {@code app.xml} -- and therefore also run this
+     * {@code @PostConstruct} -- to run a single scheduled job and exit.
+     *
+     * <p>Each child process is launched (by the corresponding {@code *Job#buildJobCommand}) with its
+     * own {@code -Dfess.<type>.process=true} system property, set as a JVM argument before the child
+     * even starts, so it is reliably present for the whole child JVM lifetime; the webapp process
+     * never sets any of them. {@link org.codelibs.fess.thumbnail.ThumbnailManager} already reads the
+     * same {@code fess.thumbnail.process} flag for the same purpose (skip webapp-only behavior while
+     * running as that one child). Without this gate, {@link #isStartupBulkReloadTarget(String)}'s
+     * create-only bulk reload would re-run in every one of these child JVMs too -- including
+     * {@code ThumbnailGenerator}, whose job is scheduled {@code * * * * *} (every minute) and
+     * available by default -- silently resurrecting a scheduled job an admin deliberately deleted
+     * within a minute of the deletion.</p>
+     *
+     * @return {@code true} when none of the known job-process markers are set
+     */
+    protected boolean isWebappProcess() {
+        return !(Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CRAWLER + ".process"))
+                || Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_THUMBNAIL + ".process"))
+                || Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_SUGGEST + ".process"))
+                || Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CHUNK + ".process")));
+    }
+
+    /**
+     * Determines whether the configured ANN engine cannot work on the embedded search engine.
+     *
+     * <p>The bundled k-NN plugin ships without its JNI libraries, so faiss and nmslib (raw input --
+     * this method runs on the unvalidated system property value, before {@link
+     * org.codelibs.fess.helper.ChunkVectorHelper#getKnnEngine() ChunkVectorHelper#getKnnEngine()}'s
+     * allow-set would separately reject nmslib outright) accept the index creation and then lose
+     * every document write in an uncaught thread. Only the pure-Java lucene engine works embedded;
+     * an external or containerized OpenSearch's JNI libraries make faiss usable too (nmslib is never
+     * a Fess-accepted engine value regardless of deployment, see {@code getKnnEngine()}).</p>
+     *
+     * @param embedded whether Fess is running the embedded search engine
+     * @param engine   the configured ANN engine
+     * @return {@code true} when the combination silently discards documents
+     */
+    protected boolean isUnsupportedEmbeddedEngine(final boolean embedded, final String engine) {
+        return embedded && !"lucene".equals(engine);
     }
 
     /**
@@ -1357,6 +1541,17 @@ public class SearchEngineClient implements Client {
                     }
                 } else {
                     logger.warn("Failed to register {}: {}", dataPath, response.buildFailureMessage());
+                }
+            }
+            if (createOnly && logger.isInfoEnabled()) {
+                // For a createOnly (OpType.CREATE) bulk, an item that did not fail is a document
+                // that did not already exist and was therefore genuinely just created -- e.g. the
+                // periodic startup reload registering a scheduled job newly shipped in this release.
+                // Without this, that reload is entirely silent when it does something (the WARN/DEBUG
+                // branches above only ever report failures or an all-skipped no-op).
+                final long created = Arrays.stream(response.getItems()).filter(item -> !item.isFailed()).count();
+                if (created > 0) {
+                    logger.info("Registered {} new document(s) in {} from {}", created, configIndex, dataPath);
                 }
             }
         } catch (final Exception e) {
