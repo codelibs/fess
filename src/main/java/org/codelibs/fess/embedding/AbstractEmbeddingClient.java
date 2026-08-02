@@ -60,6 +60,12 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
      */
     public static final String EMBEDDING_NAME_DEFAULT = "opensearch";
 
+    /** Config key suffix (under {@link #getConfigPrefix()}) for the TCP connect timeout. */
+    protected static final String CONFIG_CONNECT_TIMEOUT = "connect.timeout";
+
+    /** Config key suffix (under {@link #getConfigPrefix()}) for the availability-check interval. */
+    protected static final String CONFIG_AVAILABILITY_CHECK_INTERVAL = "availability.check.interval";
+
     private static final Logger logger = LogManager.getLogger(AbstractEmbeddingClient.class);
 
     /** The HTTP client used for API communication. */
@@ -96,7 +102,13 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
 
     /**
      * Initializes the HTTP client and starts availability checking.
-     * Should be called from subclass init() methods.
+     *
+     * <p>Subclasses should not need to override this. Everything that legitimately varies between
+     * providers is reachable through a narrower seam: {@link #getTimeout()} and
+     * {@link #getConnectTimeout()} for the two timeouts, and
+     * {@link #configureHttpClient(HttpClientBuilder)} for anything else that must be applied to the
+     * builder (default headers, auth). An override that reimplements this method has to keep the
+     * name guard and the availability-check start in sync by hand.</p>
      */
     public void init() {
         if (!getName().equals(getEmbeddingType())) {
@@ -106,24 +118,63 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
             return;
         }
 
-        final int timeout = getTimeout();
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (final IOException e) {
+                logger.warn("[Embedding] {} failed to close prior HTTP client during re-init.", getName(), e);
+            }
+        }
+        httpClient = buildHttpClient();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[Embedding] {} initialized. connectTimeout={}ms, timeout={}ms", getName(), getConnectTimeout(), getTimeout());
+        }
+
+        startAvailabilityCheck();
+    }
+
+    /**
+     * Builds the {@link CloseableHttpClient} with two-tier timeouts (connect vs response/read), the
+     * shared proxy configuration, and whatever {@link #configureHttpClient(HttpClientBuilder)}
+     * contributes.
+     *
+     * <p>Connect and response timeouts are kept distinct deliberately. A single value shared by
+     * both means the response budget also bounds the TCP handshake, so a firewalled or black-holed
+     * endpoint blocks for the full response timeout - and this client's first availability probe
+     * runs synchronously from {@link #init()}, which the container invokes as an eager init-method
+     * during startup. A provider with a generous response timeout would therefore stall Tomcat
+     * context startup for that same duration.</p>
+     *
+     * @return a configured {@link CloseableHttpClient}
+     */
+    protected CloseableHttpClient buildHttpClient() {
+        final int connectTimeout = getConnectTimeout();
+        final int responseTimeout = getTimeout();
         final RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout))
-                .setResponseTimeout(Timeout.ofMilliseconds(timeout))
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(connectTimeout))
+                .setResponseTimeout(Timeout.ofMilliseconds(responseTimeout))
                 .build();
         final HttpClientBuilder builder = HttpClients.custom()
                 .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
-                        .setDefaultConnectionConfig(ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(timeout)).build())
+                        .setDefaultConnectionConfig(
+                                ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(connectTimeout)).build())
                         .build())
                 .setDefaultRequestConfig(requestConfig)
                 .disableAutomaticRetries();
         configureProxy(builder);
-        httpClient = builder.build();
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Embedding] {} initialized. timeout={}ms", getName(), timeout);
-        }
+        configureHttpClient(builder);
+        return builder.build();
+    }
 
-        startAvailabilityCheck();
+    /**
+     * Applies provider-specific configuration to the HTTP client builder, after the timeouts and
+     * the shared proxy settings have been applied and before the client is built. The default
+     * implementation does nothing.
+     *
+     * @param builder the HTTP client builder to configure
+     */
+    protected void configureHttpClient(final HttpClientBuilder builder) {
+        // no provider-specific configuration by default
     }
 
     /**
@@ -305,25 +356,77 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
     protected abstract boolean checkAvailabilityNow();
 
     /**
-     * Gets the request timeout in milliseconds.
+     * Gets the request (response/read) timeout in milliseconds.
      *
      * @return the timeout in milliseconds
      */
     protected abstract int getTimeout();
 
     /**
-     * Gets the availability check interval in seconds.
+     * Gets the TCP connect timeout in milliseconds, separate from {@link #getTimeout()}. Reads
+     * {@code <configPrefix>.connect.timeout}.
      *
-     * @return the interval in seconds
+     * <p>The default is deliberately short and independent of {@link #getTimeout()}: establishing a
+     * connection either succeeds quickly or is not going to succeed, whereas a response budget is
+     * sized for the provider's actual work. See {@link #buildHttpClient()} for why conflating the
+     * two is a startup hazard.</p>
+     *
+     * @return the connect timeout in milliseconds (default 5000)
      */
-    protected abstract int getAvailabilityCheckInterval();
+    protected int getConnectTimeout() {
+        return getConfigInt(CONFIG_CONNECT_TIMEOUT, 5000);
+    }
 
     /**
-     * Checks if content chunking is enabled.
+     * Gets the availability check interval in seconds. Reads
+     * {@code <configPrefix>.availability.check.interval}.
+     *
+     * @return the interval in seconds (default 60)
+     */
+    protected int getAvailabilityCheckInterval() {
+        return getConfigInt(CONFIG_AVAILABILITY_CHECK_INTERVAL, 60);
+    }
+
+    /**
+     * Checks if content chunking is enabled, from the {@value #CONTENT_CHUNKER_ENABLED_PROPERTY}
+     * system property. The property is owned by this class and is not provider-scoped, so this is
+     * the same answer for every provider.
      *
      * @return true if enabled
      */
-    protected abstract boolean isContentChunkerEnabled();
+    protected boolean isContentChunkerEnabled() {
+        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(CONTENT_CHUNKER_ENABLED_PROPERTY, "false"));
+    }
+
+    /**
+     * Returns the vector dimension every vector this client produces must have, from the required
+     * {@value #EMBEDDING_DIMENSION_PROPERTY} system property.
+     *
+     * <p>The dimension is a property of the index, not of the provider: fess core creates the
+     * {@code knn_vector} mapping from this one value, so a provider that reported a different
+     * number would only be describing vectors the index cannot store. It is therefore resolved
+     * here rather than per provider.</p>
+     *
+     * @return the configured vector dimension
+     * @throws EmbeddingException if the dimension is unset, non-numeric, or not positive
+     */
+    @Override
+    public int getDimension() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(EMBEDDING_DIMENSION_PROPERTY, null);
+        if (StringUtil.isBlank(value)) {
+            throw new EmbeddingException(EMBEDDING_DIMENSION_PROPERTY + " is not configured");
+        }
+        final int dimension;
+        try {
+            dimension = Integer.parseInt(value.trim());
+        } catch (final NumberFormatException e) {
+            throw new EmbeddingException("Invalid " + EMBEDDING_DIMENSION_PROPERTY + " value: " + value, e);
+        }
+        if (dimension <= 0) {
+            throw new EmbeddingException(EMBEDDING_DIMENSION_PROPERTY + " must be positive: " + value);
+        }
+        return dimension;
+    }
 
     /**
      * Gets the configured embedding provider type from the
@@ -381,7 +484,39 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
                     return value;
                 }
             } catch (final NumberFormatException e) {
-                logger.warn("Invalid config value for key={}. Using default: {}", key, defaultValue);
+                // Reported under the concrete provider's logger, and naming the offending value:
+                // "which key" alone does not tell an operator what they actually typed.
+                LogManager.getLogger(getClass())
+                        .warn("Invalid config value for key={}: '{}'. Using default: {}", key, configValue, defaultValue);
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Gets a long configuration value using the config prefix and key suffix.
+     *
+     * <p>Unlike {@link #getConfigInt(String, int)} this does <em>not</em> reject non-positive
+     * values. The {@code int} variant serves timeouts, intervals and counts, where {@code 0} is
+     * never a meaningful setting and is better read as "unset"; the {@code long} variant serves
+     * millisecond delays, where {@code 0} is a legitimate value meaning "do not wait". Only an
+     * unparseable value falls back to {@code defaultValue}, and it is reported.</p>
+     *
+     * @param keySuffix the key suffix (appended to getConfigPrefix() + ".")
+     * @param defaultValue the default value
+     * @return the configured or default value
+     */
+    protected long getConfigLong(final String keySuffix, final long defaultValue) {
+        final String key = getConfigPrefix() + "." + keySuffix;
+        final String configValue = ComponentUtil.getFessConfig().getSystemProperty(key, null);
+        if (configValue != null) {
+            try {
+                return Long.parseLong(configValue.trim());
+            } catch (final NumberFormatException e) {
+                // Reported under the concrete provider's logger, and naming the offending value:
+                // "which key" alone does not tell an operator what they actually typed.
+                LogManager.getLogger(getClass())
+                        .warn("Invalid config value for key={}: '{}'. Using default: {}", key, configValue, defaultValue);
             }
         }
         return defaultValue;
