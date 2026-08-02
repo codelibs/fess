@@ -1474,26 +1474,6 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_hasUserInfo_detectsCredentialsWithoutParsing() {
-        assertTrue(OpenSearchEmbeddingClient.hasUserInfo("http://user:pass@host:9200"));
-        assertTrue(OpenSearchEmbeddingClient.hasUserInfo("http://user@host:9200"));
-        // Unparseable *and* credential-bearing. The scan is textual, so the userinfo is
-        // still seen; a parse-based check would throw here and leak the value instead.
-        assertTrue(OpenSearchEmbeddingClient.hasUserInfo("http://user:pa ss@host:9200"));
-        // No scheme: the whole leading segment is the authority candidate.
-        assertTrue(OpenSearchEmbeddingClient.hasUserInfo("user:pass@host:9200"));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo("https://search.example.com:9200"));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo("http://localhost:9200"));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo("http://[::1]:9200"));
-        // '@' outside the authority is not userinfo.
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo("http://host:9200/a@b"));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo("http://host:9200?q=a@b"));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo("http://host:9200#a@b"));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo(""));
-        assertFalse(OpenSearchEmbeddingClient.hasUserInfo(null));
-    }
-
-    @Test
     public void test_getApiUrl_real_userInfoIsRefused() {
         final FessConfig original = installFessConfigStub(USERINFO_API_URL);
         final LogCapturingAppender capture = LogCapturingAppender.attach(OpenSearchEmbeddingClient.class);

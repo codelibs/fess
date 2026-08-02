@@ -31,18 +31,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicHeader;
-import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -50,6 +44,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.SystemUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -112,7 +107,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
     private static final String CONFIG_MODEL_ID = "model.id";
     private static final String CONFIG_RETRY_MAX = "retry.max";
     private static final String CONFIG_RETRY_BASE_DELAY_MS = "retry.base.delay.ms";
-    private static final String CONFIG_CONNECT_TIMEOUT = "connect.timeout";
     private static final String CONFIG_DOCUMENT_PREFIX = "document.prefix";
     private static final String CONFIG_QUERY_PREFIX = "query.prefix";
     private static final String CONFIG_USERNAME = "username";
@@ -163,24 +157,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public int getDimension() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty(EMBEDDING_DIMENSION_PROPERTY, null);
-        if (StringUtil.isBlank(value)) {
-            throw new EmbeddingException(EMBEDDING_DIMENSION_PROPERTY + " is not configured");
-        }
-        final int dimension;
-        try {
-            dimension = Integer.parseInt(value.trim());
-        } catch (final NumberFormatException e) {
-            throw new EmbeddingException("Invalid " + EMBEDDING_DIMENSION_PROPERTY + " value: " + value, e);
-        }
-        if (dimension <= 0) {
-            throw new EmbeddingException(EMBEDDING_DIMENSION_PROPERTY + " must be positive: " + value);
-        }
-        return dimension;
     }
 
     @Override
@@ -575,7 +551,7 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
             source = "the built-in default";
         }
         final String normalized = normalizeApiUrl(url);
-        if (hasUserInfo(normalized)) {
+        if (CredentialUrlUtil.hasUserInfo(normalized)) {
             if (userInfoRejectionLogged.compareAndSet(false, true)) {
                 // Names the source and the remedy, never the value: the whole point is that the
                 // value holds a credential.
@@ -645,38 +621,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
     }
 
     /**
-     * Returns whether the authority of {@code url} carries a userinfo subcomponent, i.e. whether
-     * the URL embeds credentials as {@code scheme://user:password@host}.
-     *
-     * <p>Deliberately a textual scan rather than a parse. The values worth catching include the
-     * ones {@code java.net.URI} cannot parse at all (a raw space in the password, say), and those
-     * are exactly the ones a parse-based check would turn into a
-     * {@link URISyntaxException} whose message quotes the credential back. The authority is the
-     * span after {@code "://"} - or from the start when no scheme is present - up to the first
-     * {@code /}, {@code ?} or {@code #}, so an {@code @} in a path, query or fragment is not
-     * mistaken for userinfo, and a plain {@code host:port} never matches.</p>
-     *
-     * @param url the raw configured URL, possibly null or blank
-     * @return true when the authority contains an {@code @}
-     */
-    static boolean hasUserInfo(final String url) {
-        if (StringUtil.isBlank(url)) {
-            return false;
-        }
-        final int schemeEnd = url.indexOf("://");
-        final int authorityStart = schemeEnd >= 0 ? schemeEnd + 3 : 0;
-        int authorityEnd = url.length();
-        for (int i = authorityStart; i < url.length(); i++) {
-            final char c = url.charAt(i);
-            if (c == '/' || c == '?' || c == '#') {
-                authorityEnd = i;
-                break;
-            }
-        }
-        return authorityStart < authorityEnd && url.lastIndexOf('@', authorityEnd - 1) >= authorityStart;
-    }
-
-    /**
      * Gets the configured ML Commons model id. Required: a blank value makes
      * {@link #checkAvailabilityNow()} return false and embed calls throw
      * {@link EmbeddingException}.
@@ -707,59 +651,15 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
     }
 
     /**
-     * Gets the TCP connect timeout in milliseconds, separate from
-     * {@link #getTimeout()} (response/read timeout).
+     * Adds a preemptive {@code Authorization: Basic ...} default header when both a username and a
+     * password resolve to non-blank values, matching how fess core authenticates against the same
+     * cluster. The timeouts and the shared proxy configuration come from
+     * {@link AbstractEmbeddingClient#buildHttpClient()}.
      *
-     * @return the connect timeout in milliseconds
-     */
-    protected int getConnectTimeout() {
-        return getConfigInt(CONFIG_CONNECT_TIMEOUT, 5000);
-    }
-
-    /**
-     * Overrides {@link AbstractEmbeddingClient#init()} to apply distinct
-     * connect and response timeouts and the preemptive basic-auth header,
-     * mirroring {@code OllamaEmbeddingClient.init()}.
+     * @param builder the HTTP client builder to configure
      */
     @Override
-    public void init() {
-        if (!getName().equals(getEmbeddingType())) {
-            return;
-        }
-        if (httpClient != null) {
-            try {
-                httpClient.close();
-            } catch (final IOException e) {
-                logger.warn("[Embedding:OPENSEARCH] Failed to close prior HTTP client during re-init", e);
-            }
-        }
-        httpClient = buildHttpClient();
-        startAvailabilityCheck();
-    }
-
-    /**
-     * Builds the {@link CloseableHttpClient} with two-tier timeouts (connect vs
-     * response/read), the shared proxy configuration, and - when both a
-     * username and a password resolve to non-blank values - a preemptive
-     * {@code Authorization: Basic ...} default header, matching how fess core
-     * authenticates against the same cluster.
-     *
-     * @return a configured {@link CloseableHttpClient}
-     */
-    protected CloseableHttpClient buildHttpClient() {
-        final int connectTimeout = getConnectTimeout();
-        final int responseTimeout = getTimeout();
-        final RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(Timeout.ofMilliseconds(connectTimeout))
-                .setResponseTimeout(Timeout.ofMilliseconds(responseTimeout))
-                .build();
-        final HttpClientBuilder builder = HttpClients.custom()
-                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
-                        .setDefaultConnectionConfig(
-                                ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(connectTimeout)).build())
-                        .build())
-                .setDefaultRequestConfig(requestConfig)
-                .disableAutomaticRetries();
+    protected void configureHttpClient(final HttpClientBuilder builder) {
         final String username = getUsername();
         final String password = getPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
@@ -770,8 +670,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
                 logger.debug("[Embedding:OPENSEARCH] Basic authentication enabled. username={}", username);
             }
         }
-        configureProxy(builder);
-        return builder.build();
     }
 
     /**
@@ -858,16 +756,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
         return getConfigString(CONFIG_QUERY_PREFIX, DEFAULT_QUERY_PREFIX);
     }
 
-    @Override
-    protected int getAvailabilityCheckInterval() {
-        return getConfigInt("availability.check.interval", 60);
-    }
-
-    @Override
-    protected boolean isContentChunkerEnabled() {
-        return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(CONTENT_CHUNKER_ENABLED_PROPERTY, "false"));
-    }
-
     /**
      * Functional interface for the retryable HTTP call body executed by
      * {@link #executeWithRetry(String, HttpCall)}.
@@ -945,14 +833,7 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
      * @return the value of {@code content_chunker.embedding.opensearch.retry.base.delay.ms} (default 2000)
      */
     protected long getRetryBaseDelayMs() {
-        final String raw = getConfigString(CONFIG_RETRY_BASE_DELAY_MS, "2000");
-        try {
-            return Long.parseLong(raw);
-        } catch (final NumberFormatException e) {
-            logger.warn("[Embedding:OPENSEARCH] Invalid {}.{}='{}', using default 2000ms", getConfigPrefix(), CONFIG_RETRY_BASE_DELAY_MS,
-                    raw);
-            return 2000L;
-        }
+        return getConfigLong(CONFIG_RETRY_BASE_DELAY_MS, 2000L);
     }
 
     /**

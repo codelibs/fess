@@ -116,6 +116,137 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         }
     }
 
+    // ========== Shared member tests ==========
+    //
+    // getDimension(), isContentChunkerEnabled() and getAvailabilityCheckInterval() are resolved
+    // here rather than per provider: each reads a property this class owns, so every provider that
+    // implemented them separately produced the same answer by construction. These tests pin the one
+    // shared contract; a provider is free to override, but no longer has to.
+
+    @Test
+    public void test_getDimension_readsConfiguredValue() {
+        ComponentUtil.getSystemProperties().setProperty(AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY, " 768 ");
+        try {
+            assertEquals(768, new TestEmbeddingClient().testBaseGetDimension(), "a surrounding-whitespace value must still parse");
+        } finally {
+            ComponentUtil.getSystemProperties().remove(AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY);
+        }
+    }
+
+    @Test
+    public void test_getDimension_rejectsUnsetBlankNonNumericAndNonPositive() {
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        final String key = AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY;
+        assertNull(ComponentUtil.getSystemProperties().getProperty(key), "precondition: dimension must be unset");
+        assertThrowsEmbeddingException(client::testBaseGetDimension, "is not configured", "unset");
+        try {
+            for (final String bad : new String[] { "", "   ", "abc", "12.5", "0", "-1" }) {
+                ComponentUtil.getSystemProperties().setProperty(key, bad);
+                assertThrowsEmbeddingException(client::testBaseGetDimension, key, "value '" + bad + "'");
+            }
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
+    }
+
+    private void assertThrowsEmbeddingException(final Runnable action, final String expectedFragment, final String label) {
+        try {
+            action.run();
+            fail("expected EmbeddingException for " + label);
+        } catch (final EmbeddingException e) {
+            assertTrue(e.getMessage().contains(expectedFragment),
+                    "message for " + label + " should mention '" + expectedFragment + "': " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void test_isContentChunkerEnabled_readsSharedSystemProperty() {
+        final String key = AbstractEmbeddingClient.CONTENT_CHUNKER_ENABLED_PROPERTY;
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        assertFalse(client.testBaseIsContentChunkerEnabled(), "must default to false when unset");
+        ComponentUtil.getSystemProperties().setProperty(key, "true");
+        try {
+            assertTrue(client.testBaseIsContentChunkerEnabled());
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
+    }
+
+    @Test
+    public void test_getAvailabilityCheckInterval_defaultsTo60AndHonorsConfig() {
+        final String key = "test.embedding.availability.check.interval";
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        assertEquals(60, client.testBaseGetAvailabilityCheckInterval());
+        ComponentUtil.getSystemProperties().setProperty(key, "5");
+        try {
+            assertEquals(5, client.testBaseGetAvailabilityCheckInterval());
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
+    }
+
+    @Test
+    public void test_getConnectTimeout_defaultsTo5000AndHonorsConfig() {
+        final String key = "test.embedding.connect.timeout";
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        // Deliberately independent of getTimeout() (1000 for this client): a shared value would let
+        // a generous response budget bound the TCP handshake, and the first probe runs from init().
+        assertEquals(5000, client.getConnectTimeout());
+        ComponentUtil.getSystemProperties().setProperty(key, "250");
+        try {
+            assertEquals(250, client.getConnectTimeout());
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
+    }
+
+    // getConfigLong deliberately does NOT inherit getConfigInt's positive-only rule: it serves
+    // millisecond delays, where 0 means "do not wait" and must survive the round trip.
+    @Test
+    public void test_getConfigLong_parsesAnyNumericIncludingZeroAndNegative() {
+        final String key = "test.embedding.delay.ms";
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        // An absent key must fall back to the default.
+        assertEquals(2000L, client.testGetConfigLong("delay.ms", 2000L));
+        try {
+            ComponentUtil.getSystemProperties().setProperty(key, "5000");
+            assertEquals(5000L, client.testGetConfigLong("delay.ms", 2000L));
+            ComponentUtil.getSystemProperties().setProperty(key, " 7000 ");
+            // A surrounding-whitespace value must still parse.
+            assertEquals(7000L, client.testGetConfigLong("delay.ms", 2000L));
+            ComponentUtil.getSystemProperties().setProperty(key, "0");
+            // 0 is a legitimate delay, not 'unset'.
+            assertEquals(0L, client.testGetConfigLong("delay.ms", 2000L));
+            ComponentUtil.getSystemProperties().setProperty(key, "-1");
+            assertEquals(-1L, client.testGetConfigLong("delay.ms", 2000L));
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
+    }
+
+    @Test
+    public void test_getConfigLong_invalidValueFallsBackToDefault() {
+        final String key = "test.embedding.delay.ms";
+        ComponentUtil.getSystemProperties().setProperty(key, "not-a-number");
+        try {
+            assertEquals(2000L, new TestEmbeddingClient().testGetConfigLong("delay.ms", 2000L));
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
+    }
+
+    // The hook exists so a provider needing default headers (OpenSearch's preemptive basic auth)
+    // does not have to reimplement init() and buildHttpClient() to get them.
+    @Test
+    public void test_buildHttpClient_invokesConfigureHttpClientHook() throws Exception {
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        assertEquals(0, client.configureHttpClientCallCount());
+        try (CloseableHttpClient built = client.testBuildHttpClient()) {
+            assertNotNull(built);
+        }
+        assertEquals(1, client.configureHttpClientCallCount(), "buildHttpClient must give subclasses a shot at the builder");
+    }
+
     // ========== Proxy configuration tests ==========
 
     @Test
@@ -346,6 +477,7 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         private int testAvailabilityCheckInterval = 0;
         private RuntimeException testAvailabilityFailure;
         private final AtomicInteger availabilityProbes = new AtomicInteger();
+        private final AtomicInteger configureHttpClientCalls = new AtomicInteger();
 
         void setTestContentChunkerEnabled(final boolean enabled) {
             this.testContentChunkerEnabled = enabled;
@@ -397,6 +529,35 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
 
         String testBaseGetEmbeddingType() {
             return super.getEmbeddingType();
+        }
+
+        int testBaseGetDimension() {
+            return super.getDimension();
+        }
+
+        boolean testBaseIsContentChunkerEnabled() {
+            return super.isContentChunkerEnabled();
+        }
+
+        int testBaseGetAvailabilityCheckInterval() {
+            return super.getAvailabilityCheckInterval();
+        }
+
+        long testGetConfigLong(final String keySuffix, final long defaultValue) {
+            return getConfigLong(keySuffix, defaultValue);
+        }
+
+        CloseableHttpClient testBuildHttpClient() {
+            return buildHttpClient();
+        }
+
+        @Override
+        protected void configureHttpClient(final HttpClientBuilder builder) {
+            configureHttpClientCalls.incrementAndGet();
+        }
+
+        int configureHttpClientCallCount() {
+            return configureHttpClientCalls.get();
         }
 
         @Override
