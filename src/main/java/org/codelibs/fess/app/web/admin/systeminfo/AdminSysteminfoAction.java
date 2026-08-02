@@ -210,7 +210,8 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || "oic.client.id".equals(key) //
                 || "oic.client.secret".equals(key) //
                 || "content_chunker.embedding.opensearch.password".equals(key) //
-                || isEmbeddingApiKey(key);
+                || isEmbeddingApiKey(key) //
+                || isLlmApiKey(key);
     }
 
     /**
@@ -225,6 +226,26 @@ public class AdminSysteminfoAction extends FessAdminAction {
      */
     protected static boolean isEmbeddingApiKey(final String key) {
         return key != null && key.startsWith("content_chunker.embedding.") && key.endsWith(".api.key");
+    }
+
+    /**
+     * Checks if a key is a RAG LLM provider's API key, e.g. {@code rag.llm.openai.api.key} or
+     * {@code rag.llm.gemini.api.key}. Matching on the {@code rag.llm.<provider>.api.key} shape,
+     * instead of listing every provider by name, means a future LLM provider's API key is masked
+     * by default.
+     *
+     * <p>These live in {@code fess_config.properties} rather than {@code conf/system.properties},
+     * which is why they need their own rule: the embedding-side rule above is anchored on the
+     * {@code content_chunker.embedding.} prefix and never matched them, so every
+     * {@code fess-llm-*} plugin's chat API key was rendered in cleartext under
+     * System Info &gt; Config Info &gt; App Properties while its embedding counterpart one
+     * section away was masked.
+     *
+     * @param key the property key to check
+     * @return true if the key matches the LLM provider API key shape
+     */
+    protected static boolean isLlmApiKey(final String key) {
+        return key != null && key.startsWith("rag.llm.") && key.endsWith(".api.key");
     }
 
     /**

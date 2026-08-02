@@ -63,6 +63,19 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksLlmProviderApiKeys() {
+        // The RAG chat API keys live in fess_config.properties, so the embedding-side rule -
+        // anchored on the content_chunker.embedding. prefix - never matched them and every
+        // fess-llm-* plugin's chat key was rendered in cleartext one section away from its
+        // masked embedding counterpart.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.api.key"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("rag.llm.gemini.api.key"));
+        // Shape, not a fixed provider list, so a future provider is masked by default.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("rag.llm.ollama.api.key"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("rag.llm.anthropic.api.key"));
+    }
+
+    @Test
     public void test_isMaskedValue_doesNotMaskOrdinaryKeys() {
         // Other content_chunker.embedding.* keys are plain diagnostic config, not credentials,
         // and must stay visible on the admin screen.
@@ -73,6 +86,13 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertFalse(AdminSysteminfoAction.isMaskedValue("content_chunker.embedding.opensearch.model.id"));
         assertFalse(AdminSysteminfoAction.isMaskedValue("content_chunker.enabled"));
         assertFalse(AdminSysteminfoAction.isMaskedValue("some.unrelated.key"));
+        // The rag.llm.* rule is likewise narrow: only the API key is a credential. Endpoint,
+        // model and tuning knobs stay readable, and rag.llm.name selects the provider.
+        assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.name"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.api.url"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.model"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.retry.max"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("rag.chat.enabled"));
     }
 
     @Test
@@ -80,6 +100,7 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.openai.api.key", "sk-super-secret");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.gemini.api.key", "gm-super-secret");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.opensearch.password", "hunter2");
+        ComponentUtil.getSystemProperties().setProperty("rag.llm.openai.api.key", "sk-chat-secret");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.dimension", "768");
 
         final List<Map<String, String>> itemList = AdminSysteminfoAction.getBugReportItems();
@@ -89,6 +110,7 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertEquals(MASKED_VALUE, findValue(itemList, "content_chunker.embedding.openai.api.key"));
         assertEquals(MASKED_VALUE, findValue(itemList, "content_chunker.embedding.gemini.api.key"));
         assertEquals(MASKED_VALUE, findValue(itemList, "content_chunker.embedding.opensearch.password"));
+        assertEquals(MASKED_VALUE, findValue(itemList, "rag.llm.openai.api.key"));
 
         // An ordinary diagnostic key is unaffected and keeps its real value.
         assertEquals("768", findValue(itemList, "content_chunker.embedding.dimension"));
