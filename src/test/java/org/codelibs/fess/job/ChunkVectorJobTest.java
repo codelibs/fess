@@ -238,6 +238,39 @@ public class ChunkVectorJobTest extends UnitFessTestCase {
                 cmdList.contains("-D" + Constants.FESS_CONF_PATH + "=" + confPath));
     }
 
+    // The child JVM resolves content_chunker.* through FessProp#getSystemProperty, which falls back
+    // to -Dfess.system.<key> when the key is absent from system.properties (the usual case, since
+    // AdminGeneralAction never writes content_chunker.* into that file). The fallback only reaches
+    // the child if the parent forwards its own -D options, so pin all three families ExecJob hands
+    // over: dropping any addFess*Properties() call must turn this red instead of silently leaving
+    // the indexer disabled while the web JVM sees the setting.
+    @Test
+    public void test_executeChunkVectorIndexer_forwardsPropertiesToChild() {
+        createRequiredDirectories();
+        System.setProperty("fess.system.content_chunker.enabled", "true");
+        System.setProperty("fess.config.chunk.probe.key", "configValue");
+        System.setProperty("custom.chunk.probe.key", "customValue");
+
+        mockProcessHelper.setExitValue(0);
+        mockProcessHelper.setOutput("Success");
+
+        try {
+            chunkVectorJob.executeChunkVectorIndexer();
+        } finally {
+            System.clearProperty("fess.system.content_chunker.enabled");
+            System.clearProperty("fess.config.chunk.probe.key");
+            System.clearProperty("custom.chunk.probe.key");
+        }
+
+        List<String> cmdList = mockProcessHelper.getLastCommandList();
+        assertNotNull(cmdList);
+        assertTrue("fess.system.* must reach the child JVM: " + cmdList, cmdList.contains("-Dfess.system.content_chunker.enabled=true"));
+        assertTrue("fess.config.* must reach the child JVM: " + cmdList, cmdList.contains("-Dfess.config.chunk.probe.key=configValue"));
+        // MockFessConfig#getJobSystemPropertyFilterPattern() returns "custom\\..*"
+        assertTrue("job.system.property.filter.pattern matches must reach the child JVM: " + cmdList,
+                cmdList.contains("-Dcustom.chunk.probe.key=customValue"));
+    }
+
     // Test executeChunkVectorIndexer with local Fesen
     @Test
     public void test_executeChunkVectorIndexer_withLocalFesen() {
