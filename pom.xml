@@ -96,14 +96,6 @@
 		</filters>
 
 		<plugins>
-			<!-- This project publishes to Maven Central. fess-parent only manages this
-			     plugin in pluginManagement, because the Fess plugins deploy to
-			     maven.codelibs.org instead. -->
-			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
@@ -954,6 +946,25 @@
 			</plugin>
 		</plugins>
 	</build>
+	<!-- Distributed through maven.codelibs.org instead of Maven Central. This cannot be
+	     inherited from fess-parent: distributionManagement is inherited unconditionally
+	     and a POM cannot exempt itself from what it declares, so declaring it there
+	     would also redirect the deployments of fess-parent itself, which stays on Maven
+	     Central so that every project inheriting from it can resolve the parent POM
+	     without extra repository configuration. The scpexe transport comes from the
+	     wagon-ssh-external build extension inherited from fess-parent. -->
+	<distributionManagement>
+		<repository>
+			<id>codelibs-repo</id>
+			<name>CodeLibs Repository</name>
+			<url>scpexe://maven.codelibs.org/var/www/maven/release</url>
+		</repository>
+		<snapshotRepository>
+			<id>codelibs-snapshots</id>
+			<name>CodeLibs Snapshot Repository</name>
+			<url>scpexe://maven.codelibs.org/var/www/maven/snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>snapshots.central.sonatype.com</id>
