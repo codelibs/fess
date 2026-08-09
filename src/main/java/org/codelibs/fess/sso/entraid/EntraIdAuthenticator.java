@@ -68,6 +68,7 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.microsoft.aad.msal4j.AuthorizationCodeParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
@@ -1101,70 +1102,96 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("[getParentGroup] Cache MISS for id: {}, fetching from API", id);
         }
         try {
-            return groupCache.get(id, () -> {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[getParentGroup] Loading parent groups for id: {} into cache", id);
-                }
-                final List<String> groupList = new ArrayList<>();
-                final List<String> roleList = new ArrayList<>();
-                final String url = "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups";
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[getParentGroup] Calling API: {}", url);
-                }
-                try (CurlResponse response = createGraphRequest(Curl.post(url), user.getAuthenticationResult().accessToken())
-                        .header("Content-type", "application/json")
-                        .body("{\"securityEnabledOnly\":false}")
-                        .execute()) {
-                    final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("[getParentGroup] Response for id {}: {}", id, contentMap);
-                    }
-                    if (contentMap.containsKey("value")) {
-                        final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
-                        if (values != null) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("[getParentGroup] Found {} parent group IDs for id: {}", values.length, id);
-                            }
-                            for (final String value : values) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("[getParentGroup] Processing parent group id: {} for group: {}", value, id);
-                                }
-                                processGroup(user, groupList, roleList, value);
-                                if (!groupList.contains(value) && !roleList.contains(value)) {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("[getParentGroup] Recursively getting parent groups for: {}", value);
-                                    }
-                                    final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1);
-                                    StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
-                                    StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
-                                }
-                            }
-                        }
-                    } else if (contentMap.containsKey("error")) {
-                        @SuppressWarnings("unchecked")
-                        final Map<String, Object> errorMap = (Map<String, Object>) contentMap.get("error");
-                        if ("Request_ResourceNotFound".equals(errorMap.get("code"))) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("[getParentGroup] Resource not found for id {}: {}", id, contentMap);
-                            }
-                        } else {
-                            logger.warn("Failed to access parent groups for id {}: {}", id, contentMap);
-                        }
-                    }
-                } catch (final IOException e) {
-                    logger.warn("Failed to access groups/roles in Entra ID for id: {}", id, e);
-                }
-                final Pair<String[], String[]> result = new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
-                        roleList.stream().distinct().toArray(n2 -> new String[n2]));
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[getParentGroup] Cached result for id {}: {} groups, {} roles", id, result.getFirst().length,
-                            result.getSecond().length);
-                }
-                return result;
-            });
-        } catch (final ExecutionException e) {
+            return groupCache.get(id, () -> loadParentGroup(user, id, depth));
+        } catch (final ExecutionException | UncheckedExecutionException e) {
+            // A loader that throws leaves nothing in the cache, which is the point: a throttled or
+            // briefly unreachable Graph must not pin an empty result for the whole cache TTL.
+            // UncheckedExecutionException matters because the Graph JSON parser throws
+            // CurlException, a RuntimeException, on a non-JSON error body.
             logger.warn("Failed to process group cache for id: {}", id, e);
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
+        }
+    }
+
+    /**
+     * Walks the parent groups of the specified group. Any failure is thrown rather than turned
+     * into an empty result, so a caller that caches this never stores a transient failure.
+     *
+     * @param user The Entra ID user.
+     * @param id The group ID to get parent information for.
+     * @param depth The current recursion depth.
+     * @return A pair containing group names and role names.
+     * @throws IOException If Microsoft Graph could not be reached or returned an error.
+     */
+    protected Pair<String[], String[]> loadParentGroup(final EntraIdUser user, final String id, final int depth) throws IOException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[getParentGroup] Loading parent groups for id: {}", id);
+        }
+        final List<String> groupList = new ArrayList<>();
+        final List<String> roleList = new ArrayList<>();
+        for (final String value : getMemberGroupIds(user, id)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[getParentGroup] Processing parent group id: {} for group: {}", value, id);
+            }
+            processGroup(user, groupList, roleList, value);
+            if (!groupList.contains(value) && !roleList.contains(value)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[getParentGroup] Recursively getting parent groups for: {}", value);
+                }
+                final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1);
+                StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
+                StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
+            }
+        }
+        final Pair<String[], String[]> result = new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
+                roleList.stream().distinct().toArray(n2 -> new String[n2]));
+        if (logger.isDebugEnabled()) {
+            logger.debug("[getParentGroup] Result for id {}: {} groups, {} roles", id, result.getFirst().length, result.getSecond().length);
+        }
+        return result;
+    }
+
+    /**
+     * Asks Microsoft Graph which groups the specified group is a member of.
+     *
+     * <p>A {@code Request_ResourceNotFound} error is a real answer -- the group does not exist --
+     * and comes back as an empty array so it can be cached. Everything else is thrown, so a
+     * transient failure is never mistaken for "this group has no parents".
+     *
+     * @param user The Entra ID user.
+     * @param id The group ID to get parent information for.
+     * @return The parent group IDs, never null.
+     * @throws IOException If Microsoft Graph could not be reached or returned an error.
+     */
+    protected String[] getMemberGroupIds(final EntraIdUser user, final String id) throws IOException {
+        final String url = "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups";
+        if (logger.isDebugEnabled()) {
+            logger.debug("[getParentGroup] Calling API: {}", url);
+        }
+        try (CurlResponse response =
+                createGraphRequest(Curl.post(url), user.getAuthenticationResult().accessToken()).header("Content-type", "application/json")
+                        .body("{\"securityEnabledOnly\":false}")
+                        .execute()) {
+            final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+            if (logger.isDebugEnabled()) {
+                logger.debug("[getParentGroup] Response for id {}: {}", id, contentMap);
+            }
+            if (contentMap.containsKey("value")) {
+                final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
+                return values != null ? values : StringUtil.EMPTY_STRINGS;
+            }
+            if (contentMap.containsKey("error")) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> errorMap = (Map<String, Object>) contentMap.get("error");
+                if ("Request_ResourceNotFound".equals(errorMap.get("code"))) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[getParentGroup] Resource not found for id {}: {}", id, contentMap);
+                    }
+                    return StringUtil.EMPTY_STRINGS;
+                }
+                throw new IOException("Failed to access parent groups for id " + id + ": " + contentMap);
+            }
+            return StringUtil.EMPTY_STRINGS;
         }
     }
 

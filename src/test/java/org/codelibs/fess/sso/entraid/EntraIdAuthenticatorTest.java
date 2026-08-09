@@ -15,15 +15,18 @@
  */
 package org.codelibs.fess.sso.entraid;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +48,8 @@ import org.lastaflute.web.login.credential.LoginCredential;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+
+import com.google.common.cache.CacheBuilder;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
@@ -386,6 +391,120 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals("nonce-1", stateData.getNonce());
         // A state is single use.
         assertNull(authenticator.removeStateFromSession(session, "state-1"));
+    }
+
+    /**
+     * An authenticator whose Graph access is replaced by a scripted one, so the caching and
+     * recursion around it can be exercised without a tenant.
+     */
+    private static class ScriptedAuthenticator extends EntraIdAuthenticator {
+        private final Map<String, String[]> parents = new HashMap<>();
+        private final List<String> lookups = new ArrayList<>();
+        private final Set<String> failing = new HashSet<>();
+
+        @Override
+        protected String[] getMemberGroupIds(final EntraIdUser user, final String id) throws IOException {
+            lookups.add(id);
+            if (failing.contains(id)) {
+                throw new IOException("simulated Graph failure for " + id);
+            }
+            return parents.getOrDefault(id, new String[0]);
+        }
+
+        @Override
+        protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+            groupList.add(id);
+        }
+    }
+
+    private ScriptedAuthenticator newScriptedAuthenticator() {
+        final ScriptedAuthenticator authenticator = new ScriptedAuthenticator();
+        authenticator.groupCache = CacheBuilder.newBuilder().build();
+        return authenticator;
+    }
+
+    @Test
+    public void test_getParentGroup_cachesASuccessfulLookup() {
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+
+        final Pair<String[], String[]> first = authenticator.getParentGroup(null, "group-a", 0);
+        final Pair<String[], String[]> second = authenticator.getParentGroup(null, "group-a", 0);
+
+        assertEquals(1, first.getFirst().length);
+        assertEquals("group-b", first.getFirst()[0]);
+        assertEquals(1, second.getFirst().length);
+        // "group-a" is looked up once; "group-b" is walked once while loading it.
+        assertEquals(1, authenticator.lookups.stream().filter("group-a"::equals).count());
+    }
+
+    @Test
+    public void test_getParentGroup_doesNotCacheAFailedLookup() {
+        // A throttled or briefly unreachable Graph used to leave an empty result in the cache,
+        // so the user silently lost their parent-group permissions for the whole cache TTL.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        authenticator.failing.add("group-a");
+
+        final Pair<String[], String[]> failed = authenticator.getParentGroup(null, "group-a", 0);
+        assertEquals(0, failed.getFirst().length);
+        assertNull(authenticator.groupCache.getIfPresent("group-a"));
+
+        authenticator.failing.remove("group-a");
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+
+        final Pair<String[], String[]> recovered = authenticator.getParentGroup(null, "group-a", 0);
+        assertEquals(1, recovered.getFirst().length);
+        assertEquals("group-b", recovered.getFirst()[0]);
+    }
+
+    @Test
+    public void test_getParentGroup_cachesAGenuineEmptyResult() {
+        // A group with no parents is a real answer, not a transient failure, so it is cached.
+        // getMemberGroupIds maps Graph's Request_ResourceNotFound onto this same empty result.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+
+        final Pair<String[], String[]> result = authenticator.getParentGroup(null, "group-a", 0);
+
+        assertEquals(0, result.getFirst().length);
+        assertNotNull(authenticator.groupCache.getIfPresent("group-a"));
+    }
+
+    @Test
+    public void test_getParentGroup_doesNotRecurseOnceTheParentWasResolved() {
+        // Characterisation: processGroup() unconditionally adds the id it was asked about, so the
+        // `!groupList.contains(value)` guard in loadParentGroup is false on every success path and
+        // the nested-group recursion never runs. maxGroupDepth therefore has no effect here. This
+        // is consistent with Graph's getMemberGroups already being transitive, but it means the
+        // recursion is not what resolves nested groups -- pinning it so a change is deliberate.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        authenticator.parents.put("group-b", new String[] { "group-c" });
+
+        final Pair<String[], String[]> result = authenticator.getParentGroup(null, "group-a", 0);
+
+        assertEquals(1, result.getFirst().length);
+        assertEquals("group-b", result.getFirst()[0]);
+        assertFalse(authenticator.lookups.contains("group-b"));
+    }
+
+    @Test
+    public void test_getParentGroup_survivesAnUncheckedFailureFromTheLoader() {
+        // Guava wraps an unchecked exception from the loader in UncheckedExecutionException,
+        // which is not an ExecutionException, so it used to escape the catch entirely. The Graph
+        // JSON parser throws CurlException, a RuntimeException, on a non-JSON error body.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected String[] getMemberGroupIds(final EntraIdUser user, final String id) {
+                throw new IllegalStateException("non-JSON error body");
+            }
+        };
+        authenticator.groupCache = CacheBuilder.newBuilder().build();
+
+        final Pair<String[], String[]> result = authenticator.getParentGroup(null, "group-a", 0);
+
+        assertEquals(0, result.getFirst().length);
+        assertEquals(0, result.getSecond().length);
+        assertNull(authenticator.groupCache.getIfPresent("group-a"));
     }
 
     @Test
