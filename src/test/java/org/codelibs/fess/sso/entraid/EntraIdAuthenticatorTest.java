@@ -19,12 +19,16 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.misc.Pair;
@@ -36,12 +40,26 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.junit.jupiter.api.Test;
 import org.lastaflute.web.login.credential.LoginCredential;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.Test;
+import jakarta.servlet.http.HttpSession;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
+
+    /** Lets a test move the clock that state expiry is measured against. */
+    private final AtomicLong clock = new AtomicLong(1_000_000L);
+
+    private EntraIdAuthenticator newAuthenticatorWithControlledClock() {
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+        return new EntraIdAuthenticator();
+    }
 
     @Test
     public void test_maskSecret() {
@@ -255,6 +273,119 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             // Well under the 30s default, so an ignored setter fails here instead of just being slow.
             assertTrue("took " + elapsed + "ms", elapsed < 5000L);
         }
+    }
+
+    @Test
+    public void test_storeStateInSession_dropsExpiredStatesOnWrite() {
+        // Expired states used to be cleared only when a callback arrived. A user who keeps
+        // starting logins without finishing one grew the session map without bound.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final HttpSession session = getMockRequest().getSession();
+
+        authenticator.storeStateInSession(session, "state-1", "nonce-1");
+        assertEquals(1, authenticator.getStateMap(session).size());
+
+        // getStateTtl() defaults to 3600 and is compared in seconds.
+        clock.addAndGet(3601L * 1000L);
+        authenticator.storeStateInSession(session, "state-2", "nonce-2");
+
+        final Map<String, EntraIdAuthenticator.StateData> stateMap = authenticator.getStateMap(session);
+        assertEquals(1, stateMap.size());
+        assertTrue(stateMap.containsKey("state-2"));
+    }
+
+    @Test
+    public void test_storeStateInSession_capsTheNumberOfLiveStates() {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        authenticator.setMaxStates(3);
+        final HttpSession session = getMockRequest().getSession();
+
+        for (int i = 0; i < 20; i++) {
+            clock.addAndGet(1000L);
+            authenticator.storeStateInSession(session, "state-" + i, "nonce-" + i);
+        }
+
+        final Map<String, EntraIdAuthenticator.StateData> stateMap = authenticator.getStateMap(session);
+        assertEquals(3, stateMap.size());
+        // The most recent attempts are the ones a user can still complete.
+        assertTrue(stateMap.containsKey("state-19"));
+        assertTrue(stateMap.containsKey("state-18"));
+        assertTrue(stateMap.containsKey("state-17"));
+    }
+
+    @Test
+    public void test_getStateMap_migratesALegacyHashMap() {
+        // A session created before this change holds a plain HashMap under the same key.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final HttpSession session = getMockRequest().getSession();
+        final Map<String, EntraIdAuthenticator.StateData> legacy = new HashMap<>();
+        legacy.put("legacy-state", new EntraIdAuthenticator.StateData("legacy-nonce", clock.get()));
+        session.setAttribute("entraidStates", legacy);
+
+        final Map<String, EntraIdAuthenticator.StateData> stateMap = authenticator.getStateMap(session);
+
+        assertTrue(stateMap instanceof ConcurrentHashMap);
+        assertEquals("legacy-nonce", stateMap.get("legacy-state").getNonce());
+        // The migrated map is the one stored back on the session, so later writes are not lost.
+        assertSame(stateMap, session.getAttribute("entraidStates"));
+    }
+
+    @Test
+    public void test_getStateMap_isCreatedOnceUnderConcurrentAccess() throws Exception {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final HttpSession session = getMockRequest().getSession();
+        final int threads = 8;
+        final CountDownLatch start = new CountDownLatch(1);
+        final List<Map<String, EntraIdAuthenticator.StateData>> seen = Collections.synchronizedList(new ArrayList<>());
+        final List<Thread> workers = new ArrayList<>();
+        for (int i = 0; i < threads; i++) {
+            final Thread t = new Thread(() -> {
+                try {
+                    start.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                seen.add(authenticator.getStateMap(session));
+            });
+            workers.add(t);
+            t.start();
+        }
+        start.countDown();
+        for (final Thread t : workers) {
+            t.join(10000L);
+        }
+
+        assertEquals(threads, seen.size());
+        // Every caller must share one map, otherwise a state stored by one request is invisible
+        // to the request that has to validate it.
+        seen.forEach(m -> assertSame(seen.get(0), m));
+    }
+
+    @Test
+    public void test_removeStateFromSession_stillDropsExpiredStates() {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final HttpSession session = getMockRequest().getSession();
+        authenticator.storeStateInSession(session, "state-1", "nonce-1");
+
+        clock.addAndGet(3601L * 1000L);
+
+        assertNull(authenticator.removeStateFromSession(session, "state-1"));
+        assertEquals(0, authenticator.getStateMap(session).size());
+    }
+
+    @Test
+    public void test_removeStateFromSession_returnsAndConsumesALiveState() {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final HttpSession session = getMockRequest().getSession();
+        authenticator.storeStateInSession(session, "state-1", "nonce-1");
+
+        final EntraIdAuthenticator.StateData stateData = authenticator.removeStateFromSession(session, "state-1");
+
+        assertNotNull(stateData);
+        assertEquals("nonce-1", stateData.getNonce());
+        // A state is single use.
+        assertNull(authenticator.removeStateFromSession(session, "state-1"));
     }
 
     @Test
