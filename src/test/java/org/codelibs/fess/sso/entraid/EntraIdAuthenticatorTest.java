@@ -27,7 +27,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
@@ -80,6 +83,80 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
         assertEquals(List.of("0.AXkAau***"), masked.get("Code"));
         assertEquals(List.of("accessto***"), masked.get("ACCESS_TOKEN"));
+    }
+
+    @Test
+    public void test_getAuthUrl_requestsQueryResponseMode() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+        final String authUrl = authenticator.getAuthUrl(getMockRequest());
+
+        // form_post makes Entra ID reply with a cross-site POST, which does not carry a
+        // SameSite=Lax session cookie -- and Fess sets SameSite=Lax on JSESSIONID by default
+        // (tomcat.sameSiteCookies). Without the session there is no stored state, so the
+        // callback can never be validated. query mode replies with a top-level GET instead.
+        assertTrue(authUrl.contains("response_mode=query"));
+        assertFalse(authUrl.contains("response_mode=form_post"));
+        // The rest of the authorization request is unchanged.
+        assertTrue(authUrl.contains("response_type=code"));
+        assertTrue(authUrl.contains("&state="));
+        assertTrue(authUrl.contains("&nonce="));
+    }
+
+    @Test
+    public void test_getAuthUrl_requestsQueryResponseModeOnV1Endpoint() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        authenticator.setUseV2Endpoint(false);
+
+        final String authUrl = authenticator.getAuthUrl(getMockRequest());
+
+        assertTrue(authUrl.contains("response_mode=query"));
+        assertFalse(authUrl.contains("response_mode=form_post"));
+    }
+
+    @Test
+    public void test_containsAuthenticationData_acceptsQueryModeCallback() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        request.setParameter("code", "0.AXkAauthorizationcodevalue");
+        request.setParameter("state", "2b1f5c3e-0000-0000-0000-000000000000");
+
+        assertTrue(authenticator.containsAuthenticationData(request));
+    }
+
+    @Test
+    public void test_containsAuthenticationData_acceptsFormPostCallback() {
+        // An existing deployment that already set tomcat.sameSiteCookies=none keeps working.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("POST");
+        request.setParameter("code", "0.AXkAauthorizationcodevalue");
+
+        assertTrue(authenticator.containsAuthenticationData(request));
+    }
+
+    @Test
+    public void test_containsAuthenticationData_acceptsErrorCallback() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        request.setParameter("error", "access_denied");
+
+        assertTrue(authenticator.containsAuthenticationData(request));
+    }
+
+    @Test
+    public void test_containsAuthenticationData_ignoresRequestWithoutArtifacts() {
+        // A plain visit to /sso must still start a fresh login instead of being treated
+        // as a callback.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+
+        assertFalse(authenticator.containsAuthenticationData(request));
     }
 
     @Test
