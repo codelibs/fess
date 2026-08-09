@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.exception.SsoMessageException;
+import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.core.settings.Saml2Settings;
@@ -144,6 +146,18 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
 
         assertNotNull(first.getReplayCache());
         assertSame(first.getReplayCache(), second.getReplayCache());
+    }
+
+    @Test
+    public void test_getLogoutResponse_withoutIdpSingleLogoutServiceUrl() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        try {
+            authenticator.getResponse(SsoResponseType.LOGOUT);
+            fail("SsoMessageException should be thrown");
+        } catch (final SsoMessageException e) {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause().getMessage(), e.getCause().getMessage().contains("single logout service URL"));
+        }
     }
 
     @Test
