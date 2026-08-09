@@ -24,9 +24,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -166,6 +168,66 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** OAuth2 authorization code parameter name. */
     protected static final String CODE = "code";
 
+    /**
+     * Response parameters whose values are credentials. Their values are truncated before being
+     * written to a debug log; every other parameter is logged verbatim so that a failed login can
+     * still be diagnosed from {@code state}, {@code error} and {@code error_description}.
+     */
+    protected static final Set<String> SENSITIVE_PARAMS = Set.of(CODE, ID_TOKEN, "access_token", "refresh_token", "client_secret");
+
+    /** Number of leading characters kept when a secret is written to a debug log. */
+    protected static final int MASK_PREFIX_LENGTH = 8;
+
+    /**
+     * Truncates a secret so it can be correlated across log lines without being usable.
+     * Null and empty values are passed through, because several call sites log a field that
+     * the identity provider may not have sent at all.
+     *
+     * @param value The value to mask.
+     * @return The masked value.
+     */
+    protected static String maskSecret(final String value) {
+        if (StringUtil.isEmpty(value)) {
+            return value;
+        }
+        return value.substring(0, Math.min(MASK_PREFIX_LENGTH, value.length())) + "***";
+    }
+
+    /**
+     * Drops the query string from a URL before it is written to a debug log. The query string can
+     * carry the authorization code, and every parameter it holds is already logged separately via
+     * {@link #maskParams(Map)}.
+     *
+     * @param url The URL to strip.
+     * @return The URL without its query string.
+     */
+    protected static String maskQueryString(final String url) {
+        if (url == null) {
+            return null;
+        }
+        final int index = url.indexOf('?');
+        return index < 0 ? url : url.substring(0, index);
+    }
+
+    /**
+     * Returns a copy of the response parameters with credential values masked, for logging.
+     * The key set is preserved so the log still shows which artifacts the identity provider sent.
+     *
+     * @param params The response parameters.
+     * @return A new map safe to write to a log.
+     */
+    protected static Map<String, List<String>> maskParams(final Map<String, List<String>> params) {
+        final Map<String, List<String>> maskedParams = new LinkedHashMap<>();
+        params.forEach((key, values) -> {
+            if (key != null && SENSITIVE_PARAMS.contains(key.toLowerCase(Locale.ENGLISH))) {
+                maskedParams.put(key, values.stream().map(EntraIdAuthenticator::maskSecret).collect(Collectors.toList()));
+            } else {
+                maskedParams.put(key, values);
+            }
+        });
+        return maskedParams;
+    }
+
     /** Timeout for token acquisition in milliseconds. */
     protected long acquisitionTimeout = 30 * 1000L;
 
@@ -286,7 +348,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("process authentication: url: {}, params: {}", urlBuf, params);
+            logger.debug("process authentication: url: {}, params: {}", request.getRequestURL(), maskParams(params));
         }
 
         // validate that state in response equals to state in request
@@ -316,7 +378,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected AuthenticationResponse parseAuthenticationResponse(final String url, final Map<String, List<String>> params) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Parse: {} : {}", url, params);
+            logger.debug("Parse: {} : {}", maskQueryString(url), maskParams(params));
         }
         try {
             return AuthenticationResponseParser.parse(new URI(url), params);
@@ -333,7 +395,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected void validateNonce(final StateData stateData, final IAuthenticationResult authData) {
         final String idToken = authData.idToken();
         if (logger.isDebugEnabled()) {
-            logger.debug("idToken={}***", idToken.substring(0, Math.min(8, idToken.length())));
+            logger.debug("idToken={}", maskSecret(idToken));
         }
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
@@ -363,7 +425,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     public IAuthenticationResult getAccessToken(final String refreshToken) {
         final String authority = getAuthority() + getTenant() + "/";
         if (logger.isDebugEnabled()) {
-            logger.debug("refreshToken={}***, authority={}", refreshToken.substring(0, Math.min(8, refreshToken.length())), authority);
+            logger.debug("refreshToken={}, authority={}", maskSecret(refreshToken), authority);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -394,7 +456,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         final String authority = getAuthority() + getTenant() + "/";
         final String authCode = authorizationCode.getValue();
         if (logger.isDebugEnabled()) {
-            logger.debug("authCode={}, authority={}, uri={}", authCode, authority, currentUri);
+            logger.debug("authCode={}, authority={}, uri={}", maskSecret(authCode), authority, currentUri);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -520,7 +582,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
         final Map<String, String[]> params = request.getParameterMap();
         if (logger.isDebugEnabled()) {
-            logger.debug("params={}", params);
+            logger.debug("params={}", params.keySet());
         }
         return params.containsKey(ERROR) || params.containsKey(ID_TOKEN) || params.containsKey(CODE);
     }

@@ -17,7 +17,9 @@ package org.codelibs.fess.sso.entraid;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +31,57 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
+
+    @Test
+    public void test_maskSecret() {
+        // Long values keep a short prefix so two different codes can still be told apart
+        // in a log, without the value itself being usable.
+        assertEquals("abcdefgh***", EntraIdAuthenticator.maskSecret("abcdefghijklmnopqrstuvwxyz"));
+        // Values shorter than the prefix are not padded out.
+        assertEquals("abc***", EntraIdAuthenticator.maskSecret("abc"));
+        assertEquals("abcdefgh***", EntraIdAuthenticator.maskSecret("abcdefgh"));
+        // Null and empty must not blow up: these are logged on paths where the identity
+        // provider may simply not have sent the field.
+        assertNull(EntraIdAuthenticator.maskSecret(null));
+        assertEquals("", EntraIdAuthenticator.maskSecret(""));
+    }
+
+    @Test
+    public void test_maskParams_masksCredentialsAndKeepsDiagnostics() {
+        final Map<String, List<String>> params = new LinkedHashMap<>();
+        params.put("code", List.of("0.AXkAauthorizationcodevalue"));
+        params.put("id_token", List.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.payload.sig"));
+        params.put("state", List.of("2b1f5c3e-0000-0000-0000-000000000000"));
+        params.put("error", List.of("access_denied"));
+        params.put("error_description", List.of("AADSTS65004: User declined to consent."));
+
+        final Map<String, List<String>> masked = EntraIdAuthenticator.maskParams(params);
+
+        // Credentials are truncated.
+        assertEquals(List.of("0.AXkAau***"), masked.get("code"));
+        assertEquals(List.of("eyJ0eXAi***"), masked.get("id_token"));
+        // Everything needed to diagnose a failed login is kept verbatim.
+        assertEquals(List.of("2b1f5c3e-0000-0000-0000-000000000000"), masked.get("state"));
+        assertEquals(List.of("access_denied"), masked.get("error"));
+        assertEquals(List.of("AADSTS65004: User declined to consent."), masked.get("error_description"));
+        // The key set is unchanged, so the log still shows which artifacts arrived.
+        assertEquals(params.keySet(), masked.keySet());
+        // The caller's map is not modified.
+        assertEquals(List.of("0.AXkAauthorizationcodevalue"), params.get("code"));
+    }
+
+    @Test
+    public void test_maskParams_isCaseInsensitiveOnKeys() {
+        final Map<String, List<String>> params = new LinkedHashMap<>();
+        params.put("Code", List.of("0.AXkAauthorizationcodevalue"));
+        params.put("ACCESS_TOKEN", List.of("accesstokenvalue12345"));
+
+        final Map<String, List<String>> masked = EntraIdAuthenticator.maskParams(params);
+
+        assertEquals(List.of("0.AXkAau***"), masked.get("Code"));
+        assertEquals(List.of("accessto***"), masked.get("ACCESS_TOKEN"));
+    }
+
     @Test
     public void test_addGroupOrRoleName() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
