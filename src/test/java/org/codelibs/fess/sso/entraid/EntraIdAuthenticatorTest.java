@@ -42,6 +42,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
@@ -52,8 +53,89 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import com.google.common.cache.CacheBuilder;
+import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
+
+    private void setEntraIdConfig(final String clientId, final String clientSecret, final String tenant) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessConfig.setSystemProperty("entraid.client.id", clientId);
+        fessConfig.setSystemProperty("entraid.client.secret", clientSecret);
+        fessConfig.setSystemProperty("entraid.tenant", tenant);
+    }
+
+    @Test
+    public void test_getClientApplication_isReusedSoItsTokenCacheSurvives() {
+        // A fresh ConfidentialClientApplication starts with an empty TokenCache, and
+        // acquireTokenSilently throws NO_TOKEN_IN_CACHE on a miss. Building one per call therefore
+        // made silent refresh impossible; the tokens acquired at login have to stay reachable.
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+            assertSame(authenticator.getClientApplication(), authenticator.getClientApplication());
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_getClientApplication_isRebuiltWhenTheConfigurationChanges() {
+        // The client id, secret and tenant are editable from the admin screen at runtime.
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+            final ConfidentialClientApplication first = authenticator.getClientApplication();
+
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-2", "contoso.onmicrosoft.com");
+            final ConfidentialClientApplication afterSecretChange = authenticator.getClientApplication();
+            assertTrue("secret change must rebuild", first != afterSecretChange);
+
+            setEntraIdConfig("22222222-2222-2222-2222-222222222222", "secret-2", "contoso.onmicrosoft.com");
+            assertTrue("config change must rebuild", afterSecretChange != authenticator.getClientApplication());
+
+            setEntraIdConfig("22222222-2222-2222-2222-222222222222", "secret-2", "fabrikam.onmicrosoft.com");
+            assertTrue("config change must rebuild", afterSecretChange != authenticator.getClientApplication());
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_getClientApplication_isBuiltOnceUnderConcurrentAccess() throws Exception {
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+            final int threads = 8;
+            final CountDownLatch start = new CountDownLatch(1);
+            final List<ConfidentialClientApplication> seen = Collections.synchronizedList(new ArrayList<>());
+            final List<Thread> workers = new ArrayList<>();
+            for (int i = 0; i < threads; i++) {
+                final Thread t = new Thread(() -> {
+                    try {
+                        start.await();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    seen.add(authenticator.getClientApplication());
+                });
+                workers.add(t);
+                t.start();
+            }
+            start.countDown();
+            for (final Thread t : workers) {
+                t.join(10000L);
+            }
+
+            assertEquals(threads, seen.size());
+            // Two instances means two token caches, and a login cached in one is invisible to the
+            // other when its refresh comes round.
+            seen.forEach(app -> assertSame(seen.get(0), app));
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
 
     /** Lets a test move the clock that state expiry is measured against. */
     private final AtomicLong clock = new AtomicLong(1_000_000L);
