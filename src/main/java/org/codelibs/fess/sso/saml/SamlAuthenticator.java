@@ -20,6 +20,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -175,6 +176,12 @@ public class SamlAuthenticator implements SsoAuthenticator {
     private final ReplayCache replayCache = new InMemoryReplayCache();
 
     /**
+     * The security warnings reported the last time they were logged, so that the
+     * per-request settings build does not repeat them until the settings change.
+     */
+    private final AtomicReference<List<String>> loggedSecurityWarnings = new AtomicReference<>();
+
+    /**
      * Initializes the SamlAuthenticator.
      */
     @PostConstruct
@@ -276,7 +283,23 @@ public class SamlAuthenticator implements SsoAuthenticator {
         });
         final Saml2Settings settings = new SettingsBuilder().fromValues(params).build();
         settings.setReplayCache(replayCache);
+        logSecurityWarnings(settings);
         return settings;
+    }
+
+    /**
+     * Logs the security warnings reported for the given settings.
+     * The settings are rebuilt on every request, so the warnings are logged
+     * again only when they change.
+     *
+     * @param settings The SAML settings.
+     */
+    protected void logSecurityWarnings(final Saml2Settings settings) {
+        final List<String> warnings = settings.getSecurityWarnings();
+        if (!warnings.equals(loggedSecurityWarnings.getAndSet(warnings)) && !warnings.isEmpty()) {
+            logger.warn("Insecure SAML settings: {}. See the SAML SSO documentation for the recommended values.",
+                    warnings.stream().collect(Collectors.joining(", ")));
+        }
     }
 
     @Override
