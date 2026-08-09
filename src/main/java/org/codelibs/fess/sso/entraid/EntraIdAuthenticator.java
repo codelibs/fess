@@ -176,6 +176,15 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected static final String CODE = "code";
 
     /**
+     * Scopes requested at the v2.0 authorization endpoint. msal4j already prepends
+     * {@code openid profile offline_access} to the token request (its
+     * {@code OAuthAuthorizationGrant.COMMON_SCOPES}), so naming them here as well means consent is
+     * asked for the same set the token exchange goes on to request, rather than relying on the
+     * app registration's static permissions happening to include them.
+     */
+    protected static final String V2_SCOPES = "openid profile offline_access https://graph.microsoft.com/.default";
+
+    /**
      * Response parameters whose values are credentials. Their values are truncated before being
      * written to a debug log; every other parameter is logged verbatim so that a failed login can
      * still be diagnosed from {@code state}, {@code error} and {@code error_description}.
@@ -325,8 +334,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
         if (useV2Endpoint) {
             // v2.0 endpoint with MSAL4J (recommended)
-            authUrl = getAuthority() + getTenant()
-                    + "/oauth2/v2.0/authorize?response_type=code&scope=https://graph.microsoft.com/.default&response_mode=query&redirect_uri="
+            authUrl = getAuthority() + getTenant() + "/oauth2/v2.0/authorize?response_type=code&scope="
+                    + URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET) + "&response_mode=query&redirect_uri="
                     + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
                     + "&nonce=" + nonce;
         } else {
