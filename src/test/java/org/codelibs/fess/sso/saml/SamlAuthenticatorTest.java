@@ -23,6 +23,7 @@ import java.util.Map;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -93,6 +94,18 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         Field defaultSettingsField = SamlAuthenticator.class.getDeclaredField("defaultSettings");
         defaultSettingsField.setAccessible(true);
         defaultSettingsField.set(authenticator, settings);
+    }
+
+    @Test
+    public void test_getSettings_sharesReplayCacheAcrossRequests() throws Exception {
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+        setDefaultSettings(authenticator, createDefaultSettings());
+
+        Saml2Settings first = authenticator.getSettings();
+        Saml2Settings second = authenticator.getSettings();
+
+        assertNotNull(first.getReplayCache());
+        assertSame(first.getReplayCache(), second.getReplayCache());
     }
 
     @Test
