@@ -27,10 +27,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
+import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.lastaflute.web.login.credential.LoginCredential;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
@@ -146,6 +150,52 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         request.setParameter("error", "access_denied");
 
         assertTrue(authenticator.containsAuthenticationData(request));
+    }
+
+    @Test
+    public void test_getLoginCredential_surfacesUnexpectedFailures() {
+        // A swallowed failure leaves the operator with nothing above DEBUG to work from.
+        // SsoAction logs SsoLoginException at WARN and shows the SSO error message, which is
+        // what the OpenID Connect authenticator already relies on.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected LoginCredential processAuthenticationData(final HttpServletRequest request) {
+                throw new IllegalStateException("graph is down");
+            }
+        };
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        request.setParameter("code", "0.AXkAauthorizationcodevalue");
+        request.getSession();
+
+        try {
+            authenticator.getLoginCredential();
+            fail("expected SsoLoginException");
+        } catch (final SsoLoginException e) {
+            assertEquals("graph is down", e.getCause().getMessage());
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_propagatesSsoLoginExceptionUnwrapped() {
+        final SsoLoginException thrown = new SsoLoginException("could not validate state");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected LoginCredential processAuthenticationData(final HttpServletRequest request) {
+                throw thrown;
+            }
+        };
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        request.setParameter("code", "0.AXkAauthorizationcodevalue");
+        request.getSession();
+
+        try {
+            authenticator.getLoginCredential();
+            fail("expected SsoLoginException");
+        } catch (final SsoLoginException e) {
+            assertSame(thrown, e);
+        }
     }
 
     @Test

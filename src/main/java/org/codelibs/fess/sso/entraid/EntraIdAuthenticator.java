@@ -274,12 +274,15 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 }
                 try {
                     return processAuthenticationData(request);
+                } catch (final SsoLoginException e) {
+                    throw e;
                 } catch (final Exception e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Failed to process a login request on Entra ID.", e);
-                    }
+                    // Wrapped rather than returned as null so SsoAction logs it at WARN and shows
+                    // the SSO error message, the same as it already does for the other
+                    // authenticators. Swallowing it here left a failed login invisible unless
+                    // DEBUG logging happened to be on.
+                    throw new SsoLoginException("Failed to process a login request on Entra ID.", e);
                 }
-                return null;
             }
 
             return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
