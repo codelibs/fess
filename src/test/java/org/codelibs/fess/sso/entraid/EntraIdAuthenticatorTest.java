@@ -149,6 +149,20 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLoginCredential_doesNotRedirectACallbackThatLostItsSession() {
+        // Redirecting a callback that arrived without a session sends the user straight back
+        // here without a session again, which is the infinite loop this change is about.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        request.setParameter("code", "0.AXkAauthorizationcodevalue");
+        request.setParameter("state", "2b1f5c3e-0000-0000-0000-000000000000");
+        assertNull(request.getSession(false));
+
+        assertNull(authenticator.getLoginCredential());
+    }
+
+    @Test
     public void test_containsAuthenticationData_ignoresRequestWithoutArtifacts() {
         // A plain visit to /sso must still start a fresh login instead of being treated
         // as a callback.
