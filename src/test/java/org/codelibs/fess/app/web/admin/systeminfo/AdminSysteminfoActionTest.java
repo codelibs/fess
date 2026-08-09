@@ -76,6 +76,20 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksSsoClientCredentials() {
+        // Entra ID stores its client secret in conf/system.properties just like OpenID
+        // Connect does, so it has to be masked on the same screens.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("entraid.client.id"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("entraid.client.secret"));
+        // The legacy Azure AD keys are still read as a fallback by EntraIdAuthenticator,
+        // so an upgraded installation can still hold values under these names.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("aad.client.id"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("aad.client.secret"));
+        // The rule matches on shape, so an SSO provider added later is masked by default.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("okta.client.secret"));
+    }
+
+    @Test
     public void test_isMaskedValue_doesNotMaskOrdinaryKeys() {
         // Other content_chunker.embedding.* keys are plain diagnostic config, not credentials,
         // and must stay visible on the admin screen.
@@ -93,6 +107,12 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.model"));
         assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.retry.max"));
         assertFalse(AdminSysteminfoAction.isMaskedValue("rag.chat.enabled"));
+
+        // The rest of the Entra ID settings are plain configuration, not credentials.
+        assertFalse(AdminSysteminfoAction.isMaskedValue("entraid.tenant"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("entraid.authority"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("entraid.reply.url"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("entraid.permission.fields"));
     }
 
     @Test
@@ -101,6 +121,8 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.gemini.api.key", "gm-super-secret");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.opensearch.password", "hunter2");
         ComponentUtil.getSystemProperties().setProperty("rag.llm.openai.api.key", "sk-chat-secret");
+        ComponentUtil.getSystemProperties().setProperty("entraid.client.secret", "entraid-super-secret");
+        ComponentUtil.getSystemProperties().setProperty("entraid.tenant", "contoso.onmicrosoft.com");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.dimension", "768");
 
         final List<Map<String, String>> itemList = AdminSysteminfoAction.getBugReportItems();
@@ -111,9 +133,11 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertEquals(MASKED_VALUE, findValue(itemList, "content_chunker.embedding.gemini.api.key"));
         assertEquals(MASKED_VALUE, findValue(itemList, "content_chunker.embedding.opensearch.password"));
         assertEquals(MASKED_VALUE, findValue(itemList, "rag.llm.openai.api.key"));
+        assertEquals(MASKED_VALUE, findValue(itemList, "entraid.client.secret"));
 
         // An ordinary diagnostic key is unaffected and keeps its real value.
         assertEquals("768", findValue(itemList, "content_chunker.embedding.dimension"));
+        assertEquals("contoso.onmicrosoft.com", findValue(itemList, "entraid.tenant"));
     }
 
     private String findValue(final List<Map<String, String>> itemList, final String label) {
