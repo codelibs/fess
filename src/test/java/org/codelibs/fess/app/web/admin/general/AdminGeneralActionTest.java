@@ -90,6 +90,21 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
         assertResultCollapsedAfterUpdate("unknown", Constants.TRUE, null, Constants.FALSE);
     }
 
+    @Test
+    public void test_updateConfig_spnegoAllowedRealms_roundTrip() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        final EditForm form = createEditForm();
+        form.spnegoAllowedRealms = "TRUSTED.EXAMPLE,PARTNER.EXAMPLE";
+        AdminGeneralAction.updateConfig(fessConfig, form);
+        assertEquals("TRUSTED.EXAMPLE,PARTNER.EXAMPLE", ComponentUtil.getSystemProperties().getProperty("spnego.allowed.realms"));
+
+        // The value must come back into the form, otherwise the next save would silently clear it.
+        final EditForm reloaded = new EditForm();
+        AdminGeneralAction.updateForm(fessConfig, reloaded);
+        assertEquals("TRUSTED.EXAMPLE,PARTNER.EXAMPLE", reloaded.spnegoAllowedRealms);
+    }
+
     /**
      * Runs updateConfig for the given search engine type and asserts the stored property value.
      * The stored property is read back directly because isResultCollapsed() forces false for

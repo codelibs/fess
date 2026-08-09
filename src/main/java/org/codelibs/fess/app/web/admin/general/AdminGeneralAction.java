@@ -155,7 +155,14 @@ public class AdminGeneralAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_AdminGeneral_AdminGeneralJsp));
+        validate(form, messages -> {
+            // The SPNEGO library rejects this combination when it builds its configuration, and it
+            // does so lazily on the first login rather than here, so reject it at save time instead
+            // of letting SSO break silently until someone tries to log in.
+            if (!isCheckboxEnabled(form.spnegoAllowBasic) && isCheckboxEnabled(form.spnegoPromptNtlm)) {
+                messages.addErrorsSpnegoPromptNtlmRequiresBasic("spnegoPromptNtlm");
+            }
+        }, () -> asHtml(path_AdminGeneral_AdminGeneralJsp));
         verifyToken(() -> asHtml(path_AdminGeneral_AdminGeneralJsp));
 
         updateConfig(fessConfig, form);
@@ -286,6 +293,7 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSystemProperty("spnego.prompt.ntlm", String.valueOf(isCheckboxEnabled(form.spnegoPromptNtlm)));
         fessConfig.setSystemProperty("spnego.allow.localhost", String.valueOf(isCheckboxEnabled(form.spnegoAllowLocalhost)));
         fessConfig.setSystemProperty("spnego.allow.delegation", String.valueOf(isCheckboxEnabled(form.spnegoAllowDelegation)));
+        fessConfig.setSystemProperty("spnego.allowed.realms", form.spnegoAllowedRealms);
         fessConfig.setSystemProperty("spnego.logger.level", form.spnegoLoggerLevel);
 
         // Entra ID
@@ -437,6 +445,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.spnegoAllowDelegation =
                 Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.delegation", Constants.FALSE)) ? Constants.TRUE
                         : Constants.FALSE;
+        form.spnegoAllowedRealms = fessConfig.getSystemProperty("spnego.allowed.realms", StringUtil.EMPTY);
         form.spnegoLoggerLevel = fessConfig.getSystemProperty("spnego.logger.level", StringUtil.EMPTY);
 
         // Entra ID
