@@ -155,21 +155,27 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      * @return The configured SPNEGO authenticator instance
      * @throws SsoLoginException if SPNEGO initialization fails
      */
-    protected synchronized org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
-        if (authenticator != null) {
-            return authenticator;
+    protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+        final org.codelibs.spnego.SpnegoAuthenticator current = authenticator;
+        if (current != null) {
+            return current;
         }
-        try {
-            // NOTE: The underlying SpnegoFilterConfig is a JVM-wide singleton, so the SPNEGO
-            // configuration is effectively cached for the lifetime of the process. Changes to the
-            // spnego.* settings therefore require a Fess restart to take effect.
-            final SpnegoConfig spnegoConfig = new SpnegoConfig();
-            warnInsecureSettings(spnegoConfig);
-            final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(spnegoConfig);
-            authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
-            return authenticator;
-        } catch (final Exception e) {
-            throw new SsoLoginException("Failed to initialize SPNEGO.", e);
+        synchronized (this) {
+            if (authenticator != null) {
+                return authenticator;
+            }
+            try {
+                // NOTE: The underlying SpnegoFilterConfig is a JVM-wide singleton, so the SPNEGO
+                // configuration is effectively cached for the lifetime of the process. Changes to the
+                // spnego.* settings therefore require a Fess restart to take effect.
+                final SpnegoConfig spnegoConfig = new SpnegoConfig();
+                warnInsecureSettings(spnegoConfig);
+                final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(spnegoConfig);
+                authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
+                return authenticator;
+            } catch (final Exception e) {
+                throw new SsoLoginException("Failed to initialize SPNEGO.", e);
+            }
         }
     }
 
@@ -227,7 +233,10 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 if (logger.isDebugEnabled()) {
                     logger.debug(msg);
                 }
-                throw new SsoLoginException(e.getMessage() + " " + msg, e);
+                // The library reports why the handshake failed; keep it, but not every exception
+                // carries a message and "null <msg>" helps nobody diagnose an SSO failure.
+                final String detail = e.getMessage();
+                throw new SsoLoginException(detail == null ? msg : detail + " " + msg, e);
             }
 
             // context/auth loop not yet complete
@@ -259,7 +268,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 logger.debug("username={}", Arrays.toString(username));
             }
             if (username.length == 2 && StringUtil.isNotBlank(username[1]) && !isAllowedRealm(username[1])) {
-                throw new SsoLoginException("Kerberos realm is not allowed: realm=" + username[1]);
+                throw new SsoLoginException("Kerberos realm is not allowed: realm=" + username[1] + ". Add it to " + SPNEGO_ALLOWED_REALMS
+                        + " to accept logins from this realm.");
             }
             return new SpnegoCredential(username[0]);
         }).orElse(null);
@@ -339,10 +349,10 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
                 final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
                 if (StringUtil.isNotBlank(logLevel)) {
-                    if (logLevel.chars().allMatch(Character::isDigit)) {
+                    if (isSupportedLoggerLevel(logLevel)) {
                         return logLevel;
                     }
-                    logger.warn("Invalid spnego.logger.level (must be numeric): {}. Falling back to auto-detection.", logLevel);
+                    logger.warn("Invalid spnego.logger.level (must be 0-7): {}. Falling back to auto-detection.", logLevel);
                 }
                 if (logger.isDebugEnabled()) {
                     return "3";
@@ -405,6 +415,25 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             // and Fess calls SpnegoAuthenticator#authenticate directly instead of installing that
             // filter, so honoring the key here would advertise an exclusion that never happens.
             return null;
+        }
+
+        /**
+         * Determines whether a configured logger level is one the SPNEGO library can consume.
+         *
+         * The library parses the value with {@link Integer#parseInt(String)}, so a value that only
+         * looks numeric still fails initialization once it overflows an int. Anything it does not
+         * recognize is mapped to INFO, which makes the documented 0-7 range the useful bound.
+         *
+         * @param value The configured logger level (not blank)
+         * @return true if the value can be handed to the library
+         */
+        protected static boolean isSupportedLoggerLevel(final String value) {
+            try {
+                final int level = Integer.parseInt(value);
+                return level >= 0 && level <= 7;
+            } catch (final NumberFormatException e) {
+                return false;
+            }
         }
 
         /**
