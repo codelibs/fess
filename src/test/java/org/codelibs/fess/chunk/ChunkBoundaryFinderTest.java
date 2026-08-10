@@ -40,14 +40,24 @@ public class ChunkBoundaryFinderTest extends UnitFessTestCase {
         assertTrue(finder.breakableSpace(0x00A0)); // NBSP
         assertTrue(finder.breakableSpace(0x2007)); // FIGURE SPACE
         assertTrue(finder.breakableSpace(0x202F)); // NNBSP
-        assertTrue(finder.breakableSpace(0x200B)); // ZWSP
-        assertTrue(finder.breakableSpace(0x200C)); // ZWNJ
-        assertTrue(finder.breakableSpace(0x2060)); // WORD JOINER
-        assertTrue(finder.breakableSpace(0xFEFF)); // ZWNBSP / BOM
+        assertTrue(finder.breakableSpace(0x200B)); // ZWSP -- the one zero-width genuine break
         assertTrue(finder.breakableSpace(0x0085)); // NEL
         assertFalse(finder.breakableSpace('a'));
         assertFalse(finder.breakableSpace(0x3042)); // HIRAGANA A
         assertFalse(finder.breakableSpace(0x200D)); // ZWJ is a joiner, not a break
+    }
+
+    @Test
+    public void test_isBreakableSpace_excludesTheCodePointsThatForbidABreak() {
+        // These exist precisely to prevent a break; treating them as break opportunities inverted
+        // their meaning. ZWNJ in particular separates two glyphs of the SAME word.
+        assertFalse(finder.breakableSpace(0x2060)); // WORD JOINER
+        assertFalse(finder.breakableSpace(0xFEFF)); // ZWNBSP / BOM
+        assertFalse(finder.breakableSpace(0x200C)); // ZWNJ
+        assertFalse(finder.skippable(0x2060));
+        assertFalse(finder.skippable(0x200C));
+        // ...and a boundary may not be placed right after a ZWNJ either.
+        assertTrue(finder.clusterJoiner(0x200C));
     }
 
     @Test
@@ -982,6 +992,138 @@ public class ChunkBoundaryFinderTest extends UnitFessTestCase {
         return builder.toString();
     }
 
+    // ===================================================================================
+    //                                                     Break-opportunity refinements
+    //                                                     -----------------------------
+
+    @Test
+    public void test_findChunkEnd_neverBreaksAtANoBreakCodePoint() {
+        // "a<WORD JOINER>b", "a<BOM>b", Persian mi-ravad with its ZWNJ.
+        assertTrue(finder.findChunkEnd("aa\u2060bb", 0, 3, 5, 3, 0) != 3);
+        assertTrue(finder.findChunkEnd("aa\uFEFFbb", 0, 3, 5, 3, 0) != 3);
+        assertTrue(finder.findChunkEnd("aa\u2060bb", 0, 2, 5, 3, 0) != 2, "nor on the other side of the glue");
+        final String persian = "\u0645\u06CC\u200C\u0631\u0648\u062F";
+        for (int ideal = 1; ideal < persian.length(); ideal++) {
+            final int result = finder.findChunkEnd(persian, 0, ideal, persian.length(), 4, 0);
+            assertTrue(result != 3, "a boundary must not follow the ZWNJ, ideal=" + ideal);
+        }
+    }
+
+    @Test
+    public void test_isDirectionAmbiguousQuote_onlyTheAsciiForms() {
+        assertTrue(finder.ambiguousQuote('\''));
+        assertTrue(finder.ambiguousQuote('"'));
+        // The curly forms are unambiguous and keep their full closing-mark behaviour.
+        assertFalse(finder.ambiguousQuote(0x2019));
+        assertFalse(finder.ambiguousQuote(0x201D));
+        assertFalse(finder.ambiguousQuote(0x300D));
+        // They stay skippable, so a quoted sentence end still reaches its terminator.
+        assertTrue(finder.skippable('"'));
+        assertTrue(finder.skippable('\''));
+    }
+
+    @Test
+    public void test_findChunkEnd_quotedSentenceEndStillReachesItsTerminator() {
+        // Regression guard for the change above: the run "\" " contains a space, so the period
+        // behind it must still be found.
+        final String text = "he said \"go.\" then we left";
+        assertEquals(14, finder.findChunkEnd(text, 0, 18, text.length(), 12, 0));
+    }
+
+    @Test
+    public void test_findChunkEnd_apostropheInsideAContractionIsNotABoundary() {
+        final String text = "abcdefghijklmnop don't stop";
+        final int apostrophe = text.indexOf('\'');
+        for (int ideal = apostrophe + 1; ideal <= apostrophe + 2; ideal++) {
+            final int result = finder.findChunkEnd(text, 0, ideal, text.length(), 6, 0);
+            assertTrue(result <= apostrophe - 3, "ideal=" + ideal + " cut a contraction at " + result);
+        }
+    }
+
+    @Test
+    public void test_findChunkEnd_openingQuoteIsStillSwallowedByASpaceRun() {
+        // Documented limitation: an ASCII quote stays skippable so that a quoted sentence end can
+        // reach its terminator, which means a run of "space + opening quote" still ends the chunk
+        // after the quote. Lossless and cosmetic; pinned so the behaviour is a decision, not an
+        // accident.
+        final String text = "The manual says \"never restart the server\"";
+        final int quote = text.indexOf('"');
+        assertEquals(quote + 1, finder.findChunkEnd(text, 0, quote + 2, text.length(), 8, 0));
+    }
+
+    @Test
+    public void test_halfwidthCornerBracketsMatchTheirFullwidthTwins() {
+        assertTrue(finder.openingBracket(0xFF62)); // ｢
+        assertTrue(finder.closingBracket(0xFF63)); // ｣
+        assertTrue(finder.skippable(0xFF63));
+        assertFalse(finder.openingBracket(0xFF63));
+        assertFalse(finder.closingBracket(0xFF62));
+    }
+
+    @Test
+    public void test_findChunkEnd_waveDashBetweenDigitsIsNotABoundary() {
+        assertTrue(finder.requiringNonDigit(0x301C)); // 〜
+        assertTrue(finder.requiringNonDigit(0xFF5E)); // ～
+        // 開始は１０〜２０分です -- the wave dash is a numeric range, not a clause break.
+        final String text = "\u958B\u59CB\u306F\uFF11\uFF10\u301C\uFF12\uFF10\u5206\u3067\u3059";
+        assertTrue(finder.findChunkEnd(text, 0, 7, text.length(), 7, 0) != 6, "a wave dash between fullwidth digits must not end a chunk");
+    }
+
+    // ===================================================================================
+    //                                                       Grapheme-cluster completeness
+    //                                                       -----------------------------
+
+    @Test
+    public void test_isClusterContinuation_coversTheRemainingUax29Cases() {
+        assertTrue(finder.clusterContinuation(0x1F3FB)); // EMOJI MODIFIER FITZPATRICK TYPE-1-2 (Sk)
+        assertTrue(finder.clusterContinuation(0x1F3FF)); // EMOJI MODIFIER FITZPATRICK TYPE-6 (Sk)
+        assertTrue(finder.clusterContinuation(0xE0020)); // TAG SPACE (Cf)
+        assertTrue(finder.clusterContinuation(0xE007F)); // CANCEL TAG (Cf)
+        assertTrue(finder.clusterContinuation(0x1160)); // HANGUL JUNGSEONG FILLER (Lo)
+        assertTrue(finder.clusterContinuation(0x11A8)); // HANGUL JONGSEONG KIYEOK (Lo)
+        assertTrue(finder.clusterContinuation(0xD7CB)); // HANGUL JONGSEONG NIEUN-RIEUL (Lo)
+        assertTrue(finder.clusterContinuation(0xFF9E)); // HALFWIDTH KATAKANA VOICED SOUND MARK (Lm)
+        assertTrue(finder.clusterContinuation(0xFF9F)); // HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK
+        assertFalse(finder.clusterContinuation(0x1100)); // a LEADING jamo starts a cluster
+        assertFalse(finder.clusterContinuation(0x30AB)); // カ starts a cluster
+    }
+
+    @Test
+    public void test_isClusterJoiner_coversCarriageReturnAndBidiInitiators() {
+        assertTrue(finder.clusterJoiner('\r')); // UAX #29 GB3: CRLF is one cluster
+        assertTrue(finder.clusterJoiner(0x2066)); // LEFT-TO-RIGHT ISOLATE
+        assertTrue(finder.clusterJoiner(0x2068)); // FIRST STRONG ISOLATE
+        assertTrue(finder.clusterJoiner(0x202B)); // RIGHT-TO-LEFT EMBEDDING
+        assertTrue(finder.clusterJoiner(0x202E)); // RIGHT-TO-LEFT OVERRIDE
+        // The terminators are not initiators: a boundary after a POP is fine.
+        assertFalse(finder.clusterJoiner(0x2069)); // POP DIRECTIONAL ISOLATE
+        assertFalse(finder.clusterJoiner(0x202C)); // POP DIRECTIONAL FORMATTING
+        assertFalse(finder.clusterJoiner('\n'));
+    }
+
+    @Test
+    public void test_findChunkEnd_neverSplitsTheseClusters() {
+        // Literal expectations, not the predicates under test.
+        final String[] fixtures = { "AB\uD83D\uDC4D\uD83C\uDFFDCD", // 👍 + skin tone
+                "AB\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62CD", // 🏴 + tag characters
+                "AB\uD55C\u11ABCD", // 한 + trailing jamo
+                "AB\uFF76\uFF9ECD", // ｶ + halfwidth voiced mark
+                "AB\r\nCD" };
+        final int[][] forbidden = { { 4 }, { 4, 6 }, { 3 }, { 3 }, { 3 } };
+        for (int f = 0; f < fixtures.length; f++) {
+            final String text = fixtures[f];
+            for (int ideal = 1; ideal < text.length(); ideal++) {
+                for (final int lookback : new int[] { 0, 2, 8 }) {
+                    final int result = finder.findChunkEnd(text, 0, ideal, text.length(), lookback, 0);
+                    for (final int bad : forbidden[f]) {
+                        assertTrue(result != bad,
+                                "fixture " + f + " ideal=" + ideal + " lookback=" + lookback + " split a cluster at " + bad);
+                    }
+                }
+            }
+        }
+    }
+
     /** Exposes the protected character predicates for assertion. */
     private static final class ExposedFinder extends ChunkBoundaryFinder {
         boolean breakableSpace(final int cp) {
@@ -1030,6 +1172,14 @@ public class ChunkBoundaryFinderTest extends UnitFessTestCase {
 
         boolean requiringNonDigit(final int cp) {
             return isPunctuationRequiringNonDigit(cp);
+        }
+
+        boolean ambiguousQuote(final int cp) {
+            return isDirectionAmbiguousQuote(cp);
+        }
+
+        boolean noBreakGlue(final int cp) {
+            return isNoBreakGlue(cp);
         }
     }
 }

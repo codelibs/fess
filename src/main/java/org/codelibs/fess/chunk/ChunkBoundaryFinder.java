@@ -32,8 +32,14 @@ package org.codelibs.fess.chunk;
  */
 public class ChunkBoundaryFinder {
 
-    /** Zero-width joiner; splitting next to it breaks an emoji/grapheme sequence. */
-    protected static final int ZWJ = 0x200D;
+    /**
+     * Zero-width joiner; splitting next to it breaks an emoji/grapheme sequence.
+     *
+     * <p>{@code private}, unlike the {@code is*} predicates: a {@code static} field has no virtual
+     * dispatch, so a subclass redeclaring it would never be read. Override
+     * {@link #isClusterContinuation} or {@link #isClusterJoiner} instead.</p>
+     */
+    private static final int ZWJ = 0x200D;
 
     /** Returned in place of an offset when a tier has no candidate. */
     private static final int NO_CANDIDATE = -1;
@@ -42,15 +48,13 @@ public class ChunkBoundaryFinder {
      * How far the hard-cut fallback may walk back (then forward) to leave a grapheme cluster
      * intact, in code points.
      *
-     * <p>{@code protected} suggests a subclass can retune this budget by redeclaring the
-     * constant, but it cannot: the sole reader, {@link #adjustToClusterStart}, is {@code private}
-     * and binds this class's own constant at compile time -- {@code static} fields have no
-     * virtual dispatch, so a subclass's redeclaration is simply never read. This budget is not
-     * currently part of the swappable seam that {@link #isClusterContinuation} and the other
-     * {@code protected} predicates form; kept {@code protected} rather than narrowed to
-     * {@code private} to avoid an unrelated visibility change.</p>
+     * <p>Not part of the swappable seam that {@link #isClusterContinuation} and the other
+     * {@code protected} predicates form: a {@code static} field has no virtual dispatch, so a
+     * subclass redeclaring this constant would never be read. {@code package} rather than
+     * {@code private} only so {@link LengthChunker} can state the overshoot ceiling in terms of
+     * it.</p>
      */
-    protected static final int MAX_CLUSTER_ADJUST = 16;
+    static final int MAX_CLUSTER_ADJUST = 16;
 
     /**
      * Default constructor.
@@ -177,12 +181,14 @@ public class ChunkBoundaryFinder {
         // The scan's limitEnd is `bound`, and there is no forward search here: moving the overlap
         // start forward would skip text.
         final long packed = searchBackward(text, origin, base, bound, lookback);
+        // searchBackward only ever returns offsets in [max(origin + 1, base - lookback), base],
+        // which is inside (origin, bound] because base is, so no range re-check is needed here.
         final int strong = unpackStrong(packed);
-        if (strong != NO_CANDIDATE && strong > origin && strong <= bound) {
+        if (strong != NO_CANDIDATE) {
             return strong;
         }
         final int weakOrScript = unpackWeakOrScript(packed);
-        if (weakOrScript != NO_CANDIDATE && weakOrScript > origin && weakOrScript <= bound) {
+        if (weakOrScript != NO_CANDIDATE) {
             return weakOrScript;
         }
         return base;
@@ -261,13 +267,17 @@ public class ChunkBoundaryFinder {
                 }
                 runHasNewline |= isNewline(before);
                 runHasSpace |= isBreakableSpace(before);
-                runHasClosing |= isClosingBracket(before);
+                runHasClosing |= isClosingBracket(before) && !isDirectionAmbiguousQuote(before);
                 b -= beforeLen;
                 after = before;
                 continue;
             }
             final int candidate = runEnd == NO_CANDIDATE ? b : runEnd;
-            final boolean spaceSatisfied = runHasSpace || candidate >= limitEnd;
+            // No `|| candidate >= limitEnd` term here: findChunkEnd returns early when
+            // base >= bound, so every candidate is strictly below limitEnd on that path, and in
+            // snapOverlapStart limitEnd is the chunk end rather than the end of the text -- where
+            // "nothing follows, so the space requirement is moot" is simply untrue.
+            final boolean spaceSatisfied = runHasSpace;
             // A tier candidate is no more allowed to split a grapheme cluster than the hard cut
             // is; an offset that strands a combining mark or a joiner half is rejected and the
             // scan simply keeps looking. Without this the boundary search could split a cluster
@@ -389,6 +399,8 @@ public class ChunkBoundaryFinder {
                     sawSpace |= isBreakableSpace(next);
                     p += Character.charCount(next);
                 }
+                // Here the end of the text genuinely does satisfy the space requirement: a
+                // trailing "." with nothing after it still ends the sentence.
                 final boolean spaceSatisfied = sawSpace || p >= limitEnd;
                 final int afterCp = i + cpLen < limitEnd ? Character.codePointAt(text, i + cpLen) : -1;
                 final boolean blockedByDigit = isPunctuationRequiringNonDigit(cp) && afterCp >= 0 && Character.isDigit(afterCp);
@@ -474,8 +486,17 @@ public class ChunkBoundaryFinder {
      * Returns true if the code point is a break opportunity that behaves like a space.
      *
      * <p>Includes the code points {@link Character#isWhitespace(int)} reports as
-     * <em>non</em>-whitespace but that Fess's extracted text treats as separators
-     * (see {@code crawler.document.space.chars}).</p>
+     * <em>non</em>-whitespace but that render as a space: NEL, and the no-break spaces that
+     * {@code crawler.document.space.chars} normalises away before indexing but that survive in
+     * content Fess did not extract itself. They overlap that property without being derived from
+     * it.</p>
+     *
+     * <p>Deliberately excluded, although zero-width: {@code U+2060} WORD JOINER,
+     * {@code U+FEFF} ZWNBSP and {@code U+200C} ZWNJ exist precisely to <em>forbid</em> a break,
+     * so treating them as break opportunities inverted their meaning -- the ZWNJ case split
+     * single Persian words. {@code U+200B} ZERO WIDTH SPACE is the one member of that group that
+     * is a genuine break opportunity and is kept. {@code U+200D} ZWJ is a cluster joiner, handled
+     * by {@link #isClusterJoiner}.</p>
      *
      * @param cp the code point
      * @return true if the code point is a breakable space
@@ -494,9 +515,6 @@ public class ChunkBoundaryFinder {
         case 0x2007: // FIGURE SPACE
         case 0x202F: // NARROW NO-BREAK SPACE
         case 0x200B: // ZERO WIDTH SPACE
-        case 0x200C: // ZERO WIDTH NON-JOINER
-        case 0x2060: // WORD JOINER
-        case 0xFEFF: // ZERO WIDTH NO-BREAK SPACE / BOM
             return true;
         default:
             return false;
@@ -640,6 +658,8 @@ public class ChunkBoundaryFinder {
         case 0xFF0E: // ．
         case 0xFF0C: // ，
         case 0xFF1A: // ：
+        case 0x301C: // 〜
+        case 0xFF5E: // ～
             return true;
         default:
             return false;
@@ -663,6 +683,7 @@ public class ChunkBoundaryFinder {
         case 0xFF3D: // ］
         case 0xFF5D: // ｝
         case 0x300D: // 」
+        case 0xFF63: // ｣
         case 0x300F: // 』
         case 0x3011: // 】
         case 0x3015: // 〕
@@ -691,6 +712,7 @@ public class ChunkBoundaryFinder {
         case 0xFF3B: // ［
         case 0xFF5B: // ｛
         case 0x300C: // 「
+        case 0xFF62: // ｢
         case 0x300E: // 『
         case 0x3010: // 【
         case 0x3014: // 〔
@@ -713,6 +735,30 @@ public class ChunkBoundaryFinder {
      */
     protected boolean isSkippableAfterBoundary(final int cp) {
         return isBreakableSpace(cp) || isClosingBracket(cp);
+    }
+
+    /**
+     * Returns true if the code point is an ASCII quote, which cannot be told apart from its own
+     * opening form.
+     *
+     * <p>{@code '} and {@code "} are listed as closing marks -- {@code he said "go." then} must
+     * still reach its sentence end through them -- but they are just as often word-internal
+     * ({@code don't}, {@code O'Brien}) or an <em>opening</em> quote. Standing alone in a trailing
+     * run they therefore do not make a WEAK candidate the way {@code 」} or {@code )} do; a run
+     * that also contains a space still does. The curly forms {@code ’} and {@code ”} are
+     * unambiguous and are not affected.</p>
+     *
+     * <p>Known limitation: because they stay skippable, a run of "space then opening quote" still
+     * ends the chunk <em>after</em> the quote, leaving it orphaned at the end of the previous
+     * chunk. Excluding only a trailing ambiguous-quote tail from the run would need the run
+     * bookkeeping to distinguish its right edge from its interior; the outcome is lossless and
+     * purely cosmetic, so it is not worth that complexity.</p>
+     *
+     * @param cp the code point
+     * @return true if the code point is a direction-ambiguous ASCII quote
+     */
+    protected boolean isDirectionAmbiguousQuote(final int cp) {
+        return cp == '\'' || cp == '"';
     }
 
     /**
@@ -768,6 +814,27 @@ public class ChunkBoundaryFinder {
         if (cp >= 0xFE00 && cp <= 0xFE0F || cp >= 0xE0100 && cp <= 0xE01EF) {
             return true;
         }
+        if (cp >= 0x1F3FB && cp <= 0x1F3FF) {
+            // Emoji modifiers (skin tone): general category Sk, so getType() misses them.
+            return true;
+        }
+        if (cp >= 0xE0020 && cp <= 0xE007F) {
+            // Tag characters: the payload of an emoji tag sequence such as the Scotland flag.
+            return true;
+        }
+        if (cp >= 0x1160 && cp <= 0x11FF || cp >= 0xD7B0 && cp <= 0xD7FF) {
+            // Conjoining Hangul jamo: the vowel and trailing-consonant halves are Lo, but they
+            // compose with the leading jamo in front of them (UAX #29 GB6-GB8).
+            return true;
+        }
+        if (cp == 0xFF9E || cp == 0xFF9F) {
+            // Halfwidth katakana voiced and semi-voiced sound marks: Lm, but they modify the kana
+            // in front of them exactly as their fullwidth combining forms do.
+            return true;
+        }
+        if (isNoBreakGlue(cp)) {
+            return true;
+        }
         if (cp == 0x0E33 || cp == 0x0EB3) {
             // THAI/LAO SARA AM: general category Lo, but UAX #29 gives it GCB=SpacingMark, so it
             // belongs to the cluster of the consonant in front of it.
@@ -794,8 +861,41 @@ public class ChunkBoundaryFinder {
      * @param cp the code point immediately before the candidate boundary
      * @return true if a boundary must not be placed right after this code point
      */
+    /**
+     * Returns true if the code point exists specifically to forbid a break on both of its sides.
+     *
+     * <p>{@code U+2060} WORD JOINER and {@code U+FEFF} ZWNBSP are defined as no-break glue, and
+     * {@code U+200C} ZWNJ separates two glyphs of the <em>same</em> word (Persian
+     * {@code می‌رود}, Devanagari conjunct suppression). All three used to be treated as
+     * <em>preferred</em> break opportunities, which inverted their meaning. Consulted from both
+     * cluster predicates so the prohibition also binds the hard-cut fallback, not just the tier
+     * candidates. {@code U+200B} ZERO WIDTH SPACE is deliberately absent: it is a genuine break
+     * opportunity and stays in {@link #isBreakableSpace}.</p>
+     *
+     * @param cp the code point
+     * @return true if no boundary may be placed on either side of this code point
+     */
+    protected boolean isNoBreakGlue(final int cp) {
+        return cp == 0x2060 || cp == 0xFEFF || cp == 0x200C;
+    }
+
     protected boolean isClusterJoiner(final int cp) {
         if (cp == ZWJ) {
+            return true;
+        }
+        if (cp == '\r') {
+            // UAX #29 GB3: CR and LF are one cluster, so a boundary may not fall between them.
+            return true;
+        }
+        if (isNoBreakGlue(cp)) {
+            return true;
+        }
+        if (cp >= 0x2066 && cp <= 0x2068 || cp >= 0x202A && cp <= 0x202B || cp >= 0x202D && cp <= 0x202E) {
+            // Bidi isolate/embedding/override initiators. Cutting immediately after one leaves the
+            // opening control in the previous chunk with nothing to scope, and re-directs
+            // everything after it in the next one. This does not pair initiators with their
+            // terminators -- a cut further inside the run is still possible -- it only refuses the
+            // worst case, which is also the cheapest to detect.
             return true;
         }
         // Khmer coeng subscripts the consonant that follows it, and the Thai/Lao pre-base vowels
