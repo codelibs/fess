@@ -183,49 +183,52 @@ public class SamlAuthenticator implements SsoAuthenticator {
             logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getSsoManager().register(this);
+        defaultSettings = createDefaultSettings();
+    }
 
-        // Default SAML settings
-        // NOTE: Many security settings are set to false by default for compatibility.
-        // For production use, it is STRONGLY RECOMMENDED to enable security features:
-        // - onelogin.saml2.security.authnrequest_signed
-        // - onelogin.saml2.security.want_messages_signed
-        // - onelogin.saml2.security.want_assertions_signed
-        // Override these settings in your system properties with the 'saml.' prefix.
-        defaultSettings = new HashMap<>();
-        defaultSettings.put("onelogin.saml2.strict", "true");
-        defaultSettings.put("onelogin.saml2.debug", "false");
-        defaultSettings.put("onelogin.saml2.sp.entityid", buildDefaultUrl("/sso/metadata"));
-        defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.url", buildDefaultUrl("/sso/"));
-        defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-        defaultSettings.put("onelogin.saml2.sp.single_logout_service.url", buildDefaultUrl("/sso/logout"));
-        defaultSettings.put("onelogin.saml2.sp.single_logout_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
-        defaultSettings.put("onelogin.saml2.sp.nameidformat", "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress");
-        defaultSettings.put("onelogin.saml2.sp.x509cert", "");
-        defaultSettings.put("onelogin.saml2.sp.privatekey", "");
-        defaultSettings.put("onelogin.saml2.idp.single_sign_on_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
-        defaultSettings.put("onelogin.saml2.idp.single_logout_service.response.url", "");
-        defaultSettings.put("onelogin.saml2.idp.single_logout_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
-        defaultSettings.put("onelogin.saml2.security.nameid_encrypted", "false");
-        defaultSettings.put("onelogin.saml2.security.authnrequest_signed", "false");
-        defaultSettings.put("onelogin.saml2.security.logoutrequest_signed", "false");
-        defaultSettings.put("onelogin.saml2.security.logoutresponse_signed", "false");
-        defaultSettings.put("onelogin.saml2.security.want_messages_signed", "false");
-        defaultSettings.put("onelogin.saml2.security.want_assertions_signed", "false");
-        defaultSettings.put("onelogin.saml2.security.sign_metadata", "");
-        defaultSettings.put("onelogin.saml2.security.want_assertions_encrypted", "false");
-        defaultSettings.put("onelogin.saml2.security.want_nameid_encrypted", "false");
-        defaultSettings.put("onelogin.saml2.security.requested_authncontext", "urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
-        defaultSettings.put("onelogin.saml2.security.onelogin.saml2.security.requested_authncontextcomparison", "exact");
-        defaultSettings.put("onelogin.saml2.security.want_xml_validation", "true");
-        defaultSettings.put("onelogin.saml2.security.signature_algorithm", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
-        defaultSettings.put("onelogin.saml2.organization.name", "CodeLibs");
-        defaultSettings.put("onelogin.saml2.organization.displayname", "Fess");
-        defaultSettings.put("onelogin.saml2.organization.url", "https://fess.codelibs.org/");
-        defaultSettings.put("onelogin.saml2.organization.lang", "");
-        defaultSettings.put("onelogin.saml2.contacts.technical.given_name", "Technical Guy");
-        defaultSettings.put("onelogin.saml2.contacts.technical.email_address", "technical@example.com");
-        defaultSettings.put("onelogin.saml2.contacts.support.given_name", "Support Guy");
-        defaultSettings.put("onelogin.saml2.contacts.support.email_address", "support@example.com");
+    /**
+     * Creates the settings that are applied before the {@code saml.} system properties.
+     *
+     * <p>NOTE: Many security settings are set to false for compatibility.
+     * For production use, it is STRONGLY RECOMMENDED to enable security features:
+     * {@code saml.security.authnrequest_signed}, {@code saml.security.want_messages_signed}
+     * and {@code saml.security.want_assertions_signed}.</p>
+     *
+     * <p>The SP endpoint URLs are not included here because they are derived from
+     * {@code saml.sp.base.url}, which can be changed at runtime. They are built by
+     * {@link #getSettings()} on every call.</p>
+     *
+     * @return The default settings.
+     */
+    protected Map<String, Object> createDefaultSettings() {
+        final Map<String, Object> settings = new HashMap<>();
+        settings.put("onelogin.saml2.strict", "true");
+        settings.put("onelogin.saml2.debug", "false");
+        settings.put("onelogin.saml2.sp.assertion_consumer_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+        settings.put("onelogin.saml2.sp.single_logout_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
+        settings.put("onelogin.saml2.sp.nameidformat", "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress");
+        settings.put("onelogin.saml2.idp.single_sign_on_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
+        settings.put("onelogin.saml2.idp.single_logout_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
+        settings.put("onelogin.saml2.security.nameid_encrypted", "false");
+        settings.put("onelogin.saml2.security.authnrequest_signed", "false");
+        settings.put("onelogin.saml2.security.logoutrequest_signed", "false");
+        settings.put("onelogin.saml2.security.logoutresponse_signed", "false");
+        settings.put("onelogin.saml2.security.want_messages_signed", "false");
+        settings.put("onelogin.saml2.security.want_assertions_signed", "false");
+        settings.put("onelogin.saml2.security.want_assertions_encrypted", "false");
+        settings.put("onelogin.saml2.security.want_nameid_encrypted", "false");
+        settings.put("onelogin.saml2.security.requested_authncontext", "urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
+        settings.put("onelogin.saml2.security.requested_authncontextcomparison", "exact");
+        settings.put("onelogin.saml2.security.want_xml_validation", "true");
+        settings.put("onelogin.saml2.security.signature_algorithm", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+        settings.put("onelogin.saml2.organization.name", "CodeLibs");
+        settings.put("onelogin.saml2.organization.displayname", "Fess");
+        settings.put("onelogin.saml2.organization.url", "https://fess.codelibs.org/");
+        settings.put("onelogin.saml2.contacts.technical.given_name", "Technical Guy");
+        settings.put("onelogin.saml2.contacts.technical.email_address", "technical@example.com");
+        settings.put("onelogin.saml2.contacts.support.given_name", "Support Guy");
+        settings.put("onelogin.saml2.contacts.support.email_address", "support@example.com");
+        return settings;
     }
 
     /**
@@ -254,13 +257,22 @@ public class SamlAuthenticator implements SsoAuthenticator {
      */
     protected Saml2Settings getSettings() {
         final Map<String, Object> params = new HashMap<>(defaultSettings);
+        // built on every call because saml.sp.base.url can be changed at runtime
+        params.put("onelogin.saml2.sp.entityid", buildDefaultUrl("/sso/metadata"));
+        params.put("onelogin.saml2.sp.assertion_consumer_service.url", buildDefaultUrl("/sso/"));
+        params.put("onelogin.saml2.sp.single_logout_service.url", buildDefaultUrl("/sso/logout"));
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         systemProperties.entrySet().stream().forEach(e -> {
             final String key = e.getKey().toString();
             if (!key.startsWith(SAML_PREFIX)) {
                 return;
             }
-            params.put("onelogin.saml2." + key.substring(SAML_PREFIX.length()), e.getValue());
+            final Object value = e.getValue();
+            if (value instanceof final String s && StringUtil.isBlank(s)) {
+                // a blank property must not wipe out the default above
+                return;
+            }
+            params.put("onelogin.saml2." + key.substring(SAML_PREFIX.length()), value);
         });
         final Saml2Settings settings = new SettingsBuilder().fromValues(params).build();
         settings.setReplayCache(replayCache);
