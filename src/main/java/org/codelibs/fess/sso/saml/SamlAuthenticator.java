@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SamlCredential;
@@ -42,6 +41,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.Auth;
 import org.codelibs.saml2.core.authn.AuthnRequestParams;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
+import org.codelibs.saml2.core.replay.InMemoryReplayCache;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.dbflute.optional.OptionalEntity;
@@ -150,7 +151,8 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected static final String SAML_PREFIX = "saml.";
 
     /**
-     * The key for the SAML state in the session.
+     * The session key holding the ID of the AuthnRequest sent to the IdP.
+     * The value is compared with the InResponseTo of the SAML response.
      */
     protected static final String SAML_STATE = "SAML_STATE";
 
@@ -160,6 +162,17 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected static final String SAML_SP_BASE_URL = "saml.sp.base.url";
 
     private Map<String, Object> defaultSettings;
+
+    /**
+     * Cache of processed assertion IDs, used to reject replayed assertions.
+     *
+     * <p><b>Note:</b> the cache is held in memory by this instance and is not shared in a
+     * multi-instance deployment. That is also why SAML SSO needs sticky sessions: the
+     * assertion has to reach the instance whose session holds the matching AuthnRequest ID.
+     * It is that ID check, not this cache, which rejects an assertion replayed to another
+     * instance; the cache catches a repeated POST within a single session.</p>
+     */
+    private final ReplayCache replayCache = new InMemoryReplayCache();
 
     /**
      * Initializes the SamlAuthenticator.
@@ -249,7 +262,9 @@ public class SamlAuthenticator implements SsoAuthenticator {
             }
             params.put("onelogin.saml2." + key.substring(SAML_PREFIX.length()), e.getValue());
         });
-        return new SettingsBuilder().fromValues(params).build();
+        final Saml2Settings settings = new SettingsBuilder().fromValues(params).build();
+        settings.setReplayCache(replayCache);
+        return settings;
     }
 
     @Override
@@ -263,28 +278,19 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
             final HttpSession session = request.getSession(false);
             if (session != null) {
-                final String sesState = (String) session.getAttribute(SAML_STATE);
-                if (StringUtil.isNotBlank(sesState)) {
+                final String requestId = (String) session.getAttribute(SAML_STATE);
+                if (StringUtil.isNotBlank(requestId)) {
                     session.removeAttribute(SAML_STATE);
                     try {
                         final Auth auth = new Auth(getSettings(), request, response);
-                        auth.processResponse();
+                        auth.processResponse(requestId);
 
                         if (!auth.isAuthenticated()) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Authentication failed.");
-                            }
-                            return null;
-                        }
-
-                        final List<String> errors = auth.getErrors();
-                        if (!errors.isEmpty()) {
-                            logger.warn("{}", errors.stream().collect(Collectors.joining(", ")));
+                            final String errors = auth.getErrors().stream().collect(Collectors.joining(", "));
                             if (auth.isDebugActive() && StringUtil.isNotBlank(auth.getLastErrorReason())) {
-                                logger.warn("Authentication Failure: {} - Reason: {}", errors.stream().collect(Collectors.joining(", ")),
-                                        auth.getLastErrorReason());
+                                logger.warn("Authentication Failure: {} - Reason: {}", errors, auth.getLastErrorReason());
                             } else {
-                                logger.warn("Authentication Failure: {}", errors.stream().collect(Collectors.joining(", ")));
+                                logger.warn("Authentication Failure: {}", errors);
                             }
                             return null;
                         }
@@ -301,7 +307,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 final Auth auth = new Auth(getSettings(), request, response);
                 final AuthnRequestParams authnRequestParams = new AuthnRequestParams(false, false, true);
                 final String loginUrl = auth.login(null, authnRequestParams, true);
-                request.getSession().setAttribute(SAML_STATE, UuidUtil.create());
+                request.getSession().setAttribute(SAML_STATE, auth.getLastRequestId());
                 return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(loginUrl));
             } catch (final Exception e) {
                 throw new SsoLoginException("Invalid SAML redirect URL.", e);
