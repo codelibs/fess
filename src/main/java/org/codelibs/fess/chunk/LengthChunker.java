@@ -18,6 +18,7 @@ package org.codelibs.fess.chunk;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -145,6 +146,21 @@ public class LengthChunker implements Chunker {
     private static final ChunkBoundaryFinder DEFAULT_BOUNDARY_FINDER = new ChunkBoundaryFinder();
 
     /**
+     * Signature of the configuration problems most recently reported by
+     * {@link #warnOnConfigProblem}.
+     *
+     * <p>Every setting is re-read on each {@code split} call, because {@code system.properties} is
+     * live -- which means a misconfigured instance used to emit the same WARN once per crawled
+     * document, millions of times over a large corpus. Reporting only when the signature changes
+     * keeps a misconfiguration loud exactly once and still reports it again if the operator
+     * changes it to something else that is also wrong. This holds the last problem
+     * <em>reported</em>, not the last configuration seen, so a clean run in between does not
+     * re-arm it -- the WARN describes a standing misconfiguration, and saying it once is the
+     * point.</p>
+     */
+    private final AtomicReference<String> lastConfigProblem = new AtomicReference<>("");
+
+    /**
      * Default constructor.
      */
     public LengthChunker() {
@@ -257,6 +273,9 @@ public class LengthChunker implements Chunker {
         // so cap with long arithmetic before narrowing.
         final int stride = Math.max(1, chunkSize - overlap);
         final List<String> chunks = new ArrayList<>((int) Math.min(limit, (long) length / stride + 2L));
+        int movedBack = 0;
+        int movedForward = 0;
+        int hardCut = 0;
         int start = 0;
         while (start < length) {
             if (isMidSurrogatePair(content, start)) {
@@ -270,7 +289,15 @@ public class LengthChunker implements Chunker {
                 end--;
             }
             if (finder != null) {
+                final int idealEnd = end;
                 end = finder.findChunkEnd(content, start, end, length, lookback, lookahead);
+                if (end < idealEnd) {
+                    movedBack++;
+                } else if (end > idealEnd) {
+                    movedForward++;
+                } else {
+                    hardCut++;
+                }
                 if (isMidSurrogatePair(content, end)) {
                     // Defensive: a custom finder is not required to be code-point aligned.
                     end--;
@@ -311,6 +338,9 @@ public class LengthChunker implements Chunker {
                 nextStart = end;
             }
             start = nextStart;
+        }
+        if (finder != null) {
+            logBoundaryOutcome(chunks.size(), movedBack, movedForward, hardCut);
         }
         return chunks;
     }
@@ -401,6 +431,44 @@ public class LengthChunker implements Chunker {
         return DEFAULT_BOUNDARY_FINDER;
     }
 
+    /**
+     * Reports a configuration problem, but only when it differs from the one reported last.
+     *
+     * @param signature identifies the problem; an unchanged signature is not reported again
+     * @param format the log message pattern
+     * @param args the log message arguments
+     */
+    protected void warnOnConfigProblem(final String signature, final String format, final Object... args) {
+        if (!signature.equals(lastConfigProblem.getAndSet(signature))) {
+            logger.warn(format, args);
+        }
+    }
+
+    /**
+     * Summarises, at DEBUG, how often boundary search actually moved a cut for this document.
+     *
+     * <p>Without this the feature is unfalsifiable in a running system: a corpus the character
+     * tables do not cover -- a language whose sentence marks {@link ChunkBoundaryFinder} does not
+     * know, or text with no punctuation at all -- silently gets 100% hard cuts and looks exactly
+     * like the feature working. A high {@code hardCut} share is the signal to raise
+     * {@code lookback_percent} or to extend the tables.</p>
+     *
+     * <p>Only the coarse moved/hard-cut split is reported, not a per-tier histogram: which tier
+     * won is known inside {@link ChunkBoundaryFinder#findChunkEnd} alone, and widening its
+     * signature to report it would change the {@code protected} seam a deployment subclasses.</p>
+     *
+     * @param chunks the number of chunks produced
+     * @param movedBack how many cuts a backward tier pulled earlier
+     * @param movedForward how many cuts the forward search or the cluster escape pushed later
+     * @param hardCut how many cuts landed on the fixed-length offset because no tier had a candidate
+     */
+    protected void logBoundaryOutcome(final int chunks, final int movedBack, final int movedForward, final int hardCut) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[Chunk] Boundary outcome: chunks={} movedBack={} movedForward={} hardCut={} ({}% of cuts unmoved).", chunks,
+                    movedBack, movedForward, hardCut, chunks == 0 ? 0 : 100 * hardCut / chunks);
+        }
+    }
+
     private boolean getConfigBoolean(final String key, final boolean defaultValue) {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(key, null);
         if (value != null) {
@@ -411,18 +479,19 @@ public class LengthChunker implements Chunker {
             if (Constants.FALSE.equalsIgnoreCase(trimmed)) {
                 return false;
             }
-            logger.warn("[Chunk] Invalid boolean for {}: {}. Using default {}.", key, value, defaultValue);
+            warnOnConfigProblem(key + "=" + value, "[Chunk] Invalid boolean for {}: {}. Using default {}.", key, value, defaultValue);
         }
         return defaultValue;
     }
 
     private int normalizeBoundaryPercent(final int value, final int max, final String key) {
         if (value < 0) {
-            logger.warn("[Chunk] {}={} is negative, treating it as 0 (that direction is not searched)", key, value);
+            warnOnConfigProblem(key + "=" + value, "[Chunk] {}={} is negative, treating it as 0 (that direction is not searched)", key,
+                    value);
             return 0;
         }
         if (value > max) {
-            logger.warn("[Chunk] {}={} exceeds the maximum of {}, clamping to {}", key, value, max, max);
+            warnOnConfigProblem(key + "=" + value, "[Chunk] {}={} exceeds the maximum of {}, clamping to {}", key, value, max, max);
             return max;
         }
         return value;
@@ -441,7 +510,7 @@ public class LengthChunker implements Chunker {
             try {
                 return Integer.parseInt(value.trim());
             } catch (final NumberFormatException e) {
-                logger.warn("[Chunk] Invalid integer for {}: {}. Using default {}.", key, value, defaultValue);
+                warnOnConfigProblem(key + "=" + value, "[Chunk] Invalid integer for {}: {}. Using default {}.", key, value, defaultValue);
             }
         }
         return defaultValue;
@@ -449,17 +518,21 @@ public class LengthChunker implements Chunker {
 
     private int normalizeChunkSize(final int chunkSize) {
         if (chunkSize <= 0) {
-            logger.warn("[Chunk] Invalid chunk_size={}, falling back to default {}", chunkSize, DEFAULT_CHUNK_SIZE);
+            warnOnConfigProblem(CHUNK_SIZE_PROPERTY + "=" + chunkSize, "[Chunk] Invalid chunk_size={}, falling back to default {}",
+                    chunkSize, DEFAULT_CHUNK_SIZE);
             return DEFAULT_CHUNK_SIZE;
         }
         if (chunkSize < MIN_CHUNK_SIZE) {
-            logger.warn("[Chunk] chunk_size={} is below the minimum of {} (a sanity floor), clamping to {}", chunkSize, MIN_CHUNK_SIZE,
+            warnOnConfigProblem(CHUNK_SIZE_PROPERTY + "=" + chunkSize,
+                    "[Chunk] chunk_size={} is below the minimum of {} (a sanity floor), clamping to {}", chunkSize, MIN_CHUNK_SIZE,
                     MIN_CHUNK_SIZE);
             return MIN_CHUNK_SIZE;
         }
         if (chunkSize > MAX_CHUNK_SIZE) {
-            logger.warn("[Chunk] chunk_size={} exceeds the maximum of {} (sanity ceiling guarding against absurd/OOM values), "
-                    + "clamping to {}", chunkSize, MAX_CHUNK_SIZE, MAX_CHUNK_SIZE);
+            warnOnConfigProblem(CHUNK_SIZE_PROPERTY + "=" + chunkSize,
+                    "[Chunk] chunk_size={} exceeds the maximum of {} (sanity ceiling guarding against absurd/OOM values), "
+                            + "clamping to {}",
+                    chunkSize, MAX_CHUNK_SIZE, MAX_CHUNK_SIZE);
             return MAX_CHUNK_SIZE;
         }
         return chunkSize;
@@ -470,7 +543,8 @@ public class LengthChunker implements Chunker {
             return 0;
         }
         if (overlap >= chunkSize) {
-            logger.warn("[Chunk] overlap ({}) >= chunk_size ({}), clamping overlap to 0", overlap, chunkSize);
+            warnOnConfigProblem(OVERLAP_PROPERTY + "=" + overlap + "/" + chunkSize,
+                    "[Chunk] overlap ({}) >= chunk_size ({}), clamping overlap to 0", overlap, chunkSize);
             return 0;
         }
         return overlap;
