@@ -39,6 +39,8 @@ import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.StreamResponse;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
 
@@ -285,6 +287,41 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertNotNull(request.getSession(false).getAttribute("SAML_STATE"));
         } finally {
             tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getMetadataResponse_withoutIdpSettings() throws Exception {
+        // the SP metadata is what the IdP is registered from, so it must not require saml.idp.*
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            systemProperties.setProperty(BASE_URL_KEY, "https://fess.example.com");
+
+            final ActionResponse response = authenticator.getResponse(SsoResponseType.METADATA);
+
+            assertTrue(String.valueOf(response), response instanceof StreamResponse);
+            assertEquals("metadata.xml", ((StreamResponse) response).getFileName());
+        } finally {
+            systemProperties.remove(BASE_URL_KEY);
+        }
+    }
+
+    @Test
+    public void test_getMetadataResponse_reportsInvalidSpSettings() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // an SP entity ID that is not a URL leaves the ACS URL unset
+            systemProperties.setProperty("saml.sp.assertion_consumer_service.url", "not a url");
+
+            authenticator.getResponse(SsoResponseType.METADATA);
+            fail("SsoMessageException should be thrown");
+        } catch (final SsoMessageException e) {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause().getMessage(), e.getCause().getMessage().contains("sp_acs_not_found"));
+        } finally {
+            systemProperties.remove("saml.sp.assertion_consumer_service.url");
         }
     }
 

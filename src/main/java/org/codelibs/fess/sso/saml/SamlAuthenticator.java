@@ -449,6 +449,12 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
     /**
      * Gets the metadata response.
+     *
+     * <p>The SP metadata is what the IdP is registered from, so it has to be obtainable before
+     * any {@code saml.idp.*} property exists. {@code setSPValidationOnly} therefore has to be
+     * applied to the settings before they are validated; constructing an {@link Auth} here would
+     * validate the IdP settings in its constructor and fail while they are still empty.</p>
+     *
      * @return The metadata response.
      */
     protected ActionResponse getMetadataResponse() {
@@ -456,18 +462,23 @@ public class SamlAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("Accessing metadata with SAML Authenticator");
             }
-            final HttpServletResponse response = LaResponseUtil.getResponse();
             try {
-                final Auth auth = new Auth(getSettings(), request, response);
-                final Saml2Settings settings = auth.getSettings();
+                final Saml2Settings settings = getSettings();
                 settings.setSPValidationOnly(true);
+                final List<String> settingsErrors = settings.checkSettings();
+                if (!settingsErrors.isEmpty()) {
+                    final String msg = settingsErrors.stream().collect(Collectors.joining(", "));
+                    throw new SsoMessageException(
+                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
+                            "Failed to process metadata.", new SsoProcessException(msg));
+                }
                 final String metadata = settings.getSPMetadata();
                 final List<String> errors = Saml2Settings.validateMetadata(metadata);
                 if (!errors.isEmpty()) {
                     final String msg = errors.stream().collect(Collectors.joining(", "));
                     throw new SsoMessageException(
                             messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to log out.", new SsoProcessException(msg));
+                            "Failed to process metadata.", new SsoProcessException(msg));
                 }
                 return new StreamResponse("metadata.xml").contentType("application/samlmetadata+xml").stream(out -> {
                     try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
