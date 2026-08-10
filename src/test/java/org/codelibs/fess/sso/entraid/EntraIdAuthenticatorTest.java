@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -145,6 +147,32 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
         assertTrue(authUrl.contains("response_mode=query"));
         assertFalse(authUrl.contains("response_mode=form_post"));
+    }
+
+    @Test
+    public void test_getAuthUrl_requestsTheOidcScopesUpFront() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+        final String authUrl = authenticator.getAuthUrl(getMockRequest());
+
+        // msal4j already prepends these to the token request (OAuthAuthorizationGrant's
+        // COMMON_SCOPES), so asking for them at the authorization endpoint too keeps consent and
+        // the token exchange asking for the same thing.
+        final String scope = URLDecoder.decode(authUrl.replaceFirst("(?s).*[?&]scope=([^&]*).*", "$1"), StandardCharsets.UTF_8);
+        assertEquals("openid profile offline_access https://graph.microsoft.com/.default", scope);
+    }
+
+    @Test
+    public void test_getAuthUrl_encodesTheScopeParameter() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+        final String authUrl = authenticator.getAuthUrl(getMockRequest());
+
+        // A multi-valued scope is space separated, which cannot be sent raw.
+        assertFalse(authUrl.contains("scope=openid profile"));
+        assertTrue(authUrl.contains("&client_id="));
     }
 
     @Test
