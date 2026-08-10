@@ -42,6 +42,7 @@ import org.codelibs.core.net.UuidUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.curl.Curl;
+import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential;
@@ -239,6 +240,15 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /** Maximum depth for processing nested groups to prevent infinite loops. */
     protected int maxGroupDepth = 10;
+
+    /**
+     * Connection timeout for Microsoft Graph requests in milliseconds. curl4j leaves this unset,
+     * which means an unbounded wait, and the direct-membership lookup runs on the login thread.
+     */
+    protected int graphConnectTimeout = 10 * 1000;
+
+    /** Read timeout for Microsoft Graph requests in milliseconds. See {@link #graphConnectTimeout}. */
+    protected int graphReadTimeout = 30 * 1000;
 
     /** Use V2 endpoint. */
     protected boolean useV2Endpoint = true;
@@ -603,6 +613,35 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Applies the headers and timeouts every Microsoft Graph request needs.
+     *
+     * @param request The request to configure.
+     * @param accessToken The bearer token to authenticate with.
+     * @return The configured request.
+     */
+    protected CurlRequest createGraphRequest(final CurlRequest request, final String accessToken) {
+        return request.header("Authorization", "Bearer " + accessToken)
+                .header("Accept", "application/json")
+                .timeout(graphConnectTimeout, graphReadTimeout);
+    }
+
+    /**
+     * Sets the connection timeout for Microsoft Graph requests.
+     * @param graphConnectTimeout The timeout in milliseconds.
+     */
+    public void setGraphConnectTimeout(final int graphConnectTimeout) {
+        this.graphConnectTimeout = graphConnectTimeout;
+    }
+
+    /**
+     * Sets the read timeout for Microsoft Graph requests.
+     * @param graphReadTimeout The timeout in milliseconds.
+     */
+    public void setGraphReadTimeout(final int graphReadTimeout) {
+        this.graphReadTimeout = graphReadTimeout;
+    }
+
+    /**
      * Updates the user's group and role membership information with lazy loading for parent groups.
      * Direct groups are retrieved synchronously, while parent groups are fetched asynchronously
      * to avoid login delays when users have many nested group memberships.
@@ -672,10 +711,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("url={}", url);
         }
-        try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
-                .header("Accept", "application/json")
-                .execute()) {
+        try (CurlResponse response = createGraphRequest(Curl.get(url), user.getAuthenticationResult().accessToken()).execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response={}", contentMap);
@@ -776,10 +812,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("[processDirectMemberOf] Fetching direct memberships from URL: {}", url);
         }
-        try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
-                .header("Accept", "application/json")
-                .execute()) {
+        try (CurlResponse response = createGraphRequest(Curl.get(url), user.getAuthenticationResult().accessToken()).execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response={}", contentMap);
@@ -1009,9 +1042,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 if (logger.isDebugEnabled()) {
                     logger.debug("[getParentGroup] Calling API: {}", url);
                 }
-                try (CurlResponse response = Curl.post(url)
-                        .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
-                        .header("Accept", "application/json")
+                try (CurlResponse response = createGraphRequest(Curl.post(url), user.getAuthenticationResult().accessToken())
                         .header("Content-type", "application/json")
                         .body("{\"securityEnabledOnly\":false}")
                         .execute()) {
@@ -1083,10 +1114,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("[processGroup] Fetching from url: {}", url);
         }
-        try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
-                .header("Accept", "application/json")
-                .execute()) {
+        try (CurlResponse response = createGraphRequest(Curl.get(url), user.getAuthenticationResult().accessToken()).execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("[processGroup] Response for id {}: {}", id, contentMap);

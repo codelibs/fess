@@ -16,6 +16,8 @@
 package org.codelibs.fess.sso.entraid;
 
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.misc.Pair;
+import org.codelibs.curl.Curl;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.helper.SystemHelper;
@@ -221,6 +225,36 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         request.setMethod("GET");
 
         assertFalse(authenticator.containsAuthenticationData(request));
+    }
+
+    @Test
+    public void test_graphTimeouts_haveBoundedDefaults() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        // curl4j leaves both timeouts at -1 unless told otherwise, and -1 means "never give up".
+        // Any non-positive default would put an unbounded Graph call back on the login path.
+        assertTrue(authenticator.graphConnectTimeout > 0);
+        assertTrue(authenticator.graphReadTimeout > 0);
+    }
+
+    @Test
+    public void test_createGraphRequest_stopsWaitingOnAnUnresponsiveEndpoint() throws Exception {
+        // A server that accepts the connection and then never answers. Without a read timeout
+        // this call never returns, and on the login path that blocks the request thread.
+        try (ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+            authenticator.setGraphReadTimeout(300);
+            final String url = "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/v1.0/me/memberOf";
+
+            final long start = System.currentTimeMillis();
+            try (CurlResponse response = authenticator.createGraphRequest(Curl.get(url), "access-token").execute()) {
+                fail("expected the request to time out");
+            } catch (final Exception expected) {
+                // curl4j wraps the SocketTimeoutException
+            }
+            final long elapsed = System.currentTimeMillis() - start;
+            // Well under the 30s default, so an ignored setter fails here instead of just being slow.
+            assertTrue("took " + elapsed + "ms", elapsed < 5000L);
+        }
     }
 
     @Test
