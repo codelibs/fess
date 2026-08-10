@@ -574,6 +574,10 @@ public class EditForm {
     @Size(max = 10)
     public String spnegoAllowDelegation;
 
+    /** Comma-separated Kerberos realms accepted in addition to the server realm. */
+    @Size(max = 1000)
+    public String spnegoAllowedRealms;
+
     /** SPNEGO logger level (0-7, auto-detected if empty). */
     @Size(max = 10)
     public String spnegoLoggerLevel;

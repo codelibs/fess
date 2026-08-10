@@ -885,6 +885,16 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
+                                    <label for="spnegoAllowedRealms"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_allowed_realms"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoAllowedRealms"/>
+                                        <la:text styleId="spnegoAllowedRealms" property="spnegoAllowedRealms"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="spnegoLoggerLevel"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.spnego_logger_level"/></label>

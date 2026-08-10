@@ -431,6 +431,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to process a request: {0} */
     public static final String ERRORS_failed_to_process_sso_request = "{errors.failed_to_process_sso_request}";
 
+    /** The key of the message: Prompt NTLM requires Basic Auth to be enabled. */
+    public static final String ERRORS_spnego_prompt_ntlm_requires_basic = "{errors.spnego_prompt_ntlm_requires_basic}";
+
     /** The key of the message: Failed to upload theme: {0} */
     public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
 
@@ -2603,6 +2606,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToProcessSsoRequest(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_process_sso_request, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.spnego_prompt_ntlm_requires_basic' with parameters.
+     * <pre>
+     * message: Prompt NTLM requires Basic Auth to be enabled.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsSpnegoPromptNtlmRequiresBasic(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_spnego_prompt_ntlm_requires_basic));
         return this;
     }
 
