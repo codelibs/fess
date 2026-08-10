@@ -112,7 +112,14 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
         }
 
         @Override
-        public String[] getPermissions() {
+        public synchronized String[] getPermissions() {
+            // Synchronized on the same monitor as setGroups/setRoles/resetPermissions. Computing
+            // the value is a check-then-act -- read `permissions == null`, read `groups`, write
+            // `permissions` -- and the parent group lookup scheduled at login runs on a
+            // TimeoutManager thread while the user is already searching. Without the lock a reader
+            // that started first can finish last and overwrite the freshly reset value with one
+            // computed from the direct groups alone; nothing resets it again, so the parent group
+            // permissions stay missing for the rest of the session.
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
@@ -156,7 +163,7 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 if (newResult != null) {
                     authResult = newResult;
                     authenticator.updateMemberOf(this);
-                    permissions = null;
+                    resetPermissions();
                     if (logger.isDebugEnabled()) {
                         logger.debug("Token refreshed successfully via silent authentication");
                     }
@@ -200,7 +207,7 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
          * Resets permissions to force recalculation on next getPermissions() call.
          * This is called after asynchronous parent group lookup completes.
          */
-        public void resetPermissions() {
+        public synchronized void resetPermissions() {
             this.permissions = null;
         }
     }
