@@ -133,6 +133,16 @@ import jakarta.servlet.http.HttpSession;
  * saml.security.want_assertions_signed=true
  * </pre>
  *
+ * <h2>Session Cookie Settings (Required)</h2>
+ * <p>The IdP returns the assertion as a cross-site POST to the assertion consumer service.
+ * A {@code SameSite=Lax} cookie is not sent on such a request, so the shipped default in
+ * {@code tomcat_config.properties} has to be changed for SAML:</p>
+ * <pre>
+ * tomcat.sameSiteCookies = none
+ * </pre>
+ * <p>{@code none} is only accepted by browsers on a {@code Secure} cookie, so Fess must be
+ * served over HTTPS.</p>
+ *
  * @see <a href="https://fess.codelibs.org/">Fess Documentation</a>
  */
 public class SamlAuthenticator implements SsoAuthenticator {
@@ -311,9 +321,9 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
             final HttpServletResponse response = LaResponseUtil.getResponse();
 
-            final HttpSession session = request.getSession(false);
-            if (session != null) {
-                final String requestId = (String) session.getAttribute(SAML_STATE);
+            if (containsSamlResponse(request)) {
+                final HttpSession session = request.getSession(false);
+                final String requestId = session == null ? null : (String) session.getAttribute(SAML_STATE);
                 if (StringUtil.isNotBlank(requestId)) {
                     session.removeAttribute(SAML_STATE);
                     try {
@@ -336,6 +346,14 @@ public class SamlAuthenticator implements SsoAuthenticator {
                         return null;
                     }
                 }
+                // The assertion arrived but the matching AuthnRequest ID is unreachable. Sending
+                // another AuthnRequest would come straight back here in the same state, looping
+                // forever, so fail once instead.
+                logger.warn("Received a SAML response with no matching AuthnRequest ID in the session."
+                        + " The assertion consumer service is a cross-site POST, which does not carry a SameSite=Lax cookie;"
+                        + " see tomcat.sameSiteCookies in tomcat_config.properties."
+                        + " An IdP-initiated (unsolicited) response is rejected for the same reason.");
+                return null;
             }
 
             try {
@@ -349,6 +367,25 @@ public class SamlAuthenticator implements SsoAuthenticator {
             }
 
         }).orElse(null);
+    }
+
+    /**
+     * Returns whether the request carries a SAML response, which is what the IdP posts to the
+     * assertion consumer service.
+     *
+     * <p>The session is deliberately not consulted here: it is the session cookie that goes
+     * missing when the browser refuses to send it on the cross-site POST, and a callback that is
+     * mistaken for a fresh visit is redirected back to the IdP forever.</p>
+     *
+     * <p>Only solicited responses are accepted. Fess binds every response to the ID of the
+     * AuthnRequest it sent, so an unsolicited (IdP-initiated) response has nothing to match
+     * against and is rejected rather than answered with a fresh AuthnRequest.</p>
+     *
+     * @param request The HTTP request.
+     * @return true if the request carries a SAML response.
+     */
+    protected boolean containsSamlResponse(final HttpServletRequest request) {
+        return StringUtil.isNotBlank(request.getParameter("SAMLResponse"));
     }
 
     /**
