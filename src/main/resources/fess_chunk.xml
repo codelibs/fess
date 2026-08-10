@@ -10,4 +10,8 @@
 	<component name="lengthChunker" class="org.codelibs.fess.chunk.LengthChunker">
 		<postConstruct name="register"/>
 	</component>
+
+	<!-- Boundary finder used by the length chunker -->
+	<component name="chunkBoundaryFinder" class="org.codelibs.fess.chunk.ChunkBoundaryFinder">
+	</component>
 </components>

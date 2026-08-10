@@ -22,14 +22,51 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
- * Default {@link Chunker} implementation: fixed-length character windows,
- * with optional overlap between consecutive windows. Never splits a chunk
- * boundary in the middle of a UTF-16 surrogate pair (Java {@link String} is
- * UTF-16 internally; splitting between a high and low surrogate produces two
- * chunks each containing an unpaired, semantically invalid surrogate).
+ * Default {@link Chunker} implementation: character windows of roughly
+ * {@code content_chunker.length.chunk_size} characters, with optional overlap between
+ * consecutive windows.
+ *
+ * <p>By default each cut moves to a suitable break found by {@link ChunkBoundaryFinder} within
+ * the search window: the <em>nearest candidate of the highest tier present</em>, not simply the
+ * nearest candidate. A line break or sentence end wins over any clause separator or space no
+ * matter how much farther back it is, and those win over a script change. Only the boundary
+ * moves; no character is dropped, so with the default {@code content_chunker.length.overlap=0}
+ * concatenating the chunks still reproduces the content exactly. Set
+ * {@code content_chunker.length.boundary.enabled=false} for the legacy fixed-length
+ * behaviour.</p>
+ *
+ * <p>Because the forward search may overshoot, {@code chunk_size} is a target rather than a hard
+ * ceiling: a chunk can reach {@code chunk_size + lookahead}. There is a second, independent
+ * source of overshoot: {@link ChunkBoundaryFinder}'s grapheme-cluster escape is <em>not</em>
+ * governed by {@code lookahead} and can fire even when {@code lookahead_percent=0}, so the worst
+ * case reachable through this class is
+ * {@code chunk_size + max(lookahead, 2 * ChunkBoundaryFinder.MAX_CLUSTER_ADJUST)} characters --
+ * 840 at the shipped defaults ({@code chunk_size=800}, {@code lookahead_percent=5}). Setting
+ * {@code lookahead_percent=0} alone does not lower this ceiling below
+ * {@code chunk_size + 2 * ChunkBoundaryFinder.MAX_CLUSTER_ADJUST} (832 at the shipped defaults):
+ * the cluster escape still runs whenever boundary search runs at all, which only requires
+ * {@code lookback_percent > 0}. Boundary search runs at all only when {@code lookback} or
+ * {@code lookahead} is positive (see {@link #split(String, int)}), so setting <em>both</em>
+ * percentages to {@code 0} makes {@code chunk_size} an exact ceiling with no overshoot.
+ * ({@link ChunkBoundaryFinder#findChunkEnd} documents one further {@code + 1}; that branch needs
+ * {@code ideal == start + 1}, which {@link #MIN_CHUNK_SIZE} makes unreachable from here.)</p>
+ *
+ * <p>The backward search can undershoot symmetrically: because a cut may move earlier to reach a
+ * boundary, a chunk can end up to {@code lookback} characters <em>shorter</em> than
+ * {@code chunk_size} -- 160 characters at the shipped defaults ({@code chunk_size=800}, {@code
+ * lookback_percent=20}). A document therefore yields more chunks than before: measured at +9% on
+ * English prose and up to +25% in the worst case, which matters against
+ * {@code content_chunker.max_chunks_per_document}. Never splits a chunk boundary in the middle of
+ * a UTF-16 surrogate pair.</p>
+ *
+ * <p>When an overlap is configured, the restart point is snapped to a boundary too, which can
+ * only move it <em>earlier</em> and so makes the effective overlap larger than the configured
+ * value. The snap window is capped at the configured overlap (see {@link #split(String, int)}),
+ * so the effective overlap never exceeds {@code 2 * overlap}.</p>
  */
 public class LengthChunker implements Chunker {
 
@@ -48,11 +85,11 @@ public class LengthChunker implements Chunker {
     protected static final int DEFAULT_CHUNK_SIZE = 800;
 
     /**
-     * Minimum allowed chunk size. A chunk size of 1 can force the surrogate-pair
-     * boundary adjustment (see {@link #split(String)}) to collide with the
-     * defensive forward-progress fallback, re-landing the boundary on the split
-     * it was meant to avoid and silently dropping the low surrogate. A chunk
-     * size of 2 or more makes that collision mathematically unreachable.
+     * Minimum allowed chunk size: a sanity floor, not a correctness requirement. A chunk size of
+     * 1 is nonsensical in practice, but it is no longer a correctness hazard -- the defensive
+     * forward-progress fallback in {@link #split(String, int)} steps a whole code point
+     * ({@code start + Character.charCount(content.codePointAt(start))}), so it can no longer
+     * collide with the surrogate-pair boundary adjustment and silently drop a low surrogate.
      */
     protected static final int MIN_CHUNK_SIZE = 2;
 
@@ -66,6 +103,46 @@ public class LengthChunker implements Chunker {
      * affects a reasonable real configuration.
      */
     protected static final int MAX_CHUNK_SIZE = 100_000;
+
+    /** System property key toggling boundary-aware splitting. */
+    protected static final String BOUNDARY_ENABLED_PROPERTY = "content_chunker.length.boundary.enabled";
+
+    /** System property key for how far before the ideal cut a boundary may be searched, in percent of the chunk size. */
+    protected static final String LOOKBACK_PERCENT_PROPERTY = "content_chunker.length.boundary.lookback_percent";
+
+    /** System property key for how far after the ideal cut a sentence end may be searched, in percent of the chunk size. */
+    protected static final String LOOKAHEAD_PERCENT_PROPERTY = "content_chunker.length.boundary.lookahead_percent";
+
+    /** Boundary-aware splitting ships enabled; set the property to false for the legacy fixed-length behaviour. */
+    protected static final boolean DEFAULT_BOUNDARY_ENABLED = true;
+
+    /** Default backward search window, in percent of the chunk size. */
+    protected static final int DEFAULT_LOOKBACK_PERCENT = 20;
+
+    /** Default forward search window, in percent of the chunk size. */
+    protected static final int DEFAULT_LOOKAHEAD_PERCENT = 5;
+
+    /** Upper bound for the backward window: beyond half a chunk the chunks get pointlessly short. */
+    protected static final int MAX_LOOKBACK_PERCENT = 50;
+
+    /**
+     * Upper bound for the forward window. The forward search is the only overshoot path this
+     * setting governs -- {@link ChunkBoundaryFinder}'s grapheme-cluster escape can also push a
+     * chunk past {@code chunk_size}, but it ignores {@code lookahead} entirely and fires even at
+     * {@code lookahead_percent=0}, so it is not bounded by this cap. Within the range this setting
+     * does govern, it caps how far past an embedding model's token budget a chunk can grow.
+     */
+    protected static final int MAX_LOOKAHEAD_PERCENT = 25;
+
+    /** LastaDi component name of the boundary finder, defined in {@code fess_chunk.xml}. */
+    protected static final String BOUNDARY_FINDER_COMPONENT = "chunkBoundaryFinder";
+
+    /**
+     * Used when {@link #BOUNDARY_FINDER_COMPONENT} is not registered (unit tests constructing a
+     * chunker directly, or a container without {@code fess_chunk.xml}). Safe to share: the finder
+     * holds no state.
+     */
+    private static final ChunkBoundaryFinder DEFAULT_BOUNDARY_FINDER = new ChunkBoundaryFinder();
 
     /**
      * Default constructor.
@@ -85,6 +162,39 @@ public class LengthChunker implements Chunker {
             ComponentUtil.getComponent(ChunkerManager.class).register(this);
         }
         warnOnOverlapSideEffect();
+        logBoundaryMode();
+    }
+
+    /**
+     * Logs the effective boundary-search configuration once, at registration time, so that an
+     * upgrade which silently turns {@code chunk_size} from a hard ceiling into a target leaves a
+     * trace an operator can correlate an embedding-provider rejection against.
+     */
+    protected void logBoundaryMode() {
+        try {
+            if (!isBoundaryEnabled()) {
+                logger.info("[Chunk] {}=false: chunks are cut at exactly {} characters.", BOUNDARY_ENABLED_PROPERTY,
+                        normalizeChunkSize(getChunkSize()));
+                return;
+            }
+            final int chunkSize = normalizeChunkSize(getChunkSize());
+            final int lookback =
+                    windowSize(chunkSize, normalizeBoundaryPercent(getLookbackPercent(), MAX_LOOKBACK_PERCENT, LOOKBACK_PERCENT_PROPERTY));
+            final int lookahead = windowSize(chunkSize,
+                    normalizeBoundaryPercent(getLookaheadPercent(), MAX_LOOKAHEAD_PERCENT, LOOKAHEAD_PERCENT_PROPERTY));
+            logger.info(
+                    "[Chunk] Boundary-aware splitting is enabled: {}={} is a target, not a ceiling. "
+                            + "Chunks range from {} to {} characters (lookback={}, lookahead={}); "
+                            + "expect more chunks per document than a fixed-length split, which counts against {}.",
+                    CHUNK_SIZE_PROPERTY, chunkSize, chunkSize - lookback,
+                    chunkSize + Math.max(lookahead, 2 * ChunkBoundaryFinder.MAX_CLUSTER_ADJUST), lookback, lookahead,
+                    "content_chunker.max_chunks_per_document");
+        } catch (final Exception e) {
+            // Diagnostics only; never let a config-read failure break component registration.
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Chunk] Skipping boundary-mode diagnostic.", e);
+            }
+        }
     }
 
     /**
@@ -133,8 +243,20 @@ public class LengthChunker implements Chunker {
         }
         final int chunkSize = normalizeChunkSize(getChunkSize());
         final int overlap = normalizeOverlap(getOverlap(), chunkSize);
+        final boolean boundaryEnabled = isBoundaryEnabled();
+        final int lookback = boundaryEnabled
+                ? windowSize(chunkSize, normalizeBoundaryPercent(getLookbackPercent(), MAX_LOOKBACK_PERCENT, LOOKBACK_PERCENT_PROPERTY))
+                : 0;
+        final int lookahead = boundaryEnabled
+                ? windowSize(chunkSize, normalizeBoundaryPercent(getLookaheadPercent(), MAX_LOOKAHEAD_PERCENT, LOOKAHEAD_PERCENT_PROPERTY))
+                : 0;
+        // Resolved once per document, never cached on this singleton: see getBoundaryFinder().
+        final ChunkBoundaryFinder finder = lookback > 0 || lookahead > 0 ? getBoundaryFinder() : null;
         final int length = content.length();
-        final List<String> chunks = new ArrayList<>();
+        // Pre-size to avoid repeated growth on large documents. limit may be Integer.MAX_VALUE,
+        // so cap with long arithmetic before narrowing.
+        final int stride = Math.max(1, chunkSize - overlap);
+        final List<String> chunks = new ArrayList<>((int) Math.min(limit, (long) length / stride + 2L));
         int start = 0;
         while (start < length) {
             if (isMidSurrogatePair(content, start)) {
@@ -147,9 +269,19 @@ public class LengthChunker implements Chunker {
             if (isMidSurrogatePair(content, end)) {
                 end--;
             }
+            if (finder != null) {
+                end = finder.findChunkEnd(content, start, end, length, lookback, lookahead);
+                if (isMidSurrogatePair(content, end)) {
+                    // Defensive: a custom finder is not required to be code-point aligned.
+                    end--;
+                }
+            }
             if (end <= start) {
-                // Defensive: guarantee forward progress even in pathological edge cases.
-                end = start + 1;
+                // Defensive: guarantee forward progress even in pathological edge cases. Step a
+                // whole code point so a custom finder returning a mid-pair offset cannot make the
+                // fallback strand a lone surrogate -- the loop-top adjustment would then skip its
+                // low half, losing a character.
+                end = start + Character.charCount(content.codePointAt(start));
             }
             chunks.add(content.substring(start, end));
             if (chunks.size() >= limit) {
@@ -161,6 +293,18 @@ public class LengthChunker implements Chunker {
                 break;
             }
             int nextStart = end - overlap;
+            if (finder != null && overlap > 0) {
+                // Cap the snap window at the configured overlap. snapOverlapStart only ever moves
+                // the restart point earlier, so an uncapped `lookback` window (derived from
+                // chunk_size, not from overlap) would let the effective overlap reach
+                // overlap + lookback -- 165 for a configured 10 at the shipped defaults, silently
+                // multiplying the index duplication warnOnOverlapSideEffect() exists to warn
+                // about. Capped, the effective overlap can at most double.
+                nextStart = finder.snapOverlapStart(content, start, nextStart, end, Math.min(lookback, overlap));
+                if (isMidSurrogatePair(content, nextStart)) {
+                    nextStart--;
+                }
+            }
             if (nextStart <= start) {
                 // The surrogate-pair adjustment consumed the overlap slack; fall back to
                 // the actual chunk end so we never re-process the same position forever.
@@ -210,6 +354,87 @@ public class LengthChunker implements Chunker {
         return getConfigInt(OVERLAP_PROPERTY, 0);
     }
 
+    /**
+     * Returns whether each chunk boundary is moved to the nearest candidate of the highest tier
+     * present in the search window -- a line break or sentence end beats any clause separator or
+     * space however much farther back it is, and those beat a script change -- instead of being
+     * cut at exactly {@code chunk_size} characters.
+     *
+     * @return the value of {@code content_chunker.length.boundary.enabled} (default true)
+     */
+    protected boolean isBoundaryEnabled() {
+        return getConfigBoolean(BOUNDARY_ENABLED_PROPERTY, DEFAULT_BOUNDARY_ENABLED);
+    }
+
+    /**
+     * Returns how far before the ideal cut a boundary may be searched, in percent of the chunk size.
+     *
+     * @return the value of {@code content_chunker.length.boundary.lookback_percent} (default 20)
+     */
+    protected int getLookbackPercent() {
+        return getConfigInt(LOOKBACK_PERCENT_PROPERTY, DEFAULT_LOOKBACK_PERCENT);
+    }
+
+    /**
+     * Returns how far after the ideal cut a sentence end may be searched, in percent of the chunk size.
+     *
+     * @return the value of {@code content_chunker.length.boundary.lookahead_percent} (default 5)
+     */
+    protected int getLookaheadPercent() {
+        return getConfigInt(LOOKAHEAD_PERCENT_PROPERTY, DEFAULT_LOOKAHEAD_PERCENT);
+    }
+
+    /**
+     * Resolves the boundary finder.
+     *
+     * <p>Deliberately not an {@code @Resource} field: unit tests construct this chunker with
+     * {@code new}, where field injection never runs. Deliberately not cached either: a cached
+     * reference would go stale across container re-creation. Callers resolve it once per
+     * {@code split} call.</p>
+     *
+     * @return the registered {@code chunkBoundaryFinder} component, or a built-in fallback
+     */
+    protected ChunkBoundaryFinder getBoundaryFinder() {
+        if (ComponentUtil.hasComponent(BOUNDARY_FINDER_COMPONENT)) {
+            return ComponentUtil.getComponent(BOUNDARY_FINDER_COMPONENT);
+        }
+        return DEFAULT_BOUNDARY_FINDER;
+    }
+
+    private boolean getConfigBoolean(final String key, final boolean defaultValue) {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(key, null);
+        if (value != null) {
+            final String trimmed = value.trim();
+            if (Constants.TRUE.equalsIgnoreCase(trimmed)) {
+                return true;
+            }
+            if (Constants.FALSE.equalsIgnoreCase(trimmed)) {
+                return false;
+            }
+            logger.warn("[Chunk] Invalid boolean for {}: {}. Using default {}.", key, value, defaultValue);
+        }
+        return defaultValue;
+    }
+
+    private int normalizeBoundaryPercent(final int value, final int max, final String key) {
+        if (value < 0) {
+            logger.warn("[Chunk] {}={} is negative, treating it as 0 (that direction is not searched)", key, value);
+            return 0;
+        }
+        if (value > max) {
+            logger.warn("[Chunk] {}={} exceeds the maximum of {}, clamping to {}", key, value, max, max);
+            return max;
+        }
+        return value;
+    }
+
+    private int windowSize(final int chunkSize, final int percent) {
+        if (percent <= 0) {
+            return 0;
+        }
+        return Math.max(1, (int) ((long) chunkSize * percent / 100L));
+    }
+
     private int getConfigInt(final String key, final int defaultValue) {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(key, null);
         if (value != null) {
@@ -228,8 +453,8 @@ public class LengthChunker implements Chunker {
             return DEFAULT_CHUNK_SIZE;
         }
         if (chunkSize < MIN_CHUNK_SIZE) {
-            logger.warn("[Chunk] chunk_size={} is below the minimum of {} (required to avoid splitting UTF-16 surrogate pairs), "
-                    + "clamping to {}", chunkSize, MIN_CHUNK_SIZE, MIN_CHUNK_SIZE);
+            logger.warn("[Chunk] chunk_size={} is below the minimum of {} (a sanity floor), clamping to {}", chunkSize, MIN_CHUNK_SIZE,
+                    MIN_CHUNK_SIZE);
             return MIN_CHUNK_SIZE;
         }
         if (chunkSize > MAX_CHUNK_SIZE) {
