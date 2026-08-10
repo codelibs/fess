@@ -207,11 +207,29 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || "ldap.admin.security.credentials".equals(key) //
                 || "spnego.preauth.password".equals(key) //
                 || "app.cipher.key".equals(key) //
-                || "oic.client.id".equals(key) //
-                || "oic.client.secret".equals(key) //
                 || "content_chunker.embedding.opensearch.password".equals(key) //
+                || isSsoClientCredential(key) //
                 || isEmbeddingApiKey(key) //
                 || isLlmApiKey(key);
+    }
+
+    /**
+     * Checks if a key is an SSO provider's client credential, e.g. {@code oic.client.secret} or
+     * {@code entraid.client.secret}. Matching on the {@code <provider>.client.id} /
+     * {@code <provider>.client.secret} shape, instead of listing every provider by name, means a
+     * future SSO provider's credential is masked by default.
+     *
+     * <p>Only OpenID Connect was listed by name before, so the Entra ID client secret was rendered
+     * in cleartext under System Info &gt; Config Info, and was also copied verbatim into the bug
+     * report that users paste into public issues. The legacy {@code aad.*} keys are covered by the
+     * same shape because {@link org.codelibs.fess.sso.entraid.EntraIdAuthenticator} still reads
+     * them as a fallback.
+     *
+     * @param key the property key to check
+     * @return true if the key matches the SSO client credential shape
+     */
+    protected static boolean isSsoClientCredential(final String key) {
+        return key != null && (key.endsWith(".client.id") || key.endsWith(".client.secret"));
     }
 
     /**
