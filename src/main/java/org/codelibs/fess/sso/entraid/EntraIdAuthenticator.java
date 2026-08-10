@@ -105,6 +105,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** Configuration key for Entra ID state time-to-live. */
     protected static final String ENTRAID_STATE_TTL = "entraid.state.ttl";
 
+    /** Default state time-to-live in seconds. */
+    protected static final String DEFAULT_STATE_TTL = "3600";
+
     /** Configuration key for Entra ID authority URL. */
     protected static final String ENTRAID_AUTHORITY = "entraid.authority";
 
@@ -771,87 +774,6 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Processes member-of information from Microsoft Graph API.
-     * @param user The Entra ID user.
-     * @param groupList The list to add group names to.
-     * @param roleList The list to add role names to.
-     * @param url The Microsoft Graph API URL.
-     */
-    protected void processMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String url) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("url={}", url);
-        }
-        try (CurlResponse response = createGraphRequest(Curl.get(url), user.getAuthenticationResult().accessToken()).execute()) {
-            final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
-            if (logger.isDebugEnabled()) {
-                logger.debug("response={}", contentMap);
-            }
-            if (contentMap.containsKey("value")) {
-                @SuppressWarnings("unchecked")
-                final List<Map<String, Object>> memberOfList = (List<Map<String, Object>>) contentMap.get("value");
-                final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                for (final Map<String, Object> memberOf : memberOfList) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("member={}", memberOf);
-                    }
-                    String memberType = (String) memberOf.get("@odata.type");
-                    if (memberType == null) {
-                        logger.warn("@odata.type is null: {}", memberOf);
-                        continue;
-                    }
-                    memberType = memberType.toLowerCase(Locale.ENGLISH);
-                    final String id = (String) memberOf.get("id");
-                    if (StringUtil.isNotBlank(id)) {
-                        if (memberType.contains("group")) {
-                            groupList.add(id);
-                        } else if (memberType.contains("role")) {
-                            roleList.add(id);
-                        } else {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Unknown @odata.type: {}", memberOf);
-                            }
-                            groupList.add(id);
-                        }
-                        processParentGroup(user, groupList, roleList, id);
-                    } else {
-                        logger.warn("id is empty: {}", memberOf);
-                    }
-                    final String[] names = fessConfig.getEntraIdPermissionFields();
-                    final boolean useDomainServices = fessConfig.isEntraIdUseDomainServices();
-                    for (final String name : names) {
-                        final String value = (String) memberOf.get(name);
-                        if (StringUtil.isNotBlank(value)) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("{} is a member of {}", name, value);
-                            }
-                            if (memberType.contains("group")) {
-                                addGroupOrRoleName(groupList, value, useDomainServices);
-                            } else if (memberType.contains("role")) {
-                                addGroupOrRoleName(roleList, value, useDomainServices);
-                            } else {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("Unknown @odata.type: {}", memberOf);
-                                }
-                                addGroupOrRoleName(groupList, value, useDomainServices);
-                            }
-                        } else if (logger.isDebugEnabled()) {
-                            logger.debug("{} is empty: {}", name, memberOf);
-                        }
-                    }
-                }
-                final String nextLink = (String) contentMap.get("@odata.nextLink");
-                if (StringUtil.isNotBlank(nextLink)) {
-                    processMemberOf(user, groupList, roleList, nextLink);
-                }
-            } else if (contentMap.containsKey("error")) {
-                logger.warn("Failed to access groups/roles: {}", contentMap);
-            }
-        } catch (final IOException e) {
-            logger.warn("Failed to access groups/roles in Entra ID.", e);
-        }
-    }
-
-    /**
      * Adds a group or role name to the specified list.
      * @param list The list to add the group or role name to.
      * @param value The group or role name value.
@@ -1060,16 +982,6 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("[processParentGroup] Completed for id: {}, depth: {}, added groups: {}, added roles: {}", id, depth,
                     groupsAndRoles.getFirst().length, groupsAndRoles.getSecond().length);
         }
-    }
-
-    /**
-     * Retrieves parent group information for the specified group ID.
-     * @param user The Entra ID user.
-     * @param id The group ID to get parent information for.
-     * @return A pair containing group names and role names.
-     */
-    protected Pair<String[], String[]> getParentGroup(final EntraIdUser user, final String id) {
-        return getParentGroup(user, id, 0);
     }
 
     /**
@@ -1368,14 +1280,20 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /**
      * Gets the state time-to-live from configuration.
      * Uses new entraid.state.ttl key with fallback to legacy aad.state.ttl.
-     * @return The state TTL in milliseconds.
+     * @return The state TTL in seconds. removeExpiredStates compares it against an elapsed time
+     *         that has already been divided by 1000.
      */
     protected long getStateTtl() {
         String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_STATE_TTL);
         if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_STATE_TTL, "3600");
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_STATE_TTL, DEFAULT_STATE_TTL);
         }
-        return Long.parseLong(value);
+        try {
+            return Long.parseLong(value.trim());
+        } catch (final NumberFormatException e) {
+            logger.warn("Invalid {}: {}. Using {} seconds.", ENTRAID_STATE_TTL, value, DEFAULT_STATE_TTL);
+            return Long.parseLong(DEFAULT_STATE_TTL);
+        }
     }
 
     /**

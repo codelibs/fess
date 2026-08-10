@@ -508,6 +508,27 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getStateTtl_defaultsToOneHourInSeconds() {
+        // removeExpiredStates compares (now - created) / 1000 against this value, so the unit is
+        // seconds. The javadoc used to say milliseconds.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        assertEquals(3600L, authenticator.getStateTtl());
+    }
+
+    @Test
+    public void test_getStateTtl_fallsBackWhenTheConfiguredValueIsNotANumber() {
+        // A typo in conf/system.properties used to fail the login with a NumberFormatException
+        // rather than a message anyone could act on.
+        ComponentUtil.getFessConfig().setSystemProperty("entraid.state.ttl", "one hour");
+        try {
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+            assertEquals(3600L, authenticator.getStateTtl());
+        } finally {
+            ComponentUtil.getFessConfig().setSystemProperty("entraid.state.ttl", "");
+        }
+    }
+
+    @Test
     public void test_addGroupOrRoleName() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         List<String> list = new ArrayList<>();
