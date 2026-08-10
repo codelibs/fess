@@ -30,12 +30,15 @@ import org.apache.logging.log4j.core.config.Property;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.core.settings.Saml2Settings;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.login.credential.LoginCredential;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
 
@@ -192,6 +195,96 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         } catch (final SsoMessageException e) {
             assertNotNull(e.getCause());
             assertTrue(e.getCause().getMessage(), e.getCause().getMessage().contains("single logout service URL"));
+        }
+    }
+
+    // ===================================================================================
+    //                                                             Assertion Consumer Service
+    //                                                             ==========================
+
+    /** Minimal IdP settings, so that an AuthnRequest can actually be built. */
+    private void setUpIdp(final DynamicProperties systemProperties) {
+        systemProperties.setProperty("saml.idp.entityid", "https://idp.example.com/metadata");
+        systemProperties.setProperty("saml.idp.single_sign_on_service.url", "https://idp.example.com/sso");
+        systemProperties.setProperty("saml.idp.certfingerprint", "afe71c28ef740bc87425be13a2263d37971da1f9");
+    }
+
+    private void tearDownIdp(final DynamicProperties systemProperties) {
+        systemProperties.remove("saml.idp.entityid");
+        systemProperties.remove("saml.idp.single_sign_on_service.url");
+        systemProperties.remove("saml.idp.certfingerprint");
+    }
+
+    @Test
+    public void test_containsSamlResponse() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        assertFalse(authenticator.containsSamlResponse(getMockRequest()));
+
+        final MockletHttpServletRequest blank = getMockRequest();
+        blank.setParameter("SAMLResponse", "  ");
+        assertFalse(authenticator.containsSamlResponse(blank));
+
+        final MockletHttpServletRequest posted = getMockRequest();
+        posted.setParameter("SAMLResponse", "PHNhbWxwOlJlc3BvbnNlIC8+");
+        assertTrue(authenticator.containsSamlResponse(posted));
+    }
+
+    @Test
+    public void test_getLoginCredential_unmatchedResponseFailsInsteadOfRedirecting() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            setUpIdp(systemProperties);
+            // the IdP posts the assertion cross-site, so a SameSite=Lax cookie is not sent back
+            // and the session holding the AuthnRequest ID is unreachable
+            final MockletHttpServletRequest request = getMockRequest();
+            request.setMethod("POST");
+            request.setParameter("SAMLResponse", "PHNhbWxwOlJlc3BvbnNlIC8+");
+
+            // redirecting to the IdP again would come straight back in the same state
+            assertNull(authenticator.getLoginCredential());
+            assertEquals(1, appender.warnings().size());
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
+        } finally {
+            tearDownIdp(systemProperties);
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_requestWithoutResponseStartsLogin() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+
+            final LoginCredential credential = authenticator.getLoginCredential();
+
+            assertTrue(String.valueOf(credential), credential instanceof ActionResponseCredential);
+            assertNotNull(request.getSession(false).getAttribute("SAML_STATE"));
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_requestWithoutResponseKeepsPendingRequestId() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            // a plain visit to /sso/ while a login is in flight must not consume the pending ID
+            final MockletHttpServletRequest request = getMockRequest();
+            request.getSession().setAttribute("SAML_STATE", "ONELOGIN_pending");
+
+            authenticator.getLoginCredential();
+
+            assertNotNull(request.getSession(false).getAttribute("SAML_STATE"));
+        } finally {
+            tearDownIdp(systemProperties);
         }
     }
 
