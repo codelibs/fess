@@ -105,6 +105,63 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
         assertEquals("TRUSTED.EXAMPLE,PARTNER.EXAMPLE", reloaded.spnegoAllowedRealms);
     }
 
+    @Test
+    public void test_updateConfig_spnegoPreauthPassword_canBeCleared() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        final EditForm form = createEditForm();
+        form.spnegoPreauthPassword = "secret";
+        AdminGeneralAction.updateConfig(fessConfig, form);
+        assertEquals("secret", ComponentUtil.getSystemProperties().getProperty("spnego.preauth.password"));
+
+        // Clearing the field must remove the key. The SPNEGO library only uses a keytab when both
+        // the pre-authentication user name and password are empty, so a password that cannot be
+        // cleared leaves a keytab configuration unreachable from this screen.
+        form.spnegoPreauthPassword = null;
+        AdminGeneralAction.updateConfig(fessConfig, form);
+        assertNull(ComponentUtil.getSystemProperties().getProperty("spnego.preauth.password"));
+
+        // An empty string reaches updateConfig through the API, which does not map "" to null.
+        form.spnegoPreauthPassword = "secret";
+        AdminGeneralAction.updateConfig(fessConfig, form);
+        form.spnegoPreauthPassword = "";
+        AdminGeneralAction.updateConfig(fessConfig, form);
+        assertNull(ComponentUtil.getSystemProperties().getProperty("spnego.preauth.password"));
+    }
+
+    @Test
+    public void test_updateConfig_spnegoPreauthPassword_maskKeepsStoredValue() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        final EditForm form = createEditForm();
+        form.spnegoPreauthPassword = "secret";
+        AdminGeneralAction.updateConfig(fessConfig, form);
+
+        // updateForm renders a mask instead of the stored password, and submitting it back must
+        // leave the stored value alone rather than overwrite it with the mask.
+        final EditForm reloaded = createEditForm();
+        AdminGeneralAction.updateForm(fessConfig, reloaded);
+        AdminGeneralAction.updateConfig(fessConfig, reloaded);
+        assertEquals("secret", ComponentUtil.getSystemProperties().getProperty("spnego.preauth.password"));
+    }
+
+    @Test
+    public void test_isSpnegoNtlmPromptUnsupported() {
+        final EditForm form = createEditForm();
+
+        // The library requires Basic auth to be available before it can downgrade an NTLM token.
+        form.spnegoAllowBasic = null;
+        form.spnegoPromptNtlm = Constants.TRUE;
+        assertTrue(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
+
+        form.spnegoAllowBasic = Constants.TRUE;
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
+
+        form.spnegoAllowBasic = null;
+        form.spnegoPromptNtlm = null;
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
+    }
+
     /**
      * Runs updateConfig for the given search engine type and asserts the stored property value.
      * The stored property is read back directly because isResultCollapsed() forces false for

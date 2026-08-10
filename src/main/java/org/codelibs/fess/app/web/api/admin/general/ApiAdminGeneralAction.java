@@ -82,10 +82,17 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> put$index(final EditBody body) {
-        validateApi(body, messages -> {});
         final EditBody newBody = new EditBody();
         AdminGeneralAction.updateForm(fessConfig, newBody);
         BeanUtil.copyBeanToBean(body, newBody, CopyOptions::excludeNull);
+        // The correlation rules apply to what will be stored, not to what the request carried: a
+        // request may send only one half of a correlated pair and let the stored value supply the
+        // other. The request body itself is still what gets validated against its own constraints.
+        validateApi(body, messages -> {
+            if (AdminGeneralAction.isSpnegoNtlmPromptUnsupported(newBody)) {
+                messages.addErrorsSpnegoPromptNtlmRequiresBasic("spnegoPromptNtlm");
+            }
+        });
         AdminGeneralAction.updateConfig(fessConfig, newBody);
         return asJson(new ApiResponse().status(Status.OK).result());
     }
