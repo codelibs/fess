@@ -156,10 +156,7 @@ public class AdminGeneralAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         validate(form, messages -> {
-            // The SPNEGO library rejects this combination when it builds its configuration, and it
-            // does so lazily on the first login rather than here, so reject it at save time instead
-            // of letting SSO break silently until someone tries to log in.
-            if (!isCheckboxEnabled(form.spnegoAllowBasic) && isCheckboxEnabled(form.spnegoPromptNtlm)) {
+            if (isSpnegoNtlmPromptUnsupported(form)) {
                 messages.addErrorsSpnegoPromptNtlmRequiresBasic("spnegoPromptNtlm");
             }
         }, () -> asHtml(path_AdminGeneral_AdminGeneralJsp));
@@ -285,7 +282,15 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSystemProperty("spnego.login.client.module", form.spnegoLoginClientModule);
         fessConfig.setSystemProperty("spnego.login.server.module", form.spnegoLoginServerModule);
         fessConfig.setSystemProperty("spnego.preauth.username", form.spnegoPreauthUsername);
-        if (form.spnegoPreauthPassword != null && StringUtil.isNotBlank(form.spnegoPreauthPassword.replace("*", " "))) {
+        if (form.spnegoPreauthPassword == null || form.spnegoPreauthPassword.isEmpty()) {
+            // Unlike the other secrets on this screen, an empty pre-authentication password is a
+            // meaningful setting: the SPNEGO library only uses a keytab when both the user name and
+            // the password are empty. Keeping a stored password would leave a keytab configuration
+            // unreachable from here once any password had been saved.
+            fessConfig.setSystemProperty("spnego.preauth.password", null);
+        } else if (StringUtil.isNotBlank(form.spnegoPreauthPassword.replace("*", " "))) {
+            // Anything made only of the mask characters is the placeholder rendered by updateForm,
+            // which means the stored password was left untouched.
             fessConfig.setSystemProperty("spnego.preauth.password", form.spnegoPreauthPassword);
         }
         fessConfig.setSystemProperty("spnego.allow.basic", String.valueOf(isCheckboxEnabled(form.spnegoAllowBasic)));
@@ -516,6 +521,20 @@ public class AdminGeneralAction extends FessAdminAction {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks whether the submitted SPNEGO settings ask for the NTLM prompt while Basic
+     * authentication is disabled. The SPNEGO library rejects that combination when it builds its
+     * configuration, and it does so lazily on the first login rather than at save time, so both the
+     * admin screen and the API reject it here instead of letting SSO break silently until someone
+     * tries to log in.
+     *
+     * @param form the form holding the settings to be stored
+     * @return true if the combination must be rejected
+     */
+    public static boolean isSpnegoNtlmPromptUnsupported(final EditForm form) {
+        return !isCheckboxEnabled(form.spnegoAllowBasic) && isCheckboxEnabled(form.spnegoPromptNtlm);
     }
 
     /**
