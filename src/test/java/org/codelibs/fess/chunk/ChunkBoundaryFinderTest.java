@@ -837,6 +837,151 @@ public class ChunkBoundaryFinderTest extends UnitFessTestCase {
         }
     }
 
+    // ===================================================================================
+    //                                                       Non-Latin sentence and clause marks
+    //                                                       ------------------------------------
+
+    @Test
+    public void test_isSentenceTerminator_coversNonLatinScripts() {
+        assertTrue(finder.sentenceTerminator(0x0964)); // । DEVANAGARI DANDA
+        assertTrue(finder.sentenceTerminator(0x0965)); // ॥ DEVANAGARI DOUBLE DANDA
+        assertTrue(finder.sentenceTerminator(0x061F)); // ؟ ARABIC QUESTION MARK
+        assertTrue(finder.sentenceTerminator(0x0589)); // ։ ARMENIAN FULL STOP
+        assertTrue(finder.sentenceTerminator(0x05C3)); // ׃ HEBREW SOF PASUQ
+        assertTrue(finder.sentenceTerminator(0x037E)); // ; GREEK QUESTION MARK
+        assertTrue(finder.sentenceTerminator(0x0F0D)); // ། TIBETAN SHAD
+        assertTrue(finder.sentenceTerminator(0x0F0E)); // ༎ TIBETAN NYIS SHAD
+        assertTrue(finder.sentenceTerminator(0x104B)); // ။ MYANMAR SECTION
+        assertTrue(finder.sentenceTerminator(0x17D4)); // ។ KHMER KHAN
+        assertTrue(finder.sentenceTerminator(0x17D5)); // ៕ KHMER BARIYOOSAN
+        assertTrue(finder.sentenceTerminator(0x1803)); // ᠃ MONGOLIAN FULL STOP
+        assertTrue(finder.sentenceTerminator(0x1805)); // ᠅ MONGOLIAN FOUR DOTS
+        assertTrue(finder.sentenceTerminator(0x166E)); // ᙮ CANADIAN SYLLABICS FULL STOP
+        assertTrue(finder.sentenceTerminator(0x10FB)); // ჻ GEORGIAN PARAGRAPH SEPARATOR
+        assertTrue(finder.sentenceTerminator(0x0E5B)); // ๛ THAI KHOMUT
+        // U+104A is a phrase break, not a sentence end -- it belongs to the WEAK tier.
+        assertFalse(finder.sentenceTerminator(0x104A));
+        assertFalse(finder.sentenceTerminator(0x060C)); // ، is a comma
+    }
+
+    @Test
+    public void test_isClauseSeparator_coversNonLatinScripts() {
+        assertTrue(finder.clauseSeparator(0x060C)); // ، ARABIC COMMA
+        assertTrue(finder.clauseSeparator(0x061B)); // ؛ ARABIC SEMICOLON
+        assertTrue(finder.clauseSeparator(0x055D)); // ՝ ARMENIAN COMMA
+        assertTrue(finder.clauseSeparator(0x1363)); // ፣ ETHIOPIC COMMA
+        assertTrue(finder.clauseSeparator(0x1802)); // ᠂ MONGOLIAN COMMA
+        assertTrue(finder.clauseSeparator(0x1804)); // ᠄ MONGOLIAN COLON
+        assertTrue(finder.clauseSeparator(0x104A)); // ၊ MYANMAR LITTLE SECTION
+        assertTrue(finder.clauseSeparator(0x17D6)); // ៖ KHMER CAMNUC PII KUUH
+        assertTrue(finder.clauseSeparator(0x0F0B)); // ་ TIBETAN TSHEG
+        assertTrue(finder.clauseSeparator(0x0E5A)); // ๚ THAI ANGKHANKHU
+        assertFalse(finder.clauseSeparator(0x0964)); // । is a sentence end
+    }
+
+    @Test
+    public void test_findChunkEnd_dandaBeatsANearerSpaceInDevanagari() {
+        // ...करता है। व्यवस्थापक प्रबंधन -- the ideal offset sits past a space that is NEARER than the
+        // danda, so only a STRONG classification of the danda can reach back past it.
+        final String text = "\u092F\u0939 \u0916\u094B\u091C \u0938\u0930\u094D\u0935\u0930 \u0939\u0948\u0964 "
+                + "\u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0915 \u092A\u094D\u0930\u092C\u0902\u0927\u0928";
+        final int danda = text.indexOf('\u0964');
+        final int nearerSpace = text.indexOf(' ', danda + 2);
+        assertTrue(nearerSpace > danda + 2, "fixture must place a space between the danda and the ideal offset");
+        assertEquals(danda + 2, finder.findChunkEnd(text, 0, nearerSpace + 3, text.length(), 30, 0),
+                "the danda must outrank the nearer space");
+    }
+
+    @Test
+    public void test_findChunkEnd_arabicQuestionMarkBeatsANearerSpace() {
+        final String text = "\u0645\u0648\u0627\u0642\u0639 \u0627\u0644\u0648\u064A\u0628\u061F \u0646\u0639\u0645 "
+                + "\u064A\u0645\u0643\u0646\u0647 \u0630\u0644\u0643";
+        final int mark = text.indexOf('\u061F');
+        final int nearerSpace = text.indexOf(' ', mark + 2);
+        assertEquals(mark + 2, finder.findChunkEnd(text, 0, nearerSpace + 3, text.length(), 30, 0),
+                "the Arabic question mark must outrank the nearer space");
+    }
+
+    @Test
+    public void test_findChunkEnd_khmerKhanAndMyanmarSectionBeatANearerSpace() {
+        final String khmer = "\u1781\u17C2\u179A\u17D4 \u17A2\u1793\u1780 \u1782\u179A\u1794";
+        final int khan = khmer.indexOf('\u17D4');
+        assertEquals(khan + 2, finder.findChunkEnd(khmer, 0, khmer.indexOf(' ', khan + 2) + 3, khmer.length(), 30, 0));
+        final String myanmar = "\u1017\u101E\u100A\u104B \u1005\u102E\u1019 \u1001\u1014\u1037";
+        final int section = myanmar.indexOf('\u104B');
+        assertEquals(section + 2, finder.findChunkEnd(myanmar, 0, myanmar.indexOf(' ', section + 2) + 3, myanmar.length(), 30, 0));
+    }
+
+    @Test
+    public void test_findChunkEnd_myanmarLittleSectionIsOnlyAWeakBreak() {
+        // ၊ is a phrase break: a real sentence end further back must still outrank it.
+        final String text = "\u1017\u101E\u104B \u1005\u102E\u1019\u104A \u1001\u1014\u1037\u1019";
+        final int section = text.indexOf('\u104B');
+        assertEquals(section + 2, finder.findChunkEnd(text, 0, text.length() - 1, text.length(), 30, 0),
+                "the section mark (STRONG) must beat the little section (WEAK)");
+    }
+
+    // ===================================================================================
+    //                                                          Orthographic clusters
+    //                                                          ----------------------
+    // Pre-base vowels and the Khmer coeng are ordinary spacing letters, so isClusterContinuation
+    // cannot see them -- but the letter they own comes AFTER them, so a boundary placed directly
+    // behind one strands it. This is what a hard cut through scriptio-continua text hits.
+
+    @Test
+    public void test_isClusterJoiner_coversKhmerCoengAndPreBaseVowels() {
+        assertTrue(finder.clusterJoiner(0x200D)); // ZWJ
+        assertTrue(finder.clusterJoiner(0x17D2)); // KHMER SIGN COENG
+        assertTrue(finder.clusterJoiner(0x0E40)); // THAI SARA E
+        assertTrue(finder.clusterJoiner(0x0E44)); // THAI SARA AI MAIMALAI
+        assertTrue(finder.clusterJoiner(0x0EC0)); // LAO VOWEL SIGN E
+        assertTrue(finder.clusterJoiner(0x0EC4)); // LAO VOWEL SIGN AI
+        assertFalse(finder.clusterJoiner(0x0E45)); // THAI LAKKHANGYAO is not pre-base
+        assertFalse(finder.clusterJoiner('a'));
+    }
+
+    @Test
+    public void test_isClusterContinuation_coversThaiAndLaoSaraAm() {
+        // General category Lo, but UAX #29 gives it GCB=SpacingMark.
+        assertTrue(finder.clusterContinuation(0x0E33)); // THAI SARA AM
+        assertTrue(finder.clusterContinuation(0x0EB3)); // LAO VOWEL SIGN AM
+    }
+
+    @Test
+    public void test_findChunkEnd_neverStrandsAKhmerCoengOrAPreBaseVowel() {
+        final String khmer = repeatCodePoints("\u1792\u17D2\u179C\u17BE\u179B\u17B7\u1794\u17B7\u1780\u17D2\u179A\u1798", 40);
+        assertNoStrandedJoiner(khmer);
+        final String thai = repeatCodePoints(
+                "\u0E19\u0E35\u0E48\u0E04\u0E37\u0E2D\u0E40\u0E0B\u0E34\u0E23\u0E4C\u0E1F\u0E40\u0E27\u0E2D\u0E23\u0E4C", 40);
+        assertNoStrandedJoiner(thai);
+    }
+
+    private void assertNoStrandedJoiner(final String text) {
+        for (int ideal = 1; ideal < text.length(); ideal++) {
+            for (final int lookback : new int[] { 0, 4, 16, 64 }) {
+                final int result = finder.findChunkEnd(text, 0, ideal, text.length(), lookback, 0);
+                if (result > 0 && result < text.length()) {
+                    // Deliberately NOT expressed through the predicates under test: a literal set,
+                    // so weakening the predicates cannot make this assertion vacuous.
+                    final int before = Character.codePointBefore(text, result);
+                    assertFalse(before == 0x17D2 || before >= 0x0E40 && before <= 0x0E44 || before >= 0x0EC0 && before <= 0x0EC4,
+                            "ideal=" + ideal + " lookback=" + lookback + " stranded U+" + Integer.toHexString(before) + " at " + result);
+                    final int at = Character.codePointAt(text, result);
+                    assertFalse(at == 0x0E33 || at == 0x0EB3,
+                            "ideal=" + ideal + " lookback=" + lookback + " stranded SARA AM at " + result);
+                }
+            }
+        }
+    }
+
+    private String repeatCodePoints(final String unit, final int times) {
+        final StringBuilder builder = new StringBuilder(unit.length() * times);
+        for (int i = 0; i < times; i++) {
+            builder.append(unit);
+        }
+        return builder.toString();
+    }
+
     /** Exposes the protected character predicates for assertion. */
     private static final class ExposedFinder extends ChunkBoundaryFinder {
         boolean breakableSpace(final int cp) {
