@@ -71,6 +71,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.microsoft.aad.msal4j.AuthorizationCodeParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
+import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.RefreshTokenParameters;
 import com.microsoft.aad.msal4j.SilentParameters;
@@ -1399,7 +1400,35 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     @Override
     public String logout(final FessUserBean user) {
+        // The client application is shared for the whole server so that its token cache survives
+        // between a login and its refresh. MSAL4J's TokenCache is a set of unbounded LinkedHashMaps
+        // with no eviction, and removeAccount() is the only way anything leaves it, so a user who
+        // logs out has to be dropped explicitly or they stay resident until the JVM restarts.
+        if (user.getFessUser() instanceof final EntraIdUser entraIdUser) {
+            final IAuthenticationResult authResult = entraIdUser.getAuthenticationResult();
+            if (authResult != null && authResult.account() != null) {
+                removeAccount(authResult.account());
+            }
+        }
+        // Null keeps the existing behaviour: Fess does not sign the user out at Entra ID.
         return null;
+    }
+
+    /**
+     * Drops an account's tokens from the shared client application's cache.
+     *
+     * @param account The account to evict.
+     */
+    protected void removeAccount(final IAccount account) {
+        try {
+            getClientApplication().removeAccount(account).join();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removed an account from the token cache.");
+            }
+        } catch (final Exception e) {
+            // Logging out must not fail because the cache could not be pruned.
+            logger.warn("Failed to remove an account from the Entra ID token cache.", e);
+        }
     }
 
     /**

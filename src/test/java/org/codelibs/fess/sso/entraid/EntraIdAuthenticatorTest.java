@@ -23,6 +23,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,8 +41,10 @@ import org.codelibs.core.misc.Pair;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
+import org.codelibs.fess.app.web.base.login.EntraIdCredential;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -54,6 +57,9 @@ import jakarta.servlet.http.HttpSession;
 
 import com.google.common.cache.CacheBuilder;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
+import com.microsoft.aad.msal4j.IAccount;
+import com.microsoft.aad.msal4j.IAuthenticationResult;
+import com.microsoft.aad.msal4j.ITenantProfile;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
@@ -98,6 +104,141 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             assertTrue("config change must rebuild", afterSecretChange != authenticator.getClientApplication());
         } finally {
             setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_logout_evictsTheUsersTokensFromTheSharedCache() {
+        // MSAL4J's TokenCache is five unbounded LinkedHashMaps with no eviction; the only way
+        // anything leaves is removeAccount(). Now that one application is shared for the whole
+        // server, never calling it would keep every user who ever logged in resident until restart.
+        final List<IAccount> removed = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected void removeAccount(final IAccount account) {
+                removed.add(account);
+            }
+
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                // keep the constructor off Microsoft Graph
+            }
+        };
+        ComponentUtil.register(authenticator, EntraIdAuthenticator.class.getCanonicalName());
+        final TestAccount account = new TestAccount();
+        final EntraIdUser user = new EntraIdCredential(new TestAuthenticationResult(account)).getUser();
+
+        assertNull(authenticator.logout(new FessUserBean(user)));
+
+        assertEquals(1, removed.size());
+        assertSame(account, removed.get(0));
+    }
+
+    @Test
+    public void test_logout_ignoresAUserThatIsNotAnEntraIdUser() {
+        // SPNEGO, SAML and LDAP users reach the same logout hook.
+        final List<IAccount> removed = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected void removeAccount(final IAccount account) {
+                removed.add(account);
+            }
+        };
+
+        assertNull(authenticator.logout(new FessUserBean(new TestFessUser())));
+        assertTrue(removed.isEmpty());
+    }
+
+    /** A FessUser that is not an EntraIdUser, standing in for the other authenticators. */
+    private static class TestFessUser implements org.codelibs.fess.entity.FessUser {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String getName() {
+            return "not-an-entraid-user";
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
+    }
+
+    private static class TestAccount implements IAccount {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String homeAccountId() {
+            return "home-account-id";
+        }
+
+        @Override
+        public String environment() {
+            return "login.microsoftonline.com";
+        }
+
+        @Override
+        public String username() {
+            return "taro@contoso.onmicrosoft.com";
+        }
+
+        @Override
+        public Map<String, ITenantProfile> getTenantProfiles() {
+            return Collections.emptyMap();
+        }
+    }
+
+    private static class TestAuthenticationResult implements IAuthenticationResult {
+        private static final long serialVersionUID = 1L;
+        private final IAccount account;
+
+        TestAuthenticationResult(final IAccount account) {
+            this.account = account;
+        }
+
+        @Override
+        public String accessToken() {
+            return "access-token";
+        }
+
+        @Override
+        public String idToken() {
+            return "id-token";
+        }
+
+        @Override
+        public IAccount account() {
+            return account;
+        }
+
+        @Override
+        public ITenantProfile tenantProfile() {
+            return null;
+        }
+
+        @Override
+        public String environment() {
+            return "login.microsoftonline.com";
+        }
+
+        @Override
+        public String scopes() {
+            return "https://graph.microsoft.com/.default";
+        }
+
+        @Override
+        public Date expiresOnDate() {
+            return new Date(Long.MAX_VALUE);
         }
     }
 
