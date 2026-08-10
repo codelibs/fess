@@ -409,7 +409,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
                             messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
                             "Failed to log out.", new SsoProcessException(msg));
                 }
-                return new StreamResponse("metadata").contentType("application/xhtml+xml").stream(out -> {
+                return new StreamResponse("metadata.xml").contentType("application/samlmetadata+xml").stream(out -> {
                     try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
                         writer.write(metadata);
                     }
@@ -432,22 +432,34 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * @return The logout response.
      */
     protected ActionResponse getLogoutResponse() {
-        LaRequestUtil.getOptionalRequest().map(request -> {
+        return LaRequestUtil.getOptionalRequest().<ActionResponse> map(request -> {
             if (logger.isDebugEnabled()) {
                 logger.debug("Logging out with SAML Authenticator");
             }
             final HttpServletResponse response = LaResponseUtil.getResponse();
             try {
-                final Auth auth = new Auth(getSettings(), request, response);
-                auth.processSLO();
-                final List<String> errors = auth.getErrors();
-                if (errors.isEmpty()) {
-                    throw new SsoMessageException(messages -> messages.addSuccessSsoLogout(UserMessages.GLOBAL_PROPERTY_KEY), "Logged out");
+                final Saml2Settings settings = getSettings();
+                if (settings.getIdpSingleLogoutServiceResponseUrl() == null) {
+                    final String msg = "IdP single logout service URL is not configured.";
+                    throw new SsoMessageException(
+                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
+                            "Failed to log out.", new SsoProcessException(msg));
                 }
-                final String msg = errors.stream().collect(Collectors.joining(", "));
-                throw new SsoMessageException(
-                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                        "Failed to log out.", new SsoProcessException(msg));
+                final Auth auth = new Auth(settings, request, response);
+                // stay=true keeps java-saml from committing the servlet response itself
+                final String redirectUrl = auth.processSLO(false, null, true);
+                final List<String> errors = auth.getErrors();
+                if (!errors.isEmpty()) {
+                    final String msg = errors.stream().collect(Collectors.joining(", "));
+                    throw new SsoMessageException(
+                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
+                            "Failed to log out.", new SsoProcessException(msg));
+                }
+                if (StringUtil.isNotBlank(redirectUrl)) {
+                    // an IdP-initiated LogoutRequest: send our LogoutResponse back to the IdP
+                    return HtmlResponse.fromRedirectPathAsIs(redirectUrl);
+                }
+                throw new SsoMessageException(messages -> messages.addSuccessSsoLogout(UserMessages.GLOBAL_PROPERTY_KEY), "Logged out");
             } catch (final SsoMessageException e) {
                 throw e;
             } catch (final Exception e) {
@@ -459,6 +471,5 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 .orElseThrow(() -> new SsoMessageException(
                         messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
                         "Failed to log out.", new SsoProcessException("Invalid state.")));
-        return null;
     }
 }
