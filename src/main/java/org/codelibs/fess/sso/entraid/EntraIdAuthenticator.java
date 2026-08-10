@@ -23,12 +23,14 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -250,6 +252,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** Read timeout for Microsoft Graph requests in milliseconds. See {@link #graphConnectTimeout}. */
     protected int graphReadTimeout = 30 * 1000;
 
+    /**
+     * Maximum number of unfinished authorization attempts kept per session. Each redirect to the
+     * authorization endpoint stores one; without a cap, a client that keeps starting logins
+     * without finishing one grows the session attribute without bound.
+     */
+    protected int maxStates = 10;
+
     /** Use V2 endpoint. */
     protected boolean useV2Endpoint = true;
 
@@ -337,17 +346,95 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param nonce The OpenID Connect nonce parameter.
      */
     protected void storeStateInSession(final HttpSession session, final String state, final String nonce) {
-        @SuppressWarnings("unchecked")
-        Map<String, StateData> stateMap = (Map<String, StateData>) session.getAttribute(STATES);
-        if (stateMap == null) {
-            stateMap = new HashMap<>();
-            session.setAttribute(STATES, stateMap);
-        }
+        final Map<String, StateData> stateMap = getStateMap(session);
+        removeExpiredStates(stateMap);
+        removeOldestStates(stateMap, maxStates - 1);
         final StateData stateData = new StateData(nonce, ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         if (logger.isDebugEnabled()) {
             logger.debug("Storing state in session: {}", stateData);
         }
         stateMap.put(state, stateData);
+    }
+
+    /**
+     * Returns the per-session map of pending authorization attempts, creating it if needed.
+     * The map is concurrent, and the create is synchronized on the session, because a user can
+     * have several login attempts in flight at once -- a plain HashMap created twice loses the
+     * state one of them has to validate later.
+     *
+     * @param session The HTTP session.
+     * @return The state map held by the session.
+     */
+    protected Map<String, StateData> getStateMap(final HttpSession session) {
+        synchronized (session) {
+            @SuppressWarnings("unchecked")
+            final Map<String, StateData> stateMap = (Map<String, StateData>) session.getAttribute(STATES);
+            if (stateMap instanceof ConcurrentHashMap) {
+                return stateMap;
+            }
+            // Either absent, or a plain HashMap left by a session that predates this change.
+            final Map<String, StateData> concurrentMap = new ConcurrentHashMap<>();
+            if (stateMap != null) {
+                concurrentMap.putAll(stateMap);
+            }
+            session.setAttribute(STATES, concurrentMap);
+            return concurrentMap;
+        }
+    }
+
+    /**
+     * Drops states that are older than the configured TTL.
+     *
+     * @param stateMap The state map to prune.
+     */
+    protected void removeExpiredStates(final Map<String, StateData> stateMap) {
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final long stateTtl = getStateTtl();
+        stateMap.entrySet()
+                .stream()
+                .filter(e -> (now - e.getValue().getExpiration()) / 1000L > stateTtl)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList())
+                .forEach(s -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing old state: {}", s);
+                    }
+                    stateMap.remove(s);
+                });
+    }
+
+    /**
+     * Drops the least recently created states until at most {@code limit} remain. Unfinished
+     * attempts never expire on their own before the TTL, so this is what bounds the map for a
+     * client that keeps starting logins.
+     *
+     * @param stateMap The state map to prune.
+     * @param limit The number of states to keep.
+     */
+    protected void removeOldestStates(final Map<String, StateData> stateMap, final int limit) {
+        if (stateMap.size() <= limit) {
+            return;
+        }
+        stateMap.entrySet()
+                .stream()
+                .sorted(Comparator.comparingLong(e -> e.getValue().getExpiration()))
+                .limit((long) stateMap.size() - limit)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList())
+                .forEach(s -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing surplus state: {}", s);
+                    }
+                    stateMap.remove(s);
+                });
+    }
+
+    /**
+     * Sets the maximum number of pending authorization attempts kept per session.
+     * @param maxStates The maximum number of states.
+     */
+    public void setMaxStates(final int maxStates) {
+        this.maxStates = maxStates;
     }
 
     /**
@@ -562,31 +649,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The removed state data or null if not found.
      */
     protected StateData removeStateFromSession(final HttpSession session, final String state) {
-        @SuppressWarnings("unchecked")
-        final Map<String, StateData> states = (Map<String, StateData>) session.getAttribute(STATES);
-        if (states != null) {
-            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-            states.entrySet()
-                    .stream()
-                    .filter(e -> (now - e.getValue().getExpiration()) / 1000L > getStateTtl())
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList())
-                    .forEach(s -> {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Removing old state: {}", s);
-                        }
-                        states.remove(s);
-                    });
-            final StateData stateData = states.get(state);
-            if (stateData != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Restoring state from session: {}", stateData);
-                }
-                states.remove(state);
-                return stateData;
-            }
+        final Map<String, StateData> states = getStateMap(session);
+        removeExpiredStates(states);
+        final StateData stateData = states.remove(state);
+        if (stateData != null && logger.isDebugEnabled()) {
+            logger.debug("Restoring state from session: {}", stateData);
         }
-        return null;
+        return stateData;
     }
 
     /**
