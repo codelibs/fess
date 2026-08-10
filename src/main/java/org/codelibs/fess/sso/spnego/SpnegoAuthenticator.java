@@ -67,9 +67,6 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SpnegoAuthenticator.class);
 
-    /** Configuration key for directories to exclude from SPNEGO authentication. */
-    protected static final String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";
-
     /** Configuration key for enabling delegation in SPNEGO authentication. */
     protected static final String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
 
@@ -110,7 +107,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
     protected static final String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
 
     /** The underlying SPNEGO authenticator instance. */
-    protected org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
+    protected volatile org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
 
     /**
      * Constructs a new SPNEGO authenticator.
@@ -135,7 +132,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      * Releases the SPNEGO server credentials and login context on shutdown.
      */
     @PreDestroy
-    public void destroy() {
+    public synchronized void destroy() {
         if (authenticator != null) {
             try {
                 authenticator.dispose();
@@ -166,11 +163,34 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             // NOTE: The underlying SpnegoFilterConfig is a JVM-wide singleton, so the SPNEGO
             // configuration is effectively cached for the lifetime of the process. Changes to the
             // spnego.* settings therefore require a Fess restart to take effect.
-            final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpnegoConfig());
+            final SpnegoConfig spnegoConfig = new SpnegoConfig();
+            warnInsecureSettings(spnegoConfig);
+            final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(spnegoConfig);
             authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
             return authenticator;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to initialize SPNEGO.", e);
+        }
+    }
+
+    /**
+     * Logs a warning for security-sensitive settings that are effectively enabled.
+     *
+     * The coded defaults for these settings are secure, but they only apply when the key is absent
+     * from the system properties. An instance that stored the old, permissive values before the
+     * defaults were hardened keeps using them silently, so surface them at initialization time.
+     *
+     * @param config the resolved SPNEGO configuration
+     */
+    protected void warnInsecureSettings(final SpnegoConfig config) {
+        if (Boolean.parseBoolean(config.getInitParameter(Constants.ALLOW_LOCALHOST))) {
+            logger.warn("spnego.allow.localhost=true: same-host requests are authenticated as the server OS user "
+                    + "without any Kerberos verification. Set it to false unless you fully understand the risk.");
+        }
+        if (Boolean.parseBoolean(config.getInitParameter(Constants.ALLOW_BASIC))
+                && Boolean.parseBoolean(config.getInitParameter(Constants.ALLOW_UNSEC_BASIC))) {
+            logger.warn(
+                    "spnego.allow.unsecure.basic=true: basic credentials may be sent over plain HTTP. " + "Set it to false and use HTTPS.");
         }
     }
 
@@ -203,16 +223,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     logger.debug("principal={}", principal);
                 }
             } catch (final Exception e) {
-                final String authzHeader = request.getHeader(Constants.AUTHZ_HEADER);
-                final String maskedHeader;
-                if (authzHeader == null) {
-                    maskedHeader = "null";
-                } else if (authzHeader.length() <= 10) {
-                    maskedHeader = "***";
-                } else {
-                    maskedHeader = authzHeader.substring(0, 10) + "***";
-                }
-                final String msg = "Failed to process Authorization Header: " + maskedHeader;
+                final String msg = "Failed to process Authorization Header: " + maskAuthzHeader(request.getHeader(Constants.AUTHZ_HEADER));
                 if (logger.isDebugEnabled()) {
                     logger.debug(msg);
                 }
@@ -225,9 +236,12 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 logger.debug("isStatusSet={}", status);
             }
             if (status) {
+                // The library has already written and flushed the 401 with its WWW-Authenticate header,
+                // so this exception only unwinds the action. Log it at debug level to keep the normal
+                // SPNEGO handshake out of the application log.
                 return new ActionResponseCredential(() -> {
                     throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.", "401 Unauthorized",
-                            HttpServletResponse.SC_UNAUTHORIZED);
+                            HttpServletResponse.SC_UNAUTHORIZED).asLogging(RequestLoggingFilter.DelicateErrorLoggingLevel.DEBUG);
                 });
             }
 
@@ -250,6 +264,26 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             return new SpnegoCredential(username[0]);
         }).orElse(null);
 
+    }
+
+    /**
+     * Masks an Authorization header so that only its authentication scheme remains.
+     *
+     * The credential part must never reach the log: a Basic token carries the user name and the
+     * password, and even a short prefix of it decodes back to readable characters.
+     *
+     * @param authzHeader the raw Authorization header value (may be null)
+     * @return the scheme followed by a mask, or "null" when the header is absent
+     */
+    protected static String maskAuthzHeader(final String authzHeader) {
+        if (authzHeader == null) {
+            return "null";
+        }
+        final int index = authzHeader.indexOf(' ');
+        if (index <= 0) {
+            return "***";
+        }
+        return authzHeader.substring(0, index) + " ***";
     }
 
     /**
@@ -287,7 +321,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public ServletContext getServletContext() {
-            throw new UnsupportedOperationException("getServletContext() is not supported in SpnegoFilterConfig");
+            throw new UnsupportedOperationException("getServletContext() is not supported in SpnegoConfig");
         }
 
         /**
@@ -319,10 +353,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 if (logger.isWarnEnabled()) {
                     return "6";
                 }
-                if (logger.isErrorEnabled()) {
-                    return "7";
-                }
-                return "0";
+                // The library maps every unknown level (including "0") to INFO, so "7" (SEVERE) is
+                // the quietest setting it actually understands.
+                return "7";
             }
             if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
@@ -368,21 +401,30 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
             }
-            if (SpnegoHttpFilter.Constants.EXCLUDE_DIRS.equals(name)) {
-                return getProperty(SPNEGO_EXCLUDE_DIRS, StringUtil.EMPTY);
-            }
+            // NOTE: spnego.exclude.dirs is deliberately not mapped. Only SpnegoHttpFilter consumes it,
+            // and Fess calls SpnegoAuthenticator#authenticate directly instead of installing that
+            // filter, so honoring the key here would advertise an exclusion that never happens.
             return null;
         }
 
         /**
          * Gets a system property value with a default fallback.
          *
+         * A blank value is treated as unset. The admin screen writes every spnego.* key on save, so
+         * clearing an input field stores an empty string rather than removing the key, and passing
+         * that empty string down to the library turns a simple misconfiguration into an opaque
+         * initialization failure.
+         *
          * @param key The property key to look up
-         * @param defaultValue The default value to return if the property is not set
+         * @param defaultValue The default value to return if the property is not set or blank
          * @return The property value or the default value
          */
         protected String getProperty(final String key, final String defaultValue) {
-            return ComponentUtil.getSystemProperties().getProperty(key, defaultValue);
+            final String value = ComponentUtil.getSystemProperties().getProperty(key);
+            if (StringUtil.isBlank(value)) {
+                return defaultValue;
+            }
+            return value;
         }
 
         /**
@@ -408,7 +450,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public Enumeration<String> getInitParameterNames() {
-            throw new UnsupportedOperationException("getInitParameterNames() is not supported in SpnegoFilterConfig");
+            throw new UnsupportedOperationException("getInitParameterNames() is not supported in SpnegoConfig");
         }
 
     }

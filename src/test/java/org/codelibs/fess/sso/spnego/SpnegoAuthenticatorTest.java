@@ -38,6 +38,8 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         systemProperties.remove("spnego.logger.level");
         systemProperties.remove("spnego.allowed.realms");
+        systemProperties.remove("spnego.login.client.module");
+        systemProperties.remove("spnego.exclude.dirs");
         super.tearDown(testInfo);
     }
 
@@ -158,15 +160,53 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_constantsExist() {
-        // Verify all expected configuration constants are defined
-        SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+    public void test_getProperty_blankFallsBackToDefault() {
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // The admin screen stores an empty string when an input is cleared, so a present but
+            // blank key must behave like an absent one instead of reaching the library as "".
+            systemProperties.setProperty("spnego.login.client.module", "");
+            assertEquals("spnego-client", config.getInitParameter(Constants.CLIENT_MODULE));
 
-        // These constants should be accessible (would fail at compile time if not)
-        assertTrue(SpnegoAuthenticator.class.getName().contains("SpnegoAuthenticator"));
+            systemProperties.setProperty("spnego.login.client.module", "   ");
+            assertEquals("spnego-client", config.getInitParameter(Constants.CLIENT_MODULE));
 
-        // Verify authenticator is properly named (no typo)
-        assertEquals("SpnegoAuthenticator", SpnegoAuthenticator.class.getSimpleName());
+            // A real value is still passed through.
+            systemProperties.setProperty("spnego.login.client.module", "custom-client");
+            assertEquals("custom-client", config.getInitParameter(Constants.CLIENT_MODULE));
+        } finally {
+            systemProperties.remove("spnego.login.client.module");
+        }
+    }
+
+    @Test
+    public void test_getInitParameter_excludeDirsIsNotMapped() {
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // spnego.exclude.dirs is only honored by SpnegoHttpFilter, which Fess does not install,
+            // so the value must not be forwarded as if the exclusion were effective.
+            systemProperties.setProperty("spnego.exclude.dirs", "/api/");
+            assertNull(config.getInitParameter(Constants.EXCLUDE_DIRS));
+        } finally {
+            systemProperties.remove("spnego.exclude.dirs");
+        }
+    }
+
+    @Test
+    public void test_maskAuthzHeader() {
+        // Absent header.
+        assertEquals("null", SpnegoAuthenticator.maskAuthzHeader(null));
+        // Negotiate token must be reduced to its scheme.
+        assertEquals("Negotiate ***", SpnegoAuthenticator.maskAuthzHeader("Negotiate YIIFxQYGKwYBBQUCoIIFuTCCBbW"));
+        // Basic credentials must not leak: even four base64 characters decode to three plain bytes
+        // of "user:password".
+        assertEquals("Basic ***", SpnegoAuthenticator.maskAuthzHeader("Basic dXNlcjpwYXNzd29yZA=="));
+        // A header without a scheme separator is fully masked.
+        assertEquals("***", SpnegoAuthenticator.maskAuthzHeader("dXNlcjpwYXNzd29yZA=="));
+        assertEquals("***", SpnegoAuthenticator.maskAuthzHeader(""));
+        assertEquals("***", SpnegoAuthenticator.maskAuthzHeader(" leading-space"));
     }
 
     @Test
@@ -191,18 +231,13 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_innerClassNaming() {
-        // Verify the inner SpnegoConfig class exists and is properly named
-        // This test ensures the typo fix (SpengoConfig -> SpnegoConfig) is correct
-        try {
-            Class<?> configClass = Class.forName("org.codelibs.fess.sso.spnego.SpnegoAuthenticator$SpnegoConfig");
-            assertNotNull(configClass);
-            assertEquals("SpnegoConfig", configClass.getSimpleName());
-
-            // Verify it's a static inner class
-            assertTrue(java.lang.reflect.Modifier.isStatic(configClass.getModifiers()));
-        } catch (ClassNotFoundException e) {
-            fail("SpnegoConfig inner class should exist");
-        }
+    public void test_unsupportedOperations() {
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        // These two FilterConfig methods are never called by the library; make sure they fail loudly
+        // and name the class that actually threw.
+        UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class, () -> config.getServletContext());
+        assertTrue(e.getMessage().contains("SpnegoConfig"));
+        e = assertThrows(UnsupportedOperationException.class, () -> config.getInitParameterNames());
+        assertTrue(e.getMessage().contains("SpnegoConfig"));
     }
 }
