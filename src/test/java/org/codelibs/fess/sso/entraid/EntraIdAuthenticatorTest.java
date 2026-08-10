@@ -23,6 +23,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,8 +41,11 @@ import org.codelibs.core.misc.Pair;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
+import org.codelibs.fess.app.web.base.login.EntraIdCredential;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
@@ -52,8 +56,227 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import com.google.common.cache.CacheBuilder;
+import com.microsoft.aad.msal4j.ConfidentialClientApplication;
+import com.microsoft.aad.msal4j.IAccount;
+import com.microsoft.aad.msal4j.IAuthenticationResult;
+import com.microsoft.aad.msal4j.ITenantProfile;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
+
+    private void setEntraIdConfig(final String clientId, final String clientSecret, final String tenant) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessConfig.setSystemProperty("entraid.client.id", clientId);
+        fessConfig.setSystemProperty("entraid.client.secret", clientSecret);
+        fessConfig.setSystemProperty("entraid.tenant", tenant);
+    }
+
+    @Test
+    public void test_getClientApplication_isReusedSoItsTokenCacheSurvives() {
+        // A fresh ConfidentialClientApplication starts with an empty TokenCache, and
+        // acquireTokenSilently throws NO_TOKEN_IN_CACHE on a miss. Building one per call therefore
+        // made silent refresh impossible; the tokens acquired at login have to stay reachable.
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+            assertSame(authenticator.getClientApplication(), authenticator.getClientApplication());
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_getClientApplication_isRebuiltWhenTheConfigurationChanges() {
+        // The client id, secret and tenant are editable from the admin screen at runtime.
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+            final ConfidentialClientApplication first = authenticator.getClientApplication();
+
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-2", "contoso.onmicrosoft.com");
+            final ConfidentialClientApplication afterSecretChange = authenticator.getClientApplication();
+            assertTrue("secret change must rebuild", first != afterSecretChange);
+
+            setEntraIdConfig("22222222-2222-2222-2222-222222222222", "secret-2", "contoso.onmicrosoft.com");
+            assertTrue("config change must rebuild", afterSecretChange != authenticator.getClientApplication());
+
+            setEntraIdConfig("22222222-2222-2222-2222-222222222222", "secret-2", "fabrikam.onmicrosoft.com");
+            assertTrue("config change must rebuild", afterSecretChange != authenticator.getClientApplication());
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_logout_evictsTheUsersTokensFromTheSharedCache() {
+        // MSAL4J's TokenCache is five unbounded LinkedHashMaps with no eviction; the only way
+        // anything leaves is removeAccount(). Now that one application is shared for the whole
+        // server, never calling it would keep every user who ever logged in resident until restart.
+        final List<IAccount> removed = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected void removeAccount(final IAccount account) {
+                removed.add(account);
+            }
+
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                // keep the constructor off Microsoft Graph
+            }
+        };
+        ComponentUtil.register(authenticator, EntraIdAuthenticator.class.getCanonicalName());
+        final TestAccount account = new TestAccount();
+        final EntraIdUser user = new EntraIdCredential(new TestAuthenticationResult(account)).getUser();
+
+        assertNull(authenticator.logout(new FessUserBean(user)));
+
+        assertEquals(1, removed.size());
+        assertSame(account, removed.get(0));
+    }
+
+    @Test
+    public void test_logout_ignoresAUserThatIsNotAnEntraIdUser() {
+        // SPNEGO, SAML and LDAP users reach the same logout hook.
+        final List<IAccount> removed = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected void removeAccount(final IAccount account) {
+                removed.add(account);
+            }
+        };
+
+        assertNull(authenticator.logout(new FessUserBean(new TestFessUser())));
+        assertTrue(removed.isEmpty());
+    }
+
+    /** A FessUser that is not an EntraIdUser, standing in for the other authenticators. */
+    private static class TestFessUser implements org.codelibs.fess.entity.FessUser {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String getName() {
+            return "not-an-entraid-user";
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
+    }
+
+    private static class TestAccount implements IAccount {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String homeAccountId() {
+            return "home-account-id";
+        }
+
+        @Override
+        public String environment() {
+            return "login.microsoftonline.com";
+        }
+
+        @Override
+        public String username() {
+            return "taro@contoso.onmicrosoft.com";
+        }
+
+        @Override
+        public Map<String, ITenantProfile> getTenantProfiles() {
+            return Collections.emptyMap();
+        }
+    }
+
+    private static class TestAuthenticationResult implements IAuthenticationResult {
+        private static final long serialVersionUID = 1L;
+        private final IAccount account;
+
+        TestAuthenticationResult(final IAccount account) {
+            this.account = account;
+        }
+
+        @Override
+        public String accessToken() {
+            return "access-token";
+        }
+
+        @Override
+        public String idToken() {
+            return "id-token";
+        }
+
+        @Override
+        public IAccount account() {
+            return account;
+        }
+
+        @Override
+        public ITenantProfile tenantProfile() {
+            return null;
+        }
+
+        @Override
+        public String environment() {
+            return "login.microsoftonline.com";
+        }
+
+        @Override
+        public String scopes() {
+            return "https://graph.microsoft.com/.default";
+        }
+
+        @Override
+        public Date expiresOnDate() {
+            return new Date(Long.MAX_VALUE);
+        }
+    }
+
+    @Test
+    public void test_getClientApplication_isBuiltOnceUnderConcurrentAccess() throws Exception {
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+            final int threads = 8;
+            final CountDownLatch start = new CountDownLatch(1);
+            final List<ConfidentialClientApplication> seen = Collections.synchronizedList(new ArrayList<>());
+            final List<Thread> workers = new ArrayList<>();
+            for (int i = 0; i < threads; i++) {
+                final Thread t = new Thread(() -> {
+                    try {
+                        start.await();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    seen.add(authenticator.getClientApplication());
+                });
+                workers.add(t);
+                t.start();
+            }
+            start.countDown();
+            for (final Thread t : workers) {
+                t.join(10000L);
+            }
+
+            assertEquals(threads, seen.size());
+            // Two instances means two token caches, and a login cached in one is invisible to the
+            // other when its refresh comes round.
+            seen.forEach(app -> assertSame(seen.get(0), app));
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
 
     /** Lets a test move the clock that state expiry is measured against. */
     private final AtomicLong clock = new AtomicLong(1_000_000L);

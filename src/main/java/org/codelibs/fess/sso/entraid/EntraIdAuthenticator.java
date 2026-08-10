@@ -71,6 +71,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.microsoft.aad.msal4j.AuthorizationCodeParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
+import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.RefreshTokenParameters;
 import com.microsoft.aad.msal4j.SilentParameters;
@@ -274,6 +275,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /** Use V2 endpoint. */
     protected boolean useV2Endpoint = true;
+
+    /** Shared MSAL4J client application. Holds the token cache that silent refresh reads. */
+    protected volatile ConfidentialClientApplication clientApplication;
+
+    /** Identifies the configuration {@link #clientApplication} was built from. */
+    protected volatile String clientApplicationKey;
 
     /**
      * Initializes the Entra ID authenticator.
@@ -539,6 +546,51 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Returns the shared MSAL4J client application.
+     *
+     * <p>Each {@link ConfidentialClientApplication} owns its own in-memory token cache, and
+     * {@code acquireTokenSilently} throws {@code NO_TOKEN_IN_CACHE} on a miss. Building one per
+     * call therefore made silent refresh impossible: the tokens acquired at login went into an
+     * instance that was thrown away immediately afterwards. One instance per authenticator keeps
+     * them reachable. MSAL4J documents the application as thread safe and meant to be reused.
+     *
+     * <p>The instance is rebuilt when the client id, secret or tenant changes, because all three
+     * are editable from the admin screen while Fess is running.
+     *
+     * @return The client application.
+     */
+    protected ConfidentialClientApplication getClientApplication() {
+        final String clientId = getClientId();
+        final String clientSecret = getClientSecret();
+        final String authority = getAuthority() + getTenant() + "/";
+        // The secret is reduced to a hash so the key can never carry it into a log or a heap dump
+        // label; a collision would only mean the application is not rebuilt after a secret change.
+        final String key = authority + '\n' + clientId + '\n' + clientSecret.hashCode();
+        final ConfidentialClientApplication current = clientApplication;
+        if (current != null && key.equals(clientApplicationKey)) {
+            return current;
+        }
+        synchronized (this) {
+            if (clientApplication != null && key.equals(clientApplicationKey)) {
+                return clientApplication;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Building a client application for authority={}", authority);
+            }
+            try {
+                clientApplication = ConfidentialClientApplication
+                        .builder(clientId, com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(clientSecret))
+                        .authority(authority)
+                        .build();
+                clientApplicationKey = key;
+                return clientApplication;
+            } catch (final Exception e) {
+                throw new SsoLoginException("Failed to build an Entra ID client application.", e);
+            }
+        }
+    }
+
+    /**
      * Obtains an access token using a refresh token.
      * @param refreshToken The refresh token to use for token acquisition.
      * @return The authentication result containing the access token.
@@ -549,10 +601,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("refreshToken={}, authority={}", maskSecret(refreshToken), authority);
         }
         try {
-            final ConfidentialClientApplication app = ConfidentialClientApplication
-                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
-                    .authority(authority)
-                    .build();
+            final ConfidentialClientApplication app = getClientApplication();
 
             final RefreshTokenParameters parameters =
                     RefreshTokenParameters.builder(Collections.singleton("https://graph.microsoft.com/.default"), refreshToken).build();
@@ -580,10 +629,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("authCode={}, authority={}, uri={}", maskSecret(authCode), authority, currentUri);
         }
         try {
-            final ConfidentialClientApplication app = ConfidentialClientApplication
-                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
-                    .authority(authority)
-                    .build();
+            final ConfidentialClientApplication app = getClientApplication();
 
             final AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(authCode, new URI(currentUri))
                     .scopes(Collections.singleton("https://graph.microsoft.com/.default"))
@@ -605,12 +651,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The new authentication result, or null if silent refresh failed.
      */
     public IAuthenticationResult refreshTokenSilently(final EntraIdCredential.EntraIdUser user) {
-        final String authority = getAuthority() + getTenant() + "/";
         try {
-            final ConfidentialClientApplication app = ConfidentialClientApplication
-                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
-                    .authority(authority)
-                    .build();
+            final ConfidentialClientApplication app = getClientApplication();
 
             final SilentParameters parameters = SilentParameters
                     .builder(Collections.singleton("https://graph.microsoft.com/.default"), user.getAuthenticationResult().account())
@@ -1358,7 +1400,35 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     @Override
     public String logout(final FessUserBean user) {
+        // The client application is shared for the whole server so that its token cache survives
+        // between a login and its refresh. MSAL4J's TokenCache is a set of unbounded LinkedHashMaps
+        // with no eviction, and removeAccount() is the only way anything leaves it, so a user who
+        // logs out has to be dropped explicitly or they stay resident until the JVM restarts.
+        if (user.getFessUser() instanceof final EntraIdUser entraIdUser) {
+            final IAuthenticationResult authResult = entraIdUser.getAuthenticationResult();
+            if (authResult != null && authResult.account() != null) {
+                removeAccount(authResult.account());
+            }
+        }
+        // Null keeps the existing behaviour: Fess does not sign the user out at Entra ID.
         return null;
+    }
+
+    /**
+     * Drops an account's tokens from the shared client application's cache.
+     *
+     * @param account The account to evict.
+     */
+    protected void removeAccount(final IAccount account) {
+        try {
+            getClientApplication().removeAccount(account).join();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removed an account from the token cache.");
+            }
+        } catch (final Exception e) {
+            // Logging out must not fail because the cache could not be pruned.
+            logger.warn("Failed to remove an account from the Entra ID token cache.", e);
+        }
     }
 
     /**
