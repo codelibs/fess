@@ -16,7 +16,17 @@
 package org.codelibs.fess.sso.saml;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -138,6 +148,31 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getSettings_logsSecurityWarningsUntilTheyChange() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            authenticator.getSettings();
+            authenticator.getSettings();
+
+            // the permissive defaults are reported, but only once
+            assertEquals(1, appender.warnings().size());
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("assertions_and_messages_not_required_signed"));
+
+            systemProperties.setProperty("saml.security.want_assertions_signed", "true");
+            authenticator.getSettings();
+
+            // the remaining warnings differ, so they are reported again
+            assertEquals(2, appender.warnings().size());
+            assertFalse(appender.warnings().get(1).contains("assertions_and_messages_not_required_signed"));
+        } finally {
+            systemProperties.remove("saml.security.want_assertions_signed");
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_getSettings_sharesReplayCacheAcrossRequests() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticator();
 
@@ -201,6 +236,42 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertEquals("http://localhost:8080/sso/logout", authenticator.buildDefaultUrl("/sso/logout"));
         } finally {
             systemProperties.remove(BASE_URL_KEY);
+        }
+    }
+
+    /**
+     * Minimal in-memory log4j2 appender for asserting on emitted log messages.
+     * Mirrors {@code LengthChunkerTest.LogCapturingAppender}.
+     */
+    static final class LogCapturingAppender extends AbstractAppender {
+        private final List<LogEvent> events = new CopyOnWriteArrayList<>();
+        private final Logger boundLogger;
+
+        private LogCapturingAppender(final Logger logger) {
+            super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
+            this.boundLogger = logger;
+        }
+
+        static LogCapturingAppender attach(final Class<?> targetClass) {
+            final Logger logger = (Logger) LogManager.getLogger(targetClass);
+            final LogCapturingAppender appender = new LogCapturingAppender(logger);
+            appender.start();
+            logger.addAppender(appender);
+            return appender;
+        }
+
+        void detach() {
+            boundLogger.removeAppender(this);
+            stop();
+        }
+
+        @Override
+        public void append(final LogEvent event) {
+            events.add(event.toImmutable());
+        }
+
+        List<String> warnings() {
+            return events.stream().filter(e -> e.getLevel() == Level.WARN).map(e -> e.getMessage().getFormattedMessage()).toList();
         }
     }
 }
