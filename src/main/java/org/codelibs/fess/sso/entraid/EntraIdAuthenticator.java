@@ -263,7 +263,15 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 logger.debug("Logging in with Entra ID Authenticator");
             }
             final HttpSession session = request.getSession(false);
-            if (session != null && containsAuthenticationData(request)) {
+            if (containsAuthenticationData(request)) {
+                if (session == null) {
+                    // Redirecting again would send the user straight back here without a session,
+                    // looping forever. The usual cause is the session cookie not being sent on the
+                    // callback; see tomcat.sameSiteCookies in tomcat_config.properties.
+                    logger.warn("Received an Entra ID authentication response without a session."
+                            + " The session cookie was not sent back with the callback request.");
+                    return null;
+                }
                 try {
                     return processAuthenticationData(request);
                 } catch (final Exception e) {
@@ -292,13 +300,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (useV2Endpoint) {
             // v2.0 endpoint with MSAL4J (recommended)
             authUrl = getAuthority() + getTenant()
-                    + "/oauth2/v2.0/authorize?response_type=code&scope=https://graph.microsoft.com/.default&response_mode=form_post&redirect_uri="
+                    + "/oauth2/v2.0/authorize?response_type=code&scope=https://graph.microsoft.com/.default&response_mode=query&redirect_uri="
                     + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
                     + "&nonce=" + nonce;
         } else {
             // v1.0 endpoint for backward compatibility
             authUrl = getAuthority() + getTenant()
-                    + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
+                    + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=query&redirect_uri="
                     + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
                     + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
         }
@@ -577,7 +585,11 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("HTTP Method: {}", request.getMethod());
         }
-        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+        // The authorization response arrives as a GET in query mode, which is what getAuthUrl now
+        // asks for. POST is still accepted so that a deployment already configured for form_post
+        // (tomcat.sameSiteCookies=none) keeps working.
+        final String method = request.getMethod();
+        if (!"GET".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
             return false;
         }
         final Map<String, String[]> params = request.getParameterMap();
