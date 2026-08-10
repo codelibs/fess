@@ -1004,7 +1004,105 @@ public class LengthChunkerTest extends UnitFessTestCase {
         }
     }
 
-    private static final class TestableLengthChunker extends LengthChunker {
+    // ===================================================================================
+    //                                                  Config warnings and boundary metrics
+    //                                                  -----------------------------------
+
+    @Test
+    public void test_configWarning_isEmittedOncePerDistinctProblem() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LengthChunker.class);
+        try {
+            chunker.setTestChunkSize(0); // invalid -> falls back to the default, with a WARN
+            for (int i = 0; i < 25; i++) {
+                chunker.split("some content to split into chunks", 100);
+            }
+            assertEquals(1, countMatching(appender, "Invalid chunk_size"), "a misconfigured instance must not emit one WARN per document");
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_configWarning_isEmittedAgainWhenTheProblemChanges() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LengthChunker.class);
+        try {
+            chunker.setTestChunkSize(0);
+            chunker.split("some content to split into chunks", 100);
+            chunker.setTestChunkSize(-7); // a DIFFERENT bad value must be reported
+            chunker.split("some content to split into chunks", 100);
+            assertEquals(2, countMatching(appender, "Invalid chunk_size"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_configWarning_theSameProblemAfterACleanRunIsNotRepeated() {
+        // Pinned semantics: the sink remembers the last problem REPORTED, not the last
+        // configuration seen, so a clean run in between does not re-arm it. The WARN describes a
+        // standing misconfiguration, so reporting it once is the point.
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LengthChunker.class);
+        try {
+            chunker.setTestChunkSize(0);
+            chunker.split("some content to split into chunks", 100);
+            chunker.setTestChunkSize(40);
+            chunker.split("some content to split into chunks", 100);
+            chunker.setTestChunkSize(0);
+            chunker.split("some content to split into chunks", 100);
+            assertEquals(1, countMatching(appender, "Invalid chunk_size"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_boundaryOutcome_reportsHardCutsSeparatelyFromMovedCuts() {
+        final List<int[]> observed = new java.util.ArrayList<>();
+        final TestableLengthChunker recording = new TestableLengthChunker() {
+            @Override
+            protected void logBoundaryOutcome(final int chunks, final int movedBack, final int movedForward, final int hardCut) {
+                observed.add(new int[] { chunks, movedBack, movedForward, hardCut });
+            }
+        };
+        recording.setTestChunkSize(20);
+        recording.setTestLookbackPercent(30);
+        recording.setTestLookaheadPercent(0);
+
+        // Content with no boundary anywhere: every cut must be reported as a hard cut.
+        observed.clear();
+        recording.split("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 100);
+        assertEquals(1, observed.size());
+        assertEquals(observed.get(0)[0], observed.get(0)[3], "an unbreakable document must be 100% hard cut");
+        assertEquals(0, observed.get(0)[1]);
+
+        // Prose with spaces: the backward tier must move cuts instead.
+        observed.clear();
+        recording.split("alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi", 100);
+        assertEquals(1, observed.size());
+        assertTrue(observed.get(0)[1] > 0, "prose must produce backward-moved cuts, got " + observed.get(0)[1]);
+        assertTrue(observed.get(0)[3] < observed.get(0)[0], "prose must not be 100% hard cut");
+    }
+
+    @Test
+    public void test_boundaryOutcome_isNotReportedWhenBoundarySearchIsDisabled() {
+        final List<int[]> observed = new java.util.ArrayList<>();
+        final TestableLengthChunker recording = new TestableLengthChunker() {
+            @Override
+            protected void logBoundaryOutcome(final int chunks, final int movedBack, final int movedForward, final int hardCut) {
+                observed.add(new int[] { chunks, movedBack, movedForward, hardCut });
+            }
+        };
+        recording.setTestChunkSize(20);
+        recording.setTestBoundaryEnabled(false);
+        recording.split("alpha beta gamma delta epsilon zeta eta theta iota kappa", 100);
+        assertTrue(observed.isEmpty(), "nothing to report when the finder never runs");
+    }
+
+    private static int countMatching(final LogCapturingAppender appender, final String needle) {
+        return (int) appender.warnings().stream().filter(m -> m.contains(needle)).count();
+    }
+
+    private static class TestableLengthChunker extends LengthChunker {
         private int testChunkSize = 800;
         private int testOverlap = 0;
         private boolean testBoundaryEnabled = DEFAULT_BOUNDARY_ENABLED;
