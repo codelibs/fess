@@ -114,6 +114,43 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isSupportedLoggerLevel() {
+        // The library switches on 1-7 and maps everything else, including 0, to INFO.
+        assertTrue(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel("0"));
+        assertTrue(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel("7"));
+        // Outside the documented range the value carries no meaning.
+        assertFalse(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel("8"));
+        assertFalse(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel("-1"));
+        // All-digit strings are not automatically parseable: the library uses Integer.parseInt.
+        assertFalse(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel("99999999999"));
+        assertFalse(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel("abc"));
+    }
+
+    @Test
+    public void test_getInitParameter_loggerLevel_outOfRangeFallsBack() {
+        SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // An all-digit value that overflows an int used to be passed through and made the
+            // library fail with NumberFormatException while building its configuration.
+            systemProperties.setProperty("spnego.logger.level", "99999999999");
+            String level = config.getInitParameter(Constants.LOGGER_LEVEL);
+            assertFalse("99999999999".equals(level));
+            assertTrue(SpnegoAuthenticator.SpnegoConfig.isSupportedLoggerLevel(level));
+
+            // A value above the documented range is ignored as well.
+            systemProperties.setProperty("spnego.logger.level", "8");
+            assertFalse("8".equals(config.getInitParameter(Constants.LOGGER_LEVEL)));
+
+            // The quietest documented level is still passed through unchanged.
+            systemProperties.setProperty("spnego.logger.level", "7");
+            assertEquals("7", config.getInitParameter(Constants.LOGGER_LEVEL));
+        } finally {
+            systemProperties.remove("spnego.logger.level");
+        }
+    }
+
+    @Test
     public void test_getResourcePath_throwsWhenMissing() {
         SpnegoAuthenticator.SpnegoConfig config = new SpnegoAuthenticator.SpnegoConfig();
         // A missing resource must raise SsoLoginException rather than returning null.
