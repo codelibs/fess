@@ -535,8 +535,24 @@ public class ChunkBoundaryFinder {
         case 0x2047: // ⁇
         case 0x2048: // ⁈
         case 0x2049: // ⁉
-        case 0x06D4: // Arabic full stop
-        case 0x1362: // Ethiopic full stop
+        case 0x06D4: // ۔ Arabic full stop
+        case 0x061F: // ؟ Arabic question mark
+        case 0x0589: // ։ Armenian full stop
+        case 0x05C3: // ׃ Hebrew sof pasuq
+        case 0x037E: // ; Greek question mark
+        case 0x0964: // । Devanagari danda
+        case 0x0965: // ॥ Devanagari double danda
+        case 0x0F0D: // ། Tibetan shad
+        case 0x0F0E: // ༎ Tibetan nyis shad
+        case 0x104B: // ။ Myanmar section
+        case 0x17D4: // ។ Khmer khan
+        case 0x17D5: // ៕ Khmer bariyoosan
+        case 0x1362: // ። Ethiopic full stop
+        case 0x1803: // ᠃ Mongolian full stop
+        case 0x1805: // ᠅ Mongolian four dots
+        case 0x166E: // ᙮ Canadian syllabics full stop
+        case 0x10FB: // ჻ Georgian paragraph separator
+        case 0x0E5B: // ๛ Thai khomut (end of a passage)
         case 0x2E3C: // stenographic full stop
             return true;
         default:
@@ -569,6 +585,16 @@ public class ChunkBoundaryFinder {
         case 0x2015: // ―
         case 0x301C: // 〜
         case 0xFF5E: // ～
+        case 0x060C: // ، Arabic comma
+        case 0x061B: // ؛ Arabic semicolon
+        case 0x055D: // ՝ Armenian comma
+        case 0x1363: // ፣ Ethiopic comma
+        case 0x1802: // ᠂ Mongolian comma
+        case 0x1804: // ᠄ Mongolian colon
+        case 0x104A: // ၊ Myanmar little section (a phrase break, not a sentence end)
+        case 0x17D6: // ៖ Khmer camnuc pii kuuh
+        case 0x0F0B: // ་ Tibetan tsheg -- the intersyllabic separator Tibetan uses for a space
+        case 0x0E5A: // ๚ Thai angkhankhu
             return true;
         default:
             return false;
@@ -727,9 +753,10 @@ public class ChunkBoundaryFinder {
      * Returns true if the code point continues the grapheme cluster started by the preceding
      * code point, so a boundary must not be placed in front of it.
      *
-     * <p>Covers combining marks, variation selectors and the zero-width joiner. Regional
-     * indicator pairs (flag emoji) are deliberately <em>not</em> covered: splitting is lossless,
-     * so a flag merely renders as two letters across the chunk boundary.</p>
+     * <p>Covers combining marks, variation selectors, the zero-width joiner and the Thai/Lao
+     * SARA AM. Regional indicator pairs (flag emoji) are deliberately <em>not</em> covered:
+     * splitting is lossless, so a flag merely renders as two letters across the chunk
+     * boundary.</p>
      *
      * @param cp the code point
      * @return true if a boundary must not be placed before this code point
@@ -739,6 +766,11 @@ public class ChunkBoundaryFinder {
             return true;
         }
         if (cp >= 0xFE00 && cp <= 0xFE0F || cp >= 0xE0100 && cp <= 0xE01EF) {
+            return true;
+        }
+        if (cp == 0x0E33 || cp == 0x0EB3) {
+            // THAI/LAO SARA AM: general category Lo, but UAX #29 gives it GCB=SpacingMark, so it
+            // belongs to the cluster of the consonant in front of it.
             return true;
         }
         final int type = Character.getType(cp);
@@ -751,7 +783,9 @@ public class ChunkBoundaryFinder {
      * be placed right after it either.
      *
      * <p>This is the backward-looking counterpart of {@link #isClusterContinuation}, which asks
-     * the same question about the code point <em>at</em> the candidate boundary. {@link
+     * the same question about the code point <em>at</em> the candidate boundary. It carries the
+     * cases where the <em>preceding</em> code point is an ordinary spacing letter that
+     * nonetheless owns the one after it -- the Khmer coeng and the Thai/Lao pre-base vowels. {@link
      * #adjustToClusterStart} tests both directions, so both must be overridable for a subclass
      * that redefines cluster joining to take full effect: overriding only
      * {@link #isClusterContinuation} would leave this direction on the built-in zero-width-joiner
@@ -761,6 +795,13 @@ public class ChunkBoundaryFinder {
      * @return true if a boundary must not be placed right after this code point
      */
     protected boolean isClusterJoiner(final int cp) {
-        return cp == ZWJ;
+        if (cp == ZWJ) {
+            return true;
+        }
+        // Khmer coeng subscripts the consonant that follows it, and the Thai/Lao pre-base vowels
+        // are written before the consonant they belong to. Both are ordinary spacing letters, so
+        // isClusterContinuation cannot see them -- but a boundary placed immediately after one
+        // strands it from its base, which is what a hard cut through scriptio-continua text hits.
+        return cp == 0x17D2 || cp >= 0x0E40 && cp <= 0x0E44 || cp >= 0x0EC0 && cp <= 0x0EC4;
     }
 }
