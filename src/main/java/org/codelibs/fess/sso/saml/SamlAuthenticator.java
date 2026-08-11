@@ -18,9 +18,11 @@ package org.codelibs.fess.sso.saml;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,7 @@ import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.Auth;
 import org.codelibs.saml2.core.authn.AuthnRequestParams;
+import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
 import org.codelibs.saml2.core.replay.InMemoryReplayCache;
 import org.codelibs.saml2.core.replay.ReplayCache;
@@ -170,8 +173,19 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected static final String SAML_PREFIX = "saml.";
 
     /**
-     * The session key holding the ID of the AuthnRequest sent to the IdP.
-     * The value is compared with the InResponseTo of the SAML response.
+     * The session key holding the IDs of the AuthnRequests sent to the IdP that have not been
+     * answered yet. Each ID is compared with the InResponseTo of the SAML response.
+     *
+     * <p>The value is a {@code Map<String, Long>} of AuthnRequest ID to the time it was created,
+     * not a single ID: a browser with several tabs open sends one AuthnRequest per tab, and a
+     * single slot means the second overwrites the first, after which the first assertion to come
+     * back consumes the slot, fails the InResponseTo comparison and takes both logins down with
+     * it. {@code FessSearchAction} redirects every unauthenticated page hit to {@code /sso/}, so
+     * that happens as soon as a session expires with more than one tab open.</p>
+     *
+     * <p>The key is unchanged from the release that stored a bare {@link String} here, so that an
+     * existing session keeps working across an upgrade; see {@link #getRequestIdMap(HttpSession)}
+     * for how such a value is migrated.</p>
      */
     protected static final String SAML_STATE = "SAML_STATE";
 
@@ -179,6 +193,28 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * The property key for the SAML SP base URL.
      */
     protected static final String SAML_SP_BASE_URL = "saml.sp.base.url";
+
+    /**
+     * The property key for how long, in seconds, an unanswered AuthnRequest ID stays usable.
+     */
+    protected static final String SAML_REQUEST_ID_TTL = "saml.request.id.ttl";
+
+    /**
+     * The time-to-live applied to an unanswered AuthnRequest ID when
+     * {@link #SAML_REQUEST_ID_TTL} is absent, blank or not a number. One hour, the same default
+     * {@code EntraIdAuthenticator} uses for an OpenID Connect state, and comfortably longer than
+     * any interactive login at an IdP.
+     */
+    protected static final String DEFAULT_REQUEST_ID_TTL = "3600";
+
+    /**
+     * Maximum number of unanswered AuthnRequest IDs kept per session. Every visit to
+     * {@code /sso/} without a SAML response stores one, and {@code /sso/} is anonymous and
+     * answers GET, so without a cap a page that embeds it as a sub-resource would grow the
+     * session attribute without bound. It also bounds the number of candidates
+     * {@link #processSamlResponse} tries.
+     */
+    protected int maxRequestIds = 10;
 
     private Map<String, Object> defaultSettings;
 
@@ -412,36 +448,22 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
             if (containsSamlResponse(request)) {
                 final HttpSession session = request.getSession(false);
-                final String requestId = session == null ? null : (String) session.getAttribute(SAML_STATE);
-                if (StringUtil.isNotBlank(requestId)) {
-                    session.removeAttribute(SAML_STATE);
-                    try {
-                        final Auth auth = new Auth(getSettings(), request, response);
-                        auth.processResponse(requestId);
-
-                        if (!auth.isAuthenticated()) {
-                            final String errors = auth.getErrors().stream().collect(Collectors.joining(", "));
-                            if (auth.isDebugActive() && StringUtil.isNotBlank(auth.getLastErrorReason())) {
-                                logger.warn("Authentication Failure: {} - Reason: {}", errors, auth.getLastErrorReason());
-                            } else {
-                                logger.warn("Authentication Failure: {}", errors);
-                            }
+                if (session != null) {
+                    final Map<String, Long> requestIdMap = getRequestIdMap(session);
+                    removeExpiredRequestIds(requestIdMap);
+                    if (!requestIdMap.isEmpty()) {
+                        try {
+                            return processSamlResponse(request, response, requestIdMap);
+                        } catch (final Exception e) {
+                            logger.warn("Authentication failed.", e);
                             return null;
                         }
-
-                        return createLoginCredential(request, response, auth);
-                    } catch (final Exception e) {
-                        logger.warn("Authentication failed.", e);
-                        return null;
                     }
                 }
-                // The assertion arrived but the matching AuthnRequest ID is unreachable. Sending
-                // another AuthnRequest would come straight back here in the same state, looping
-                // forever, so fail once instead.
-                logger.warn("Received a SAML response with no matching AuthnRequest ID in the session."
-                        + " The assertion consumer service is a cross-site POST, which does not carry a SameSite=Lax cookie;"
-                        + " see tomcat.sameSiteCookies in tomcat_config.properties."
-                        + " An IdP-initiated (unsolicited) response is rejected for the same reason.");
+                // No session at all, or one that holds nothing still answerable: the assertion
+                // cannot be tied to an AuthnRequest this server sent, so it is refused rather
+                // than answered with another one.
+                logUnmatchedSamlResponse(0);
                 return null;
             }
 
@@ -449,13 +471,278 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 final Auth auth = new Auth(getSettings(), request, response);
                 final AuthnRequestParams authnRequestParams = new AuthnRequestParams(false, false, true);
                 final String loginUrl = auth.login(null, authnRequestParams, true);
-                request.getSession().setAttribute(SAML_STATE, auth.getLastRequestId());
+                storeRequestIdInSession(request.getSession(), auth.getLastRequestId());
                 return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(loginUrl));
             } catch (final Exception e) {
                 throw new SsoLoginException("Invalid SAML redirect URL.", e);
             }
 
         }).orElse(null);
+    }
+
+    /**
+     * Answers a SAML response with the pending AuthnRequest it names.
+     *
+     * <p>{@code Auth.processResponse} takes exactly one AuthnRequest ID and compares it with the
+     * InResponseTo of the response, and java-saml 3.1.1 exposes no supported way of reading that
+     * InResponseTo beforehand: {@code SamlResponse} has no getter for it, and the only other
+     * route would be to base64-decode and parse the {@code SAMLResponse} parameter here, which
+     * would add an XML parsing surface -- and therefore an XXE surface -- to an endpoint that is
+     * anonymous by design. So the candidates are tried one at a time instead.</p>
+     *
+     * <p>That is cheap and, more importantly, safe, because of where the comparison sits in
+     * {@code SamlResponse.isValid}: it runs before signature validation and before the assertion
+     * ID is registered with the replay cache, so a candidate the response does not name fails
+     * fast and leaves no trace behind. A candidate that fails for any other reason has already
+     * passed the comparison, so there is nothing left to try and the loop stops there; that is
+     * also what keeps the reported error the real one rather than the InResponseTo mismatch of
+     * whichever candidate happened to be tried last.</p>
+     *
+     * <p>Only a response that authenticates consumes its AuthnRequest ID. Consuming it on failure
+     * as well would look tidier, but telling "named this ID and was then rejected" apart from
+     * "was rejected before the ID was even looked at" means enumerating java-saml's internal
+     * ordering of checks, and getting that wrong hands anyone who can reach the assertion
+     * consumer service -- a cross-site POST, since SAML requires {@code SameSite=none} -- a way
+     * to burn a pending login per request. The TTL and {@link #maxRequestIds} bound the map
+     * instead.</p>
+     *
+     * <p>With {@code saml.strict=false} the library skips the InResponseTo comparison entirely,
+     * so the first candidate either authenticates or fails for a real reason and no further
+     * candidate is tried. That matches the library's contract: without strict mode there is no
+     * InResponseTo binding to match against.</p>
+     *
+     * @param request The HTTP request carrying the SAML response.
+     * @param response The HTTP response.
+     * @param requestIdMap The pending AuthnRequest IDs of the session, already pruned of expired
+     *            entries. The matching entry is removed from it on success.
+     * @return The login credential, or null when the response is not accepted.
+     */
+    protected LoginCredential processSamlResponse(final HttpServletRequest request, final HttpServletResponse response,
+            final Map<String, Long> requestIdMap) {
+        Auth lastAuth = null;
+        for (final String requestId : getCandidateRequestIds(requestIdMap)) {
+            final Auth auth = createAuth(request, response);
+            auth.processResponse(requestId);
+            if (auth.isAuthenticated()) {
+                requestIdMap.remove(requestId);
+                return createLoginCredential(request, response, auth);
+            }
+            lastAuth = auth;
+            if (!isInResponseToMismatch(auth)) {
+                break;
+            }
+        }
+        if (lastAuth == null || isInResponseToMismatch(lastAuth)) {
+            logUnmatchedSamlResponse(requestIdMap.size());
+            return null;
+        }
+        final String errors = lastAuth.getErrors().stream().collect(Collectors.joining(", "));
+        if (lastAuth.isDebugActive() && StringUtil.isNotBlank(lastAuth.getLastErrorReason())) {
+            logger.warn("Authentication Failure: {} - Reason: {}", errors, lastAuth.getLastErrorReason());
+        } else {
+            logger.warn("Authentication Failure: {}", errors);
+        }
+        return null;
+    }
+
+    /**
+     * Creates the {@link Auth} that processes one candidate AuthnRequest ID.
+     *
+     * <p>A fresh instance per candidate is required, not an optimisation left undone:
+     * {@code Auth} accumulates its errors, its authenticated flag and its last validation
+     * exception across calls, so reusing one would report the first candidate's InResponseTo
+     * mismatch alongside whatever the matching candidate produced.</p>
+     *
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @return A new SAML authentication object.
+     */
+    protected Auth createAuth(final HttpServletRequest request, final HttpServletResponse response) {
+        return new Auth(getSettings(), request, response);
+    }
+
+    /**
+     * Returns the pending AuthnRequest IDs to try, most recently created first.
+     *
+     * <p>Most recent first because the overwhelmingly common case is a single login, whose ID is
+     * the newest one; every earlier entry is a tab or a visit the user abandoned. The list is
+     * capped at {@link #maxRequestIds} even though the map is already bounded on write, so that
+     * lowering the cap at runtime takes effect on the very next response rather than only once
+     * the surplus entries have been evicted.</p>
+     *
+     * @param requestIdMap The pending AuthnRequest IDs of the session.
+     * @return The AuthnRequest IDs to try, in the order they are tried.
+     */
+    protected List<String> getCandidateRequestIds(final Map<String, Long> requestIdMap) {
+        return requestIdMap.entrySet()
+                .stream()
+                .sorted(Comparator.comparingLong((final Map.Entry<String, Long> e) -> e.getValue()).reversed())
+                .limit(maxRequestIds)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns whether the given attempt failed only because the response names a different
+     * AuthnRequest, which is the one failure that says nothing about the response itself and is
+     * therefore worth retrying with the next candidate.
+     *
+     * @param auth The attempt that did not authenticate.
+     * @return true if the response's InResponseTo did not match the candidate that was tried.
+     */
+    protected boolean isInResponseToMismatch(final Auth auth) {
+        return auth.getLastValidationException() instanceof final ValidationException e
+                && e.getErrorCode() == ValidationException.WRONG_INRESPONSETO;
+    }
+
+    /**
+     * Logs the one line reported when a SAML response cannot be tied to an AuthnRequest this
+     * server sent.
+     *
+     * <p>It is a warning and not a redirect back to the IdP on purpose: answering an unmatched
+     * assertion with a fresh AuthnRequest sends the browser to an IdP that is already
+     * authenticated, which posts the same kind of unmatched assertion straight back, and the
+     * loop only ends when the browser gives up.</p>
+     *
+     * @param pendingCount How many pending AuthnRequest IDs the session held, so that a log can
+     *            tell a missing session cookie apart from a response that simply matched none of
+     *            several live logins.
+     */
+    protected void logUnmatchedSamlResponse(final int pendingCount) {
+        logger.warn("Received a SAML response with no matching AuthnRequest ID in the session ({} pending)."
+                + " The assertion consumer service is a cross-site POST, which does not carry a SameSite=Lax cookie;"
+                + " see tomcat.sameSiteCookies in tomcat_config.properties."
+                + " An IdP-initiated (unsolicited) response is rejected for the same reason.", pendingCount);
+    }
+
+    /**
+     * Records the ID of an AuthnRequest that has just been sent to the IdP, pruning the entries
+     * that can no longer be answered first.
+     *
+     * @param session The HTTP session.
+     * @param requestId The ID of the AuthnRequest sent to the IdP.
+     */
+    protected void storeRequestIdInSession(final HttpSession session, final String requestId) {
+        final Map<String, Long> requestIdMap = getRequestIdMap(session);
+        removeExpiredRequestIds(requestIdMap);
+        removeOldestRequestIds(requestIdMap, maxRequestIds - 1);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Storing AuthnRequest ID in session: {}", requestId);
+        }
+        requestIdMap.put(requestId, ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+    }
+
+    /**
+     * Returns the per-session map of unanswered AuthnRequest IDs, creating it if needed.
+     *
+     * <p>The map is concurrent, and the create is synchronized on the session, because the tabs
+     * that make several logins possible in the first place can also start them at the same
+     * moment: a plain {@code HashMap} created twice loses the ID one of them has to match
+     * later.</p>
+     *
+     * <p>Anything else found under the key is replaced rather than cast. A session that predates
+     * this change holds a bare {@link String} there, and blindly casting it would end the login
+     * with a {@link ClassCastException} rather than a message; that single ID is carried over so
+     * a login already in flight across the upgrade can still complete.</p>
+     *
+     * @param session The HTTP session.
+     * @return The AuthnRequest ID map held by the session, keyed by ID and valued with the time
+     *         the ID was created.
+     */
+    protected Map<String, Long> getRequestIdMap(final HttpSession session) {
+        synchronized (session) {
+            final Object stored = session.getAttribute(SAML_STATE);
+            if (stored instanceof ConcurrentHashMap) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Long> requestIdMap = (Map<String, Long>) stored;
+                return requestIdMap;
+            }
+            final Map<String, Long> concurrentMap = new ConcurrentHashMap<>();
+            if (stored instanceof final String requestId && StringUtil.isNotBlank(requestId)) {
+                concurrentMap.put(requestId, ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+            }
+            session.setAttribute(SAML_STATE, concurrentMap);
+            return concurrentMap;
+        }
+    }
+
+    /**
+     * Drops the AuthnRequest IDs that are older than the configured TTL.
+     *
+     * @param requestIdMap The AuthnRequest ID map to prune.
+     */
+    protected void removeExpiredRequestIds(final Map<String, Long> requestIdMap) {
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final long requestIdTtl = getRequestIdTtl();
+        requestIdMap.entrySet()
+                .stream()
+                .filter(e -> (now - e.getValue()) / 1000L > requestIdTtl)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList())
+                .forEach(requestId -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing expired AuthnRequest ID: {}", requestId);
+                    }
+                    requestIdMap.remove(requestId);
+                });
+    }
+
+    /**
+     * Drops the least recently created AuthnRequest IDs until at most {@code limit} remain. An
+     * AuthnRequest that is never answered does not expire before the TTL, so this is what bounds
+     * the map for a client that keeps starting logins.
+     *
+     * @param requestIdMap The AuthnRequest ID map to prune.
+     * @param limit The number of AuthnRequest IDs to keep.
+     */
+    protected void removeOldestRequestIds(final Map<String, Long> requestIdMap, final int limit) {
+        if (requestIdMap.size() <= limit) {
+            return;
+        }
+        requestIdMap.entrySet()
+                .stream()
+                .sorted(Comparator.comparingLong(Map.Entry::getValue))
+                .limit((long) requestIdMap.size() - limit)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList())
+                .forEach(requestId -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing surplus AuthnRequest ID: {}", requestId);
+                    }
+                    requestIdMap.remove(requestId);
+                });
+    }
+
+    /**
+     * Sets the maximum number of unanswered AuthnRequest IDs kept per session.
+     *
+     * @param maxRequestIds The maximum number of AuthnRequest IDs.
+     */
+    public void setMaxRequestIds(final int maxRequestIds) {
+        this.maxRequestIds = maxRequestIds;
+    }
+
+    /**
+     * Gets how long an unanswered AuthnRequest ID stays usable.
+     *
+     * <p>A value that is not a number is reported once per read rather than thrown, because the
+     * alternative is a login that dies with a {@code NumberFormatException} nobody can act
+     * on.</p>
+     *
+     * @return The TTL in seconds. {@link #removeExpiredRequestIds} compares it against an elapsed
+     *         time that has already been divided by 1000.
+     */
+    protected long getRequestIdTtl() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(SAML_REQUEST_ID_TTL);
+        if (StringUtil.isBlank(value)) {
+            return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
+        }
+        try {
+            return Long.parseLong(value.trim());
+        } catch (final NumberFormatException e) {
+            logger.warn("Invalid {}: {}. Using {} seconds.", SAML_REQUEST_ID_TTL, value, DEFAULT_REQUEST_ID_TTL);
+            return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
+        }
     }
 
     /**
