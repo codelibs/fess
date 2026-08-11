@@ -23,6 +23,7 @@ import java.util.Base64;
 
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
@@ -55,8 +56,21 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
                 (proxy, method, args) -> "getHeader".equals(method.getName()) ? value : null);
     }
 
+    /**
+     * Encodes credentials only. Header separator tests must build their header literally, because
+     * {@link #basic(String)} hardcodes a single space and would hide the very divergence they check.
+     */
+    private static String token(final String credentials) {
+        return Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+    }
+
     private static String basic(final String credentials) {
-        return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        return "Basic " + token(credentials);
+    }
+
+    /** Builds a one-character string without a source escape, keeping raw break characters out of this file. */
+    private static String ch(final int codePoint) {
+        return String.valueOf((char) codePoint);
     }
 
     @Test
@@ -83,6 +97,39 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getBasicRealm_separatorMatchesLibraryParsing() {
+        // SpnegoProvider#parseAuthHeader matches the scheme case-insensitively and then skips a run
+        // of any whitespace, possibly empty. Every header below is authenticated by the library, so
+        // each one has to yield its realm here as well; a header this check cannot read is a header
+        // the spnego.allowed.realms list cannot govern. These are built literally on purpose.
+        final String credentials = token("alice@PARTNER.COM:secret");
+        assertEquals("PARTNER.COM", SpnegoAuthenticator.getBasicRealm("Basic " + credentials));
+        assertEquals("PARTNER.COM", SpnegoAuthenticator.getBasicRealm("Basic\t" + credentials));
+        assertEquals("PARTNER.COM", SpnegoAuthenticator.getBasicRealm("Basic\t " + credentials));
+        // No separator at all: the library takes everything after the scheme as the token.
+        assertEquals("PARTNER.COM", SpnegoAuthenticator.getBasicRealm("Basic" + credentials));
+        assertEquals("PARTNER.COM", SpnegoAuthenticator.getBasicRealm("basic\t" + credentials));
+        assertEquals("PARTNER.COM", SpnegoAuthenticator.getBasicRealm("BASIC" + credentials));
+
+        // A user name without a realm names nothing to check, whichever separator was used.
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic\t" + token("alice:secret")));
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic" + token("CORP\\alice:secret")));
+    }
+
+    @Test
+    public void test_getBasicRealm_ignoresNonBasicAndTokenlessHeaders() {
+        // A Negotiate token is not Basic credentials; decoding it here would invent a realm from
+        // arbitrary bytes. The realm of that path comes from the principal after the handshake.
+        assertNull(SpnegoAuthenticator.getBasicRealm("Negotiate " + token("alice@PARTNER.COM:secret")));
+        // A scheme with no token authenticates nobody, so there is no realm to reject.
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic"));
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic   "));
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic\t"));
+        assertNull(SpnegoAuthenticator.getBasicRealm(""));
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basi"));
+    }
+
+    @Test
     public void test_sanitizeForLog() {
         assertEquals("CORP.EXAMPLE", SpnegoAuthenticator.sanitizeForLog("CORP.EXAMPLE"));
         // A newline would otherwise let an unauthenticated client forge a log line.
@@ -105,6 +152,23 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertTrue(e.getMessage().contains("FOREIGN.EXAMPLE"));
         assertTrue(e.getMessage().contains("spnego.allowed.realms"));
         // The decoded token holds the password; it must never reach the message or the log.
+        assertFalse(e.getMessage().contains("secret"));
+    }
+
+    @Test
+    public void test_rejectDisallowedBasicRealm_rejectsForeignRealmBehindNonSpaceSeparator() {
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected boolean isAllowedRealm(final String realm) {
+                return false;
+            }
+        };
+        // The library authenticates a tab-separated header, so the allow list has to reach it too.
+        // SsoStateException, not a plain SsoLoginException: /sso is anonymous, and SsoAction logs a
+        // full stack trace for anything else, which one crafted header per request would exploit.
+        final SsoStateException e = assertThrows(SsoStateException.class,
+                () -> authenticator.rejectDisallowedBasicRealm(requestWithAuthz("Basic\t" + token("alice@FOREIGN.EXAMPLE:secret"))));
+        assertTrue(e.getMessage().contains("FOREIGN.EXAMPLE"));
         assertFalse(e.getMessage().contains("secret"));
     }
 
@@ -333,6 +397,33 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertEquals("***", SpnegoAuthenticator.maskAuthzHeader("dXNlcjpwYXNzd29yZA=="));
         assertEquals("***", SpnegoAuthenticator.maskAuthzHeader(""));
         assertEquals("***", SpnegoAuthenticator.maskAuthzHeader(" leading-space"));
+    }
+
+    @Test
+    public void test_sanitizeForLog_unicodeLineBreaks() {
+        // \p{Cntrl} without the UNICODE flag covers ASCII only, so these three would otherwise reach
+        // the log intact and let an unauthenticated client forge a line in it.
+        assertEquals("EVIL?WARN forged", SpnegoAuthenticator.sanitizeForLog("EVIL" + ch(0x0085) + "WARN forged"));
+        assertEquals("EVIL?WARN forged", SpnegoAuthenticator.sanitizeForLog("EVIL" + ch(0x2028) + "WARN forged"));
+        assertEquals("EVIL?WARN forged", SpnegoAuthenticator.sanitizeForLog("EVIL" + ch(0x2029) + "WARN forged"));
+    }
+
+    @Test
+    public void test_maskAuthzHeader_boundsAndSanitizesTheScheme() {
+        // The surviving scheme is client-controlled and ends up in an exception message that is
+        // logged, so it is bounded like the realm instead of echoing up to the container's header
+        // limit.
+        final String masked = SpnegoAuthenticator.maskAuthzHeader("S".repeat(8192) + " dXNlcjpwYXNzd29yZA==");
+        assertEquals(SpnegoAuthenticator.MAX_LOGGED_REALM_LENGTH + 3 + 4, masked.length());
+        assertTrue(masked.endsWith("... ***"));
+
+        // Neither NUL nor NEL is whitespace, so both survive the scheme scan and have to be
+        // stripped before the value is logged.
+        assertEquals("Ba?ic ***", SpnegoAuthenticator.maskAuthzHeader("Ba" + ch(0x0000) + "ic dXNlcjpwYXNzd29yZA=="));
+        assertEquals("Ba?ic ***", SpnegoAuthenticator.maskAuthzHeader("Ba" + ch(0x0085) + "ic dXNlcjpwYXNzd29yZA=="));
+
+        // A tab-separated header names its scheme rather than degrading to a bare mask.
+        assertEquals("Basic ***", SpnegoAuthenticator.maskAuthzHeader("Basic\tdXNlcjpwYXNzd29yZA=="));
     }
 
     @Test

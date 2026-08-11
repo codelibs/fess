@@ -22,6 +22,7 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +32,7 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
@@ -111,6 +113,13 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     /** Upper bound on the length of a client-supplied value embedded in a log message. */
     protected static final int MAX_LOGGED_REALM_LENGTH = 64;
+
+    /**
+     * Characters that must not be copied verbatim into a log message. {@code \p{Cntrl}} alone is
+     * ASCII-only, so the Unicode break characters a log viewer still renders as a new line are
+     * listed explicitly.
+     */
+    private static final Pattern LOG_UNSAFE_PATTERN = Pattern.compile("[\\p{Cntrl}\\u0085\\u2028\\u2029]");
 
     /** The underlying SPNEGO authenticator instance. */
     protected volatile org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
@@ -282,7 +291,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 logger.debug("username={}", Arrays.toString(username));
             }
             if (username.length == 2 && StringUtil.isNotBlank(username[1]) && !isAllowedRealm(username[1])) {
-                throw new SsoLoginException(realmRejectedMessage(username[1]));
+                // A refused realm is a rejected request, not a fault: /sso is anonymous, so a stack
+                // trace per attempt would let an unauthenticated client fill the log.
+                throw new SsoStateException(realmRejectedMessage(username[1]));
             }
             return new SpnegoCredential(username[0]);
         }).orElse(null);
@@ -300,12 +311,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      * exists the typed realm is gone, which would leave the allow list unable to govern this path.
      *
      * @param request the current request
-     * @throws SsoLoginException if the realm named in the header is not allowed
+     * @throws SsoStateException if the realm named in the header is not allowed
      */
     protected void rejectDisallowedBasicRealm(final HttpServletRequest request) {
         final String realm = getBasicRealm(request.getHeader(Constants.AUTHZ_HEADER));
         if (realm != null && !isAllowedRealm(realm)) {
-            throw new SsoLoginException(realmRejectedMessage(realm));
+            // A refused realm is a rejected request, not a fault: /sso is anonymous, so a stack
+            // trace per attempt would let an unauthenticated client fill the log.
+            throw new SsoStateException(realmRejectedMessage(realm));
         }
     }
 
@@ -334,13 +347,30 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         if (authzHeader == null) {
             return null;
         }
-        final int schemeEnd = authzHeader.indexOf(' ');
-        if (schemeEnd <= 0 || !Constants.BASIC_HEADER.equalsIgnoreCase(authzHeader.substring(0, schemeEnd))) {
+        // The scheme is separated from the token exactly the way SpnegoProvider#parseAuthHeader
+        // separates it: the scheme is matched case-insensitively at offset 0, any run of whitespace
+        // after it is skipped, and the trimmed remainder is the token. Diverging from that -- by
+        // splitting on a literal space, for instance -- leaves headers the library still
+        // authenticates (a tab as the separator, or no separator at all) resolving to no realm
+        // here, which silently reopens the spnego.allowed.realms bypass this check exists to close.
+        final int schemeLength = Constants.BASIC_HEADER.length();
+        if (authzHeader.length() < schemeLength || !authzHeader.regionMatches(true, 0, Constants.BASIC_HEADER, 0, schemeLength)) {
+            return null;
+        }
+        int index = schemeLength;
+        while (index < authzHeader.length() && Character.isWhitespace(authzHeader.charAt(index))) {
+            index++;
+        }
+        if (index >= authzHeader.length()) {
+            return null;
+        }
+        final String token = authzHeader.substring(index).trim();
+        if (token.isEmpty()) {
             return null;
         }
         final byte[] decoded;
         try {
-            decoded = Base64.getDecoder().decode(authzHeader.substring(schemeEnd + 1).trim());
+            decoded = Base64.getDecoder().decode(token);
         } catch (final IllegalArgumentException e) {
             // A malformed token is the library's to reject; do not turn it into a realm failure.
             return null;
@@ -368,14 +398,17 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      */
     protected static String sanitizeForLog(final String value) {
         final String bounded = value.length() > MAX_LOGGED_REALM_LENGTH ? value.substring(0, MAX_LOGGED_REALM_LENGTH) + "..." : value;
-        return bounded.replaceAll("\\p{Cntrl}", "?");
+        return LOG_UNSAFE_PATTERN.matcher(bounded).replaceAll("?");
     }
 
     /**
      * Masks an Authorization header so that only its authentication scheme remains.
      *
      * The credential part must never reach the log: a Basic token carries the user name and the
-     * password, and even a short prefix of it decodes back to readable characters.
+     * password, and even a short prefix of it decodes back to readable characters. The scheme that
+     * survives is still client-controlled, so it is bounded and sanitized like any other value
+     * taken from the request. The scheme ends at the first whitespace, matching how the library and
+     * {@link #getBasicRealm(String)} split the header.
      *
      * @param authzHeader the raw Authorization header value (may be null)
      * @return the scheme followed by a mask, or "null" when the header is absent
@@ -384,11 +417,16 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         if (authzHeader == null) {
             return "null";
         }
-        final int index = authzHeader.indexOf(' ');
-        if (index <= 0) {
+        int index = 0;
+        while (index < authzHeader.length() && !Character.isWhitespace(authzHeader.charAt(index))) {
+            index++;
+        }
+        // Nothing before the first whitespace, or no whitespace at all, means no scheme can be
+        // named without echoing part of the credential.
+        if (index == 0 || index == authzHeader.length()) {
             return "***";
         }
-        return authzHeader.substring(0, index) + " ***";
+        return sanitizeForLog(authzHeader.substring(0, index)) + " ***";
     }
 
     /**
@@ -614,7 +652,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
         }
         if (allowedRealms.isEmpty()) {
-            logger.warn("No allowed Kerberos realm could be determined; accepting realm={} without validation.", realm);
+            logger.warn("No allowed Kerberos realm could be determined; accepting realm={} without validation.", sanitizeForLog(realm));
             return true;
         }
         return allowedRealms.stream().anyMatch(r -> r.equalsIgnoreCase(realm));
