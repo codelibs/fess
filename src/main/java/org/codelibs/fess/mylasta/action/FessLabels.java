@@ -3774,6 +3774,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Reply URL */
     public static final String LABELS_entraid_reply_url = "{labels.entraid_reply_url}";
 
+    /** The key of the message: Response Mode */
+    public static final String LABELS_entraid_response_mode = "{labels.entraid_response_mode}";
+
     /** The key of the message: State TTL */
     public static final String LABELS_entraid_state_ttl = "{labels.entraid_state_ttl}";
 

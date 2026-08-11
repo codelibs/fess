@@ -199,6 +199,38 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_updateForm_entraidResponseMode() {
+        // 15.7 always asked for form_post; 15.8 made the mode configurable and defaults it to
+        // query. A deployment that relies on form_post -- the mode that keeps the authorization
+        // code out of the callback URL, and therefore out of browser history and any front-end
+        // proxy log -- has to be able to select it on this screen, and a legacy aad.response.mode
+        // has to survive a save the same way the other Entra ID settings do.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        // Nothing configured: the screen must show what EntraIdAuthenticator.getResponseMode()
+        // actually uses, not an empty box.
+        final EditForm form = createEditForm();
+        AdminGeneralAction.updateForm(fessConfig, form);
+        assertEquals("query", form.entraidResponseMode);
+
+        // Legacy key only: the screen shows it, and saving migrates it into the new key instead
+        // of writing the default over a working form_post deployment.
+        fessConfig.setSystemProperty("aad.response.mode", "form_post");
+        final EditForm legacyForm = createEditForm();
+        AdminGeneralAction.updateForm(fessConfig, legacyForm);
+        assertEquals("form_post", legacyForm.entraidResponseMode);
+
+        AdminGeneralAction.updateConfig(fessConfig, legacyForm);
+        assertEquals("form_post", ComponentUtil.getSystemProperties().getProperty("entraid.response.mode"));
+
+        // The new key wins over the legacy one, as it does in getResponseMode().
+        fessConfig.setSystemProperty("entraid.response.mode", "query");
+        final EditForm reloaded = createEditForm();
+        AdminGeneralAction.updateForm(fessConfig, reloaded);
+        assertEquals("query", reloaded.entraidResponseMode);
+    }
+
+    @Test
     public void test_isSpnegoNtlmPromptUnsupported_spnego_rejectsNtlmPromptWithoutBasic() {
         // The library requires Basic auth to be available before it can downgrade an NTLM token.
         assertTrue(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm("spnego", Constants.FALSE, Constants.TRUE)));

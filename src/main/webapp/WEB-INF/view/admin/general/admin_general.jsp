@@ -957,6 +957,19 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
+                                    <label for="entraidResponseMode"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_response_mode"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidResponseMode"/>
+                                        <la:select styleId="entraidResponseMode" property="entraidResponseMode"
+                                                   styleClass="form-control">
+                                            <la:option value="query">query</la:option>
+                                            <la:option value="form_post">form_post</la:option>
+                                        </la:select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="entraidStateTtl"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.entraid_state_ttl"/></label>
