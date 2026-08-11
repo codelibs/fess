@@ -43,6 +43,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -201,19 +202,41 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     private static class TestAuthenticationResult implements IAuthenticationResult {
         private static final long serialVersionUID = 1L;
         private final IAccount account;
+        private final Date expiresOn;
+        private final String accessToken;
+        private final String idToken;
 
         TestAuthenticationResult(final IAccount account) {
+            this(account, new Date(Long.MAX_VALUE));
+        }
+
+        TestAuthenticationResult(final IAccount account, final Date expiresOn) {
+            this(account, expiresOn, "access-token", "id-token");
+        }
+
+        TestAuthenticationResult(final IAccount account, final Date expiresOn, final String accessToken) {
+            this(account, expiresOn, accessToken, "id-token");
+        }
+
+        TestAuthenticationResult(final IAccount account, final String idToken) {
+            this(account, new Date(Long.MAX_VALUE), "access-token", idToken);
+        }
+
+        TestAuthenticationResult(final IAccount account, final Date expiresOn, final String accessToken, final String idToken) {
             this.account = account;
+            this.expiresOn = expiresOn;
+            this.accessToken = accessToken;
+            this.idToken = idToken;
         }
 
         @Override
         public String accessToken() {
-            return "access-token";
+            return accessToken;
         }
 
         @Override
         public String idToken() {
-            return "id-token";
+            return idToken;
         }
 
         @Override
@@ -238,7 +261,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
         @Override
         public Date expiresOnDate() {
-            return new Date(Long.MAX_VALUE);
+            return expiresOn;
         }
     }
 
@@ -1234,10 +1257,11 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         }
 
         @Override
-        protected void processDirectMemberOf(EntraIdUser user, List<String> groupList, List<String> roleList,
+        protected boolean processDirectMemberOf(EntraIdUser user, List<String> groupList, List<String> roleList,
                 List<String> groupIdsForParentLookup, String url) {
             processDirectMemberOfCalled.set(true);
             // Don't call super to avoid actual API calls in tests
+            return true;
         }
 
         // Expose protected methods for testing
@@ -1250,5 +1274,376 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         public List<String> getDefaultRoleList() {
             return super.getDefaultRoleList();
         }
+    }
+
+    // ===================================================================================
+    //                                                        Regressions guarded from 15.7
+    //                                                        ==============================
+
+    @Test
+    public void test_updateMemberOf_keepsTheResolvedGroupsWhenGraphReportsAnError() {
+        // godHandPrologue refreshes the user on every action request, so updateMemberOf can run
+        // long after login. A throttled or newly unauthorised Graph used to leave the user with
+        // the configured defaults alone, silently taking away every permission they logged in
+        // with, until some later call happened to succeed.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                return false;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        user.setGroups(new String[] { "group-a", "group-b" });
+        user.setRoles(new String[] { "role-a" });
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(2, user.getGroupNames().length);
+        assertEquals("group-a", user.getGroupNames()[0]);
+        assertEquals(1, user.getRoleNames().length);
+    }
+
+    @Test
+    public void test_updateMemberOf_stillSetsTheDefaultsWhenNothingWasResolvedYet() {
+        // At login there is nothing to keep, so a failed lookup must not leave groups null.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                return false;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            authenticator.updateMemberOf(user);
+
+            assertEquals(1, user.getGroupNames().length);
+            assertEquals("everyone", user.getGroupNames()[0]);
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_replacesTheGroupsWhenGraphAnswers() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-c");
+                return true;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        user.setGroups(new String[] { "group-a" });
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(1, user.getGroupNames().length);
+        assertEquals("group-c", user.getGroupNames()[0]);
+    }
+
+    /**
+     * Builds a user without letting its constructor reach Microsoft Graph. The tests below drive
+     * {@code updateMemberOf} directly, so the registered component only has to stay quiet.
+     */
+    private EntraIdUser newUserWithoutGraph() {
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                // keep the constructor off Microsoft Graph
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+        return new EntraIdCredential(new TestAuthenticationResult(new TestAccount())).getUser();
+    }
+
+    @Test
+    public void test_toMemberGroupIds_treatsADeniedPermissionAsAnAnswerSoItCanBeCached() throws Exception {
+        // A Graph permission that was never granted will not appear within the cache TTL.
+        // Throwing left nothing cached, so every login re-issued one failing request, and one
+        // stack trace, per direct group.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("error", Map.of("code", "Authorization_RequestDenied", "message", "Insufficient privileges"));
+
+        assertEquals(0, authenticator.toMemberGroupIds(contentMap, "group-a").length);
+    }
+
+    @Test
+    public void test_toMemberGroupIds_treatsAMissingGroupAsAnAnswer() throws Exception {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("error", Map.of("code", "Request_ResourceNotFound", "message", "not found"));
+
+        assertEquals(0, authenticator.toMemberGroupIds(contentMap, "group-a").length);
+    }
+
+    @Test
+    public void test_toMemberGroupIds_throwsOnATransientFailure() {
+        // Throttling must stay uncached so the parents are resolved on the next attempt.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("error", Map.of("code", "TooManyRequests", "message", "throttled"));
+
+        try {
+            authenticator.toMemberGroupIds(contentMap, "group-a");
+            fail("a throttled response must not be mistaken for an answer");
+        } catch (final IOException e) {
+            assertTrue(e.getMessage().contains("group-a"));
+        }
+    }
+
+    @Test
+    public void test_toMemberGroupIds_throwsWhenTheErrorIsNotAnObject() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("error", "invalid_grant");
+
+        try {
+            authenticator.toMemberGroupIds(contentMap, "group-a");
+            fail("an unparsable error must not be mistaken for an answer");
+        } catch (final IOException e) {
+            assertTrue(e.getMessage().contains("group-a"));
+        }
+    }
+
+    @Test
+    public void test_toMemberGroupIds_returnsTheValues() throws Exception {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("value", List.of("parent-a", "parent-b"));
+
+        assertEquals(2, authenticator.toMemberGroupIds(contentMap, "group-a").length);
+    }
+
+    @Test
+    public void test_refresh_doesNotTouchGraphWhileTheTokenIsStillFresh() {
+        // FessBaseAction.godHandPrologue calls refresh() on every action request. Once the MSAL4J
+        // application became shared, acquireTokenSilently started succeeding, and every success
+        // ran updateMemberOf -- a synchronous Microsoft Graph call on the request thread.
+        final AtomicBoolean touched = new AtomicBoolean(false);
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                touched.set(true);
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                touched.set(true);
+                return null;
+            }
+        };
+        ComponentUtil.register(authenticator, EntraIdAuthenticator.class.getCanonicalName());
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final EntraIdUser user =
+                new EntraIdCredential(new TestAuthenticationResult(new TestAccount(), new Date(now + 60 * 60 * 1000L))).getUser();
+        touched.set(false);
+
+        assertTrue(user.refresh());
+        assertFalse(touched.get());
+    }
+
+    @Test
+    public void test_refresh_acquiresSilentlyOnceTheTokenIsCloseToExpiring() {
+        final AtomicBoolean refreshed = new AtomicBoolean(false);
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                // keep the constructor and the refresh off Microsoft Graph
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                refreshed.set(true);
+                return null;
+            }
+        };
+        ComponentUtil.register(authenticator, EntraIdAuthenticator.class.getCanonicalName());
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final EntraIdUser user =
+                new EntraIdCredential(new TestAuthenticationResult(new TestAccount(), new Date(now + 30 * 1000L))).getUser();
+
+        assertTrue(user.refresh());
+        assertTrue(refreshed.get());
+    }
+
+    @Test
+    public void test_refresh_reportsAnExpiredToken() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                // keep the constructor off Microsoft Graph
+            }
+        };
+        ComponentUtil.register(authenticator, EntraIdAuthenticator.class.getCanonicalName());
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final EntraIdUser user = new EntraIdCredential(new TestAuthenticationResult(new TestAccount(), new Date(now - 1000L))).getUser();
+
+        assertFalse(user.refresh());
+    }
+
+    @Test
+    public void test_getAuthUrl_usesTheConfiguredResponseMode() {
+        // 15.7 hard-coded form_post and 15.8 hard-codes query. A deployment that sets
+        // tomcat.sameSiteCookies=none may prefer form_post to keep the authorization code out of
+        // the callback URL, so the mode has to be selectable rather than compiled in.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final HttpServletRequest request = newAuthUrlRequest();
+        try {
+            assertTrue(authenticator.getAuthUrl(request).contains("&response_mode=query&"));
+
+            fessConfig.setSystemProperty("entraid.response.mode", "form_post");
+            assertTrue(authenticator.getAuthUrl(request).contains("&response_mode=form_post&"));
+
+            authenticator.setUseV2Endpoint(false);
+            assertTrue(authenticator.getAuthUrl(request).contains("&response_mode=form_post&"));
+        } finally {
+            fessConfig.setSystemProperty("entraid.response.mode", "");
+        }
+    }
+
+    @Test
+    public void test_getResponseMode_fallsBackWhenTheConfiguredValueIsNotAResponseMode() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            fessConfig.setSystemProperty("entraid.response.mode", "fragment");
+            assertEquals("query", authenticator.getResponseMode());
+        } finally {
+            fessConfig.setSystemProperty("entraid.response.mode", "");
+        }
+    }
+
+    @Test
+    public void test_getResponseMode_readsTheLegacyAzureAdKey() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            fessConfig.setSystemProperty("aad.response.mode", " form_post ");
+            assertEquals("form_post", authenticator.getResponseMode());
+        } finally {
+            fessConfig.setSystemProperty("aad.response.mode", "");
+        }
+    }
+
+    @Test
+    public void test_validateState_reportsACallbackThatMatchesNoLogin() {
+        // The SSO endpoint is anonymous, so anyone can send a state this server never issued.
+        // SsoAction logs SsoStateException without a stack trace so that cannot fill the log.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final HttpSession session = newAuthUrlRequest().getSession();
+        try {
+            authenticator.validateState(session, "never-issued");
+            fail("expected SsoStateException");
+        } catch (final SsoStateException e) {
+            assertEquals("could not validate state", e.getMessage());
+        }
+    }
+
+    @Test
+    public void test_validateNonce_reportsAMismatchAsAStateFailure() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            authenticator.validateNonce(new EntraIdAuthenticator.StateData("expected-nonce", 0L),
+                    new TestAuthenticationResult(new TestAccount(), plainIdToken("some-other-nonce")));
+            fail("expected SsoStateException");
+        } catch (final SsoStateException e) {
+            assertEquals("could not validate nonce", e.getMessage());
+        }
+    }
+
+    @Test
+    public void test_validateNonce_acceptsTheNonceItIssued() throws Exception {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        authenticator.validateNonce(new EntraIdAuthenticator.StateData("expected-nonce", 0L),
+                new TestAuthenticationResult(new TestAccount(), plainIdToken("expected-nonce")));
+    }
+
+    @Test
+    public void test_validateNonce_keepsTheStackTraceOfAnUnreadableIdToken() {
+        // Only reachable once the authorization code was redeemed, so this is a fault an operator
+        // has to be able to diagnose -- not a callback someone sent us. It must not be reduced to
+        // the stack-free SsoStateException log line.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            authenticator.validateNonce(new EntraIdAuthenticator.StateData("expected-nonce", 0L),
+                    new TestAuthenticationResult(new TestAccount(), "not-a-jwt"));
+            fail("expected SsoLoginException");
+        } catch (final SsoStateException e) {
+            fail("an unreadable ID token must keep its cause: " + e);
+        } catch (final SsoLoginException e) {
+            assertNotNull(e.getCause());
+        }
+    }
+
+    /** Builds an unsigned JWT carrying the given nonce; validateNonce only reads the claims. */
+    private String plainIdToken(final String nonce) {
+        final java.util.Base64.Encoder encoder = java.util.Base64.getUrlEncoder().withoutPadding();
+        return encoder.encodeToString("{\"alg\":\"none\"}".getBytes(StandardCharsets.UTF_8)) + "."
+                + encoder.encodeToString(("{\"nonce\":\"" + nonce + "\"}").getBytes(StandardCharsets.UTF_8)) + ".";
+    }
+
+    @Test
+    public void test_getResponseMode_ignoresABlankLegacyKey() {
+        // getSystemProperty only applies the default when the key is absent, so a key left empty
+        // by the admin screen would otherwise warn about entraid.response.mode on every redirect.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            fessConfig.setSystemProperty("aad.response.mode", "");
+            assertEquals("query", authenticator.getResponseMode());
+        } finally {
+            fessConfig.setSystemProperty("aad.response.mode", "");
+        }
+    }
+
+    @Test
+    public void test_refresh_doesNotReReadTheDirectoryForAnUnchangedToken() {
+        // MSAL4J rounds its expiry buffer down to whole seconds, so around REFRESH_MARGIN it
+        // returns the token it already had. Treating that as a renewal would restore the
+        // per-request Microsoft Graph call.
+        final AtomicBoolean updated = new AtomicBoolean(false);
+        final AtomicReference<IAuthenticationResult> current = new AtomicReference<>();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                updated.set(true);
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                return current.get();
+            }
+        };
+        ComponentUtil.register(authenticator, EntraIdAuthenticator.class.getCanonicalName());
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final TestAuthenticationResult sameToken = new TestAuthenticationResult(new TestAccount(), new Date(now + 30 * 1000L));
+        current.set(sameToken);
+        final EntraIdUser user = new EntraIdCredential(sameToken).getUser();
+        updated.set(false);
+
+        assertTrue(user.refresh());
+        assertFalse(updated.get());
+
+        current.set(new TestAuthenticationResult(new TestAccount(), new Date(now + 30 * 1000L), "renewed-access-token"));
+        assertTrue(user.refresh());
+        assertTrue(updated.get());
+    }
+
+    private HttpServletRequest newAuthUrlRequest() {
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        return request;
     }
 }
