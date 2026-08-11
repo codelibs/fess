@@ -119,8 +119,17 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         /** The user roles. */
         protected String[] roles;
 
-        /** The user permissions. */
-        protected String[] permissions;
+        /**
+         * The user permissions.
+         *
+         * <p>Lazily computed by {@link #getPermissions()} and never invalidated afterwards.
+         * {@code volatile} for the same reason as in
+         * {@link org.codelibs.fess.app.web.base.login.SamlCredential.SamlUser}: the enclosing bean is
+         * a session attribute shared by concurrent requests, and the array is written after the
+         * session publication, so an unsynchronized reader could see the reference before the
+         * elements.</p>
+         */
+        protected volatile String[] permissions;
 
         /**
          * Creates a new OpenID Connect user.
