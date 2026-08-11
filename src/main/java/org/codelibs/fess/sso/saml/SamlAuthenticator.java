@@ -480,6 +480,8 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 // than answered with another one.
                 if (expiredCount > 0) {
                     logUnmatchedSamlResponseAfterExpiry(expiredCount);
+                } else if (hasExpiredSession(request)) {
+                    logUnmatchedSamlResponseAfterSessionExpiry();
                 } else {
                     logUnmatchedSamlResponse(0);
                 }
@@ -623,11 +625,13 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * authenticated, which posts the same kind of unmatched assertion straight back, and the
      * loop only ends when the browser gives up.</p>
      *
-     * <p>The SameSite guidance below is what this case usually is, but only because the case
-     * where the session was found and its AuthnRequest IDs had merely run out of time is reported
-     * by {@link #logUnmatchedSamlResponseAfterExpiry(int)} instead. Without that split every
-     * expired login would read as a cookie misconfiguration, since the pruning happens before
-     * this is reached and therefore reports a pending count of zero as well.</p>
+     * <p>The SameSite guidance below is what this case usually is, but only because the two ways
+     * a login can instead have run out of time are reported elsewhere: an ID pruned by
+     * {@link #SAML_REQUEST_ID_TTL} by {@link #logUnmatchedSamlResponseAfterExpiry(int)}, and a
+     * session the container has already discarded by
+     * {@link #logUnmatchedSamlResponseAfterSessionExpiry()}. Without that split every expired
+     * login would read as a cookie misconfiguration, since neither leaves anything pending and
+     * both therefore reach this line with a pending count of zero as well.</p>
      *
      * @param pendingCount How many pending AuthnRequest IDs the session held, so that a log can
      *            tell a missing session cookie apart from a response that simply matched none of
@@ -668,6 +672,62 @@ public class SamlAuthenticator implements SsoAuthenticator {
                         + " The session cookie did reach this server, so this is not the SameSite case:"
                         + " the login took longer to finish at the IdP than {} allows, and starting it again resolves it.",
                 expiredCount, SAML_REQUEST_ID_TTL);
+    }
+
+    /**
+     * Logs the one line reported when a SAML response arrives with a session id the container no
+     * longer recognises, so the session that held the AuthnRequest ID is gone rather than merely
+     * empty.
+     *
+     * <p>This, not {@link #logUnmatchedSamlResponseAfterExpiry(int)}, is what a login left too
+     * long at the IdP actually reaches on a stock Fess, because the session runs out first: the
+     * AuthnRequest ID is kept for {@link #DEFAULT_REQUEST_ID_TTL} seconds, an hour, while
+     * {@code WEB-INF/web.xml} sets no {@code session-timeout} and nothing calls
+     * {@code setMaxInactiveInterval}, which leaves the servlet container's own default of thirty
+     * minutes. The session is therefore discarded, IDs and all, some half an hour before any of
+     * those IDs can expire, and the response comes back to a {@code getSession(false)} that
+     * returns null. Without this line that lands on {@link #logUnmatchedSamlResponse(int)} and is
+     * reported as a {@code SameSite} cookie problem -- the very misdiagnosis the expiry line was
+     * added to prevent, in the one case that occurs in practice.</p>
+     *
+     * <p>The two are told apart by {@link #hasExpiredSession(HttpServletRequest)}: a browser that
+     * is not sending the session cookie sends no session id at all, so a request that does carry
+     * one demonstrably kept the cookie and lost only the session behind it.</p>
+     *
+     * <p>Like the TTL case this is an ordinary event rather than a misconfiguration, and starting
+     * the login again resolves it. It names the container's session timeout instead of
+     * {@link #SAML_REQUEST_ID_TTL} on purpose, since raising the TTL cannot extend a session that
+     * is already the shorter of the two.</p>
+     *
+     * <p>An extension that overrides {@link #logUnmatchedSamlResponse(int)} to reshape or suppress
+     * that warning wants to override this one as well: until this method existed, this case was
+     * reported by that one with a pending count of zero.</p>
+     */
+    protected void logUnmatchedSamlResponseAfterSessionExpiry() {
+        logger.warn("Received a SAML response after the session it belongs to had expired."
+                + " The browser did return its session cookie, so this is not the SameSite case:"
+                + " the session, and with it the AuthnRequest ID it held, was discarded by the"
+                + " container's session timeout rather than by {}, so raising that value does not help."
+                + " Starting the login again resolves it.", SAML_REQUEST_ID_TTL);
+    }
+
+    /**
+     * Returns whether the request carries a session id that the container no longer recognises.
+     *
+     * <p>This is what tells an expired session apart from a browser that is not sending the
+     * cookie: a request with no session id at all cannot have lost one. Named after the
+     * {@code EntraIdAuthenticator} method that answers the same question, so that the two
+     * authenticators stay recognisable to each other.</p>
+     *
+     * <p>Unlike there, the answer only chooses a log line here. An unmatched SAML response is
+     * refused either way, because restarting the login by redirecting to an IdP that is already
+     * authenticated would only bring the same unmatched assertion straight back.</p>
+     *
+     * @param request The HTTP servlet request.
+     * @return True if a session id was sent and it is no longer valid.
+     */
+    protected boolean hasExpiredSession(final HttpServletRequest request) {
+        return request.getRequestedSessionId() != null && !request.isRequestedSessionIdValid();
     }
 
     /**
