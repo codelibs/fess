@@ -1532,14 +1532,35 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param id The group ID to process.
      */
     protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+        processGroup(user, groupList, roleList, id, "https://graph.microsoft.com/v1.0/groups/" + id);
+    }
+
+    /**
+     * Processes individual group information read from the specified URL. The URL is a parameter
+     * so that this, like {@link #processDirectMemberOf}, can be pointed at a stub rather than at
+     * Microsoft Graph.
+     *
+     * @param user The Entra ID user.
+     * @param groupList The list to add group names to.
+     * @param roleList The list to add role names to.
+     * @param id The group ID to process.
+     * @param url The Microsoft Graph URL to read the group from.
+     */
+    protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
+            final String url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("[processGroup] Processing group info for id: {}", id);
-        }
-        final String url = "https://graph.microsoft.com/v1.0/groups/" + id;
-        if (logger.isDebugEnabled()) {
-            logger.debug("[processGroup] Fetching from url: {}", url);
+            logger.debug("[processGroup] Processing group info for id: {} from url: {}", id, url);
         }
         try (CurlResponse response = createGraphRequest(Curl.get(url), user.getAuthenticationResult().accessToken()).execute()) {
+            // Before the body, for the same reason as in getMemberGroupIds and
+            // processDirectMemberOf: a throttled reply is not required to be JSON, and the parser
+            // throws CurlException when it is not. This was the one Graph call in the class that
+            // did not record the backoff, and it is the one most likely to meet a 429 first: the
+            // parent group walk calls it once per member id, whereas getMemberGroupIds is called
+            // once per group. Worse, a 429 whose body *is* JSON leaves the walk believing it had
+            // an answer -- groupList.add(id) below runs on every non-throwing path -- so nothing
+            // else on that path ever reached Graph to notice the throttling.
+            applyGraphThrottle(response);
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("[processGroup] Response for id {}: {}", id, contentMap);
