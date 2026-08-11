@@ -343,6 +343,37 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected volatile ClientApplicationHolder clientApplicationHolder;
 
     /**
+     * The accounts whose tokens are in the shared application's cache, in least-recently-acquired
+     * order. See {@link #maxCachedAccounts} for why this exists; access order rather than
+     * insertion order because the entry worth evicting is the one whose tokens have gone longest
+     * without being used, not the one that logged in first -- a session that has been alive for
+     * days is the last one to throw away.
+     *
+     * <p>Guarded by its own monitor. It is only ever touched after an acquisition or a logout,
+     * so contention is a fraction of what the login path already serialises on.
+     */
+    protected final Map<String, IAccount> cachedAccounts = new LinkedHashMap<>(16, 0.75f, true);
+
+    /**
+     * Maximum number of accounts kept in the shared application's token cache.
+     *
+     * <p>MSAL4J's {@code TokenCache} is five plain maps with no size bound and no expiry, and
+     * {@code removeAccount} is the only thing that takes anything out of them. While the
+     * application was rebuilt per call there was nothing to accumulate; now that one instance is
+     * shared so that silent refresh can work at all, every account that logged in and never
+     * pressed Logout keeps an access token, a refresh token and an ID token resident until the
+     * JVM restarts. The keys are account-scoped, so a user who logs in repeatedly overwrites
+     * their own entry -- the bound is distinct accounts, not logins -- but a large tenant still
+     * reaches a size worth capping, and a refresh token is good for up to 90 days.
+     *
+     * <p>The default is high enough that an ordinary deployment never reaches it. When it is
+     * reached, the cost of evicting a live session is one silent re-authentication: a failed
+     * silent acquisition leaves {@code refresh()} returning true until the access token actually
+     * expires, and the re-login that follows goes through an unexpired Entra ID session.
+     */
+    protected int maxCachedAccounts = 10000;
+
+    /**
      * Initializes the Entra ID authenticator.
      * Registers this authenticator with the SSO manager and sets up group cache.
      */
@@ -800,6 +831,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (result == null) {
                 throw new SsoLoginException("authentication result was null");
             }
+            trackAccount(result);
             return result;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
@@ -829,6 +861,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (result == null) {
                 throw new SsoLoginException("authentication result was null");
             }
+            trackAccount(result);
             return result;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
@@ -851,6 +884,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("Silent token acquisition successful");
             }
+            trackAccount(result);
             return result;
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
@@ -1957,11 +1991,53 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Records that an acquisition put tokens in the shared cache, and evicts the accounts that
+     * pushes past {@link #maxCachedAccounts}.
+     *
+     * <p>The eviction runs outside the monitor: {@link #removeAccount} joins on MSAL4J's future,
+     * and holding the map while it does that would put every other acquisition behind it.
+     *
+     * @param result The acquisition result, which may be null.
+     */
+    protected void trackAccount(final IAuthenticationResult result) {
+        if (result == null || result.account() == null || StringUtil.isBlank(result.account().homeAccountId())) {
+            return;
+        }
+        final List<IAccount> evicted = new ArrayList<>();
+        synchronized (cachedAccounts) {
+            cachedAccounts.put(result.account().homeAccountId(), result.account());
+            while (cachedAccounts.size() > maxCachedAccounts) {
+                final Map.Entry<String, IAccount> eldest = cachedAccounts.entrySet().iterator().next();
+                cachedAccounts.remove(eldest.getKey());
+                evicted.add(eldest.getValue());
+            }
+        }
+        if (!evicted.isEmpty()) {
+            logger.warn("The Entra ID token cache reached {} accounts. Evicting {} that went longest without acquiring a token.",
+                    maxCachedAccounts, evicted.size());
+            evicted.forEach(this::removeAccount);
+        }
+    }
+
+    /**
+     * Sets the maximum number of accounts kept in the shared application's token cache.
+     * @param maxCachedAccounts The maximum number of accounts.
+     */
+    public void setMaxCachedAccounts(final int maxCachedAccounts) {
+        this.maxCachedAccounts = maxCachedAccounts;
+    }
+
+    /**
      * Drops an account's tokens from the shared client application's cache.
      *
      * @param account The account to evict.
      */
     protected void removeAccount(final IAccount account) {
+        // Unconditional, and ahead of the join below: an eviction has already taken the entry out,
+        // and a logout has to take it out whether or not MSAL4J manages to prune its own cache.
+        synchronized (cachedAccounts) {
+            cachedAccounts.remove(account.homeAccountId());
+        }
         try {
             getClientApplication().removeAccount(account).join();
             if (logger.isDebugEnabled()) {

@@ -183,6 +183,100 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertSame(account, removed.get(0));
     }
 
+    /** An authenticator that records the evictions instead of reaching MSAL4J for them. */
+    private EntraIdAuthenticator newAuthenticatorRecordingEvictions(final List<IAccount> evicted, final int maxCachedAccounts) {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected void removeAccount(final IAccount account) {
+                synchronized (cachedAccounts) {
+                    cachedAccounts.remove(account.homeAccountId());
+                }
+                evicted.add(account);
+            }
+        };
+        authenticator.setMaxCachedAccounts(maxCachedAccounts);
+        return authenticator;
+    }
+
+    @Test
+    public void test_trackAccount_overwritesRatherThanGrowingForTheSameAccount() {
+        // MSAL4J keys its cache by home account id, so a user who logs in repeatedly replaces
+        // their own tokens. The bound is distinct accounts, not logins, and this is what says so.
+        final EntraIdAuthenticator authenticator = newAuthenticatorRecordingEvictions(new ArrayList<>(), 10);
+        final TestAccount account = new TestAccount("account-a");
+
+        for (int i = 0; i < 100; i++) {
+            authenticator.trackAccount(new TestAuthenticationResult(account));
+        }
+
+        assertEquals(1, authenticator.cachedAccounts.size());
+    }
+
+    @Test
+    public void test_trackAccount_evictsTheAccountThatWentLongestWithoutAToken() {
+        // Nothing leaves MSAL4J's cache on its own -- no size bound, no expiry, and an expired
+        // access token is filtered on read rather than removed -- so without this a server that
+        // never sees a Logout keeps every account resident until it restarts.
+        final List<IAccount> evicted = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = newAuthenticatorRecordingEvictions(evicted, 2);
+
+        authenticator.trackAccount(new TestAuthenticationResult(new TestAccount("account-a")));
+        authenticator.trackAccount(new TestAuthenticationResult(new TestAccount("account-b")));
+        authenticator.trackAccount(new TestAuthenticationResult(new TestAccount("account-c")));
+
+        assertEquals(1, evicted.size());
+        assertEquals("account-a", evicted.get(0).homeAccountId());
+        assertEquals(Set.of("account-b", "account-c"), authenticator.cachedAccounts.keySet());
+    }
+
+    @Test
+    public void test_trackAccount_keepsTheAccountThatIsStillAcquiring() {
+        // Access order, not insertion order. A session that has been alive for days keeps
+        // acquiring, and evicting it first -- which is what insertion order would do -- would
+        // throw away exactly the account most likely to still be in use.
+        final List<IAccount> evicted = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = newAuthenticatorRecordingEvictions(evicted, 2);
+
+        final TestAccount oldest = new TestAccount("account-a");
+        authenticator.trackAccount(new TestAuthenticationResult(oldest));
+        authenticator.trackAccount(new TestAuthenticationResult(new TestAccount("account-b")));
+        authenticator.trackAccount(new TestAuthenticationResult(oldest));
+        authenticator.trackAccount(new TestAuthenticationResult(new TestAccount("account-c")));
+
+        assertEquals(1, evicted.size());
+        assertEquals("account-b", evicted.get(0).homeAccountId());
+        assertEquals(Set.of("account-a", "account-c"), authenticator.cachedAccounts.keySet());
+    }
+
+    @Test
+    public void test_trackAccount_ignoresAnAcquisitionWithNothingToTrack() {
+        final EntraIdAuthenticator authenticator = newAuthenticatorRecordingEvictions(new ArrayList<>(), 2);
+
+        authenticator.trackAccount(null);
+        authenticator.trackAccount(new TestAuthenticationResult(null));
+        authenticator.trackAccount(new TestAuthenticationResult(new TestAccount("")));
+
+        assertTrue(authenticator.cachedAccounts.isEmpty());
+    }
+
+    @Test
+    public void test_removeAccount_freesTheSlotSoALogoutIsNotJustAnMsalCall() {
+        // A user who logs out must stop counting against the bound, otherwise a server with a
+        // steady turnover evicts live sessions to make room for accounts that already left.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        authenticator.setMaxCachedAccounts(2);
+        final TestAccount account = new TestAccount("account-a");
+        authenticator.trackAccount(new TestAuthenticationResult(account));
+        assertEquals(1, authenticator.cachedAccounts.size());
+
+        // Entra ID is unconfigured here, so the MSAL4J call behind this fails and is swallowed.
+        // The slot has to be freed regardless of whether that call got anywhere.
+        setEntraIdConfig("", "", "");
+        authenticator.removeAccount(account);
+
+        assertTrue(authenticator.cachedAccounts.isEmpty());
+    }
+
     @Test
     public void test_logout_ignoresAUserThatIsNotAnEntraIdUser() {
         // SPNEGO, SAML and LDAP users reach the same logout hook.
@@ -225,10 +319,19 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
     private static class TestAccount implements IAccount {
         private static final long serialVersionUID = 1L;
+        private final String homeAccountId;
+
+        TestAccount() {
+            this("home-account-id");
+        }
+
+        TestAccount(final String homeAccountId) {
+            this.homeAccountId = homeAccountId;
+        }
 
         @Override
         public String homeAccountId() {
-            return "home-account-id";
+            return homeAccountId;
         }
 
         @Override
