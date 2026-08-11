@@ -232,15 +232,21 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getLoginCredential_serverFaultKeepsItsStackTrace() {
-        // The counterpart of the case above: getAuthenticator() wraps every initialization failure
-        // in a plain SsoLoginException, and that must not be downgraded to a rejected request --
-        // an unreadable keytab or an unreachable KDC is a fault the operator needs the trace for.
+    public void test_getLoginCredential_initializationFaultKeepsItsStackTrace() {
+        // The boundary the case above must not cross, and the reason it tests the thrown type
+        // rather than the cause chain. SpnegoFilterConfig raises UnsupportedOperationException for
+        // an invalid login module too -- no storeKey, a login module class it does not support, a
+        // control flag other than REQUIRED -- and those are server-side faults the operator needs
+        // the trace for. They are harmless here only because getAuthenticator() has already wrapped
+        // them in a plain SsoLoginException, so the thrown type is no longer the one being matched.
+        // Matching on the cause instead would find the nested UnsupportedOperationException and
+        // silently demote every initialization failure to a message-only log; this goes red first.
         addMockRequestHeader(Constants.AUTHZ_HEADER, "Negotiate YIIFoAYGKwYBBQUCoIIF");
         final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
             @Override
             protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
-                throw new SsoLoginException("Failed to initialize SPNEGO.", new java.io.FileNotFoundException("krb5.conf"));
+                throw new SsoLoginException("Failed to initialize SPNEGO.",
+                        new UnsupportedOperationException("Login Module for server does not have the storeKey option."));
             }
         };
         final SsoLoginException e = assertThrows(SsoLoginException.class, authenticator::getLoginCredential);
