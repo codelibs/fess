@@ -17,6 +17,8 @@ package org.codelibs.fess.sso.spnego;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -27,6 +29,7 @@ import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
+import org.codelibs.spnego.SpnegoProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -247,6 +250,99 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
             protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
                 throw new SsoLoginException("Failed to initialize SPNEGO.",
                         new UnsupportedOperationException("Login Module for server does not have the storeKey option."));
+            }
+        };
+        final SsoLoginException e = assertThrows(SsoLoginException.class, authenticator::getLoginCredential);
+        assertFalse(e instanceof SsoStateException);
+    }
+
+    /**
+     * Drives the library's own header parser and token decoder, so the exception type the mapping
+     * below relies on is pinned against the shipping spnego jar rather than assumed.
+     *
+     * <p>
+     * {@code SpnegoProvider#getAuthScheme} is public, but the {@code SpnegoAuthScheme} it returns is
+     * a package-private final class whose {@code getToken()} is package private too, so both are
+     * reached by reflection. Library and Fess both load from the class path (the unnamed module),
+     * so {@code setAccessible(true)} succeeds without any {@code --add-opens}.
+     * </p>
+     *
+     * @param header the raw Authorization header value
+     * @throws Throwable whatever the library raises, unwrapped from the reflective call
+     */
+    private void decodeLibraryToken(final String header) throws Throwable {
+        final Method getAuthScheme = SpnegoProvider.class.getMethod("getAuthScheme", String.class);
+        final Object scheme;
+        try {
+            scheme = getAuthScheme.invoke(null, header);
+        } catch (final InvocationTargetException e) {
+            throw e.getCause();
+        }
+        assertNotNull(scheme);
+        final Method getToken = scheme.getClass().getDeclaredMethod("getToken");
+        getToken.setAccessible(true);
+        try {
+            getToken.invoke(scheme);
+        } catch (final InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test
+    public void test_libraryRaisesIllegalArgumentExceptionForAMalformedToken() {
+        // SpnegoProvider#parseAuthHeader does not validate the token -- it accepts any non-empty
+        // trimmed remainder -- so the strict decoder behind SpnegoAuthScheme#getToken is what
+        // rejects it. SpnegoProvider#negotiate evaluates that decode at the top of the method,
+        // before any scheme dispatch and before the 401 is written, so every shape below reaches it
+        // whatever the spnego.allow.* settings say. This is the contract the mapping in
+        // getLoginCredential depends on; if a library upgrade changed the type, this goes red
+        // first instead of the demotion silently ceasing to apply.
+        assertThrows(IllegalArgumentException.class, () -> decodeLibraryToken("Negotiate ###"));
+        assertThrows(IllegalArgumentException.class, () -> decodeLibraryToken("Basic ###"));
+        // Valid base64 alphabet, but not a valid length.
+        assertThrows(IllegalArgumentException.class, () -> decodeLibraryToken("Negotiate a"));
+        // The scheme is matched case-insensitively and the separator is any run of whitespace, so a
+        // lower-case scheme behind a tab decodes -- and fails -- exactly the same way.
+        assertThrows(IllegalArgumentException.class, () -> decodeLibraryToken("negotiate" + ch(0x09) + "###"));
+        // The control: a scheme the library refuses outright is the other family, and it is raised
+        // by getAuthScheme before any token exists. Both families are demoted, but keeping the
+        // distinction visible here documents why the mapping names two types rather than one.
+        assertThrows(UnsupportedOperationException.class, () -> decodeLibraryToken("Digest abc"));
+    }
+
+    @Test
+    public void test_getLoginCredential_malformedTokenIsAStateException() {
+        // The client chose the token, /sso is anonymous, and the header is echoed masked, so this
+        // is a rejected request rather than a fault: SsoStateException, which SsoAction logs
+        // message-only. Before this mapping existed the same request produced a full stack trace
+        // per attempt, which let an unauthenticated client fill the log.
+        addMockRequestHeader(Constants.AUTHZ_HEADER, "Negotiate ###");
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+                throw new IllegalArgumentException("Illegal base64 character 23");
+            }
+        };
+        final SsoStateException e = assertThrows(SsoStateException.class, authenticator::getLoginCredential);
+        assertTrue(e.getMessage().contains("Illegal base64 character 23"));
+        assertTrue(e.getMessage().contains("Negotiate ***"));
+    }
+
+    @Test
+    public void test_getLoginCredential_initializationFaultWithAnIllegalArgumentCauseKeepsItsStackTrace() {
+        // The same boundary as the UnsupportedOperationException case above, for the type added
+        // alongside it. SpnegoFilterConfig raises IllegalArgumentException for a missing
+        // spnego.krb5.conf, a missing spnego.login.conf and an exclude-dirs pattern it rejects, and
+        // those are server-side faults the operator needs the trace for. They are harmless here
+        // only because getAuthenticator() has already wrapped them in a plain SsoLoginException --
+        // a FessSystemException, so no longer the type being matched. Matching on the cause instead
+        // would find the nested IllegalArgumentException and silently demote every one of them.
+        addMockRequestHeader(Constants.AUTHZ_HEADER, "Negotiate YIIFoAYGKwYBBQUCoIIF");
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+                throw new SsoLoginException("Failed to initialize SPNEGO.",
+                        new IllegalArgumentException("Must specify a username and password or a keyTab."));
             }
         };
         final SsoLoginException e = assertThrows(SsoLoginException.class, authenticator::getLoginCredential);
