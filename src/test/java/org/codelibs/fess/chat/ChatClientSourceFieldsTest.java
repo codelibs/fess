@@ -23,12 +23,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.core.config.Property;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatClient.ChatSearchResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
@@ -39,6 +33,7 @@ import org.codelibs.fess.llm.IntentDetectionResult;
 import org.codelibs.fess.llm.LlmChatResponse;
 import org.codelibs.fess.llm.LlmClientManager;
 import org.codelibs.fess.llm.LlmMessage;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Assertions;
@@ -224,31 +219,13 @@ public class ChatClientSourceFieldsTest extends UnitFessTestCase {
         final CapturingChatClient client = newChatClient(List.of(searchResultDoc()));
         final List<Map<String, Object>> searchResults = List.of(searchResultDoc());
 
-        final List<LogEvent> captured = new ArrayList<>();
-        final String loggerName = ChatClient.class.getName();
-        final LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
-        final Configuration cfg = ctx.getConfiguration();
-        final LoggerConfig loggerCfg = cfg.getLoggerConfig(loggerName);
-        final Level originalLevel = loggerCfg.getLevel();
-        final AbstractAppender listAppender = new AbstractAppender("chat-client-degrade-appender", null,
-                PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
-            @Override
-            public void append(final LogEvent event) {
-                if (event.getLevel().isMoreSpecificThan(Level.WARN)) {
-                    captured.add(event.toImmutable());
-                }
-            }
-        };
-        listAppender.start();
-        loggerCfg.addAppender(listAppender, Level.WARN, null);
-        loggerCfg.setLevel(Level.WARN);
-        ctx.updateLoggers();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ChatClient.class);
         try {
             assertSame(searchResults, client.fetchContentForAnswer(searchResults, "install"),
                     "a fetcher failure must degrade to the raw search results");
 
-            final LogEvent warn = captured.stream()
-                    .filter(e -> loggerName.equals(e.getLoggerName()))
+            final LogEvent warn = appender.eventsAt(Level.WARN)
+                    .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("Failed to fetch answer content"))
                     .findFirst()
                     .orElse(null);
@@ -256,10 +233,7 @@ public class ChatClientSourceFieldsTest extends UnitFessTestCase {
             assertNotNull(warn.getThrown(), "the degrade WARN must carry the Throwable; only a stack trace identifies the bug");
             assertEquals("boom", warn.getThrown().getMessage());
         } finally {
-            loggerCfg.removeAppender("chat-client-degrade-appender");
-            loggerCfg.setLevel(originalLevel);
-            ctx.updateLoggers();
-            listAppender.stop();
+            appender.detach();
         }
     }
 }

@@ -18,14 +18,8 @@ package org.codelibs.fess.rank.fusion;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Property;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.ChunkVectorHelper;
@@ -36,6 +30,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -545,39 +540,6 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
                 final OptionalThing<FessUserBean> userBean) {
             return OptionalEntity.empty();
-        }
-    }
-
-    /** Minimal in-memory log4j2 appender for asserting on emitted log messages. */
-    static final class LogCapturingAppender extends AbstractAppender {
-        private final List<LogEvent> events = new CopyOnWriteArrayList<>();
-        private final org.apache.logging.log4j.core.Logger boundLogger;
-
-        private LogCapturingAppender(final org.apache.logging.log4j.core.Logger logger) {
-            super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
-            this.boundLogger = logger;
-        }
-
-        static LogCapturingAppender attach(final Class<?> targetClass) {
-            final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getLogger(targetClass);
-            final LogCapturingAppender appender = new LogCapturingAppender(logger);
-            appender.start();
-            logger.addAppender(appender);
-            return appender;
-        }
-
-        void detach() {
-            boundLogger.removeAppender(this);
-            stop();
-        }
-
-        @Override
-        public void append(final LogEvent event) {
-            events.add(event.toImmutable());
-        }
-
-        List<String> messagesAt(final Level level) {
-            return events.stream().filter(e -> e.getLevel() == level).map(e -> e.getMessage().getFormattedMessage()).toList();
         }
     }
 

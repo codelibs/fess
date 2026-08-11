@@ -24,16 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Property;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -305,27 +300,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         // harness. The firstFailure AtomicBoolean ensures exactly one WARN is emitted
         // no matter how many requests arrive.
         //
-        // Capture log4j2 output via a ListAppender attached to StaticThemeFilter's logger.
-        final String loggerName = StaticThemeFilter.class.getName();
-        final LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
-        final org.apache.logging.log4j.core.config.Configuration cfg = ctx.getConfiguration();
-        final org.apache.logging.log4j.core.config.LoggerConfig loggerCfg = cfg.getLoggerConfig(loggerName);
-        // Temporarily set to WARN so the appender captures it.
-        final Level originalLevel = loggerCfg.getLevel();
-        final java.util.List<LogEvent> captured = new java.util.ArrayList<>();
-        final AbstractAppender listAppender =
-                new AbstractAppender("test-list-appender", null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
-                    @Override
-                    public void append(final LogEvent event) {
-                        if (event.getLevel().isMoreSpecificThan(Level.WARN)) {
-                            captured.add(event.toImmutable());
-                        }
-                    }
-                };
-        listAppender.start();
-        loggerCfg.addAppender(listAppender, Level.WARN, null);
-        loggerCfg.setLevel(Level.WARN);
-        ctx.updateLoggers();
+        // Capture log4j2 output via an appender bound to StaticThemeFilter's own logger.
+        final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class);
         try {
             // Create a fresh filter with NO registry injected -- ComponentUtil will throw.
             final StaticThemeFilter f = new StaticThemeFilter();
@@ -335,22 +311,12 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
                 f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), chain);
                 assertTrue(chain.called, "filter must pass through when registry is unavailable");
             }
-            // Count only WARN events from StaticThemeFilter's logger about ThemeRegistry.
-            final long warnCount = captured.stream()
-                    .filter(e -> loggerName.equals(e.getLoggerName()))
-                    .filter(e -> Level.WARN.equals(e.getLevel()))
-                    .filter(e -> {
-                        final String msg = e.getMessage().getFormattedMessage();
-                        return msg != null && msg.contains("ThemeRegistry");
-                    })
-                    .count();
+            // Count only WARN events about ThemeRegistry.
+            final long warnCount = appender.warnings().stream().filter(msg -> msg != null && msg.contains("ThemeRegistry")).count();
             org.junit.jupiter.api.Assertions.assertEquals(1L, warnCount,
                     "exactly 1 WARN must be emitted for ThemeRegistry unavailable across 5 requests; got " + warnCount);
         } finally {
-            loggerCfg.removeAppender("test-list-appender");
-            loggerCfg.setLevel(originalLevel);
-            ctx.updateLoggers();
-            listAppender.stop();
+            appender.detach();
         }
     }
 

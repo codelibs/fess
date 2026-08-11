@@ -28,18 +28,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.core.config.Property;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -970,38 +965,18 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     /**
-     * Attaches a DEBUG-level capturing appender to {@code loggerName}, runs {@code body}, then
-     * restores the original appender set and level. Only events emitted by {@code loggerName}
-     * itself are retained, so the surrounding framework chatter is filtered out.
+     * Attaches a DEBUG-level capturing appender to {@code loggerName} and runs {@code body}.
+     * Only events emitted by {@code loggerName} itself are retained, so the surrounding
+     * framework chatter is filtered out.
      */
     private static List<LogEvent> captureLogEvents(final String loggerName, final Executable body) throws Throwable {
-        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        final LoggerConfig loggerCfg = ctx.getConfiguration().getLoggerConfig(loggerName);
-        final Level originalLevel = loggerCfg.getLevel();
-        final List<LogEvent> captured = new ArrayList<>();
-        final String appenderName = "login-handler-capture";
-        final AbstractAppender appender =
-                new AbstractAppender(appenderName, null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
-                    @Override
-                    public void append(final LogEvent event) {
-                        if (loggerName.equals(event.getLoggerName())) {
-                            captured.add(event.toImmutable());
-                        }
-                    }
-                };
-        appender.start();
-        loggerCfg.addAppender(appender, Level.DEBUG, null);
-        loggerCfg.setLevel(Level.DEBUG);
-        ctx.updateLoggers();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(loggerName, Level.DEBUG);
         try {
             body.execute();
         } finally {
-            loggerCfg.removeAppender(appenderName);
-            loggerCfg.setLevel(originalLevel);
-            ctx.updateLoggers();
-            appender.stop();
+            appender.detach();
         }
-        return captured;
+        return appender.events().stream().filter(event -> loggerName.equals(event.getLoggerName())).toList();
     }
 
     /**
