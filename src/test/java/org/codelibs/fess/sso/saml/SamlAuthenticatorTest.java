@@ -16,17 +16,7 @@
 package org.codelibs.fess.sso.saml;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Property;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -34,6 +24,7 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.sso.SsoResponseType;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.core.settings.Saml2Settings;
@@ -523,42 +514,6 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertEquals("http://localhost:8080/sso/logout", authenticator.buildDefaultUrl("/sso/logout"));
         } finally {
             systemProperties.remove(BASE_URL_KEY);
-        }
-    }
-
-    /**
-     * Minimal in-memory log4j2 appender for asserting on emitted log messages.
-     * Mirrors {@code LengthChunkerTest.LogCapturingAppender}.
-     */
-    static final class LogCapturingAppender extends AbstractAppender {
-        private final List<LogEvent> events = new CopyOnWriteArrayList<>();
-        private final Logger boundLogger;
-
-        private LogCapturingAppender(final Logger logger) {
-            super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
-            this.boundLogger = logger;
-        }
-
-        static LogCapturingAppender attach(final Class<?> targetClass) {
-            final Logger logger = (Logger) LogManager.getLogger(targetClass);
-            final LogCapturingAppender appender = new LogCapturingAppender(logger);
-            appender.start();
-            logger.addAppender(appender);
-            return appender;
-        }
-
-        void detach() {
-            boundLogger.removeAppender(this);
-            stop();
-        }
-
-        @Override
-        public void append(final LogEvent event) {
-            events.add(event.toImmutable());
-        }
-
-        List<String> warnings() {
-            return events.stream().filter(e -> e.getLevel() == Level.WARN).map(e -> e.getMessage().getFormattedMessage()).toList();
         }
     }
 }

@@ -20,18 +20,11 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Property;
 import org.codelibs.fess.embedding.EmbeddingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -1801,66 +1794,6 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
 
         void initHttpClient() {
             httpClient = buildHttpClient();
-        }
-    }
-
-    /**
-     * Minimal in-memory log4j2 appender for asserting on emitted log messages.
-     * Mirrors {@code OllamaEmbeddingClientTest.LogCapturingAppender}.
-     */
-    static final class LogCapturingAppender extends AbstractAppender {
-        private final List<LogEvent> events = new CopyOnWriteArrayList<>();
-        private final Logger boundLogger;
-
-        private LogCapturingAppender(final Logger logger) {
-            super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
-            this.boundLogger = logger;
-        }
-
-        static LogCapturingAppender attach(final Class<?> targetClass) {
-            final Logger logger = (Logger) LogManager.getLogger(targetClass);
-            final LogCapturingAppender appender = new LogCapturingAppender(logger);
-            appender.start();
-            logger.addAppender(appender);
-            return appender;
-        }
-
-        void detach() {
-            boundLogger.removeAppender(this);
-            stop();
-        }
-
-        @Override
-        public void append(final LogEvent event) {
-            events.add(event.toImmutable());
-        }
-
-        List<String> messagesAt(final Level level) {
-            return events.stream().filter(e -> e.getLevel() == level).map(e -> e.getMessage().getFormattedMessage()).toList();
-        }
-
-        List<String> warnings() {
-            return messagesAt(Level.WARN);
-        }
-
-        List<String> errors() {
-            return messagesAt(Level.ERROR);
-        }
-
-        /**
-         * Renders every captured event the way an appender's layout would: the formatted
-         * message <em>and</em> the attached throwable's stack trace, cause chain included.
-         *
-         * <p>Asserting only on {@link #messagesAt(Level)} is a trap for credential leaks:
-         * a leak carried by {@code logger.warn(pattern, args, throwable)} lives entirely in
-         * {@link LogEvent#getThrown()}, so a message-only assertion goes green while the
-         * rendered log line still prints the offending value.</p>
-         */
-        List<String> renderedEvents() {
-            return events.stream().map(e -> {
-                final Throwable thrown = e.getThrown();
-                return e.getMessage().getFormattedMessage() + (thrown != null ? System.lineSeparator() + renderThrowable(thrown) : "");
-            }).toList();
         }
     }
 }

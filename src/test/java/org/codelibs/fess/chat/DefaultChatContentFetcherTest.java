@@ -22,14 +22,11 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Property;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.helper.ChunkVectorHelper;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -812,43 +809,18 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         manager.available = false;
         f.embeddingManager = manager;
 
-        final String loggerName = DefaultChatContentFetcher.class.getName();
-        final LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
-        final org.apache.logging.log4j.core.config.Configuration cfg = ctx.getConfiguration();
-        final org.apache.logging.log4j.core.config.LoggerConfig loggerCfg = cfg.getLoggerConfig(loggerName);
-        final Level originalLevel = loggerCfg.getLevel();
-        final List<LogEvent> captured = new ArrayList<>();
-        final AbstractAppender listAppender =
-                new AbstractAppender("test-list-appender-2", null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
-                    @Override
-                    public void append(final LogEvent event) {
-                        if (event.getLevel().isMoreSpecificThan(Level.WARN)) {
-                            captured.add(event.toImmutable());
-                        }
-                    }
-                };
-        listAppender.start();
-        loggerCfg.addAppender(listAppender, Level.WARN, null);
-        loggerCfg.setLevel(Level.WARN);
-        ctx.updateLoggers();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DefaultChatContentFetcher.class);
         try {
             // A persistently unavailable embedding provider must not silently return null forever --
             // exactly one WARN across repeated calls during the same outage, not zero and not one per call.
             for (int i = 0; i < 5; i++) {
                 assertNull(f.resolveQueryVector("query"));
             }
-            final long warnCount = captured.stream()
-                    .filter(e -> loggerName.equals(e.getLoggerName()))
-                    .filter(e -> Level.WARN.equals(e.getLevel()))
-                    .filter(e -> e.getMessage().getFormattedMessage().contains("Embedding client unavailable"))
-                    .count();
+            final long warnCount = appender.warnings().stream().filter(msg -> msg.contains("Embedding client unavailable")).count();
             org.junit.jupiter.api.Assertions.assertEquals(1L, warnCount,
                     "exactly 1 WARN must be emitted across 5 calls during the same outage; got " + warnCount);
         } finally {
-            loggerCfg.removeAppender("test-list-appender-2");
-            loggerCfg.setLevel(originalLevel);
-            ctx.updateLoggers();
-            listAppender.stop();
+            appender.detach();
         }
     }
 
@@ -860,25 +832,7 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         manager.queryVector = new float[] { 1.0f };
         f.embeddingManager = manager;
 
-        final String loggerName = DefaultChatContentFetcher.class.getName();
-        final LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
-        final org.apache.logging.log4j.core.config.Configuration cfg = ctx.getConfiguration();
-        final org.apache.logging.log4j.core.config.LoggerConfig loggerCfg = cfg.getLoggerConfig(loggerName);
-        final Level originalLevel = loggerCfg.getLevel();
-        final List<LogEvent> captured = new ArrayList<>();
-        final AbstractAppender listAppender =
-                new AbstractAppender("test-list-appender-3", null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
-                    @Override
-                    public void append(final LogEvent event) {
-                        if (event.getLevel().isMoreSpecificThan(Level.WARN)) {
-                            captured.add(event.toImmutable());
-                        }
-                    }
-                };
-        listAppender.start();
-        loggerCfg.addAppender(listAppender, Level.WARN, null);
-        loggerCfg.setLevel(Level.WARN);
-        ctx.updateLoggers();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DefaultChatContentFetcher.class);
         try {
             assertNull(f.resolveQueryVector("query")); // outage #1 -> 1st WARN
             manager.available = true;
@@ -886,18 +840,11 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
             manager.available = false;
             assertNull(f.resolveQueryVector("query")); // outage #2 -> must WARN again, not degrade to DEBUG forever
 
-            final long warnCount = captured.stream()
-                    .filter(e -> loggerName.equals(e.getLoggerName()))
-                    .filter(e -> Level.WARN.equals(e.getLevel()))
-                    .filter(e -> e.getMessage().getFormattedMessage().contains("Embedding client unavailable"))
-                    .count();
+            final long warnCount = appender.warnings().stream().filter(msg -> msg.contains("Embedding client unavailable")).count();
             org.junit.jupiter.api.Assertions.assertEquals(2L, warnCount,
                     "a distinct later outage must surface its own WARN; got " + warnCount);
         } finally {
-            loggerCfg.removeAppender("test-list-appender-3");
-            loggerCfg.setLevel(originalLevel);
-            ctx.updateLoggers();
-            listAppender.stop();
+            appender.detach();
         }
     }
 
@@ -1403,37 +1350,17 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
      * Runs {@code body} with a WARN-capturing appender attached to the fetcher's logger and returns
      * the first captured event whose formatted message contains {@code messageFragment}.
      */
-    private static LogEvent captureWarn(final String appenderName, final String messageFragment, final Runnable body) {
-        final String loggerName = DefaultChatContentFetcher.class.getName();
-        final LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
-        final org.apache.logging.log4j.core.config.LoggerConfig loggerCfg = ctx.getConfiguration().getLoggerConfig(loggerName);
-        final Level originalLevel = loggerCfg.getLevel();
-        final List<LogEvent> captured = new ArrayList<>();
-        final AbstractAppender listAppender =
-                new AbstractAppender(appenderName, null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
-                    @Override
-                    public void append(final LogEvent event) {
-                        if (event.getLevel().isMoreSpecificThan(Level.WARN)) {
-                            captured.add(event.toImmutable());
-                        }
-                    }
-                };
-        listAppender.start();
-        loggerCfg.addAppender(listAppender, Level.WARN, null);
-        loggerCfg.setLevel(Level.WARN);
-        ctx.updateLoggers();
+    private static LogEvent captureWarn(final String messageFragment, final Runnable body) {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DefaultChatContentFetcher.class);
         try {
             body.run();
-            return captured.stream()
-                    .filter(e -> loggerName.equals(e.getLoggerName()))
+            return appender.eventsAt(Level.WARN)
+                    .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains(messageFragment))
                     .findFirst()
                     .orElse(null);
         } finally {
-            loggerCfg.removeAppender(appenderName);
-            loggerCfg.setLevel(originalLevel);
-            ctx.updateLoggers();
-            listAppender.stop();
+            appender.detach();
         }
     }
 
@@ -1441,7 +1368,7 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
     public void test_fetchFullContent_failureWarnCarriesStackTrace() {
         registerThrowingSearchHelper(new IllegalStateException("full-fetch boom"));
         final DefaultChatContentFetcher f = new DefaultChatContentFetcher();
-        final LogEvent warn = captureWarn("test-full-fetch-throwable-appender", "Failed to fetch full content", () -> {
+        final LogEvent warn = captureWarn("Failed to fetch full content", () -> {
             assertTrue(f.fetchFullContent(List.of("a")).isEmpty(), "a failed full fetch must degrade to an empty list");
         });
         assertNotNull(warn, "the failure must be logged at WARN");
@@ -1454,7 +1381,7 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         registerQueryFieldConfig();
         registerThrowingSearchHelper(new IllegalStateException("highlight boom"));
         final DefaultChatContentFetcher f = new DefaultChatContentFetcher();
-        final LogEvent warn = captureWarn("test-highlight-throwable-appender", "Failed to fetch highlighted content", () -> {
+        final LogEvent warn = captureWarn("Failed to fetch highlighted content", () -> {
             assertTrue(f.fetchHighlightedContent(List.of("a"), "q").isEmpty(), "a failed highlight fetch must degrade to an empty list");
         });
         assertNotNull(warn, "the failure must be logged at WARN");
