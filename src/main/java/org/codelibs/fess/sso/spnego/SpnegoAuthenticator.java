@@ -259,7 +259,21 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 // The library reports why the handshake failed; keep it, but not every exception
                 // carries a message and "null <msg>" helps nobody diagnose an SSO failure.
                 final String detail = e.getMessage();
-                throw new SsoLoginException(detail == null ? msg : detail + " " + msg, e);
+                final String reason = detail == null ? msg : detail + " " + msg;
+                if (e instanceof UnsupportedOperationException) {
+                    // The library raises this type only for a header it refuses to even try: a
+                    // scheme that is neither Negotiate nor Basic, a Basic header carrying no token,
+                    // Basic while basic authentication is not supported, or an NTLM token it cannot
+                    // downgrade. The client decides every one of those, and /sso is anonymous, so a
+                    // stack trace per attempt would let an unauthenticated client fill the log. It
+                    // is not only an abuse path either: basic support is off unless the request is
+                    // secure, so a TLS-terminating proxy that leaves isSecure() false sends
+                    // ordinary browser traffic down here. An initialization fault cannot arrive as
+                    // this type, because getAuthenticator() wraps every one of them in a plain
+                    // SsoLoginException, which keeps its stack trace.
+                    throw new SsoStateException(reason, e);
+                }
+                throw new SsoLoginException(reason, e);
             }
 
             // context/auth loop not yet complete
@@ -380,7 +394,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         final String user = colon < 0 ? credentials : credentials.substring(0, colon);
         // The library drops a NetBIOS "DOMAIN\" prefix before authenticating, so mirror it here.
         final String name = user.substring(user.indexOf('\\') + 1);
-        final int at = name.indexOf('@');
+        // Kerberos reads the realm after the last '@', not the first: KerberosPrincipal collapses
+        // "alice@a@PARTNER.EXAMPLE" to name "alice@PARTNER.EXAMPLE" in realm "PARTNER.EXAMPLE", and
+        // the library hands the typed name straight to the login module, so PARTNER.EXAMPLE is the
+        // realm an AS-REQ would actually reach. Splitting on the first '@' names a realm that
+        // exists nowhere and that the allow list can therefore only refuse.
+        final int at = name.lastIndexOf('@');
+        // A name ending in '@' names an empty realm, which KerberosPrincipal rejects outright, so
+        // there is nothing here for the allow list to decide.
         if (at < 0 || at == name.length() - 1) {
             return null;
         }

@@ -97,6 +97,19 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getBasicRealm_realmFollowsTheLastAtSign() {
+        // Kerberos takes the realm after the LAST '@': KerberosPrincipal("alice@a@PARTNER.EXAMPLE")
+        // normalizes to name "alice@PARTNER.EXAMPLE" and realm "PARTNER.EXAMPLE", and the library
+        // hands the typed name straight to the login module, so that is the realm an AS-REQ would
+        // reach. Reading the first '@' instead names a realm that exists nowhere, which the allow
+        // list can only ever refuse. Built literally so the header is visible at the call site.
+        assertEquals("PARTNER.EXAMPLE", SpnegoAuthenticator.getBasicRealm("Basic " + token("alice@a@PARTNER.EXAMPLE:secret")));
+        // A name ending in '@' names an empty realm, which KerberosPrincipal rejects outright, so
+        // there is nothing for the allow list to decide.
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic " + token("alice@a@:secret")));
+    }
+
+    @Test
     public void test_getBasicRealm_separatorMatchesLibraryParsing() {
         // SpnegoProvider#parseAuthHeader matches the scheme case-insensitively and then skips a run
         // of any whitespace, possibly empty. Every header below is authenticated by the library, so
@@ -194,6 +207,50 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         authenticator.rejectDisallowedBasicRealm(requestWithAuthz("Negotiate YIIFoAYGKwYBBQUCoIIF"));
         authenticator.rejectDisallowedBasicRealm(requestWithAuthz(basic("alice:secret")));
         authenticator.rejectDisallowedBasicRealm(requestWithAuthz(basic("CORP\\alice:secret")));
+    }
+
+    @Test
+    public void test_getLoginCredential_rejectedAuthorizationHeaderIsAStateException() {
+        // "Negotiate or Basic Only" is what SpnegoProvider#getAuthScheme raises for a header whose
+        // scheme is neither Negotiate nor Basic, and for a Basic header carrying no token. The
+        // library also raises UnsupportedOperationException for Basic once basicSupported is false
+        // and for an NTLM token it cannot downgrade. All three are decided by the client, and /sso
+        // is anonymous, so a stack trace per attempt would let an unauthenticated client fill the
+        // log -- SsoStateException, which SsoAction logs message-only.
+        addMockRequestHeader(Constants.AUTHZ_HEADER, "Bearer " + token("alice@PARTNER.EXAMPLE"));
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+                throw new UnsupportedOperationException("Negotiate or Basic Only");
+            }
+        };
+        final SsoStateException e = assertThrows(SsoStateException.class, authenticator::getLoginCredential);
+        assertTrue(e.getMessage().contains("Negotiate or Basic Only"));
+        // The header is echoed masked, so the scheme survives and the credential does not.
+        assertTrue(e.getMessage().contains("Bearer ***"));
+        assertFalse(e.getMessage().contains(token("alice@PARTNER.EXAMPLE")));
+    }
+
+    @Test
+    public void test_getLoginCredential_initializationFaultKeepsItsStackTrace() {
+        // The boundary the case above must not cross, and the reason it tests the thrown type
+        // rather than the cause chain. SpnegoFilterConfig raises UnsupportedOperationException for
+        // an invalid login module too -- no storeKey, a login module class it does not support, a
+        // control flag other than REQUIRED -- and those are server-side faults the operator needs
+        // the trace for. They are harmless here only because getAuthenticator() has already wrapped
+        // them in a plain SsoLoginException, so the thrown type is no longer the one being matched.
+        // Matching on the cause instead would find the nested UnsupportedOperationException and
+        // silently demote every initialization failure to a message-only log; this goes red first.
+        addMockRequestHeader(Constants.AUTHZ_HEADER, "Negotiate YIIFoAYGKwYBBQUCoIIF");
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
+                throw new SsoLoginException("Failed to initialize SPNEGO.",
+                        new UnsupportedOperationException("Login Module for server does not have the storeKey option."));
+            }
+        };
+        final SsoLoginException e = assertThrows(SsoLoginException.class, authenticator::getLoginCredential);
+        assertFalse(e instanceof SsoStateException);
     }
 
     @Test
