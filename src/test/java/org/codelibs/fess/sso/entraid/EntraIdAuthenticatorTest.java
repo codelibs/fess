@@ -16,8 +16,10 @@
 package org.codelibs.fess.sso.entraid;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,6 +49,7 @@ import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
@@ -65,8 +67,25 @@ import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.ITenantProfile;
+import com.sun.net.httpserver.HttpServer;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
+
+    /**
+     * These tests reset a setting by writing {@code ""} rather than removing it, and
+     * {@code ComponentUtil.getSystemProperties()} is held by the container for the life of the
+     * surefire fork. Without its own container this class would leave entraid.state.ttl,
+     * entraid.default.groups, entraid.response.mode, aad.authority and aad.response.mode
+     * permanently present-but-empty for every test class that runs after it -- which is the exact
+     * state {@code test_getAuthority_fallsBackWhenTheLegacyKeyIsPresentButBlank} and
+     * {@code test_getResponseMode_ignoresABlankLegacyKey} exist to characterise.
+     *
+     * @return true to create the container for each test
+     */
+    @Override
+    protected boolean isUseOneTimeContainer() {
+        return true;
+    }
 
     private void setEntraIdConfig(final String clientId, final String clientSecret, final String tenant) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -1114,29 +1133,22 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_setMaxGroupDepth() {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+    public void test_setGroupCacheExpiry_isHonouredByTheCacheItBuilds() {
+        // The setter is what a fess_sso+entraidAuthenticator.xml writes, so it has to reach the
+        // builder rather than just a field nothing reads.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        authenticator.setGroupCacheExpiry(0L);
 
-        // Test setting different max group depths
-        authenticator.setMaxGroupDepth(5);
-        authenticator.setMaxGroupDepth(20);
-        authenticator.setMaxGroupDepth(1);
+        final Cache<String, Pair<String[], String[]>> expiringCache = authenticator.createGroupCache();
+        expiringCache.put("group-a", new Pair<>(new String[0], new String[0]));
+        expiringCache.cleanUp();
+        assertNull(expiringCache.getIfPresent("group-a"));
 
-        // Verify method accepts valid values without exception
-        assertTrue(true);
-    }
-
-    @Test
-    public void test_setGroupCacheExpiry() {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-
-        // Test setting different cache expiry values
-        authenticator.setGroupCacheExpiry(300L);
         authenticator.setGroupCacheExpiry(600L);
-        authenticator.setGroupCacheExpiry(60L);
-
-        // Verify method accepts valid values without exception
-        assertTrue(true);
+        final Cache<String, Pair<String[], String[]>> livingCache = authenticator.createGroupCache();
+        livingCache.put("group-a", new Pair<>(new String[0], new String[0]));
+        livingCache.cleanUp();
+        assertNotNull(livingCache.getIfPresent("group-a"));
     }
 
     @Test
@@ -1166,42 +1178,38 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
     @Test
     public void test_getParentGroup_oneBeforeDepthLimit() {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        // The sibling tests above pin the depth check returning early. This one has to prove the
+        // opposite -- that one below the limit the lookup really is attempted -- so it needs a
+        // cache and a scripted Graph. Without them getParentGroup throws NullPointerException on
+        // the null groupCache, which the version of this test inherited from 15.7 swallowed along
+        // with everything else.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
         authenticator.setMaxGroupDepth(5);
+        authenticator.parents.put("test-id", new String[] { "parent-id" });
 
-        // Test with depth one before the limit - should attempt to process
-        // Will fail due to null user, but verifies depth check passes
-        try {
-            authenticator.getParentGroup(null, "test-id", 4);
-            // If we reach here without NullPointerException, depth check passed
-        } catch (NullPointerException e) {
-            // Expected due to null user - depth check passed, processing attempted
-            assertTrue(true);
-        } catch (Exception e) {
-            // Other exceptions are also acceptable as we're testing depth logic
-            assertTrue(true);
-        }
+        final Pair<String[], String[]> result = authenticator.getParentGroup(null, "test-id", 4);
+
+        assertEquals(1, result.getFirst().length);
+        assertEquals("parent-id", result.getFirst()[0]);
+        assertTrue(authenticator.lookups.contains("test-id"));
     }
 
     @Test
     public void test_processParentGroup_callsOverloadWithDepth() {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-        authenticator.setMaxGroupDepth(3);
+        // maxGroupDepth is 1, so the walk happens only if the overload starts at depth 0. Passing
+        // anything else through would make this silently do nothing.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        authenticator.setMaxGroupDepth(1);
+        authenticator.parents.put("test-id", new String[] { "parent-id" });
+        final List<String> groupList = new ArrayList<>();
+        final List<String> roleList = new ArrayList<>();
 
-        List<String> groupList = new ArrayList<>();
-        List<String> roleList = new ArrayList<>();
+        authenticator.processParentGroup(null, groupList, roleList, "test-id");
 
-        // Test the overload that doesn't take depth parameter
-        // It should call the depth-tracking version with depth 0
-        try {
-            authenticator.processParentGroup(null, groupList, roleList, "test-id");
-        } catch (Exception e) {
-            // Expected due to null user
-        }
-
-        // Verify lists are still valid
-        assertNotNull(groupList);
-        assertNotNull(roleList);
+        assertTrue(authenticator.lookups.contains("test-id"));
+        assertEquals(1, groupList.size());
+        assertEquals("parent-id", groupList.get(0));
+        assertEquals(0, roleList.size());
     }
 
     @Test
@@ -1286,146 +1294,108 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
      */
     @Test
     public void test_processDirectMemberOf_collectsGroupIds() throws Exception {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        // The parsing loop had no coverage at all: the version of this test inherited from 15.7
+        // pointed at an unreachable URL and then asserted that three lists it had just created
+        // were not null.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final EntraIdUser user = newUserWithoutGraph();
+        final List<String> groupList = new ArrayList<>();
+        final List<String> roleList = new ArrayList<>();
+        final List<String> groupIdsForParentLookup = new ArrayList<>();
 
-        List<String> groupList = new ArrayList<>();
-        List<String> roleList = new ArrayList<>();
-        List<String> groupIdsForParentLookup = new ArrayList<>();
+        try (GraphStub graph = new GraphStub(200, Map.of(),
+                "{\"value\":[{\"@odata.type\":\"#microsoft.graph.group\",\"id\":\"group-1\",\"mail\":\"sales@contoso.com\"},"
+                        + "{\"@odata.type\":\"#microsoft.graph.directoryRole\",\"id\":\"role-1\"}]}")) {
+            assertTrue(authenticator.processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, graph.url()));
+        }
 
-        // Call with invalid URL - should handle gracefully
-        Method method = EntraIdAuthenticator.class.getDeclaredMethod("processDirectMemberOf", EntraIdUser.class, List.class, List.class,
-                List.class, String.class);
-        method.setAccessible(true);
+        // entraid.permission.fields defaults to "mail" and entraid.use.ds to true, so the mail
+        // address contributes both itself and its local part.
+        assertEquals(List.of("group-1", "sales@contoso.com", "sales"), groupList);
+        assertEquals(List.of("role-1"), roleList);
+        // Only groups are walked for parents; a directory role has none.
+        assertEquals(List.of("group-1"), groupIdsForParentLookup);
+    }
 
+    /**
+     * Test that the parent group lookup is scheduled only when there is something to look up.
+     */
+    @Test
+    public void test_updateMemberOf_schedulesTheParentLookupOnlyWhenThereAreGroupIds() {
+        final TestableEntraIdAuthenticator empty = new TestableEntraIdAuthenticator();
+        empty.updateMemberOf(newUserWithoutGraph());
+        assertFalse(empty.scheduleParentGroupLookupCalled.get());
+        assertTrue(empty.processDirectMemberOfCalled.get());
+
+        final TestableEntraIdAuthenticator collecting = new TestableEntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                super.processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, url);
+                groupIdsForParentLookup.add("group-1");
+                return true;
+            }
+        };
+        collecting.updateMemberOf(newUserWithoutGraph());
+        assertTrue(collecting.scheduleParentGroupLookupCalled.get());
+    }
+
+    /**
+     * Test that default groups and roles are read from configuration, new key first.
+     */
+    @Test
+    public void test_defaultGroupsAndRoles_readTheLegacyAzureAdKeys() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         try {
-            method.invoke(authenticator, null, groupList, roleList, groupIdsForParentLookup, "http://invalid-url-for-test");
-        } catch (Exception e) {
-            // Expected - null user or invalid URL
-        }
+            assertEquals(Collections.emptyList(), authenticator.getDefaultGroupList());
+            assertEquals(Collections.emptyList(), authenticator.getDefaultRoleList());
 
-        // Verify lists remain valid after error
-        assertNotNull(groupList, "groupList should not be null");
-        assertNotNull(roleList, "roleList should not be null");
-        assertNotNull(groupIdsForParentLookup, "groupIdsForParentLookup should not be null");
+            // Blank entries are dropped and the rest trimmed, so a hand-edited list still works.
+            fessConfig.setSystemProperty("aad.default.groups", " everyone , , guests ");
+            fessConfig.setSystemProperty("aad.default.roles", " guest ");
+            assertEquals(List.of("everyone", "guests"), authenticator.getDefaultGroupList());
+            assertEquals(List.of("guest"), authenticator.getDefaultRoleList());
+
+            // The renamed key wins over the legacy one.
+            fessConfig.setSystemProperty("entraid.default.groups", "staff");
+            fessConfig.setSystemProperty("entraid.default.roles", "member");
+            assertEquals(List.of("staff"), authenticator.getDefaultGroupList());
+            assertEquals(List.of("member"), authenticator.getDefaultRoleList());
+        } finally {
+            fessConfig.setSystemProperty("aad.default.groups", "");
+            fessConfig.setSystemProperty("aad.default.roles", "");
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+            fessConfig.setSystemProperty("entraid.default.roles", "");
+        }
     }
 
     /**
-     * Test that scheduleParentGroupLookup uses TimeoutManager correctly.
-     * This test verifies the method signature and can be called via reflection.
+     * Test that the client application settings fall back to the legacy Azure AD keys.
      */
     @Test
-    public void test_scheduleParentGroupLookup_schedulesTask() throws Exception {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-        // Don't call init() to avoid SsoManager dependency
-
-        List<String> initialGroups = new ArrayList<>();
-        initialGroups.add("group1");
-        List<String> initialRoles = new ArrayList<>();
-        initialRoles.add("role1");
-        List<String> groupIds = new ArrayList<>();
-        groupIds.add("test-group-id");
-
-        Method method = EntraIdAuthenticator.class.getDeclaredMethod("scheduleParentGroupLookup", EntraIdUser.class, List.class, List.class,
-                List.class);
-        method.setAccessible(true);
-
-        // Call should not throw - task is scheduled asynchronously
-        // Will fail when executed due to null user, but scheduling should succeed
+    public void test_clientConfiguration_fallsBackToTheLegacyAzureAdKeys() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         try {
-            method.invoke(authenticator, null, initialGroups, initialRoles, groupIds);
-            // Small wait to allow scheduled task to start
-            Thread.sleep(100);
-        } catch (Exception e) {
-            // May throw due to null user when task executes, which is expected
+            fessConfig.setSystemProperty("aad.client.id", "legacy-client-id");
+            fessConfig.setSystemProperty("aad.client.secret", "legacy-secret");
+            fessConfig.setSystemProperty("aad.tenant", "legacy-tenant");
+            fessConfig.setSystemProperty("aad.state.ttl", "120");
+            fessConfig.setSystemProperty("aad.authority", "https://login.microsoftonline.us/");
+
+            assertEquals("legacy-client-id", authenticator.getClientId());
+            assertEquals("legacy-secret", authenticator.getClientSecret());
+            assertEquals("legacy-tenant", authenticator.getTenant());
+            assertEquals(120L, authenticator.getStateTtl());
+            assertEquals("https://login.microsoftonline.us/", authenticator.getAuthority());
+        } finally {
+            fessConfig.setSystemProperty("aad.client.id", "");
+            fessConfig.setSystemProperty("aad.client.secret", "");
+            fessConfig.setSystemProperty("aad.tenant", "");
+            fessConfig.setSystemProperty("aad.state.ttl", "");
+            fessConfig.setSystemProperty("aad.authority", "");
         }
-
-        assertTrue("scheduleParentGroupLookup should complete without immediate error", true);
-    }
-
-    /**
-     * Test that empty groupIds list does not schedule any task.
-     */
-    @Test
-    public void test_updateMemberOf_emptyGroupIds_noScheduledTask() throws Exception {
-        // This test verifies the logic: if groupIdsForParentLookup is empty,
-        // scheduleParentGroupLookup should not be called
-
-        TestableEntraIdAuthenticator authenticator = new TestableEntraIdAuthenticator();
-        // Don't call init() to avoid SsoManager dependency
-
-        // Verify the flag tracking method call
-        assertFalse("scheduleParentGroupLookup should not have been called yet", authenticator.scheduleParentGroupLookupCalled.get());
-    }
-
-    /**
-     * Test concurrent calls to processDirectMemberOf.
-     */
-    @Test
-    public void test_processDirectMemberOf_threadSafety() throws Exception {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-        // Don't call init() to avoid SsoManager dependency
-
-        int threadCount = 5;
-        CountDownLatch latch = new CountDownLatch(threadCount);
-        AtomicBoolean errorOccurred = new AtomicBoolean(false);
-
-        Method method = EntraIdAuthenticator.class.getDeclaredMethod("processDirectMemberOf", EntraIdUser.class, List.class, List.class,
-                List.class, String.class);
-        method.setAccessible(true);
-
-        for (int i = 0; i < threadCount; i++) {
-            new Thread(() -> {
-                try {
-                    List<String> groupList = new ArrayList<>();
-                    List<String> roleList = new ArrayList<>();
-                    List<String> groupIds = new ArrayList<>();
-
-                    try {
-                        method.invoke(authenticator, null, groupList, roleList, groupIds, "http://test-url");
-                    } catch (Exception e) {
-                        // Expected due to null user
-                    }
-                } catch (Exception e) {
-                    errorOccurred.set(true);
-                } finally {
-                    latch.countDown();
-                }
-            }).start();
-        }
-
-        latch.await(10, TimeUnit.SECONDS);
-        assertFalse("No unexpected errors should occur during concurrent access", errorOccurred.get());
-    }
-
-    /**
-     * Test that default groups and roles are preserved during lazy loading.
-     */
-    @Test
-    public void test_defaultGroupsAndRoles_preserved() throws Exception {
-        TestableEntraIdAuthenticator authenticator = new TestableEntraIdAuthenticator();
-
-        List<String> defaultGroups = authenticator.getDefaultGroupList();
-        List<String> defaultRoles = authenticator.getDefaultRoleList();
-
-        // Default lists should be empty or contain configured defaults
-        assertNotNull(defaultGroups, "Default groups should not be null");
-        assertNotNull(defaultRoles, "Default roles should not be null");
-    }
-
-    /**
-     * Test list isolation during concurrent updates.
-     */
-    @Test
-    public void test_listIsolation_duringConcurrentUpdates() throws Exception {
-        List<String> originalGroups = new ArrayList<>();
-        originalGroups.add("original-group");
-
-        List<String> copiedGroups = new ArrayList<>(originalGroups);
-        copiedGroups.add("new-group");
-
-        // Verify original is not modified
-        assertEquals("Original list should have 1 element", 1, originalGroups.size());
-        assertEquals("Copied list should have 2 elements", 2, copiedGroups.size());
     }
 
     /**
@@ -1458,70 +1428,6 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         authenticator.addGroupOrRoleName(list, "", true);
         assertEquals(1, list.size());
         assertEquals("", list.get(0));
-    }
-
-    /**
-     * Test that lazy loading mechanism handles errors gracefully.
-     */
-    @Test
-    public void test_lazyLoading_errorHandling() throws Exception {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-        // Don't call init() to avoid SsoManager dependency
-
-        // Create lists
-        List<String> groups = new ArrayList<>();
-        List<String> roles = new ArrayList<>();
-        List<String> groupIds = new ArrayList<>();
-        groupIds.add("invalid-id");
-
-        Method method = EntraIdAuthenticator.class.getDeclaredMethod("scheduleParentGroupLookup", EntraIdUser.class, List.class, List.class,
-                List.class);
-        method.setAccessible(true);
-
-        // Should not throw - errors should be logged but not propagated
-        try {
-            method.invoke(authenticator, null, groups, roles, groupIds);
-            Thread.sleep(200); // Wait for async execution
-        } catch (Exception e) {
-            // Exception in async task is expected and should be caught internally
-        }
-
-        assertTrue("Method should handle errors gracefully", true);
-    }
-
-    /**
-     * Test that multiple scheduleParentGroupLookup calls don't interfere.
-     */
-    @Test
-    public void test_multipleScheduledTasks_noInterference() throws Exception {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-        // Don't call init() to avoid SsoManager dependency
-
-        Method method = EntraIdAuthenticator.class.getDeclaredMethod("scheduleParentGroupLookup", EntraIdUser.class, List.class, List.class,
-                List.class);
-        method.setAccessible(true);
-
-        AtomicReference<Exception> caughtException = new AtomicReference<>();
-
-        for (int i = 0; i < 5; i++) {
-            List<String> groups = new ArrayList<>();
-            groups.add("group_" + i);
-            List<String> roles = new ArrayList<>();
-            List<String> groupIds = new ArrayList<>();
-            groupIds.add("id_" + i);
-
-            try {
-                method.invoke(authenticator, null, groups, roles, groupIds);
-            } catch (Exception e) {
-                caughtException.set(e);
-            }
-        }
-
-        // Wait for tasks to complete
-        Thread.sleep(500);
-
-        // No interference should occur (just verify no critical errors)
-        assertTrue("Multiple scheduled tasks should not interfere with each other", true);
     }
 
     /**
@@ -1587,27 +1493,22 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_updateMemberOf_failsTheLoginWhenTheFirstLookupFails() {
+    public void test_updateMemberOf_failsTheLoginWhenTheFirstLookupFailsAndMembershipIsRequired() {
         // At login there is nothing to keep, and curl4j does not throw on a non-2xx response, so a
-        // Graph 429/403/401 on /me/memberOf used to parse cleanly, log a WARN and hand the user a
+        // Graph 429/403/401 on /me/memberOf parses cleanly, logs a WARN and hands the user a
         // working session carrying the configured defaults alone -- silently truncated search
-        // results for its whole lifetime, with refresh() not retrying until the token was nearly
-        // expired.
+        // results for its whole lifetime, with refresh() not retrying until the token is nearly
+        // expired. A deployment that would rather hand out no session at all opts in to this.
         //
         // LoginFailureException specifically: TypicalLoginAssist calls this resolver directly
         // without wrapping anything, and SsoAction only catches LoginFailureException around
         // loginRedirect(), so any other type would reach the generic error page instead of the
         // standard SSO error message.
-        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
-            @Override
-            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
-                    final List<String> groupIdsForParentLookup, final String url) {
-                return false;
-            }
-        };
+        final EntraIdAuthenticator authenticator = newAuthenticatorWhoseLookupFails();
         final EntraIdUser user = newUserWithoutGraph();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
+            fessConfig.setSystemProperty("entraid.require.membership", "true");
             fessConfig.setSystemProperty("entraid.default.groups", "everyone");
 
             try {
@@ -1619,8 +1520,123 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
             assertNull(user.getGroupNames(), "a half-permissioned session must not be handed out");
         } finally {
+            fessConfig.setSystemProperty("entraid.require.membership", "");
             fessConfig.setSystemProperty("entraid.default.groups", "");
         }
+    }
+
+    @Test
+    public void test_updateMemberOf_degradesToTheDefaultsWhenTheFirstLookupFails() {
+        // The default, and what 15.7 did. Failing the login instead turns a Graph 429/503, a
+        // transport failure, the 15.8 graphConnectTimeout/graphReadTimeout expiring, or a
+        // GroupMember.Read.All permission that was never granted, into a refusal for every user
+        // in the tenant for as long as the condition lasts.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWhoseLookupFails();
+        final EntraIdUser user = newUserWithoutGraph();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final LogCapturingAppender logs = LogCapturingAppender.attach(EntraIdAuthenticator.class);
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            fessConfig.setSystemProperty("entraid.default.roles", "guest");
+
+            authenticator.updateMemberOf(user);
+
+            assertEquals(1, user.getGroupNames().length);
+            assertEquals("everyone", user.getGroupNames()[0]);
+            assertEquals(1, user.getRoleNames().length);
+            assertEquals("guest", user.getRoleNames()[0]);
+            // Degrading silently would leave the operator with a tenant of under-permissioned
+            // sessions and nothing in the log to explain them.
+            assertTrue(logs.warnings().toString(),
+                    logs.warnings().stream().anyMatch(m -> m.contains(user.getName()) && m.contains("entraid.require.membership")));
+        } finally {
+            logs.detach();
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+            fessConfig.setSystemProperty("entraid.default.roles", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_degradesWhenRequireMembershipIsPresentButEmpty() {
+        // getSystemProperty substitutes a default only when the key is absent, and the admin
+        // screen stores an empty string rather than removing a key, so "" has to mean the default
+        // rather than being handed to Boolean.parseBoolean by accident.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWhoseLookupFails();
+        final EntraIdUser user = newUserWithoutGraph();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.require.membership", "");
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+
+            authenticator.updateMemberOf(user);
+
+            assertEquals(1, user.getGroupNames().length);
+            assertEquals("everyone", user.getGroupNames()[0]);
+        } finally {
+            fessConfig.setSystemProperty("entraid.require.membership", "");
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_keepsWhatWasCollectedBeforeTheFailure() {
+        // processDirectMemberOf pages through /me/memberOf and adds as it goes, so a failure on a
+        // later page leaves the earlier ones in the list. The result is always a superset of the
+        // configured defaults, which are seeded before the lookup runs.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-from-the-first-page");
+                return false;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+
+            authenticator.updateMemberOf(user);
+
+            assertEquals(List.of("everyone", "group-from-the-first-page"), List.of(user.getGroupNames()));
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_isRequireMembership_readsTheKeyAndHasNoLegacyAzureAdAlias() {
+        // The key is new in 15.8, so no aad.* value can predate it. Reading one would let a key
+        // nobody ever wrote for this purpose start refusing logins.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            assertFalse(authenticator.isRequireMembership());
+
+            fessConfig.setSystemProperty("entraid.require.membership", " TRUE ");
+            assertTrue(authenticator.isRequireMembership());
+
+            fessConfig.setSystemProperty("entraid.require.membership", "false");
+            assertFalse(authenticator.isRequireMembership());
+
+            fessConfig.setSystemProperty("entraid.require.membership", "");
+            fessConfig.setSystemProperty("aad.require.membership", "true");
+            assertFalse(authenticator.isRequireMembership());
+        } finally {
+            fessConfig.setSystemProperty("entraid.require.membership", "");
+            fessConfig.setSystemProperty("aad.require.membership", "");
+        }
+    }
+
+    /** An authenticator whose direct membership lookup always reports a failure. */
+    private EntraIdAuthenticator newAuthenticatorWhoseLookupFails() {
+        return new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                return false;
+            }
+        };
     }
 
     @Test
@@ -1673,6 +1689,89 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
                 "http://127.0.0.1:" + deadPort + "/v1.0/me/memberOf");
 
         assertFalse(resolved);
+    }
+
+    @Test
+    public void test_processDirectMemberOf_reportsAHostileBodyInsteadOfLettingItEscape() throws Exception {
+        // "value" is cast to List<Map<String, Object>>, so a body whose value is an object throws
+        // ClassCastException. catch (IOException | CurlException) did not cover it, and it escaped
+        // updateMemberOf and the EntraIdUser constructor to the generic error page instead of the
+        // outcome entraid.require.membership selects.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final EntraIdUser user = newUserWithoutGraph();
+
+        try (GraphStub graph = new GraphStub(200, Map.of(), "{\"value\":{\"id\":\"group-1\"}}")) {
+            assertFalse(authenticator.processDirectMemberOf(user, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), graph.url()));
+        }
+    }
+
+    @Test
+    public void test_processDirectMemberOf_recordsTheBackoffAThrottledGraphAskedFor() throws Exception {
+        // applyGraphThrottle had exactly one call site, inside getMemberGroupIds -- the
+        // asynchronous parent group walk. A 429 answered to the synchronous login lookup was
+        // therefore neither recorded nor honoured, and the walk went on issuing one request, and
+        // one stack trace, per group against a Graph that had already asked us to wait.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+
+        try (GraphStub graph = new GraphStub(429, Map.of("Retry-After", "120"), "{\"error\":{\"code\":\"TooManyRequests\"}}")) {
+            assertFalse(authenticator.processDirectMemberOf(user, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), graph.url()));
+        }
+
+        assertEquals(clock.get() + 120_000L, authenticator.graphThrottledUntil);
+        assertTrue(authenticator.isGraphThrottled());
+    }
+
+    @Test
+    public void test_processDirectMemberOf_stillAsksWhileGraphIsThrottling() throws Exception {
+        // The backoff keeps the asynchronous parent group walk off a throttled Graph. A login has
+        // no such luxury: skipping the lookup would hand out the configured defaults alone for the
+        // whole backoff, so it has to try -- the tenant may well have recovered already.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+        authenticator.graphThrottledUntil = clock.get() + 60_000L;
+        assertTrue(authenticator.isGraphThrottled());
+        final List<String> groupList = new ArrayList<>();
+
+        try (GraphStub graph =
+                new GraphStub(200, Map.of(), "{\"value\":[{\"@odata.type\":\"#microsoft.graph.group\",\"id\":\"group-1\"}]}")) {
+            assertTrue(authenticator.processDirectMemberOf(user, groupList, new ArrayList<>(), new ArrayList<>(), graph.url()));
+        }
+
+        assertEquals(List.of("group-1"), groupList);
+    }
+
+    /**
+     * A local stand-in for the Microsoft Graph endpoint. curl4j does not throw on a non-2xx
+     * response, so the status code and the headers are only observable through a real request.
+     */
+    private static final class GraphStub implements AutoCloseable {
+        private final HttpServer server;
+        private final String url;
+
+        GraphStub(final int statusCode, final Map<String, String> headers, final String body) throws IOException {
+            server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+            server.createContext("/v1.0/me/memberOf", exchange -> {
+                final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                headers.forEach((name, value) -> exchange.getResponseHeaders().set(name, value));
+                exchange.sendResponseHeaders(statusCode, bytes.length);
+                try (OutputStream out = exchange.getResponseBody()) {
+                    out.write(bytes);
+                }
+            });
+            server.start();
+            url = "http://" + server.getAddress().getAddress().getHostAddress() + ":" + server.getAddress().getPort() + "/v1.0/me/memberOf";
+        }
+
+        String url() {
+            return url;
+        }
+
+        @Override
+        public void close() {
+            server.stop(0);
+        }
     }
 
     @Test

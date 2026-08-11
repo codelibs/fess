@@ -143,6 +143,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** Configuration key for Entra ID default roles. */
     protected static final String ENTRAID_DEFAULT_ROLES = "entraid.default.roles";
 
+    /**
+     * Configuration key deciding what a login does when Microsoft Graph does not answer with a
+     * membership list and the user has none yet. See {@link #isRequireMembership()}. There is no
+     * {@code aad.require.membership} counterpart: the key is new, so no legacy value can exist.
+     */
+    protected static final String ENTRAID_REQUIRE_MEMBERSHIP = "entraid.require.membership";
+
     // Legacy configuration keys for backward compatibility (Azure AD)
     /** Legacy configuration key for Azure AD state time-to-live. */
     protected static final String AAD_STATE_TTL = "aad.state.ttl";
@@ -954,11 +961,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * to avoid login delays when users have many nested group memberships.
      *
      * <p>When Microsoft Graph does not answer with a membership list, the memberships already on
-     * the user are kept; if there are none yet -- which is the case at login -- the login is
-     * failed rather than completed with the configured defaults alone.
+     * the user are kept; if there are none yet -- which is the case at login -- the login either
+     * completes with whatever was collected plus the configured defaults, or is failed, according
+     * to {@link #isRequireMembership()}.
      *
      * @param user The Entra ID user to update.
-     * @throws LoginFailureException If the first membership lookup for this user failed.
+     * @throws LoginFailureException If the first membership lookup for this user failed and
+     *         {@code entraid.require.membership} is enabled.
      */
     public void updateMemberOf(final EntraIdUser user) {
         if (logger.isDebugEnabled()) {
@@ -997,17 +1006,29 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 logger.warn("Failed to resolve the Entra ID memberships of {}. Keeping the ones already resolved.", user.getName());
                 return;
             }
-            // First resolution, so there is nothing to keep. Handing out a session carrying the
-            // configured defaults alone would look like a successful login and quietly truncate
-            // every search result for its whole lifetime, and refresh() does not try again until
-            // the token is nearly expired. Failing the login is the honest answer.
-            //
-            // LoginFailureException specifically: this runs inside the resolver that
-            // FessLoginAssist passes to TypicalLoginAssist.findLoginUser, which calls it directly
-            // without wrapping anything, and SsoAction only catches LoginFailureException around
-            // fessLoginAssist.loginRedirect(). Any other type escapes to the generic error page
-            // instead of the standard SSO error message.
-            throw new LoginFailureException("Failed to resolve the Entra ID memberships of " + user.getName() + ".");
+            // First resolution, so there is nothing to keep.
+            if (isRequireMembership()) {
+                // Handing out a session carrying the configured defaults alone looks like a
+                // successful login and quietly truncates every search result for its whole
+                // lifetime, and refresh() does not try again until the token is nearly expired.
+                // A deployment that would rather have no session at all asks for this.
+                //
+                // LoginFailureException specifically: this runs inside the resolver that
+                // FessLoginAssist passes to TypicalLoginAssist.findLoginUser, which calls it
+                // directly without wrapping anything, and SsoAction only catches
+                // LoginFailureException around fessLoginAssist.loginRedirect(). Any other type
+                // escapes to the generic error page instead of the standard SSO error message.
+                throw new LoginFailureException("Failed to resolve the Entra ID memberships of " + user.getName() + ".");
+            }
+            // Otherwise degrade rather than refuse, which is what 15.7 did. A throttled tenant, a
+            // Graph outage or a permission that was never granted would otherwise refuse every
+            // login in the tenant for as long as the condition lasts. The lists are seeded with
+            // the configured defaults before the lookup, so what is written below is always a
+            // superset of them.
+            logger.warn(
+                    "Failed to resolve the Entra ID memberships of {}. Continuing with the memberships collected so far"
+                            + " and the configured defaults. Set {} = true to fail the login instead.",
+                    user.getName(), ENTRAID_REQUIRE_MEMBERSHIP);
         }
 
         // Set initial groups
@@ -1073,6 +1094,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("[processDirectMemberOf] Fetching direct memberships from URL: {}", url);
         }
         try (CurlResponse response = createGraphRequest(Curl.get(url), user.getAuthenticationResult().accessToken()).execute()) {
+            // Before the body, for the same reason as in getMemberGroupIds: a throttled reply is
+            // not required to be JSON, and the parser throws CurlException when it is not. The
+            // lookup itself is still attempted while throttled -- a login has to try -- but
+            // recording the backoff here is what keeps the asynchronous parent group walk from
+            // hammering a Graph that already asked us to wait.
+            applyGraphThrottle(response);
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response={}", contentMap);
@@ -1147,10 +1174,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 logger.warn("Unexpected response while accessing groups/roles: {}", contentMap);
             }
             return false;
-        } catch (final IOException | CurlException e) {
-            // curl4j reports a transport failure as CurlException, which is unchecked, so catching
-            // IOException alone let it escape as an unhandled RuntimeException instead of taking
-            // this controlled path.
+        } catch (final IOException | RuntimeException e) {
+            // Every unchecked failure has to take this path too, not just curl4j's CurlException:
+            // a body whose "value" is not an array of objects throws ClassCastException from the
+            // cast above, which used to escape updateMemberOf and the EntraIdUser constructor and
+            // land on the generic error page rather than on the controlled outcome the caller
+            // chooses. Nothing thrown from inside this method has to propagate --
+            // LoginFailureException is raised by updateMemberOf, after this returns.
             logger.warn("Failed to access groups/roles in Entra ID.", e);
             return false;
         }
@@ -1572,6 +1602,30 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             return Collections.emptyList();
         }
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns whether a login must be refused when the first membership lookup does not answer.
+     *
+     * <p>Defaults to false, which is what 15.7 did: a throttled tenant, a Graph outage or a
+     * {@code GroupMember.Read.All} permission that was never granted degrades the login to the
+     * memberships collected so far plus the configured defaults, rather than refusing every login
+     * in the tenant for as long as the condition lasts. A deployment that would rather hand out no
+     * session at all than an under-permissioned one sets {@code entraid.require.membership} to
+     * {@code true}.
+     *
+     * @return True to fail the login, false to complete it with the configured defaults.
+     */
+    protected boolean isRequireMembership() {
+        final String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_REQUIRE_MEMBERSHIP);
+        if (StringUtil.isBlank(value)) {
+            // Absent, or present but empty. getSystemProperty substitutes a default only when the
+            // key is absent, and the admin screen stores an empty string rather than removing a
+            // key, so both have to be mapped onto the default here rather than left to
+            // Boolean.parseBoolean.
+            return false;
+        }
+        return Boolean.parseBoolean(value.trim());
     }
 
     /**
