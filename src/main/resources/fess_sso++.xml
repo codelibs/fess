@@ -16,6 +16,10 @@
 	<component name="oicAuthenticator" class="org.codelibs.fess.sso.oic.OpenIdConnectAuthenticator">
 	</component>
 	<component name="samlAuthenticator" class="org.codelibs.fess.sso.saml.SamlAuthenticator">
+		<!-- Tunable with no saml.* configuration key. Uncomment to override the default.
+		     How long an unanswered AuthnRequest ID stays usable is saml.request.id.ttl instead.
+		<property name="maxRequestIds">10</property>
+		-->
 	</component>
 	<component name="spnegoAuthenticator" class="org.codelibs.fess.sso.spnego.SpnegoAuthenticator">
 	</component>

@@ -141,7 +141,10 @@ import jakarta.servlet.http.HttpSession;
  * {@code saml.idp.single_logout_service.url} is configured. It defaults to {@code false} because
  * not every IdP signs its LogoutRequest, but while it is {@code false} the single logout service
  * accepts an unsigned LogoutRequest and does not compare its NameID with the session user, so
- * anyone who knows the IdP entity ID can end an authenticated session. This is reported once as
+ * anyone who can lure a logged-in user to a crafted URL can end that session. The IdP entity ID
+ * is not needed either: {@code Issuer} is optional in the SAML protocol schema and java-saml
+ * compares it only when the element is present, so a LogoutRequest that omits it skips the
+ * comparison altogether. The impact is a forced logout, not account takeover. This is reported as
  * {@code unsigned_logoutrequest_accepted} in the insecure-settings warning.</p>
  *
  * <h2>Session Cookie Settings (Required)</h2>
@@ -427,8 +430,9 @@ public class SamlAuthenticator implements SsoAuthenticator {
         final List<String> warnings = new ArrayList<>(settings.getSecurityWarnings());
         if (settings.getIdpSingleLogoutServiceResponseUrl() != null && !settings.getWantMessagesSigned()) {
             // /sso/logout accepts a LogoutRequest that is not signed, and the NameID it carries is
-            // never compared with the session user, so anyone who knows the IdP entity ID can end
-            // an authenticated session by luring the user to a crafted URL.
+            // never compared with the session user, so anyone can end an authenticated session by
+            // luring the user to a crafted URL. Not even the IdP entity ID is needed: Issuer is
+            // optional in the protocol schema and java-saml compares it only when it is present.
             warnings.add("unsigned_logoutrequest_accepted");
         }
         if (!warnings.equals(loggedSecurityWarnings.getAndSet(warnings)) && !warnings.isEmpty()) {
