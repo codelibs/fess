@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.SamlCredential;
 import org.codelibs.fess.app.web.base.login.SamlCredential.SamlUser;
@@ -50,12 +52,16 @@ import org.codelibs.saml2.Auth;
 import org.codelibs.saml2.core.authn.AuthnRequestParams;
 import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.ValidationException;
+import org.codelibs.saml2.core.logout.LogoutRequest;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
 import org.codelibs.saml2.core.replay.InMemoryReplayCache;
 import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
+import org.codelibs.saml2.core.util.Util;
+import org.codelibs.saml2.servlet.ServletUtils;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
@@ -63,6 +69,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
+import org.w3c.dom.Document;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -152,11 +159,14 @@ import jakarta.servlet.http.HttpSession;
  * <p>{@code saml.security.want_messages_signed} matters in particular once
  * {@code saml.idp.single_logout_service.url} is configured. It defaults to {@code false} because
  * not every IdP signs its LogoutRequest, but while it is {@code false} the single logout service
- * accepts an unsigned LogoutRequest and does not compare its NameID with the session user, so
- * anyone who can lure a logged-in user to a crafted URL can end that session. The IdP entity ID
- * is not needed either: {@code Issuer} is optional in the SAML protocol schema and java-saml
- * compares it only when the element is present, so a LogoutRequest that omits it skips the
- * comparison altogether. The impact is a forced logout, not account takeover. This is reported as
+ * accepts a LogoutRequest that nobody authenticated, and reaching it needs no knowledge of the
+ * deployment: {@code Issuer} is optional in the SAML protocol schema and java-saml compares it
+ * only when the element is present, so a LogoutRequest that omits it is never matched against the
+ * IdP entity ID. A session logged in through SAML is protected by
+ * {@link #isLogoutRequestForAnotherUser}, which refuses to end a session the LogoutRequest does
+ * not name; what remains exposed is a session whose NameID the sender already knows, and any
+ * session that did not come from SAML at all, because there is then no NameID to compare. The
+ * impact is a forced logout, not account takeover. This is reported once as
  * {@code unsigned_logoutrequest_accepted} in the insecure-settings warning.</p>
  *
  * <h2>Session Cookie Settings (Required)</h2>
@@ -207,6 +217,16 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * The property key for the SAML SP base URL.
      */
     protected static final String SAML_SP_BASE_URL = "saml.sp.base.url";
+
+    /** Upper bound on the length of a sender-supplied NameID embedded in a log message. */
+    protected static final int MAX_LOGGED_NAME_ID_LENGTH = 64;
+
+    /**
+     * Characters that must not be copied verbatim into a log message. {@code \p{Cntrl}} alone is
+     * ASCII-only, so the Unicode break characters a log viewer still renders as a new line are
+     * listed explicitly.
+     */
+    private static final Pattern LOG_UNSAFE_PATTERN = Pattern.compile("[\\p{Cntrl}\\u0085\\u2028\\u2029]");
 
     /**
      * The property key for how long, in seconds, an unanswered AuthnRequest ID stays usable. Only
@@ -452,10 +472,13 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected void logSecurityWarnings(final Saml2Settings settings) {
         final List<String> warnings = new ArrayList<>(settings.getSecurityWarnings());
         if (settings.getIdpSingleLogoutServiceResponseUrl() != null && !settings.getWantMessagesSigned()) {
-            // /sso/logout accepts a LogoutRequest that is not signed, and the NameID it carries is
-            // never compared with the session user, so anyone can end an authenticated session by
-            // luring the user to a crafted URL. Not even the IdP entity ID is needed: Issuer is
-            // optional in the protocol schema and java-saml compares it only when it is present.
+            // /sso/logout accepts a LogoutRequest that is not signed, so anyone who can lure a
+            // logged-in user to a crafted URL can reach it; not even the IdP entity ID is needed,
+            // since Issuer is optional in the protocol schema and java-saml compares it only when
+            // it is present. isLogoutRequestForAnotherUser() keeps such a request from ending a
+            // SAML session it does not name, but a session whose NameID the sender already knows,
+            // and a session that did not come from SAML and therefore has no NameID to compare,
+            // are still ended by it.
             warnings.add("unsigned_logoutrequest_accepted");
         }
         if (!warnings.equals(loggedSecurityWarnings.getAndSet(warnings)) && !warnings.isEmpty()) {
@@ -1207,8 +1230,13 @@ public class SamlAuthenticator implements SsoAuthenticator {
                     throw processFailure("Failed to log out.", msg);
                 }
                 final Auth auth = new Auth(settings, request, response);
+                // A LogoutRequest that names somebody else must not take this session with it, but
+                // it is still answered with an ordinary LogoutResponse: an error would tell an
+                // unauthenticated sender whether it guessed a live session, and would leave a
+                // confused-but-legitimate IdP with no way of finishing its own logout.
+                final boolean keepLocalSession = isLogoutRequestForAnotherUser(request, settings);
                 // stay=true keeps java-saml from committing the servlet response itself
-                final String redirectUrl = auth.processSLO(false, null, true);
+                final String redirectUrl = auth.processSLO(keepLocalSession, null, true);
                 final List<String> errors = auth.getErrors();
                 if (!errors.isEmpty()) {
                     final String msg = String.join(", ", errors);
@@ -1225,5 +1253,178 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 throw processFailure("Failed to log out.", e.getMessage(), e);
             }
         }).orElseThrow(() -> processFailure("Failed to log out.", "Invalid state."));
+    }
+
+    /**
+     * Returns whether an IdP-initiated LogoutRequest names somebody other than the user this
+     * session is logged in as, in which case the session must survive it.
+     *
+     * <p>{@code /sso/logout} is anonymous and, because SAML requires {@code SameSite=none}, is
+     * reachable cross-site with the victim's session cookie attached. With the shipped default
+     * {@code saml.security.want_messages_signed=false} java-saml accepts a LogoutRequest that
+     * carries no signature, and every other check it makes is conditional on an attribute the
+     * sender simply omits -- {@code NotOnOrAfter}, {@code Destination}, and even {@code Issuer},
+     * which the protocol schema declares optional and whose absence therefore skips the entity ID
+     * comparison as well. The NameID is the one element java-saml insists on, so it is the one
+     * thing left worth checking, and comparing it with the session costs an attacker the guess.</p>
+     *
+     * <p>A LogoutResponse the IdP is answering ({@code SAMLResponse}) is left alone: it is the
+     * reply to a LogoutRequest this SP itself sent, so it carries no NameID to compare, and
+     * constructing a {@link LogoutRequest} from such a request would silently build a fresh
+     * outgoing message rather than parse anything.</p>
+     *
+     * <p>Anything that is not a clear mismatch keeps the previous behaviour of ending the session:
+     * no user logged in, a user who did not come from SAML, a NameID that cannot be read. Failing
+     * the other way would let an unreadable NameID keep sessions alive, which is the failure mode
+     * this method exists to avoid making worse.</p>
+     *
+     * @param request The HTTP request carrying the SAML logout message.
+     * @param settings The SAML settings, used to parse the LogoutRequest the way java-saml
+     *            itself parses it a moment later.
+     * @return true if the session must be kept because the LogoutRequest names another user.
+     */
+    protected boolean isLogoutRequestForAnotherUser(final HttpServletRequest request, final Saml2Settings settings) {
+        if (StringUtil.isBlank(request.getParameter("SAMLRequest"))) {
+            return false;
+        }
+        final String sessionNameId = getSessionSamlNameId();
+        if (StringUtil.isBlank(sessionNameId)) {
+            return false;
+        }
+        final String logoutRequestNameId = getLogoutRequestNameId(request, settings);
+        if (StringUtil.isBlank(logoutRequestNameId)) {
+            return false;
+        }
+        if (isSameNameId(sessionNameId, logoutRequestNameId)) {
+            return false;
+        }
+        logger.warn("The LogoutRequest names '{}' but this session is logged in as '{}', so it is answered without ending the session."
+                + " If a legitimate single logout stopped working, compare the NameID the IdP puts in its assertion with the one it puts"
+                + " in its LogoutRequest.", sanitizeForLog(logoutRequestNameId), sanitizeForLog(sessionNameId));
+        return true;
+    }
+
+    /**
+     * Bounds a NameID and strips its control characters so that it can be embedded in a log
+     * message.
+     *
+     * <p>The NameID of the LogoutRequest reaches this log before anything has authenticated the
+     * message -- that is the whole point of the check that reports it -- so a raw newline in it
+     * would let an unauthenticated sender forge log lines. It is XML text content, so it can hold
+     * one. {@code SpnegoAuthenticator} bounds the realm it logs for the same reason and in the
+     * same way.</p>
+     *
+     * @param value The NameID to embed in a log message.
+     * @return A value safe to embed in a log message.
+     */
+    protected static String sanitizeForLog(final String value) {
+        final String bounded = value.length() > MAX_LOGGED_NAME_ID_LENGTH ? value.substring(0, MAX_LOGGED_NAME_ID_LENGTH) + "..." : value;
+        return LOG_UNSAFE_PATTERN.matcher(bounded).replaceAll("?");
+    }
+
+    /**
+     * Returns the NameID this session was logged in with, or null when it did not come from SAML.
+     *
+     * <p>{@code SamlUser.getName()} is that NameID rather than a display name: it is what
+     * {@link #logout(FessUserBean)} passes as the {@code nameId} of the LogoutRequest it sends,
+     * so the IdP is expected to name the same value when the logout starts at its end.</p>
+     *
+     * @return The NameID of the session user, or null when nobody is logged in, when the user did
+     *         not authenticate through SAML, or when the session cannot be reached at all.
+     */
+    protected String getSessionSamlNameId() {
+        try {
+            final FessUserBean userBean = getSavedUserBean().orElse(null);
+            if (userBean != null && userBean.getFessUser() instanceof final SamlUser samlUser) {
+                return samlUser.getName();
+            }
+        } catch (final Exception e) {
+            // this endpoint has to keep working for a request that reaches it outside a login
+            // scope, so being unable to look at the session means "cannot tell", not "fail"
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to read the session user.", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the user bean held by the session.
+     *
+     * <p>Separate from {@link #getSessionSamlNameId()} so that a test can decide who is logged in
+     * without standing up a login scope; {@code /api/v2} does the same with its own handlers.</p>
+     *
+     * @return The user bean of the session, empty when nobody is logged in.
+     */
+    protected OptionalThing<FessUserBean> getSavedUserBean() {
+        return ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+    }
+
+    /**
+     * Returns the NameID carried by the incoming LogoutRequest, or null when it cannot be read.
+     *
+     * <p>The message is parsed with java-saml rather than by hand. {@code /sso/logout} is
+     * anonymous, so hand-parsing the base64 {@code SAMLRequest} here would put an XML parser --
+     * and therefore an XXE surface -- in front of an unauthenticated sender, whereas
+     * {@link LogoutRequest} decodes and loads it through the hardened path the library already
+     * uses. The arguments mirror {@code LogoutRequest.isValid()} exactly, including the allowed
+     * key transport algorithms, so an encrypted NameID is read here under the same restrictions it
+     * would be read under a moment later and this adds no decryption the message was not going to
+     * get anyway.</p>
+     *
+     * <p>Nothing here is allowed to abort the logout. A malformed message, an {@code EncryptedID}
+     * with no SP private key configured to open it, an unreadable NameID: all of them mean "cannot
+     * tell", which {@link #isLogoutRequestForAnotherUser} turns back into the previous behaviour.
+     * Constructing the {@link LogoutRequest} touches no replay cache -- only {@code isValid()}
+     * registers a message ID -- so parsing it twice does not make java-saml reject its own copy as
+     * a replay.</p>
+     *
+     * @param request The HTTP request carrying the LogoutRequest.
+     * @param settings The SAML settings.
+     * @return The NameID of the LogoutRequest, or null when it cannot be read.
+     */
+    protected String getLogoutRequestNameId(final HttpServletRequest request, final Saml2Settings settings) {
+        try {
+            final LogoutRequest logoutRequest = new LogoutRequest(settings, ServletUtils.makeHttpRequest(request));
+            final Document document = Util.loadXML(logoutRequest.getLogoutRequestXml());
+            if (document == null) {
+                // Util.loadXML answers unparsable XML, and anything holding an ENTITY, with null
+                return null;
+            }
+            return LogoutRequest.getNameId(document, settings.getSPkey(), settings.isTrimNameIds(),
+                    settings.getAllowedKeyTransportAlgorithms());
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to read the NameID of the LogoutRequest.", e);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Returns whether two NameIDs identify the same user.
+     *
+     * <p>Deliberately more forgiving than {@code equals}, because the damage of the two comparisons
+     * is not symmetric: a false match only leaves today's behaviour in place, while a false
+     * mismatch breaks a legitimate single logout, which is silent and looks like the session simply
+     * refusing to end.</p>
+     *
+     * <p>Both sides are trimmed. The NameID stored at login and the NameID of the LogoutRequest
+     * are read from the text content of two different XML documents, and java-saml trims neither
+     * unless {@code saml.parsing.trim_name_ids} is turned on, which Fess leaves off; an IdP that
+     * pretty-prints one message and not the other would otherwise look like a different user.</p>
+     *
+     * <p>The comparison also ignores case. NameIDs that differ only in case are the same account
+     * at every IdP that produces them -- an email address or a UPN -- and an IdP that normalises
+     * case differently between its assertion and its LogoutRequest is a real deployment, not a
+     * hypothetical one. It costs nothing to defend against: a sender who does not know the NameID
+     * fails whatever the case, and one who does gains nothing from being allowed to change it.</p>
+     *
+     * @param sessionNameId The NameID this session was logged in with, not blank.
+     * @param logoutRequestNameId The NameID carried by the LogoutRequest, not blank.
+     * @return true if both name the same user.
+     */
+    protected boolean isSameNameId(final String sessionNameId, final String logoutRequestNameId) {
+        return sessionNameId.trim().equalsIgnoreCase(logoutRequestNameId.trim());
     }
 }
