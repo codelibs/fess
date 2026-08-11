@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -1781,31 +1782,156 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals(List.of("group-1"), groupList);
     }
 
+    @Test
+    public void test_processDirectMemberOf_followsTheNextLinkAcrossPages() throws Exception {
+        // A tenant with more direct memberships than Graph returns in one page answers with
+        // @odata.nextLink, and the recursion that follows it had never been executed: the stub
+        // served one fixed answer, so every test stopped after the first page.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+        final List<String> groupList = new ArrayList<>();
+        final List<String> groupIdsForParentLookup = new ArrayList<>();
+
+        try (GraphStub graph = new GraphStub(List.of(
+                new StubResponse(200, Map.of(),
+                        "{\"value\":[{\"@odata.type\":\"#microsoft.graph.group\",\"id\":\"group-1\"}],\"@odata.nextLink\":\"${url}\"}"),
+                new StubResponse(200, Map.of(), "{\"value\":[{\"@odata.type\":\"#microsoft.graph.group\",\"id\":\"group-2\"}]}")))) {
+            assertTrue(authenticator.processDirectMemberOf(user, groupList, new ArrayList<>(), groupIdsForParentLookup, graph.url()));
+            assertEquals(2, graph.requestCount());
+        }
+
+        assertEquals(List.of("group-1", "group-2"), groupList);
+        // Both pages feed the parent group walk, not just the one the first request answered with.
+        assertEquals(List.of("group-1", "group-2"), groupIdsForParentLookup);
+    }
+
+    @Test
+    public void test_processDirectMemberOf_reportsAFailureOnALaterPage() throws Exception {
+        // Whatever the earlier pages collected stays in the lists. updateMemberOf is what decides
+        // between keeping it, writing it with the configured defaults and refusing the login, so
+        // this must not be resolved here by returning true for a partial answer.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+        final List<String> groupList = new ArrayList<>();
+
+        try (GraphStub graph = new GraphStub(List.of(
+                new StubResponse(200, Map.of(),
+                        "{\"value\":[{\"@odata.type\":\"#microsoft.graph.group\",\"id\":\"group-1\"}],\"@odata.nextLink\":\"${url}\"}"),
+                new StubResponse(500, Map.of(), "{\"error\":{\"code\":\"generalException\"}}")))) {
+            assertFalse(authenticator.processDirectMemberOf(user, groupList, new ArrayList<>(), new ArrayList<>(), graph.url()));
+            assertEquals(2, graph.requestCount());
+        }
+
+        assertEquals(List.of("group-1"), groupList);
+    }
+
+    @Test
+    public void test_getMemberGroupIds_returnsTheParentIdsGraphAnswered() throws Exception {
+        // toMemberGroupIds is covered directly, but the request around it -- the POST, the
+        // securityEnabledOnly body and the applyGraphThrottle call ahead of the parser -- was
+        // never executed, because this was the one Graph call in the class with no URL seam.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+
+        try (GraphStub graph = new GraphStub(200, Map.of(), "{\"value\":[\"parent-a\",\"parent-b\"]}")) {
+            assertEquals(List.of("parent-a", "parent-b"), List.of(authenticator.getMemberGroupIds(user, "group-a", graph.url())));
+        }
+
+        assertEquals(0L, authenticator.graphThrottledUntil);
+    }
+
+    @Test
+    public void test_getMemberGroupIds_recordsTheBackoffBeforeReadingTheBody() throws Exception {
+        // applyGraphThrottle runs ahead of the parser on purpose: a throttled reply is not
+        // required to be JSON, and the parser throws on one that is not. Recording the backoff
+        // afterwards would lose it for exactly the responses it exists to handle, so the body
+        // here is deliberately not JSON.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+
+        try (GraphStub graph = new GraphStub(429, Map.of("Retry-After", "120", "Content-Type", "text/plain"), "Too Many Requests")) {
+            try {
+                authenticator.getMemberGroupIds(user, "group-a", graph.url());
+                fail("an unreadable throttled reply must not be mistaken for an answer");
+            } catch (final IOException | RuntimeException e) {
+                // Expected: getParentGroup turns this into an uncached empty result.
+            }
+        }
+
+        assertEquals(clock.get() + 120_000L, authenticator.graphThrottledUntil);
+        assertTrue(authenticator.isGraphThrottled());
+    }
+
+    @Test
+    public void test_removeAccount_doesNotLetALogoutFailBecauseTheCacheCouldNotBePruned() {
+        // getClientApplication throws when Entra ID is not configured -- which is the state a
+        // server is left in after the settings are cleared while a session is still live -- and
+        // LogoutAction has nothing to catch it with.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        setEntraIdConfig("", "", "");
+
+        authenticator.removeAccount(new TestAccount());
+    }
+
+    /**
+     * One scripted answer from {@link GraphStub}. {@code Content-Type: application/json} is sent
+     * unless {@code headers} overrides it, because that is what Microsoft Graph answers with and
+     * what the response parser expects.
+     *
+     * @param statusCode The HTTP status to answer with.
+     * @param headers The headers to add, which may override the default {@code Content-Type}.
+     * @param body The body to answer with. See {@link GraphStub} for the {@code ${url}} token.
+     */
+    private record StubResponse(int statusCode, Map<String, String> headers, String body) {
+    }
+
     /**
      * A local stand-in for the Microsoft Graph endpoint. curl4j does not throw on a non-2xx
      * response, so the status code and the headers are only observable through a real request.
+     *
+     * <p>The scripted answers are served one per request, in order, and the last one is repeated
+     * once the script runs out. {@code ${url}} in a body is replaced by the stub's own URL, which
+     * is what lets a paged answer point its {@code @odata.nextLink} back at the stub: the URL is
+     * only known once the server has bound a port, so a test cannot write it into the body itself.
+     *
+     * <p>The single context is registered under the {@code /me/memberOf} path for every method,
+     * which is why the methods driven through it all take their URL as a parameter.
      */
     private static final class GraphStub implements AutoCloseable {
         private final HttpServer server;
         private final String url;
+        private final List<StubResponse> responses;
+        private final AtomicInteger requestCount = new AtomicInteger();
 
         GraphStub(final int statusCode, final Map<String, String> headers, final String body) throws IOException {
+            this(List.of(new StubResponse(statusCode, headers, body)));
+        }
+
+        GraphStub(final List<StubResponse> responses) throws IOException {
+            this.responses = responses;
             server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+            // Resolved before the handler is registered rather than after: the body substitution
+            // below reads it, and a blank final read from a lambda does not compile.
+            url = "http://" + server.getAddress().getAddress().getHostAddress() + ":" + server.getAddress().getPort() + "/v1.0/me/memberOf";
             server.createContext("/v1.0/me/memberOf", exchange -> {
-                final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                final StubResponse response = responses.get(Math.min(requestCount.getAndIncrement(), responses.size() - 1));
+                final byte[] bytes = response.body().replace("${url}", url).getBytes(StandardCharsets.UTF_8);
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                headers.forEach((name, value) -> exchange.getResponseHeaders().set(name, value));
-                exchange.sendResponseHeaders(statusCode, bytes.length);
+                response.headers().forEach((name, value) -> exchange.getResponseHeaders().set(name, value));
+                exchange.sendResponseHeaders(response.statusCode(), bytes.length);
                 try (OutputStream out = exchange.getResponseBody()) {
                     out.write(bytes);
                 }
             });
             server.start();
-            url = "http://" + server.getAddress().getAddress().getHostAddress() + ":" + server.getAddress().getPort() + "/v1.0/me/memberOf";
         }
 
         String url() {
             return url;
+        }
+
+        int requestCount() {
+            return requestCount.get();
         }
 
         @Override
