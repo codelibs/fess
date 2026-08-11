@@ -32,11 +32,13 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.exception.SsoMessageException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
@@ -135,6 +137,98 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getSettings_blankPropertyFallsBackToLibraryDefault() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // clearing the key is the documented way of not constraining the authentication
+            // method; falling back to the Fess default instead would keep sending
+            // RequestedAuthnContext=Password and break an IdP that enforces MFA
+            systemProperties.setProperty("saml.security.requested_authncontext", StringUtil.EMPTY);
+            systemProperties.setProperty("saml.sp.nameidformat", "  ");
+
+            final Saml2Settings settings = authenticator.getSettings();
+
+            assertTrue(String.valueOf(settings.getRequestedAuthnContext()), settings.getRequestedAuthnContext().isEmpty());
+            assertEquals("urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified", settings.getSpNameIDFormat());
+        } finally {
+            systemProperties.remove("saml.security.requested_authncontext");
+            systemProperties.remove("saml.sp.nameidformat");
+        }
+    }
+
+    @Test
+    public void test_getSettings_cachedUntilPropertiesChange() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            final Saml2Settings first = authenticator.getSettings();
+            final Saml2Settings second = authenticator.getSettings();
+
+            // rebuilding re-parses the IdP certificate and makes the library re-emit one warn
+            // line per security warning, so unchanged properties must reuse the instance
+            assertSame(first, second);
+            assertEquals(1, appender.warnings().size());
+
+            systemProperties.setProperty("saml.security.want_assertions_signed", "true");
+            final Saml2Settings rebuilt = authenticator.getSettings();
+
+            Assertions.assertNotSame(first, rebuilt);
+            assertTrue(rebuilt.getWantAssertionsSigned());
+        } finally {
+            systemProperties.remove("saml.security.want_assertions_signed");
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getSettings_cacheFollowsBaseUrlChangedAfterStartup() throws Exception {
+        // the computed SP URLs are not system properties, so the cache key has to include them
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            assertEquals("http://localhost:8080/sso/metadata", authenticator.getSettings().getSpEntityId());
+
+            systemProperties.setProperty(BASE_URL_KEY, "https://fess.example.com");
+
+            assertEquals("https://fess.example.com/sso/metadata", authenticator.getSettings().getSpEntityId());
+        } finally {
+            systemProperties.remove(BASE_URL_KEY);
+        }
+    }
+
+    @Test
+    public void test_logSecurityWarnings_reportsUnsignedLogoutRequests() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            // without a single logout service there is nothing to send a LogoutRequest to
+            authenticator.getSettings();
+            assertEquals(1, appender.warnings().size());
+            assertFalse(appender.warnings().get(0), appender.warnings().get(0).contains("unsigned_logoutrequest_accepted"));
+
+            systemProperties.setProperty("saml.idp.single_logout_service.url", "https://idp.example.com/slo");
+            authenticator.getSettings();
+
+            // an unsigned LogoutRequest whose NameID is never checked ends any session
+            assertEquals(2, appender.warnings().size());
+            assertTrue(appender.warnings().get(1), appender.warnings().get(1).contains("unsigned_logoutrequest_accepted"));
+
+            systemProperties.setProperty("saml.security.want_messages_signed", "true");
+            authenticator.getSettings();
+
+            assertEquals(3, appender.warnings().size());
+            assertFalse(appender.warnings().get(2), appender.warnings().get(2).contains("unsigned_logoutrequest_accepted"));
+        } finally {
+            systemProperties.remove("saml.idp.single_logout_service.url");
+            systemProperties.remove("saml.security.want_messages_signed");
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_getSettings_propertyOverridesDefault() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticator();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
@@ -191,12 +285,29 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     @Test
     public void test_getLogoutResponse_withoutIdpSingleLogoutServiceUrl() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticator();
+        // a real logout message, so that the missing configuration is what fails
+        getMockRequest().setParameter("SAMLRequest", "PHNhbWxwOkxvZ291dFJlcXVlc3QgLz4=");
         try {
             authenticator.getResponse(SsoResponseType.LOGOUT);
             fail("SsoMessageException should be thrown");
         } catch (final SsoMessageException e) {
             assertNotNull(e.getCause());
             assertTrue(e.getCause().getMessage(), e.getCause().getMessage().contains("single logout service URL"));
+        }
+    }
+
+    @Test
+    public void test_getLogoutResponse_withoutSamlLogoutMessageAndWithoutSlo() throws Exception {
+        // single logout is optional, so the anonymous visit below reaches a deployment that never
+        // configured it. It must still be rejected as a request rather than reported as a fault,
+        // or /sso/logout writes a stack trace per anonymous hit on every such deployment.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        try {
+            authenticator.getResponse(SsoResponseType.LOGOUT);
+            fail("SsoMessageException should be thrown");
+        } catch (final SsoMessageException e) {
+            assertTrue(String.valueOf(e.getCause()), e.getCause() instanceof SsoStateException);
+            assertEquals("This endpoint expects a SAML logout message from the IdP.", e.getCause().getMessage());
         }
     }
 
@@ -273,21 +384,67 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getLoginCredential_requestWithoutResponseKeepsPendingRequestId() throws Exception {
+    public void test_getLoginCredential_requestWithoutResponseReplacesPendingRequestId() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticator();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         try {
             setUpIdp(systemProperties);
-            // a plain visit to /sso/ while a login is in flight must not consume the pending ID
+            // a plain visit to /sso/ sends a fresh AuthnRequest and rebinds the session to its
+            // ID, so a login already in flight is abandoned: only one AuthnRequest per session
+            // can be answered, and the response to the older one is rejected as unmatched
             final MockletHttpServletRequest request = getMockRequest();
             request.getSession().setAttribute("SAML_STATE", "ONELOGIN_pending");
 
             authenticator.getLoginCredential();
 
-            assertNotNull(request.getSession(false).getAttribute("SAML_STATE"));
+            final Object requestId = request.getSession(false).getAttribute("SAML_STATE");
+            assertNotNull(requestId);
+            Assertions.assertNotEquals("ONELOGIN_pending", requestId);
+            assertTrue(String.valueOf(requestId), String.valueOf(requestId).startsWith("ONELOGIN_"));
         } finally {
             tearDownIdp(systemProperties);
         }
+    }
+
+    @Test
+    public void test_getLogoutResponse_withoutSamlLogoutMessage() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            systemProperties.setProperty("saml.idp.single_logout_service.url", "https://idp.example.com/slo");
+
+            // /sso/logout is anonymous, so it also receives plain visits carrying no SAML message
+            authenticator.getResponse(SsoResponseType.LOGOUT);
+            fail("SsoMessageException should be thrown");
+        } catch (final SsoMessageException e) {
+            // a rejected request, not a fault: the cause decides that SsoAction logs it without a
+            // stack trace, and the user-facing text is ours rather than the library's binding note
+            assertTrue(String.valueOf(e.getCause()), e.getCause() instanceof SsoStateException);
+            assertEquals("This endpoint expects a SAML logout message from the IdP.", e.getCause().getMessage());
+        } finally {
+            systemProperties.remove("saml.idp.single_logout_service.url");
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_containsSamlLogoutMessage() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        assertFalse(authenticator.containsSamlLogoutMessage(getMockRequest()));
+
+        final MockletHttpServletRequest blank = getMockRequest();
+        blank.setParameter("SAMLRequest", "  ");
+        assertFalse(authenticator.containsSamlLogoutMessage(blank));
+
+        final MockletHttpServletRequest logoutRequest = getMockRequest();
+        logoutRequest.setParameter("SAMLRequest", "PHNhbWxwOkxvZ291dFJlcXVlc3QgLz4=");
+        assertTrue(authenticator.containsSamlLogoutMessage(logoutRequest));
+
+        final MockletHttpServletRequest logoutResponse = getMockRequest();
+        logoutResponse.setParameter("SAMLResponse", "PHNhbWxwOkxvZ291dFJlc3BvbnNlIC8+");
+        assertTrue(authenticator.containsSamlLogoutMessage(logoutResponse));
     }
 
     @Test
