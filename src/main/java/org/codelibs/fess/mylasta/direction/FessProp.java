@@ -802,7 +802,8 @@ public interface FessProp {
 
     /**
      * Gets the permission fields for Entra ID authentication.
-     * Uses new entraid.permission.fields key with fallback to legacy aad.permission.fields.
+     * Uses new entraid.permission.fields key with fallback to legacy aad.permission.fields,
+     * and to {@code mail} when neither key holds a value.
      * @return Array of permission field names.
      */
     default String[] getEntraIdPermissionFields() {
@@ -810,18 +811,31 @@ public interface FessProp {
         if (StringUtil.isBlank(value)) {
             value = getSystemProperty("aad.permission.fields", "mail");
         }
+        if (StringUtil.isBlank(value)) {
+            // getSystemProperty only substitutes the default when the key is absent, so a key
+            // that is present but empty arrives here as "". Splitting it would leave no
+            // permission field at all, and the only permissions the user would get are the raw
+            // group object IDs -- every document ACL'd by group mail address turns invisible.
+            value = "mail";
+        }
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
     /**
      * Checks if domain services are enabled for Entra ID authentication.
-     * Uses new entraid.use.ds key with fallback to legacy aad.use.ds.
+     * Uses new entraid.use.ds key with fallback to legacy aad.use.ds, and to {@code true} when
+     * neither key holds a value.
      * @return true if domain services are enabled, false otherwise.
      */
     default boolean isEntraIdUseDomainServices() {
         String value = getSystemProperty("entraid.use.ds", null);
         if (StringUtil.isBlank(value)) {
             value = getSystemProperty("aad.use.ds", "true");
+        }
+        if (StringUtil.isBlank(value)) {
+            // A present-but-empty key is not the default: getSystemProperty returns "" and the
+            // comparison below would answer false, flipping the documented default of true.
+            value = Constants.TRUE;
         }
         return Constants.TRUE.equalsIgnoreCase(value);
     }

@@ -454,18 +454,61 @@ public class AdminGeneralAction extends FessAdminAction {
         form.spnegoLoggerLevel = fessConfig.getSystemProperty("spnego.logger.level", StringUtil.EMPTY);
 
         // Entra ID
-        form.entraidClientId = StringUtil.isNotBlank(fessConfig.getSystemProperty("entraid.client.id")) ? DUMMY_PASSWORD : StringUtil.EMPTY;
+        form.entraidClientId =
+                StringUtil.isNotBlank(entraidProperty(fessConfig, "entraid.client.id", "aad.client.id", StringUtil.EMPTY)) ? DUMMY_PASSWORD
+                        : StringUtil.EMPTY;
         form.entraidClientSecret =
-                StringUtil.isNotBlank(fessConfig.getSystemProperty("entraid.client.secret")) ? DUMMY_PASSWORD : StringUtil.EMPTY;
-        form.entraidTenant = fessConfig.getSystemProperty("entraid.tenant", StringUtil.EMPTY);
-        form.entraidAuthority = fessConfig.getSystemProperty("entraid.authority", "https://login.microsoftonline.com/");
-        form.entraidReplyUrl = fessConfig.getSystemProperty("entraid.reply.url", StringUtil.EMPTY);
-        form.entraidStateTtl = fessConfig.getSystemProperty("entraid.state.ttl", "3600");
-        form.entraidDefaultGroups = fessConfig.getSystemProperty("entraid.default.groups", StringUtil.EMPTY);
-        form.entraidDefaultRoles = fessConfig.getSystemProperty("entraid.default.roles", StringUtil.EMPTY);
-        form.entraidPermissionFields = fessConfig.getSystemProperty("entraid.permission.fields", "mail");
-        form.entraidUseDs = Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("entraid.use.ds", Constants.TRUE)) ? Constants.TRUE
+                StringUtil.isNotBlank(entraidProperty(fessConfig, "entraid.client.secret", "aad.client.secret", StringUtil.EMPTY))
+                        ? DUMMY_PASSWORD
+                        : StringUtil.EMPTY;
+        form.entraidTenant = entraidProperty(fessConfig, "entraid.tenant", "aad.tenant", StringUtil.EMPTY);
+        form.entraidAuthority = entraidProperty(fessConfig, "entraid.authority", "aad.authority", "https://login.microsoftonline.com/");
+        form.entraidReplyUrl = entraidProperty(fessConfig, "entraid.reply.url", "aad.reply.url", StringUtil.EMPTY);
+        form.entraidStateTtl = entraidProperty(fessConfig, "entraid.state.ttl", "aad.state.ttl", "3600");
+        form.entraidDefaultGroups = entraidProperty(fessConfig, "entraid.default.groups", "aad.default.groups", StringUtil.EMPTY);
+        form.entraidDefaultRoles = entraidProperty(fessConfig, "entraid.default.roles", "aad.default.roles", StringUtil.EMPTY);
+        form.entraidPermissionFields = entraidProperty(fessConfig, "entraid.permission.fields", "aad.permission.fields", "mail");
+        form.entraidUseDs = Constants.TRUE.equalsIgnoreCase(entraidProperty(fessConfig, "entraid.use.ds", "aad.use.ds", Constants.TRUE))
+                ? Constants.TRUE
                 : Constants.FALSE;
+    }
+
+    /**
+     * Resolves an Entra ID setting the way {@code EntraIdAuthenticator} and {@code FessProp} do:
+     * the new {@code entraid.*} key first, then the legacy {@code aad.*} key it replaced, then the
+     * hard-coded default. Only non-blank values count, because a key that is present but empty is
+     * not a configured value.
+     *
+     * <p>updateForm has to follow the same chain the consumers follow. Reading only the new key
+     * renders the hard-coded default on a deployment that is configured through the legacy keys,
+     * and updateConfig then writes that default to the new key -- which every getter prefers --
+     * so opening this screen for an unrelated change and pressing Update would silently move a
+     * sovereign-cloud {@code aad.authority}, a tuned {@code aad.state.ttl}, a non-default
+     * {@code aad.permission.fields} or {@code aad.use.ds=false} back to the shipped default.</p>
+     *
+     * <p>With the legacy value rendered, saving migrates it into the new key instead: the same
+     * setting stays in effect and the screen becomes the migration path the legacy keys never
+     * had. The two masked credential fields go through here as well so a legacy-only deployment
+     * shows them as configured; the mask-only guard in updateConfig then skips the write and
+     * leaves {@code aad.client.id}/{@code aad.client.secret} in place.</p>
+     *
+     * @param fessConfig the current Fess configuration
+     * @param newKey the {@code entraid.*} property key
+     * @param legacyKey the {@code aad.*} property key it replaced
+     * @param defaultValue the value to render when neither key holds one
+     * @return the first non-blank of the new key, the legacy key and the default
+     */
+    private static String entraidProperty(final FessConfig fessConfig, final String newKey, final String legacyKey,
+            final String defaultValue) {
+        final String value = fessConfig.getSystemProperty(newKey);
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        }
+        final String legacyValue = fessConfig.getSystemProperty(legacyKey);
+        if (StringUtil.isNotBlank(legacyValue)) {
+            return legacyValue;
+        }
+        return defaultValue;
     }
 
     private void updateProperty(final String key, final String value) {

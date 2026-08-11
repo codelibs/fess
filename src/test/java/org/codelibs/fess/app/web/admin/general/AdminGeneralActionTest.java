@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.ldap.LdapManager;
@@ -143,6 +144,58 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
         AdminGeneralAction.updateForm(fessConfig, reloaded);
         AdminGeneralAction.updateConfig(fessConfig, reloaded);
         assertEquals("secret", ComponentUtil.getSystemProperties().getProperty("spnego.preauth.password"));
+    }
+
+    @Test
+    public void test_updateForm_legacyEntraIdSettingsSurviveAnUpdate() {
+        // A deployment configured only through the legacy aad.* keys still works: both
+        // EntraIdAuthenticator and FessProp fall back to them and no migration exists. updateForm
+        // read only the entraid.* keys, so it rendered the shipped defaults for the four settings
+        // that have a non-empty one, and updateConfig then wrote those defaults to the entraid.*
+        // keys -- which every getter prefers. Opening this screen for an unrelated change and
+        // pressing Update therefore moved a sovereign-cloud tenant onto the commercial cloud,
+        // reset a tuned state TTL, put the permission field back to mail and re-enabled domain
+        // services, all without a log line.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessConfig.setSystemProperty("aad.authority", "https://login.microsoftonline.us/");
+        fessConfig.setSystemProperty("aad.state.ttl", "600");
+        fessConfig.setSystemProperty("aad.permission.fields", "userPrincipalName");
+        fessConfig.setSystemProperty("aad.use.ds", Constants.FALSE);
+        fessConfig.setSystemProperty("aad.tenant", "legacy-tenant");
+        fessConfig.setSystemProperty("aad.client.id", "legacy-client-id");
+        fessConfig.setSystemProperty("aad.client.secret", "legacy-client-secret");
+
+        final EditForm form = createEditForm();
+        AdminGeneralAction.updateForm(fessConfig, form);
+
+        // The screen must show what is actually in effect, not the shipped default.
+        assertEquals("https://login.microsoftonline.us/", form.entraidAuthority);
+        assertEquals("600", form.entraidStateTtl);
+        assertEquals("userPrincipalName", form.entraidPermissionFields);
+        assertEquals(Constants.FALSE, form.entraidUseDs);
+        assertEquals("legacy-tenant", form.entraidTenant);
+        // A legacy-only deployment does have credentials; an empty box would say otherwise.
+        assertTrue("entraidClientId was rendered empty", StringUtil.isNotBlank(form.entraidClientId));
+        assertTrue("entraidClientSecret was rendered empty", StringUtil.isNotBlank(form.entraidClientSecret));
+
+        AdminGeneralAction.updateConfig(fessConfig, form);
+
+        // Saving is now a migration of the legacy values into the new keys, not a clobber.
+        assertEquals("https://login.microsoftonline.us/", ComponentUtil.getSystemProperties().getProperty("entraid.authority"));
+        assertEquals("600", ComponentUtil.getSystemProperties().getProperty("entraid.state.ttl"));
+        assertEquals("userPrincipalName", ComponentUtil.getSystemProperties().getProperty("entraid.permission.fields"));
+        assertEquals(Constants.FALSE, ComponentUtil.getSystemProperties().getProperty("entraid.use.ds"));
+
+        // What the consumers see is unchanged by the round trip.
+        assertEquals("userPrincipalName", fessConfig.getEntraIdPermissionFields()[0]);
+        assertFalse(fessConfig.isEntraIdUseDomainServices());
+
+        // The masked credential fields go back as the mask, which updateConfig skips, so the
+        // legacy secrets stay where they are instead of being replaced by "**********".
+        assertEquals("legacy-client-id", ComponentUtil.getSystemProperties().getProperty("aad.client.id"));
+        assertEquals("legacy-client-secret", ComponentUtil.getSystemProperties().getProperty("aad.client.secret"));
+        assertNull(ComponentUtil.getSystemProperties().getProperty("entraid.client.id"));
+        assertNull(ComponentUtil.getSystemProperties().getProperty("entraid.client.secret"));
     }
 
     @Test

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -40,10 +41,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.core.net.UuidUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.curl.Curl;
+import org.codelibs.curl.CurlException;
 import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
@@ -63,6 +64,7 @@ import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -109,6 +111,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /** Default state time-to-live in seconds. */
     protected static final String DEFAULT_STATE_TTL = "3600";
+
+    /**
+     * Authority used when none is configured. Also used when the configured value is present but
+     * blank: an empty authority would make {@link #getAuthUrl} build a scheme-less, and therefore
+     * relative, redirect that sends the browser back into Fess instead of to Microsoft.
+     */
+    protected static final String DEFAULT_AUTHORITY = "https://login.microsoftonline.com/";
 
     /** Configuration key for Entra ID authority URL. */
     protected static final String ENTRAID_AUTHORITY = "entraid.authority";
@@ -192,6 +201,21 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** Microsoft Graph error code returned when the application lacks the required permission. */
     protected static final String PERMISSION_DENIED_ERROR_CODE = "Authorization_RequestDenied";
 
+    /** HTTP status Microsoft Graph answers with while it is throttling the caller. */
+    protected static final int HTTP_TOO_MANY_REQUESTS = 429;
+
+    /** HTTP status Microsoft Graph answers with while it is temporarily unavailable. */
+    protected static final int HTTP_SERVICE_UNAVAILABLE = 503;
+
+    /** Backoff applied when a throttled response carries no usable {@code Retry-After} header. */
+    protected static final long DEFAULT_GRAPH_THROTTLE_SECONDS = 60L;
+
+    /**
+     * Upper bound on the backoff. {@code Retry-After} is whatever the service says it is, and an
+     * unreasonably large value would leave nested groups unresolved for the rest of the day.
+     */
+    protected static final long MAX_GRAPH_THROTTLE_SECONDS = 60L * 60L;
+
     /**
      * Scopes requested at the v2.0 authorization endpoint. msal4j already prepends
      * {@code openid profile offline_access} to the token request (its
@@ -270,6 +294,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** Group cache expiry time in seconds. */
     protected long groupCacheExpiry = 10 * 60L;
 
+    /**
+     * Maximum number of groups kept in {@link #groupCache}. The cache is keyed by group id, so a
+     * tenant with many groups would otherwise grow it without bound until every entry expired.
+     */
+    protected int maxGroupCacheSize = 10000;
+
     /** Maximum depth for processing nested groups to prevent infinite loops. */
     protected int maxGroupDepth = 10;
 
@@ -289,14 +319,21 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected int maxStates = 10;
 
-    /** Use V2 endpoint. */
-    protected boolean useV2Endpoint = true;
+    /**
+     * Point in time, as epoch milliseconds, until which Microsoft Graph asked us to stop calling
+     * it. Zero means it never did. Read on the login path, written from whichever thread was
+     * throttled, hence volatile.
+     */
+    protected volatile long graphThrottledUntil;
 
-    /** Shared MSAL4J client application. Holds the token cache that silent refresh reads. */
-    protected volatile ConfidentialClientApplication clientApplication;
-
-    /** Identifies the configuration {@link #clientApplication} was built from. */
-    protected volatile String clientApplicationKey;
+    /**
+     * Shared MSAL4J client application together with the configuration it was built from.
+     *
+     * <p>A single reference is what makes the pair consistent: with the application and its key in
+     * two separate fields, a reader interleaved between the two writes pairs the old application
+     * with the new key and hands back the stale one indefinitely.
+     */
+    protected volatile ClientApplicationHolder clientApplicationHolder;
 
     /**
      * Initializes the Entra ID authenticator.
@@ -308,7 +345,18 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getSsoManager().register(this);
-        groupCache = CacheBuilder.newBuilder().expireAfterWrite(groupCacheExpiry, TimeUnit.SECONDS).build();
+        groupCache = createGroupCache();
+    }
+
+    /**
+     * Builds the parent group cache. Both bounds matter: the expiry keeps a group whose
+     * membership changed from being served forever, and the size keeps a large tenant from
+     * holding every group it ever resolved until the expiry comes round.
+     *
+     * @return The cache.
+     */
+    protected Cache<String, Pair<String[], String[]>> createGroupCache() {
+        return CacheBuilder.newBuilder().maximumSize(maxGroupCacheSize).expireAfterWrite(groupCacheExpiry, TimeUnit.SECONDS).build();
     }
 
     @Override
@@ -319,29 +367,84 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             }
             final HttpSession session = request.getSession(false);
             if (containsAuthenticationData(request)) {
-                if (session == null) {
-                    // Redirecting again would send the user straight back here without a session,
-                    // looping forever. The usual cause is the session cookie not being sent on the
-                    // callback; see tomcat.sameSiteCookies in tomcat_config.properties.
+                if (session != null) {
+                    try {
+                        return processAuthenticationData(request);
+                    } catch (final SsoLoginException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        // Wrapped rather than returned as null so SsoAction logs it at WARN and
+                        // shows the SSO error message, the same as it already does for the other
+                        // authenticators. Swallowing it here left a failed login invisible unless
+                        // DEBUG logging happened to be on.
+                        throw new SsoLoginException("Failed to process a login request on Entra ID.", e);
+                    }
+                }
+                if (!hasExpiredSession(request)) {
+                    // No session, and no session id came back either: the browser is not returning
+                    // the cookie at all (form_post with SameSite=Lax or Strict, or cookies off).
+                    // Redirecting would send the user straight back here in the same state, so
+                    // this is where the loop has to stop. Returning null makes SsoAction show the
+                    // SSO error message and fall back to the local login form.
                     logger.warn("Received an Entra ID authentication response without a session."
-                            + " The session cookie was not sent back with the callback request.");
+                            + " The session cookie was not sent back with the callback request."
+                            + " See tomcat.sameSiteCookies in tomcat_config.properties.");
                     return null;
                 }
-                try {
-                    return processAuthenticationData(request);
-                } catch (final SsoLoginException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    // Wrapped rather than returned as null so SsoAction logs it at WARN and shows
-                    // the SSO error message, the same as it already does for the other
-                    // authenticators. Swallowing it here left a failed login invisible unless
-                    // DEBUG logging happened to be on.
-                    throw new SsoLoginException("Failed to process a login request on Entra ID.", e);
+                // The browser did return a session id and the container rejected it, so cookies
+                // demonstrably work and the session merely expired while the user was at
+                // Microsoft. Start the login again rather than dropping them on a login form that
+                // has no SSO link. This cannot loop: getAuthUrl creates a fresh session, so the
+                // next callback either finds it or arrives with no session id at all, which is
+                // the branch above.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("The session of an Entra ID callback had expired. Restarting the login.");
                 }
             }
 
+            validateConfiguration();
             return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
         }).orElse(null);
+    }
+
+    /**
+     * Returns whether the request carries a session id that the container no longer recognises.
+     *
+     * <p>This is what tells an expired session apart from a browser that is not sending the
+     * cookie: a request with no session id at all cannot have lost one.
+     *
+     * @param request The HTTP servlet request.
+     * @return True if a session id was sent and it is no longer valid.
+     */
+    protected boolean hasExpiredSession(final HttpServletRequest request) {
+        return request.getRequestedSessionId() != null && !request.isRequestedSessionIdValid();
+    }
+
+    /**
+     * Fails the login when Entra ID cannot possibly answer for want of configuration.
+     *
+     * <p>Without this an unconfigured server redirects to
+     * {@code https://login.microsoftonline.com//oauth2/v2.0/authorize?...&amp;client_id=} and logs
+     * nothing, so the administrator sees only a Microsoft error page. It is thrown from here
+     * rather than from the {@link ActionResponseCredential} supplier because {@code SsoAction}
+     * executes that supplier outside the block that catches {@link SsoLoginException}, and it is
+     * not checked in {@code init()} because {@code fess_sso++.xml} registers every authenticator
+     * unconditionally -- including when {@code sso.type} selects another one.
+     */
+    protected void validateConfiguration() {
+        final List<String> missing = new ArrayList<>();
+        if (StringUtil.isBlank(getTenant())) {
+            missing.add(ENTRAID_TENANT);
+        }
+        if (StringUtil.isBlank(getClientId())) {
+            missing.add(ENTRAID_CLIENT_ID);
+        }
+        if (StringUtil.isBlank(getClientSecret())) {
+            missing.add(ENTRAID_CLIENT_SECRET);
+        }
+        if (!missing.isEmpty()) {
+            throw new SsoLoginException("Entra ID is not configured. The following settings are empty: " + String.join(", ", missing));
+        }
     }
 
     /**
@@ -350,26 +453,21 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The authorization URL to redirect the user to.
      */
     protected String getAuthUrl(final HttpServletRequest request) {
-        final String state = UuidUtil.create();
-        final String nonce = UuidUtil.create();
+        // UUID.randomUUID is backed by SecureRandom and varies in 122 bits. The state is the
+        // only thing standing between a login and a forged callback (RFC 6749 section 10.12), and
+        // org.codelibs.core.net.UuidUtil, which this used to call, keeps the first 16 hex
+        // characters constant for the life of the JVM and varies under 32 bits per call.
+        final String state = UUID.randomUUID().toString();
+        final String nonce = UUID.randomUUID().toString();
         storeStateInSession(request.getSession(), state, nonce);
-        final String authUrl;
 
         final String responseMode = getResponseMode();
-        if (useV2Endpoint) {
-            // v2.0 endpoint with MSAL4J (recommended)
-            authUrl = getAuthority() + getTenant() + "/oauth2/v2.0/authorize?response_type=code&scope="
-                    + URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET) + "&response_mode=" + responseMode + "&redirect_uri="
-                    + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
-                    + "&nonce=" + nonce;
-        } else {
-            // v1.0 endpoint for backward compatibility
-            authUrl = getAuthority() + getTenant() + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode="
-                    + responseMode + "&redirect_uri=" + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id="
-                    + getClientId() + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
-        }
+        final String authUrl = getAuthority() + getTenant() + "/oauth2/v2.0/authorize?response_type=code&scope="
+                + URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET) + "&response_mode=" + responseMode + "&redirect_uri="
+                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
+                + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
-            logger.debug("redirect to: {} (using {} endpoint)", authUrl, useV2Endpoint ? "v2.0" : "v1.0");
+            logger.debug("redirect to: {}", authUrl);
         }
         return authUrl;
 
@@ -579,33 +677,99 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The client application.
      */
     protected ConfidentialClientApplication getClientApplication() {
-        final String clientId = getClientId();
-        final String clientSecret = getClientSecret();
-        final String authority = getAuthority() + getTenant() + "/";
-        // The secret is reduced to a hash so the key can never carry it into a log or a heap dump
-        // label; a collision would only mean the application is not rebuilt after a secret change.
-        final String key = authority + '\n' + clientId + '\n' + clientSecret.hashCode();
-        final ConfidentialClientApplication current = clientApplication;
-        if (current != null && key.equals(clientApplicationKey)) {
-            return current;
+        final ClientApplicationHolder current = clientApplicationHolder;
+        final String key = buildClientApplicationKey();
+        if (current != null && current.getKey().equals(key)) {
+            return current.getApplication();
         }
         synchronized (this) {
-            if (clientApplication != null && key.equals(clientApplicationKey)) {
-                return clientApplication;
+            // The four settings are read again, and the key recomputed, inside the monitor. They
+            // are four independent reads of mutable configuration, so a key built on the fast path
+            // can mix values from before and after an admin save; publishing an application built
+            // from that mixture would leave it in place indefinitely.
+            final String currentKey = buildClientApplicationKey();
+            final ClientApplicationHolder holder = clientApplicationHolder;
+            if (holder != null && holder.getKey().equals(currentKey)) {
+                return holder.getApplication();
             }
+            final String clientId = getClientId();
+            final String clientSecret = getClientSecret();
+            final String authority = getAuthority() + getTenant() + "/";
             if (logger.isDebugEnabled()) {
                 logger.debug("Building a client application for authority={}", authority);
             }
             try {
-                clientApplication = ConfidentialClientApplication
+                final ConfidentialClientApplication application = ConfidentialClientApplication
                         .builder(clientId, com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(clientSecret))
                         .authority(authority)
                         .build();
-                clientApplicationKey = key;
-                return clientApplication;
+                clientApplicationHolder =
+                        new ClientApplicationHolder(buildClientApplicationKey(clientId, clientSecret, authority), application);
+                return application;
             } catch (final Exception e) {
                 throw new SsoLoginException("Failed to build an Entra ID client application.", e);
             }
+        }
+    }
+
+    /**
+     * Reads the configuration the client application depends on and reduces it to a key.
+     *
+     * @return The key.
+     */
+    protected String buildClientApplicationKey() {
+        return buildClientApplicationKey(getClientId(), getClientSecret(), getAuthority() + getTenant() + "/");
+    }
+
+    /**
+     * Reduces the configuration the client application depends on to a key.
+     *
+     * @param clientId The client id.
+     * @param clientSecret The client secret.
+     * @param authority The authority URL.
+     * @return The key.
+     */
+    protected String buildClientApplicationKey(final String clientId, final String clientSecret, final String authority) {
+        // The secret is reduced to a hash so the key can never carry it into a log or a heap dump
+        // label; a collision would only mean the application is not rebuilt after a secret change.
+        return authority + '\n' + clientId + '\n' + clientSecret.hashCode();
+    }
+
+    /**
+     * A client application and the configuration key it was built from, published together so a
+     * reader can never see one without the other.
+     */
+    protected static final class ClientApplicationHolder {
+        private final String key;
+        private final ConfidentialClientApplication application;
+
+        /**
+         * Constructs a holder.
+         *
+         * @param key The configuration key.
+         * @param application The application built from it.
+         */
+        public ClientApplicationHolder(final String key, final ConfidentialClientApplication application) {
+            this.key = key;
+            this.application = application;
+        }
+
+        /**
+         * Gets the configuration key.
+         *
+         * @return The key.
+         */
+        public String getKey() {
+            return key;
+        }
+
+        /**
+         * Gets the client application.
+         *
+         * @return The application.
+         */
+        public ConfidentialClientApplication getApplication() {
+            return application;
         }
     }
 
@@ -788,7 +952,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * Updates the user's group and role membership information with lazy loading for parent groups.
      * Direct groups are retrieved synchronously, while parent groups are fetched asynchronously
      * to avoid login delays when users have many nested group memberships.
+     *
+     * <p>When Microsoft Graph does not answer with a membership list, the memberships already on
+     * the user are kept; if there are none yet -- which is the case at login -- the login is
+     * failed rather than completed with the configured defaults alone.
+     *
      * @param user The Entra ID user to update.
+     * @throws LoginFailureException If the first membership lookup for this user failed.
      */
     public void updateMemberOf(final EntraIdUser user) {
         if (logger.isDebugEnabled()) {
@@ -817,13 +987,27 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     groupList.size(), roleList.size(), groupIdsForParentLookup.size());
         }
 
-        if (!resolved && user.getGroupNames() != null) {
+        if (!resolved) {
             // Microsoft Graph did not answer with a membership list -- an expired token, a
-            // throttled tenant, a revoked permission. Writing what we have would replace the
-            // memberships this user logged in with by the configured defaults alone, silently
-            // taking away their search permissions until some later call happens to succeed.
-            logger.warn("Failed to resolve the Entra ID memberships of {}. Keeping the ones already resolved.", user.getName());
-            return;
+            // throttled tenant, a revoked permission.
+            if (user.getGroupNames() != null) {
+                // Refresh path. Writing what we have would replace the memberships this user
+                // logged in with by the configured defaults alone, silently taking away their
+                // search permissions until some later call happens to succeed.
+                logger.warn("Failed to resolve the Entra ID memberships of {}. Keeping the ones already resolved.", user.getName());
+                return;
+            }
+            // First resolution, so there is nothing to keep. Handing out a session carrying the
+            // configured defaults alone would look like a successful login and quietly truncate
+            // every search result for its whole lifetime, and refresh() does not try again until
+            // the token is nearly expired. Failing the login is the honest answer.
+            //
+            // LoginFailureException specifically: this runs inside the resolver that
+            // FessLoginAssist passes to TypicalLoginAssist.findLoginUser, which calls it directly
+            // without wrapping anything, and SsoAction only catches LoginFailureException around
+            // fessLoginAssist.loginRedirect(). Any other type escapes to the generic error page
+            // instead of the standard SSO error message.
+            throw new LoginFailureException("Failed to resolve the Entra ID memberships of " + user.getName() + ".");
         }
 
         // Set initial groups
@@ -880,8 +1064,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param url The Microsoft Graph API URL.
      * @return True if Microsoft Graph answered with a membership list, false if it reported an
      *         error or could not be read. When this is false the lists hold whatever was collected
-     *         before the failure, which {@link #updateMemberOf} only writes when the user has no
-     *         memberships yet -- at login there is nothing better to fall back to.
+     *         before the failure, and {@link #updateMemberOf} discards them: it keeps the
+     *         memberships the user already had, or fails the login when there are none yet.
      */
     protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
             final List<String> groupIdsForParentLookup, final String url) {
@@ -963,7 +1147,10 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 logger.warn("Unexpected response while accessing groups/roles: {}", contentMap);
             }
             return false;
-        } catch (final IOException e) {
+        } catch (final IOException | CurlException e) {
+            // curl4j reports a transport failure as CurlException, which is unchecked, so catching
+            // IOException alone let it escape as an unhandled RuntimeException instead of taking
+            // this controlled path.
             logger.warn("Failed to access groups/roles in Entra ID.", e);
             return false;
         }
@@ -1103,6 +1290,16 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("[getParentGroup] Cache MISS for id: {}, fetching from API", id);
         }
+        if (isGraphThrottled()) {
+            // Microsoft Graph asked us to back off, so walking it would fail once per group on
+            // every login until the tenant recovered. The empty pair is deliberately not written
+            // to groupCache: caching it would keep the parent group permissions away for the whole
+            // cache TTL even once the throttle had lapsed, which is what #3223 removed.
+            if (logger.isDebugEnabled()) {
+                logger.debug("[getParentGroup] Skipping the lookup for id {} while Microsoft Graph is throttling.", id);
+            }
+            return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
+        }
         try {
             return groupCache.get(id, () -> loadParentGroup(user, id, depth));
         } catch (final ExecutionException | UncheckedExecutionException e) {
@@ -1110,9 +1307,81 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             // briefly unreachable Graph must not pin an empty result for the whole cache TTL.
             // UncheckedExecutionException matters because the Graph JSON parser throws
             // CurlException, a RuntimeException, on a non-JSON error body.
-            logger.warn("Failed to process group cache for id: {}", id, e);
+            if (isGraphThrottled()) {
+                // The reason is already stated by the single WARN that set the throttle; a stack
+                // trace per group would bury it.
+                logger.warn("Failed to process group cache for id {} while Microsoft Graph is throttling: {}", id, e.getMessage());
+            } else {
+                logger.warn("Failed to process group cache for id: {}", id, e);
+            }
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
+    }
+
+    /**
+     * Returns whether Microsoft Graph is still inside the backoff a throttled response asked for.
+     *
+     * @return True while the parent group walk has to be skipped.
+     */
+    protected boolean isGraphThrottled() {
+        final long until = graphThrottledUntil;
+        // The clock is read only once a throttle has actually been recorded, so the ordinary path
+        // does not depend on the system helper at all.
+        return until > 0L && ComponentUtil.getSystemHelper().getCurrentTimeAsLong() < until;
+    }
+
+    /**
+     * Records the backoff a throttled Microsoft Graph response asked for, if it is one.
+     *
+     * <p>Nothing is cached in response to it. 15.7 cached an empty result for the cache TTL, and
+     * #3223 removed that because it silently took the parent group permissions away for ten
+     * minutes. An explicit backoff does the job the negative cache was reaching for -- the next
+     * logins skip the walk instead of re-issuing one failing request, and one stack trace, per
+     * group -- without outliving the condition that caused it.
+     *
+     * @param response The response to inspect.
+     */
+    protected void applyGraphThrottle(final CurlResponse response) {
+        // curl4j does not throw on a non-2xx response, it hands back the error stream, so the
+        // status code is the only place a 429 is visible.
+        final int statusCode = response.getHttpStatusCode();
+        if (statusCode != HTTP_TOO_MANY_REQUESTS && statusCode != HTTP_SERVICE_UNAVAILABLE) {
+            return;
+        }
+        final long seconds = parseRetryAfterSeconds(response.getHeaderValue("Retry-After"));
+        final long until = ComponentUtil.getSystemHelper().getCurrentTimeAsLong() + seconds * 1000L;
+        if (until > graphThrottledUntil) {
+            graphThrottledUntil = until;
+            // One line per throttling episode: every group after this one short-circuits in
+            // getParentGroup without reaching Graph, so nothing repeats it per group.
+            logger.warn("Microsoft Graph returned {} for a group membership lookup."
+                    + " Nested groups are not resolved for the next {} seconds.", statusCode, seconds);
+        }
+    }
+
+    /**
+     * Reads a {@code Retry-After} header as a number of seconds.
+     *
+     * @param value The header value, which may be null.
+     * @return The backoff in seconds, always positive and bounded by
+     *         {@link #MAX_GRAPH_THROTTLE_SECONDS}.
+     */
+    protected long parseRetryAfterSeconds(final String value) {
+        if (StringUtil.isNotBlank(value)) {
+            try {
+                final long seconds = Long.parseLong(value.trim());
+                if (seconds > 0L) {
+                    return Math.min(seconds, MAX_GRAPH_THROTTLE_SECONDS);
+                }
+            } catch (final NumberFormatException e) {
+                // RFC 9110 also allows an HTTP-date here. Microsoft Graph sends delay-seconds, so
+                // rather than parse a format we never see, fall back to the default.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Retry-After is not a number of seconds: {}", value);
+                }
+            }
+        }
+        return DEFAULT_GRAPH_THROTTLE_SECONDS;
     }
 
     /**
@@ -1163,6 +1432,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * every login re-issue one failing request, and one stack trace, per group. Everything else is
      * thrown, so a transient failure is never mistaken for "this group has no parents".
      *
+     * <p>A throttled reply is recorded by {@link #applyGraphThrottle} before the body is looked
+     * at, so the groups after this one skip the walk instead of each producing their own failure.
+     *
      * @param user The Entra ID user.
      * @param id The group ID to get parent information for.
      * @return The parent group IDs, never null.
@@ -1177,6 +1449,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 createGraphRequest(Curl.post(url), user.getAuthenticationResult().accessToken()).header("Content-type", "application/json")
                         .body("{\"securityEnabledOnly\":false}")
                         .execute()) {
+            // Before the body: a throttled reply is not required to be JSON, and the parser throws
+            // CurlException when it is not.
+            applyGraphThrottle(response);
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("[getParentGroup] Response for id {}: {}", id, contentMap);
@@ -1261,7 +1536,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     logger.debug("[processGroup] Completed for id: {}, added {} entries", id, groupList.size() - initialSize);
                 }
             }
-        } catch (final IOException e) {
+        } catch (final IOException | CurlException e) {
+            // See processDirectMemberOf: curl4j's transport failure is the unchecked CurlException.
             logger.warn("Failed to access groups/roles in Entra ID for id: {}", id, e);
         }
     }
@@ -1384,7 +1660,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected String getAuthority() {
         String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_AUTHORITY);
         if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_AUTHORITY, "https://login.microsoftonline.com/");
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_AUTHORITY, DEFAULT_AUTHORITY);
+        }
+        if (StringUtil.isBlank(value)) {
+            // getSystemProperty only falls back to the default when the key is absent, so a legacy
+            // aad.authority that is present but empty arrives here as "". Left alone, getAuthUrl
+            // would build a scheme-less URL and redirect the browser back inside Fess.
+            return DEFAULT_AUTHORITY;
         }
         return value;
     }
@@ -1475,6 +1757,14 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Sets the maximum number of groups kept in the parent group cache.
+     * @param maxGroupCacheSize The maximum number of cached groups.
+     */
+    public void setMaxGroupCacheSize(final int maxGroupCacheSize) {
+        this.maxGroupCacheSize = maxGroupCacheSize;
+    }
+
+    /**
      * Sets the maximum group depth for nested group processing.
      * @param maxGroupDepth The maximum depth for nested groups.
      */
@@ -1521,10 +1811,22 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Enable to use V2 endpoint.
-     * @param useV2Endpoint true if using V2 endpoint.
+     * Kept only so an out-of-tree {@code fess_sso+entraidAuthenticator.xml} that still sets this
+     * property keeps loading. The value is ignored.
+     *
+     * <p>The v1.0 endpoint is not supported. msal4j hardcodes {@code oauth2/v2.0/token} as the
+     * token endpoint of an AAD authority and offers no v1 alternative, so an authorization code
+     * minted at {@code /oauth2/authorize} could never be redeemed -- the v1.0 branch this used to
+     * select produced a login that always failed.
+     *
+     * @param useV2Endpoint Ignored.
+     * @deprecated The v1.0 endpoint is unsupported; the authorization request is always v2.0.
      */
+    @Deprecated
     public void setUseV2Endpoint(final boolean useV2Endpoint) {
-        this.useV2Endpoint = useV2Endpoint;
+        if (!useV2Endpoint) {
+            logger.warn("useV2Endpoint=false is ignored. The Entra ID v1.0 endpoint is not supported:"
+                    + " msal4j only redeems authorization codes at the v2.0 token endpoint.");
+        }
     }
 }

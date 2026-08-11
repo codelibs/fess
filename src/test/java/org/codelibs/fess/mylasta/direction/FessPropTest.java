@@ -409,6 +409,39 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getEntraIdPermissionFields_blankLegacyKeyStillYieldsTheDefault() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // getSystemProperty substitutes the default only when the key is absent, so a legacy key
+        // that is present but empty -- what the admin screen leaves behind for a cleared field --
+        // came back as "" and split into no fields at all. The only permissions such a user then
+        // gets are the raw group object IDs, so every document ACL'd by group mail turns
+        // invisible to them.
+        systemPropMap.put("aad.permission.fields", "");
+        String[] fields = fessConfig.getEntraIdPermissionFields();
+        assertEquals(1, fields.length);
+        assertEquals("mail", fields[0]);
+
+        // Both keys present and blank, which is what saving the admin screen twice produces.
+        systemPropMap.put("entraid.permission.fields", "  ");
+        fields = fessConfig.getEntraIdPermissionFields();
+        assertEquals(1, fields.length);
+        assertEquals("mail", fields[0]);
+    }
+
+    @Test
     public void test_isEntraIdUseDomainServices_withNewKey() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -471,6 +504,32 @@ public class FessPropTest extends UnitFessTestCase {
         };
 
         // Test default value (true) when no key is set
+        assertTrue(fessConfig.isEntraIdUseDomainServices());
+    }
+
+    @Test
+    public void test_isEntraIdUseDomainServices_blankLegacyKeyKeepsTheDocumentedDefault() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // A present-but-empty legacy key is not a configured "false": getSystemProperty hands
+        // back "", which never equals "true", so the documented default of true silently flipped.
+        systemPropMap.put("aad.use.ds", "");
+        assertTrue(fessConfig.isEntraIdUseDomainServices());
+
+        // Both keys present and blank, which is what saving the admin screen twice produces.
+        systemPropMap.put("entraid.use.ds", "  ");
         assertTrue(fessConfig.isEntraIdUseDomainServices());
     }
 

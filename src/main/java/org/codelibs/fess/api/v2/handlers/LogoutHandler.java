@@ -56,11 +56,12 @@ public class LogoutHandler {
     /**
      * Processes one {@code /api/v2/auth/logout} POST request.
      *
-     * <p>Invokes {@link FessLoginAssist#logout()} (swallowing failures so the
-     * call remains idempotent) and then invalidates the underlying
-     * {@link HttpSession} when one exists. Rejects non-{@code POST} methods
-     * with {@link V2ErrorCode#METHOD_NOT_ALLOWED}; otherwise always writes a
-     * success envelope of {@code {"ok": true}}.</p>
+     * <p>Runs the SSO logout for the bound user, invokes
+     * {@link FessLoginAssist#logout()} (swallowing failures so the call remains
+     * idempotent) and then invalidates the underlying {@link HttpSession} when
+     * one exists. Rejects non-{@code POST} methods with
+     * {@link V2ErrorCode#METHOD_NOT_ALLOWED}; otherwise always writes a success
+     * envelope of {@code {"ok": true}}.</p>
      *
      * @param req the incoming HTTP request
      * @param res the HTTP response to write to
@@ -77,6 +78,7 @@ public class LogoutHandler {
             // Mirror LogoutAction.index(): the LOGOUT record must be written BEFORE logout()
             // drops the user bean, otherwise the audit line degrades to "user:-".
             recordLogoutActivity(assist);
+            runSsoLogout(assist);
             assist.logout();
         } catch (final Exception e) {
             // logout is idempotent — no session or unavailable login subsystem; log WARN for
@@ -110,6 +112,31 @@ public class LogoutHandler {
             ComponentUtil.getActivityHelper().logout(assist.getSavedUserBean());
         } catch (final RuntimeException e) {
             logger.warn("[v2/logout] failed to write the LOGOUT audit record", e);
+        }
+    }
+
+    /**
+     * Runs the SSO logout for the bound user, mirroring {@code LogoutAction.index()} so a session
+     * ended through the v2 API is torn down at the identity provider as well as locally.
+     *
+     * <p>For Entra ID this is the only thing that evicts the user's tokens from the MSAL4J token
+     * cache shared by the whole application ({@code EntraIdAuthenticator.logout()} calls
+     * {@code removeAccount}). That cache expires nothing by itself, so skipping this call leaves
+     * the tokens of everyone who logs out through the v2 API resident for the life of the JVM.</p>
+     *
+     * <p>{@code SsoManager.logout} answers with the provider's single-logout URL. The v2 API has
+     * no redirect semantics -- it always writes a JSON envelope -- so the URL is deliberately
+     * discarded; a client that wants a front-channel single logout has to navigate there itself.
+     * Like the audit write, failures are logged and swallowed: the local logout below must still
+     * happen and the endpoint must stay idempotent. An absent user bean is simply skipped.</p>
+     *
+     * @param assist the login assist still holding the user bean to be logged out
+     */
+    private void runSsoLogout(final FessLoginAssist assist) {
+        try {
+            assist.getSavedUserBean().ifPresent(user -> ComponentUtil.getSsoManager().logout(user));
+        } catch (final RuntimeException e) {
+            logger.warn("[v2/logout] failed to run the SSO logout", e);
         }
     }
 }
