@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,8 +92,19 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
         /** User's computed permissions. */
         protected volatile String[] permissions;
 
-        /** Entra ID authentication result. */
-        protected IAuthenticationResult authResult;
+        /**
+         * Entra ID authentication result. Volatile because {@link #refresh()} replaces it from
+         * whichever request thread wins the renewal while the other request threads sharing this
+         * session-scoped instance keep reading it.
+         */
+        protected volatile IAuthenticationResult authResult;
+
+        /**
+         * Set for as long as one thread is inside the silent acquisition in {@link #refresh()}.
+         * A plain flag rather than a lock: the losing threads must carry on with the token they
+         * already hold instead of queueing behind an acquisition that can take tens of seconds.
+         */
+        private final AtomicBoolean refreshing = new AtomicBoolean();
 
         /**
          * Constructs an Entra ID user with the authentication result.
@@ -175,6 +187,25 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 }
                 return true;
             }
+            // Lastaflute keeps one FessUserBean -- and therefore one EntraIdUser -- as a session
+            // attribute, and FessBaseAction.godHandPrologue calls refresh() on every action
+            // request, so all the requests a session has in flight arrive here together once the
+            // token enters REFRESH_MARGIN. Each of them would see a renewed token, run
+            // updateMemberOf -- a synchronous Microsoft Graph call on a request thread -- and
+            // schedule another parent group lookup, and the last one to assign would decide which
+            // of the results authResult ends up holding. One renewal per rollover is enough.
+            // Not a lock, and deliberately not a synchronized method: the acquisition runs for up
+            // to the authenticator's acquisition timeout plus the Graph calls behind
+            // updateMemberOf, and getPermissions() takes this object's monitor, so waiting here
+            // would stall every concurrent search of this user for that whole time.
+            if (!refreshing.compareAndSet(false, true)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Another request is already renewing the token. Skipping silent authentication.");
+                }
+                // The token this thread holds has not expired yet -- the check above proved it --
+                // so the request may proceed while the winner renews.
+                return true;
+            }
             // Attempt to refresh token using MSAL4J silent authentication
             try {
                 final EntraIdAuthenticator authenticator = ComponentUtil.getComponent(EntraIdAuthenticator.class);
@@ -199,6 +230,8 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Silent token refresh failed: {}", e.getMessage());
                 }
+            } finally {
+                refreshing.set(false);
             }
             // For MSAL4J, if silent refresh fails, return true if token is still valid
             // Actual refresh will happen during next authentication request

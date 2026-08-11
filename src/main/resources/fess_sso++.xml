@@ -9,6 +9,7 @@
 		<property name="graphReadTimeout">30000</property>
 		<property name="acquisitionTimeout">30000</property>
 		<property name="groupCacheExpiry">600</property>
+		<property name="maxGroupCacheSize">10000</property>
 		<property name="maxGroupDepth">10</property>
 		-->
 	</component>

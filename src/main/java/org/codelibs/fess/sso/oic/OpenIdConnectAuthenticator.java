@@ -21,12 +21,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
@@ -150,7 +150,14 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      * @return the authorization URL
      */
     protected String getAuthUrl(final HttpServletRequest request) {
-        final String state = UuidUtil.create();
+        // UUID.randomUUID is backed by SecureRandom and varies in 122 bits. The state is the only
+        // thing standing between a login and a forged callback (RFC 6749 section 10.12), and
+        // org.codelibs.core.net.UuidUtil, which this used to call, is
+        // hex(localIP) + hex(identityHashCode(RANDOM)) + hex((int) (currentTimeMillis() >> 32)) +
+        // hex(SecureRandom.nextInt()): its first 16 hex characters are constant for the life of
+        // the JVM and under 32 bits actually vary per call. The value is only ever compared with
+        // equals() against the copy held in the session, so its length and format are free.
+        final String state = UUID.randomUUID().toString();
         request.getSession().setAttribute(OIC_STATE, state);
         return new AuthorizationCodeRequestUrl(getOicAuthServerUrl(), getOicClientId())//
                 .setScopes(Arrays.asList(getOicScope()))//

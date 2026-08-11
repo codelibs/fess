@@ -29,6 +29,7 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -130,6 +131,83 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         assertEquals(200, res.status, res.body());
         assertTrue(res.body().contains("\"ok\":true"), res.body());
         assertEquals(1, assist.logoutCount, "logout must still be performed when the audit write fails");
+    }
+
+    // ── SSO: the v2 logout must tear the session down at the identity provider too ──
+
+    @Test
+    public void logout_runsTheSsoLogoutForTheBoundUser() throws Exception {
+        // Regression: the handler called FessLoginAssist.logout() but never
+        // SsoManager.logout(user), which LogoutAction.index() does. For Entra ID that call is the
+        // only thing that takes the account out of the MSAL4J token cache shared by the whole
+        // application (EntraIdAuthenticator.logout -> removeAccount), and msal4j's TokenCache
+        // evicts nothing by itself -- so the tokens of everyone who logged out through the v2 API
+        // stayed resident for the life of the JVM.
+        final List<String> ssoLogouts = new ArrayList<>();
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public String logout(final FessUserBean user) {
+                ssoLogouts.add(user.getUserId());
+                // A real SLO URL. The v2 API has no redirect semantics, so it must be ignored.
+                return "https://login.microsoftonline.com/common/oauth2/v2.0/logout";
+            }
+        }, "ssoManager");
+        final StubLoginAssist assist = new StubLoginAssist("carol");
+        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+
+        assertEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("carol"), ssoLogouts,
+                "the v2 logout must run the SSO logout for the user still bound to the session");
+        assertEquals(1, assist.logoutCount, "the local logout must still run");
+        // The single-logout URL is discarded: the envelope stays the plain idempotent success.
+        assertTrue(res.body().contains("\"ok\":true"), res.body());
+    }
+
+    @Test
+    public void logout_ssoFailureStillLogsOutAndReturnsOk() throws Exception {
+        // An unreachable identity provider must not strand the caller in a logged-in session:
+        // the local logout has to run anyway and the endpoint has to stay idempotent.
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public String logout(final FessUserBean user) {
+                throw new IllegalStateException("the identity provider is unreachable");
+            }
+        }, "ssoManager");
+        final StubLoginAssist assist = new StubLoginAssist("carol");
+        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ok\":true"), res.body());
+        assertEquals(1, assist.logoutCount, "logout must still be performed when the SSO logout fails");
+    }
+
+    @Test
+    public void logout_withoutAUserBean_doesNotTouchTheSsoManager() throws Exception {
+        // The endpoint is fire-and-forget, so it is routinely called with no session at all.
+        final List<String> ssoLogouts = new ArrayList<>();
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public String logout(final FessUserBean user) {
+                ssoLogouts.add(String.valueOf(user));
+                return null;
+            }
+        }, "ssoManager");
+        final StubLoginAssist assist = new StubLoginAssist("carol");
+        assist.logout();
+        assist.logoutCount = 0;
+        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+
+        assertEquals(200, res.status, res.body());
+        assertTrue(ssoLogouts.isEmpty(), "an absent user bean must not reach SsoManager.logout: " + ssoLogouts);
     }
 
     /**

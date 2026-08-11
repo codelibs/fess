@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential;
 import org.codelibs.fess.exception.SsoLoginException;
@@ -52,10 +53,13 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.exception.LoginFailureException;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 import com.microsoft.aad.msal4j.IAccount;
@@ -81,6 +85,27 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
             assertSame(authenticator.getClientApplication(), authenticator.getClientApplication());
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_getClientApplication_publishesTheApplicationAndItsKeyTogether() {
+        // The application and the configuration it was built from used to be two separate
+        // volatile fields, read one after the other. A reader that landed between the two writes
+        // paired the old application with the new key and kept returning the stale one. One
+        // reference makes that unrepresentable, and the key it carries is the one the published
+        // application was actually built from.
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+            final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+            final ConfidentialClientApplication application = authenticator.getClientApplication();
+
+            assertNotNull(authenticator.clientApplicationHolder);
+            assertSame(application, authenticator.clientApplicationHolder.getApplication());
+            assertEquals(authenticator.buildClientApplicationKey(), authenticator.clientApplicationHolder.getKey());
         } finally {
             setEntraIdConfig("", "", "");
         }
@@ -384,15 +409,20 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getAuthUrl_requestsQueryResponseModeOnV1Endpoint() {
+    public void test_getAuthUrl_alwaysUsesTheV2Endpoint() {
+        // msal4j hardcodes oauth2/v2.0/token as the token endpoint of an AAD authority, so a code
+        // minted at the v1.0 /oauth2/authorize could never be redeemed. The setter is kept so an
+        // out-of-tree fess_sso+entraidAuthenticator.xml still loads, but it no longer selects a
+        // login that always fails.
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setUseV2Endpoint(false);
 
         final String authUrl = authenticator.getAuthUrl(getMockRequest());
 
+        assertTrue(authUrl.contains("/oauth2/v2.0/authorize?"));
+        assertFalse(authUrl.contains("resource=https%3a%2f%2fgraph.microsoft.com"));
         assertTrue(authUrl.contains("response_mode=query"));
-        assertFalse(authUrl.contains("response_mode=form_post"));
     }
 
     @Test
@@ -511,6 +541,145 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertNull(request.getSession(false));
 
         assertNull(authenticator.getLoginCredential());
+    }
+
+    @Test
+    public void test_getLoginCredential_restartsTheLoginWhenTheSessionMerelyExpired() {
+        // The browser did send a session id, so it stores and returns cookies; the container just
+        // no longer knows that session. 15.7 recovered by bouncing back to Entra ID, and dropping
+        // the user on the local login form instead leaves them stuck -- that form has no SSO link.
+        // This cannot loop: getAuthUrl creates a session, so the next callback either finds it or
+        // arrives with no session id at all, which is the branch the sibling test pins.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        request.setParameter("code", "0.AXkAauthorizationcodevalue");
+        request.setParameter("state", "2b1f5c3e-0000-0000-0000-000000000000");
+        request.addCookie(new Cookie("jsessionid", "AB1C2D3E4F5061728394A5B6C7D8E9F0"));
+        assertNull(request.getSession(false));
+        assertNotNull(request.getRequestedSessionId());
+        assertFalse(request.isRequestedSessionIdValid());
+
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "contoso.onmicrosoft.com");
+
+            final LoginCredential credential = authenticator.getLoginCredential();
+
+            assertTrue(credential instanceof ActionResponseCredential);
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_reportsAnUnconfiguredTenantInsteadOfRedirecting() {
+        // Unconfigured, Fess used to redirect to
+        // https://login.microsoftonline.com//oauth2/v2.0/authorize?...&client_id= and log nothing,
+        // so the only symptom was a Microsoft error page.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        setEntraIdConfig("", "", "");
+
+        try {
+            authenticator.getLoginCredential();
+            fail("expected SsoLoginException");
+        } catch (final SsoLoginException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("entraid.tenant"));
+            assertTrue(e.getMessage(), e.getMessage().contains("entraid.client.id"));
+            assertTrue(e.getMessage(), e.getMessage().contains("entraid.client.secret"));
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_reportsThePartiallyConfiguredKeysOnly() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+
+        try {
+            setEntraIdConfig("11111111-1111-1111-1111-111111111111", "secret-1", "");
+
+            authenticator.getLoginCredential();
+            fail("expected SsoLoginException");
+        } catch (final SsoLoginException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("entraid.tenant"));
+            assertFalse(e.getMessage(), e.getMessage().contains("entraid.client.id"));
+        } finally {
+            setEntraIdConfig("", "", "");
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_thrownEagerlyRatherThanFromTheRedirectSupplier() {
+        // SsoAction runs the ActionResponseCredential supplier outside the block that catches
+        // SsoLoginException, so a throw from inside the lambda reaches the generic error page
+        // instead of the SSO error message. The check therefore has to happen before the
+        // credential is built, not when it is executed.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setMethod("GET");
+        setEntraIdConfig("", "", "");
+
+        try {
+            authenticator.getLoginCredential();
+            fail("expected SsoLoginException before any credential was returned");
+        } catch (final SsoLoginException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void test_getAuthUrl_issuesAnUnguessableState() {
+        // org.codelibs.core.net.UuidUtil is hex(localIP) + hex(identityHashCode(RANDOM)) +
+        // hex((int) (currentTimeMillis() >> 32)) + hex(SecureRandom.nextInt()): the first 16 hex
+        // characters never change within a JVM and the timestamp word moves every ~49.7 days, so
+        // under 32 bits actually vary per call. RFC 6749 section 10.12 wants the state
+        // unguessable.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Set<String> states = new HashSet<>();
+        final Set<String> prefixes = new HashSet<>();
+        for (int i = 0; i < 200; i++) {
+            final String state = URLDecoder.decode(
+                    authenticator.getAuthUrl(newAuthUrlRequest()).replaceFirst("(?s).*[&?]state=([^&]*).*", "$1"), StandardCharsets.UTF_8);
+            states.add(state);
+            prefixes.add(state.replace("-", "").substring(0, 16));
+        }
+
+        assertEquals(200, states.size());
+        // The whole point: a fixed leading half is what UuidUtil produced.
+        assertTrue("distinct prefixes: " + prefixes.size(), prefixes.size() > 190);
+    }
+
+    @Test
+    public void test_getAuthUrl_issuesADistinctNoncePerRequest() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Set<String> nonces = new HashSet<>();
+        for (int i = 0; i < 50; i++) {
+            nonces.add(authenticator.getAuthUrl(newAuthUrlRequest()).replaceFirst("(?s).*&nonce=([^&]*).*", "$1"));
+        }
+
+        assertEquals(50, nonces.size());
+    }
+
+    @Test
+    public void test_createGroupCache_isBounded() {
+        // Every sibling cache in Fess caps its size; this one only had an expiry, so a tenant with
+        // many groups grew it without bound until the TTL came round.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        assertTrue(authenticator.maxGroupCacheSize > 0);
+        authenticator.setMaxGroupCacheSize(2);
+
+        final Cache<String, Pair<String[], String[]>> cache = authenticator.createGroupCache();
+        for (int i = 0; i < 10; i++) {
+            cache.put("group-" + i, new Pair<>(new String[0], new String[0]));
+        }
+        cache.cleanUp();
+
+        assertTrue("size=" + cache.size(), cache.size() <= 2);
     }
 
     @Test
@@ -782,6 +951,114 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_applyGraphThrottle_honoursTheRetryAfterGraphSent() {
+        // curl4j does not throw on a non-2xx response -- CurlRequest hands back the error stream --
+        // so a Graph 429 arrives as an ordinary parsed body and the status code is the only place
+        // the throttling is visible.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final CurlResponse response = new CurlResponse();
+        response.setHttpStatusCode(429);
+        response.setHeaders(Map.of("Retry-After", List.of("120")));
+
+        authenticator.applyGraphThrottle(response);
+
+        assertEquals(clock.get() + 120_000L, authenticator.graphThrottledUntil);
+        assertTrue(authenticator.isGraphThrottled());
+
+        clock.addAndGet(120_000L);
+        assertFalse("the backoff has to lapse on its own", authenticator.isGraphThrottled());
+    }
+
+    @Test
+    public void test_applyGraphThrottle_alsoBacksOffOnServiceUnavailable() {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final CurlResponse response = new CurlResponse();
+        response.setHttpStatusCode(503);
+
+        authenticator.applyGraphThrottle(response);
+
+        // No Retry-After: the default backoff applies rather than none at all.
+        assertEquals(clock.get() + 60_000L, authenticator.graphThrottledUntil);
+    }
+
+    @Test
+    public void test_applyGraphThrottle_ignoresAnOrdinaryResponse() {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final CurlResponse ok = new CurlResponse();
+        ok.setHttpStatusCode(200);
+        final CurlResponse forbidden = new CurlResponse();
+        forbidden.setHttpStatusCode(403);
+
+        authenticator.applyGraphThrottle(ok);
+        authenticator.applyGraphThrottle(forbidden);
+
+        assertEquals(0L, authenticator.graphThrottledUntil);
+        assertFalse(authenticator.isGraphThrottled());
+    }
+
+    @Test
+    public void test_parseRetryAfterSeconds_fallsBackAndStaysBounded() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+
+        assertEquals(30L, authenticator.parseRetryAfterSeconds(" 30 "));
+        assertEquals(60L, authenticator.parseRetryAfterSeconds(null));
+        assertEquals(60L, authenticator.parseRetryAfterSeconds(""));
+        assertEquals(60L, authenticator.parseRetryAfterSeconds("0"));
+        // RFC 9110 also allows an HTTP-date; Graph sends delay-seconds, so this is a fallback.
+        assertEquals(60L, authenticator.parseRetryAfterSeconds("Wed, 21 Oct 2026 07:28:00 GMT"));
+        // An unbounded value would leave nested groups unresolved for the rest of the day.
+        assertEquals(3600L, authenticator.parseRetryAfterSeconds("999999"));
+    }
+
+    @Test
+    public void test_getParentGroup_skipsTheWalkWhileGraphIsThrottling() {
+        // 15.7 cached an empty result for the cache TTL, which #3223 removed because it silently
+        // took the parent group permissions away for ten minutes. The backoff replaces it: the
+        // walk is skipped while Graph asked us to wait, nothing is written to the cache, and it
+        // resumes by itself.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        authenticator.graphThrottledUntil = clock.get() + 60_000L;
+
+        final Pair<String[], String[]> throttled = authenticator.getParentGroup(null, "group-a", 0);
+
+        assertEquals(0, throttled.getFirst().length);
+        assertTrue(authenticator.lookups.isEmpty());
+        assertNull(authenticator.groupCache.getIfPresent("group-a"), "a skipped walk must not be cached");
+
+        clock.addAndGet(60_000L);
+        final Pair<String[], String[]> recovered = authenticator.getParentGroup(null, "group-a", 0);
+
+        assertEquals(1, recovered.getFirst().length);
+        assertEquals("group-b", recovered.getFirst()[0]);
+    }
+
+    @Test
+    public void test_getParentGroup_stillServesACachedAnswerWhileThrottling() {
+        // The backoff exists to stop Graph being called, not to throw away memberships that were
+        // already resolved.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        assertEquals(1, authenticator.getParentGroup(null, "group-a", 0).getFirst().length);
+
+        authenticator.graphThrottledUntil = clock.get() + 60_000L;
+
+        assertEquals(1, authenticator.getParentGroup(null, "group-a", 0).getFirst().length);
+    }
+
+    @Test
     public void test_getStateTtl_defaultsToOneHourInSeconds() {
         // removeExpiredStates compares (now - created) / 1000 against this value, so the unit is
         // seconds. The javadoc used to say milliseconds.
@@ -943,16 +1220,21 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals(0, roleList.size());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void test_setUseV2Endpoint() {
-        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+    public void test_setUseV2Endpoint_isKeptAsANoOpForOutOfTreeDiFiles() {
+        // Removing the public setter would break a fess_sso+entraidAuthenticator.xml that still
+        // sets the property, so it stays -- but it no longer changes anything.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
-        // Test parameter accepts final boolean (compile-time verification)
         authenticator.setUseV2Endpoint(true);
+        final String afterTrue = authenticator.getAuthUrl(getMockRequest());
         authenticator.setUseV2Endpoint(false);
+        final String afterFalse = authenticator.getAuthUrl(getMockRequest());
 
-        // Verify method signature is correct
-        assertTrue(true);
+        assertTrue(afterTrue.contains("/oauth2/v2.0/authorize?"));
+        assertTrue(afterFalse.contains("/oauth2/v2.0/authorize?"));
     }
 
     @Test
@@ -1305,8 +1587,17 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_updateMemberOf_stillSetsTheDefaultsWhenNothingWasResolvedYet() {
-        // At login there is nothing to keep, so a failed lookup must not leave groups null.
+    public void test_updateMemberOf_failsTheLoginWhenTheFirstLookupFails() {
+        // At login there is nothing to keep, and curl4j does not throw on a non-2xx response, so a
+        // Graph 429/403/401 on /me/memberOf used to parse cleanly, log a WARN and hand the user a
+        // working session carrying the configured defaults alone -- silently truncated search
+        // results for its whole lifetime, with refresh() not retrying until the token was nearly
+        // expired.
+        //
+        // LoginFailureException specifically: TypicalLoginAssist calls this resolver directly
+        // without wrapping anything, and SsoAction only catches LoginFailureException around
+        // loginRedirect(), so any other type would reach the generic error page instead of the
+        // standard SSO error message.
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
             @Override
             protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
@@ -1318,13 +1609,70 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
             fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+
+            try {
+                authenticator.updateMemberOf(user);
+                fail("expected LoginFailureException");
+            } catch (final LoginFailureException e) {
+                assertTrue(e.getMessage(), e.getMessage().contains(user.getName()));
+            }
+
+            assertNull(user.getGroupNames(), "a half-permissioned session must not be handed out");
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_appliesTheDefaultsWhenTheLookupFindsNoMemberships() {
+        // A user who genuinely belongs to nothing is a successful answer, not a failure, and the
+        // configured defaults are exactly what they are meant to get.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                return true;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            fessConfig.setSystemProperty("entraid.default.roles", "guest");
+
             authenticator.updateMemberOf(user);
 
             assertEquals(1, user.getGroupNames().length);
             assertEquals("everyone", user.getGroupNames()[0]);
+            assertEquals(1, user.getRoleNames().length);
+            assertEquals("guest", user.getRoleNames()[0]);
         } finally {
             fessConfig.setSystemProperty("entraid.default.groups", "");
+            fessConfig.setSystemProperty("entraid.default.roles", "");
         }
+    }
+
+    @Test
+    public void test_processDirectMemberOf_reportsATransportFailureInsteadOfLettingItEscape() {
+        // curl4j reports a transport failure as CurlException, which is unchecked, so
+        // catch (IOException) alone let it escape as an unhandled RuntimeException -- out of the
+        // EntraIdUser constructor and past every caller. The same one-line widening is applied to
+        // processGroup, whose Graph URL is not injectable and so is covered by inspection only.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        authenticator.setGraphConnectTimeout(500);
+        authenticator.setGraphReadTimeout(500);
+        final EntraIdUser user = newUserWithoutGraph();
+        final int deadPort;
+        try (ServerSocket socket = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+            deadPort = socket.getLocalPort();
+        } catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        final boolean resolved = authenticator.processDirectMemberOf(user, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                "http://127.0.0.1:" + deadPort + "/v1.0/me/memberOf");
+
+        assertFalse(resolved);
     }
 
     @Test
@@ -1503,9 +1851,6 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
             fessConfig.setSystemProperty("entraid.response.mode", "form_post");
             assertTrue(authenticator.getAuthUrl(request).contains("&response_mode=form_post&"));
-
-            authenticator.setUseV2Endpoint(false);
-            assertTrue(authenticator.getAuthUrl(request).contains("&response_mode=form_post&"));
         } finally {
             fessConfig.setSystemProperty("entraid.response.mode", "");
         }
@@ -1591,6 +1936,22 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final java.util.Base64.Encoder encoder = java.util.Base64.getUrlEncoder().withoutPadding();
         return encoder.encodeToString("{\"alg\":\"none\"}".getBytes(StandardCharsets.UTF_8)) + "."
                 + encoder.encodeToString(("{\"nonce\":\"" + nonce + "\"}").getBytes(StandardCharsets.UTF_8)) + ".";
+    }
+
+    @Test
+    public void test_getAuthority_fallsBackWhenTheLegacyKeyIsPresentButBlank() {
+        // getSystemProperty returns the default only when the key is absent, so an aad.authority
+        // that exists and is empty came back as "". getAuthUrl then built a scheme-less, and
+        // therefore relative, URL that redirected the browser back inside Fess.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            fessConfig.setSystemProperty("aad.authority", "");
+
+            assertEquals("https://login.microsoftonline.com/", authenticator.getAuthority());
+        } finally {
+            fessConfig.setSystemProperty("aad.authority", "");
+        }
     }
 
     @Test

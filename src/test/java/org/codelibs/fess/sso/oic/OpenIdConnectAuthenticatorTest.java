@@ -18,8 +18,10 @@ package org.codelibs.fess.sso.oic;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -28,6 +30,8 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Unit tests for {@link OpenIdConnectAuthenticator}.
@@ -244,6 +248,32 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         final var credential = authenticator.getLoginCredential();
         assertNotNull(credential);
         assertTrue(credential instanceof ActionResponseCredential);
+    }
+
+    @Test
+    public void test_getAuthUrl_issuesAnUnguessableState() {
+        // The state is the only thing standing between a login and a forged callback
+        // (RFC 6749 section 10.12), and org.codelibs.core.net.UuidUtil -- which getAuthUrl used
+        // to call -- is hex(localIP) + hex(identityHashCode(RANDOM)) +
+        // hex((int) (currentTimeMillis() >> 32)) + hex(SecureRandom.nextInt()): the first 16 hex
+        // characters never change within a JVM and the timestamp word moves every ~49.7 days, so
+        // under 32 bits actually varied per call.
+        final Set<String> states = new HashSet<>();
+        final Set<String> prefixes = new HashSet<>();
+        for (int i = 0; i < 200; i++) {
+            final HttpServletRequest request = getMockRequest();
+            authenticator.getAuthUrl(request);
+            // getAuthUrl stashes the same value it puts in the URL, and getLoginCredential only
+            // ever compares the two with equals(), so nothing depends on its length or format.
+            final String state = (String) request.getSession().getAttribute(OpenIdConnectAuthenticator.OIC_STATE);
+            assertNotNull(state, "no state was stored in the session");
+            states.add(state);
+            prefixes.add(state.replace("-", "").substring(0, 16));
+        }
+
+        assertEquals(200, states.size());
+        // The whole point: a fixed leading half is what UuidUtil produced.
+        assertTrue("distinct prefixes: " + prefixes.size(), prefixes.size() > 190);
     }
 
     @Test
