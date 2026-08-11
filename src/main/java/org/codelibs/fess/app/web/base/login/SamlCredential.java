@@ -143,8 +143,17 @@ public class SamlCredential implements LoginCredential, FessCredential {
 
         /**
          * The permissions of the user.
+         *
+         * <p>Lazily computed by {@link #getPermissions()} and never invalidated afterwards.
+         * {@code volatile} because the enclosing {@link org.codelibs.fess.mylasta.action.FessUserBean}
+         * is a session attribute read by every concurrent request of that session, while the array
+         * is written on whichever thread calls {@code getPermissions()} first. That write is not
+         * ordered by the session publication -- LastaFlute stores the bean before the login success
+         * callback that warms this cache -- so without {@code volatile} a request already in flight
+         * could observe the reference while the elements are still unwritten and see an incomplete
+         * permission set. Two threads racing to compute it is harmless; they produce equal arrays.</p>
          */
-        protected String[] permissions;
+        protected volatile String[] permissions;
 
         /**
          * The name ID of the user.
