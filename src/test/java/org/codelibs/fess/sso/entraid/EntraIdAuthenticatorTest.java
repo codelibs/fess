@@ -1723,6 +1723,46 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_processGroup_recordsTheBackoffAThrottledGraphAskedFor() throws Exception {
+        // processGroup was the one Microsoft Graph call in this class that never recorded the
+        // backoff, and it is the call most likely to meet a 429 first: the parent group walk
+        // issues one per member id, against one getMemberGroupIds per group. The gap did not
+        // close by itself either -- a 429 whose body is JSON parses, so groupList.add(id) runs
+        // and the `!groupList.contains(value)` guard in loadParentGroup then skips the recursion,
+        // which is the only other thing on that path that would have reached Graph.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+        final List<String> groupList = new ArrayList<>();
+
+        try (GraphStub graph = new GraphStub(429, Map.of("Retry-After", "120"), "{\"error\":{\"code\":\"TooManyRequests\"}}")) {
+            authenticator.processGroup(user, groupList, new ArrayList<>(), "group-a", graph.url());
+        }
+
+        assertEquals(clock.get() + 120_000L, authenticator.graphThrottledUntil);
+        assertTrue(authenticator.isGraphThrottled());
+        // The membership itself is unaffected: the id came from getMemberGroups, which is
+        // authoritative, and only the permission fields are missing from this degraded answer.
+        assertEquals(List.of("group-a"), groupList);
+    }
+
+    @Test
+    public void test_processGroup_leavesTheBackoffAloneOnAnOrdinaryAnswer() throws Exception {
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithControlledClock();
+        final EntraIdUser user = newUserWithoutGraph();
+        final List<String> groupList = new ArrayList<>();
+
+        try (GraphStub graph = new GraphStub(200, Map.of(), "{\"id\":\"group-a\",\"mail\":\"group-a@example.com\"}")) {
+            authenticator.processGroup(user, groupList, new ArrayList<>(), "group-a", graph.url());
+        }
+
+        assertEquals(0L, authenticator.graphThrottledUntil);
+        assertFalse(authenticator.isGraphThrottled());
+        // Not asserting the permission fields here: entraid.permission.fields is a system
+        // property, and those live for the whole JVM, so a sibling test could decide it.
+        assertEquals("group-a", groupList.get(0));
+    }
+
+    @Test
     public void test_processDirectMemberOf_stillAsksWhileGraphIsThrottling() throws Exception {
         // The backoff keeps the asynchronous parent group walk off a throttled Graph. A login has
         // no such luxury: skipping the lookup would hand out the configured defaults alone for the
