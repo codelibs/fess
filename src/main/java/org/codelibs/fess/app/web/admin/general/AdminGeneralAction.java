@@ -61,6 +61,13 @@ public class AdminGeneralAction extends FessAdminAction {
 
     private static final String DUMMY_PASSWORD = "**********";
 
+    /**
+     * The {@code sso.type} value that selects the SPNEGO provider. {@link org.codelibs.fess.sso.SsoManager}
+     * resolves the provider by looking up a component named {@code ssoType + "Authenticator"}, so this
+     * literal is the identifier and there is no constant for it elsewhere.
+     */
+    private static final String SSO_TYPE_SPNEGO = "spnego";
+
     private static final Logger logger = LogManager.getLogger(AdminGeneralAction.class);
 
     // ===================================================================================
@@ -572,11 +579,23 @@ public class AdminGeneralAction extends FessAdminAction {
      * configuration, and it does so lazily on the first login rather than at save time, so both the
      * admin screen and the API reject it here instead of letting SSO break silently until someone
      * tries to log in.
+     * <p>
+     * The rule only applies when the settings being stored also select SPNEGO as the SSO provider.
+     * The SPNEGO configuration is built by the SPNEGO authenticator alone, so with any other
+     * {@code sso.type} the stored combination is dormant and cannot break a login. Rejecting it
+     * regardless of the type would pin an error on a SPNEGO checkbox and block every unrelated
+     * change on this screen for installations that never enabled SPNEGO. The gate reads the
+     * submitted type rather than the stored one, so the save that switches {@code sso.type} to
+     * spnego is itself rejected until the combination is fixed: that save is the first one whose
+     * result would be a broken SPNEGO login.
      *
      * @param form the form holding the settings to be stored
      * @return true if the combination must be rejected
      */
     public static boolean isSpnegoNtlmPromptUnsupported(final EditForm form) {
+        if (!SSO_TYPE_SPNEGO.equals(form.ssoType)) {
+            return false;
+        }
         return !isCheckboxEnabled(form.spnegoAllowBasic) && isCheckboxEnabled(form.spnegoPromptNtlm);
     }
 
