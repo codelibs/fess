@@ -102,7 +102,13 @@
 		<Logger name="org.opensearch.bootstrap" additivity="false" level="error">
 			<AppenderRef ref="AppFile" />
 		</Logger>
-		<Logger name="com.onelogin.saml2" level="off"/>
+		<!-- The SAML library resolves to the org.codelibs logger above, which follows
+		     ${log.level}. At debug it prints the decoded assertion, i.e. the NameID and
+		     every attribute, so switching Admin > General > Log Level to DEBUG would dump
+		     user identities into the log. info keeps the library's warn/error lines, which
+		     carry the only human-readable reason a SAML validation failed; off would
+		     suppress those too. -->
+		<Logger name="org.codelibs.saml2" level="info"/>
 		<Logger name="org.codelibs.fess.llm" additivity="false" level="${llm.log.level}">
 			<AppenderRef ref="LlmFile" />
 		</Logger>

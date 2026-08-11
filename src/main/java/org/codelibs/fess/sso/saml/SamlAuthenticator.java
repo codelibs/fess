@@ -17,6 +17,7 @@ package org.codelibs.fess.sso.saml;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoProcessException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
@@ -132,6 +134,12 @@ import jakarta.servlet.http.HttpSession;
  * saml.security.want_messages_signed=true
  * saml.security.want_assertions_signed=true
  * </pre>
+ * <p>{@code saml.security.want_messages_signed} matters in particular once
+ * {@code saml.idp.single_logout_service.url} is configured. It defaults to {@code false} because
+ * not every IdP signs its LogoutRequest, but while it is {@code false} the single logout service
+ * accepts an unsigned LogoutRequest and does not compare its NameID with the session user, so
+ * anyone who knows the IdP entity ID can end an authenticated session. This is reported once as
+ * {@code unsigned_logoutrequest_accepted} in the insecure-settings warning.</p>
  *
  * <h2>Session Cookie Settings (Required)</h2>
  * <p>The IdP returns the assertion as a cross-site POST to the assertion consumer service.
@@ -186,10 +194,33 @@ public class SamlAuthenticator implements SsoAuthenticator {
     private final ReplayCache replayCache = new InMemoryReplayCache();
 
     /**
-     * The security warnings reported the last time they were logged, so that the
-     * per-request settings build does not repeat them until the settings change.
+     * The security warnings reported the last time they were logged, so that a settings
+     * rebuild does not repeat them until the settings change.
      */
     private final AtomicReference<List<String>> loggedSecurityWarnings = new AtomicReference<>();
+
+    /**
+     * The most recently built settings, paired with the parameters they were built from.
+     *
+     * @param params the parameters the settings were built from; values are always {@link String},
+     *               never a {@link java.net.URL}, whose {@code equals} would resolve DNS
+     * @param settings the settings built from {@code params}
+     */
+    private record CachedSettings(Map<String, Object> params, Saml2Settings settings) {
+    }
+
+    /**
+     * The settings built for the parameters currently in effect.
+     *
+     * <p>Building is not cheap and is not silent: it re-parses the IdP certificate and the SP
+     * private key, and {@code SettingsBuilder.build()} logs one line per security warning, so a
+     * per-request build defeats the deduplication in {@link #logSecurityWarnings(Saml2Settings)}.</p>
+     *
+     * <p>An {@link AtomicReference} rather than a plain field because it is required for safe
+     * publication: every field of {@link Saml2Settings} is non-final and non-volatile, so another
+     * thread could otherwise observe a partially initialized instance.</p>
+     */
+    private final AtomicReference<CachedSettings> cachedSettings = new AtomicReference<>();
 
     /**
      * Initializes the SamlAuthenticator.
@@ -213,7 +244,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
      *
      * <p>The SP endpoint URLs are not included here because they are derived from
      * {@code saml.sp.base.url}, which can be changed at runtime. They are built by
-     * {@link #getSettings()} on every call.</p>
+     * {@link #buildSettingsParams()}.</p>
      *
      * @return The default settings.
      */
@@ -269,43 +300,101 @@ public class SamlAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Gets the SAML settings.
-     * @return The SAML settings.
+     * Builds the parameters the SAML settings are built from.
+     *
+     * <p>The {@code saml.} system properties are applied without filtering out blank values:
+     * {@code SettingsBuilder} already treats a blank value as absent, so a present-but-blank
+     * property falls through to the library default. That is what lets
+     * {@code saml.security.requested_authncontext=} suppress the {@code RequestedAuthnContext}
+     * element, which is the documented way of not constraining the authentication method.</p>
+     *
+     * <p>The three SP endpoint URLs are the exception: they are computed from
+     * {@code saml.sp.base.url} rather than defaulted by the library, so they are filled in only
+     * when the matching property is absent or blank.</p>
+     *
+     * <p>Every value in the returned map is a {@link String}. A {@link java.net.URL} must never be
+     * put in it, because the map is compared with {@code equals} and {@code URL.equals} resolves
+     * DNS.</p>
+     *
+     * @return The parameters for {@link SettingsBuilder}.
      */
-    protected Saml2Settings getSettings() {
+    protected Map<String, Object> buildSettingsParams() {
         final Map<String, Object> params = new HashMap<>(defaultSettings);
-        // built on every call because saml.sp.base.url can be changed at runtime
-        params.put("onelogin.saml2.sp.entityid", buildDefaultUrl("/sso/metadata"));
-        params.put("onelogin.saml2.sp.assertion_consumer_service.url", buildDefaultUrl("/sso/"));
-        params.put("onelogin.saml2.sp.single_logout_service.url", buildDefaultUrl("/sso/logout"));
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         systemProperties.entrySet().stream().forEach(e -> {
             final String key = e.getKey().toString();
             if (!key.startsWith(SAML_PREFIX)) {
                 return;
             }
-            final Object value = e.getValue();
-            if (value instanceof final String s && StringUtil.isBlank(s)) {
-                // a blank property must not wipe out the default above
-                return;
-            }
-            params.put("onelogin.saml2." + key.substring(SAML_PREFIX.length()), value);
+            params.put("onelogin.saml2." + key.substring(SAML_PREFIX.length()), e.getValue());
         });
+        // resolved here, not in createDefaultSettings(), because saml.sp.base.url can be changed
+        // at runtime from the admin UI
+        putComputedSpUrl(params, "onelogin.saml2.sp.entityid", "/sso/metadata");
+        putComputedSpUrl(params, "onelogin.saml2.sp.assertion_consumer_service.url", "/sso/");
+        putComputedSpUrl(params, "onelogin.saml2.sp.single_logout_service.url", "/sso/logout");
+        return params;
+    }
+
+    /**
+     * Derives an SP endpoint URL from {@code saml.sp.base.url} unless the corresponding property
+     * already carries a usable value.
+     *
+     * <p>A present-but-blank property must not wipe out the derived URL: the library would treat
+     * it as absent and leave the SP endpoint unset, which fails {@code checkSPSettings()}.</p>
+     *
+     * @param params The parameters being built.
+     * @param key The {@code onelogin.saml2.} key to fill in.
+     * @param path The path to append to the base URL.
+     */
+    protected void putComputedSpUrl(final Map<String, Object> params, final String key, final String path) {
+        if (params.get(key) instanceof final String s && StringUtil.isNotBlank(s)) {
+            return;
+        }
+        params.put(key, buildDefaultUrl(path));
+    }
+
+    /**
+     * Gets the SAML settings.
+     *
+     * <p>The settings are cached and rebuilt only when the parameters change, because building
+     * them re-parses the IdP certificate and the SP private key and logs the security warnings
+     * again.</p>
+     *
+     * @return The SAML settings.
+     */
+    protected Saml2Settings getSettings() {
+        final Map<String, Object> params = buildSettingsParams();
+        final CachedSettings cached = cachedSettings.get();
+        if (cached != null && cached.params().equals(params)) {
+            return cached.settings();
+        }
+        // deliberately get()/set() rather than updateAndGet() or a synchronized block: the
+        // mapping function of updateAndGet() may be retried, and building has logging side
+        // effects that must not be repeated. Two threads building at once is harmless; both
+        // produce equivalent settings and the last write wins.
         final Saml2Settings settings = new SettingsBuilder().fromValues(params).build();
         settings.setReplayCache(replayCache);
         logSecurityWarnings(settings);
+        cachedSettings.set(new CachedSettings(params, settings));
         return settings;
     }
 
     /**
      * Logs the security warnings reported for the given settings.
-     * The settings are rebuilt on every request, so the warnings are logged
-     * again only when they change.
+     * The warnings are logged again only when they change, so that a settings rebuild does not
+     * repeat them.
      *
      * @param settings The SAML settings.
      */
     protected void logSecurityWarnings(final Saml2Settings settings) {
-        final List<String> warnings = settings.getSecurityWarnings();
+        final List<String> warnings = new ArrayList<>(settings.getSecurityWarnings());
+        if (settings.getIdpSingleLogoutServiceResponseUrl() != null && !settings.getWantMessagesSigned()) {
+            // /sso/logout accepts a LogoutRequest that is not signed, and the NameID it carries is
+            // never compared with the session user, so anyone who knows the IdP entity ID can end
+            // an authenticated session by luring the user to a crafted URL.
+            warnings.add("unsigned_logoutrequest_accepted");
+        }
         if (!warnings.equals(loggedSecurityWarnings.getAndSet(warnings)) && !warnings.isEmpty()) {
             logger.warn("Insecure SAML settings: {}. See the SAML SSO documentation for the recommended values.",
                     warnings.stream().collect(Collectors.joining(", ")));
@@ -451,9 +540,9 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * Gets the metadata response.
      *
      * <p>The SP metadata is what the IdP is registered from, so it has to be obtainable before
-     * any {@code saml.idp.*} property exists. {@code setSPValidationOnly} therefore has to be
-     * applied to the settings before they are validated; constructing an {@link Auth} here would
-     * validate the IdP settings in its constructor and fail while they are still empty.</p>
+     * any {@code saml.idp.*} property exists. Only the SP settings are therefore validated;
+     * constructing an {@link Auth} here would validate the IdP settings in its constructor and
+     * fail while they are still empty.</p>
      *
      * @return The metadata response.
      */
@@ -464,8 +553,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
             }
             try {
                 final Saml2Settings settings = getSettings();
-                settings.setSPValidationOnly(true);
-                final List<String> settingsErrors = settings.checkSettings();
+                // checkSettings() with spValidationOnly is by definition checkSPSettings(), and
+                // mutating the shared settings instance to say so would leak into every other
+                // caller
+                final List<String> settingsErrors = settings.checkSPSettings();
                 if (!settingsErrors.isEmpty()) {
                     final String msg = settingsErrors.stream().collect(Collectors.joining(", "));
                     throw new SsoMessageException(
@@ -499,6 +590,22 @@ public class SamlAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Returns whether the request carries a SAML logout message, which is what the IdP sends to
+     * the single logout service.
+     *
+     * <p>{@code /sso/logout} is reachable without authentication, so it also receives plain visits
+     * that carry no SAML message at all. Those are not logout callbacks and must be rejected
+     * before {@code Auth.processSLO} sees them, because it answers them with an exception whose
+     * text describes the supported bindings rather than anything the visitor can act on.</p>
+     *
+     * @param request The HTTP request.
+     * @return true if the request carries a SAML logout request or response.
+     */
+    protected boolean containsSamlLogoutMessage(final HttpServletRequest request) {
+        return StringUtil.isNotBlank(request.getParameter("SAMLRequest")) || StringUtil.isNotBlank(request.getParameter("SAMLResponse"));
+    }
+
+    /**
      * Gets the logout response.
      * @return The logout response.
      */
@@ -509,6 +616,17 @@ public class SamlAuthenticator implements SsoAuthenticator {
             }
             final HttpServletResponse response = LaResponseUtil.getResponse();
             try {
+                if (!containsSamlLogoutMessage(request)) {
+                    // an anonymous request that is not a logout callback: rejected, not a fault,
+                    // so it carries an SsoStateException and is logged without a stack trace.
+                    // Checked before the configuration guard below, because otherwise a
+                    // deployment that leaves single logout unconfigured would answer the very
+                    // same anonymous visit with a stack trace per request.
+                    final String msg = "This endpoint expects a SAML logout message from the IdP.";
+                    throw new SsoMessageException(
+                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
+                            "Failed to log out.", new SsoStateException(msg));
+                }
                 final Saml2Settings settings = getSettings();
                 if (settings.getIdpSingleLogoutServiceResponseUrl() == null) {
                     final String msg = "IdP single logout service URL is not configured.";
