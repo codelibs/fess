@@ -423,6 +423,9 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertNull(authenticator.getLoginCredential());
             assertEquals(1, appender.warnings().size());
             assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
+            // there is no session at all, which is the one situation the cookie really explains,
+            // so this is where that guidance has to stay
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("tomcat.sameSiteCookies"));
         } finally {
             tearDownIdp(systemProperties);
             appender.detach();
@@ -565,8 +568,14 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
 
                 assertNull(authenticator.getLoginCredential());
                 assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
-                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
-                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("(0 pending)"));
+                // The session was found and it did hold the ID until this very request pruned it,
+                // so the cookie demonstrably arrived. Reporting this as the SameSite case sends an
+                // operator whose cookie settings are already right off to change them, and this is
+                // the ordinary outcome of a user who walks away mid-login.
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("had expired"));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("all 1 pending"));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("saml.request.id.ttl"));
+                assertFalse(appender.warnings().get(0), appender.warnings().get(0).contains("tomcat.sameSiteCookies"));
                 assertTrue(pendingRequestIds(request.getSession(false)).toString(), pendingRequestIds(request.getSession(false)).isEmpty());
             } finally {
                 appender.detach();
@@ -688,6 +697,116 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertTrue(String.valueOf(appender.warnings()), appender.warnings().isEmpty());
         } finally {
             ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "");
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getRequestIdTtl_fallsBackWhenTheConfiguredValueIsNotPositive() throws Exception {
+        // Both values parse, so nothing fails here, but removeExpiredRequestIds compares
+        // (now - created) / 1000 against the result: 0 drops the AuthnRequest ID one second after
+        // the IdP was sent to, and -1 drops it at once, so every SAML login in the deployment
+        // fails. 0 is not a far-fetched thing to write, either: it reads as "no expiry".
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "0");
+            assertEquals(3600L, new SamlAuthenticator().getRequestIdTtl());
+
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "-1");
+            assertEquals(3600L, new SamlAuthenticator().getRequestIdTtl());
+
+            assertEquals(2, appender.warnings().size(), String.valueOf(appender.warnings()));
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("saml.request.id.ttl"));
+            // the value that was configured, not only the default that replaced it
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains(": 0."));
+            assertTrue(appender.warnings().get(1), appender.warnings().get(1).contains(": -1."));
+        } finally {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "");
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getRequestIdTtl_reportsANonPositiveValueDifferentlyFromANonNumericOne() throws Exception {
+        // The two mistakes need different corrections, and 0 is a number, so reporting it as
+        // invalid would send an administrator hunting for a typo that is not there.
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "0");
+            new SamlAuthenticator().getRequestIdTtl();
+
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "one hour");
+            new SamlAuthenticator().getRequestIdTtl();
+
+            assertEquals(2, appender.warnings().size(), String.valueOf(appender.warnings()));
+            final String nonPositive = appender.warnings().get(0);
+            final String nonNumeric = appender.warnings().get(1);
+            assertTrue(nonPositive, nonPositive.contains("positive"));
+            assertFalse(nonPositive, nonPositive.contains("Invalid"));
+            assertTrue(nonNumeric, nonNumeric.contains("Invalid"));
+            assertFalse(nonNumeric, nonNumeric.contains("positive"));
+        } finally {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "");
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_nonPositiveRequestIdTtlStillAnswersAResponse() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            // Taken literally, this expires the AuthnRequest ID one second after the browser was
+            // sent to the IdP, which no round trip can beat: the deployment would answer every
+            // login attempt with a warning and no session would ever be created.
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "0");
+            final MockletHttpServletRequest request = getMockRequest();
+            authenticator.getLoginCredential();
+            final String requestId = pendingRequestIds(request.getSession(false)).iterator().next();
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                clock.addAndGet(1000L);
+                postSamlResponse(request, requestId);
+
+                // The response is unsigned, so it cannot authenticate; what this pins is that it
+                // was compared with the pending ID at all rather than finding it already pruned.
+                assertNull(authenticator.getLoginCredential());
+                final List<String> warnings = appender.warnings();
+                assertTrue(String.valueOf(warnings), warnings.stream().anyMatch(w -> w.startsWith("Authentication Failure:")));
+                assertTrue(String.valueOf(warnings), warnings.stream().noneMatch(w -> w.contains("had expired")));
+                assertTrue(String.valueOf(warnings), warnings.stream().noneMatch(w -> w.contains("no matching AuthnRequest ID")));
+                // and a rejected response does not consume the ID, so the login is still live
+                final Set<String> pending = pendingRequestIds(request.getSession(false));
+                assertTrue(String.valueOf(pending), pending.contains(requestId));
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "");
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_logUnmatchedSamlResponse_separatesAnExpiredLoginFromAMissingSessionCookie() throws Exception {
+        // Both situations reach the log with nothing pending, so the text is the only thing that
+        // can tell them apart, and only one of them is a misconfiguration.
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            authenticator.logUnmatchedSamlResponse(0);
+            authenticator.logUnmatchedSamlResponseAfterExpiry(1);
+
+            assertEquals(2, appender.warnings().size(), String.valueOf(appender.warnings()));
+            final String missingCookie = appender.warnings().get(0);
+            final String expired = appender.warnings().get(1);
+            assertTrue(missingCookie, missingCookie.contains("tomcat.sameSiteCookies"));
+            assertFalse(missingCookie, missingCookie.contains("saml.request.id.ttl"));
+            assertTrue(expired, expired.contains("saml.request.id.ttl"));
+            assertFalse(expired, expired.contains("tomcat.sameSiteCookies"));
+        } finally {
             appender.detach();
         }
     }

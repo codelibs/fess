@@ -195,15 +195,16 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected static final String SAML_SP_BASE_URL = "saml.sp.base.url";
 
     /**
-     * The property key for how long, in seconds, an unanswered AuthnRequest ID stays usable.
+     * The property key for how long, in seconds, an unanswered AuthnRequest ID stays usable. Only
+     * a positive value is honoured; see {@link #getRequestIdTtl()}.
      */
     protected static final String SAML_REQUEST_ID_TTL = "saml.request.id.ttl";
 
     /**
      * The time-to-live applied to an unanswered AuthnRequest ID when
-     * {@link #SAML_REQUEST_ID_TTL} is absent, blank or not a number. One hour, the same default
-     * {@code EntraIdAuthenticator} uses for an OpenID Connect state, and comfortably longer than
-     * any interactive login at an IdP.
+     * {@link #SAML_REQUEST_ID_TTL} is absent, blank, not a number, or not positive. One hour, the
+     * same default {@code EntraIdAuthenticator} uses for an OpenID Connect state, and comfortably
+     * longer than any interactive login at an IdP.
      */
     protected static final String DEFAULT_REQUEST_ID_TTL = "3600";
 
@@ -448,8 +449,12 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
             if (containsSamlResponse(request)) {
                 final HttpSession session = request.getSession(false);
+                // counted here rather than inside removeExpiredRequestIds so that the pruning
+                // itself keeps the signature it ships with; see logUnmatchedSamlResponseAfterExpiry
+                int expiredCount = 0;
                 if (session != null) {
                     final Map<String, Long> requestIdMap = getRequestIdMap(session);
+                    final int pendingCount = requestIdMap.size();
                     removeExpiredRequestIds(requestIdMap);
                     if (!requestIdMap.isEmpty()) {
                         try {
@@ -459,11 +464,21 @@ public class SamlAuthenticator implements SsoAuthenticator {
                             return null;
                         }
                     }
+                    // pruning is the only thing this thread removed, so an emptied map that was not
+                    // empty a moment ago says how many logins ran out of time. A concurrent request
+                    // of the same session can consume or evict an entry too, which would make this
+                    // an over-count; it only shapes a log line, and the response was unanswerable
+                    // by this thread either way.
+                    expiredCount = pendingCount;
                 }
                 // No session at all, or one that holds nothing still answerable: the assertion
                 // cannot be tied to an AuthnRequest this server sent, so it is refused rather
                 // than answered with another one.
-                logUnmatchedSamlResponse(0);
+                if (expiredCount > 0) {
+                    logUnmatchedSamlResponseAfterExpiry(expiredCount);
+                } else {
+                    logUnmatchedSamlResponse(0);
+                }
                 return null;
             }
 
@@ -604,6 +619,12 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * authenticated, which posts the same kind of unmatched assertion straight back, and the
      * loop only ends when the browser gives up.</p>
      *
+     * <p>The SameSite guidance below is what this case usually is, but only because the case
+     * where the session was found and its AuthnRequest IDs had merely run out of time is reported
+     * by {@link #logUnmatchedSamlResponseAfterExpiry(int)} instead. Without that split every
+     * expired login would read as a cookie misconfiguration, since the pruning happens before
+     * this is reached and therefore reports a pending count of zero as well.</p>
+     *
      * @param pendingCount How many pending AuthnRequest IDs the session held, so that a log can
      *            tell a missing session cookie apart from a response that simply matched none of
      *            several live logins.
@@ -613,6 +634,36 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 + " The assertion consumer service is a cross-site POST, which does not carry a SameSite=Lax cookie;"
                 + " see tomcat.sameSiteCookies in tomcat_config.properties."
                 + " An IdP-initiated (unsolicited) response is rejected for the same reason.", pendingCount);
+    }
+
+    /**
+     * Logs the one line reported when a SAML response arrives after every AuthnRequest ID its
+     * session held had passed {@link #SAML_REQUEST_ID_TTL}.
+     *
+     * <p>Kept apart from {@link #logUnmatchedSamlResponse(int)} because that line names
+     * {@code tomcat.sameSiteCookies} as the cause, and here the session cookie demonstrably did
+     * arrive: the session was found and it did hold pending IDs until this request pruned them.
+     * Sending an operator whose cookie settings are already correct off to change them is what
+     * the split avoids; the only line that told the two apart was the {@code debug} one in
+     * {@link #removeExpiredRequestIds(Map)}, which is below the level a shipped Fess logs at.</p>
+     *
+     * <p>This is an ordinary event rather than a misconfiguration -- a user who starts a login and
+     * finishes it at the IdP later than the TTL allows reaches it, and simply starting the login
+     * again succeeds -- so it is worth telling apart from the cases that need an administrator.</p>
+     *
+     * <p>An extension that overrides {@link #logUnmatchedSamlResponse(int)} to reshape or suppress
+     * that warning wants to override this one as well: until this method existed, the expiry case
+     * was reported by that one with a pending count of zero.</p>
+     *
+     * @param expiredCount How many pending AuthnRequest IDs had expired, that is, how many logins
+     *            the session still had in flight before the TTL removed them.
+     */
+    protected void logUnmatchedSamlResponseAfterExpiry(final int expiredCount) {
+        logger.warn(
+                "Received a SAML response after all {} pending AuthnRequest ID(s) of the session had expired."
+                        + " The session cookie did reach this server, so this is not the SameSite case:"
+                        + " the login took longer to finish at the IdP than {} allows, and starting it again resolves it.",
+                expiredCount, SAML_REQUEST_ID_TTL);
     }
 
     /**
@@ -729,20 +780,37 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * alternative is a login that dies with a {@code NumberFormatException} nobody can act
      * on.</p>
      *
-     * @return The TTL in seconds. {@link #removeExpiredRequestIds} compares it against an elapsed
-     *         time that has already been divided by 1000.
+     * <p>A value that is not positive is treated the same way, and for the same reason. It parses,
+     * so nothing would fail here, but {@link #removeExpiredRequestIds} compares
+     * {@code (now - created) / 1000} against it: {@code 0} drops an AuthnRequest ID one second
+     * after it was issued and a negative value drops it at once, so no IdP round trip could ever
+     * complete and every SAML login in the deployment would fail. {@code 0} is not a far-fetched
+     * value to write either -- it reads as "no expiry", and elsewhere in Fess that is what it
+     * means -- which is why it falls back rather than being taken literally. The warning names the
+     * property and the value, and is worded differently from the one above so that a log says
+     * which of the two mistakes was made.</p>
+     *
+     * @return The TTL in seconds, always positive. {@link #removeExpiredRequestIds} compares it
+     *         against an elapsed time that has already been divided by 1000.
      */
     protected long getRequestIdTtl() {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(SAML_REQUEST_ID_TTL);
         if (StringUtil.isBlank(value)) {
             return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
         }
+        final long requestIdTtl;
         try {
-            return Long.parseLong(value.trim());
+            requestIdTtl = Long.parseLong(value.trim());
         } catch (final NumberFormatException e) {
             logger.warn("Invalid {}: {}. Using {} seconds.", SAML_REQUEST_ID_TTL, value, DEFAULT_REQUEST_ID_TTL);
             return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
         }
+        if (requestIdTtl <= 0) {
+            logger.warn("{} must be a positive number of seconds: {}. Using {} seconds.", SAML_REQUEST_ID_TTL, value,
+                    DEFAULT_REQUEST_ID_TTL);
+            return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
+        }
+        return requestIdTtl;
     }
 
     /**
