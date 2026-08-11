@@ -199,20 +199,53 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_isSpnegoNtlmPromptUnsupported() {
-        final EditForm form = createEditForm();
-
+    public void test_isSpnegoNtlmPromptUnsupported_spnego_rejectsNtlmPromptWithoutBasic() {
         // The library requires Basic auth to be available before it can downgrade an NTLM token.
-        form.spnegoAllowBasic = null;
-        form.spnegoPromptNtlm = Constants.TRUE;
+        assertTrue(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm("spnego", Constants.FALSE, Constants.TRUE)));
+    }
+
+    @Test
+    public void test_isSpnegoNtlmPromptUnsupported_spnego_allowsNtlmPromptWithBasic() {
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm("spnego", Constants.TRUE, Constants.TRUE)));
+    }
+
+    @Test
+    public void test_isSpnegoNtlmPromptUnsupported_spnego_allowsNtlmPromptDisabled() {
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm("spnego", Constants.FALSE, Constants.FALSE)));
+    }
+
+    @Test
+    public void test_isSpnegoNtlmPromptUnsupported_otherSsoType_leavesDormantSettingsAlone() {
+        // sso.type=none is the default, so a stored combination that no authenticator ever reads
+        // must not block saving an unrelated setting on this screen.
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm(Constants.NONE, Constants.FALSE, Constants.TRUE)));
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm("saml", Constants.FALSE, Constants.TRUE)));
+    }
+
+    @Test
+    public void test_isSpnegoNtlmPromptUnsupported_missingSsoType_isNotSpnego() {
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm(null, Constants.FALSE, Constants.TRUE)));
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm(StringUtil.EMPTY, Constants.FALSE, Constants.TRUE)));
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(createSpnegoForm(" ", Constants.FALSE, Constants.TRUE)));
+    }
+
+    @Test
+    public void test_isSpnegoNtlmPromptUnsupported_switchingToSpnegoIsStillRejected() {
+        // The gate reads the submitted type, so turning SPNEGO on while the stored checkboxes hold
+        // the unsupported combination is rejected instead of being saved into a broken login.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EditForm stored = createEditForm();
+        stored.ssoType = Constants.NONE;
+        stored.spnegoAllowBasic = Constants.FALSE;
+        stored.spnegoPromptNtlm = Constants.TRUE;
+        AdminGeneralAction.updateConfig(fessConfig, stored);
+
+        final EditForm form = createEditForm();
+        AdminGeneralAction.updateForm(fessConfig, form);
+        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
+
+        form.ssoType = "spnego";
         assertTrue(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
-
-        form.spnegoAllowBasic = Constants.TRUE;
-        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
-
-        form.spnegoAllowBasic = null;
-        form.spnegoPromptNtlm = null;
-        assertFalse(AdminGeneralAction.isSpnegoNtlmPromptUnsupported(form));
     }
 
     /**
@@ -243,6 +276,24 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
 
         assertEquals("fesenType=" + fesenType + ", resultCollapsed=" + formValue, expectedValue,
                 ComponentUtil.getSystemProperties().getProperty(Constants.RESULT_COLLAPSED_PROPERTY));
+    }
+
+    /**
+     * Creates a form carrying the three fields the SPNEGO NTLM prompt rule correlates. The
+     * checkbox fields are always set explicitly, because isCheckboxEnabled reads an absent field
+     * as disabled and a fixture that leaves one out could not tell the two apart.
+     *
+     * @param ssoType the submitted sso.type value
+     * @param spnegoAllowBasic the submitted spnegoAllowBasic checkbox value
+     * @param spnegoPromptNtlm the submitted spnegoPromptNtlm checkbox value
+     * @return the form to pass to isSpnegoNtlmPromptUnsupported
+     */
+    private EditForm createSpnegoForm(final String ssoType, final String spnegoAllowBasic, final String spnegoPromptNtlm) {
+        final EditForm form = createEditForm();
+        form.ssoType = ssoType;
+        form.spnegoAllowBasic = spnegoAllowBasic;
+        form.spnegoPromptNtlm = spnegoPromptNtlm;
+        return form;
     }
 
     /**
