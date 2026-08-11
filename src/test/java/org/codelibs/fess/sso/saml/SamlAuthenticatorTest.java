@@ -16,13 +16,23 @@
 package org.codelibs.fess.sso.saml;
 
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoStateException;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -34,6 +44,8 @@ import org.junit.jupiter.api.Test;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
+
+import jakarta.servlet.http.HttpSession;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
 
@@ -265,12 +277,23 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     @Test
     public void test_getSettings_sharesReplayCacheAcrossRequests() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // the properties have to change between the two calls, otherwise the settings cache
+            // hands back the same instance and comparing its replay cache with itself asserts
+            // nothing. What matters is that the cache survives a *rebuild*: it is the only thing
+            // that would otherwise be discarded, letting an assertion already seen be replayed
+            // whenever an administrator saves a SAML setting.
+            final Saml2Settings first = authenticator.getSettings();
+            systemProperties.setProperty("saml.security.want_assertions_signed", "true");
+            final Saml2Settings second = authenticator.getSettings();
 
-        final Saml2Settings first = authenticator.getSettings();
-        final Saml2Settings second = authenticator.getSettings();
-
-        assertNotNull(first.getReplayCache());
-        assertSame(first.getReplayCache(), second.getReplayCache());
+            Assertions.assertNotSame(first, second);
+            assertNotNull(first.getReplayCache());
+            assertSame(first.getReplayCache(), second.getReplayCache());
+        } finally {
+            systemProperties.remove("saml.security.want_assertions_signed");
+        }
     }
 
     @Test
@@ -319,6 +342,55 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         systemProperties.remove("saml.idp.certfingerprint");
     }
 
+    /** Lets a test move the clock that pending AuthnRequest ID expiry is measured against. */
+    private final AtomicLong clock = new AtomicLong(1_000_000L);
+
+    private SamlAuthenticator createAuthenticatorWithControlledClock() throws Exception {
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+        return createAuthenticator();
+    }
+
+    /**
+     * Reads the pending AuthnRequest IDs out of the session without assuming the shape of the
+     * attribute, so that the same assertion can be run against the build that stored a single ID
+     * as a bare String.
+     */
+    private Set<String> pendingRequestIds(final HttpSession session) {
+        final Object value = session == null ? null : session.getAttribute("SAML_STATE");
+        if (value instanceof final Map<?, ?> requestIdMap) {
+            return requestIdMap.keySet().stream().map(String::valueOf).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        if (value instanceof final String requestId) {
+            return new LinkedHashSet<>(List.of(requestId));
+        }
+        return new LinkedHashSet<>();
+    }
+
+    /**
+     * Puts a SAML response on the request that is well formed enough to reach the InResponseTo
+     * comparison and is rejected right after it. It carries no signature, so it can never
+     * authenticate; what it makes observable is which pending AuthnRequest ID it was compared
+     * with, without a test having to sign an assertion.
+     *
+     * @param request The request the IdP is pretending to post to.
+     * @param inResponseTo The AuthnRequest ID the response claims to answer.
+     */
+    private void postSamlResponse(final MockletHttpServletRequest request, final String inResponseTo) {
+        final String xml = "<samlp:Response xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                + " xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_response\" Version=\"2.0\""
+                + " IssueInstant=\"2026-01-01T00:00:00Z\" InResponseTo=\"" + inResponseTo + "\">"
+                + "<samlp:Status><samlp:StatusCode Value=\"urn:oasis:names:tc:SAML:2.0:status:Success\"/></samlp:Status>"
+                + "<saml:Assertion ID=\"_assertion\" Version=\"2.0\" IssueInstant=\"2026-01-01T00:00:00Z\">"
+                + "<saml:Issuer>https://idp.example.com/metadata</saml:Issuer></saml:Assertion></samlp:Response>";
+        request.setMethod("POST");
+        request.setParameter("SAMLResponse", Base64.getEncoder().encodeToString(xml.getBytes(StandardCharsets.UTF_8)));
+    }
+
     @Test
     public void test_containsSamlResponse() throws Exception {
         final SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -359,7 +431,9 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
 
     @Test
     public void test_getLoginCredential_requestWithoutResponseStartsLogin() throws Exception {
-        final SamlAuthenticator authenticator = createAuthenticator();
+        // recording the AuthnRequest ID stamps it with SystemHelper's clock, which test_app.xml
+        // does not register on its own
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         try {
             setUpIdp(systemProperties);
@@ -375,25 +449,246 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getLoginCredential_requestWithoutResponseReplacesPendingRequestId() throws Exception {
-        final SamlAuthenticator authenticator = createAuthenticator();
+    public void test_getLoginCredential_requestWithoutResponseKeepsPendingRequestIds() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         try {
             setUpIdp(systemProperties);
-            // a plain visit to /sso/ sends a fresh AuthnRequest and rebinds the session to its
-            // ID, so a login already in flight is abandoned: only one AuthnRequest per session
-            // can be answered, and the response to the older one is rejected as unmatched
+            // FessSearchAction redirects every unauthenticated page hit to /sso/, so a session
+            // that expires with two tabs open sends two AuthnRequests. A single slot made the
+            // second visit abandon the first login, and the first assertion back then consumed
+            // the slot, failed the InResponseTo comparison and took both tabs down with it.
             final MockletHttpServletRequest request = getMockRequest();
-            request.getSession().setAttribute("SAML_STATE", "ONELOGIN_pending");
 
             authenticator.getLoginCredential();
+            final Set<String> afterFirstVisit = pendingRequestIds(request.getSession(false));
+            clock.addAndGet(1000L);
+            authenticator.getLoginCredential();
+            final Set<String> afterSecondVisit = pendingRequestIds(request.getSession(false));
 
-            final Object requestId = request.getSession(false).getAttribute("SAML_STATE");
-            assertNotNull(requestId);
-            Assertions.assertNotEquals("ONELOGIN_pending", requestId);
-            assertTrue(String.valueOf(requestId), String.valueOf(requestId).startsWith("ONELOGIN_"));
+            assertEquals(1, afterFirstVisit.size(), String.valueOf(afterFirstVisit));
+            assertEquals(2, afterSecondVisit.size(), String.valueOf(afterSecondVisit));
+            assertTrue(String.valueOf(afterSecondVisit), afterSecondVisit.containsAll(afterFirstVisit));
+            afterSecondVisit.forEach(requestId -> assertTrue(requestId, requestId.startsWith("ONELOGIN_")));
         } finally {
             tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_requestWithoutResponseCarriesOverALegacyRequestId() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            // A session created before this change holds the single pending ID as a bare String.
+            // Casting it to the map would end the login with a ClassCastException, and dropping
+            // it would abandon a login that was already in flight over the upgrade.
+            final MockletHttpServletRequest request = getMockRequest();
+            request.getSession().setAttribute("SAML_STATE", "ONELOGIN_legacy");
+
+            final LoginCredential credential = authenticator.getLoginCredential();
+
+            assertTrue(String.valueOf(credential), credential instanceof ActionResponseCredential);
+            final Set<String> pending = pendingRequestIds(request.getSession(false));
+            assertEquals(2, pending.size(), String.valueOf(pending));
+            assertTrue(String.valueOf(pending), pending.contains("ONELOGIN_legacy"));
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getRequestIdMap_replacesAnUnusableSessionValue() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final HttpSession session = getMockRequest().getSession();
+        session.setAttribute("SAML_STATE", Integer.valueOf(42));
+
+        final Map<String, Long> requestIdMap = authenticator.getRequestIdMap(session);
+
+        // Anything that is not a live map and not a legacy ID is discarded rather than cast.
+        assertTrue(requestIdMap.toString(), requestIdMap.isEmpty());
+        assertTrue(String.valueOf(requestIdMap), requestIdMap instanceof ConcurrentHashMap);
+        // The map that was handed out is the one stored back, so later writes are not lost.
+        assertSame(requestIdMap, session.getAttribute("SAML_STATE"));
+    }
+
+    @Test
+    public void test_getLoginCredential_capsThePendingRequestIds() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            // /sso/ is anonymous and answers GET, so a page embedding it as a sub-resource would
+            // otherwise grow the session attribute for as long as the session lives.
+            final MockletHttpServletRequest request = getMockRequest();
+            final List<String> issuedRequestIds = new ArrayList<>();
+            for (int i = 0; i < 12; i++) {
+                clock.addAndGet(1000L);
+                authenticator.getLoginCredential();
+                pendingRequestIds(request.getSession(false)).stream()
+                        .filter(requestId -> !issuedRequestIds.contains(requestId))
+                        .forEach(issuedRequestIds::add);
+            }
+
+            final Set<String> pending = pendingRequestIds(request.getSession(false));
+
+            assertEquals(12, issuedRequestIds.size(), String.valueOf(issuedRequestIds));
+            assertEquals(10, pending.size(), String.valueOf(pending));
+            // The two oldest were evicted; the most recent are the ones a user can still finish.
+            assertFalse(String.valueOf(pending), pending.contains(issuedRequestIds.get(0)));
+            assertFalse(String.valueOf(pending), pending.contains(issuedRequestIds.get(1)));
+            assertTrue(String.valueOf(pending), pending.contains(issuedRequestIds.get(2)));
+            assertTrue(String.valueOf(pending), pending.contains(issuedRequestIds.get(11)));
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_expiredRequestIdCannotBeAnswered() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            authenticator.getLoginCredential();
+            final String requestId = pendingRequestIds(request.getSession(false)).iterator().next();
+
+            // attached only now, so that the insecure-settings warning the first getSettings()
+            // emits is not one of the messages asserted on below
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                // getRequestIdTtl() defaults to 3600 and is compared in seconds
+                clock.addAndGet(3601L * 1000L);
+                postSamlResponse(request, requestId);
+
+                assertNull(authenticator.getLoginCredential());
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("(0 pending)"));
+                assertTrue(pendingRequestIds(request.getSession(false)).toString(), pendingRequestIds(request.getSession(false)).isEmpty());
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_responseMatchingNoPendingRequestIdFails() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            authenticator.getLoginCredential();
+            final Set<String> pending = pendingRequestIds(request.getSession(false));
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                postSamlResponse(request, "ONELOGIN_never-sent");
+
+                // Answering it with a fresh AuthnRequest would bounce off an IdP that is already
+                // authenticated and come straight back here, forever.
+                assertNull(authenticator.getLoginCredential());
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("(1 pending)"));
+                // A response nobody asked for must not be able to burn a login that is in flight:
+                // the assertion consumer service is reachable cross-site, since SAML needs
+                // SameSite=none, so consuming an ID here would be a denial of service per request.
+                Assertions.assertEquals(pending, pendingRequestIds(request.getSession(false)));
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_answersTheOlderOfTwoPendingRequestIds() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            // schema validation is not what this test is about, and switching it off keeps the
+            // response below down to the elements the InResponseTo comparison needs
+            systemProperties.setProperty("saml.security.want_xml_validation", "false");
+            final MockletHttpServletRequest request = getMockRequest();
+            authenticator.getLoginCredential();
+            final String olderRequestId = pendingRequestIds(request.getSession(false)).iterator().next();
+            clock.addAndGet(1000L);
+            authenticator.getLoginCredential();
+            final Set<String> pending = pendingRequestIds(request.getSession(false));
+            assertEquals(2, pending.size(), String.valueOf(pending));
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            // java-saml reports each rejected candidate itself, which is how a test can see that
+            // the response was tried against more than the newest pending ID
+            final LogCapturingAppender samlAppender = LogCapturingAppender.attach("org.codelibs.saml2.core.authn.SamlResponse");
+            try {
+                // the first tab's assertion comes back while the second tab's AuthnRequest is the
+                // most recent one, which is the case that used to fail both logins
+                postSamlResponse(request, olderRequestId);
+                assertNull(authenticator.getLoginCredential());
+
+                final List<String> samlWarnings = samlAppender.warnings();
+                assertEquals(2, samlWarnings.size(), String.valueOf(samlWarnings));
+                // the newest ID is tried first and rejected on InResponseTo alone
+                assertTrue(samlWarnings.get(0), samlWarnings.get(0).contains("does not match the ID of the AuthNRequest"));
+                assertTrue(samlWarnings.get(0), samlWarnings.get(0).contains(olderRequestId));
+                // the older ID then matched, so the response was rejected on its own merits, which
+                // is as far as an unsigned response can get
+                assertFalse(samlWarnings.get(1), samlWarnings.get(1).contains("does not match the ID of the AuthNRequest"));
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                assertFalse(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).startsWith("Authentication Failure:"));
+            } finally {
+                samlAppender.detach();
+                appender.detach();
+            }
+        } finally {
+            systemProperties.remove("saml.security.want_xml_validation");
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getRequestIdTtl_defaultsToOneHourInSeconds() throws Exception {
+        // removeExpiredRequestIds compares (now - created) / 1000 against this value
+        assertEquals(3600L, new SamlAuthenticator().getRequestIdTtl());
+    }
+
+    @Test
+    public void test_getRequestIdTtl_fallsBackWhenTheConfiguredValueIsNotANumber() throws Exception {
+        // A typo in conf/system.properties must not fail every login with a
+        // NumberFormatException nobody can act on.
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "one hour");
+        try {
+            assertEquals(3600L, new SamlAuthenticator().getRequestIdTtl());
+            assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("saml.request.id.ttl"));
+        } finally {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "");
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getRequestIdTtl_blankValueIsNotReportedAsInvalid() throws Exception {
+        // A blank property means "unset" everywhere else in this class, so it must not warn.
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", " ");
+        try {
+            assertEquals(3600L, new SamlAuthenticator().getRequestIdTtl());
+            assertTrue(String.valueOf(appender.warnings()), appender.warnings().isEmpty());
+        } finally {
+            ComponentUtil.getFessConfig().setSystemProperty("saml.request.id.ttl", "");
+            appender.detach();
         }
     }
 
