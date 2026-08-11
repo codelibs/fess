@@ -30,6 +30,7 @@ import org.codelibs.fess.app.web.search.SearchAction;
 import org.codelibs.fess.entity.RequestParameter;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoMessageException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -91,7 +92,14 @@ public class SsoAction extends FessLoginAction {
             loginCredential = ssoManager.getLoginCredential();
         } catch (final SsoLoginException e) {
             if (ssoManager.available()) {
-                logger.warn("Failed to process SSO login.", e);
+                if (e instanceof SsoStateException) {
+                    // The endpoint is anonymous, so a callback that matches no login this server
+                    // started is a rejected request rather than a fault. A stack trace per attempt
+                    // would let an unauthenticated client fill the log.
+                    logger.warn("Failed to process SSO login: {}", e.getMessage());
+                } else {
+                    logger.warn("Failed to process SSO login.", e);
+                }
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             } else if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process SSO login.", e);

@@ -74,6 +74,14 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
     public static class EntraIdUser implements FessUser {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * How long before the access token expires {@link #refresh()} starts asking MSAL4J for a
+         * new one. It matches MSAL4J's own expiry buffer, so the token is renewed at the same
+         * instant it always was; what the guard removes is the silent acquisition -- and the
+         * Microsoft Graph call behind it -- on every other request.
+         */
+        protected static final long REFRESH_MARGIN = 5 * 60 * 1000L;
+
         /** User's group memberships. */
         protected volatile String[] groups;
 
@@ -156,16 +164,34 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 }
                 return false;
             }
+            if (tokenExpiryTime - currentTime > REFRESH_MARGIN) {
+                // FessBaseAction.godHandPrologue calls this on every action request. A silent
+                // acquisition that succeeds runs updateMemberOf, which makes a synchronous
+                // Microsoft Graph call on the request thread, so it must not happen per request.
+                // Until the token is close to expiring there is nothing to acquire, and the
+                // groups this user was given at login are still the ones Entra ID issued them.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Token is still valid for {}ms. Skipping silent authentication.", tokenExpiryTime - currentTime);
+                }
+                return true;
+            }
             // Attempt to refresh token using MSAL4J silent authentication
             try {
                 final EntraIdAuthenticator authenticator = ComponentUtil.getComponent(EntraIdAuthenticator.class);
                 final IAuthenticationResult newResult = authenticator.refreshTokenSilently(this);
                 if (newResult != null) {
+                    // MSAL4J rounds its own buffer down to whole seconds, so for up to a second
+                    // either side of REFRESH_MARGIN it hands back the token it already had.
+                    // Re-reading the directory for a token that did not change would put the
+                    // per-request Graph call straight back.
+                    final boolean renewed = !newResult.accessToken().equals(authResult.accessToken());
                     authResult = newResult;
-                    authenticator.updateMemberOf(this);
-                    resetPermissions();
+                    if (renewed) {
+                        authenticator.updateMemberOf(this);
+                        resetPermissions();
+                    }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Token refreshed successfully via silent authentication");
+                        logger.debug("Silent authentication succeeded. renewed={}", renewed);
                     }
                     return true;
                 }

@@ -3,6 +3,14 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="entraidAuthenticator" class="org.codelibs.fess.sso.entraid.EntraIdAuthenticator">
+		<!-- Tunables with no entraid.* configuration key. Uncomment to override a default.
+		<property name="maxStates">10</property>
+		<property name="graphConnectTimeout">10000</property>
+		<property name="graphReadTimeout">30000</property>
+		<property name="acquisitionTimeout">30000</property>
+		<property name="groupCacheExpiry">600</property>
+		<property name="maxGroupDepth">10</property>
+		-->
 	</component>
 	<component name="oicAuthenticator" class="org.codelibs.fess.sso.oic.OpenIdConnectAuthenticator">
 	</component>

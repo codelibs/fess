@@ -52,6 +52,7 @@ import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
+import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
@@ -124,6 +125,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /** Configuration key for Entra ID reply URL. */
     protected static final String ENTRAID_REPLY_URL = "entraid.reply.url";
 
+    /** Configuration key for the OAuth2 response mode of the authorization request. */
+    protected static final String ENTRAID_RESPONSE_MODE = "entraid.response.mode";
+
     /** Configuration key for Entra ID default groups. */
     protected static final String ENTRAID_DEFAULT_GROUPS = "entraid.default.groups";
 
@@ -148,6 +152,15 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /** Legacy configuration key for Azure AD reply URL. */
     protected static final String AAD_REPLY_URL = "aad.reply.url";
+
+    /** Legacy configuration key for the OAuth2 response mode. */
+    protected static final String AAD_RESPONSE_MODE = "aad.response.mode";
+
+    /** Response mode that returns the authorization code in the callback query string. */
+    protected static final String RESPONSE_MODE_QUERY = "query";
+
+    /** Response mode that returns the authorization code in a form POST to the callback. */
+    protected static final String RESPONSE_MODE_FORM_POST = "form_post";
 
     /** Legacy configuration key for Azure AD default groups. */
     protected static final String AAD_DEFAULT_GROUPS = "aad.default.groups";
@@ -175,6 +188,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /** OAuth2 authorization code parameter name. */
     protected static final String CODE = "code";
+
+    /** Microsoft Graph error code returned when the application lacks the required permission. */
+    protected static final String PERMISSION_DENIED_ERROR_CODE = "Authorization_RequestDenied";
 
     /**
      * Scopes requested at the v2.0 authorization endpoint. msal4j already prepends
@@ -339,18 +355,18 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         storeStateInSession(request.getSession(), state, nonce);
         final String authUrl;
 
+        final String responseMode = getResponseMode();
         if (useV2Endpoint) {
             // v2.0 endpoint with MSAL4J (recommended)
             authUrl = getAuthority() + getTenant() + "/oauth2/v2.0/authorize?response_type=code&scope="
-                    + URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET) + "&response_mode=query&redirect_uri="
+                    + URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET) + "&response_mode=" + responseMode + "&redirect_uri="
                     + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
                     + "&nonce=" + nonce;
         } else {
             // v1.0 endpoint for backward compatibility
-            authUrl = getAuthority() + getTenant()
-                    + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=query&redirect_uri="
-                    + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
-                    + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+            authUrl = getAuthority() + getTenant() + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode="
+                    + responseMode + "&redirect_uri=" + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id="
+                    + getClientId() + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
         }
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {} (using {} endpoint)", authUrl, useV2Endpoint ? "v2.0" : "v1.0");
@@ -528,7 +544,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
             if (claimsSet == null) {
-                throw new SsoLoginException("could not validate nonce");
+                throw new SsoStateException("could not validate nonce");
             }
 
             final String nonce = (String) claimsSet.getClaim("nonce");
@@ -536,11 +552,14 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 logger.debug("nonce={}", nonce);
             }
             if (StringUtils.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
-                throw new SsoLoginException("could not validate nonce");
+                throw new SsoStateException("could not validate nonce");
             }
         } catch (final SsoLoginException e) {
             throw e;
         } catch (final Exception e) {
+            // Not an SsoStateException: this is only reachable once the authorization code was
+            // redeemed, so an unparsable or unreadable ID token is a fault worth a stack trace,
+            // not a callback someone sent us.
             throw new SsoLoginException("could not validate nonce", e);
         }
     }
@@ -694,7 +713,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 return stateDataInSession;
             }
         }
-        throw new SsoLoginException("could not validate state");
+        throw new SsoStateException("could not validate state");
     }
 
     /**
@@ -722,9 +741,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("HTTP Method: {}", request.getMethod());
         }
-        // The authorization response arrives as a GET in query mode, which is what getAuthUrl now
-        // asks for. POST is still accepted so that a deployment already configured for form_post
-        // (tomcat.sameSiteCookies=none) keeps working.
+        // The authorization response arrives as a GET in query mode and as a POST in form_post
+        // mode; both are accepted because entraid.response.mode selects between them, and a login
+        // already in flight when that setting changes still has to complete.
         final String method = request.getMethod();
         if (!"GET".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
             return false;
@@ -790,11 +809,21 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
 
         // Retrieve direct groups synchronously (parent group lookup is deferred)
-        processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, "https://graph.microsoft.com/v1.0/me/memberOf");
+        final boolean resolved =
+                processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, "https://graph.microsoft.com/v1.0/me/memberOf");
 
         if (logger.isDebugEnabled()) {
             logger.debug("[updateMemberOf] Direct groups retrieved. Total groups: {}, Total roles: {}, Group IDs for parent lookup: {}",
                     groupList.size(), roleList.size(), groupIdsForParentLookup.size());
+        }
+
+        if (!resolved && user.getGroupNames() != null) {
+            // Microsoft Graph did not answer with a membership list -- an expired token, a
+            // throttled tenant, a revoked permission. Writing what we have would replace the
+            // memberships this user logged in with by the configured defaults alone, silently
+            // taking away their search permissions until some later call happens to succeed.
+            logger.warn("Failed to resolve the Entra ID memberships of {}. Keeping the ones already resolved.", user.getName());
+            return;
         }
 
         // Set initial groups
@@ -849,8 +878,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param roleList The list to add role names to.
      * @param groupIdsForParentLookup The list to collect group IDs for later parent lookup.
      * @param url The Microsoft Graph API URL.
+     * @return True if Microsoft Graph answered with a membership list, false if it reported an
+     *         error or could not be read. When this is false the lists hold whatever was collected
+     *         before the failure, which {@link #updateMemberOf} only writes when the user has no
+     *         memberships yet -- at login there is nothing better to fall back to.
      */
-    protected void processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+    protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
             final List<String> groupIdsForParentLookup, final String url) {
         if (logger.isDebugEnabled()) {
             logger.debug("[processDirectMemberOf] Fetching direct memberships from URL: {}", url);
@@ -920,13 +953,19 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 }
                 final String nextLink = (String) contentMap.get("@odata.nextLink");
                 if (StringUtil.isNotBlank(nextLink)) {
-                    processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, nextLink);
+                    return processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, nextLink);
                 }
-            } else if (contentMap.containsKey("error")) {
-                logger.warn("Failed to access groups/roles: {}", contentMap);
+                return true;
             }
+            if (contentMap.containsKey("error")) {
+                logger.warn("Failed to access groups/roles: {}", contentMap);
+            } else {
+                logger.warn("Unexpected response while accessing groups/roles: {}", contentMap);
+            }
+            return false;
         } catch (final IOException e) {
             logger.warn("Failed to access groups/roles in Entra ID.", e);
+            return false;
         }
     }
 
@@ -1117,9 +1156,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /**
      * Asks Microsoft Graph which groups the specified group is a member of.
      *
-     * <p>A {@code Request_ResourceNotFound} error is a real answer -- the group does not exist --
-     * and comes back as an empty array so it can be cached. Everything else is thrown, so a
-     * transient failure is never mistaken for "this group has no parents".
+     * <p>Two error codes are real answers rather than failures and come back as an empty array so
+     * that the caller can cache them: {@code Request_ResourceNotFound}, because the group does not
+     * exist, and {@code Authorization_RequestDenied}, because a Graph permission that was never
+     * granted will not appear within the cache TTL -- throwing on it left nothing cached and made
+     * every login re-issue one failing request, and one stack trace, per group. Everything else is
+     * thrown, so a transient failure is never mistaken for "this group has no parents".
      *
      * @param user The Entra ID user.
      * @param id The group ID to get parent information for.
@@ -1139,23 +1181,42 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("[getParentGroup] Response for id {}: {}", id, contentMap);
             }
-            if (contentMap.containsKey("value")) {
-                final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
-                return values != null ? values : StringUtil.EMPTY_STRINGS;
-            }
-            if (contentMap.containsKey("error")) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> errorMap = (Map<String, Object>) contentMap.get("error");
-                if ("Request_ResourceNotFound".equals(errorMap.get("code"))) {
+            return toMemberGroupIds(contentMap, id);
+        }
+    }
+
+    /**
+     * Classifies a {@code getMemberGroups} response body. See {@link #getMemberGroupIds} for which
+     * error codes count as an answer and which are failures.
+     *
+     * @param contentMap The parsed response body.
+     * @param id The group ID the response is for.
+     * @return The parent group IDs, never null.
+     * @throws IOException If the body reports a failure rather than an answer.
+     */
+    protected String[] toMemberGroupIds(final Map<String, Object> contentMap, final String id) throws IOException {
+        if (contentMap.containsKey("value")) {
+            final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
+            return values != null ? values : StringUtil.EMPTY_STRINGS;
+        }
+        if (contentMap.containsKey("error")) {
+            if (contentMap.get("error") instanceof final Map<?, ?> errorMap) {
+                final Object code = errorMap.get("code");
+                if ("Request_ResourceNotFound".equals(code)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("[getParentGroup] Resource not found for id {}: {}", id, contentMap);
                     }
                     return StringUtil.EMPTY_STRINGS;
                 }
-                throw new IOException("Failed to access parent groups for id " + id + ": " + contentMap);
+                if (PERMISSION_DENIED_ERROR_CODE.equals(code)) {
+                    logger.warn("Not allowed to read the parent groups of {}. Grant the Entra ID application"
+                            + " GroupMember.Read.All to resolve nested groups. {}", id, contentMap);
+                    return StringUtil.EMPTY_STRINGS;
+                }
             }
-            return StringUtil.EMPTY_STRINGS;
+            throw new IOException("Failed to access parent groups for id " + id + ": " + contentMap);
         }
+        return StringUtil.EMPTY_STRINGS;
     }
 
     /**
@@ -1362,6 +1423,34 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             return value;
         }
         return request.getRequestURL().toString();
+    }
+
+    /**
+     * Gets the OAuth2 response mode to ask the authorization endpoint for.
+     *
+     * <p>Defaults to {@code query}. Fess ships {@code tomcat.sameSiteCookies = lax}, and a Lax
+     * cookie is not sent on the cross-site POST that {@code form_post} produces, so a form_post
+     * callback arrives without JSESSIONID and the login loops. A deployment that sets
+     * {@code tomcat.sameSiteCookies = none} can select {@code form_post} to keep the
+     * authorization code out of the callback URL, and therefore out of browser history and any
+     * front-end proxy log.
+     *
+     * @return Either {@code query} or {@code form_post}.
+     */
+    protected String getResponseMode() {
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_RESPONSE_MODE);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_RESPONSE_MODE, RESPONSE_MODE_QUERY);
+        }
+        if (StringUtil.isBlank(value)) {
+            return RESPONSE_MODE_QUERY;
+        }
+        value = value.trim();
+        if (RESPONSE_MODE_QUERY.equals(value) || RESPONSE_MODE_FORM_POST.equals(value)) {
+            return value;
+        }
+        logger.warn("Invalid {}: {}. Using {}.", ENTRAID_RESPONSE_MODE, value, RESPONSE_MODE_QUERY);
+        return RESPONSE_MODE_QUERY;
     }
 
     @Override
