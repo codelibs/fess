@@ -318,6 +318,7 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSystemProperty("entraid.tenant", form.entraidTenant);
         fessConfig.setSystemProperty("entraid.authority", form.entraidAuthority);
         fessConfig.setSystemProperty("entraid.reply.url", form.entraidReplyUrl);
+        fessConfig.setSystemProperty("entraid.response.mode", form.entraidResponseMode);
         fessConfig.setSystemProperty("entraid.state.ttl", form.entraidStateTtl);
         fessConfig.setSystemProperty("entraid.default.groups", form.entraidDefaultGroups);
         fessConfig.setSystemProperty("entraid.default.roles", form.entraidDefaultRoles);
@@ -471,6 +472,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.entraidTenant = entraidProperty(fessConfig, "entraid.tenant", "aad.tenant", StringUtil.EMPTY);
         form.entraidAuthority = entraidProperty(fessConfig, "entraid.authority", "aad.authority", "https://login.microsoftonline.com/");
         form.entraidReplyUrl = entraidProperty(fessConfig, "entraid.reply.url", "aad.reply.url", StringUtil.EMPTY);
+        form.entraidResponseMode = entraidProperty(fessConfig, "entraid.response.mode", "aad.response.mode", "query");
         form.entraidStateTtl = entraidProperty(fessConfig, "entraid.state.ttl", "aad.state.ttl", "3600");
         form.entraidDefaultGroups = entraidProperty(fessConfig, "entraid.default.groups", "aad.default.groups", StringUtil.EMPTY);
         form.entraidDefaultRoles = entraidProperty(fessConfig, "entraid.default.roles", "aad.default.roles", StringUtil.EMPTY);

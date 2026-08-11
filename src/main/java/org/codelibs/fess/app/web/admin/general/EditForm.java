@@ -602,6 +602,10 @@ public class EditForm {
     @Size(max = 1000)
     public String entraidReplyUrl;
 
+    /** Entra ID OAuth2 authorization response mode (query or form_post). */
+    @Size(max = 100)
+    public String entraidResponseMode;
+
     /** Entra ID state parameter TTL in seconds. */
     @Size(max = 100)
     public String entraidStateTtl;
