@@ -17,6 +17,10 @@ package org.codelibs.fess.sso.spnego;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -24,6 +28,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class SpnegoAuthenticatorTest extends UnitFessTestCase {
 
@@ -41,6 +47,89 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         systemProperties.remove("spnego.login.client.module");
         systemProperties.remove("spnego.exclude.dirs");
         super.tearDown(testInfo);
+    }
+
+    /** Builds a request stub that answers only getHeader(), which is all the check reads. */
+    private HttpServletRequest requestWithAuthz(final String value) {
+        return (HttpServletRequest) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { HttpServletRequest.class },
+                (proxy, method, args) -> "getHeader".equals(method.getName()) ? value : null);
+    }
+
+    private static String basic(final String credentials) {
+        return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void test_getBasicRealm() {
+        // Only a Basic header carrying a realm yields one.
+        assertEquals("FOREIGN.EXAMPLE", SpnegoAuthenticator.getBasicRealm(basic("alice@FOREIGN.EXAMPLE:secret")));
+        // The library strips a NetBIOS domain prefix before authenticating, so the realm is what
+        // follows '@', not the prefix.
+        assertEquals("FOREIGN.EXAMPLE", SpnegoAuthenticator.getBasicRealm(basic("CORP\\alice@FOREIGN.EXAMPLE:secret")));
+        // A password containing '@' or ':' must not be mistaken for a realm.
+        assertEquals("FOREIGN.EXAMPLE", SpnegoAuthenticator.getBasicRealm(basic("alice@FOREIGN.EXAMPLE:p@ss:word")));
+
+        // No realm to check.
+        assertNull(SpnegoAuthenticator.getBasicRealm(null));
+        assertNull(SpnegoAuthenticator.getBasicRealm(basic("alice:secret")));
+        assertNull(SpnegoAuthenticator.getBasicRealm(basic("CORP\\alice:secret")));
+        assertNull(SpnegoAuthenticator.getBasicRealm(basic("alice@:secret")));
+        // Other schemes carry the realm in the principal instead and are validated after the
+        // handshake; they must not be decoded here.
+        assertNull(SpnegoAuthenticator.getBasicRealm("Negotiate YIIFoAYGKwYBBQUCoIIF"));
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic"));
+        // A malformed token belongs to the library to reject, not to this check.
+        assertNull(SpnegoAuthenticator.getBasicRealm("Basic !!!not-base64!!!"));
+    }
+
+    @Test
+    public void test_sanitizeForLog() {
+        assertEquals("CORP.EXAMPLE", SpnegoAuthenticator.sanitizeForLog("CORP.EXAMPLE"));
+        // A newline would otherwise let an unauthenticated client forge a log line.
+        assertEquals("EVIL??WARN forged", SpnegoAuthenticator.sanitizeForLog("EVIL\r\nWARN forged"));
+        final String bounded = SpnegoAuthenticator.sanitizeForLog("R".repeat(200));
+        assertEquals(SpnegoAuthenticator.MAX_LOGGED_REALM_LENGTH + 3, bounded.length());
+        assertTrue(bounded.endsWith("..."));
+    }
+
+    @Test
+    public void test_rejectDisallowedBasicRealm_rejectsForeignRealm() {
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected boolean isAllowedRealm(final String realm) {
+                return false;
+            }
+        };
+        final SsoLoginException e = assertThrows(SsoLoginException.class,
+                () -> authenticator.rejectDisallowedBasicRealm(requestWithAuthz(basic("alice@FOREIGN.EXAMPLE:secret"))));
+        assertTrue(e.getMessage().contains("FOREIGN.EXAMPLE"));
+        assertTrue(e.getMessage().contains("spnego.allowed.realms"));
+        // The decoded token holds the password; it must never reach the message or the log.
+        assertFalse(e.getMessage().contains("secret"));
+    }
+
+    @Test
+    public void test_rejectDisallowedBasicRealm_acceptsAllowedRealm() {
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator() {
+            @Override
+            protected boolean isAllowedRealm(final String realm) {
+                return "PARTNER.EXAMPLE".equals(realm);
+            }
+        };
+        authenticator.rejectDisallowedBasicRealm(requestWithAuthz(basic("alice@PARTNER.EXAMPLE:secret")));
+    }
+
+    @Test
+    public void test_rejectDisallowedBasicRealm_skipsCheckWhenNoRealmIsNamed() {
+        // A plain user name and a non-Basic scheme must not reach the allow list, because
+        // isAllowedRealm resolves the server realm through the library and would otherwise force
+        // SPNEGO initialization on every Negotiate handshake. Any such attempt fails here, since
+        // this authenticator has no usable SPNEGO configuration.
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+        authenticator.rejectDisallowedBasicRealm(requestWithAuthz(null));
+        authenticator.rejectDisallowedBasicRealm(requestWithAuthz("Negotiate YIIFoAYGKwYBBQUCoIIF"));
+        authenticator.rejectDisallowedBasicRealm(requestWithAuthz(basic("alice:secret")));
+        authenticator.rejectDisallowedBasicRealm(requestWithAuthz(basic("CORP\\alice:secret")));
     }
 
     @Test

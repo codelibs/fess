@@ -16,7 +16,9 @@
 package org.codelibs.fess.sso.spnego;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,6 +51,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -105,6 +108,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     /** Configuration key for SPNEGO logger level. */
     protected static final String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
+
+    /** Upper bound on the length of a client-supplied value embedded in a log message. */
+    protected static final int MAX_LOGGED_REALM_LENGTH = 64;
 
     /** The underlying SPNEGO authenticator instance. */
     protected volatile org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
@@ -169,9 +175,12 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 // configuration is effectively cached for the lifetime of the process. Changes to the
                 // spnego.* settings therefore require a Fess restart to take effect.
                 final SpnegoConfig spnegoConfig = new SpnegoConfig();
-                warnInsecureSettings(spnegoConfig);
                 final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(spnegoConfig);
                 authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
+                // Warn only once initialization has succeeded. A failed attempt leaves authenticator
+                // null and is retried on the next login, so warning before this point repeats the
+                // same message for every attempt, and the settings cannot matter until SPNEGO runs.
+                warnInsecureSettings(spnegoConfig);
                 return authenticator;
             } catch (final Exception e) {
                 throw new SsoLoginException("Failed to initialize SPNEGO.", e);
@@ -221,6 +230,11 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             final HttpServletResponse response = LaResponseUtil.getResponse();
             final SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(response);
 
+            // The Basic path destroys the realm before a principal exists, so it has to be checked
+            // here, against the request. Doing it before authenticating also keeps a rejected realm
+            // from causing an AS-REQ to a foreign KDC.
+            rejectDisallowedBasicRealm(request);
+
             // client/caller principal
             final SpnegoPrincipal principal;
             try {
@@ -268,12 +282,93 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 logger.debug("username={}", Arrays.toString(username));
             }
             if (username.length == 2 && StringUtil.isNotBlank(username[1]) && !isAllowedRealm(username[1])) {
-                throw new SsoLoginException("Kerberos realm is not allowed: realm=" + username[1] + ". Add it to " + SPNEGO_ALLOWED_REALMS
-                        + " to accept logins from this realm.");
+                throw new SsoLoginException(realmRejectedMessage(username[1]));
             }
             return new SpnegoCredential(username[0]);
         }).orElse(null);
 
+    }
+
+    /**
+     * Rejects a Basic authentication attempt whose user name names a Kerberos realm that is not
+     * allowed.
+     *
+     * The SPNEGO handshake carries the client's real realm in the principal, so it can be validated
+     * after the fact. Basic authentication cannot: the library authenticates the name the user
+     * typed but then builds the principal from the <em>server</em> realm, and KerberosPrincipal
+     * collapses the resulting two-realm name back to that server realm. By the time a principal
+     * exists the typed realm is gone, which would leave the allow list unable to govern this path.
+     *
+     * @param request the current request
+     * @throws SsoLoginException if the realm named in the header is not allowed
+     */
+    protected void rejectDisallowedBasicRealm(final HttpServletRequest request) {
+        final String realm = getBasicRealm(request.getHeader(Constants.AUTHZ_HEADER));
+        if (realm != null && !isAllowedRealm(realm)) {
+            throw new SsoLoginException(realmRejectedMessage(realm));
+        }
+    }
+
+    /**
+     * Builds the message reported when a Kerberos realm is refused.
+     *
+     * @param realm the rejected realm
+     * @return the message, with the realm sanitized for logging
+     */
+    protected static String realmRejectedMessage(final String realm) {
+        return "Kerberos realm is not allowed: realm=" + sanitizeForLog(realm) + ". Add it to " + SPNEGO_ALLOWED_REALMS
+                + " to accept logins from this realm.";
+    }
+
+    /**
+     * Extracts the Kerberos realm from the user name of a Basic {@code Authorization} header.
+     *
+     * Only the user name half of the decoded token is inspected. The password is never returned and
+     * never logged.
+     *
+     * @param authzHeader the raw Authorization header value (may be null)
+     * @return the realm the client typed, or null when the header is not Basic, cannot be decoded,
+     *         or names no realm
+     */
+    protected static String getBasicRealm(final String authzHeader) {
+        if (authzHeader == null) {
+            return null;
+        }
+        final int schemeEnd = authzHeader.indexOf(' ');
+        if (schemeEnd <= 0 || !Constants.BASIC_HEADER.equalsIgnoreCase(authzHeader.substring(0, schemeEnd))) {
+            return null;
+        }
+        final byte[] decoded;
+        try {
+            decoded = Base64.getDecoder().decode(authzHeader.substring(schemeEnd + 1).trim());
+        } catch (final IllegalArgumentException e) {
+            // A malformed token is the library's to reject; do not turn it into a realm failure.
+            return null;
+        }
+        final String credentials = new String(decoded, StandardCharsets.UTF_8);
+        final int colon = credentials.indexOf(':');
+        final String user = colon < 0 ? credentials : credentials.substring(0, colon);
+        // The library drops a NetBIOS "DOMAIN\" prefix before authenticating, so mirror it here.
+        final String name = user.substring(user.indexOf('\\') + 1);
+        final int at = name.indexOf('@');
+        if (at < 0 || at == name.length() - 1) {
+            return null;
+        }
+        return name.substring(at + 1);
+    }
+
+    /**
+     * Bounds a client-supplied value and strips its control characters.
+     *
+     * A realm refused on the Basic path comes straight from an unauthenticated request and is
+     * written to the application log, so a raw newline would let a client forge log lines.
+     *
+     * @param value the client-supplied value
+     * @return a value safe to embed in a log message
+     */
+    protected static String sanitizeForLog(final String value) {
+        final String bounded = value.length() > MAX_LOGGED_REALM_LENGTH ? value.substring(0, MAX_LOGGED_REALM_LENGTH) + "..." : value;
+        return bounded.replaceAll("\\p{Cntrl}", "?");
     }
 
     /**
