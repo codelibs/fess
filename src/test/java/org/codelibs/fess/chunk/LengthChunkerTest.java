@@ -485,10 +485,19 @@ public class LengthChunkerTest extends UnitFessTestCase {
     public void test_split_largeDocument_staysLinear() {
         // A guard against an accidental O(N^2): re-scanning the skippable run at every candidate,
         // or losing the `ideal - lookback` floor so every cut rescans the whole prefix, would turn
-        // this into minutes. An ABSOLUTE threshold cannot see that -- the real time here is a few
-        // milliseconds, so a 1000x regression still fits inside any bound loose enough not to be
-        // flaky. The ratio between 4N and N is the only assertion that actually measures the
-        // growth curve; the absolute bound below is kept only as a coarse "nothing hung" cap.
+        // this into minutes.
+        //
+        // Wall-clock cannot express that. An absolute bound loose enough not to flake still
+        // swallows a 1000x regression, and the 4N/N *time* ratio has to sit well above its ideal
+        // of 4.0 to survive a contended runner -- CI runs surefire with `-Dparallel=classes
+        // -DthreadCount=4`, and a 6.0 bound was measured failing at 6.25 on a green commit.
+        //
+        // So count the work instead of timing it. Every character the boundary scan inspects goes
+        // through one of ChunkBoundaryFinder's protected predicates, so a counting subclass turns
+        // the growth curve into an exact integer: linear means the per-character inspection count
+        // does not grow with the document. Measured on this input it is 3.3197/char at N and
+        // 3.3249/char at 4N (a 1.0016x drift), while dropping the lookback floor takes it to
+        // 4.2x per quadrupling. Nothing here reads the clock, so contention cannot move it.
         chunker.setTestChunkSize(800);
         chunker.setTestOverlap(0);
         // Han text with no space, no punctuation and no script change: every cut must walk the
@@ -497,18 +506,29 @@ public class LengthChunkerTest extends UnitFessTestCase {
         final String unit = "本日快晴無風";
         final String small = unit.repeat(SMALL_DOCUMENT_UNITS);
         final String large = unit.repeat(4 * SMALL_DOCUMENT_UNITS);
-        // Warm up first: the first passes measure the JIT, not the algorithm.
-        for (int i = 0; i < 2; i++) {
-            chunker.split(small);
-            chunker.split(large);
-        }
-        final long smallNanos = fastestSplitNanos(small, 7);
-        final long largeNanos = fastestSplitNanos(large, 7);
+        final double smallPerChar = inspectionsPerChar(small);
+        final double largePerChar = inspectionsPerChar(large);
         assertEquals(large, String.join("", chunker.split(large)));
-        final double ratio = (double) largeNanos / Math.max(1L, smallNanos);
-        assertTrue(ratio < 6.0, "quadrupling the document multiplied the time by " + ratio + " (small=" + smallNanos / 1_000_000L
-                + "ms, large=" + largeNanos / 1_000_000L + "ms); the scan is not linear");
-        assertTrue(largeNanos < 10_000_000_000L, "splitting " + large.length() + " characters took " + largeNanos / 1_000_000L + "ms");
+        final double growth = largePerChar / smallPerChar;
+        assertTrue(growth < 1.1,
+                "quadrupling the document multiplied the per-character scan cost by " + growth + " (small=" + smallPerChar + "/char over "
+                        + small.length() + " chars, large=" + largePerChar + "/char over " + large.length()
+                        + " chars); the scan is not linear");
+    }
+
+    /**
+     * Splits {@code content} with a boundary finder that counts every character inspection and
+     * returns the count divided by the document length. A linear scan keeps this flat.
+     */
+    private double inspectionsPerChar(final String content) {
+        final CountingBoundaryFinder finder = new CountingBoundaryFinder();
+        chunker.setTestBoundaryFinder(finder);
+        try {
+            assertFalse(chunker.split(content).isEmpty(), "the split must produce chunks");
+        } finally {
+            chunker.setTestBoundaryFinder(null);
+        }
+        return (double) finder.inspections / content.length();
     }
 
     /** 250,002 characters; the ratio assertion above compares this against four times as many. */
@@ -974,17 +994,6 @@ public class LengthChunkerTest extends UnitFessTestCase {
         return starts;
     }
 
-    private long fastestSplitNanos(final String content, final int runs) {
-        long best = Long.MAX_VALUE;
-        for (int i = 0; i < runs; i++) {
-            final long startedAt = System.nanoTime();
-            final List<String> chunks = chunker.split(content);
-            best = Math.min(best, System.nanoTime() - startedAt);
-            assertFalse(chunks.isEmpty(), "the split must produce chunks");
-        }
-        return best;
-    }
-
     private static void setChunkerProperty(final String key, final String value) {
         System.setProperty(Constants.SYSTEM_PROP_PREFIX + key, value);
     }
@@ -1101,6 +1110,7 @@ public class LengthChunkerTest extends UnitFessTestCase {
         private boolean testBoundaryEnabled = DEFAULT_BOUNDARY_ENABLED;
         private int testLookbackPercent = DEFAULT_LOOKBACK_PERCENT;
         private int testLookaheadPercent = DEFAULT_LOOKAHEAD_PERCENT;
+        private ChunkBoundaryFinder testBoundaryFinder;
 
         void setTestChunkSize(final int chunkSize) {
             this.testChunkSize = chunkSize;
@@ -1124,6 +1134,15 @@ public class LengthChunkerTest extends UnitFessTestCase {
 
         ChunkBoundaryFinder exposedBoundaryFinder() {
             return getBoundaryFinder();
+        }
+
+        void setTestBoundaryFinder(final ChunkBoundaryFinder finder) {
+            this.testBoundaryFinder = finder;
+        }
+
+        @Override
+        protected ChunkBoundaryFinder getBoundaryFinder() {
+            return testBoundaryFinder != null ? testBoundaryFinder : super.getBoundaryFinder();
         }
 
         @Override
@@ -1151,4 +1170,89 @@ public class LengthChunkerTest extends UnitFessTestCase {
             return testLookaheadPercent;
         }
     }
+
+    /**
+     * Delegating {@link ChunkBoundaryFinder} that counts how many characters the boundary scan
+     * inspects. Every predicate the scan consults is a protected seam, so overriding all of them
+     * and forwarding to {@code super} measures the work without changing any decision.
+     */
+    private static final class CountingBoundaryFinder extends ChunkBoundaryFinder {
+        private long inspections;
+
+        private boolean counted(final boolean result) {
+            inspections++;
+            return result;
+        }
+
+        @Override
+        protected boolean isBreakableSpace(final int cp) {
+            return counted(super.isBreakableSpace(cp));
+        }
+
+        @Override
+        protected boolean isNewline(final int cp) {
+            return counted(super.isNewline(cp));
+        }
+
+        @Override
+        protected boolean isSentenceTerminator(final int cp) {
+            return counted(super.isSentenceTerminator(cp));
+        }
+
+        @Override
+        protected boolean isClauseSeparator(final int cp) {
+            return counted(super.isClauseSeparator(cp));
+        }
+
+        @Override
+        protected boolean isAsciiPunctuationRequiringSpace(final int cp) {
+            return counted(super.isAsciiPunctuationRequiringSpace(cp));
+        }
+
+        @Override
+        protected boolean isPunctuationRequiringNonDigit(final int cp) {
+            return counted(super.isPunctuationRequiringNonDigit(cp));
+        }
+
+        @Override
+        protected boolean isClosingBracket(final int cp) {
+            return counted(super.isClosingBracket(cp));
+        }
+
+        @Override
+        protected boolean isOpeningBracket(final int cp) {
+            return counted(super.isOpeningBracket(cp));
+        }
+
+        @Override
+        protected boolean isSkippableAfterBoundary(final int cp) {
+            return counted(super.isSkippableAfterBoundary(cp));
+        }
+
+        @Override
+        protected boolean isDirectionAmbiguousQuote(final int cp) {
+            return counted(super.isDirectionAmbiguousQuote(cp));
+        }
+
+        @Override
+        protected boolean isScriptBoundary(final int before, final int after) {
+            return counted(super.isScriptBoundary(before, after));
+        }
+
+        @Override
+        protected boolean isClusterContinuation(final int cp) {
+            return counted(super.isClusterContinuation(cp));
+        }
+
+        @Override
+        protected boolean isNoBreakGlue(final int cp) {
+            return counted(super.isNoBreakGlue(cp));
+        }
+
+        @Override
+        protected boolean isClusterJoiner(final int cp) {
+            return counted(super.isClusterJoiner(cp));
+        }
+    }
+
 }
