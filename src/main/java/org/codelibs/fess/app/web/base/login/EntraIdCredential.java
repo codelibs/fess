@@ -83,6 +83,20 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
          */
         protected static final long REFRESH_MARGIN = 5 * 60 * 1000L;
 
+        /**
+         * How long a silent acquisition that failed is left alone before another one is attempted
+         * for this session. A refresh token that has been revoked, an account that has been
+         * disabled, and an account a {@code logout()} elsewhere evicted from the shared MSAL4J
+         * cache all fail for good, and {@link #refresh()} runs on every action request, so
+         * retrying one unconditionally would put back the per-request round trip
+         * {@link #REFRESH_MARGIN} was introduced to remove. A minute matches the backoff
+         * {@code EntraIdAuthenticator} applies to a throttled Microsoft Graph, holds a session
+         * whose renewal cannot succeed to one acquisition a minute rather than one per request,
+         * and is short enough that a failure early in {@link #REFRESH_MARGIN} still leaves four
+         * more attempts before the token actually expires.
+         */
+        protected static final long RENEWAL_THROTTLE_INTERVAL = 60 * 1000L;
+
         /** User's group memberships. */
         protected volatile String[] groups;
 
@@ -127,6 +141,14 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
          * already hold instead of queueing behind an acquisition that can take tens of seconds.
          */
         private final AtomicBoolean refreshing = new AtomicBoolean();
+
+        /**
+         * Point in time, as epoch milliseconds, until which {@link #refresh()} attempts no further
+         * silent acquisition. Zero means none has failed yet. Written by whichever request thread
+         * ran the failing acquisition while the other request threads sharing this session-scoped
+         * instance keep reading it, hence volatile.
+         */
+        protected volatile long renewalThrottledUntil;
 
         /**
          * Constructs an Entra ID user with the authentication result.
@@ -197,13 +219,8 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
             // Check if token is still valid by comparing absolute timestamps
             final long tokenExpiryTime = authResult.expiresOnDate().getTime(); // milliseconds since epoch
             final long currentTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong(); // milliseconds since epoch
-            if (tokenExpiryTime < currentTime) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Token expired: expiryTime={}, currentTime={}", tokenExpiryTime, currentTime);
-                }
-                return false;
-            }
-            if (tokenExpiryTime - currentTime > REFRESH_MARGIN) {
+            final boolean expired = tokenExpiryTime < currentTime;
+            if (!expired && tokenExpiryTime - currentTime > REFRESH_MARGIN) {
                 // FessBaseAction.godHandPrologue calls this on every action request; a silent
                 // acquisition is a network call, so it must not happen per request. Until the
                 // token is close to expiring there is nothing to acquire, and the groups this
@@ -212,6 +229,24 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                     logger.debug("Token is still valid for {}ms. Skipping silent authentication.", tokenExpiryTime - currentTime);
                 }
                 return true;
+            }
+            // An expired access token still goes through the acquisition below rather than
+            // straight out of here. MSAL4J's silent flow spends the cached refresh token, which
+            // outlives the access token by hours, so a user who was idle across the expiry is
+            // recoverable -- and giving up instead was permanent, because godHandPrologue
+            // discards this result: nothing logged the user out, and every later request took the
+            // same early exit, so the session kept a dead token and stopped re-reading its group
+            // memberships for as long as it lasted.
+            //
+            // Attempting it is not free, though: an acquisition that cannot succeed would be
+            // repeated on every request of a session that keeps searching, so one failure holds
+            // the next attempt off for RENEWAL_THROTTLE_INTERVAL.
+            if (isRenewalThrottled(currentTime)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("A silent authentication has just failed. Not retrying before {}. expired={}", renewalThrottledUntil,
+                            expired);
+                }
+                return !expired;
             }
             // Lastaflute keeps one FessUserBean -- and therefore one EntraIdUser -- as a session
             // attribute, and FessBaseAction.godHandPrologue calls refresh() on every action
@@ -227,15 +262,16 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Another request is already renewing the token. Skipping silent authentication.");
                 }
-                // The token this thread holds has not expired yet -- the check above proved it --
-                // so the request may proceed while the winner renews.
-                return true;
+                // A token that has not expired yet lets this request proceed while the winner
+                // renews. An expired one does not, and whether the winner recovers it is not this
+                // thread's to report.
+                return !expired;
             }
             // Attempt to refresh token using MSAL4J silent authentication
             try {
                 final EntraIdAuthenticator authenticator = ComponentUtil.getComponent(EntraIdAuthenticator.class);
                 final IAuthenticationResult newResult = authenticator.refreshTokenSilently(this);
-                if (newResult != null) {
+                if (newResult != null && newResult.expiresOnDate().getTime() >= currentTime) {
                     // MSAL4J rounds its own buffer down to whole seconds, so for up to a second
                     // either side of REFRESH_MARGIN it hands back the token it already had.
                     // Re-reading the directory for a token that did not change would put the
@@ -252,16 +288,54 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                     }
                     return true;
                 }
+                // refreshTokenSilently answers null instead of throwing, so a revoked refresh
+                // token, a disabled account, and an account evicted from the shared MSAL4J cache
+                // all arrive here rather than in the catch below. A result that is itself already
+                // expired is treated the same way: keeping it would leave nothing to renew from
+                // and no record that the renewal has to be held off.
+                applyRenewalThrottle(currentTime);
+                logger.warn("Silent authentication returned no usable access token for {}. expired={}. Next attempt in {} seconds.",
+                        getName(), expired, RENEWAL_THROTTLE_INTERVAL / 1000L);
             } catch (final Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Silent token refresh failed: {}", e.getMessage());
-                }
+                // At WARN, not DEBUG: this is the same anti-pattern #3218 removed from
+                // getLoginCredential, where a login that failed was invisible unless debug
+                // logging happened to be on. The throttle applied first is what keeps a
+                // persistent failure to one line per interval instead of one per request.
+                applyRenewalThrottle(currentTime);
+                logger.warn("Failed to renew the access token of {}. expired={}. Next attempt in {} seconds.", getName(), expired,
+                        RENEWAL_THROTTLE_INTERVAL / 1000L, e);
             } finally {
                 refreshing.set(false);
             }
-            // For MSAL4J, if silent refresh fails, return true if token is still valid
-            // Actual refresh will happen during next authentication request
-            return true;
+            // The silent acquisition produced nothing. A token that has not expired yet still
+            // authorises this request and MSAL4J is asked again once the throttle lapses, but an
+            // expired one leaves nothing to carry on with.
+            return !expired;
+        }
+
+        /**
+         * Returns whether a silent acquisition failed recently enough that another one has to wait.
+         *
+         * @param currentTime The current time in epoch milliseconds.
+         * @return True while the silent acquisition has to be skipped.
+         */
+        protected boolean isRenewalThrottled(final long currentTime) {
+            final long until = renewalThrottledUntil;
+            return until > 0L && currentTime < until;
+        }
+
+        /**
+         * Records that a silent acquisition produced no usable token, so that the requests this
+         * session makes over the next {@link #RENEWAL_THROTTLE_INTERVAL} do not repeat it.
+         *
+         * <p>Shaped after {@code EntraIdAuthenticator#applyGraphThrottle}, with a fixed interval
+         * rather than a negotiated one: MSAL4J reports the failure as a null result, so there is
+         * no {@code Retry-After} to read.
+         *
+         * @param currentTime The current time in epoch milliseconds.
+         */
+        protected void applyRenewalThrottle(final long currentTime) {
+            renewalThrottledUntil = currentTime + RENEWAL_THROTTLE_INTERVAL;
         }
 
         /**

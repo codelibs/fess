@@ -24,6 +24,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
@@ -357,5 +358,215 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
         final String[] afterPermissions = user.getPermissions();
         assertTrue("resolved-group missing from " + Arrays.toString(afterPermissions),
                 Arrays.stream(afterPermissions).anyMatch(p -> p.contains("resolved-group")));
+    }
+
+    /**
+     * Registers a SystemHelper whose clock the test drives, the way EntraIdAuthenticatorTest does.
+     */
+    private void registerClock(final AtomicLong clock) {
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+    }
+
+    @Test
+    public void test_refresh_attemptsARenewalWhenTheTokenHasExpired() {
+        // FessBaseAction.godHandPrologue discards this result, so returning false without asking
+        // MSAL4J for anything never ended the session: it left it holding a dead access token and
+        // taking the same early exit on every later request, which is what stopped its group
+        // memberships from ever being re-read again. MSAL4J's silent flow spends the cached
+        // refresh token, which outlives the access token by hours, so an expired access token is
+        // precisely the case worth one attempt.
+        final AtomicLong clock = new AtomicLong(1_700_000_000_000L);
+        registerClock(clock);
+        final AtomicInteger acquisitions = new AtomicInteger();
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                // the constructor must not reach Microsoft Graph. Overriding the scheduling and
+                // not updateMemberOf: the base implementation hands a real task to TimeoutManager,
+                // so overriding only the body still leaves a timer thread racing this test.
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                acquisitions.incrementAndGet();
+                return null;
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+
+        final EntraIdUser user = new EntraIdUser(authResult(new Date(clock.get() - 1L), "expired-access-token"));
+
+        // The acquisition failed, so the token really is dead and refresh() says so.
+        assertFalse(user.refresh());
+        assertEquals(1, acquisitions.get(), "an expired access token must not be given up on without asking MSAL4J");
+    }
+
+    @Test
+    public void test_refresh_recoversASessionWhoseTokenExpired() {
+        // The user was idle across the expiry -- with REFRESH_MARGIN in place their last request
+        // can easily have fallen before the renewal window -- and comes back. The cached refresh
+        // token is still good, so the session carries on with a live token and re-read groups.
+        final AtomicLong clock = new AtomicLong(1_700_000_000_000L);
+        registerClock(clock);
+        final AtomicInteger memberOfCalls = new AtomicInteger();
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                // The renewal schedules the re-resolution rather than running it: refresh() is on
+                // a request thread and updateMemberOf reaches Microsoft Graph. Counting the
+                // scheduling is what pins that the re-read is requested at all.
+                memberOfCalls.incrementAndGet();
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                return authResult(new Date(clock.get() + 60 * 60 * 1000L), "renewed-access-token");
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+
+        final EntraIdUser user = new EntraIdUser(authResult(new Date(clock.get() - 1L), "expired-access-token"));
+        // The constructor schedules the first resolution; only what refresh() adds is under test.
+        memberOfCalls.set(0);
+
+        assertTrue(user.refresh());
+        assertEquals("renewed-access-token", user.getAuthenticationResult().accessToken());
+        assertEquals(1, memberOfCalls.get(), "a recovered session must re-read its group memberships");
+    }
+
+    @Test
+    public void test_refresh_holdsOffAFailingRenewalUntilTheThrottleLapses() {
+        // A revoked refresh token, a disabled account, and an account a logout on another session
+        // evicted from the shared MSAL4J cache all fail for good, and refresh() runs on every
+        // action request. Retrying unconditionally would put back exactly the per-request round
+        // trip REFRESH_MARGIN was introduced to remove.
+        final AtomicLong clock = new AtomicLong(1_700_000_000_000L);
+        registerClock(clock);
+        final AtomicInteger acquisitions = new AtomicInteger();
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                // the constructor must not reach Microsoft Graph. Overriding the scheduling and
+                // not updateMemberOf: the base implementation hands a real task to TimeoutManager,
+                // so overriding only the body still leaves a timer thread racing this test.
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                acquisitions.incrementAndGet();
+                return null;
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+
+        final EntraIdUser user = new EntraIdUser(authResult(new Date(clock.get() - 1L), "expired-access-token"));
+
+        assertFalse(user.refresh());
+        assertEquals(1, acquisitions.get(), "the first request after the expiry must attempt a renewal");
+
+        // The rest of the requests this session makes inside the interval.
+        assertFalse(user.refresh());
+        clock.addAndGet(EntraIdUser.RENEWAL_THROTTLE_INTERVAL - 1L);
+        assertFalse(user.refresh());
+        assertEquals(1, acquisitions.get(), "a renewal that failed must not be retried on every request");
+
+        // ... and the first one after it.
+        clock.addAndGet(1L);
+        assertFalse(user.refresh());
+        assertEquals(2, acquisitions.get(), "the throttle must lapse rather than give up for good");
+    }
+
+    @Test
+    public void test_refresh_doesNotStampedeWhenConcurrentRequestsFindAnExpiredToken() throws Exception {
+        // The concurrency guard has to cover the expired token as well, not just the renewal
+        // window: godHandPrologue calls refresh() on every action request, so the requests a
+        // session has in flight when it comes back after the expiry arrive here together, and
+        // each of them would otherwise run its own acquisition and its own synchronous Microsoft
+        // Graph call behind updateMemberOf.
+        final AtomicLong clock = new AtomicLong(1_700_000_000_000L);
+        registerClock(clock);
+        final AtomicInteger acquisitions = new AtomicInteger();
+        final AtomicInteger memberOfCalls = new AtomicInteger();
+        final CountDownLatch winnerIsAcquiring = new CountDownLatch(1);
+        final CountDownLatch loserIsDone = new CountDownLatch(1);
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                // The scheduling is what refresh() does -- it runs on a request thread and
+                // updateMemberOf reaches Microsoft Graph. Counting the base implementation's
+                // TimeoutManager task instead would race this assertion.
+                memberOfCalls.incrementAndGet();
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                acquisitions.incrementAndGet();
+                // Hold the acquisition open the way a real MSAL4J round trip does, so the second
+                // request reaches refresh() while this one is still inside it.
+                winnerIsAcquiring.countDown();
+                try {
+                    loserIsDone.await(10L, TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return authResult(new Date(clock.get() + 60 * 60 * 1000L), "renewed-access-token");
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+
+        final EntraIdUser user = new EntraIdUser(authResult(new Date(clock.get() - 1L), "expired-access-token"));
+        memberOfCalls.set(0);
+
+        final AtomicBoolean winnerResult = new AtomicBoolean();
+        final Thread winner = new Thread(() -> winnerResult.set(user.refresh()));
+        winner.start();
+        assertTrue(winnerIsAcquiring.await(10L, TimeUnit.SECONDS));
+
+        // The session's second concurrent request. It holds nothing valid, so it reports that,
+        // but it must not start a second acquisition of its own.
+        assertFalse(user.refresh());
+        assertEquals(1, acquisitions.get(), "a concurrent refresh must not start a second silent acquisition");
+        loserIsDone.countDown();
+        winner.join(10000L);
+
+        assertTrue(winnerResult.get());
+        assertEquals(1, memberOfCalls.get(), "a concurrent refresh must not make a second Microsoft Graph round trip");
+        assertEquals("renewed-access-token", user.getAuthenticationResult().accessToken());
+    }
+
+    @Test
+    public void test_refresh_holdsOffAfterAnExceptionToo() {
+        // The exception path has to back off as well, otherwise the failure it now reports at
+        // WARN -- refreshTokenSilently swallows its own, so in production this is updateMemberOf
+        // or the component lookup throwing -- is written once per request rather than once per
+        // interval, which is exactly the noise the throttle is there to prevent.
+        final AtomicLong clock = new AtomicLong(1_700_000_000_000L);
+        registerClock(clock);
+        final AtomicInteger acquisitions = new AtomicInteger();
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                // the constructor must not reach Microsoft Graph. Overriding the scheduling and
+                // not updateMemberOf: the base implementation hands a real task to TimeoutManager,
+                // so overriding only the body still leaves a timer thread racing this test.
+            }
+
+            @Override
+            public IAuthenticationResult refreshTokenSilently(final EntraIdUser user) {
+                acquisitions.incrementAndGet();
+                throw new IllegalStateException("the directory could not be reached");
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+
+        final EntraIdUser user = new EntraIdUser(authResult(new Date(clock.get() - 1L), "expired-access-token"));
+
+        assertFalse(user.refresh());
+        assertFalse(user.refresh());
+        assertEquals(1, acquisitions.get(), "a renewal that threw must not be retried on every request");
+
+        clock.addAndGet(EntraIdUser.RENEWAL_THROTTLE_INTERVAL);
+        assertFalse(user.refresh());
+        assertEquals(2, acquisitions.get(), "the throttle must lapse rather than give up for good");
     }
 }
