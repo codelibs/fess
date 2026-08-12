@@ -58,7 +58,12 @@ public interface FessUser extends Serializable {
         RESOLVED,
         /** They are still being resolved, so the user currently holds fewer than they should. */
         PENDING,
-        /** They could not be resolved, and will not be retried for this session. */
+        /**
+         * Resolving them failed outright, or completed only in part, so the user holds fewer
+         * group and role permissions than they should. Not final: a later resolution -- an
+         * authenticator that re-resolves on token renewal, say -- replaces this with
+         * {@link #RESOLVED} once it succeeds.
+         */
         FAILED
     }
 

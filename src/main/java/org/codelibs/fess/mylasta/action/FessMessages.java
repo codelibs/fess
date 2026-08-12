@@ -182,10 +182,10 @@ public class FessMessages extends FessLabels {
     /** The key of the message: SSO login process failed. */
     public static final String ERRORS_sso_login_error = "{errors.sso_login_error}";
 
-    /** The key of the message: Your group and role permissions are still loading, so some results may be missing. */
+    /** The key of the message: Your group and role permissions are still loading, so you may see few or no results. Please search again in a moment. */
     public static final String ERRORS_user_permissions_loading = "{errors.user_permissions_loading}";
 
-    /** The key of the message: Your group and role permissions could not be loaded, so some results may be missing. Please log in again, and contact your administrator if this keeps happening. */
+    /** The key of the message: Your group and role permissions could not be fully loaded, so you may see few or no results. Please log out and log in again, and contact your administrator if this keeps happening. */
     public static final String ERRORS_user_permissions_unavailable = "{errors.user_permissions_unavailable}";
 
     /** The key of the message: Could not find {0}. */
@@ -1420,7 +1420,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.user_permissions_loading' with parameters.
      * <pre>
-     * message: Your group and role permissions are still loading, so some results may be missing.
+     * message: Your group and role permissions are still loading, so you may see few or no results. Please search again in a moment.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -1434,7 +1434,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.user_permissions_unavailable' with parameters.
      * <pre>
-     * message: Your group and role permissions could not be loaded, so some results may be missing. Please log in again, and contact your administrator if this keeps happening.
+     * message: Your group and role permissions could not be fully loaded, so you may see few or no results. Please log out and log in again, and contact your administrator if this keeps happening.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)

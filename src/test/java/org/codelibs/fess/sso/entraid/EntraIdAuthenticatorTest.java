@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -876,8 +877,9 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         }
 
         @Override
-        protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+        protected boolean processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
             groupList.add(id);
+            return true;
         }
     }
 
@@ -1693,6 +1695,15 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     /**
+     * Counts the notifications the {@link ActivityHelper} stub below receives. A no-op stub
+     * registered only to avoid a NullPointerException leaves the notification untested -- deleting
+     * the {@code permissionChanged} call from {@code updateMemberOf} kept the whole suite green --
+     * so {@code test_updateMemberOf_notifiesTheActivityLogOncePerCompletedResolution} asserts on
+     * this instead.
+     */
+    private final AtomicInteger permissionChangedCount = new AtomicInteger();
+
+    /**
      * Builds a user without letting its constructor reach Microsoft Graph. The tests below drive
      * {@code updateMemberOf} directly, so the registered component only has to stay quiet.
      */
@@ -1703,13 +1714,14 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
                 // keep the constructor off Microsoft Graph
             }
         }, EntraIdAuthenticator.class.getCanonicalName());
-        // updateMemberOf now calls ComponentUtil.getActivityHelper().permissionChanged(...) itself
-        // once it lands, and test_app.xml does not register one; the tests below that drive
-        // updateMemberOf directly only care about the EntraIdUser's own state.
+        // updateMemberOf calls ComponentUtil.getActivityHelper().permissionChanged(...) itself
+        // once it lands, and test_app.xml does not register one. Most of the tests below only care
+        // about the EntraIdUser's own state, but the notification is the operator's record that a
+        // user's permissions changed, so it is counted rather than swallowed.
         ComponentUtil.register(new ActivityHelper() {
             @Override
             public void permissionChanged(final OptionalThing<FessUserBean> user) {
-                // no-op
+                permissionChangedCount.incrementAndGet();
             }
         }, "activityHelper");
         return new EntraIdCredential(new TestAuthenticationResult(new TestAccount())).getUser();
@@ -2279,9 +2291,10 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             }
 
             @Override
-            protected void processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+            protected boolean processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
                     final String id) {
                 groupList.add("parent-of-" + id);
+                return true;
             }
 
             @Override
@@ -2297,6 +2310,136 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertTrue(groups.contains("group-a"));
         assertTrue(groups.contains("parent-of-group-a"));
         assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+    }
+
+    // ===================================================================================
+    //                                            The Parent Group Walk and the Reported State
+    //                                            ===========================================
+    // The direct lookup answering says nothing about the parent groups: the walk that follows it
+    // fails silently, group by group. A user who holds their direct groups and none of their
+    // parent groups holds fewer permissions than they should, which is what FAILED is for.
+
+    /**
+     * A scripted authenticator whose direct lookup succeeds and hands one group id to the parent
+     * group walk, so that the walk alone decides the state that gets reported.
+     */
+    private ScriptedAuthenticator newAuthenticatorWalkingOneDirectGroup() {
+        final ScriptedAuthenticator authenticator = new ScriptedAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-a");
+                groupIdsForParentLookup.add("group-a");
+                return true;
+            }
+        };
+        authenticator.groupCache = CacheBuilder.newBuilder().build();
+        return authenticator;
+    }
+
+    @Test
+    public void test_updateMemberOf_reportsAParentWalkTheGraphBackoffSkipped() {
+        // graphThrottledUntil is a field on the singleton authenticator and is capped at an hour,
+        // so one user's 429 skips the walk for the whole tenant for that long. The direct lookup
+        // goes on answering, so every user resolved in that window used to be reported RESOLVED
+        // while none of them held a single parent group.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+        final EntraIdUser user = newUserWithoutGraph();
+        authenticator.graphThrottledUntil = clock.get() + 60_000L;
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+        // Skipped, not attempted -- and the direct groups are still written, because degrading is
+        // the point of the backoff.
+        assertTrue(authenticator.lookups.isEmpty());
+        assertEquals(List.of("group-a"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_reportsAParentWalkWhoseLookupFailed() {
+        // The other empty pair getParentGroup returns: the cache loader threw, so nothing was
+        // cached and nothing was resolved.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.failing.add("group-a");
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+        assertEquals(List.of("group-a"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_resolvesAWalkThatCompleted() {
+        // The other half of the contract: a walk that reached Graph for every group must not be
+        // reported as a shortfall, or every Entra ID user would be told their permissions are
+        // incomplete.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        assertEquals(List.of("group-a", "group-b"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_doesNotReportTheConfiguredDepthBoundAsAFailure() {
+        // maxGroupDepth is where the walk is meant to stop, not a Graph failure. Counting it would
+        // mark every user of a tenant whose nesting is deeper than the bound FAILED for good.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        authenticator.maxGroupDepth = 0;
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        assertTrue(authenticator.lookups.isEmpty());
+        assertEquals(List.of("group-a"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_notifiesTheActivityLogOncePerCompletedResolution() {
+        // The notification is the operator's record that a user's permissions changed, and it was
+        // pinned by nothing: the ActivityHelper stubs in this class were registered only to keep
+        // ComponentUtil.getActivityHelper() from returning null, so deleting the call from
+        // updateMemberOf left the whole suite green.
+        final AtomicBoolean graphAnswers = new AtomicBoolean(true);
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                if (!graphAnswers.get()) {
+                    return false;
+                }
+                groupList.add("group-a");
+                return true;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        // Constructing the user only schedules the resolution, so it has nothing to report yet.
+        assertEquals(0, permissionChangedCount.get());
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(1, permissionChangedCount.get());
+
+        // A re-resolution Graph did not answer returns before writing anything, so there is no
+        // change to report either -- the notification belongs after the write, not before it.
+        graphAnswers.set(false);
+        authenticator.updateMemberOf(user);
+
+        assertEquals(1, permissionChangedCount.get());
     }
 
     @Test

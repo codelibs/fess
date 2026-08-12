@@ -82,6 +82,14 @@ public class FessSearchActionTest extends UnitFessTestCase {
                 action.getPermissionStateMessageKey(userWith(FessUser.PermissionState.FAILED)));
     }
 
+    @Test
+    public void test_getPermissionStateMessageKey_toleratesAMissingState() {
+        // FessUser#getPermissionState() is documented as never null, but nothing enforces that on
+        // an implementation, and this method is a documented extension point. A switch that threw
+        // here would 500 every front-end page.
+        assertNull(action.getPermissionStateMessageKey(userWith(null)), "an unknown state has nothing to say");
+    }
+
     // ===================================================================================
     //                                                             hookBefore Wiring
     //                                                             ==================
@@ -117,6 +125,17 @@ public class FessSearchActionTest extends UnitFessTestCase {
         searchAction.hookBefore(new TestActionRuntime("/"));
 
         assertFalse(searchAction.requestManager.errors().get().isPresent(), "a resolved user has nothing to report");
+        assertSessionHasNoMessage(searchAction);
+    }
+
+    @Test
+    public void test_hookBefore_addsNothingWhenTheBeanCarriesNoUser() {
+        // FessUserBean.empty() wraps a null FessUser and does not override getFessUser().
+        final FessSearchAction searchAction = createAction(OptionalThing.of(FessUserBean.empty()));
+
+        searchAction.hookBefore(new TestActionRuntime("/"));
+
+        assertFalse(searchAction.requestManager.errors().get().isPresent(), "a bean with no user has no state to report on");
         assertSessionHasNoMessage(searchAction);
     }
 
@@ -168,6 +187,41 @@ public class FessSearchActionTest extends UnitFessTestCase {
         assertFalse(searchAction.requestManager.errors().get().isPresent(), "a resolved user has nothing to add to request scope");
         assertTrue(resolveAsErrorsTagWould(searchAction).hasMessageOf(UserMessages.GLOBAL, FessMessages.ERRORS_invalid_query_unknown),
                 "the saved message must still reach the page");
+    }
+
+    // ===================================================================================
+    //                                                        Carrying Over, Not Consuming
+    //                                                        ============================
+    // UserMessages#add(UserMessages) -- what addMessages(saved) ends up calling -- reads its source
+    // through accessByIteratorOf, which marks that source accessed. ActionCoinsHelper then deletes
+    // any accessed session errors at the start of the next request. Handing the session copy
+    // straight to request scope would therefore destroy it, including on the responses that render
+    // no <la:errors> at all (error/notFound.jsp, help.jsp, the streaming and redirecting actions),
+    // where it was displayed zero times.
+
+    @Test
+    public void test_carryOverSavedErrors_doesNotConsumeTheSessionCopy() {
+        final FessSearchAction searchAction = createAction(savedUserBean(FessUser.PermissionState.RESOLVED));
+        final UserMessages saved = new UserMessages();
+        saved.add(UserMessages.GLOBAL, new UserMessage(FessMessages.ERRORS_invalid_query_unknown, "sea"));
+        searchAction.sessionManager.errors().saveMessages(saved);
+
+        searchAction.carryOverSavedErrors();
+
+        assertFalse(saved.isAccessed(),
+                "the session copy must not be marked accessed; ActionCoinsHelper deletes accessed session errors next request");
+        assertTrue(saved.hasMessageOf(UserMessages.GLOBAL, FessMessages.ERRORS_invalid_query_unknown),
+                "the session copy must still hold its message");
+
+        assertTrue(searchAction.requestManager.errors().get().isPresent(), "the saved error must reach request scope");
+        final UserMessages carried = searchAction.requestManager.errors().get().get();
+        final UserMessage sessionMessage = saved.silentAccessByIteratorOf(UserMessages.GLOBAL).next();
+        final UserMessage requestMessage = carried.silentAccessByIteratorOf(UserMessages.GLOBAL).next();
+        assertEquals(sessionMessage.getMessageKey(), requestMessage.getMessageKey());
+        assertEquals("sea", requestMessage.getValues()[0]);
+        assertTrue(sessionMessage != requestMessage, "the request copy must be a rebuilt message, not the session instance");
+        assertTrue(sessionMessage.getValues() != requestMessage.getValues(),
+                "the values array must not be shared: TaglibEnhanceLogic escapes message arguments in place");
     }
 
     /** Mirrors FessBaseAction#saveError: session scope, under LastaWebKey.ACTION_ERRORS_KEY. */

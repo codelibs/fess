@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.base;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +45,7 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.UserMessage;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
@@ -152,8 +154,10 @@ public abstract class FessSearchAction extends FessBaseAction {
             runtime.registerData("popularWords", popularWordHelper.getWordList(SearchRequestType.SEARCH, null,
                     tagList.toArray(new String[tagList.size()]), null, null, null));
         }
-        fessLoginAssist.getSavedUserBean().ifPresent(user -> {
-            final String messageKey = getPermissionStateMessageKey(user.getFessUser());
+        fessLoginAssist.getSavedUserBean().ifPresent(userBean -> {
+            // FessUserBean.empty() wraps a null FessUser, so the bean does not always carry one.
+            final FessUser fessUser = userBean.getFessUser();
+            final String messageKey = fessUser != null ? getPermissionStateMessageKey(fessUser) : null;
             if (messageKey != null) {
                 carryOverSavedErrors();
                 // Request scope and add, not sessionManager and saveMessages. Session scope would
@@ -179,14 +183,43 @@ public abstract class FessSearchAction extends FessBaseAction {
      * are still loading: {@code SearchAction} saves it and redirects to the root, and the root's
      * own hookBefore would shadow it.
      *
-     * <p>The session copy is not cleared here, because it does not need to be: on a page that
-     * renders {@code <la:errors>} the tag clears it once it has written the merged request copy,
-     * and on a page that does not, copying it has already marked it accessed, so
-     * {@code ActionCoinsHelper#removeCachedMessages} drops it at the start of the next request.
-     * Either way it is carried exactly once.
+     * <p>The carry-over is deliberately non-consuming: the messages are rebuilt into a fresh
+     * {@link UserMessages} and only that new instance is handed to request scope, so the session
+     * copy is never marked accessed and {@code ActionCoinsHelper#removeCachedMessages} leaves it
+     * in place at the start of the next request. Reading the session copy through
+     * {@code UserMessages#accessByIteratorOf} instead -- which is what handing it straight to
+     * {@code addMessages(saved)} does -- would mark it accessed and so destroy it even for a
+     * response that renders no {@code <la:errors>} at all and therefore displayed it zero times.
+     * Several of the responses reachable from here are exactly that: {@code error/notFound.jsp},
+     * {@code help.jsp}, {@code chat/chat.jsp}, and the streaming or redirecting actions that
+     * extend this class. A page that does render the tag still clears the session copy itself,
+     * once it has written the merged request copy.
+     *
+     * <p>Resource messages are rebuilt from their key and values rather than shared, because
+     * {@code TaglibEnhanceLogic#htmlEscapeMessageArgs} escapes the value array in place: one
+     * array shared by both copies would be escaped twice if the session copy were rendered on a
+     * later request.
      */
     protected void carryOverSavedErrors() {
-        sessionManager.errors().get().ifPresent(saved -> requestManager.errors().addMessages(saved));
+        sessionManager.errors().get().ifPresent(saved -> {
+            final UserMessages carried = new UserMessages();
+            for (final String property : saved.toPropertySet()) {
+                // silentAccessByIteratorOf, not accessByIteratorOf: reading must not mark the
+                // session copy accessed.
+                for (final Iterator<UserMessage> ite = saved.silentAccessByIteratorOf(property); ite.hasNext();) {
+                    final UserMessage message = ite.next();
+                    if (message.isResource()) {
+                        // The constructor copies the values array, so the two copies share nothing.
+                        carried.add(property, new UserMessage(message.getMessageKey(), message.getValues()));
+                    } else {
+                        // A direct message has no values to share -- UserMessage's direct
+                        // constructor stores an empty array -- and no public way to rebuild it.
+                        carried.add(property, message);
+                    }
+                }
+            }
+            requestManager.errors().addMessages(carried);
+        });
     }
 
     /**
@@ -197,6 +230,10 @@ public abstract class FessSearchAction extends FessBaseAction {
      * state is on the interface so that any authenticator resolving memberships after login can
      * report it.
      *
+     * <p>An unrecognized state says nothing, and so does null: {@link FessUser#getPermissionState()}
+     * is documented as never null but nothing enforces that on an implementation, and this runs on
+     * every front-end page, where throwing would turn a missing state into a 500.
+     *
      * @param user The logged-in user.
      * @return The message key, or null when there is nothing to say.
      */
@@ -204,7 +241,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         return switch (user.getPermissionState()) {
         case PENDING -> FessMessages.ERRORS_user_permissions_loading;
         case FAILED -> FessMessages.ERRORS_user_permissions_unavailable;
-        default -> null;
+        case null, default -> null;
         };
     }
 
