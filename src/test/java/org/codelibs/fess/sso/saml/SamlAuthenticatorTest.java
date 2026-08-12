@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.sso.saml;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
@@ -37,6 +40,9 @@ import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.saml2.core.exception.SAMLException;
+import org.codelibs.saml2.core.exception.ValidationException;
+import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Assertions;
@@ -46,6 +52,8 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
@@ -664,6 +672,224 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             systemProperties.remove("saml.security.want_xml_validation");
             tearDownIdp(systemProperties);
         }
+    }
+
+    /**
+     * Wraps an authenticator whose response processing always fails with {@code failure}, so that
+     * a test can choose the exception {@code getLoginCredential} has to classify. The instance is
+     * deliberately left without {@code defaultSettings}: the SAMLResponse branch reaches the
+     * override before anything asks for settings, so a test that needed them would be testing a
+     * different path than the one it names.
+     */
+    private SamlAuthenticator failingAuthenticator(final RuntimeException failure) {
+        return new SamlAuthenticator() {
+            @Override
+            protected LoginCredential processSamlResponse(final HttpServletRequest request, final HttpServletResponse response,
+                    final Map<String, Long> requestIdMap) {
+                throw failure;
+            }
+        };
+    }
+
+    /**
+     * Seeds a session with one pending AuthnRequest ID and puts {@code samlResponse} on the
+     * request, which is the state a malformed callback arrives in.
+     *
+     * @param authenticator The authenticator that sends the AuthnRequest.
+     * @param samlResponse The raw value of the SAMLResponse parameter.
+     * @return The request, now carrying both the session and the response.
+     */
+    private MockletHttpServletRequest postRawSamlResponse(final SamlAuthenticator authenticator, final String samlResponse) {
+        final MockletHttpServletRequest request = getMockRequest();
+        authenticator.getLoginCredential();
+        request.setMethod("POST");
+        request.setParameter("SAMLResponse", samlResponse);
+        return request;
+    }
+
+    /** A SAMLResponse that is not base64 at all, the cheapest payload an anonymous client can send. */
+    private static final String NOT_BASE64 = "!!! not base64 at all !!!";
+
+    /** A SAMLResponse that decodes cleanly and is then not parsable as XML. */
+    private static final String BROKEN_XML = Base64.getEncoder().encodeToString("<samlp:Response".getBytes(StandardCharsets.UTF_8));
+
+    @Test
+    public void test_getLoginCredential_unparsableResponseIsWarnedWithoutAStackTrace() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = postRawSamlResponse(authenticator, NOT_BASE64);
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(authenticator.getLoginCredential());
+
+                // /sso/ is anonymous, so this is a rejected request rather than a fault of this
+                // server: one line, and no stack trace an unauthenticated client can repeat.
+                final List<LogEvent> warnEvents = appender.eventsAt(Level.WARN);
+                assertEquals(1, warnEvents.size(), String.valueOf(appender.warnings()));
+                assertEquals("Authentication failed: ValidationException: SAML Response could not be processed",
+                        appender.warnings().get(0));
+                assertNull(warnEvents.get(0).getThrown(), String.valueOf(warnEvents.get(0).getThrown()));
+                // the pending ID is not consumed by the failure, which is what makes the same
+                // request repeatable for the whole TTL and therefore worth not tracing
+                assertEquals(1, pendingRequestIds(request.getSession(false)).size());
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_brokenXmlResponseIsWarnedWithoutAStackTrace() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            // base64 that decodes fine and is then not XML reaches the same throw by a different
+            // route, so neither a stricter decoder nor a stricter parser alone closes this
+            postRawSamlResponse(authenticator, BROKEN_XML);
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(authenticator.getLoginCredential());
+
+                final List<LogEvent> warnEvents = appender.eventsAt(Level.WARN);
+                assertEquals(1, warnEvents.size(), String.valueOf(appender.warnings()));
+                assertEquals("Authentication failed: ValidationException: SAML Response could not be processed",
+                        appender.warnings().get(0));
+                assertNull(warnEvents.get(0).getThrown(), String.valueOf(warnEvents.get(0).getThrown()));
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_unparsableResponseKeepsTheStackTraceAtDebug() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            postRawSamlResponse(authenticator, NOT_BASE64);
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(authenticator.getLoginCredential());
+
+                // dropping the trace from the WARN must not drop it from the build: an operator
+                // chasing a real IdP problem raises the level and gets everything back
+                final List<LogEvent> traced = appender.eventsAt(Level.DEBUG)
+                        .stream()
+                        .filter(e -> "Authentication failed.".equals(e.getMessage().getFormattedMessage()))
+                        .toList();
+                assertEquals(1, traced.size(), String.valueOf(appender.messagesAt(Level.DEBUG)));
+                assertTrue(String.valueOf(traced.get(0).getThrown()), traced.get(0).getThrown() instanceof ValidationException);
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_unparsableResponseCanBeRepeatedWithThePendingRequestId() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = postRawSamlResponse(authenticator, NOT_BASE64);
+            final Set<String> pending = pendingRequestIds(request.getSession(false));
+            assertEquals(1, pending.size(), String.valueOf(pending));
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(authenticator.getLoginCredential());
+                assertNull(authenticator.getLoginCredential());
+                assertNull(authenticator.getLoginCredential());
+
+                // this is the whole reason the trace has to go: the failure leaves the pending ID
+                // in place, so the very same anonymous request answers again and again
+                assertEquals(3, appender.warnings().size(), String.valueOf(appender.warnings()));
+                Assertions.assertEquals(pending, pendingRequestIds(request.getSession(false)));
+                appender.eventsAt(Level.WARN).forEach(e -> assertNull(e.getThrown(), e.getMessage().getFormattedMessage()));
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_unparsableResponseWarningNamesTheNestedCause() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = postRawSamlResponse(authenticator, BROKEN_XML);
+            // java-saml's own wrapper for a parse failure, whose message names neither what
+            // failed nor where: dropping the cause chain here would leave the WARN useless
+            final RuntimeException failure = new XMLParsingException("Failed to load XML data.",
+                    new IOException("Stream closed", new IllegalStateException("underlying detail")));
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(failingAuthenticator(failure).getLoginCredential());
+
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                assertEquals("Authentication failed: XMLParsingException: Failed to load XML data."
+                        + " <- IOException: Stream closed <- IllegalStateException: underlying detail", appender.warnings().get(0));
+            } finally {
+                appender.detach();
+            }
+            assertEquals(1, pendingRequestIds(request.getSession(false)).size());
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_nonSamlFailureKeepsItsStackTrace() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            postRawSamlResponse(authenticator, BROKEN_XML);
+            // anything that is not a SAML failure is a bug in this server rather than a payload an
+            // anonymous client chose, so it keeps the trace it always had
+            final RuntimeException failure = new IllegalStateException("something this server got wrong");
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(failingAuthenticator(failure).getLoginCredential());
+
+                final List<LogEvent> warnEvents = appender.eventsAt(Level.WARN);
+                assertEquals(1, warnEvents.size(), String.valueOf(appender.warnings()));
+                assertEquals("Authentication failed.", appender.warnings().get(0));
+                assertSame(failure, warnEvents.get(0).getThrown());
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_describeSamlFailure_stopsOnACyclicCauseChain() throws Exception {
+        final SAMLException first = new SAMLException("first");
+        final SAMLException second = new SAMLException("second", first);
+        first.initCause(second);
+
+        // a chain that points back at itself must end the rendering, not the request
+        assertEquals("SAMLException: first <- SAMLException: second", new SamlAuthenticator().describeSamlFailure(first));
     }
 
     @Test

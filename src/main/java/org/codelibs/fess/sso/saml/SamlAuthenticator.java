@@ -18,10 +18,13 @@ package org.codelibs.fess.sso.saml;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -45,6 +48,7 @@ import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.Auth;
 import org.codelibs.saml2.core.authn.AuthnRequestParams;
+import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
 import org.codelibs.saml2.core.replay.InMemoryReplayCache;
@@ -474,6 +478,18 @@ public class SamlAuthenticator implements SsoAuthenticator {
                     if (!requestIdMap.isEmpty()) {
                         try {
                             return processSamlResponse(request, response, requestIdMap);
+                        } catch (final SAMLException e) {
+                            // The assertion consumer service is anonymous, and a SAMLResponse that
+                            // cannot be decoded or parsed is refused before the pending
+                            // AuthnRequest ID is consumed (see processSamlResponse), so the same
+                            // request can be repeated for the whole TTL. A stack trace per attempt
+                            // would let an unauthenticated client fill the log; SsoAction already
+                            // makes this split for SsoStateException.
+                            logger.warn("Authentication failed: {}", describeSamlFailure(e));
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Authentication failed.", e);
+                            }
+                            return null;
                         } catch (final Exception e) {
                             logger.warn("Authentication failed.", e);
                             return null;
@@ -510,6 +526,38 @@ public class SamlAuthenticator implements SsoAuthenticator {
             }
 
         }).orElse(null);
+    }
+
+    /**
+     * Renders a SAML failure as the single line that stands in for its stack trace at WARN.
+     *
+     * <p>The cause chain is rendered, not just {@code getMessage()}, because the exception a
+     * malformed response produces is often the one that says the least: java-saml wraps a parse
+     * failure as {@code XMLParsingException("Failed to load XML data.", cause)}, whose own
+     * message names neither what failed nor where. Everything actionable lives further down the
+     * chain, so dropping it would trade a noisy log for a useless one.</p>
+     *
+     * <p>Split out as its own method so that an extension can reshape or shorten this line
+     * without having to re-implement the WARN/DEBUG split around it. The full stack trace stays
+     * available at DEBUG either way.</p>
+     *
+     * @param throwable The failure to describe.
+     * @return The chain rendered as {@code Type: message} entries joined by {@code " <- "},
+     *         stopping at the first cause already seen so that a cyclic chain terminates.
+     */
+    protected String describeSamlFailure(final Throwable throwable) {
+        final Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        final StringBuilder buf = new StringBuilder();
+        for (Throwable current = throwable; current != null && seen.add(current); current = current.getCause()) {
+            if (buf.length() > 0) {
+                buf.append(" <- ");
+            }
+            buf.append(current.getClass().getSimpleName());
+            if (StringUtil.isNotBlank(current.getMessage())) {
+                buf.append(": ").append(current.getMessage());
+            }
+        }
+        return buf.toString();
     }
 
     /**
