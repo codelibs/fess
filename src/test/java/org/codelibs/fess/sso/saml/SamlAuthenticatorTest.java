@@ -752,6 +752,74 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_setMaxRequestIds_honoursAPositiveValue() throws Exception {
+        // fess_sso++.xml offers 10 as the line to uncomment, so that is what an untouched
+        // deployment has to be running with.
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+        assertEquals(10, authenticator.maxRequestIds);
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            authenticator.setMaxRequestIds(1);
+            assertEquals(1, authenticator.maxRequestIds);
+
+            authenticator.setMaxRequestIds(50);
+            assertEquals(50, authenticator.maxRequestIds);
+
+            assertTrue(String.valueOf(appender.warnings()), appender.warnings().isEmpty());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_setMaxRequestIds_fallsBackWhenTheValueIsNotPositive() throws Exception {
+        // Both values are applied without failing here, but getCandidateRequestIds hands the cap
+        // to limit(): 0 leaves processSamlResponse no candidate to try and -1 makes limit() throw,
+        // so either way every SAML login in the deployment fails. 0 is not a far-fetched thing to
+        // write, either: it reads as "no limit".
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            authenticator.setMaxRequestIds(0);
+            assertEquals(10, authenticator.maxRequestIds);
+
+            authenticator.setMaxRequestIds(-1);
+            assertEquals(10, authenticator.maxRequestIds);
+
+            assertEquals(2, appender.warnings().size(), String.valueOf(appender.warnings()));
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("maxRequestIds"));
+            // the value that was configured, not only the default that replaced it
+            assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains(": 0."));
+            assertTrue(appender.warnings().get(1), appender.warnings().get(1).contains(": -1."));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getCandidateRequestIds_isNotEmptiedByANonPositiveCap() throws Exception {
+        // The end the guard protects. Taken literally, the cap discards the pending ID the
+        // session does hold before processSamlResponse ever sees it, and the login is then
+        // reported as a session cookie that never arrived.
+        final Map<String, Long> requestIdMap = new ConcurrentHashMap<>();
+        requestIdMap.put("_pending", 1000L);
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            authenticator.setMaxRequestIds(0);
+            Assertions.assertEquals(List.of("_pending"), authenticator.getCandidateRequestIds(requestIdMap));
+
+            // -1 does not merely return nothing: limit() throws, and processSamlResponse's caller
+            // logs that as "Authentication failed." with no hint of the cap.
+            authenticator.setMaxRequestIds(-1);
+            Assertions.assertEquals(List.of("_pending"), authenticator.getCandidateRequestIds(requestIdMap));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_getLoginCredential_nonPositiveRequestIdTtlStillAnswersAResponse() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();

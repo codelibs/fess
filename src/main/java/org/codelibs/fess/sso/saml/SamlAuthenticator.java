@@ -212,13 +212,24 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected static final String DEFAULT_REQUEST_ID_TTL = "3600";
 
     /**
+     * The number of unanswered AuthnRequest IDs kept per session when {@code fess_sso++.xml}
+     * leaves the cap alone, and the value {@link #setMaxRequestIds} falls back to when the
+     * configured one is not positive. Ten abandoned logins in one session is already well past
+     * anything a person does by hand.
+     */
+    protected static final int DEFAULT_MAX_REQUEST_IDS = 10;
+
+    /**
      * Maximum number of unanswered AuthnRequest IDs kept per session. Every visit to
      * {@code /sso/} without a SAML response stores one, and {@code /sso/} is anonymous and
      * answers GET, so without a cap a page that embeds it as a sub-resource would grow the
      * session attribute without bound. It also bounds the number of candidates
      * {@link #processSamlResponse} tries.
+     *
+     * <p>Always positive when it is set through {@link #setMaxRequestIds}, which is the only path
+     * a configured value takes; a subclass that assigns the field directly is on its own.</p>
      */
-    protected int maxRequestIds = 10;
+    protected int maxRequestIds = DEFAULT_MAX_REQUEST_IDS;
 
     private Map<String, Object> defaultSettings;
 
@@ -771,9 +782,28 @@ public class SamlAuthenticator implements SsoAuthenticator {
     /**
      * Sets the maximum number of unanswered AuthnRequest IDs kept per session.
      *
-     * @param maxRequestIds The maximum number of AuthnRequest IDs.
+     * <p>A value that is not positive is reported and replaced by
+     * {@link #DEFAULT_MAX_REQUEST_IDS} rather than taken literally, for the same reason
+     * {@link #getRequestIdTtl()} refuses one. Nothing fails as it is applied, but
+     * {@link #getCandidateRequestIds} hands it to {@code limit()}: {@code 0} leaves
+     * {@link #processSamlResponse} no candidate to try, so every SAML login in the deployment
+     * fails and is reported by {@link #logUnmatchedSamlResponse} as the cookie problem it is not,
+     * and a negative value makes {@code limit()} throw an {@link IllegalArgumentException} that
+     * reaches the log only as "Authentication failed.". {@code 0} is not a far-fetched value to
+     * write either -- it reads as "no limit" -- which is why it falls back rather than being
+     * taken at its word. The warning names the property and the value. Refusing it here is
+     * enough because this setter is the only path a configured value takes; a subclass that
+     * assigns the field directly bypasses the check.</p>
+     *
+     * @param maxRequestIds The maximum number of AuthnRequest IDs. Only a positive value is
+     *                      honoured.
      */
     public void setMaxRequestIds(final int maxRequestIds) {
+        if (maxRequestIds <= 0) {
+            logger.warn("maxRequestIds must be a positive number: {}. Using {}.", maxRequestIds, DEFAULT_MAX_REQUEST_IDS);
+            this.maxRequestIds = DEFAULT_MAX_REQUEST_IDS;
+            return;
+        }
         this.maxRequestIds = maxRequestIds;
     }
 
