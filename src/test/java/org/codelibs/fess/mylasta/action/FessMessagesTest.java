@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.message.UserMessage;
 
 public class FessMessagesTest extends UnitFessTestCase {
 
@@ -764,5 +771,34 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertNotNull(result);
         assertSame(messages, result);
         assertTrue(messages.hasMessageOf(property));
+    }
+
+    @Test
+    public void test_permissionStateKeys_existInEveryBundle() throws Exception {
+        // A key missing from one bundle renders as its raw key for that locale, which is only ever
+        // noticed by a user of that locale. The keys are derived from the constants the application
+        // actually adds -- UserMessage strips the braces the same way it does at runtime -- so a
+        // typo in a constant fails here instead of shipping a raw key to every locale.
+        final String[] keys = { new UserMessage(FessMessages.ERRORS_user_permissions_loading).getMessageKey(),
+                new UserMessage(FessMessages.ERRORS_user_permissions_unavailable).getMessageKey() };
+        final File dir = new File("src/main/resources");
+        final File[] bundles = dir.listFiles((d, name) -> name.startsWith("fess_message") && name.endsWith(".properties"));
+        assertNotNull(bundles, dir.getAbsolutePath());
+        // A lower bound, not an exact count: a new locale must not redden this test, while a listing
+        // that suddenly finds nothing (wrong working directory) must not pass the loop vacuously.
+        assertTrue(bundles.length >= 17, "shipped message bundles: " + bundles.length);
+        for (final File bundle : bundles) {
+            final Properties props = new Properties();
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(bundle), StandardCharsets.UTF_8)) {
+                props.load(reader);
+            }
+            for (final String key : keys) {
+                // getProperty returns "" for an untranslated "key=" line, which renders as a blank
+                // banner, so a present-but-empty value has to fail as hard as a missing one.
+                final String value = props.getProperty(key);
+                assertNotNull(value, bundle.getName() + ": " + key + " is missing");
+                assertFalse(value.trim().isEmpty(), bundle.getName() + ": " + key + " is blank");
+            }
+        }
     }
 }

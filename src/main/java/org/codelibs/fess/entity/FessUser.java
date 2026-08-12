@@ -48,6 +48,39 @@ public interface FessUser extends Serializable {
     String[] getPermissions();
 
     /**
+     * How far the user's group and role permissions have got.
+     *
+     * <p>Only an authenticator that resolves memberships after the user object is handed out has
+     * anything but {@link PermissionState#RESOLVED} to report.
+     */
+    enum PermissionState {
+        /** Group and role permissions are in place. */
+        RESOLVED,
+        /** They are still being resolved, so the user currently holds fewer than they should. */
+        PENDING,
+        /**
+         * Resolving them failed outright, or completed only in part, so the user holds fewer
+         * group and role permissions than they should. Not final: a later resolution -- an
+         * authenticator that re-resolves on token renewal, say -- replaces this with
+         * {@link #RESOLVED} once it succeeds.
+         */
+        FAILED
+    }
+
+    /**
+     * Returns how far the user's group and role permissions have got.
+     *
+     * <p>Defaults to {@link PermissionState#RESOLVED}: every implementation that reads its groups
+     * from an assertion, a token or a directory lookup finishes before the user object exists, so
+     * there is never a window in which the user holds fewer permissions than they should.
+     *
+     * @return The state, never null.
+     */
+    default PermissionState getPermissionState() {
+        return PermissionState.RESOLVED;
+    }
+
+    /**
      * Determines if the user's information can be edited.
      * @return True if the user's information is editable, false otherwise.
      */

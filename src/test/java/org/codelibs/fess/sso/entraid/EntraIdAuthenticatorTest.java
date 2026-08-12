@@ -45,18 +45,20 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoStateException;
+import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.login.exception.LoginFailureException;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -166,7 +168,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             }
 
             @Override
-            public void updateMemberOf(final EntraIdUser user) {
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 // keep the constructor off Microsoft Graph
             }
         };
@@ -875,8 +877,9 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         }
 
         @Override
-        protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+        protected boolean processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
             groupList.add(id);
+            return true;
         }
     }
 
@@ -1271,16 +1274,6 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     /**
-     * Test that scheduleParentGroupLookup method exists with correct signature.
-     */
-    @Test
-    public void test_scheduleParentGroupLookup_methodExists() throws Exception {
-        Method method = EntraIdAuthenticator.class.getDeclaredMethod("scheduleParentGroupLookup", EntraIdUser.class, List.class, List.class,
-                List.class);
-        assertNotNull(method, "scheduleParentGroupLookup method should exist");
-    }
-
-    /**
      * Test that updateMemberOf still exists and is public.
      */
     @Test
@@ -1316,29 +1309,6 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals(List.of("role-1"), roleList);
         // Only groups are walked for parents; a directory role has none.
         assertEquals(List.of("group-1"), groupIdsForParentLookup);
-    }
-
-    /**
-     * Test that the parent group lookup is scheduled only when there is something to look up.
-     */
-    @Test
-    public void test_updateMemberOf_schedulesTheParentLookupOnlyWhenThereAreGroupIds() {
-        final TestableEntraIdAuthenticator empty = new TestableEntraIdAuthenticator();
-        empty.updateMemberOf(newUserWithoutGraph());
-        assertFalse(empty.scheduleParentGroupLookupCalled.get());
-        assertTrue(empty.processDirectMemberOfCalled.get());
-
-        final TestableEntraIdAuthenticator collecting = new TestableEntraIdAuthenticator() {
-            @Override
-            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
-                    final List<String> groupIdsForParentLookup, final String url) {
-                super.processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, url);
-                groupIdsForParentLookup.add("group-1");
-                return true;
-            }
-        };
-        collecting.updateMemberOf(newUserWithoutGraph());
-        assertTrue(collecting.scheduleParentGroupLookupCalled.get());
     }
 
     /**
@@ -1431,40 +1401,6 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals("", list.get(0));
     }
 
-    /**
-     * Testable subclass of EntraIdAuthenticator for testing purposes.
-     */
-    private static class TestableEntraIdAuthenticator extends EntraIdAuthenticator {
-        AtomicBoolean scheduleParentGroupLookupCalled = new AtomicBoolean(false);
-        AtomicBoolean processDirectMemberOfCalled = new AtomicBoolean(false);
-
-        @Override
-        protected void scheduleParentGroupLookup(EntraIdUser user, List<String> initialGroups, List<String> initialRoles,
-                List<String> groupIds) {
-            scheduleParentGroupLookupCalled.set(true);
-            // Don't call super to avoid actual scheduling in tests
-        }
-
-        @Override
-        protected boolean processDirectMemberOf(EntraIdUser user, List<String> groupList, List<String> roleList,
-                List<String> groupIdsForParentLookup, String url) {
-            processDirectMemberOfCalled.set(true);
-            // Don't call super to avoid actual API calls in tests
-            return true;
-        }
-
-        // Expose protected methods for testing
-        @Override
-        public List<String> getDefaultGroupList() {
-            return super.getDefaultGroupList();
-        }
-
-        @Override
-        public List<String> getDefaultRoleList() {
-            return super.getDefaultRoleList();
-        }
-    }
-
     // ===================================================================================
     //                                                        Regressions guarded from 15.7
     //                                                        ==============================
@@ -1485,45 +1421,15 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final EntraIdUser user = newUserWithoutGraph();
         user.setGroups(new String[] { "group-a", "group-b" });
         user.setRoles(new String[] { "role-a" });
+        // What makes this a re-resolution rather than a first one. Not inferable from the
+        // memberships any more: the constructor seeds the configured defaults.
+        user.markResolutionCompleted();
 
         authenticator.updateMemberOf(user);
 
         assertEquals(2, user.getGroupNames().length);
         assertEquals("group-a", user.getGroupNames()[0]);
         assertEquals(1, user.getRoleNames().length);
-    }
-
-    @Test
-    public void test_updateMemberOf_failsTheLoginWhenTheFirstLookupFailsAndMembershipIsRequired() {
-        // At login there is nothing to keep, and curl4j does not throw on a non-2xx response, so a
-        // Graph 429/403/401 on /me/memberOf parses cleanly, logs a WARN and hands the user a
-        // working session carrying the configured defaults alone -- silently truncated search
-        // results for its whole lifetime, with refresh() not retrying until the token is nearly
-        // expired. A deployment that would rather hand out no session at all opts in to this.
-        //
-        // LoginFailureException specifically: TypicalLoginAssist calls this resolver directly
-        // without wrapping anything, and SsoAction only catches LoginFailureException around
-        // loginRedirect(), so any other type would reach the generic error page instead of the
-        // standard SSO error message.
-        final EntraIdAuthenticator authenticator = newAuthenticatorWhoseLookupFails();
-        final EntraIdUser user = newUserWithoutGraph();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        try {
-            fessConfig.setSystemProperty("entraid.require.membership", "true");
-            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
-
-            try {
-                authenticator.updateMemberOf(user);
-                fail("expected LoginFailureException");
-            } catch (final LoginFailureException e) {
-                assertTrue(e.getMessage(), e.getMessage().contains(user.getName()));
-            }
-
-            assertNull(user.getGroupNames(), "a half-permissioned session must not be handed out");
-        } finally {
-            fessConfig.setSystemProperty("entraid.require.membership", "");
-            fessConfig.setSystemProperty("entraid.default.groups", "");
-        }
     }
 
     @Test
@@ -1549,33 +1455,11 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             // Degrading silently would leave the operator with a tenant of under-permissioned
             // sessions and nothing in the log to explain them.
             assertTrue(logs.warnings().toString(),
-                    logs.warnings().stream().anyMatch(m -> m.contains(user.getName()) && m.contains("entraid.require.membership")));
+                    logs.warnings().stream().anyMatch(m -> m.contains(user.getName()) && m.contains("configured defaults")));
         } finally {
             logs.detach();
             fessConfig.setSystemProperty("entraid.default.groups", "");
             fessConfig.setSystemProperty("entraid.default.roles", "");
-        }
-    }
-
-    @Test
-    public void test_updateMemberOf_degradesWhenRequireMembershipIsPresentButEmpty() {
-        // getSystemProperty substitutes a default only when the key is absent, and the admin
-        // screen stores an empty string rather than removing a key, so "" has to mean the default
-        // rather than being handed to Boolean.parseBoolean by accident.
-        final EntraIdAuthenticator authenticator = newAuthenticatorWhoseLookupFails();
-        final EntraIdUser user = newUserWithoutGraph();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        try {
-            fessConfig.setSystemProperty("entraid.require.membership", "");
-            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
-
-            authenticator.updateMemberOf(user);
-
-            assertEquals(1, user.getGroupNames().length);
-            assertEquals("everyone", user.getGroupNames()[0]);
-        } finally {
-            fessConfig.setSystemProperty("entraid.require.membership", "");
-            fessConfig.setSystemProperty("entraid.default.groups", "");
         }
     }
 
@@ -1602,30 +1486,6 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             assertEquals(List.of("everyone", "group-from-the-first-page"), List.of(user.getGroupNames()));
         } finally {
             fessConfig.setSystemProperty("entraid.default.groups", "");
-        }
-    }
-
-    @Test
-    public void test_isRequireMembership_readsTheKeyAndHasNoLegacyAzureAdAlias() {
-        // The key is new in 15.8, so no aad.* value can predate it. Reading one would let a key
-        // nobody ever wrote for this purpose start refusing logins.
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
-        try {
-            assertFalse(authenticator.isRequireMembership());
-
-            fessConfig.setSystemProperty("entraid.require.membership", " TRUE ");
-            assertTrue(authenticator.isRequireMembership());
-
-            fessConfig.setSystemProperty("entraid.require.membership", "false");
-            assertFalse(authenticator.isRequireMembership());
-
-            fessConfig.setSystemProperty("entraid.require.membership", "");
-            fessConfig.setSystemProperty("aad.require.membership", "true");
-            assertFalse(authenticator.isRequireMembership());
-        } finally {
-            fessConfig.setSystemProperty("entraid.require.membership", "");
-            fessConfig.setSystemProperty("aad.require.membership", "");
         }
     }
 
@@ -1696,8 +1556,8 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     public void test_processDirectMemberOf_reportsAHostileBodyInsteadOfLettingItEscape() throws Exception {
         // "value" is cast to List<Map<String, Object>>, so a body whose value is an object throws
         // ClassCastException. catch (IOException | CurlException) did not cover it, and it escaped
-        // updateMemberOf and the EntraIdUser constructor to the generic error page instead of the
-        // outcome entraid.require.membership selects.
+        // updateMemberOf and the EntraIdUser constructor to the generic error page instead of
+        // degrading to the configured defaults.
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         final EntraIdUser user = newUserWithoutGraph();
 
@@ -1960,16 +1820,35 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     /**
+     * Counts the notifications the {@link ActivityHelper} stub below receives. A no-op stub
+     * registered only to avoid a NullPointerException leaves the notification untested -- deleting
+     * the {@code permissionChanged} call from {@code updateMemberOf} kept the whole suite green --
+     * so {@code test_updateMemberOf_notifiesTheActivityLogOncePerCompletedResolution} asserts on
+     * this instead.
+     */
+    private final AtomicInteger permissionChangedCount = new AtomicInteger();
+
+    /**
      * Builds a user without letting its constructor reach Microsoft Graph. The tests below drive
      * {@code updateMemberOf} directly, so the registered component only has to stay quiet.
      */
     private EntraIdUser newUserWithoutGraph() {
         ComponentUtil.register(new EntraIdAuthenticator() {
             @Override
-            public void updateMemberOf(final EntraIdUser user) {
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 // keep the constructor off Microsoft Graph
             }
         }, EntraIdAuthenticator.class.getCanonicalName());
+        // updateMemberOf calls ComponentUtil.getActivityHelper().permissionChanged(...) itself
+        // once it lands, and test_app.xml does not register one. Most of the tests below only care
+        // about the EntraIdUser's own state, but the notification is the operator's record that a
+        // user's permissions changed, so it is counted rather than swallowed.
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void permissionChanged(final OptionalThing<FessUserBean> user) {
+                permissionChangedCount.incrementAndGet();
+            }
+        }, "activityHelper");
         return new EntraIdCredential(new TestAuthenticationResult(new TestAccount())).getUser();
     }
 
@@ -2040,7 +1919,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final AtomicBoolean touched = new AtomicBoolean(false);
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
             @Override
-            public void updateMemberOf(final EntraIdUser user) {
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 touched.set(true);
             }
 
@@ -2066,7 +1945,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final AtomicBoolean refreshed = new AtomicBoolean(false);
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
             @Override
-            public void updateMemberOf(final EntraIdUser user) {
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 // keep the constructor and the refresh off Microsoft Graph
             }
 
@@ -2090,7 +1969,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     public void test_refresh_reportsAnExpiredToken() {
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
             @Override
-            public void updateMemberOf(final EntraIdUser user) {
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 // keep the constructor off Microsoft Graph
             }
         };
@@ -2242,7 +2121,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final AtomicReference<IAuthenticationResult> current = new AtomicReference<>();
         final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
             @Override
-            public void updateMemberOf(final EntraIdUser user) {
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 updated.set(true);
             }
 
@@ -2271,5 +2150,449 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final MockletHttpServletRequest request = getMockRequest();
         request.setMethod("GET");
         return request;
+    }
+
+    @Test
+    public void test_updateMemberOf_marksTheFirstResolutionResolved() {
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-a");
+                return true;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        assertEquals(FessUser.PermissionState.PENDING, user.getPermissionState());
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+    }
+
+    @Test
+    public void test_updateMemberOf_marksAFailedFirstResolutionFailed() {
+        // The login still completes -- the user keeps their user-level permission and the
+        // configured defaults -- but the shortfall has to be visible rather than silent.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                return false;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+        assertNotNull(user.getGroupNames());
+    }
+
+    @Test
+    public void test_updateMemberOf_leavesTheStateAloneOnAReResolution() {
+        // A token renewal re-resolves a user who already holds working permissions. Neither
+        // PENDING nor FAILED is true of them, so neither may be written.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                return false;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        user.setGroups(new String[] { "group-a" });
+        user.setPermissionState(FessUser.PermissionState.RESOLVED);
+        user.markResolutionCompleted();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        assertEquals("group-a", user.getGroupNames()[0]);
+    }
+
+    @Test
+    public void test_updateMemberOf_clearsAFailedStateOnceAReResolutionSucceeds() {
+        // The user's first lookup failed, so they are FAILED and hold the defaults. A token
+        // renewal an hour later re-resolves them successfully -- they now genuinely hold their
+        // groups, and going on telling them their permissions could not be loaded would be a lie.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-a");
+                return true;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        user.setGroups(new String[] { "everyone" });
+        user.setPermissionState(FessUser.PermissionState.FAILED);
+        user.markResolutionCompleted();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        assertEquals("group-a", user.getGroupNames()[0]);
+    }
+
+    @Test
+    public void test_constructor_doesNotReachGraphOnTheLoginThread() {
+        // The login thread must not wait on Microsoft Graph. A slow tenant used to delay every
+        // login by up to the read timeout.
+        final AtomicBoolean scheduled = new AtomicBoolean();
+        ComponentUtil.register(new EntraIdAuthenticator() {
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                scheduled.set(true);
+            }
+
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                fail("updateMemberOf must not run on the login thread");
+            }
+        }, EntraIdAuthenticator.class.getCanonicalName());
+
+        final EntraIdUser user = new EntraIdCredential(new TestAuthenticationResult(new TestAccount())).getUser();
+
+        assertTrue(scheduled.get());
+        assertEquals(FessUser.PermissionState.PENDING, user.getPermissionState());
+        // Seeded with the configured defaults, of which there are none here -- not left null.
+        assertEquals(0, user.getGroupNames().length);
+        assertEquals(0, user.getRoleNames().length);
+        assertFalse(user.isResolutionCompleted());
+    }
+
+    // ===================================================================================
+    //                                                  Defaults During the PENDING Window
+    //                                                  ==================================
+    // entraid.default.groups/roles are static configuration -- no Graph call stands behind them --
+    // so there is no reason for them to be absent while the background resolution runs. SsoAction
+    // redirects straight to the search page in the request that only schedules it, so without the
+    // seed the first page after login is that of a user holding no groups at all.
+
+    @Test
+    public void test_constructor_seedsTheConfiguredDefaultsBeforeAnyResolution() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            fessConfig.setSystemProperty("entraid.default.roles", "guest");
+
+            final EntraIdUser user = newUserWithoutGraph();
+
+            assertEquals(List.of("everyone"), List.of(user.getGroupNames()));
+            assertEquals(List.of("guest"), List.of(user.getRoleNames()));
+            // Seeding is not resolving: the state must still say so, and the next updateMemberOf
+            // must still be treated as the first resolution.
+            assertEquals(FessUser.PermissionState.PENDING, user.getPermissionState());
+            assertFalse(user.isResolutionCompleted());
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+            fessConfig.setSystemProperty("entraid.default.roles", "");
+        }
+    }
+
+    @Test
+    public void test_getPermissions_appliesTheSeededDefaultsWhileStillPending() {
+        // The seed is only worth having if it reaches the permissions the search query is built
+        // from, which are computed lazily and cached.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+
+            final EntraIdUser user = newUserWithoutGraph();
+
+            assertEquals(FessUser.PermissionState.PENDING, user.getPermissionState());
+            assertTrue(List.of(user.getPermissions()).toString(),
+                    List.of(user.getPermissions()).contains(ComponentUtil.getSystemHelper().getSearchRoleByGroup("everyone")));
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_writesTheResolvedGroupsOnTopOfTheSeededDefaults() {
+        // First resolution, Graph answers: the seed is a floor, not a ceiling -- the resolved
+        // groups join it rather than replacing it or being dropped in favour of it.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-a");
+                return true;
+            }
+        };
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            final EntraIdUser user = newUserWithoutGraph();
+            assertEquals(List.of("everyone"), List.of(user.getGroupNames()));
+
+            authenticator.updateMemberOf(user);
+
+            assertEquals(List.of("everyone", "group-a"), List.of(user.getGroupNames()));
+            assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+            assertTrue(user.isResolutionCompleted());
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_keepsTheFirstResolutionsGroupsWhenALaterOneFails() {
+        // The re-resolution behaviour driven through the real state machine rather than a
+        // hand-set flag: one successful resolution, then a token rollover whose lookup fails.
+        // Nothing about the user may change -- these are the groups they are actually searching
+        // with, and replacing them with the defaults alone would silently take their results away.
+        final AtomicBoolean graphAnswers = new AtomicBoolean(true);
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                if (!graphAnswers.get()) {
+                    return false;
+                }
+                groupList.add("group-a");
+                return true;
+            }
+        };
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            final EntraIdUser user = newUserWithoutGraph();
+
+            authenticator.updateMemberOf(user);
+            assertEquals(List.of("everyone", "group-a"), List.of(user.getGroupNames()));
+            assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+
+            graphAnswers.set(false);
+            authenticator.updateMemberOf(user);
+
+            assertEquals(List.of("everyone", "group-a"), List.of(user.getGroupNames()));
+            assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_keepsTheSeededDefaultsWhenTheFirstLookupFails() {
+        // First resolution, Graph does not answer: FAILED, and the seeded defaults are retained
+        // rather than the user being left with nothing.
+        //
+        // This is the case the explicit flag exists for. firstResolution only decides anything on
+        // the failure path, and with it inferred from `getGroupNames() == null` the seed would
+        // make this look like a re-resolution: updateMemberOf would take the early return, so the
+        // user would stay PENDING for the rest of the session -- never marked FAILED, so never
+        // told their permissions are incomplete -- and whatever the lookup collected before
+        // failing would be thrown away.
+        final EntraIdAuthenticator authenticator = newAuthenticatorWhoseLookupFails();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.default.groups", "everyone");
+            final EntraIdUser user = newUserWithoutGraph();
+
+            authenticator.updateMemberOf(user);
+
+            assertEquals(List.of("everyone"), List.of(user.getGroupNames()));
+            assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+            assertTrue(user.isResolutionCompleted());
+        } finally {
+            fessConfig.setSystemProperty("entraid.default.groups", "");
+        }
+    }
+
+    @Test
+    public void test_updateMemberOf_walksParentGroupsWithoutASecondScheduledTask() {
+        // The walk used to be a second TimeoutManager task, which published direct-only groups
+        // first and then overwrote them. One task writes once.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-a");
+                groupIdsForParentLookup.add("group-a");
+                return true;
+            }
+
+            @Override
+            protected boolean processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final String id) {
+                groupList.add("parent-of-" + id);
+                return true;
+            }
+
+            @Override
+            public void scheduleUpdateMemberOf(final EntraIdUser user) {
+                fail("updateMemberOf must resolve the parents itself, not schedule a second task");
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        final List<String> groups = List.of(user.getGroupNames());
+        assertTrue(groups.contains("group-a"));
+        assertTrue(groups.contains("parent-of-group-a"));
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+    }
+
+    // ===================================================================================
+    //                                            The Parent Group Walk and the Reported State
+    //                                            ===========================================
+    // The direct lookup answering says nothing about the parent groups: the walk that follows it
+    // fails silently, group by group. A user who holds their direct groups and none of their
+    // parent groups holds fewer permissions than they should, which is what FAILED is for.
+
+    /**
+     * A scripted authenticator whose direct lookup succeeds and hands one group id to the parent
+     * group walk, so that the walk alone decides the state that gets reported.
+     */
+    private ScriptedAuthenticator newAuthenticatorWalkingOneDirectGroup() {
+        final ScriptedAuthenticator authenticator = new ScriptedAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupList.add("group-a");
+                groupIdsForParentLookup.add("group-a");
+                return true;
+            }
+        };
+        authenticator.groupCache = CacheBuilder.newBuilder().build();
+        return authenticator;
+    }
+
+    @Test
+    public void test_updateMemberOf_reportsAParentWalkTheGraphBackoffSkipped() {
+        // graphThrottledUntil is a field on the singleton authenticator and is capped at an hour,
+        // so one user's 429 skips the walk for the whole tenant for that long. The direct lookup
+        // goes on answering, so every user resolved in that window used to be reported RESOLVED
+        // while none of them held a single parent group.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return clock.get();
+            }
+        }, "systemHelper");
+        final EntraIdUser user = newUserWithoutGraph();
+        authenticator.graphThrottledUntil = clock.get() + 60_000L;
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+        // Skipped, not attempted -- and the direct groups are still written, because degrading is
+        // the point of the backoff.
+        assertTrue(authenticator.lookups.isEmpty());
+        assertEquals(List.of("group-a"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_reportsAParentWalkWhoseLookupFailed() {
+        // The other empty pair getParentGroup returns: the cache loader threw, so nothing was
+        // cached and nothing was resolved.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.failing.add("group-a");
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+        assertEquals(List.of("group-a"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_resolvesAWalkThatCompleted() {
+        // The other half of the contract: a walk that reached Graph for every group must not be
+        // reported as a shortfall, or every Entra ID user would be told their permissions are
+        // incomplete.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        assertEquals(List.of("group-a", "group-b"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_doesNotReportTheConfiguredDepthBoundAsAFailure() {
+        // maxGroupDepth is where the walk is meant to stop, not a Graph failure. Counting it would
+        // mark every user of a tenant whose nesting is deeper than the bound FAILED for good.
+        final ScriptedAuthenticator authenticator = newAuthenticatorWalkingOneDirectGroup();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        authenticator.maxGroupDepth = 0;
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+        assertTrue(authenticator.lookups.isEmpty());
+        assertEquals(List.of("group-a"), List.of(user.getGroupNames()));
+    }
+
+    @Test
+    public void test_updateMemberOf_notifiesTheActivityLogOncePerCompletedResolution() {
+        // The notification is the operator's record that a user's permissions changed, and it was
+        // pinned by nothing: the ActivityHelper stubs in this class were registered only to keep
+        // ComponentUtil.getActivityHelper() from returning null, so deleting the call from
+        // updateMemberOf left the whole suite green.
+        final AtomicBoolean graphAnswers = new AtomicBoolean(true);
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                if (!graphAnswers.get()) {
+                    return false;
+                }
+                groupList.add("group-a");
+                return true;
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        // Constructing the user only schedules the resolution, so it has nothing to report yet.
+        assertEquals(0, permissionChangedCount.get());
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(1, permissionChangedCount.get());
+
+        // A re-resolution Graph did not answer returns before writing anything, so there is no
+        // change to report either -- the notification belongs after the write, not before it.
+        graphAnswers.set(false);
+        authenticator.updateMemberOf(user);
+
+        assertEquals(1, permissionChangedCount.get());
+    }
+
+    @Test
+    public void test_scheduleUpdateMemberOf_marksTheUserFailedWhenUpdateMemberOfThrows() throws Exception {
+        // scheduleUpdateMemberOf's own body -- the TimeoutManager wiring and the exception
+        // backstop -- has no coverage otherwise: every other test overrides it away. The stub
+        // below writes groups and then throws before updateMemberOf would reach the permission
+        // state write, the exact window Finding M1 is about: a stale "groups == null" check would
+        // leave this user PENDING forever instead of FAILED. TimeoutManager's loop ticks about
+        // once a second, so poll for the state with a bounded wait rather than sleeping a fixed
+        // amount or asserting immediately.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator() {
+            @Override
+            public void updateMemberOf(final EntraIdUser user) {
+                user.setGroups(new String[] { "group-a" });
+                throw new RuntimeException("boom");
+            }
+        };
+        final EntraIdUser user = newUserWithoutGraph();
+        assertEquals(FessUser.PermissionState.PENDING, user.getPermissionState());
+
+        authenticator.scheduleUpdateMemberOf(user);
+
+        final long deadline = System.currentTimeMillis() + 10_000L;
+        while (user.getPermissionState() == FessUser.PermissionState.PENDING && System.currentTimeMillis() < deadline) {
+            Thread.sleep(100L);
+        }
+
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
     }
 }

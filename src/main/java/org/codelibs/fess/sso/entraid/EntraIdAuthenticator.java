@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,7 @@ import org.codelibs.fess.app.web.base.login.EntraIdCredential;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.crawler.Constants;
+import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -64,7 +66,6 @@ import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -142,13 +143,6 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /** Configuration key for Entra ID default roles. */
     protected static final String ENTRAID_DEFAULT_ROLES = "entraid.default.roles";
-
-    /**
-     * Configuration key deciding what a login does when Microsoft Graph does not answer with a
-     * membership list and the user has none yet. See {@link #isRequireMembership()}. There is no
-     * {@code aad.require.membership} counterpart: the key is new, so no legacy value can exist.
-     */
-    protected static final String ENTRAID_REQUIRE_MEMBERSHIP = "entraid.require.membership";
 
     // Legacy configuration keys for backward compatibility (Azure AD)
     /** Legacy configuration key for Azure AD state time-to-live. */
@@ -956,20 +950,25 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Updates the user's group and role membership information with lazy loading for parent groups.
-     * Direct groups are retrieved synchronously, while parent groups are fetched asynchronously
-     * to avoid login delays when users have many nested group memberships.
+     * Updates the user's group and role membership information, walking direct memberships and
+     * their parent groups in one pass. This method itself runs synchronously -- {@link
+     * #scheduleUpdateMemberOf} is what keeps it off the login thread -- so tests can call it
+     * directly.
      *
      * <p>When Microsoft Graph does not answer with a membership list, the memberships already on
-     * the user are kept; if there are none yet -- which is the case at login -- the login either
-     * completes with whatever was collected plus the configured defaults, or is failed, according
-     * to {@link #isRequireMembership()}.
+     * the user are kept; if there are none yet -- which is the case at login -- the login
+     * completes with whatever was collected plus the configured defaults.
      *
      * @param user The Entra ID user to update.
-     * @throws LoginFailureException If the first membership lookup for this user failed and
-     *         {@code entraid.require.membership} is enabled.
      */
     public void updateMemberOf(final EntraIdUser user) {
+        // Captured before anything below writes to the user: markResolutionCompleted later in this
+        // method changes what user.isResolutionCompleted() answers.
+        //
+        // Not `user.getGroupNames() == null`, which this used to be: the constructor seeds the
+        // configured defaults, so the memberships are never null and every resolution would take
+        // the re-resolution path -- keeping the defaults forever instead of the resolved groups.
+        final boolean firstResolution = !user.isResolutionCompleted();
         if (logger.isDebugEnabled()) {
             logger.debug("[updateMemberOf] Starting for user: {}", user.getName());
         }
@@ -987,7 +986,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             logger.debug("[updateMemberOf] Default groups: {}, Default roles: {}", defaultGroups, defaultRoles);
         }
 
-        // Retrieve direct groups synchronously (parent group lookup is deferred)
+        // Retrieve direct group/role memberships; group IDs are collected for the parent walk below.
         final boolean resolved =
                 processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, "https://graph.microsoft.com/v1.0/me/memberOf");
 
@@ -999,63 +998,78 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         if (!resolved) {
             // Microsoft Graph did not answer with a membership list -- an expired token, a
             // throttled tenant, a revoked permission.
-            if (user.getGroupNames() != null) {
+            if (!firstResolution) {
                 // Refresh path. Writing what we have would replace the memberships this user
                 // logged in with by the configured defaults alone, silently taking away their
                 // search permissions until some later call happens to succeed.
                 logger.warn("Failed to resolve the Entra ID memberships of {}. Keeping the ones already resolved.", user.getName());
                 return;
             }
-            // First resolution, so there is nothing to keep.
-            if (isRequireMembership()) {
-                // Handing out a session carrying the configured defaults alone looks like a
-                // successful login and quietly truncates every search result for its whole
-                // lifetime, and refresh() does not try again until the token is nearly expired.
-                // A deployment that would rather have no session at all asks for this.
-                //
-                // LoginFailureException specifically: this runs inside the resolver that
-                // FessLoginAssist passes to TypicalLoginAssist.findLoginUser, which calls it
-                // directly without wrapping anything, and SsoAction only catches
-                // LoginFailureException around fessLoginAssist.loginRedirect(). Any other type
-                // escapes to the generic error page instead of the standard SSO error message.
-                throw new LoginFailureException("Failed to resolve the Entra ID memberships of " + user.getName() + ".");
-            }
-            // Otherwise degrade rather than refuse, which is what 15.7 did. A throttled tenant, a
-            // Graph outage or a permission that was never granted would otherwise refuse every
-            // login in the tenant for as long as the condition lasts. The lists are seeded with
-            // the configured defaults before the lookup, so what is written below is always a
-            // superset of them.
-            logger.warn(
-                    "Failed to resolve the Entra ID memberships of {}. Continuing with the memberships collected so far"
-                            + " and the configured defaults. Set {} = true to fail the login instead.",
-                    user.getName(), ENTRAID_REQUIRE_MEMBERSHIP);
+            // First resolution, so there is nothing to keep. Degrade rather than refuse: a
+            // throttled tenant, a Graph outage or a permission that was never granted would
+            // otherwise refuse every login in the tenant for as long as the condition lasts. The
+            // lists are seeded with the configured defaults before the lookup, so what is written
+            // below is always a superset of them, and Task 4 makes the shortfall visible.
+            logger.warn("Failed to resolve the Entra ID memberships of {}. Continuing with the memberships"
+                    + " collected so far and the configured defaults.", user.getName());
         }
 
-        // Set initial groups
+        // Every direct group is still walked after one of them fails: a partial parent set is worth
+        // more than none, so the failures are collected rather than short-circuited.
+        boolean parentsResolved = true;
+        for (final String groupId : groupIdsForParentLookup) {
+            if (!processParentGroup(user, groupList, roleList, groupId)) {
+                parentsResolved = false;
+            }
+        }
+
         user.setGroups(groupList.stream().distinct().toArray(n -> new String[n]));
         user.setRoles(roleList.stream().distinct().toArray(n -> new String[n]));
+        user.resetPermissions();
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("[updateMemberOf] Initial groups/roles set for user: {}. Groups: {}, Roles: {}", user.getName(),
-                    Arrays.toString(user.getGroupNames()), Arrays.toString(user.getRoleNames()));
-        }
+        // No firstResolution guard: the only case that must not touch the state -- a re-resolution
+        // whose direct lookup Graph did not answer -- returned early above. What reaches here is
+        // either a resolution that succeeded, first or not, or one that fell short in the direct
+        // lookup or in the parent group walk. Guarding this would pin a stale FAILED on a user
+        // whose token renewal has since resolved their groups.
+        //
+        // The walk counts as much as the direct lookup: a Graph backoff is recorded on this
+        // authenticator for the whole tenant, so one user's 429 skips every parent lookup for up
+        // to MAX_GRAPH_THROTTLE_SECONDS while the direct lookup keeps answering. The users
+        // resolved in that window hold their direct groups alone -- fewer permissions than they
+        // should have, which is what FAILED is there to say.
+        user.setPermissionState(resolved && parentsResolved ? PermissionState.RESOLVED : PermissionState.FAILED);
 
-        // Schedule lazy loading of parent groups
-        if (!groupIdsForParentLookup.isEmpty()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[updateMemberOf] Scheduling parent group lookup for {} group IDs: {}", groupIdsForParentLookup.size(),
-                        groupIdsForParentLookup);
-            }
-            scheduleParentGroupLookup(user, new ArrayList<>(groupList), new ArrayList<>(roleList), groupIdsForParentLookup);
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[updateMemberOf] No parent group lookup needed (no group IDs to process)");
-            }
-        }
+        // Every path that reaches here has written the memberships, so the next resolution is a
+        // re-resolution and must keep them rather than fall back to the defaults alone.
+        user.markResolutionCompleted();
+
+        ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(user)));
 
         if (logger.isDebugEnabled()) {
             logger.debug("[updateMemberOf] Completed for user: {}", user.getName());
         }
+    }
+
+    /**
+     * Puts the configured default groups and roles on a user that has just been constructed, so
+     * that they apply for the whole window before {@link #updateMemberOf} lands rather than only
+     * after it.
+     *
+     * <p>Nothing here reaches Microsoft Graph -- {@code entraid.default.groups} and
+     * {@code entraid.default.roles} are static configuration -- so it is safe on the login thread,
+     * which is the point: {@code SsoAction} redirects to the search page in the same request that
+     * schedules the resolution, and a user holding no groups at all sees a near-empty result set
+     * until it completes.
+     *
+     * <p>This does not mark the user as resolved: it is a seed, not a resolution, and
+     * {@link #updateMemberOf} must still treat the next run as the first one.
+     *
+     * @param user The Entra ID user to seed.
+     */
+    public void applyDefaultMemberships(final EntraIdUser user) {
+        user.setGroups(getDefaultGroupList().stream().distinct().toArray(n -> new String[n]));
+        user.setRoles(getDefaultRoleList().stream().distinct().toArray(n -> new String[n]));
     }
 
     /**
@@ -1076,8 +1090,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
     /**
      * Processes direct member-of information from Microsoft Graph API without parent group lookup.
-     * This method retrieves only direct group memberships and collects group IDs for later
-     * asynchronous parent group lookup.
+     * This method retrieves only direct group memberships and collects their group IDs, which
+     * {@link #updateMemberOf} then walks for parent groups in the same pass.
      * @param user The Entra ID user.
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
@@ -1085,8 +1099,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param url The Microsoft Graph API URL.
      * @return True if Microsoft Graph answered with a membership list, false if it reported an
      *         error or could not be read. When this is false the lists hold whatever was collected
-     *         before the failure, and {@link #updateMemberOf} discards them: it keeps the
-     *         memberships the user already had, or fails the login when there are none yet.
+     *         before the failure, and {@link #updateMemberOf} keeps the memberships already on the
+     *         user, or, when there are none yet, writes what was collected plus the configured
+     *         defaults.
      */
     protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
             final List<String> groupIdsForParentLookup, final String url) {
@@ -1179,75 +1194,42 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             // a body whose "value" is not an array of objects throws ClassCastException from the
             // cast above, which used to escape updateMemberOf and the EntraIdUser constructor and
             // land on the generic error page rather than on the controlled outcome the caller
-            // chooses. Nothing thrown from inside this method has to propagate --
-            // LoginFailureException is raised by updateMemberOf, after this returns.
+            // chooses. Nothing thrown from inside this method has to propagate to the caller.
             logger.warn("Failed to access groups/roles in Entra ID.", e);
             return false;
         }
     }
 
     /**
-     * Schedules asynchronous parent group lookup using TimeoutManager.
-     * This method defers the retrieval of nested group information to avoid login delays.
-     * @param user The Entra ID user.
-     * @param initialGroups The initial group list to be updated.
-     * @param initialRoles The initial role list to be updated.
-     * @param groupIds The list of group IDs to lookup parent groups for.
+     * Runs {@link #updateMemberOf} on a background thread.
+     *
+     * <p>The Microsoft Graph calls behind it -- the direct membership lookup and the parent group
+     * walk, one call per direct group -- used to be split across the login thread and a second
+     * scheduled task. One task keeps the login off Graph altogether and writes the groups, the
+     * roles and the permission reset once at the end, instead of publishing the direct groups and
+     * then overwriting them.
+     *
+     * @param user The Entra ID user to resolve.
      */
-    protected void scheduleParentGroupLookup(final EntraIdUser user, final List<String> initialGroups, final List<String> initialRoles,
-            final List<String> groupIds) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("[scheduleParentGroupLookup] Scheduling async parent group lookup for user: {}, groupIds count: {}",
-                    user.getName(), groupIds.size());
-        }
+    public void scheduleUpdateMemberOf(final EntraIdUser user) {
         TimeoutManager.getInstance().addTimeoutTarget(() -> {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[scheduleParentGroupLookup] Async task started for user: {}", user.getName());
-            }
             final long startTime = System.currentTimeMillis();
             try {
-                final List<String> updatedGroups = new ArrayList<>(initialGroups);
-                final List<String> updatedRoles = new ArrayList<>(initialRoles);
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[scheduleParentGroupLookup] Processing {} group IDs for parent lookup", groupIds.size());
-                }
-
-                int processedCount = 0;
-                for (final String groupId : groupIds) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("[scheduleParentGroupLookup] Processing parent groups for groupId: {} ({}/{})", groupId,
-                                ++processedCount, groupIds.size());
-                    }
-                    processParentGroup(user, updatedGroups, updatedRoles, groupId);
-                }
-
-                // Update groups/roles
-                final String[] finalGroups = updatedGroups.stream().distinct().toArray(n -> new String[n]);
-                final String[] finalRoles = updatedRoles.stream().distinct().toArray(n -> new String[n]);
-                user.setGroups(finalGroups);
-                user.setRoles(finalRoles);
-
-                // Reset permissions to force recalculation
-                user.resetPermissions();
-
-                final long elapsedTime = System.currentTimeMillis() - startTime;
-                if (logger.isDebugEnabled()) {
-                    logger.debug(
-                            "[scheduleParentGroupLookup] Async task completed for user: {}. Final groups: {}, Final roles: {}, Elapsed time: {}ms",
-                            user.getName(), finalGroups.length, finalRoles.length, elapsedTime);
-                    logger.debug("[scheduleParentGroupLookup] Final groups for user {}: {}", user.getName(), Arrays.toString(finalGroups));
-                    logger.debug("[scheduleParentGroupLookup] Final roles for user {}: {}", user.getName(), Arrays.toString(finalRoles));
-                }
-
-                // Update session information
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[scheduleParentGroupLookup] Notifying permission change for user: {}", user.getName());
-                }
-                ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(user)));
+                updateMemberOf(user);
             } catch (final Exception e) {
-                final long elapsedTime = System.currentTimeMillis() - startTime;
-                logger.warn("Failed to process parent groups asynchronously for user: {} after {}ms", user.getName(), elapsedTime, e);
+                // A backstop: updateMemberOf contains every Graph failure itself, so reaching here
+                // means something unforeseen -- possibly after the memberships were already
+                // resolved and written correctly, e.g. a throw from the permissionChanged audit
+                // call below them. So this does not claim the resolution itself failed. What it
+                // does guard is PENDING: a throw between the setGroups/setRoles write and the
+                // setPermissionState write would otherwise leave the user PENDING forever, which
+                // is indistinguishable from never having been resolved at all. A re-resolution's
+                // state is RESOLVED (or FAILED), not PENDING, so this leaves it untouched.
+                logger.warn("Unexpected error while resolving the Entra ID memberships of {} after {}ms.", user.getName(),
+                        System.currentTimeMillis() - startTime, e);
+                if (user.getPermissionState() == PermissionState.PENDING) {
+                    user.setPermissionState(PermissionState.FAILED);
+                }
             }
         }, 0, false);
     }
@@ -1258,9 +1240,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
+     * @return True if the walk completed without a Microsoft Graph failure. See
+     *         {@link #processParentGroup(EntraIdUser, List, List, String, int)}.
      */
-    protected void processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
-        processParentGroup(user, groupList, roleList, id, 0);
+    protected boolean processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+            final String id) {
+        return processParentGroup(user, groupList, roleList, id, 0);
     }
 
     /**
@@ -1270,8 +1255,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
      * @param depth The current recursion depth.
+     * @return True if the walk completed without a Microsoft Graph failure, so that
+     *         {@link #updateMemberOf} can tell a user who holds all their parent groups from one
+     *         who silently holds only some of them. The configured depth bound is not a failure --
+     *         it is where the walk is meant to stop -- and neither is a group that genuinely has
+     *         no parents.
      */
-    protected void processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
+    protected boolean processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
             final int depth) {
         if (logger.isDebugEnabled()) {
             logger.debug("[processParentGroup] Processing parent groups for id: {}, depth: {}/{}", id, depth, maxGroupDepth);
@@ -1280,25 +1270,48 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("[processParentGroup] Maximum group depth {} reached for group {}", maxGroupDepth, id);
             }
-            return;
+            return true;
         }
-        final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, id, depth);
+        final AtomicBoolean failed = new AtomicBoolean();
+        final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, id, depth, failed);
         StreamUtil.stream(groupsAndRoles.getFirst()).of(stream -> stream.forEach(groupList::add));
         StreamUtil.stream(groupsAndRoles.getSecond()).of(stream -> stream.forEach(roleList::add));
         if (logger.isDebugEnabled()) {
-            logger.debug("[processParentGroup] Completed for id: {}, depth: {}, added groups: {}, added roles: {}", id, depth,
-                    groupsAndRoles.getFirst().length, groupsAndRoles.getSecond().length);
+            logger.debug("[processParentGroup] Completed for id: {}, depth: {}, added groups: {}, added roles: {}, failed: {}", id, depth,
+                    groupsAndRoles.getFirst().length, groupsAndRoles.getSecond().length, failed.get());
         }
+        return !failed.get();
     }
 
     /**
-     * Retrieves parent group information for the specified group ID with depth tracking.
+     * Retrieves parent group information for the specified group ID with depth tracking, for a
+     * caller that has nothing to report a failure to.
      * @param user The Entra ID user.
      * @param id The group ID to get parent information for.
      * @param depth The current recursion depth.
      * @return A pair containing group names and role names.
      */
     protected Pair<String[], String[]> getParentGroup(final EntraIdUser user, final String id, final int depth) {
+        return getParentGroup(user, id, depth, new AtomicBoolean());
+    }
+
+    /**
+     * Retrieves parent group information for the specified group ID with depth tracking.
+     *
+     * <p>An empty result is not by itself an answer: it is also what a skipped or failed lookup
+     * returns. {@code failed} is what tells the two apart, so that a user missing their parent
+     * groups is not reported as fully resolved.
+     *
+     * @param user The Entra ID user.
+     * @param id The group ID to get parent information for.
+     * @param depth The current recursion depth.
+     * @param failed Set to true when Microsoft Graph could not be asked, or answered with a
+     *        failure, anywhere in this walk. Never cleared, so one flag can be passed down the
+     *        recursion and read once at the top.
+     * @return A pair containing group names and role names.
+     */
+    protected Pair<String[], String[]> getParentGroup(final EntraIdUser user, final String id, final int depth,
+            final AtomicBoolean failed) {
         if (logger.isDebugEnabled()) {
             logger.debug("[getParentGroup] Getting parent groups for id: {}, depth: {}", id, depth);
         }
@@ -1325,14 +1338,20 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             // every login until the tenant recovered. The empty pair is deliberately not written
             // to groupCache: caching it would keep the parent group permissions away for the whole
             // cache TTL even once the throttle had lapsed, which is what #3223 removed.
+            //
+            // Skipped, not answered: the backoff is recorded for the whole tenant, so without this
+            // flag one user's 429 would report every login in the next hour as fully resolved
+            // while none of them held a single parent group.
+            failed.set(true);
             if (logger.isDebugEnabled()) {
                 logger.debug("[getParentGroup] Skipping the lookup for id {} while Microsoft Graph is throttling.", id);
             }
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
         try {
-            return groupCache.get(id, () -> loadParentGroup(user, id, depth));
+            return groupCache.get(id, () -> loadParentGroup(user, id, depth, failed));
         } catch (final ExecutionException | UncheckedExecutionException e) {
+            failed.set(true);
             // A loader that throws leaves nothing in the cache, which is the point: a throttled or
             // briefly unreachable Graph must not pin an empty result for the whole cache TTL.
             // UncheckedExecutionException matters because the Graph JSON parser throws
@@ -1415,16 +1434,22 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Walks the parent groups of the specified group. Any failure is thrown rather than turned
-     * into an empty result, so a caller that caches this never stores a transient failure.
+     * Walks the parent groups of the specified group. A failure of the {@code getMemberGroups}
+     * lookup itself is thrown rather than turned into an empty result, so a caller that caches
+     * this never stores a transient failure. A failure of one of the per-group reads underneath it
+     * cannot be thrown -- the groups that did answer are worth keeping -- so it is recorded in
+     * {@code failed} instead.
      *
      * @param user The Entra ID user.
      * @param id The group ID to get parent information for.
      * @param depth The current recursion depth.
+     * @param failed Set to true when a lookup underneath this one could not be made or failed.
+     *        See {@link #getParentGroup(EntraIdUser, String, int, AtomicBoolean)}.
      * @return A pair containing group names and role names.
      * @throws IOException If Microsoft Graph could not be reached or returned an error.
      */
-    protected Pair<String[], String[]> loadParentGroup(final EntraIdUser user, final String id, final int depth) throws IOException {
+    protected Pair<String[], String[]> loadParentGroup(final EntraIdUser user, final String id, final int depth, final AtomicBoolean failed)
+            throws IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("[getParentGroup] Loading parent groups for id: {}", id);
         }
@@ -1434,12 +1459,16 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("[getParentGroup] Processing parent group id: {} for group: {}", value, id);
             }
-            processGroup(user, groupList, roleList, value);
+            if (!processGroup(user, groupList, roleList, value)) {
+                // The group is dropped entirely -- processGroup adds nothing at all when the read
+                // fails -- so the user ends up without a parent group they are a member of.
+                failed.set(true);
+            }
             if (!groupList.contains(value) && !roleList.contains(value)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("[getParentGroup] Recursively getting parent groups for: {}", value);
                 }
-                final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1);
+                final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1, failed);
                 StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
                 StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
             }
@@ -1544,9 +1573,11 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
+     * @return True if Microsoft Graph could be read. See
+     *         {@link #processGroup(EntraIdUser, List, List, String, String)}.
      */
-    protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
-        processGroup(user, groupList, roleList, id, "https://graph.microsoft.com/v1.0/groups/" + id);
+    protected boolean processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+        return processGroup(user, groupList, roleList, id, "https://graph.microsoft.com/v1.0/groups/" + id);
     }
 
     /**
@@ -1559,8 +1590,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
      * @param url The Microsoft Graph URL to read the group from.
+     * @return True if Microsoft Graph could be read. False means the group was dropped altogether
+     *         -- nothing is added on that path -- so the caller has to know rather than take the
+     *         shorter list for the answer. A body that reports an error is still a read: the group
+     *         id is kept, only the names configured by {@code entraid.permission.fields} are not.
      */
-    protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
+    protected boolean processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
             final String url) {
         if (logger.isDebugEnabled()) {
             logger.debug("[processGroup] Processing group info for id: {} from url: {}", id, url);
@@ -1601,9 +1636,11 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     logger.debug("[processGroup] Completed for id: {}, added {} entries", id, groupList.size() - initialSize);
                 }
             }
+            return true;
         } catch (final IOException | CurlException e) {
             // See processDirectMemberOf: curl4j's transport failure is the unchecked CurlException.
             logger.warn("Failed to access groups/roles in Entra ID for id: {}", id, e);
+            return false;
         }
     }
 
@@ -1637,30 +1674,6 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             return Collections.emptyList();
         }
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
-    }
-
-    /**
-     * Returns whether a login must be refused when the first membership lookup does not answer.
-     *
-     * <p>Defaults to false, which is what 15.7 did: a throttled tenant, a Graph outage or a
-     * {@code GroupMember.Read.All} permission that was never granted degrades the login to the
-     * memberships collected so far plus the configured defaults, rather than refusing every login
-     * in the tenant for as long as the condition lasts. A deployment that would rather hand out no
-     * session at all than an under-permissioned one sets {@code entraid.require.membership} to
-     * {@code true}.
-     *
-     * @return True to fail the login, false to complete it with the configured defaults.
-     */
-    protected boolean isRequireMembership() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_REQUIRE_MEMBERSHIP);
-        if (StringUtil.isBlank(value)) {
-            // Absent, or present but empty. getSystemProperty substitutes a default only when the
-            // key is absent, and the admin screen stores an empty string rather than removing a
-            // key, so both have to be mapped onto the default here rather than left to
-            // Boolean.parseBoolean.
-            return false;
-        }
-        return Boolean.parseBoolean(value.trim());
     }
 
     /**
