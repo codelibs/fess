@@ -45,6 +45,7 @@ import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
@@ -876,6 +877,123 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertFalse(expired, expired.contains("tomcat.sameSiteCookies"));
         } finally {
             appender.detach();
+        }
+    }
+
+    @Test
+    public void test_hasExpiredSession_needsASessionIdThatIsNoLongerValid() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+        // one request, walked through the three states, because getMockRequest() hands out the
+        // same instance for the whole test method
+        final MockletHttpServletRequest request = getMockRequest();
+
+        // a browser that is not sending the cookie sends no session id, so nothing was lost
+        assertNull(request.getRequestedSessionId());
+        assertFalse(authenticator.hasExpiredSession(request));
+
+        // an id that came back with nothing behind it is the case worth naming
+        request.addCookie(new Cookie("jsessionid", "AB1C2D3E4F5061728394A5B6C7D8E9F0"));
+        assertNotNull(request.getRequestedSessionId());
+        assertFalse(request.isRequestedSessionIdValid());
+        assertTrue(authenticator.hasExpiredSession(request));
+
+        // an id the container still knows is a live session, not an expired one
+        request.getSession();
+        assertTrue(request.isRequestedSessionIdValid());
+        assertFalse(authenticator.hasExpiredSession(request));
+    }
+
+    @Test
+    public void test_getLoginCredential_responseWithoutASessionIdBlamesTheCookie() throws Exception {
+        // Nothing came back at all, which really is what a SameSite=Lax cookie on a cross-site
+        // POST looks like, so this is the one case that keeps that guidance.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            request.setMethod("POST");
+            request.setParameter("SAMLResponse", "PHNhbWxwOlJlc3BvbnNlIC8+");
+            assertNull(request.getRequestedSessionId());
+
+            assertNull(authenticator.getLoginCredential());
+            assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+            final String warning = appender.warnings().get(0);
+            assertTrue(warning, warning.contains("tomcat.sameSiteCookies"));
+            assertFalse(warning, warning.contains("session it belongs to had expired"));
+        } finally {
+            tearDownIdp(systemProperties);
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_expiredSessionIsNotReportedAsABlockedCookie() throws Exception {
+        // The realistic "walked away at the IdP" case arrives exactly like this, because the
+        // container reaps the session (30 minutes by default) long before saml.request.id.ttl
+        // (3600 seconds) can prune an ID, so the AuthnRequest IDs go with it and the branch that
+        // counts pruned IDs is never reached. Reported as the SameSite case it sends an operator
+        // whose cookie settings are already right off to change them.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            request.setMethod("POST");
+            request.setParameter("SAMLResponse", "PHNhbWxwOlJlc3BvbnNlIC8+");
+            request.addCookie(new Cookie("jsessionid", "AB1C2D3E4F5061728394A5B6C7D8E9F0"));
+            // the cookie demonstrably arrived; there is simply no session behind it any more
+            assertNotNull(request.getRequestedSessionId());
+            assertNull(request.getSession(false));
+
+            // still refused: bouncing back to an IdP that is already authenticated would only
+            // post the same unmatched assertion straight back
+            assertNull(authenticator.getLoginCredential());
+            assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+            final String warning = appender.warnings().get(0);
+            assertTrue(warning, warning.contains("session it belongs to had expired"));
+            assertFalse(warning, warning.contains("tomcat.sameSiteCookies"));
+            // raising the TTL cannot extend a session that is already the shorter of the two
+            assertTrue(warning, warning.contains("raising that value does not help"));
+        } finally {
+            tearDownIdp(systemProperties);
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getLoginCredential_prunedRequestIdsStillNameTheTtl() throws Exception {
+        // The third case: the session is alive and its cookie is valid, and only the IDs it held
+        // ran out of time. That one really is about saml.request.id.ttl, so the session-expiry
+        // wording must not take it over.
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            request.addCookie(new Cookie("jsessionid", "AB1C2D3E4F5061728394A5B6C7D8E9F0"));
+            authenticator.getLoginCredential();
+            final String requestId = pendingRequestIds(request.getSession(false)).iterator().next();
+            assertTrue(request.isRequestedSessionIdValid());
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                clock.addAndGet(3601L * 1000L);
+                postSamlResponse(request, requestId);
+
+                assertNull(authenticator.getLoginCredential());
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                final String warning = appender.warnings().get(0);
+                assertTrue(warning, warning.contains("all 1 pending AuthnRequest ID(s) of the session had expired"));
+                assertFalse(warning, warning.contains("session it belongs to had expired"));
+                assertFalse(warning, warning.contains("tomcat.sameSiteCookies"));
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownIdp(systemProperties);
         }
     }
 
