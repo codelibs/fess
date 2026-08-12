@@ -955,9 +955,11 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * #scheduleUpdateMemberOf} is what keeps it off the login thread -- so tests can call it
      * directly.
      *
-     * <p>When Microsoft Graph does not answer with a membership list, the memberships already on
-     * the user are kept; if there are none yet -- which is the case at login -- the login
-     * completes with whatever was collected plus the configured defaults.
+     * <p>When Microsoft Graph does not answer with a membership list, a re-resolution keeps the
+     * memberships it resolved earlier rather than replacing them. A first resolution has none of
+     * those to keep, so it writes whatever was collected on top of the configured defaults the
+     * lists were seeded with, and marks the user {@link PermissionState#FAILED} rather than
+     * leaving the session with no memberships at all.
      *
      * @param user The Entra ID user to update.
      */
@@ -1098,10 +1100,11 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param groupIdsForParentLookup The list to collect group IDs for later parent lookup.
      * @param url The Microsoft Graph API URL.
      * @return True if Microsoft Graph answered with a membership list, false if it reported an
-     *         error or could not be read. When this is false the lists hold whatever was collected
-     *         before the failure, and {@link #updateMemberOf} keeps the memberships already on the
-     *         user, or, when there are none yet, writes what was collected plus the configured
-     *         defaults.
+     *         error or could not be read. When this is false the lists hold the configured
+     *         defaults they were seeded with plus whatever was collected before the failure, and
+     *         what {@link #updateMemberOf} does with them turns on whether a resolution has
+     *         completed for this user before: a re-resolution discards them and keeps the
+     *         memberships it resolved earlier, while a first resolution writes them.
      */
     protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
             final List<String> groupIdsForParentLookup, final String url) {
