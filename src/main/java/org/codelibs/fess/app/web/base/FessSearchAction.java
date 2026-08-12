@@ -29,6 +29,7 @@ import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.sso.SsoAction;
 import org.codelibs.fess.chat.ChatClient;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OsddHelper;
@@ -37,11 +38,13 @@ import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -149,7 +152,60 @@ public abstract class FessSearchAction extends FessBaseAction {
             runtime.registerData("popularWords", popularWordHelper.getWordList(SearchRequestType.SEARCH, null,
                     tagList.toArray(new String[tagList.size()]), null, null, null));
         }
+        fessLoginAssist.getSavedUserBean().ifPresent(user -> {
+            final String messageKey = getPermissionStateMessageKey(user.getFessUser());
+            if (messageKey != null) {
+                carryOverSavedErrors();
+                // Request scope and add, not sessionManager and saveMessages. Session scope would
+                // leave the message behind on any page without <la:errors>, to surface later when
+                // it is no longer true, and saveMessages overwrites -- it would discard a message
+                // an earlier request saved before redirecting here.
+                requestManager.errors().add(UserMessages.GLOBAL, messageKey);
+            }
+        });
         return super.hookBefore(runtime);
+    }
+
+    /**
+     * Moves any error messages an earlier request saved into request scope, so that the permission
+     * notice added next accompanies them instead of hiding them.
+     *
+     * <p>{@code saveError(...)} writes under {@link org.lastaflute.web.LastaWebKey#ACTION_ERRORS_KEY}
+     * in session scope, and the notice is written under that same key in request scope.
+     * {@code <la:errors>} resolves the key with {@code pageContext.findAttribute}, which searches
+     * page, then request, then session and stops at the first scope that answers -- so a
+     * request-scoped notice on its own wins outright, and the tag then clears the session copy it
+     * never rendered. That is how "invalid query" would go missing for a user whose permissions
+     * are still loading: {@code SearchAction} saves it and redirects to the root, and the root's
+     * own hookBefore would shadow it.
+     *
+     * <p>The session copy is not cleared here, because it does not need to be: on a page that
+     * renders {@code <la:errors>} the tag clears it once it has written the merged request copy,
+     * and on a page that does not, copying it has already marked it accessed, so
+     * {@code ActionCoinsHelper#removeCachedMessages} drops it at the start of the next request.
+     * Either way it is carried exactly once.
+     */
+    protected void carryOverSavedErrors() {
+        sessionManager.errors().get().ifPresent(saved -> requestManager.errors().addMessages(saved));
+    }
+
+    /**
+     * Returns the message telling the user that their group and role permissions are not all in
+     * place, or null when they are.
+     *
+     * <p>Takes a {@link FessUser} rather than reading a specific authenticator's user type: the
+     * state is on the interface so that any authenticator resolving memberships after login can
+     * report it.
+     *
+     * @param user The logged-in user.
+     * @return The message key, or null when there is nothing to say.
+     */
+    protected String getPermissionStateMessageKey(final FessUser user) {
+        return switch (user.getPermissionState()) {
+        case PENDING -> FessMessages.ERRORS_user_permissions_loading;
+        case FAILED -> FessMessages.ERRORS_user_permissions_unavailable;
+        default -> null;
+        };
     }
 
     /**

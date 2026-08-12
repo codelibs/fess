@@ -21,6 +21,9 @@ ${fe:html(true)}
 <body class="search">
 	<jsp:include page="header.jsp" />
 	<main id="content" class="container">
+		<la:errors header="errors.front_header"
+			footer="errors.front_footer" prefix="errors.front_prefix"
+			suffix="errors.front_suffix" />
 		<ul class="list-inline">
 			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_sort" /> <a
 				href="#searchOptions" class="badge text-bg-primary text-decoration-none"

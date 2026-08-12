@@ -209,6 +209,37 @@ public class FessUserTest extends UnitFessTestCase {
         assertFalse(user.refresh());
     }
 
+    @Test
+    public void test_getPermissionState_defaultsToResolved() {
+        // Every user type except Entra ID resolves its groups before the object is handed out, so
+        // RESOLVED is the truth for them and they must not have to say so.
+        final FessUser user = new FessUser() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "taro";
+            }
+
+            @Override
+            public String[] getRoleNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getGroupNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getPermissions() {
+                return new String[0];
+            }
+        };
+
+        assertEquals(FessUser.PermissionState.RESOLVED, user.getPermissionState());
+    }
+
     // Helper method to assert array equality
     private void assertArrayEquals(String[] expected, String[] actual) {
         if (expected == null && actual == null) {

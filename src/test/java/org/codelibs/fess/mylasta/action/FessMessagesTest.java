@@ -15,6 +15,12 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -764,5 +770,23 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertNotNull(result);
         assertSame(messages, result);
         assertTrue(messages.hasMessageOf(property));
+    }
+
+    @Test
+    public void test_permissionStateKeys_existInEveryBundle() throws Exception {
+        // A key missing from one bundle renders as its raw key for that locale, which is only ever
+        // noticed by a user of that locale.
+        final File dir = new File("src/main/resources");
+        final File[] bundles = dir.listFiles((d, name) -> name.startsWith("fess_message") && name.endsWith(".properties"));
+        assertNotNull(bundles);
+        assertEquals(17, bundles.length);
+        for (final File bundle : bundles) {
+            final Properties props = new Properties();
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(bundle), StandardCharsets.UTF_8)) {
+                props.load(reader);
+            }
+            assertNotNull(props.getProperty("errors.user_permissions_loading"), bundle.getName());
+            assertNotNull(props.getProperty("errors.user_permissions_unavailable"), bundle.getName());
+        }
     }
 }

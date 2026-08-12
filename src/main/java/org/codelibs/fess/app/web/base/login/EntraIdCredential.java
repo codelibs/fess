@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.sso.entraid.EntraIdAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
@@ -100,6 +101,28 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
         protected volatile IAuthenticationResult authResult;
 
         /**
+         * How far this user's group and role permissions have got. Volatile because the resolution
+         * runs on a TimeoutManager thread while request threads read it.
+         *
+         * <p>Starts PENDING: unlike every other {@code FessUser}, this one is handed out before its
+         * memberships exist.
+         */
+        protected volatile PermissionState permissionState = PermissionState.PENDING;
+
+        /**
+         * Whether a membership resolution has ever run to completion for this user -- whether it
+         * reached Microsoft Graph or fell back to the configured defaults. Volatile for the same
+         * reason as {@link #permissionState}: written on a TimeoutManager thread, read on request
+         * threads.
+         *
+         * <p>An explicit flag rather than {@code groups == null}, which is what it used to be
+         * inferred from: the constructor now seeds the configured defaults, so the memberships are
+         * never null and every resolution would look like a re-resolution -- keeping the seeded
+         * defaults forever instead of writing the resolved groups.
+         */
+        protected volatile boolean resolutionCompleted;
+
+        /**
          * Set for as long as one thread is inside the silent acquisition in {@link #refresh()}.
          * A plain flag rather than a lock: the losing threads must carry on with the token they
          * already hold instead of queueing behind an acquisition that can take tens of seconds.
@@ -113,7 +136,12 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
         public EntraIdUser(final IAuthenticationResult authResult) {
             this.authResult = authResult;
             final EntraIdAuthenticator authenticator = ComponentUtil.getComponent(EntraIdAuthenticator.class);
-            authenticator.updateMemberOf(this);
+            // The configured defaults are static -- no Graph call stands behind them -- so they
+            // apply from the first request rather than only once the background resolution lands.
+            // SsoAction redirects straight to the search page after login, so without this the
+            // first results a user sees are those of someone holding no groups at all.
+            authenticator.applyDefaultMemberships(this);
+            authenticator.scheduleUpdateMemberOf(this);
         }
 
         @Override
@@ -135,11 +163,11 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
         public synchronized String[] getPermissions() {
             // Synchronized on the same monitor as setGroups/setRoles/resetPermissions. Computing
             // the value is a check-then-act -- read `permissions == null`, read `groups`, write
-            // `permissions` -- and the parent group lookup scheduled at login runs on a
+            // `permissions` -- and the membership resolution scheduled at login runs on a
             // TimeoutManager thread while the user is already searching. Without the lock a reader
-            // that started first can finish last and overwrite the freshly reset value with one
-            // computed from the direct groups alone; nothing resets it again, so the parent group
-            // permissions stay missing for the rest of the session.
+            // that started before it lands can finish after and overwrite the freshly reset value
+            // with one computed from stale (or absent) groups; nothing resets it again, so those
+            // permissions stay wrong for the rest of the session.
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
@@ -177,11 +205,10 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 return false;
             }
             if (tokenExpiryTime - currentTime > REFRESH_MARGIN) {
-                // FessBaseAction.godHandPrologue calls this on every action request. A silent
-                // acquisition that succeeds runs updateMemberOf, which makes a synchronous
-                // Microsoft Graph call on the request thread, so it must not happen per request.
-                // Until the token is close to expiring there is nothing to acquire, and the
-                // groups this user was given at login are still the ones Entra ID issued them.
+                // FessBaseAction.godHandPrologue calls this on every action request; a silent
+                // acquisition is a network call, so it must not happen per request. Until the
+                // token is close to expiring there is nothing to acquire, and the groups this
+                // user was given at login are still the ones Entra ID issued them.
                 if (logger.isDebugEnabled()) {
                     logger.debug("Token is still valid for {}ms. Skipping silent authentication.", tokenExpiryTime - currentTime);
                 }
@@ -190,14 +217,13 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
             // Lastaflute keeps one FessUserBean -- and therefore one EntraIdUser -- as a session
             // attribute, and FessBaseAction.godHandPrologue calls refresh() on every action
             // request, so all the requests a session has in flight arrive here together once the
-            // token enters REFRESH_MARGIN. Each of them would see a renewed token, run
-            // updateMemberOf -- a synchronous Microsoft Graph call on a request thread -- and
-            // schedule another parent group lookup, and the last one to assign would decide which
-            // of the results authResult ends up holding. One renewal per rollover is enough.
+            // token enters REFRESH_MARGIN. Each of them would see a renewed token and schedule its
+            // own updateMemberOf task, and the last one to assign would decide which of the
+            // results authResult ends up holding. One renewal per rollover is enough.
             // Not a lock, and deliberately not a synchronized method: the acquisition runs for up
-            // to the authenticator's acquisition timeout plus the Graph calls behind
-            // updateMemberOf, and getPermissions() takes this object's monitor, so waiting here
-            // would stall every concurrent search of this user for that whole time.
+            // to the authenticator's acquisition timeout, and getPermissions() takes this object's
+            // monitor, so waiting here would stall every concurrent search of this user for that
+            // whole time.
             if (!refreshing.compareAndSet(false, true)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Another request is already renewing the token. Skipping silent authentication.");
@@ -218,8 +244,9 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                     final boolean renewed = !newResult.accessToken().equals(authResult.accessToken());
                     authResult = newResult;
                     if (renewed) {
-                        authenticator.updateMemberOf(this);
-                        resetPermissions();
+                        // Scheduled, not called: this runs on a request thread, and updateMemberOf
+                        // reaches Microsoft Graph. It resets the permissions itself when it lands.
+                        authenticator.scheduleUpdateMemberOf(this);
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("Silent authentication succeeded. renewed={}", renewed);
@@ -262,9 +289,39 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
             this.roles = roles;
         }
 
+        @Override
+        public PermissionState getPermissionState() {
+            return permissionState;
+        }
+
+        /**
+         * Records how far the group and role resolution has got.
+         * @param permissionState The state.
+         */
+        public void setPermissionState(final PermissionState permissionState) {
+            this.permissionState = permissionState;
+        }
+
+        /**
+         * Whether a membership resolution has ever run to completion for this user.
+         * @return True once one has, so that a later one is a re-resolution.
+         */
+        public boolean isResolutionCompleted() {
+            return resolutionCompleted;
+        }
+
+        /**
+         * Records that a membership resolution has run to completion, so that the next one is a
+         * re-resolution and must not overwrite what this one wrote with the defaults alone.
+         */
+        public void markResolutionCompleted() {
+            this.resolutionCompleted = true;
+        }
+
         /**
          * Resets permissions to force recalculation on next getPermissions() call.
-         * This is called after asynchronous parent group lookup completes.
+         * Called from within {@code updateMemberOf}, before the permission state write, once the
+         * asynchronous membership resolution has the new groups and roles in hand.
          */
         public synchronized void resetPermissions() {
             this.permissions = null;

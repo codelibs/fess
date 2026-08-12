@@ -182,6 +182,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: SSO login process failed. */
     public static final String ERRORS_sso_login_error = "{errors.sso_login_error}";
 
+    /** The key of the message: Your group and role permissions are still loading, so some results may be missing. */
+    public static final String ERRORS_user_permissions_loading = "{errors.user_permissions_loading}";
+
+    /** The key of the message: Your group and role permissions could not be loaded, so some results may be missing. Please log in again, and contact your administrator if this keeps happening. */
+    public static final String ERRORS_user_permissions_unavailable = "{errors.user_permissions_unavailable}";
+
     /** The key of the message: Could not find {0}. */
     public static final String ERRORS_could_not_find_log_file = "{errors.could_not_find_log_file}";
 
@@ -1408,6 +1414,34 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsSsoLoginError(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_sso_login_error));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.user_permissions_loading' with parameters.
+     * <pre>
+     * message: Your group and role permissions are still loading, so some results may be missing.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsUserPermissionsLoading(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_user_permissions_loading));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.user_permissions_unavailable' with parameters.
+     * <pre>
+     * message: Your group and role permissions could not be loaded, so some results may be missing. Please log in again, and contact your administrator if this keeps happening.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsUserPermissionsUnavailable(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_user_permissions_unavailable));
         return this;
     }
 
