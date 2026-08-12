@@ -260,17 +260,30 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 // carries a message and "null <msg>" helps nobody diagnose an SSO failure.
                 final String detail = e.getMessage();
                 final String reason = detail == null ? msg : detail + " " + msg;
-                if (e instanceof UnsupportedOperationException) {
-                    // The library raises this type only for a header it refuses to even try: a
-                    // scheme that is neither Negotiate nor Basic, a Basic header carrying no token,
-                    // Basic while basic authentication is not supported, or an NTLM token it cannot
-                    // downgrade. The client decides every one of those, and /sso is anonymous, so a
-                    // stack trace per attempt would let an unauthenticated client fill the log. It
-                    // is not only an abuse path either: basic support is off unless the request is
-                    // secure, so a TLS-terminating proxy that leaves isSecure() false sends
-                    // ordinary browser traffic down here. An initialization fault cannot arrive as
-                    // this type, because getAuthenticator() wraps every one of them in a plain
-                    // SsoLoginException, which keeps its stack trace.
+                if (e instanceof UnsupportedOperationException || e instanceof IllegalArgumentException) {
+                    // Both types describe a header the client got wrong, never a fault of this
+                    // server. UnsupportedOperationException is what the library raises for a header
+                    // it refuses to even try: a scheme that is neither Negotiate nor Basic, a Basic
+                    // header carrying no token, Basic while basic authentication is not supported,
+                    // or an NTLM token it cannot downgrade. IllegalArgumentException is what the
+                    // token itself raises: SpnegoProvider#parseAuthHeader does not validate the
+                    // token, so the strict Base64 decoder behind SpnegoAuthScheme#getToken rejects
+                    // it, and that decode runs at the top of SpnegoProvider#negotiate before any
+                    // scheme dispatch -- so "Negotiate ###" reaches it whatever the spnego.allow.*
+                    // settings say. A decoded Basic token with no ':' raises it from doBasicAuth
+                    // as well.
+                    //
+                    // The client decides every one of those, and /sso is anonymous, so a stack
+                    // trace per attempt would let an unauthenticated client fill the log. It is not
+                    // only an abuse path either: basic support is off unless the request is secure,
+                    // so a TLS-terminating proxy that leaves isSecure() false sends ordinary
+                    // browser traffic down here.
+                    //
+                    // A genuine server fault cannot arrive as either type. Initialization faults
+                    // are wrapped by getAuthenticator() in a plain SsoLoginException -- which is a
+                    // FessSystemException, so it is neither of these types -- and that keeps its
+                    // stack trace. A broken keytab, an unreachable KDC, clock skew or a wrong SPN
+                    // surface from authenticate() as GSSException, which also keeps its trace.
                     throw new SsoStateException(reason, e);
                 }
                 throw new SsoLoginException(reason, e);
