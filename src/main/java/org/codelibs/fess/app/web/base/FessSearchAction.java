@@ -201,10 +201,15 @@ public abstract class FessSearchAction extends FessBaseAction {
      * @return The message key, or null when there is nothing to say.
      */
     protected String getPermissionStateMessageKey(final FessUser user) {
+        // "case null" as well as default: FessUser is Serializable and its implementations live in
+        // the session, so one that gains this field without changing serialVersionUID deserializes an
+        // older session with it null. A bare switch on a null selector throws, and this runs in
+        // hookBefore on every front page, so that would be a 500 on every request until the session
+        // is dropped.
         return switch (user.getPermissionState()) {
         case PENDING -> FessMessages.ERRORS_user_permissions_loading;
         case FAILED -> FessMessages.ERRORS_user_permissions_unavailable;
-        default -> null;
+        case null, default -> null;
         };
     }
 

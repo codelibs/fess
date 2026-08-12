@@ -19,6 +19,14 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.SearchResult;
+
+import org.codelibs.fess.entity.FessUser;
 
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -475,5 +483,384 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("normal", ldapManager.replaceWithUnderscores("normal"));
         // Input "//\\[]:;" has 8 special characters that should be replaced
         assertEquals("________", ldapManager.replaceWithUnderscores("//\\\\[]:;"));
+    }
+
+    // ==============================================================================
+    //                                              Nested group resolution reporting
+    //                                              ==================================
+
+    /** Builds a search result carrying the given memberOf values. */
+    private SearchResult memberOfResult(final String... entryDns) {
+        final BasicAttributes attributes = new BasicAttributes();
+        final BasicAttribute memberOf = new BasicAttribute("memberOf");
+        for (final String entryDn : entryDns) {
+            memberOf.add(entryDn);
+        }
+        attributes.put(memberOf);
+        final SearchResult result = new SearchResult("cn=testuser", null, attributes);
+        result.setNameInNamespace("cn=testuser,dc=example,dc=com");
+        return result;
+    }
+
+    /** The configuration the nested-group tests share: a group DN yields a group-typed role. */
+    private void registerGroupResolvingConfig() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapMemberofAttribute() {
+                return "memberOf";
+            }
+
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchUserEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchGroupEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchRoleEnabled() {
+                return true;
+            }
+
+            @Override
+            public String getRoleSearchGroupPrefix() {
+                return "2";
+            }
+
+            @Override
+            public String getRoleSearchRolePrefix() {
+                return "R";
+            }
+
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return false;
+            }
+
+            @Override
+            public boolean isLdapSamaccountnameGroup() {
+                return false;
+            }
+        });
+    }
+
+    /** Builds a group search result whose name-in-namespace is the given DN. */
+    private SearchResult groupResult(final String groupDn) {
+        final SearchResult result = new SearchResult(groupDn, null, new BasicAttributes());
+        result.setNameInNamespace(groupDn);
+        return result;
+    }
+
+    @Test
+    public void test_getRoles_leavesThePermissionsResolvedWhenNoWalkIsScheduled() {
+        // The shipped default leaves ldap.group.filter blank, so subRoleSet stays empty and nothing
+        // is ever scheduled. Reporting PENDING here would strand the notice on screen forever,
+        // which is why LdapUser starts RESOLVED rather than PENDING the way EntraIdUser does.
+        registerGroupResolvingConfig();
+        final AtomicBoolean scheduled = new AtomicBoolean(false);
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void search(final String baseDn, final String filter, final String[] returningAttrs,
+                    final java.util.function.Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer)
+                    throws RuntimeException {
+                try {
+                    consumer.accept(List.of(memberOfResult("CN=group1,OU=group,DC=example,DC=com")));
+                } catch (final javax.naming.NamingException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
+            @Override
+            protected void scheduleSubRoleUpdate(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet, final java.util.Set<String> sAMAccountGroupNameSet,
+                    final java.util.function.Consumer<String[]> lazyLoading) {
+                scheduled.set(true);
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapManager.getRoles(ldapUser, "dc=example,dc=com", "(uid=%s)", "", roles -> {});
+
+        assertFalse(scheduled.get());
+        assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
+    }
+
+    @Test
+    public void test_getRoles_marksThePermissionsPendingWhenItSchedulesTheWalk() {
+        // Set before the task is handed to the timer, not inside it: the timer only notices a
+        // second later, and the user is being given their direct groups right now.
+        registerGroupResolvingConfig();
+        final AtomicBoolean scheduled = new AtomicBoolean(false);
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void search(final String baseDn, final String filter, final String[] returningAttrs,
+                    final java.util.function.Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer)
+                    throws RuntimeException {
+                try {
+                    consumer.accept(List.of(memberOfResult("CN=group1,OU=group,DC=example,DC=com")));
+                } catch (final javax.naming.NamingException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
+            @Override
+            protected void scheduleSubRoleUpdate(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet, final java.util.Set<String> sAMAccountGroupNameSet,
+                    final java.util.function.Consumer<String[]> lazyLoading) {
+                // The state must already be PENDING by the time the task is scheduled.
+                assertEquals(FessUser.PermissionState.PENDING, user.getPermissionState());
+                scheduled.set(true);
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapManager.getRoles(ldapUser, "dc=example,dc=com", "(uid=%s)", "(member=%s)", roles -> {});
+
+        assertTrue(scheduled.get());
+        assertEquals(FessUser.PermissionState.PENDING, ldapUser.getPermissionState());
+    }
+
+    @Test
+    public void test_updateSubRoles_marksTheUserResolvedOnceTheWalkLands() {
+        registerGroupResolvingConfig();
+        final AtomicReference<String[]> published = new AtomicReference<>();
+        final AtomicReference<FessUser.PermissionState> stateWhenPublished = new AtomicReference<>();
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void processSubRoles(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet) {
+                roleSet.add("2parent");
+            }
+
+            @Override
+            protected OptionalEntity<String> getSAMAccountGroupName(final String bindDn, final String groupName) {
+                return OptionalEntity.of(groupName + "sam");
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapUser.setPermissionState(FessUser.PermissionState.PENDING);
+        final java.util.Set<String> roleSet = new java.util.HashSet<>(List.of("2group1"));
+
+        ldapManager.updateSubRoles(ldapUser, "dc=example,dc=com", java.util.Set.of("CN=group1"), "(member=%s)", roleSet,
+                java.util.Set.of("group1"), roles -> {
+                    published.set(roles);
+                    // The permissions must be published before the state that describes them, or a
+                    // reader that sees RESOLVED can still be looking at the previous set.
+                    stateWhenPublished.set(ldapUser.getPermissionState());
+                });
+
+        assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
+        assertEquals(FessUser.PermissionState.PENDING, stateWhenPublished.get());
+        assertNotNull(published.get());
+        // 2group1 from the direct pass, 2parent from the walk, and the sAMAccountName batch entry.
+        assertEquals(3, published.get().length);
+    }
+
+    @Test
+    public void test_updateSubRoles_doesNotDowngradeAStateAnotherWalkAlreadySettled() {
+        // Two concurrent first requests each schedule a walk. If one succeeds and a later one fails,
+        // the user still holds the groups the first published, so reporting FAILED over them would
+        // show a failure notice on a complete permission set.
+        registerGroupResolvingConfig();
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void processSubRoles(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet) {
+                throw new org.codelibs.fess.exception.LdapOperationException("Failed to search.");
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapUser.setPermissionState(FessUser.PermissionState.RESOLVED);
+
+        ldapManager.updateSubRoles(ldapUser, "dc=example,dc=com", java.util.Set.of("CN=group1"), "(member=%s)",
+                new java.util.HashSet<>(List.of("2group1")), java.util.Set.of(), roles -> {});
+
+        assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
+    }
+
+    @Test
+    public void test_updateSubRoles_marksTheUserFailedWhenTheWalkThrows() {
+        // Without the catch this throw escapes the TimeoutManager task, where corelib logs
+        // "Failed to process a task." -- naming neither LDAP nor the user -- and lazyLoading is
+        // never called, so the direct-only groups stand for the whole session with nothing saying
+        // so. The permissions already published stay; what changes is that the user is told.
+        registerGroupResolvingConfig();
+        final AtomicBoolean publishedAnything = new AtomicBoolean(false);
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void processSubRoles(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet) {
+                throw new org.codelibs.fess.exception.LdapOperationException("Failed to search.");
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapUser.setPermissionState(FessUser.PermissionState.PENDING);
+
+        ldapManager.updateSubRoles(ldapUser, "dc=example,dc=com", java.util.Set.of("CN=group1"), "(member=%s)",
+                new java.util.HashSet<>(List.of("2group1")), java.util.Set.of(), roles -> publishedAnything.set(true));
+
+        assertEquals(FessUser.PermissionState.FAILED, ldapUser.getPermissionState());
+        assertFalse(publishedAnything.get());
+    }
+
+    @Test
+    public void test_processSubRoles_looksUpSamAccountNamesAsTheAdminPrincipal() {
+        // getSAMAccountGroupName asks for the admin credentials, but getDirContext discards that
+        // request whenever a context is already open on the thread -- and inside search()'s consumer
+        // one is, the one search() opened with the end user's own credentials. So the lookups must
+        // not run from inside the consumer, or they bind as whoever is logging in. They now run
+        // after search() has closed its context, under a single admin context opened for the batch.
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
+
+            @Override
+            public boolean isLdapSamaccountnameGroup() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchGroupEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapRoleSearchRoleEnabled() {
+                return true;
+            }
+
+            @Override
+            public String getRoleSearchGroupPrefix() {
+                return "2";
+            }
+
+            @Override
+            public String getRoleSearchRolePrefix() {
+                return "R";
+            }
+
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return false;
+            }
+        });
+
+        final Hashtable<String, String> userEnv = new Hashtable<>();
+        userEnv.put("principal", "end-user");
+        final Hashtable<String, String> adminEnv = new Hashtable<>();
+        adminEnv.put("principal", "admin");
+
+        final AtomicReference<String> envOfOpenContext = new AtomicReference<>();
+        final AtomicReference<String> principalAtLookup = new AtomicReference<>();
+        final AtomicInteger contextsOpened = new AtomicInteger();
+
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected Hashtable<String, String> createSearchEnv() {
+                return adminEnv;
+            }
+
+            @Override
+            protected DirContextHolder getDirContext(final java.util.function.Supplier<Hashtable<String, String>> envSupplier) {
+                // Mirrors the real one: an already-open context on this thread is reused, and the
+                // supplied environment is then never consulted.
+                final DirContextHolder existing = contextLocal.get();
+                if (existing != null) {
+                    existing.inc();
+                    return existing;
+                }
+                envOfOpenContext.set(envSupplier.get().get("principal"));
+                contextsOpened.incrementAndGet();
+                final DirContextHolder holder = new DirContextHolder(null);
+                contextLocal.set(holder);
+                return holder;
+            }
+
+            @Override
+            protected void search(final String baseDn, final String filter, final String[] returningAttrs,
+                    final java.util.function.Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer) {
+                try (DirContextHolder holder = getDirContext(envSupplier)) {
+                    consumer.accept(List.of(groupResult("CN=group1,OU=group,DC=example,DC=com"),
+                            groupResult("CN=group2,OU=group,DC=example,DC=com")));
+                } catch (final javax.naming.NamingException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+
+            @Override
+            protected OptionalEntity<String> getSAMAccountGroupName(final String bindDn, final String groupName) {
+                principalAtLookup.set(envOfOpenContext.get());
+                return OptionalEntity.of(groupName + "sam");
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final java.util.Set<String> roleSet = new java.util.HashSet<>();
+        ldapManager.processSubRoles(new LdapUser(userEnv, "testuser"), "dc=example,dc=com", java.util.Set.of("CN=user1"), "(member=%s)",
+                roleSet);
+
+        // The lookups ran, and under the admin principal rather than the end user's.
+        assertEquals("admin", principalAtLookup.get());
+        // Two groups, but only two contexts in total: the search's, and one shared by the batch.
+        assertEquals(2, contextsOpened.get());
+        assertTrue(roleSet.toString(), roleSet.contains("2group1sam"));
+        assertTrue(roleSet.toString(), roleSet.contains("2group2sam"));
+    }
+
+    @Test
+    public void test_updateSubRoles_marksTheUserFailedWhenTheWalkThrowsAnError() {
+        // The state write is in a finally, not only in the catch, so that a Throwable that is not an
+        // Exception cannot strand the user in PENDING. corelib's own task handler also catches only
+        // Exception, so nothing further downstream would settle it.
+        registerGroupResolvingConfig();
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void processSubRoles(final LdapUser user, final String bindDn, final java.util.Set<String> subRoleSet,
+                    final String groupFilter, final java.util.Set<String> roleSet) {
+                throw new StackOverflowError("walk blew the stack");
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+
+        final LdapUser ldapUser = new LdapUser(new Hashtable<>(), "testuser");
+        ldapUser.setPermissionState(FessUser.PermissionState.PENDING);
+
+        try {
+            ldapManager.updateSubRoles(ldapUser, "dc=example,dc=com", java.util.Set.of("CN=group1"), "(member=%s)",
+                    new java.util.HashSet<>(List.of("2group1")), java.util.Set.of(), roles -> {});
+            fail("the Error must still propagate");
+        } catch (final StackOverflowError expected) {
+            // propagating is correct; what matters is that the state was settled on the way out
+        }
+
+        assertEquals(FessUser.PermissionState.FAILED, ldapUser.getPermissionState());
     }
 }
