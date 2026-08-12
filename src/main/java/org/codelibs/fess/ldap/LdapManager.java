@@ -32,9 +32,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.TimeLimitExceededException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
@@ -70,6 +72,19 @@ import jakarta.annotation.PostConstruct;
  */
 public class LdapManager {
     private static final Logger logger = LogManager.getLogger(LdapManager.class);
+
+    /**
+     * The JNDI environment property bounding the connection setup. The JDK LDAP provider applies it to the TCP
+     * connect, to the TLS handshake and to the response of the initial bind, so an unset value leaves a bind
+     * against an unresponsive directory waiting forever.
+     */
+    protected static final String JNDI_CONNECT_TIMEOUT = "com.sun.jndi.ldap.connect.timeout";
+
+    /**
+     * The JNDI environment property bounding how long a bound connection waits for a response. It does not apply
+     * to the initial bind, which is bounded by {@link #JNDI_CONNECT_TIMEOUT}.
+     */
+    protected static final String JNDI_READ_TIMEOUT = "com.sun.jndi.ldap.read.timeout";
 
     /** A thread-local variable to hold the directory context. */
     protected ThreadLocal<DirContextHolder> contextLocal = new ThreadLocal<>();
@@ -119,6 +134,8 @@ public class LdapManager {
         if (providerUrl != null && providerUrl.startsWith("ldaps://")) {
             putEnv(env, Context.SECURITY_PROTOCOL, "ssl");
         }
+        putTimeoutEnv(env, JNDI_CONNECT_TIMEOUT, getConnectTimeout());
+        putTimeoutEnv(env, JNDI_READ_TIMEOUT, getReadTimeout());
         return env;
     }
 
@@ -134,6 +151,47 @@ public class LdapManager {
             throw new LdapConfigurationException(key + " is null.");
         }
         env.put(key, value);
+    }
+
+    /**
+     * Puts a timeout property to the environment. A value of 0 or less leaves the property unset, which restores
+     * the JNDI default of waiting for the JDK/OS default (the connect timeout) or forever (the read timeout).
+     *
+     * @param env The environment.
+     * @param key The JNDI property name.
+     * @param timeout The timeout in milliseconds.
+     */
+    protected void putTimeoutEnv(final Hashtable<String, String> env, final String key, final int timeout) {
+        if (timeout > 0) {
+            env.put(key, Integer.toString(timeout));
+        }
+    }
+
+    /**
+     * Returns the configured connection timeout in milliseconds.
+     *
+     * @return The connection timeout, or 0 or less to leave it unbounded.
+     */
+    protected int getConnectTimeout() {
+        return fessConfig.getLdapConnectTimeoutAsInteger().intValue();
+    }
+
+    /**
+     * Returns the configured read timeout in milliseconds.
+     *
+     * @return The read timeout, or 0 or less to leave it unbounded.
+     */
+    protected int getReadTimeout() {
+        return fessConfig.getLdapReadTimeoutAsInteger().intValue();
+    }
+
+    /**
+     * Returns the configured search time limit in milliseconds.
+     *
+     * @return The search time limit, or 0 or less for no limit.
+     */
+    protected int getSearchTimeLimit() {
+        return fessConfig.getLdapSearchTimeLimitAsInteger().intValue();
     }
 
     /**
@@ -411,8 +469,7 @@ public class LdapManager {
         final Hashtable<String, String> env = createSearchEnv();
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
-            final SearchControls searchControls = new SearchControls();
-            searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            final SearchControls searchControls = createSearchControls(null);
             if (logger.isDebugEnabled()) {
                 logger.debug("Searching for sAMAccountName of group: {} on {}", groupName, bindDn);
             }
@@ -1568,11 +1625,7 @@ public class LdapManager {
     protected void search(final String baseDn, final String filter, final String[] returningAttrs,
             final Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer) {
         try (DirContextHolder holder = getDirContext(envSupplier)) {
-            final SearchControls controls = new SearchControls();
-            controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            if (returningAttrs != null) {
-                controls.setReturningAttributes(returningAttrs);
-            }
+            final SearchControls controls = createSearchControls(returningAttrs);
 
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final long startTime = systemHelper.getCurrentTimeAsLong();
@@ -1583,8 +1636,48 @@ public class LdapManager {
             }
             consumer.accept(list);
         } catch (final NamingException e) {
+            if (isDirectoryUnavailable(e)) {
+                // The caller may run on a request thread and only report this at debug level, so surface the
+                // timeout here where the operation and the bounds that produced it are still known.
+                logger.warn("LDAP directory did not answer the search: baseDn={}, filter={}, readTimeout={}ms, timeLimit={}ms", baseDn,
+                        filter, getReadTimeout(), getSearchTimeLimit(), e);
+            }
             throw new LdapOperationException("Failed to search " + baseDn + " with " + filter, e);
         }
+    }
+
+    /**
+     * Creates the search controls used by every LDAP search, applying the configured search time limit.
+     *
+     * @param returningAttrs The attributes to return from the search, or null for all attributes.
+     * @return The search controls.
+     */
+    protected SearchControls createSearchControls(final String[] returningAttrs) {
+        final SearchControls controls = new SearchControls();
+        controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        if (returningAttrs != null) {
+            controls.setReturningAttributes(returningAttrs);
+        }
+        final int timeLimit = getSearchTimeLimit();
+        if (timeLimit > 0) {
+            // SearchControls already defaults to 0, which is its own contract for "no limit".
+            controls.setTimeLimit(timeLimit);
+        }
+        return controls;
+    }
+
+    /**
+     * Determines whether the given exception means the directory did not answer. The JDK LDAP provider
+     * reports both a connect timeout and a read timeout as a {@link CommunicationException} (the read timeout
+     * carries a "LDAP response read timed out" cause), and the server side time limit as a
+     * {@link TimeLimitExceededException}. A {@link CommunicationException} also covers a connection that failed
+     * outright, which is equally worth reporting to an operator.
+     *
+     * @param e The naming exception.
+     * @return True if the directory did not answer.
+     */
+    protected boolean isDirectoryUnavailable(final NamingException e) {
+        return e instanceof CommunicationException || e instanceof TimeLimitExceededException;
     }
 
     /**
@@ -1675,7 +1768,10 @@ public class LdapManager {
             contextLocal.set(holder);
             return holder;
         } catch (final NamingException e) {
-            throw new LdapOperationException("Failed to create DirContext.", e);
+            // The provider URL is the only part of env that is safe to report; the rest holds credentials.
+            throw new LdapOperationException(
+                    "Failed to create DirContext: url=" + env.get(Context.PROVIDER_URL) + ", connectTimeout=" + getConnectTimeout() + "ms",
+                    e);
         }
     }
 

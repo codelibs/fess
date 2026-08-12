@@ -1855,6 +1855,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LDAP_AUTH_VALIDATION = "ldap.auth.validation";
 
+    /** The key of the configuration. e.g. 10000 */
+    String LDAP_CONNECT_TIMEOUT = "ldap.connect.timeout";
+
+    /** The key of the configuration. e.g. 30000 */
+    String LDAP_READ_TIMEOUT = "ldap.read.timeout";
+
+    /** The key of the configuration. e.g. 60000 */
+    String LDAP_SEARCH_TIME_LIMIT = "ldap.search.time.limit";
+
     /** The key of the configuration. e.g. -1 */
     String LDAP_MAX_USERNAME_LENGTH = "ldap.max.username.length";
 
@@ -9016,6 +9025,57 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapAuthValidation();
 
     /**
+     * Get the value for the key 'ldap.connect.timeout'. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Timeout (milliseconds) to establish an LDAP connection. This also bounds the TLS handshake and the initial bind response. 0 or less leaves it to the JDK/OS default.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapConnectTimeout();
+
+    /**
+     * Get the value for the key 'ldap.connect.timeout' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Timeout (milliseconds) to establish an LDAP connection. This also bounds the TLS handshake and the initial bind response. 0 or less leaves it to the JDK/OS default.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapConnectTimeoutAsInteger();
+
+    /**
+     * Get the value for the key 'ldap.read.timeout'. <br>
+     * The value is, e.g. 30000 <br>
+     * comment: Timeout (milliseconds) to wait for an LDAP response after the connection is bound. 0 or less waits indefinitely.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapReadTimeout();
+
+    /**
+     * Get the value for the key 'ldap.read.timeout' as {@link Integer}. <br>
+     * The value is, e.g. 30000 <br>
+     * comment: Timeout (milliseconds) to wait for an LDAP response after the connection is bound. 0 or less waits indefinitely.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapReadTimeoutAsInteger();
+
+    /**
+     * Get the value for the key 'ldap.search.time.limit'. <br>
+     * The value is, e.g. 60000 <br>
+     * comment: Server side time limit (milliseconds) for an LDAP search. 0 or less means no limit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapSearchTimeLimit();
+
+    /**
+     * Get the value for the key 'ldap.search.time.limit' as {@link Integer}. <br>
+     * The value is, e.g. 60000 <br>
+     * comment: Server side time limit (milliseconds) for an LDAP search. 0 or less means no limit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapSearchTimeLimitAsInteger();
+
+    /**
      * Get the value for the key 'ldap.max.username.length'. <br>
      * The value is, e.g. -1 <br>
      * comment: Maximum username length for LDAP.
@@ -13407,6 +13467,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.LDAP_AUTH_VALIDATION);
         }
 
+        public String getLdapConnectTimeout() {
+            return get(FessConfig.LDAP_CONNECT_TIMEOUT);
+        }
+
+        public Integer getLdapConnectTimeoutAsInteger() {
+            return getAsInteger(FessConfig.LDAP_CONNECT_TIMEOUT);
+        }
+
+        public String getLdapReadTimeout() {
+            return get(FessConfig.LDAP_READ_TIMEOUT);
+        }
+
+        public Integer getLdapReadTimeoutAsInteger() {
+            return getAsInteger(FessConfig.LDAP_READ_TIMEOUT);
+        }
+
+        public String getLdapSearchTimeLimit() {
+            return get(FessConfig.LDAP_SEARCH_TIME_LIMIT);
+        }
+
+        public Integer getLdapSearchTimeLimitAsInteger() {
+            return getAsInteger(FessConfig.LDAP_SEARCH_TIME_LIMIT);
+        }
+
         public String getLdapMaxUsernameLength() {
             return get(FessConfig.LDAP_MAX_USERNAME_LENGTH);
         }
@@ -14540,6 +14624,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES, "groupOfNames");
             defaultMap.put(FessConfig.LDAP_ADMIN_SYNC_PASSWORD, "true");
             defaultMap.put(FessConfig.LDAP_AUTH_VALIDATION, "true");
+            defaultMap.put(FessConfig.LDAP_CONNECT_TIMEOUT, "10000");
+            defaultMap.put(FessConfig.LDAP_READ_TIMEOUT, "30000");
+            defaultMap.put(FessConfig.LDAP_SEARCH_TIME_LIMIT, "60000");
             defaultMap.put(FessConfig.LDAP_MAX_USERNAME_LENGTH, "-1");
             defaultMap.put(FessConfig.LDAP_IGNORE_NETBIOS_NAME, "true");
             defaultMap.put(FessConfig.LDAP_GROUP_NAME_WITH_UNDERSCORES, "false");
