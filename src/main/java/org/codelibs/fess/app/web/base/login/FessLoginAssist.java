@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.base.login;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -181,6 +182,47 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      */
     protected void insertLogin(final Object member) {
         // nothing
+    }
+
+    // -----------------------------------------------------
+    //                                LoginSession SyncCheck
+    //                                ----------------------
+    /**
+     * Determines whether the login session of the given user bean should be sync-checked.
+     *
+     * <p>The sync check asks "can this user still log in?" and answers it with
+     * {@link #doFindLoginUser(String)}, i.e. a lookup of {@link FessUserBean#getUserId()} in the
+     * {@code .fess_user} index. That is the right question for a user who lives in that index, but
+     * it is not answerable there for a user authenticated by an external identity provider: LDAP,
+     * SAML, OpenID Connect, Entra ID and SPNEGO logins never write a user document, so the lookup
+     * finds nothing and the check can only ever fail. The failure branch of
+     * {@code syncCheckLoginSessionIfNeeds} logs the user out and invalidates the session, so an
+     * externally authenticated administrator was signed out of the admin console after the check
+     * interval (300 seconds) and sent to the local password form, which offers no way back to the
+     * identity provider.</p>
+     *
+     * <p>Restricting the check to a {@link User} entity, the only type that {@code .fess_user} can
+     * answer for, therefore removes a guaranteed-failing lookup rather than weakening a check. For
+     * an external user, the identity provider owns the account lifecycle and the session lifetime;
+     * Fess has no local record whose absence could mean anything.</p>
+     *
+     * <p>Local-user semantics are unchanged: deleting a user in the admin UI still ends that
+     * user's session within the check interval. The only behaviour given up is the incidental
+     * ability to end an externally authenticated user's session by creating and then deleting a
+     * local user document that happens to share the external user's name.</p>
+     *
+     * @param userBean the logged-in user bean to be checked (NotNull)
+     * @param checkDt the date-time of the latest sync check, empty if not checked yet (NotNull)
+     * @param currentDt the current date-time (NotNull)
+     * @return true if the sync check should be performed
+     */
+    @Override
+    protected boolean needsLoginSessionSyncCheck(final FessUserBean userBean, final OptionalThing<LocalDateTime> checkDt,
+            final LocalDateTime currentDt) {
+        if (!(userBean.getFessUser() instanceof User)) {
+            return false;
+        }
+        return super.needsLoginSessionSyncCheck(userBean, checkDt, currentDt);
     }
 
     /**
