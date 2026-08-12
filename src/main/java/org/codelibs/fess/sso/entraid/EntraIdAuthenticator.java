@@ -1471,7 +1471,21 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @throws IOException If Microsoft Graph could not be reached or returned an error.
      */
     protected String[] getMemberGroupIds(final EntraIdUser user, final String id) throws IOException {
-        final String url = "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups";
+        return getMemberGroupIds(user, id, "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups");
+    }
+
+    /**
+     * Asks Microsoft Graph, at the specified URL, which groups the specified group is a member of.
+     * The URL is a parameter so that this, like {@link #processDirectMemberOf} and
+     * {@link #processGroup}, can be pointed at a stub rather than at Microsoft Graph.
+     *
+     * @param user The Entra ID user.
+     * @param id The group ID to get parent information for.
+     * @param url The Microsoft Graph URL to post the request to.
+     * @return The parent group IDs, never null.
+     * @throws IOException If Microsoft Graph could not be reached or returned an error.
+     */
+    protected String[] getMemberGroupIds(final EntraIdUser user, final String id, final String url) throws IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("[getParentGroup] Calling API: {}", url);
         }
