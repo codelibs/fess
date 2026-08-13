@@ -395,14 +395,14 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_needsSyncCheck_emptyUserBean_doesNotThrow() {
+    public void test_needsSyncCheck_emptyUserBean_skipsCheck() {
         final FessUserBean bean = FessUserBean.empty(); // wraps a null FessUser
         assertNull(bean.getFessUser());
         assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
     }
 
     @Test
-    public void test_needsSyncCheck_nullBackedUserBean_doesNotThrow() {
+    public void test_needsSyncCheck_nullBackedUserBean_skipsCheck() {
         final FessUserBean bean = new FessUserBean(null);
         assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.empty(), NOW));
     }
@@ -444,6 +444,35 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
         assertTrue(assist.callSyncCheckLoginSession(bean));
         assertEquals(1, bhv.selectCalls.get());
+        assertEquals(0, assist.logoutCalls.get());
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_localUserWithinInterval_keepsSessionWithoutQuery() {
+        // pins that the fixed clock is honoured: with the real clock, FRESH_CHECK_DT would be
+        // stale and the check would issue a query.
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, newLocalUser("alice"));
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        bean.manageLastestSyncCheckTime(FRESH_CHECK_DT);
+
+        assertTrue(assist.callSyncCheckLoginSession(bean));
+        assertEquals(0, bhv.selectCalls.get());
+        assertEquals(0, assist.logoutCalls.get());
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_ldapUserWithLocalDocument_keepsSessionWithoutQuery() {
+        // the behaviour the javadoc says is given up: resolveCredential prefers LDAP, so a user
+        // present in both LDAP and the user index logs in as an LdapUser. Deleting that user in
+        // the admin UI no longer ends the session, because the check is skipped, not answered.
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, newLocalUser("bob")); // document exists
+        final FessUserBean bean = new FessUserBean(new LdapUser(new Hashtable<>(), "bob"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertTrue(assist.callSyncCheckLoginSession(bean));
+        assertEquals(0, bhv.selectCalls.get());
         assertEquals(0, assist.logoutCalls.get());
     }
 
