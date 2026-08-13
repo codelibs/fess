@@ -18,10 +18,24 @@ package org.codelibs.fess.ldap;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
+import javax.naming.CommunicationException;
+import javax.naming.Context;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+
+import org.apache.logging.log4j.Level;
+import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -475,5 +489,274 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("normal", ldapManager.replaceWithUnderscores("normal"));
         // Input "//\\[]:;" has 8 special characters that should be replaced
         assertEquals("________", ldapManager.replaceWithUnderscores("//\\\\[]:;"));
+    }
+
+    // ========================================================================
+    // Tests for Directory Timeouts
+    // ========================================================================
+
+    /**
+     * Pins the shipped defaults. They are read with the raw keys rather than the generated accessors so this
+     * assertion is about what {@code fess_config.properties} actually ships, not about the accessor wiring.
+     */
+    @Test
+    public void test_ldapTimeoutDefaults() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        assertEquals("10000", fessConfig.get("ldap.connect.timeout"));
+        assertEquals("30000", fessConfig.get("ldap.read.timeout"));
+        assertEquals("60000", fessConfig.get("ldap.search.time.limit"));
+    }
+
+    @Test
+    public void test_createEnvironment_appliesTimeouts() {
+        ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, 60000));
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        final Hashtable<String, String> env =
+                ldapManager.createEnvironment("com.sun.jndi.ldap.LdapCtxFactory", "simple", "ldap://localhost:389", "cn=admin", "secret");
+
+        assertEquals("10000", env.get("com.sun.jndi.ldap.connect.timeout"));
+        assertEquals("30000", env.get("com.sun.jndi.ldap.read.timeout"));
+        // The pre-existing entries must survive.
+        assertEquals("ldap://localhost:389", env.get(Context.PROVIDER_URL));
+        assertEquals("cn=admin", env.get(Context.SECURITY_PRINCIPAL));
+        assertEquals("secret", env.get(Context.SECURITY_CREDENTIALS));
+    }
+
+    @Test
+    public void test_createEnvironment_omitsNonPositiveTimeouts() {
+        ComponentUtil.setFessConfig(timeoutConfig(0, 1500, 60000));
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        Hashtable<String, String> env =
+                ldapManager.createEnvironment("com.sun.jndi.ldap.LdapCtxFactory", "simple", "ldap://localhost:389", "cn=admin", "secret");
+
+        // 0 means "leave it to the JDK/OS default", so the property must not be present at all.
+        assertNull(env.get("com.sun.jndi.ldap.connect.timeout"));
+        assertEquals("1500", env.get("com.sun.jndi.ldap.read.timeout"));
+
+        ComponentUtil.setFessConfig(timeoutConfig(1500, -1, 60000));
+        ldapManager.init();
+        env = ldapManager.createEnvironment("com.sun.jndi.ldap.LdapCtxFactory", "simple", "ldap://localhost:389", "cn=admin", "secret");
+
+        assertEquals("1500", env.get("com.sun.jndi.ldap.connect.timeout"));
+        assertNull(env.get("com.sun.jndi.ldap.read.timeout"));
+    }
+
+    @Test
+    public void test_search_appliesSearchTimeLimit() throws Exception {
+        ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, 45000));
+        final CapturingDirContext context = new CapturingDirContext();
+        final CapturingLdapManager ldapManager = new CapturingLdapManager(context);
+        ldapManager.init();
+
+        final String[] returningAttrs = { "memberOf" };
+        ldapManager.search("dc=example,dc=com", "(cn=test)", returningAttrs, Hashtable::new, result -> {});
+
+        assertEquals("dc=example,dc=com", context.capturedName);
+        assertEquals("(cn=test)", context.capturedFilter);
+        assertEquals(45000, context.capturedControls.getTimeLimit());
+        assertEquals(SearchControls.SUBTREE_SCOPE, context.capturedControls.getSearchScope());
+        assertEquals(1, context.capturedControls.getReturningAttributes().length);
+        assertEquals("memberOf", context.capturedControls.getReturningAttributes()[0]);
+    }
+
+    @Test
+    public void test_search_nonPositiveTimeLimitMeansNoLimit() throws Exception {
+        final CapturingDirContext context = new CapturingDirContext();
+        final CapturingLdapManager ldapManager = new CapturingLdapManager(context);
+
+        // 0 is SearchControls' own contract for "wait indefinitely", and a negative value must not be
+        // forwarded to SearchControls either.
+        for (final int timeLimit : new int[] { 0, -1 }) {
+            ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, timeLimit));
+            ldapManager.init();
+            ldapManager.search("dc=example,dc=com", "(cn=test)", null, Hashtable::new, result -> {});
+            assertEquals(0, context.capturedControls.getTimeLimit());
+        }
+
+        ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, 5000));
+        ldapManager.init();
+        ldapManager.search("dc=example,dc=com", "(cn=test)", null, Hashtable::new, result -> {});
+        assertEquals(5000, context.capturedControls.getTimeLimit());
+    }
+
+    @Test
+    public void test_getSAMAccountGroupName_appliesSearchTimeLimit() throws Exception {
+        ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, 45000));
+        final CapturingDirContext context = new CapturingDirContext();
+        // getSAMAccountGroupName runs context.search directly instead of going through search().
+        final CapturingLdapManager ldapManager = new CapturingLdapManager(context) {
+            @Override
+            protected Hashtable<String, String> createSearchEnv() {
+                return new Hashtable<>();
+            }
+        };
+        ldapManager.init();
+
+        ldapManager.getSAMAccountGroupName("dc=example,dc=com", "testGroup");
+
+        assertEquals("dc=example,dc=com", context.capturedName);
+        assertEquals("(name=testGroup)", context.capturedFilter);
+        assertEquals(45000, context.capturedControls.getTimeLimit());
+        assertEquals(SearchControls.SUBTREE_SCOPE, context.capturedControls.getSearchScope());
+    }
+
+    @Test
+    public void test_search_warnsOnlyWhenTheDirectoryDoesNotAnswer() throws Exception {
+        ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, 45000));
+        final CapturingDirContext context = new CapturingDirContext();
+        final CapturingLdapManager ldapManager = new CapturingLdapManager(context);
+        ldapManager.init();
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LdapManager.class);
+        try {
+            // A read timeout reaches JNDI callers as a CommunicationException.
+            context.searchException = new CommunicationException("LDAP response read timed out, timeout used: 30000 ms.");
+            try {
+                ldapManager.search("dc=example,dc=com", "(cn=test)", null, Hashtable::new, result -> {});
+                fail("LdapOperationException should be thrown.");
+            } catch (final LdapOperationException e) {
+                assertTrue(e.getMessage().contains("dc=example,dc=com"));
+            }
+
+            final List<String> warnings = appender.warnings();
+            assertEquals(1, warnings.size());
+            assertTrue(warnings.get(0).contains("dc=example,dc=com"));
+            assertTrue(warnings.get(0).contains("(cn=test)"));
+            assertTrue(warnings.get(0).contains("30000"));
+            assertTrue(warnings.get(0).contains("45000"));
+
+            // An ordinary directory error is not a timeout and must not be promoted to WARN.
+            context.searchException = new NameNotFoundException("dc=example,dc=com");
+            try {
+                ldapManager.search("dc=example,dc=com", "(cn=test)", null, Hashtable::new, result -> {});
+                fail("LdapOperationException should be thrown.");
+            } catch (final LdapOperationException e) {
+                // expected
+            }
+            assertEquals(1, appender.warnings().size());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getDirContext_failureNamesTheTarget() {
+        ComponentUtil.setFessConfig(timeoutConfig(10000, 30000, 45000));
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        final Hashtable<String, String> env = new Hashtable<>();
+        // An unresolvable factory fails inside InitialDirContext without touching the network.
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "org.codelibs.fess.ldap.NoSuchLdapCtxFactory");
+        env.put(Context.PROVIDER_URL, "ldap://ldap.example.com:389");
+
+        try {
+            ldapManager.getDirContext(() -> env);
+            fail("LdapOperationException should be thrown.");
+        } catch (final LdapOperationException e) {
+            // validate() reports this message at WARN, so it has to say which directory and which bound.
+            assertTrue(e.getMessage().contains("ldap://ldap.example.com:389"), e.getMessage());
+            assertTrue(e.getMessage().contains("connectTimeout=10000ms"), e.getMessage());
+        }
+    }
+
+    private static FessConfig timeoutConfig(final int connectTimeout, final int readTimeout, final int searchTimeLimit) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getLdapConnectTimeoutAsInteger() {
+                return Integer.valueOf(connectTimeout);
+            }
+
+            @Override
+            public Integer getLdapReadTimeoutAsInteger() {
+                return Integer.valueOf(readTimeout);
+            }
+
+            @Override
+            public Integer getLdapSearchTimeLimitAsInteger() {
+                return Integer.valueOf(searchTimeLimit);
+            }
+        };
+    }
+
+    /** An {@link LdapManager} whose directory context is a {@link CapturingDirContext}. */
+    private static class CapturingLdapManager extends LdapManager {
+        private final CapturingDirContext context;
+
+        CapturingLdapManager(final CapturingDirContext context) {
+            this.context = context;
+        }
+
+        @Override
+        protected DirContextHolder getDirContext(final Supplier<Hashtable<String, String>> envSupplier) {
+            return new DirContextHolder(context);
+        }
+    }
+
+    /** A directory context that records the {@link SearchControls} it is handed. */
+    private static class CapturingDirContext extends InitialDirContext {
+        String capturedName;
+
+        String capturedFilter;
+
+        SearchControls capturedControls;
+
+        NamingException searchException;
+
+        CapturingDirContext() throws NamingException {
+            super(true); // lazy: do not resolve an initial context
+        }
+
+        @Override
+        public NamingEnumeration<SearchResult> search(final String name, final String filter, final SearchControls cons)
+                throws NamingException {
+            capturedName = name;
+            capturedFilter = filter;
+            capturedControls = cons;
+            if (searchException != null) {
+                throw searchException;
+            }
+            return new EmptySearchResults();
+        }
+
+        @Override
+        public void close() {
+            // nothing to release
+        }
+    }
+
+    /** An empty result enumeration, enough for {@link java.util.Collections#list}. */
+    private static class EmptySearchResults implements NamingEnumeration<SearchResult> {
+        @Override
+        public boolean hasMoreElements() {
+            return false;
+        }
+
+        @Override
+        public SearchResult nextElement() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public boolean hasMore() {
+            return false;
+        }
+
+        @Override
+        public SearchResult next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void close() {
+            // nothing to release
+        }
     }
 }
