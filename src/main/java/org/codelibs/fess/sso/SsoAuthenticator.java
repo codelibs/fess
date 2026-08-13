@@ -28,6 +28,15 @@ import org.lastaflute.web.response.ActionResponse;
  * OAuth, SPNEGO, or other authentication mechanisms. Each authenticator is responsible
  * for obtaining login credentials, resolving user information, and managing SSO
  * lifecycle operations like logout and metadata exchange.
+ *
+ * An implementation has to satisfy two separate conventions to be reachable:
+ * <ul>
+ * <li>It must be registered in DI under the name {@code <sso.type> + "Authenticator"}, because
+ * {@link SsoManager#getAuthenticator()} resolves the active provider by that name.</li>
+ * <li>It must call {@link SsoManager#register(SsoAuthenticator)} from its initialization method, or
+ * {@code FessLoginAssist} will never invoke its {@link #resolveCredential(LoginCredentialResolver)}
+ * and a logged-in user will not be resolved.</li>
+ * </ul>
  */
 public interface SsoAuthenticator {
 
@@ -45,16 +54,29 @@ public interface SsoAuthenticator {
 
     /**
      * Gets the action response for the specified SSO response type.
+     *
+     * Only a protocol with its own metadata or single-logout endpoint implements this; the default
+     * reports that this provider does not participate in the operation, which {@code SsoAction}
+     * answers with a 400.
+     *
      * @param responseType The type of SSO response required.
-     * @return The action response.
+     * @return The action response, or null if this provider has no response for the type.
      */
-    ActionResponse getResponse(SsoResponseType responseType);
+    default ActionResponse getResponse(final SsoResponseType responseType) {
+        return null;
+    }
 
     /**
      * Performs logout for the specified user.
+     *
+     * The default reports that this provider has no single-logout endpoint, leaving the caller to
+     * end the local session only.
+     *
      * @param user The user to logout.
-     * @return The logout URL or null if not applicable.
+     * @return The logout URL, or null if not applicable.
      */
-    String logout(FessUserBean user);
+    default String logout(final FessUserBean user) {
+        return null;
+    }
 
 }

@@ -453,7 +453,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
         }
         if (!warnings.equals(loggedSecurityWarnings.getAndSet(warnings)) && !warnings.isEmpty()) {
             logger.warn("Insecure SAML settings: {}. See the SAML SSO documentation for the recommended values.",
-                    warnings.stream().collect(Collectors.joining(", ")));
+                    String.join(", ", warnings));
         }
     }
 
@@ -616,7 +616,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
             logUnmatchedSamlResponse(requestIdMap.size());
             return null;
         }
-        final String errors = lastAuth.getErrors().stream().collect(Collectors.joining(", "));
+        final String errors = String.join(", ", lastAuth.getErrors());
         if (lastAuth.isDebugActive() && StringUtil.isNotBlank(lastAuth.getLastErrorReason())) {
             logger.warn("Authentication Failure: {} - Reason: {}", errors, lastAuth.getLastErrorReason());
         } else {
@@ -936,21 +936,22 @@ public class SamlAuthenticator implements SsoAuthenticator {
      *         against an elapsed time that has already been divided by 1000.
      */
     protected long getRequestIdTtl() {
+        final long defaultTtl = Long.parseLong(DEFAULT_REQUEST_ID_TTL);
         final String value = ComponentUtil.getFessConfig().getSystemProperty(SAML_REQUEST_ID_TTL);
         if (StringUtil.isBlank(value)) {
-            return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
+            return defaultTtl;
         }
         final long requestIdTtl;
         try {
             requestIdTtl = Long.parseLong(value.trim());
         } catch (final NumberFormatException e) {
             logger.warn("Invalid {}: {}. Using {} seconds.", SAML_REQUEST_ID_TTL, value, DEFAULT_REQUEST_ID_TTL);
-            return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
+            return defaultTtl;
         }
         if (requestIdTtl <= 0) {
             logger.warn("{} must be a positive number of seconds: {}. Using {} seconds.", SAML_REQUEST_ID_TTL, value,
                     DEFAULT_REQUEST_ID_TTL);
-            return Long.parseLong(DEFAULT_REQUEST_ID_TTL);
+            return defaultTtl;
         }
         return requestIdTtl;
     }
@@ -996,13 +997,12 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
     @Override
     public String logout(final FessUserBean user) {
-        if (user.getFessUser() instanceof SamlUser) {
+        if (user.getFessUser() instanceof final SamlUser samlUser) {
             return LaRequestUtil.getOptionalRequest().map(request -> {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Logging out with SAML Authenticator");
                 }
                 final HttpServletResponse response = LaResponseUtil.getResponse();
-                final SamlUser samlUser = (SamlUser) user.getFessUser();
                 try {
                     final Saml2Settings settings = getSettings();
                     if (settings.getIdpSingleLogoutServiceUrl() == null) {
@@ -1034,6 +1034,31 @@ public class SamlAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Builds the exception used to report a failed SSO request to the user.
+     *
+     * @param action The action being performed, used as the log message.
+     * @param msg The reason, shown to the user.
+     * @param cause The underlying cause. An {@code SsoStateException} marks the failure as caused
+     *        by the client, which {@code SsoAction} logs without a stack trace.
+     * @return The exception to throw.
+     */
+    protected SsoMessageException processFailure(final String action, final String msg, final Exception cause) {
+        return new SsoMessageException(messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
+                action, cause);
+    }
+
+    /**
+     * Builds the exception used to report a failed SSO request that has no underlying exception.
+     *
+     * @param action The action being performed, used as the log message.
+     * @param msg The reason, shown to the user.
+     * @return The exception to throw.
+     */
+    protected SsoMessageException processFailure(final String action, final String msg) {
+        return processFailure(action, msg, new SsoProcessException(msg));
+    }
+
+    /**
      * Gets the metadata response.
      *
      * <p>The SP metadata is what the IdP is registered from, so it has to be obtainable before
@@ -1055,18 +1080,14 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 // caller
                 final List<String> settingsErrors = settings.checkSPSettings();
                 if (!settingsErrors.isEmpty()) {
-                    final String msg = settingsErrors.stream().collect(Collectors.joining(", "));
-                    throw new SsoMessageException(
-                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to process metadata.", new SsoProcessException(msg));
+                    final String msg = String.join(", ", settingsErrors);
+                    throw processFailure("Failed to process metadata.", msg);
                 }
                 final String metadata = settings.getSPMetadata();
                 final List<String> errors = Saml2Settings.validateMetadata(metadata);
                 if (!errors.isEmpty()) {
-                    final String msg = errors.stream().collect(Collectors.joining(", "));
-                    throw new SsoMessageException(
-                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to process metadata.", new SsoProcessException(msg));
+                    final String msg = String.join(", ", errors);
+                    throw processFailure("Failed to process metadata.", msg);
                 }
                 return new StreamResponse("metadata.xml").contentType("application/samlmetadata+xml").stream(out -> {
                     try (final Writer writer = new OutputStreamWriter(out.stream(), Constants.UTF_8_CHARSET)) {
@@ -1076,14 +1097,9 @@ public class SamlAuthenticator implements SsoAuthenticator {
             } catch (final SsoMessageException e) {
                 throw e;
             } catch (final Exception e) {
-                throw new SsoMessageException(
-                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, e.getMessage()),
-                        "Failed to process metadata.", e);
+                throw processFailure("Failed to process metadata.", e.getMessage(), e);
             }
-        })
-                .orElseThrow(() -> new SsoMessageException(
-                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
-                        "Failed to process metadata.", new SsoProcessException("Invalid state.")));
+        }).orElseThrow(() -> processFailure("Failed to process metadata.", "Invalid state."));
     }
 
     /**
@@ -1120,26 +1136,20 @@ public class SamlAuthenticator implements SsoAuthenticator {
                     // deployment that leaves single logout unconfigured would answer the very
                     // same anonymous visit with a stack trace per request.
                     final String msg = "This endpoint expects a SAML logout message from the IdP.";
-                    throw new SsoMessageException(
-                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to log out.", new SsoStateException(msg));
+                    throw processFailure("Failed to log out.", msg, new SsoStateException(msg));
                 }
                 final Saml2Settings settings = getSettings();
                 if (settings.getIdpSingleLogoutServiceResponseUrl() == null) {
                     final String msg = "IdP single logout service URL is not configured.";
-                    throw new SsoMessageException(
-                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to log out.", new SsoProcessException(msg));
+                    throw processFailure("Failed to log out.", msg);
                 }
                 final Auth auth = new Auth(settings, request, response);
                 // stay=true keeps java-saml from committing the servlet response itself
                 final String redirectUrl = auth.processSLO(false, null, true);
                 final List<String> errors = auth.getErrors();
                 if (!errors.isEmpty()) {
-                    final String msg = errors.stream().collect(Collectors.joining(", "));
-                    throw new SsoMessageException(
-                            messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, msg),
-                            "Failed to log out.", new SsoProcessException(msg));
+                    final String msg = String.join(", ", errors);
+                    throw processFailure("Failed to log out.", msg);
                 }
                 if (StringUtil.isNotBlank(redirectUrl)) {
                     // an IdP-initiated LogoutRequest: send our LogoutResponse back to the IdP
@@ -1149,13 +1159,8 @@ public class SamlAuthenticator implements SsoAuthenticator {
             } catch (final SsoMessageException e) {
                 throw e;
             } catch (final Exception e) {
-                throw new SsoMessageException(
-                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, e.getMessage()),
-                        "Failed to log out.", e);
+                throw processFailure("Failed to log out.", e.getMessage(), e);
             }
-        })
-                .orElseThrow(() -> new SsoMessageException(
-                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
-                        "Failed to log out.", new SsoProcessException("Invalid state.")));
+        }).orElseThrow(() -> processFailure("Failed to log out.", "Invalid state."));
     }
 }

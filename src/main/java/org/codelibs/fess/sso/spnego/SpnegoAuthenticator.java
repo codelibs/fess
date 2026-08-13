@@ -33,18 +33,14 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResol
 import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoStateException;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
-import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoFilterConfig;
-import org.codelibs.spnego.SpnegoHttpFilter;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.codelibs.spnego.SpnegoHttpServletResponse;
 import org.codelibs.spnego.SpnegoPrincipal;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -513,7 +509,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public String getInitParameter(final String name) {
-            if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
+            if (Constants.LOGGER_LEVEL.equals(name)) {
                 final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
                 if (StringUtil.isNotBlank(logLevel)) {
                     if (isSupportedLoggerLevel(logLevel)) {
@@ -534,48 +530,48 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 // the quietest setting it actually understands.
                 return "7";
             }
-            if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
+            if (Constants.LOGIN_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
             }
-            if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
+            if (Constants.KRB5_CONF.equals(name)) {
                 return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));
             }
-            if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
+            if (Constants.CLIENT_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");
             }
-            if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
+            if (Constants.SERVER_MODULE.equals(name)) {
                 return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");
             }
-            if (SpnegoHttpFilter.Constants.PREAUTH_USERNAME.equals(name)) {
+            if (Constants.PREAUTH_USERNAME.equals(name)) {
                 // Empty by default so that keytab-based server login is used when the server login
                 // module is configured for it (the library only uses a keytab when both preauth
                 // username and password are empty).
                 return getProperty(SPNEGO_PREAUTH_USERNAME, StringUtil.EMPTY);
             }
-            if (SpnegoHttpFilter.Constants.PREAUTH_PASSWORD.equals(name)) {
+            if (Constants.PREAUTH_PASSWORD.equals(name)) {
                 return getProperty(SPNEGO_PREAUTH_PASSWORD, StringUtil.EMPTY);
             }
-            if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
+            if (Constants.ALLOW_BASIC.equals(name)) {
                 // SECURITY NOTE: Basic authentication is enabled by default for compatibility.
                 // For production, consider setting spnego.allow.basic to false.
                 return getProperty(SPNEGO_ALLOW_BASIC, "true");
             }
-            if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
+            if (Constants.ALLOW_UNSEC_BASIC.equals(name)) {
                 // SECURITY: unsecure basic authentication is disabled by default so that basic
                 // credentials are never offered over plain HTTP. When false, basic auth is only
                 // offered over HTTPS. Enable only if you fully understand the risk.
                 return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "false");
             }
-            if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
+            if (Constants.PROMPT_NTLM.equals(name)) {
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");
             }
-            if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
+            if (Constants.ALLOW_LOCALHOST.equals(name)) {
                 // SECURITY: localhost bypass is disabled by default. When enabled, the spnego library
                 // authenticates same-host requests as the server OS user without Kerberos verification,
                 // which is unsafe behind a same-host reverse proxy. Opt in explicitly if required.
                 return getProperty(SPNEGO_ALLOW_LOCALHOST, "false");
             }
-            if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
+            if (Constants.ALLOW_DELEGATION.equals(name)) {
                 return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
             }
             // NOTE: spnego.exclude.dirs is deliberately not mapped. Only SpnegoHttpFilter consumes it,
@@ -709,34 +705,6 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             }
             return OptionalEntity.empty();
         });
-    }
-
-    /**
-     * Gets the action response for the specified SSO response type.
-     *
-     * SPNEGO authentication typically doesn't require special response handling
-     * for metadata or logout operations, so this method returns null.
-     *
-     * @param responseType The type of SSO response requested
-     * @return Always returns null for SPNEGO authentication
-     */
-    @Override
-    public ActionResponse getResponse(final SsoResponseType responseType) {
-        return null;
-    }
-
-    /**
-     * Performs logout for the specified user.
-     *
-     * SPNEGO authentication relies on the underlying Kerberos infrastructure
-     * for session management, so no specific logout URL is provided.
-     *
-     * @param user The user to logout
-     * @return Always returns null as SPNEGO doesn't provide a logout URL
-     */
-    @Override
-    public String logout(final FessUserBean user) {
-        return null;
     }
 
 }

@@ -31,13 +31,10 @@ import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.crawler.Constants;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
-import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -246,23 +243,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      */
     protected void parseJwtClaim(final String jwtClaim, final Map<String, Object> attributes) throws IOException {
         try (final JsonParser jsonParser = jsonFactory.createJsonParser(jwtClaim)) {
-            while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-                final String name = jsonParser.getCurrentName();
-                if (name != null) {
-                    jsonParser.nextToken();
-
-                    if (jsonParser.getCurrentToken() == JsonToken.START_ARRAY) {
-                        // Handle array type
-                        attributes.put(name, parseArray(jsonParser));
-                    } else if (jsonParser.getCurrentToken() == JsonToken.START_OBJECT) {
-                        // Handle nested object type
-                        attributes.put(name, parseObject(jsonParser));
-                    } else {
-                        // Handle primitive types (string, number, boolean, etc.)
-                        attributes.put(name, parsePrimitive(jsonParser));
-                    }
-                }
-            }
+            attributes.putAll(parseObject(jsonParser));
         }
     }
 
@@ -374,7 +355,8 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      * @return the redirect URL
      */
     protected String getOicRedirectUrl() {
-        return ComponentUtil.getSystemProperties().getProperty(OIC_REDIRECT_URL, buildDefaultRedirectUrl());
+        final String redirectUrl = ComponentUtil.getSystemProperties().getProperty(OIC_REDIRECT_URL);
+        return redirectUrl != null ? redirectUrl : buildDefaultRedirectUrl();
     }
 
     /**
@@ -428,13 +410,4 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         resolver.resolve(OpenIdConnectCredential.class, credential -> OptionalEntity.of(credential.getUser()));
     }
 
-    @Override
-    public ActionResponse getResponse(final SsoResponseType responseType) {
-        return null;
-    }
-
-    @Override
-    public String logout(final FessUserBean user) {
-        return null;
-    }
 }
