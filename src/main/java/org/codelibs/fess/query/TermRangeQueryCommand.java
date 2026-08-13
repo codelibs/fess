@@ -42,7 +42,6 @@ public class TermRangeQueryCommand extends QueryCommand {
      * Default constructor for TermRangeQueryCommand.
      */
     public TermRangeQueryCommand() {
-        super();
     }
 
     @Override

@@ -48,7 +48,6 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictKuromojiAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictKuromojiAction.class);

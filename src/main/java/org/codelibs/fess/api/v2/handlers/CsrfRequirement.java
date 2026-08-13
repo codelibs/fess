@@ -70,23 +70,21 @@ public class CsrfRequirement {
             return false;
         }
         final String m = method.toUpperCase(Locale.ROOT);
-        if ("GET".equals(m) || "HEAD".equals(m) || "OPTIONS".equals(m)) {
+        if ("GET".equals(m) || "HEAD".equals(m) || "OPTIONS".equals(m) || (subPath == null)) {
             return false;
         }
-        if (subPath == null) {
+        switch (subPath) {
+        case "/auth/login":
             return false;
-        }
-        if ("/auth/login".equals(subPath)) {
-            return false;
-        }
-        if ("/auth/logout".equals(subPath)) {
+        case "/auth/logout":
             return true;
-        }
-        if ("/auth/password".equals(subPath)) {
+        case "/auth/password":
             return true;
-        }
-        if ("/click".equals(subPath)) {
+        case "/click":
             return true;
+        case null:
+        default:
+            break;
         }
         if (subPath.startsWith("/documents/") && subPath.endsWith("/favorite")) {
             return true;

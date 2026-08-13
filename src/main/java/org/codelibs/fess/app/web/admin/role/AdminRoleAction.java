@@ -47,7 +47,6 @@ public class AdminRoleAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminRoleAction() {
-        super();
     }
 
     /** Role name for admin role operations */

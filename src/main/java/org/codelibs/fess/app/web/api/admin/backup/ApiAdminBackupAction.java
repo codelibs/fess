@@ -57,7 +57,6 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminBackupAction() {
-        super();
     }
 
     /**
@@ -122,17 +121,18 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                 });
             }
             final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
-            if ("search_log".equals(name)) {
+            switch (name) {
+            case "search_log":
                 return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
-            }
-            if ("user_info".equals(name)) {
+            case "user_info":
                 return writeNdjsonResponse(id, getUserInfoNdjsonWriteCall());
-            }
-            if ("click_log".equals(name)) {
+            case "click_log":
                 return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
-            }
-            if ("favorite_log".equals(name)) {
+            case "favorite_log":
                 return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
+            case null:
+            default:
+                break;
             }
         }
 

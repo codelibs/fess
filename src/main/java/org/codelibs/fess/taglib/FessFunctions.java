@@ -130,7 +130,7 @@ public class FessFunctions {
     public static String html(final boolean isOpen) {
         if (isOpen) {
             return "<html lang=\"" + LaRequestUtil.getOptionalRequest().map(req -> {
-                if (req.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof Locale locale) {
+                if (req.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof final Locale locale) {
                     return locale;
                 }
                 return Locale.ENGLISH;

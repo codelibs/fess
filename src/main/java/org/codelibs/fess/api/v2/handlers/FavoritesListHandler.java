@@ -189,7 +189,7 @@ public class FavoritesListHandler {
     private void writeEmpty(final HttpServletResponse res) throws IOException {
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("record_count", 0);
-        payload.put("data", new ArrayList<Map<String, Object>>());
+        payload.put("data", new ArrayList<>());
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 }

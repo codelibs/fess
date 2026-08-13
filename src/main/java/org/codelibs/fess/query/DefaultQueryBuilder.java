@@ -171,7 +171,7 @@ public class DefaultQueryBuilder implements QueryBuilder {
      * @return the query builder
      */
     @Override
-    public QueryBuilder filter(QueryBuilder filter) {
+    public QueryBuilder filter(final QueryBuilder filter) {
         return queryBuilder.filter(filter);
     }
 

@@ -39,7 +39,6 @@ public class FessFileTransformer extends AbstractFessFileTransformer {
      * Default constructor.
      */
     public FessFileTransformer() {
-        super();
     }
 
     /** Logger instance for this class */

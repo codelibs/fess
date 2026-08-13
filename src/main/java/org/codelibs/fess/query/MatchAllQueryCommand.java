@@ -32,7 +32,6 @@ public class MatchAllQueryCommand extends QueryCommand {
      * Default constructor.
      */
     public MatchAllQueryCommand() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(MatchAllQueryCommand.class);

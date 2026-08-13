@@ -41,7 +41,6 @@ public class PathMappingService extends FessAppService {
      * Default constructor.
      */
     public PathMappingService() {
-        super();
     }
 
     /** Path mapping behavior. */

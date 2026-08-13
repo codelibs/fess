@@ -30,6 +30,5 @@ public class DeleteBody extends DeleteForm {
      * extending the standard plugin DeleteForm with JSON request body functionality.
      */
     public DeleteBody() {
-        super();
     }
 }

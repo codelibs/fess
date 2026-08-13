@@ -196,7 +196,7 @@ public class PasswordChangeHandler {
             return;
         }
         try {
-            final int maxPwLen = ComponentUtil.getFessConfig().getPasswordMaxLengthAsInteger();
+            final int maxPwLen = ComponentUtil.getFessConfig().getPasswordMaxLengthOrDefault();
             if (currentPw.length() > maxPwLen) {
                 throw new InvalidRequestParameterException("current_password exceeds the maximum length of " + maxPwLen);
             }

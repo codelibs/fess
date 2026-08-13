@@ -50,7 +50,6 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminJoblogAction() {
-        super();
     }
 
     // ===================================================================================

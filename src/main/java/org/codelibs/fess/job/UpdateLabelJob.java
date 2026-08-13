@@ -48,7 +48,6 @@ public class UpdateLabelJob {
      * Default constructor for UpdateLabelJob.
      */
     public UpdateLabelJob() {
-        super();
     }
 
     /**

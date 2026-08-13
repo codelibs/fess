@@ -1216,12 +1216,12 @@ public class SystemHelper {
         }
 
         try {
-            final int maxLength = fessConfig.getPasswordMaxLengthAsInteger();
+            final int maxLength = fessConfig.getPasswordMaxLengthOrDefault();
             if (maxLength > 0 && password.length() > maxLength) {
                 return "errors.password_length";
             }
         } catch (final Exception e) {
-            // getPasswordMaxLengthAsInteger is unavailable in slim test harnesses — skip the check.
+            // getPasswordMaxLengthOrDefault is unavailable in slim test harnesses — skip the check.
         }
 
         if (fessConfig.isPasswordRequireUppercase() && !containsUppercase(password)) {

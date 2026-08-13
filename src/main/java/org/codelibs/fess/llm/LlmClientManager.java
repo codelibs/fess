@@ -221,10 +221,7 @@ public class LlmClientManager {
      */
     protected LlmClient getAvailableClient() {
         final String llmType = getLlmType();
-        if (Constants.NONE.equals(llmType)) {
-            throw new LlmException("LLM client is not available");
-        }
-        if (!isRagChatEnabled()) {
+        if (Constants.NONE.equals(llmType) || !isRagChatEnabled()) {
             throw new LlmException("LLM client is not available");
         }
         final LlmClient client = getClient();

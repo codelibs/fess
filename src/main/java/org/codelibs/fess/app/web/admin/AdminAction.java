@@ -67,7 +67,6 @@ public class AdminAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminAction() {
-        super();
     }
 
     @Override

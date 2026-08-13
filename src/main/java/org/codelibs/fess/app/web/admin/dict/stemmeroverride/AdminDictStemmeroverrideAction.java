@@ -56,7 +56,6 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictStemmeroverrideAction() {
-        super();
     }
 
     /**

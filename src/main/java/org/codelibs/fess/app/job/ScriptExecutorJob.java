@@ -39,7 +39,6 @@ public class ScriptExecutorJob implements LaJob {
      * Constructor.
      */
     public ScriptExecutorJob() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ScriptExecutorJob.class);

@@ -97,8 +97,8 @@ public class CacheHandler {
         // the login-required check below) — in production FessConfig is always present.
         try {
             final org.codelibs.fess.mylasta.direction.FessConfig cfg = ComponentUtil.getFessConfig();
-            V2ParamValidator.checkArray(req.getParameterValues("hq"), cfg.getApiV2ParamMaxArraySizeAsInteger(),
-                    cfg.getApiV2ParamMaxLengthAsInteger(), "hq");
+            V2ParamValidator.checkArray(req.getParameterValues("hq"), cfg.getApiParamMaxArraySizeOrDefault(),
+                    cfg.getApiParamMaxLengthOrDefault(), "hq");
         } catch (final InvalidRequestParameterException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;

@@ -720,7 +720,7 @@ public class FessPropTest extends UnitFessTestCase {
         final FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public String getSystemProperty(final String key, final String defaultValue) {
-                if ("api.v2.chat.rate.limit.per.user.per.minute".equals(key)) {
+                if ("api.chat.rate.limit.per.user.per.minute".equals(key)) {
                     return "0";
                 }
                 return defaultValue;
@@ -735,7 +735,7 @@ public class FessPropTest extends UnitFessTestCase {
         final FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public String getSystemProperty(final String key, final String defaultValue) {
-                if ("api.v2.chat.rate.limit.per.user.per.minute".equals(key)) {
+                if ("api.chat.rate.limit.per.user.per.minute".equals(key)) {
                     return "bad-value";
                 }
                 return defaultValue;
@@ -747,12 +747,42 @@ public class FessPropTest extends UnitFessTestCase {
     @Test
     public void test_apiV2InputBoundGetters_defaults() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        assertEquals(1000, fessConfig.getApiV2ParamMaxLengthAsInteger());
-        assertEquals(100, fessConfig.getApiV2ParamMaxArraySizeAsInteger());
-        assertEquals(100, fessConfig.getPasswordMaxLengthAsInteger());
-        assertEquals(1000, fessConfig.getQueryFacetFieldsSizeMaxAsInteger());
-        assertEquals(2147483647L, fessConfig.getQueryFacetFieldsMinDocCountMaxAsLong());
-        assertEquals(9999999999999L, fessConfig.getApiV2ClickMaxRtAsLong());
+        assertEquals(1000, fessConfig.getApiParamMaxLengthOrDefault());
+        assertEquals(100, fessConfig.getApiParamMaxArraySizeOrDefault());
+        assertEquals(100, fessConfig.getPasswordMaxLengthOrDefault());
+        assertEquals(1000, fessConfig.getQueryFacetFieldsSizeMaxOrDefault());
+        assertEquals(2147483647L, fessConfig.getQueryFacetFieldsMinDocCountMaxOrDefault());
+        assertEquals(9999999999999L, fessConfig.getApiClickMaxTimestampOrDefault());
+    }
+
+    /**
+     * A blank value in fess_config.properties reads back as null (getAsInteger) or as an
+     * unparsable string (get), and every caller unboxes the result into a primitive. These
+     * getters therefore must fall back to their documented default rather than hand a null
+     * to the caller. See the naming note on the FessProp methods: an ...AsInteger/...AsLong
+     * name here would be overridden by the generated FessConfig and drop the fallback.
+     */
+    @Test
+    public void test_apiV2InputBoundGetters_fallBackOnBlankValue() {
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getAsInteger(final String propertyKey) {
+                return null; // DfTypeUtil.toInteger("") is null
+            }
+
+            @Override
+            public String get(final String propertyKey) {
+                return ""; // blank value, as written by a hand-edited properties file
+            }
+        };
+        assertEquals(1000, fessConfig.getApiParamMaxLengthOrDefault());
+        assertEquals(100, fessConfig.getApiParamMaxArraySizeOrDefault());
+        assertEquals(100, fessConfig.getPasswordMaxLengthOrDefault());
+        assertEquals(1000, fessConfig.getQueryFacetFieldsSizeMaxOrDefault());
+        assertEquals(2147483647L, fessConfig.getQueryFacetFieldsMinDocCountMaxOrDefault());
+        assertEquals(9999999999999L, fessConfig.getApiClickMaxTimestampOrDefault());
     }
 
     @Test

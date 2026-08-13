@@ -66,11 +66,14 @@ public class WebAuthentication extends BsWebAuthentication {
 
         // AuthSchemeType の設定
         final String scheme = getProtocolScheme();
-        if (Constants.BASIC.equals(scheme)) {
+        switch (scheme) {
+        case Constants.BASIC:
             config.setAuthSchemeType(AuthSchemeType.BASIC);
-        } else if (Constants.DIGEST.equals(scheme)) {
+            break;
+        case Constants.DIGEST:
             config.setAuthSchemeType(AuthSchemeType.DIGEST);
-        } else if (Constants.NTLM.equals(scheme)) {
+            break;
+        case Constants.NTLM: {
             config.setAuthSchemeType(AuthSchemeType.NTLM);
             // Pass jcifs.* properties via formParameters for NTLM configuration
             final Map<String, String> jcifsParams = new HashMap<>();
@@ -82,9 +85,15 @@ public class WebAuthentication extends BsWebAuthentication {
             if (!jcifsParams.isEmpty()) {
                 config.setNtlmParameters(jcifsParams);
             }
-        } else if (Constants.FORM.equals(scheme)) {
+            break;
+        }
+        case Constants.FORM:
             config.setAuthSchemeType(AuthSchemeType.FORM);
             config.setFormParameters(ParameterUtil.parse(getParameters()));
+            break;
+        case null:
+        default:
+            break;
         }
 
         // Credentials の設定

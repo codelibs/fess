@@ -40,23 +40,12 @@ public final class LdapUtil {
         for (int i = 0; i < value.length(); i++) {
             final char c = value.charAt(i);
             switch (c) {
-            case '\\':
-                sb.append("\\5c");
-                break;
-            case '*':
-                sb.append("\\2a");
-                break;
-            case '(':
-                sb.append("\\28");
-                break;
-            case ')':
-                sb.append("\\29");
-                break;
-            case '\0':
-                sb.append("\\00");
-                break;
-            default:
-                sb.append(c);
+            case '\\' -> sb.append("\\5c");
+            case '*' -> sb.append("\\2a");
+            case '(' -> sb.append("\\28");
+            case ')' -> sb.append("\\29");
+            case '\0' -> sb.append("\\00");
+            default -> sb.append(c);
             }
         }
         return sb.toString();

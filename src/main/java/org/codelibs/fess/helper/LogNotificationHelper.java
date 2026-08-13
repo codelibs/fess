@@ -82,10 +82,8 @@ public class LogNotificationHelper {
             maxBufferSize = 1000;
         }
         queue.offer(event);
-        if (size.incrementAndGet() > maxBufferSize) {
-            if (queue.poll() != null) {
-                size.decrementAndGet();
-            }
+        if ((size.incrementAndGet() > maxBufferSize) && (queue.poll() != null)) {
+            size.decrementAndGet();
         }
     }
 

@@ -56,7 +56,6 @@ public class AdminDictProtwordsAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictProtwordsAction() {
-        super();
     }
 
     /** The role for this action. */

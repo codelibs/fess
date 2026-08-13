@@ -44,7 +44,6 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminCrawlinginfoAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminCrawlinginfoAction.class);

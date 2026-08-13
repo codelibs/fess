@@ -71,7 +71,6 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminElevatewordAction() {
-        super();
     }
 
     // ===================================================================================

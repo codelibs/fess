@@ -422,12 +422,11 @@ public class SearchEngineClient implements Client {
                 final String knnEngine =
                         fessConfig.getSystemProperty(ChunkVectorHelper.KNN_ENGINE_PROPERTY, ChunkVectorHelper.DEFAULT_KNN_ENGINE);
                 if (isUnsupportedEmbeddedEngine(true, knnEngine)) {
-                    logger.warn(
-                            "content_chunker.search.knn.engine is set to '{}', but the embedded OpenSearch's bundled k-NN plugin "
-                                    + "has no JNI native libraries for it: index creation will succeed, then every document write is "
-                                    + "silently dropped by an uncaught error, and searches will return zero hits. Set "
-                                    + "content_chunker.search.knn.engine=lucene, or use Docker or an external OpenSearch instead.",
-                            knnEngine);
+                    logger.warn("""
+                            content_chunker.search.knn.engine is set to '{}', but the embedded OpenSearch's bundled k-NN plugin \
+                            has no JNI native libraries for it: index creation will succeed, then every document write is \
+                            silently dropped by an uncaught error, and searches will return zero hits. Set \
+                            content_chunker.search.knn.engine=lucene, or use Docker or an external OpenSearch instead.""", knnEngine);
                 }
                 break;
             }
@@ -752,11 +751,12 @@ public class SearchEngineClient implements Client {
             }
         } catch (final Exception e) {
             if (isMissingKnnPluginError(e)) {
-                logger.warn("Failed to create index: index={}, path={}. This looks like the OpenSearch cluster is missing the "
-                        + "opensearch-knn plugin -- every shipped index now declares \"index.knn\": true and a "
-                        + "\"knn_vector\" field unconditionally. Install opensearch-knn on every node and restart; Fess "
-                        + "cannot start against this cluster otherwise, and the failure this triggers next (loading this "
-                        + "index's mapping) will not repeat this diagnosis.", index, indexConfigFile, e);
+                logger.warn("""
+                        Failed to create index: index={}, path={}. This looks like the OpenSearch cluster is missing the \
+                        opensearch-knn plugin -- every shipped index now declares "index.knn": true and a \
+                        "knn_vector" field unconditionally. Install opensearch-knn on every node and restart; Fess \
+                        cannot start against this cluster otherwise, and the failure this triggers next (loading this \
+                        index's mapping) will not repeat this diagnosis.""", index, indexConfigFile, e);
             } else {
                 logger.warn("Failed to create index: index={}, path={}", index, indexConfigFile, e);
             }
@@ -1256,10 +1256,10 @@ public class SearchEngineClient implements Client {
      * @return {@code true} when none of the known job-process markers are set
      */
     protected boolean isWebappProcess() {
-        return !(Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CRAWLER + ".process"))
-                || Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_THUMBNAIL + ".process"))
-                || Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_SUGGEST + ".process"))
-                || Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CHUNK + ".process")));
+        return (!Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CRAWLER + ".process"))
+                && !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_THUMBNAIL + ".process"))
+                && !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_SUGGEST + ".process"))
+                && !Constants.TRUE.equalsIgnoreCase(System.getProperty("fess." + Constants.EXECUTE_TYPE_CHUNK + ".process")));
     }
 
     /**
@@ -1334,7 +1334,7 @@ public class SearchEngineClient implements Client {
             if (aliasConfigDir.isDirectory()) {
                 stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(stream -> stream.forEach(f -> {
                     String aliasName = f.getName().replaceFirst(".json$", "");
-                    if (index.equals(DOC_INDEX)) {
+                    if (DOC_INDEX.equals(index)) {
                         if ("fess.search".equals(aliasName)) {
                             aliasName = fessConfig.getIndexDocumentSearchIndex();
                         } else if ("fess.update".equals(aliasName)) {
@@ -1587,12 +1587,9 @@ public class SearchEngineClient implements Client {
             if (cause instanceof OpenSearchStatusException) {
                 final RestStatus status = ((OpenSearchStatusException) cause).status();
                 switch (status) {
-                case UNAUTHORIZED:
-                    logger.warn("[{}] Unauthorized access: {}", i, SystemUtil.getSearchEngineHttpAddress(), cause);
-                    break;
-                default:
-                    logger.debug("[{}][{}] Failed to access to Fesen ({})", i, status, SystemUtil.getSearchEngineHttpAddress(), cause);
-                    break;
+                case UNAUTHORIZED -> logger.warn("[{}] Unauthorized access: {}", i, SystemUtil.getSearchEngineHttpAddress(), cause);
+                default -> logger.debug("[{}][{}] Failed to access to Fesen ({})", i, status, SystemUtil.getSearchEngineHttpAddress(),
+                        cause);
                 }
             } else if (logger.isDebugEnabled()) {
                 logger.debug("[{}] Failed to access to Fesen ({})", i, SystemUtil.getSearchEngineHttpAddress(), cause);
@@ -2511,11 +2508,12 @@ public class SearchEngineClient implements Client {
                         AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
                 termsBuilder.order(facetInfo.getBucketOrder());
                 if (facetInfo.size != null) {
-                    final int maxFacetSize = fessConfig.getQueryFacetFieldsSizeMaxAsInteger();
+                    final int maxFacetSize = fessConfig.getQueryFacetFieldsSizeMaxOrDefault();
                     termsBuilder.size(clampFacetSize(facetInfo.size, maxFacetSize));
                 }
                 if (facetInfo.minDocCount != null) {
-                    termsBuilder.minDocCount(clampMinDocCount(facetInfo.minDocCount, fessConfig.getQueryFacetFieldsMinDocCountMaxAsLong()));
+                    termsBuilder
+                            .minDocCount(clampMinDocCount(facetInfo.minDocCount, fessConfig.getQueryFacetFieldsMinDocCountMaxOrDefault()));
                 }
                 if (facetInfo.missing != null) {
                     termsBuilder.missing(facetInfo.missing);
@@ -3540,8 +3538,8 @@ public class SearchEngineClient implements Client {
      * @throws UnsupportedOperationException always thrown as this operation is not implemented
      */
     @Override
-    public void searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request,
-            ActionListener<SearchResponse> listener) {
+    public void searchView(final org.opensearch.action.admin.indices.view.SearchViewAction.Request request,
+            final ActionListener<SearchResponse> listener) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -3553,7 +3551,7 @@ public class SearchEngineClient implements Client {
      * @throws UnsupportedOperationException always thrown as this operation is not implemented
      */
     @Override
-    public ActionFuture<SearchResponse> searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request) {
+    public ActionFuture<SearchResponse> searchView(final org.opensearch.action.admin.indices.view.SearchViewAction.Request request) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -3565,8 +3563,8 @@ public class SearchEngineClient implements Client {
      * @throws UnsupportedOperationException always thrown as this operation is not implemented
      */
     @Override
-    public void listViewNames(org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request,
-            ActionListener<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listener) {
+    public void listViewNames(final org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request,
+            final ActionListener<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listener) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -3579,7 +3577,7 @@ public class SearchEngineClient implements Client {
      */
     @Override
     public ActionFuture<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listViewNames(
-            org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request) {
+            final org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

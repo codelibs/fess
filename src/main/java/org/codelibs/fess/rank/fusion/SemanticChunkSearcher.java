@@ -146,7 +146,6 @@ public class SemanticChunkSearcher extends DefaultSearcher {
      * Default constructor.
      */
     public SemanticChunkSearcher() {
-        super();
     }
 
     /**
@@ -284,10 +283,10 @@ public class SemanticChunkSearcher extends DefaultSearcher {
             return;
         }
         if (exactModeWarned.compareAndSet(false, true)) {
-            logger.warn(
-                    "Semantic chunk search is falling back to the exact vector scan: the live index was not created with "
-                            + "index.knn and an ANN method on {}. Every plain-text query now scans all stored chunk vectors. "
-                            + "Recreate or reindex the index with {}=true so the ANN setting and method are baked in.",
+            logger.warn("""
+                    Semantic chunk search is falling back to the exact vector scan: the live index was not created with \
+                    index.knn and an ANN method on {}. Every plain-text query now scans all stored chunk vectors. \
+                    Recreate or reindex the index with {}=true so the ANN setting and method are baked in.""",
                     Constants.CONTENT_CHUNK_VECTOR_FIELD, SEARCH_ENABLED_PROPERTY);
         } else if (logger.isDebugEnabled()) {
             logger.debug("Semantic chunk search still using the exact vector scan.");

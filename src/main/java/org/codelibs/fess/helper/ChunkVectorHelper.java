@@ -276,12 +276,12 @@ public class ChunkVectorHelper {
                 // is true but the model id was never set, so checkAvailabilityNow() can never
                 // succeed -- and the operator sees this same line on every scheduled run with no
                 // hint of what to change. Name both remediations.
-                logger.warn(
-                        "[ChunkVector] The embedding provider is not available; skipping chunk-vector processing to keep pending "
-                                + "documents pending. If this repeats on every run it is a misconfiguration rather than a transient "
-                                + "outage: set {} to a deployed model, or set {}={} to run chunk-only mode (content is chunked and "
-                                + "marked \"{}\" without vectors).",
-                        OPENSEARCH_MODEL_ID_PROPERTY, AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, Constants.NONE, Constants.CHUNKED);
+                logger.warn("""
+                        [ChunkVector] The embedding provider is not available; skipping chunk-vector processing to keep pending \
+                        documents pending. If this repeats on every run it is a misconfiguration rather than a transient \
+                        outage: set {} to a deployed model, or set {}={} to run chunk-only mode (content is chunked and \
+                        marked "{}" without vectors).""", OPENSEARCH_MODEL_ID_PROPERTY, AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY,
+                        Constants.NONE, Constants.CHUNKED);
                 return "Embedding provider is not available. Skipped. If this repeats on every run, it is a misconfiguration rather "
                         + "than a transient outage: set " + OPENSEARCH_MODEL_ID_PROPERTY + " to a deployed model, or set "
                         + AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY + "=" + Constants.NONE + " to run chunk-only mode.";
@@ -826,10 +826,10 @@ public class ChunkVectorHelper {
             return true;
         }
         if (liveDimension.intValue() != configuredDimension) {
-            logger.error(
-                    "[ChunkVector] Embedding dimension mismatch: configured {}={} but the live {} mapping was created with "
-                            + "dimension={}. This looks like the embedding provider/model was switched without recreating the index. "
-                            + "Skipping this job run -- recreate the index (or restore the prior dimension) before re-running.",
+            logger.error("""
+                    [ChunkVector] Embedding dimension mismatch: configured {}={} but the live {} mapping was created with \
+                    dimension={}. This looks like the embedding provider/model was switched without recreating the index. \
+                    Skipping this job run -- recreate the index (or restore the prior dimension) before re-running.""",
                     AbstractEmbeddingClient.EMBEDDING_DIMENSION_PROPERTY, configuredDimension, Constants.CONTENT_CHUNK_VECTOR_FIELD,
                     liveDimension);
             return false;
@@ -889,10 +889,11 @@ public class ChunkVectorHelper {
             }
         }
         if (confirmedNotReady) {
-            logger.warn("[ChunkVector] The live index has no usable {} knn_vector mapping (the index was likely created while "
-                    + "embedding was disabled/chunk-only, or by a version without this feature). Writing vectors now would "
-                    + "dynamic-map them as a non-knn field, so this run is skipped. Recreate or reindex the index with "
-                    + "embedding enabled so the mapping is created, then re-run.", Constants.CONTENT_CHUNK_VECTOR_FIELD);
+            logger.warn("""
+                    [ChunkVector] The live index has no usable {} knn_vector mapping (the index was likely created while \
+                    embedding was disabled/chunk-only, or by a version without this feature). Writing vectors now would \
+                    dynamic-map them as a non-knn field, so this run is skipped. Recreate or reindex the index with \
+                    embedding enabled so the mapping is created, then re-run.""", Constants.CONTENT_CHUNK_VECTOR_FIELD);
             return false;
         }
         return true;
@@ -1368,10 +1369,9 @@ public class ChunkVectorHelper {
             return null;
         }
         final Object contentObj = doc.get(fessConfig.getIndexFieldContent());
-        if (!(contentObj instanceof List<?>) || ((List<?>) contentObj).isEmpty()) {
+        if (!(contentObj instanceof final List<?> contentList) || ((List<?>) contentObj).isEmpty()) {
             return null;
         }
-        final List<?> contentList = (List<?>) contentObj;
         final List<String> chunks = new ArrayList<>(contentList.size());
         for (final Object element : contentList) {
             chunks.add(String.valueOf(element));
@@ -1712,10 +1712,8 @@ public class ChunkVectorHelper {
         // Bounded walk: a malformed exception chain with a cycle longer than one frame must not
         // spin here.
         for (int depth = 0; cur != null && depth < MAX_CAUSE_CHAIN_DEPTH; depth++) {
-            if (cur.getClass().getName().endsWith("RetryableHttpException")) {
-                return true;
-            }
-            if (cur instanceof SocketException || cur instanceof InterruptedIOException || cur instanceof UnknownHostException) {
+            if (cur.getClass().getName().endsWith("RetryableHttpException") || cur instanceof SocketException
+                    || cur instanceof InterruptedIOException || cur instanceof UnknownHostException) {
                 return true;
             }
             final Throwable next = cur.getCause();

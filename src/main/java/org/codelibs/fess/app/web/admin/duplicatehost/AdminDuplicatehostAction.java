@@ -45,7 +45,6 @@ public class AdminDuplicatehostAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDuplicatehostAction() {
-        super();
     }
 
     /**

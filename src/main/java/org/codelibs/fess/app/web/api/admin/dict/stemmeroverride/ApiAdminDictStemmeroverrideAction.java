@@ -48,7 +48,6 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictStemmeroverrideAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictStemmeroverrideAction.class);

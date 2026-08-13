@@ -30,7 +30,6 @@ public class ErrorAction extends FessSearchAction {
      * Default constructor for ErrorAction.
      */
     public ErrorAction() {
-        super();
     }
 
     // ===================================================================================

@@ -42,7 +42,6 @@ public class ApiAdminPluginAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminPluginAction() {
-        super();
     }
 
     // ===================================================================================

@@ -73,7 +73,6 @@ public class AdminDictSynonymAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictSynonymAction() {
-        super();
     }
 
     // ===================================================================================

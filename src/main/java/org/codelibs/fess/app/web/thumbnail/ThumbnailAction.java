@@ -39,7 +39,6 @@ public class ThumbnailAction extends FessSearchAction {
      * Default constructor for ThumbnailAction.
      */
     public ThumbnailAction() {
-        super();
     }
 
     // ===================================================================================

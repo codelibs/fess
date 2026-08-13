@@ -29,7 +29,6 @@ public class ErrorBusyAction extends FessSearchAction {
      * Default constructor for ErrorBusyAction.
      */
     public ErrorBusyAction() {
-        super();
     }
 
     /**

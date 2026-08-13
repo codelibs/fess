@@ -112,7 +112,6 @@ public class SearchForm extends SearchRequestParams {
      * Default constructor for SearchForm.
      */
     public SearchForm() {
-        super();
     }
 
     // advance

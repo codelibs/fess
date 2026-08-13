@@ -30,7 +30,6 @@ public class RootAction extends FessSearchAction {
      * Constructor.
      */
     public RootAction() {
-        super();
     }
 
     // ===================================================================================

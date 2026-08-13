@@ -86,14 +86,11 @@ public final class StorageClientFactory {
             type = parseStorageType(typeStr);
         }
 
-        switch (type) {
-        case GCS:
-            return new GcsStorageClient(fessConfig.getStorageProjectId(), bucket, endpoint, fessConfig.getStorageCredentialsPath());
-        case S3:
-        case S3_COMPAT:
-        default:
-            return new S3StorageClient(endpoint, accessKey, secretKey, bucket, fessConfig.getStorageRegion());
-        }
+        return switch (type) {
+        case GCS -> new GcsStorageClient(fessConfig.getStorageProjectId(), bucket, endpoint, fessConfig.getStorageCredentialsPath());
+        case S3, S3_COMPAT -> new S3StorageClient(endpoint, accessKey, secretKey, bucket, fessConfig.getStorageRegion());
+        default -> new S3StorageClient(endpoint, accessKey, secretKey, bucket, fessConfig.getStorageRegion());
+        };
     }
 
     /**

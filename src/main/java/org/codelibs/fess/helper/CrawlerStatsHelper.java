@@ -287,19 +287,13 @@ public class CrawlerStatsHelper {
      * @return the URL string or a default value if not extractable
      */
     protected String getUrl(final Object keyObj) {
-        if (keyObj instanceof final UrlQueue<?> urlQueue) {
-            return escapeValue(urlQueue.getUrl());
-        }
-        if (keyObj instanceof final StatsKeyObject statsKey) {
-            return escapeValue(statsKey.getUrl());
-        }
-        if (keyObj instanceof final String key) {
-            return escapeValue(key);
-        }
-        if (keyObj instanceof final Number key) {
-            return key.toString();
-        }
-        return "-";
+        return switch (keyObj) {
+        case final UrlQueue<?> urlQueue -> escapeValue(urlQueue.getUrl());
+        case final StatsKeyObject statsKey -> escapeValue(statsKey.getUrl());
+        case final String key -> escapeValue(key);
+        case final Number key -> key.toString();
+        case null, default -> "-";
+        };
     }
 
     /**
@@ -309,19 +303,13 @@ public class CrawlerStatsHelper {
      * @return Optional cache key string, empty if object type not supported
      */
     protected OptionalThing<String> getCacheKey(final Object keyObj) {
-        if (keyObj instanceof final UrlQueue<?> urlQueue) {
-            return OptionalThing.of(urlQueue.getId().toString());
-        }
-        if (keyObj instanceof final StatsKeyObject statsKey) {
-            return OptionalThing.of(statsKey.getId());
-        }
-        if (keyObj instanceof final String key) {
-            return OptionalThing.of(key);
-        }
-        if (keyObj instanceof final Number key) {
-            return OptionalThing.of(key.toString());
-        }
-        return OptionalThing.empty();
+        return switch (keyObj) {
+        case final UrlQueue<?> urlQueue -> OptionalThing.of(urlQueue.getId().toString());
+        case final StatsKeyObject statsKey -> OptionalThing.of(statsKey.getId());
+        case final String key -> OptionalThing.of(key);
+        case final Number key -> OptionalThing.of(key.toString());
+        case null, default -> OptionalThing.empty();
+        };
     }
 
     /**

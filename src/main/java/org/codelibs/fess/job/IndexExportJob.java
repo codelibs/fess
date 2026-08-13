@@ -94,14 +94,11 @@ public class IndexExportJob {
         if (format == null || format.trim().isEmpty()) {
             throw new IllegalArgumentException("Export format must not be null or empty");
         }
-        switch (format.trim().toLowerCase()) {
-        case "html":
-            return new HtmlIndexExportFormatter();
-        case "json":
-            return new JsonIndexExportFormatter();
-        default:
-            throw new IllegalArgumentException("Unsupported export format: " + format);
-        }
+        return switch (format.trim().toLowerCase()) {
+        case "html" -> new HtmlIndexExportFormatter();
+        case "json" -> new JsonIndexExportFormatter();
+        default -> throw new IllegalArgumentException("Unsupported export format: " + format);
+        };
     }
 
     /**
@@ -234,8 +231,8 @@ public class IndexExportJob {
 
             final String[] components = (host + "/" + path).split("/");
             final StringBuilder sanitized = new StringBuilder();
-            for (int i = 0; i < components.length; i++) {
-                String component = components[i].replaceAll("[<>:\"|?*\\\\]", "_");
+            for (final String component2 : components) {
+                String component = component2.replaceAll("[<>:\"|?*\\\\]", "_");
                 if (".".equals(component) || "..".equals(component)) {
                     continue;
                 }

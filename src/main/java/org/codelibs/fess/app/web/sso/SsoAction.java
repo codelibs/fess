@@ -241,14 +241,15 @@ public class SsoAction extends FessLoginAction {
                     logger.debug("Logout response.", e);
                 }
                 saveInfo(e.getMessageCode());
-            } else if (e.getCause() instanceof SsoStateException) {
-                // The endpoint is anonymous, so a request that is not a logout callback the IdP
-                // sent is a rejected request rather than a fault. A stack trace per attempt would
-                // let an unauthenticated client fill the log.
-                logger.warn("Failed to process SSO logout: {}", e.getCause().getMessage());
-                saveError(e.getMessageCode());
             } else {
-                logger.warn("Failed to log out.", e);
+                if (e.getCause() instanceof SsoStateException) {
+                    // The endpoint is anonymous, so a request that is not a logout callback the IdP
+                    // sent is a rejected request rather than a fault. A stack trace per attempt would
+                    // let an unauthenticated client fill the log.
+                    logger.warn("Failed to process SSO logout: {}", e.getCause().getMessage());
+                } else {
+                    logger.warn("Failed to log out.", e);
+                }
                 saveError(e.getMessageCode());
             }
             return redirect(LoginAction.class);

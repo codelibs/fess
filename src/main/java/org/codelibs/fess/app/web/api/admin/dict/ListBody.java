@@ -27,7 +27,6 @@ public class ListBody extends ListForm {
      * Default constructor.
      */
     public ListBody() {
-        super();
     }
 
     /** The ID of the dictionary. */

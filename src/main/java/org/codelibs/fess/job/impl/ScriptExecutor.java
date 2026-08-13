@@ -30,7 +30,6 @@ public class ScriptExecutor extends JobExecutor {
      * Constructor.
      */
     public ScriptExecutor() {
-        super();
     }
 
     @Override

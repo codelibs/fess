@@ -53,7 +53,6 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminKeymatchAction() {
-        super();
     }
 
     // ===================================================================================

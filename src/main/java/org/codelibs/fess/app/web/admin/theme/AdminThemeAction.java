@@ -68,7 +68,6 @@ public class AdminThemeAction extends FessAdminAction {
 
     /** Default constructor. */
     public AdminThemeAction() {
-        super();
     }
 
     @Resource
@@ -229,65 +228,33 @@ public class AdminThemeAction extends FessAdminAction {
      * @param ex the install exception raised by the installer
      */
     static void mapInstallExceptionToMessage(final FessMessages messages, final StaticThemeInstaller.InstallException ex) {
-        if (ex.getCause() instanceof ThemeManifestException tme) {
+        if (ex.getCause() instanceof final ThemeManifestException tme) {
             addErrorForManifestCode(messages, tme.code());
             return;
         }
         switch (ex.code()) {
-        case SIZE_LIMIT:
-            messages.addErrorsThemeInstallSizeLimit(GLOBAL);
-            break;
-        case ENTRY_LIMIT:
-            messages.addErrorsThemeInstallEntryLimit(GLOBAL);
-            break;
-        case RATIO_LIMIT:
-            messages.addErrorsThemeInstallRatioLimit(GLOBAL);
-            break;
-        case ZIP_BOMB_RATIO:
-            messages.addErrorsThemeInstallZipBombRatio(GLOBAL);
-            break;
-        default:
-            messages.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage()));
-            break;
+        case SIZE_LIMIT -> messages.addErrorsThemeInstallSizeLimit(GLOBAL);
+        case ENTRY_LIMIT -> messages.addErrorsThemeInstallEntryLimit(GLOBAL);
+        case RATIO_LIMIT -> messages.addErrorsThemeInstallRatioLimit(GLOBAL);
+        case ZIP_BOMB_RATIO -> messages.addErrorsThemeInstallZipBombRatio(GLOBAL);
+        default -> messages.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage()));
         }
     }
 
     private static void addErrorForManifestCode(final FessMessages messages, final ThemeManifestException.Code code) {
         switch (code) {
-        case PARSE_FAILED:
-            messages.addErrorsThemeManifestParseFailed(GLOBAL);
-            break;
-        case EMPTY:
-            messages.addErrorsThemeManifestEmpty(GLOBAL);
-            break;
-        case NOT_MAPPING:
-            messages.addErrorsThemeManifestNotMapping(GLOBAL);
-            break;
-        case FIELD_TOO_LONG:
-            messages.addErrorsThemeManifestFieldTooLong(GLOBAL);
-            break;
-        case UNSUPPORTED_API_VERSION:
-            messages.addErrorsThemeManifestUnsupportedApiVersion(GLOBAL);
-            break;
-        case UNSUPPORTED_KIND:
-            messages.addErrorsThemeManifestUnsupportedKind(GLOBAL);
-            break;
-        case INVALID_NAME:
-            messages.addErrorsThemeManifestInvalidName(GLOBAL);
-            break;
-        case DISPLAY_NAME_REQUIRED:
-            messages.addErrorsThemeManifestDisplayNameRequired(GLOBAL);
-            break;
-        case INVALID_VERSION:
-            messages.addErrorsThemeManifestInvalidVersion(GLOBAL);
-            break;
-        case UNSAFE_ENTRY:
-            messages.addErrorsThemeManifestUnsafeEntry(GLOBAL);
-            break;
-        case OTHER:
-        default:
-            messages.addErrorsFailedToUploadTheme(GLOBAL, "");
-            break;
+        case PARSE_FAILED -> messages.addErrorsThemeManifestParseFailed(GLOBAL);
+        case EMPTY -> messages.addErrorsThemeManifestEmpty(GLOBAL);
+        case NOT_MAPPING -> messages.addErrorsThemeManifestNotMapping(GLOBAL);
+        case FIELD_TOO_LONG -> messages.addErrorsThemeManifestFieldTooLong(GLOBAL);
+        case UNSUPPORTED_API_VERSION -> messages.addErrorsThemeManifestUnsupportedApiVersion(GLOBAL);
+        case UNSUPPORTED_KIND -> messages.addErrorsThemeManifestUnsupportedKind(GLOBAL);
+        case INVALID_NAME -> messages.addErrorsThemeManifestInvalidName(GLOBAL);
+        case DISPLAY_NAME_REQUIRED -> messages.addErrorsThemeManifestDisplayNameRequired(GLOBAL);
+        case INVALID_VERSION -> messages.addErrorsThemeManifestInvalidVersion(GLOBAL);
+        case UNSAFE_ENTRY -> messages.addErrorsThemeManifestUnsafeEntry(GLOBAL);
+        case OTHER -> messages.addErrorsFailedToUploadTheme(GLOBAL, "");
+        default -> messages.addErrorsFailedToUploadTheme(GLOBAL, "");
         }
     }
 
@@ -326,18 +293,10 @@ public class AdminThemeAction extends FessAdminAction {
     static void mapDeleteExceptionToMessage(final FessMessages messages, final StaticThemeInstaller.InstallException ex,
             final String themeName) {
         switch (ex.code()) {
-        case ACTIVE_DEFAULT:
-            messages.addErrorsThemeIsActive(GLOBAL, themeName);
-            break;
-        case NOT_FOUND:
-            messages.addErrorsThemeNotFound(GLOBAL, themeName);
-            break;
-        case INVALID_NAME:
-            messages.addErrorsThemeNameInvalid(GLOBAL, themeName);
-            break;
-        default:
-            messages.addErrorsFailedToDeleteTheme(GLOBAL, themeName);
-            break;
+        case ACTIVE_DEFAULT -> messages.addErrorsThemeIsActive(GLOBAL, themeName);
+        case NOT_FOUND -> messages.addErrorsThemeNotFound(GLOBAL, themeName);
+        case INVALID_NAME -> messages.addErrorsThemeNameInvalid(GLOBAL, themeName);
+        default -> messages.addErrorsFailedToDeleteTheme(GLOBAL, themeName);
         }
     }
 
@@ -355,11 +314,9 @@ public class AdminThemeAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asListHtml(form));
         verifyToken(() -> asListHtml(form));
         final String name = form.defaultTheme == null ? "" : form.defaultTheme.trim();
-        if (!name.isEmpty()) {
-            // existence check — refuse to point the default theme at a missing theme
-            if (themeRegistry.getTheme(name).isEmpty()) {
-                throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, name), () -> asListHtml(form));
-            }
+        // existence check — refuse to point the default theme at a missing theme
+        if (!name.isEmpty() && themeRegistry.getTheme(name).isEmpty()) {
+            throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, name), () -> asListHtml(form));
         }
         try {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();

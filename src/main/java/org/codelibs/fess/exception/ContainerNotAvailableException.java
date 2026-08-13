@@ -24,7 +24,7 @@ public class ContainerNotAvailableException extends FessSystemException {
     private static final long serialVersionUID = 1L;
 
     /** The name of the component that is not available. */
-    private String componentName;
+    private final String componentName;
 
     /**
      * Constructor with component name.

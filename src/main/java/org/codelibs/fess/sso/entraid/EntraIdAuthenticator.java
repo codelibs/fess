@@ -392,9 +392,10 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     // Redirecting would send the user straight back here in the same state, so
                     // this is where the loop has to stop. Returning null makes SsoAction show the
                     // SSO error message and fall back to the local login form.
-                    logger.warn("Received an Entra ID authentication response without a session."
-                            + " The session cookie was not sent back with the callback request."
-                            + " See tomcat.sameSiteCookies in tomcat_config.properties.");
+                    logger.warn("""
+                            Received an Entra ID authentication response without a session.\
+                             The session cookie was not sent back with the callback request.\
+                             See tomcat.sameSiteCookies in tomcat_config.properties.""");
                     return null;
                 }
                 // The browser did return a session id and the container rejected it, so cookies

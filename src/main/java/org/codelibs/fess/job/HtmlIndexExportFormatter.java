@@ -56,10 +56,7 @@ public class HtmlIndexExportFormatter implements IndexExportFormatter {
 
         for (final Map.Entry<String, Object> entry : source.entrySet()) {
             final String field = entry.getKey();
-            if ("title".equals(field) || "content".equals(field) || "lang".equals(field)) {
-                continue;
-            }
-            if (excludeFields.contains(field)) {
+            if ("title".equals(field) || "content".equals(field) || "lang".equals(field) || excludeFields.contains(field)) {
                 continue;
             }
 

@@ -33,7 +33,6 @@ public class EditBody extends EditForm {
      * Default constructor.
      */
     public EditBody() {
-        super();
     }
 
 }

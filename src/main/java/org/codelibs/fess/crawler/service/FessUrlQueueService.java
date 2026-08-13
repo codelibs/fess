@@ -76,7 +76,8 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
                             new FunctionScoreQueryBuilder.FilterFunctionBuilder[] { new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                                     new RandomScoreFunctionBuilder().seed(sessionId.hashCode())) }),
                     0, pollingFetchSize, SortBuilders.scoreSort().order(SortOrder.DESC));
-        } else if (!ORDER_SEQUENTIAL.equals(crawlOrder)) {
+        }
+        if (!ORDER_SEQUENTIAL.equals(crawlOrder)) {
             logger.warn("Invalid crawl order specified: {}. Falling back to sequential.", crawlOrder);
         }
         return super.fetchUrlQueueList(sessionId);

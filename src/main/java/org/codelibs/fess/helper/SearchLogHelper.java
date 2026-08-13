@@ -278,7 +278,8 @@ public class SearchLogHelper {
     protected String determineAccessType(final Object accessType) {
         if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
             return Constants.SEARCH_LOG_ACCESS_TYPE_JSON;
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+        }
+        if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
             return Constants.SEARCH_LOG_ACCESS_TYPE_GSA;
         } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
             return Constants.SEARCH_LOG_ACCESS_TYPE_OTHER;

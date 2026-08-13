@@ -25,9 +25,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -555,14 +555,14 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
             if (userInfoRejectionLogged.compareAndSet(false, true)) {
                 // Names the source and the remedy, never the value: the whole point is that the
                 // value holds a credential.
-                logger.error(
-                        "[Embedding:OPENSEARCH] {} embeds credentials in the URL (a 'user:password@' userinfo component). "
-                                + "The HTTP client rejects that form unconditionally (RFC 9110 4.2.4 forbids sending it), so it can "
-                                + "never work; reporting the provider as unavailable so no run is started against it. Remove the "
-                                + "userinfo part and configure {}.{} / {}.{} for the OpenSearch cluster itself, or "
-                                + "http.proxy.username / http.proxy.password when the endpoint sits behind an authenticating proxy. "
-                                + "The rejected value is not logged.",
-                        source, getConfigPrefix(), CONFIG_USERNAME, getConfigPrefix(), CONFIG_PASSWORD);
+                logger.error("""
+                        [Embedding:OPENSEARCH] {} embeds credentials in the URL (a 'user:password@' userinfo component). \
+                        The HTTP client rejects that form unconditionally (RFC 9110 4.2.4 forbids sending it), so it can \
+                        never work; reporting the provider as unavailable so no run is started against it. Remove the \
+                        userinfo part and configure {}.{} / {}.{} for the OpenSearch cluster itself, or \
+                        http.proxy.username / http.proxy.password when the endpoint sits behind an authenticating proxy. \
+                        The rejected value is not logged.""", source, getConfigPrefix(), CONFIG_USERNAME, getConfigPrefix(),
+                        CONFIG_PASSWORD);
             }
             return StringUtil.EMPTY;
         }

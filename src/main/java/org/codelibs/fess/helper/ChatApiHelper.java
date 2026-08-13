@@ -29,8 +29,8 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.api.v2.handlers.ChatRequestBody;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.handlers.ChatRequestBody;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -89,7 +89,7 @@ public class ChatApiHelper {
         // Support nested fields object: {"fields": {"label": ... }}
         Object labelsRaw = null;
         final Object fieldsObj = raw.get("fields");
-        if (fieldsObj instanceof Map<?, ?> fieldsMap) {
+        if (fieldsObj instanceof final Map<?, ?> fieldsMap) {
             labelsRaw = fieldsMap.get("label");
         }
         // Fallback: legacy dotted-key "fields.label" (kept for backward compat during transition)
@@ -103,8 +103,8 @@ public class ChatApiHelper {
 
         final List<String> labelValues = toStringList(labelsRaw);
         final org.codelibs.fess.mylasta.direction.FessConfig cfg = ComponentUtil.getFessConfig();
-        final int maxArraySize = cfg.getApiV2ParamMaxArraySizeAsInteger();
-        final int maxElementLen = cfg.getApiV2ParamMaxLengthAsInteger();
+        final int maxArraySize = cfg.getApiParamMaxArraySizeOrDefault();
+        final int maxElementLen = cfg.getApiParamMaxLengthOrDefault();
         if (labelValues.size() > maxArraySize) {
             throw new ChatRequestBody.TooManyValuesException("fields.label exceeds the maximum number of values: " + maxArraySize);
         }
@@ -159,8 +159,8 @@ public class ChatApiHelper {
 
         final List<String> values = toStringList(exqRaw);
         final org.codelibs.fess.mylasta.direction.FessConfig cfg2 = ComponentUtil.getFessConfig();
-        final int maxArraySize2 = cfg2.getApiV2ParamMaxArraySizeAsInteger();
-        final int maxElementLen2 = cfg2.getApiV2ParamMaxLengthAsInteger();
+        final int maxArraySize2 = cfg2.getApiParamMaxArraySizeOrDefault();
+        final int maxElementLen2 = cfg2.getApiParamMaxLengthOrDefault();
         if (values.size() > maxArraySize2) {
             throw new ChatRequestBody.TooManyValuesException("extra_queries exceeds the maximum number of values: " + maxArraySize2);
         }
@@ -250,7 +250,7 @@ public class ChatApiHelper {
      */
     private List<String> toStringList(final Object raw) {
         final List<String> values = new ArrayList<>();
-        if (raw instanceof List<?> l) {
+        if (raw instanceof final List<?> l) {
             for (final Object o : l) {
                 if (o != null) {
                     values.add(o.toString());

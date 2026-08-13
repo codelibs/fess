@@ -52,7 +52,6 @@ public class AdminDesignAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDesignAction() {
-        super();
     }
 
     private static final String CACHE_AND_SESSION_INVALIDATE_STATEMENT = "<!--CACHE_AND_SESSION_INVALIDATE-->";

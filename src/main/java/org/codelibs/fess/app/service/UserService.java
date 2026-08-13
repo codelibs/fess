@@ -255,10 +255,10 @@ public class UserService {
             userBhv.update(entity, op -> {
                 op.setRefreshPolicy(Constants.TRUE);
                 if (seqNo != null && seqNo.longValue() >= 0L) {
-                    op.setIfSeqNo(seqNo.longValue());
+                    op.setIfSeqNo(seqNo);
                 }
                 if (primaryTerm != null && primaryTerm.longValue() >= 0L) {
-                    op.setIfPrimaryTerm(primaryTerm.longValue());
+                    op.setIfPrimaryTerm(primaryTerm);
                 }
             });
             if (logger.isDebugEnabled()) {

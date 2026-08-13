@@ -29,6 +29,5 @@ public class DownloadBody extends DownloadForm {
      * Default constructor.
      */
     public DownloadBody() {
-        super();
     }
 }

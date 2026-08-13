@@ -61,7 +61,6 @@ public class AdminDataconfigAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDataconfigAction() {
-        super();
     }
 
     /** The role for this action. */

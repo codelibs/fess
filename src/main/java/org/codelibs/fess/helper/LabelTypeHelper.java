@@ -55,7 +55,6 @@ public class LabelTypeHelper extends AbstractConfigHelper {
      * Default constructor.
      */
     public LabelTypeHelper() {
-        super();
     }
 
     /**

@@ -55,7 +55,6 @@ public class PythonJob extends ExecJob {
      * Creates a new instance of the Python job with default settings.
      */
     public PythonJob() {
-        super();
     }
 
     /** The Python script filename to execute */

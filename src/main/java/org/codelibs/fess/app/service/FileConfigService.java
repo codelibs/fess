@@ -46,7 +46,6 @@ public class FileConfigService extends FessAppService {
      * Creates a new instance with default values.
      */
     public FileConfigService() {
-        super();
     }
 
     /**

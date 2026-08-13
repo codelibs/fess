@@ -63,7 +63,6 @@ public class AdminMaintenanceAction extends FessAdminAction {
      * Default constructor for AdminMaintenanceAction.
      */
     public AdminMaintenanceAction() {
-        super();
     }
 
     /**

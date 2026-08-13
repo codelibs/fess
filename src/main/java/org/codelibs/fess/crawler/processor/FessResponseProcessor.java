@@ -41,7 +41,6 @@ public class FessResponseProcessor extends DefaultResponseProcessor {
      * Default constructor.
      */
     public FessResponseProcessor() {
-        super();
     }
 
     /** Logger instance for this class */

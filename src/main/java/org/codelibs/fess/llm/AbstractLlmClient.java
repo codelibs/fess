@@ -961,12 +961,14 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:EVAL] prompt={}", prompt);
             }
             final LlmChatRequest request = new LlmChatRequest();
-            request.addSystemMessage("You are a strict relevance evaluator. "
-                    + "Select ONLY documents that DIRECTLY address the user's specific question topic. "
-                    + "Do NOT select documents about different or merely related topics. "
-                    + "Do NOT select table-of-contents or index pages that lack substantive content. "
-                    + "Respond with JSON only. Do not include any text outside the JSON object.\n\n"
-                    + "Example output: {\"relevant_indexes\": [1, 3], \"has_relevant\": true}");
+            request.addSystemMessage("""
+                    You are a strict relevance evaluator. \
+                    Select ONLY documents that DIRECTLY address the user's specific question topic. \
+                    Do NOT select documents about different or merely related topics. \
+                    Do NOT select table-of-contents or index pages that lack substantive content. \
+                    Respond with JSON only. Do not include any text outside the JSON object.
+
+                    Example output: {"relevant_indexes": [1, 3], "has_relevant": true}""");
             request.addUserMessage(prompt);
             applyPromptTypeParams(request, "evaluation");
 
@@ -1305,12 +1307,11 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         for (int i = history.size() - 1; i >= earliest; i--) {
             final int msgLen = history.get(i).getContent().length();
-            if (msgLen <= remaining) {
-                remaining -= msgLen;
-                startIndex = i;
-            } else {
+            if (msgLen > remaining) {
                 break;
             }
+            remaining -= msgLen;
+            startIndex = i;
         }
 
         for (int i = startIndex; i < history.size(); i++) {
@@ -1518,12 +1519,11 @@ public abstract class AbstractLlmClient implements LlmClient {
             for (int i = turn[0]; i < turn[1]; i++) {
                 turnLen += history.get(i).getContent().length();
             }
-            if (turnLen <= remaining) {
-                remaining -= turnLen;
-                firstIncludedTurn = t;
-            } else {
+            if (turnLen > remaining) {
                 break; // Stop at first non-fitting turn to maintain contiguous recency
             }
+            remaining -= turnLen;
+            firstIncludedTurn = t;
         }
 
         if (firstIncludedTurn < turns.size()) {
@@ -1586,16 +1586,16 @@ public abstract class AbstractLlmClient implements LlmClient {
             final String query = extractJsonString(response, "query");
             final String reasoning = extractJsonString(response, "reasoning");
 
-            if (intent == ChatIntent.SEARCH) {
-                return IntentDetectionResult.search(query, reasoning);
-            } else if (intent == ChatIntent.FAQ) {
-                return IntentDetectionResult.faq(query, reasoning);
-            } else if (intent == ChatIntent.SUMMARY) {
+            return switch (intent) {
+            case SEARCH -> IntentDetectionResult.search(query, reasoning);
+            case FAQ -> IntentDetectionResult.faq(query, reasoning);
+            case SUMMARY -> {
                 final String docUrl = extractJsonString(response, "url");
-                return IntentDetectionResult.summary(docUrl, reasoning);
-            } else {
-                return IntentDetectionResult.unclear(reasoning);
+                yield IntentDetectionResult.summary(docUrl, reasoning);
             }
+            case null -> IntentDetectionResult.unclear(reasoning);
+            default -> IntentDetectionResult.unclear(reasoning);
+            };
         } catch (final Exception e) {
             logger.warn("[RAG:INTENT] Failed to parse intent response, falling back to search. responseLength={}, responseHead={}",
                     response != null ? response.length() : 0, truncateForLog(response), e);
@@ -1809,20 +1809,21 @@ public abstract class AbstractLlmClient implements LlmClient {
      * @return the corresponding error code
      */
     protected String resolveErrorCode(final int statusCode) {
-        if (statusCode == 429) {
+        switch (statusCode) {
+        case 429:
             return LlmException.ERROR_RATE_LIMIT;
-        }
-        if (statusCode == 401 || statusCode == 403) {
+        case 401:
+        case 403:
             return LlmException.ERROR_AUTH;
-        }
-        if (statusCode == 404) {
+        case 404:
             return LlmException.ERROR_MODEL_NOT_FOUND;
-        }
-        if (statusCode == 408) {
+        case 408:
             return LlmException.ERROR_TIMEOUT;
-        }
-        if (statusCode == 502 || statusCode == 503) {
+        case 502:
+        case 503:
             return LlmException.ERROR_SERVICE_UNAVAILABLE;
+        default:
+            break;
         }
         return LlmException.ERROR_UNKNOWN;
     }

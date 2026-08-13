@@ -60,7 +60,6 @@ public class RoleService {
      * Constructor.
      */
     public RoleService() {
-        super();
     }
 
     /**

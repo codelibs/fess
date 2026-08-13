@@ -37,7 +37,6 @@ public class CacheAction extends FessSearchAction {
      * Creates a new instance of CacheAction.
      */
     public CacheAction() {
-        super();
     }
 
     // ===================================================================================

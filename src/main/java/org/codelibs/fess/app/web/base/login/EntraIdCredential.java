@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
-import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.sso.entraid.EntraIdAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;

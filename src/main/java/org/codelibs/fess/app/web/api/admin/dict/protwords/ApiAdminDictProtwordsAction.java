@@ -47,7 +47,6 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictProtwordsAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictProtwordsAction.class);

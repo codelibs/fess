@@ -377,7 +377,7 @@ public class ChatStreamHandler {
      */
     protected long resolveKeepaliveIntervalMs(final FessConfig fessConfig) {
         try {
-            final Integer v = fessConfig.getApiV2ChatStreamKeepaliveIntervalMsAsInteger();
+            final Integer v = fessConfig.getApiChatStreamKeepaliveIntervalMsAsInteger();
             if (v == null) {
                 return 15000L;
             }
@@ -417,10 +417,9 @@ public class ChatStreamHandler {
             logger.debug("ChatStreamHandler: keepalive pool unavailable; pinger disabled for this request");
             return null;
         }
-        // Use fixed-delay (not fixed-rate) scheduling: a heartbeat needs no catch-up
-        // semantics, and fixed-rate would queue burst pings if a write is delayed by
-        // writeLock contention during a long chunk flush.
-        final ScheduledFuture<?> future = pool.scheduleWithFixedDelay(() -> {
+
+        // scheduleWithFixedDelay never returns null, so no null-check/assert is needed here.
+        return pool.scheduleWithFixedDelay(() -> {
             try {
                 synchronized (writeLock) {
                     writer.write(": keepalive\n\n");
@@ -432,8 +431,6 @@ public class ChatStreamHandler {
                 logger.debug("SSE keep-alive write failed", e);
             }
         }, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
-        // scheduleWithFixedDelay never returns null, so no null-check/assert is needed here.
-        return future;
     }
 
     /**

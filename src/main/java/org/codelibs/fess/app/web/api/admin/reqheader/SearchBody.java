@@ -26,7 +26,6 @@ public class SearchBody extends BaseSearchBody {
      * Default constructor.
      */
     public SearchBody() {
-        super();
     }
 
     /** Request header configuration ID */

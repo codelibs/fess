@@ -131,7 +131,7 @@ public class StaticThemeResponder {
         // HTTP status so proxies and CDNs see the correct status without parsing X-Fess-Error-Code.
         // When a ?message_key query parameter is present, inject an error detail meta tag so the
         // SPA can surface the specific error message.
-        final boolean isErrorRoute = requestPath != null && (requestPath.equals("/error") || requestPath.startsWith("/error/"));
+        final boolean isErrorRoute = requestPath != null && ("/error".equals(requestPath) || requestPath.startsWith("/error/"));
         final String messageKey = resolveMessageKey(req);
 
         if (isErrorRoute) {
@@ -227,31 +227,22 @@ public class StaticThemeResponder {
         }
         // Extract the kind segment after "/error/"
         final String kind;
-        if (uri.equals("/error")) {
+        if ("/error".equals(uri) || !uri.startsWith("/error/")) {
             kind = "";
-        } else if (uri.startsWith("/error/")) {
+        } else {
             // Take only the first path segment after /error/ (ignore trailing /...),
             // and normalise to lower-case for case-insensitive matching.
             final String rest = uri.substring("/error/".length());
             final int slash = rest.indexOf('/');
             kind = (slash < 0 ? rest : rest.substring(0, slash)).toLowerCase(Locale.ROOT);
-        } else {
-            kind = "";
         }
-        switch (kind) {
-        case "":
-        case "error":
-        case "system":
-            return 500;
-        case "badrequest":
-            return 400;
-        case "notfound":
-            return 404;
-        case "busy":
-            return 429;
-        default:
-            return 500;
-        }
+        return switch (kind) {
+        case "", "error", "system" -> 500;
+        case "badrequest" -> 400;
+        case "notfound" -> 404;
+        case "busy" -> 429;
+        default -> 500;
+        };
     }
 
     /**
@@ -269,11 +260,8 @@ public class StaticThemeResponder {
             return null;
         }
         final String raw = req.getParameter("message_key");
-        if (raw == null || raw.isEmpty()) {
-            return null;
-        }
         // Allowlist: letters, digits, dots, underscores, hyphens only.
-        if (!MESSAGE_KEY_PATTERN.matcher(raw).matches()) {
+        if (raw == null || raw.isEmpty() || !MESSAGE_KEY_PATTERN.matcher(raw).matches()) {
             return null;
         }
         return raw;
@@ -356,11 +344,8 @@ public class StaticThemeResponder {
         }
         final Path candidate = theme.getBasePath().resolve(path).normalize();
         // Re-check containment after normalization.
-        if (!candidate.startsWith(theme.getBasePath())) {
-            return null;
-        }
         // Reject symlinks (NOFOLLOW_LINKS): a symlink could escape the theme sandbox.
-        if (!Files.isRegularFile(candidate, LinkOption.NOFOLLOW_LINKS)) {
+        if (!candidate.startsWith(theme.getBasePath()) || !Files.isRegularFile(candidate, LinkOption.NOFOLLOW_LINKS)) {
             return null;
         }
         final String fname = candidate.getFileName() != null ? candidate.getFileName().toString() : "";
@@ -388,10 +373,7 @@ public class StaticThemeResponder {
      * @return {@code true} if the file must not be served
      */
     static boolean isBlockedFilename(final String filename) {
-        if (filename == null || filename.isEmpty()) {
-            return true;
-        }
-        if (filename.startsWith(".")) {
+        if (filename == null || filename.isEmpty() || filename.startsWith(".")) {
             return true;
         }
         final String lower = filename.toLowerCase(Locale.ROOT);

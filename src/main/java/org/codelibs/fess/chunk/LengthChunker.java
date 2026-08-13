@@ -198,12 +198,11 @@ public class LengthChunker implements Chunker {
                     windowSize(chunkSize, normalizeBoundaryPercent(getLookbackPercent(), MAX_LOOKBACK_PERCENT, LOOKBACK_PERCENT_PROPERTY));
             final int lookahead = windowSize(chunkSize,
                     normalizeBoundaryPercent(getLookaheadPercent(), MAX_LOOKAHEAD_PERCENT, LOOKAHEAD_PERCENT_PROPERTY));
-            logger.info(
-                    "[Chunk] Boundary-aware splitting is enabled: {}={} is a target, not a ceiling. "
-                            + "Chunks range from {} to {} characters (lookback={}, lookahead={}); "
-                            + "expect more chunks per document than a fixed-length split, which counts against {}.",
-                    CHUNK_SIZE_PROPERTY, chunkSize, chunkSize - lookback,
-                    chunkSize + Math.max(lookahead, 2 * ChunkBoundaryFinder.MAX_CLUSTER_ADJUST), lookback, lookahead,
+            logger.info("""
+                    [Chunk] Boundary-aware splitting is enabled: {}={} is a target, not a ceiling. \
+                    Chunks range from {} to {} characters (lookback={}, lookahead={}); \
+                    expect more chunks per document than a fixed-length split, which counts against {}.""", CHUNK_SIZE_PROPERTY, chunkSize,
+                    chunkSize - lookback, chunkSize + Math.max(lookahead, 2 * ChunkBoundaryFinder.MAX_CLUSTER_ADJUST), lookback, lookahead,
                     "content_chunker.max_chunks_per_document");
         } catch (final Exception e) {
             // Diagnostics only; never let a config-read failure break component registration.
@@ -311,12 +310,7 @@ public class LengthChunker implements Chunker {
                 end = start + Character.charCount(content.codePointAt(start));
             }
             chunks.add(content.substring(start, end));
-            if (chunks.size() >= limit) {
-                // Production bound: stop here instead of splitting the remainder only to have the
-                // caller discard it. See Chunker#split(String, int).
-                break;
-            }
-            if (end >= length) {
+            if ((chunks.size() >= limit) || (end >= length)) {
                 break;
             }
             int nextStart = end - overlap;

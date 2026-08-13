@@ -18,11 +18,13 @@ package org.codelibs.fess.chat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -259,7 +261,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             final Map<String, Object> doc = e.getValue();
             final Object snippet = doc.get(highlightField);
             return isChunkedStatus(doc) && doc.get("content") instanceof List<?> && !hasUsableChunkVectors(doc)
-                    && !(snippet instanceof String && StringUtil.isNotBlank((String) snippet))
+                    && (!(snippet instanceof String) || !StringUtil.isNotBlank((String) snippet))
                     && !alreadyHighlightedIds.contains(e.getKey());
         }).map(Map.Entry::getKey).collect(Collectors.toList());
         if (targetIds.isEmpty()) {
@@ -375,10 +377,9 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      */
     protected String selectBySemanticSimilarity(final List<String> chunks, final Map<String, Object> doc, final float[] queryVector) {
         final Object vectorFieldValue = doc.get(Constants.CONTENT_CHUNK_VECTOR_FIELD);
-        if (!(vectorFieldValue instanceof List<?>)) {
+        if (!(vectorFieldValue instanceof final List<?> vectorEntries)) {
             return null;
         }
-        final List<?> vectorEntries = (List<?>) vectorFieldValue;
         final int n = Math.min(chunks.size(), vectorEntries.size());
         final List<Map.Entry<Integer, Double>> scored = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
@@ -390,7 +391,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         if (scored.isEmpty()) {
             return null;
         }
-        scored.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        scored.sort(Comparator.comparing(Entry<Integer, Double>::getValue).reversed());
         final int topK = Math.max(1, getChatTopK());
         final Set<Integer> selectedIndexes =
                 scored.stream().limit(topK).map(Map.Entry::getKey).collect(Collectors.toCollection(TreeSet::new));
@@ -432,8 +433,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         if (value instanceof float[]) {
             return (float[]) value;
         }
-        if (value instanceof List<?>) {
-            final List<?> list = (List<?>) value;
+        if (value instanceof final List<?> list) {
             final float[] result = new float[list.size()];
             for (int i = 0; i < list.size(); i++) {
                 final Object element = list.get(i);
@@ -627,10 +627,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
      * @return {@link Strategy#HIGHLIGHT} for large documents, otherwise {@link Strategy#FULL}
      */
     protected Strategy decideStrategy(final String docId, final Long contentLength, final ChatContentRequest request) {
-        if (StringUtil.isBlank(request.getQuery())) {
-            return Strategy.FULL; // no query to highlight with
-        }
-        if (contentLength == null) {
+        if (StringUtil.isBlank(request.getQuery()) || (contentLength == null)) {
             return Strategy.FULL; // unknown size (e.g. summary path) -> full, no regression
         }
         return contentLength.longValue() > getFulltextThreshold() ? Strategy.HIGHLIGHT : Strategy.FULL;
@@ -706,9 +703,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         if (value instanceof String && StringUtil.isNotBlank((String) value)) {
             try {
                 return Long.valueOf((String) value);
-            } catch (final NumberFormatException e) {
-                return null;
-            }
+            } catch (final NumberFormatException e) {}
         }
         return null;
     }
@@ -786,7 +781,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
             @SuppressWarnings("unchecked")
-            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
+            final List<Map<String, Object>> docs = data.getDocumentItems();
             if (docs == null) {
                 return Collections.emptyList();
             }

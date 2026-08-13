@@ -58,7 +58,6 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminLabeltypeAction() {
-        super();
     }
 
     // ===================================================================================

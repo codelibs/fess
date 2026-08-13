@@ -42,7 +42,6 @@ public abstract class ScoreBooster {
      * Constructor.
      */
     public ScoreBooster() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ScoreBooster.class);

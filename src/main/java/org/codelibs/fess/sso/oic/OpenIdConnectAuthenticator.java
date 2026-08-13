@@ -170,13 +170,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      * @param base64String the Base64 string to decode
      * @return the decoded bytes, or null if input is null
      */
-    protected byte[] decodeBase64(String base64String) {
+    protected byte[] decodeBase64(final String base64String) {
         if (base64String == null) {
             return null;
         }
         try {
             return BASE64_DECODER.decode(base64String);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             if (e.getCause() instanceof DecodingException) {
                 return BASE64URL_DECODER.decode(base64String.trim());
             }

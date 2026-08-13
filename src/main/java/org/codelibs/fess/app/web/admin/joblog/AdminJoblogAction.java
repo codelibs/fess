@@ -42,7 +42,6 @@ public class AdminJoblogAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminJoblogAction() {
-        super();
     }
 
     /** The role name for job log administration. */

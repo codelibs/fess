@@ -45,7 +45,6 @@ public class PathMappingHelper extends AbstractConfigHelper {
      * Default constructor.
      */
     public PathMappingHelper() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(PathMappingHelper.class);

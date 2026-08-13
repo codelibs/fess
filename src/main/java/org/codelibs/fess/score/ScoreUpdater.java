@@ -29,7 +29,6 @@ public class ScoreUpdater {
      * Constructor.
      */
     public ScoreUpdater() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ScoreUpdater.class);

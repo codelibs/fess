@@ -57,7 +57,6 @@ public class AdminStorageAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminStorageAction() {
-        super();
     }
 
     /** Role name for admin storage operations */
@@ -363,20 +362,6 @@ public class AdminStorageAction extends FessAdminAction {
 
         list.addAll(fileList);
         return list;
-    }
-
-    /**
-     * Extracts the file name from a full object path.
-     *
-     * @param objectName the full object path
-     * @return the file name portion of the path
-     */
-    private static String getName(final String objectName) {
-        final String[] values = objectName.split("/");
-        if (values.length == 0) {
-            return StringUtil.EMPTY;
-        }
-        return values[values.length - 1];
     }
 
     /**

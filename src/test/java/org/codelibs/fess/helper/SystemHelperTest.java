@@ -1122,7 +1122,7 @@ public class SystemHelperTest extends UnitFessTestCase {
             }
 
             @Override
-            public int getPasswordMaxLengthAsInteger() {
+            public int getPasswordMaxLengthOrDefault() {
                 // Explicit override: avoids getAsInteger NPE in slim test harness.
                 return 100;
             }

@@ -55,7 +55,6 @@ public class KeyMatchHelper extends AbstractConfigHelper {
      * Default constructor.
      */
     public KeyMatchHelper() {
-        super();
     }
 
     /**

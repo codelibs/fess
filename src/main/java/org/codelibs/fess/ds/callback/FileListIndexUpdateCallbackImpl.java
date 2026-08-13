@@ -294,13 +294,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     logger.debug("Using exclude pattern: {}", pattern);
                 }
             }
-            if (paramMap.get(URL_EXCLUDE_PATTERN) instanceof final Pattern pattern) {
-                if (pattern.matcher(url).matches()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Skipping URL {} due to exclude pattern: {}", url, pattern);
-                    }
-                    return false;
+            if ((paramMap.get(URL_EXCLUDE_PATTERN) instanceof final Pattern pattern) && pattern.matcher(url).matches()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Skipping URL {} due to exclude pattern: {}", url, pattern);
                 }
+                return false;
             }
         }
         return true;

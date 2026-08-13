@@ -379,13 +379,11 @@ public class PluginHelper {
      */
     public void installArtifact(final Artifact artifact) {
         switch (artifact.getType()) {
-        case THEME:
+        case THEME -> {
             install(artifact);
             ComponentUtil.getThemeHelper().install(artifact);
-            break;
-        default:
-            install(artifact);
-            break;
+        }
+        default -> install(artifact);
         }
     }
 
@@ -450,13 +448,11 @@ public class PluginHelper {
         }
 
         switch (artifact.getType()) {
-        case THEME:
+        case THEME -> {
             ComponentUtil.getThemeHelper().uninstall(artifact);
             uninstall(fileName, jarPath);
-            break;
-        default:
-            uninstall(fileName, jarPath);
-            break;
+        }
+        default -> uninstall(fileName, jarPath);
         }
 
     }

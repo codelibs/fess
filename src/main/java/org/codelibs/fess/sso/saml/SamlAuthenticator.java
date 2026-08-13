@@ -169,7 +169,6 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * Constructor.
      */
     public SamlAuthenticator() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(SamlAuthenticator.class);
@@ -697,10 +696,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
      *            several live logins.
      */
     protected void logUnmatchedSamlResponse(final int pendingCount) {
-        logger.warn("Received a SAML response with no matching AuthnRequest ID in the session ({} pending)."
-                + " The assertion consumer service is a cross-site POST, which does not carry a SameSite=Lax cookie;"
-                + " see tomcat.sameSiteCookies in tomcat_config.properties."
-                + " An IdP-initiated (unsolicited) response is rejected for the same reason.", pendingCount);
+        logger.warn("""
+                Received a SAML response with no matching AuthnRequest ID in the session ({} pending).\
+                 The assertion consumer service is a cross-site POST, which does not carry a SameSite=Lax cookie;\
+                 see tomcat.sameSiteCookies in tomcat_config.properties.\
+                 An IdP-initiated (unsolicited) response is rejected for the same reason.""", pendingCount);
     }
 
     /**
@@ -726,11 +726,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
      *            the session still had in flight before the TTL removed them.
      */
     protected void logUnmatchedSamlResponseAfterExpiry(final int expiredCount) {
-        logger.warn(
-                "Received a SAML response after all {} pending AuthnRequest ID(s) of the session had expired."
-                        + " The session cookie did reach this server, so this is not the SameSite case:"
-                        + " the login took longer to finish at the IdP than {} allows, and starting it again resolves it.",
-                expiredCount, SAML_REQUEST_ID_TTL);
+        logger.warn("""
+                Received a SAML response after all {} pending AuthnRequest ID(s) of the session had expired.\
+                 The session cookie did reach this server, so this is not the SameSite case:\
+                 the login took longer to finish at the IdP than {} allows, and starting it again resolves it.""", expiredCount,
+                SAML_REQUEST_ID_TTL);
     }
 
     /**
@@ -763,11 +763,12 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * reported by that one with a pending count of zero.</p>
      */
     protected void logUnmatchedSamlResponseAfterSessionExpiry() {
-        logger.warn("Received a SAML response after the session it belongs to had expired."
-                + " The browser did return its session cookie, so this is not the SameSite case:"
-                + " the session, and with it the AuthnRequest ID it held, was discarded by the"
-                + " container's session timeout rather than by {}, so raising that value does not help."
-                + " Starting the login again resolves it.", SAML_REQUEST_ID_TTL);
+        logger.warn("""
+                Received a SAML response after the session it belongs to had expired.\
+                 The browser did return its session cookie, so this is not the SameSite case:\
+                 the session, and with it the AuthnRequest ID it held, was discarded by the\
+                 container's session timeout rather than by {}, so raising that value does not help.\
+                 Starting the login again resolves it.""", SAML_REQUEST_ID_TTL);
     }
 
     /**
@@ -827,9 +828,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
         synchronized (session) {
             final Object stored = session.getAttribute(SAML_STATE);
             if (stored instanceof ConcurrentHashMap) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Long> requestIdMap = (Map<String, Long>) stored;
-                return requestIdMap;
+                return (Map<String, Long>) stored;
             }
             final Map<String, Long> concurrentMap = new ConcurrentHashMap<>();
             if (stored instanceof final String requestId && StringUtil.isNotBlank(requestId)) {
