@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -1728,6 +1729,86 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         }
     }
 
+    // ========== Injectable prompt base tests ==========
+
+    @Test
+    public void test_evaluateResults_usesConfiguredEvaluationSystemPrompt() {
+        client.setTestEvaluationSystemPrompt("custom evaluator instructions");
+        client.setChatResponse("{\"relevant_indexes\":[1],\"has_relevant\":true}");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("doc_id", "1");
+        doc.put("title", "Fess");
+        doc.put("content", "Fess is a search server.");
+        searchResults.add(doc);
+
+        client.evaluateResults("What is Fess?", "Fess", searchResults);
+
+        final LlmChatRequest request = client.getLastChatRequest();
+        assertEquals("system", request.getMessages().get(0).getRole());
+        assertEquals("custom evaluator instructions", request.getMessages().get(0).getContent());
+    }
+
+    @Test
+    public void test_buildIntentDetectionSystemPrompt_appendsConfiguredGuard() {
+        client.setTestIntentDetectionPrompt("base intent prompt");
+        client.setTestIntentDetectionGuardPrompt("custom guard sentence");
+
+        final String prompt = client.testBuildIntentDetectionSystemPrompt();
+
+        assertEquals("base intent prompt\n\ncustom guard sentence", prompt);
+    }
+
+    @Test
+    public void test_getLanguageInstruction_usesConfiguredTemplate() {
+        client.setTestUserLocale(Locale.JAPANESE);
+        client.setTestLanguageInstructionPrompt("Answer in {{language}} please.");
+
+        assertEquals("Answer in Japanese please.", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_emptyForEnglishRegardlessOfTemplate() {
+        client.setTestUserLocale(Locale.ENGLISH);
+        client.setTestLanguageInstructionPrompt("Answer in {{language}} please.");
+
+        assertEquals("", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_buildContext_usesConfiguredReferenceDocumentsGuard() {
+        client.setTestReferenceDocumentsGuardPrompt("custom reference guard");
+
+        final List<Map<String, Object>> documents = new ArrayList<>();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "Title");
+        doc.put("content", "Content");
+        documents.add(doc);
+
+        final String context = client.testBuildContext(documents);
+
+        assertTrue(context.startsWith("--- REFERENCE DOCUMENTS START ---\ncustom reference guard\n\n"));
+        assertTrue(context.endsWith("--- REFERENCE DOCUMENTS END ---\n"));
+    }
+
+    @Test
+    public void test_buildEvaluationPrompt_usesConfiguredSearchResultsGuard() {
+        client.setTestEvaluationPrompt("eval prompt\n{{searchResults}}");
+        client.setTestSearchResultsGuardPrompt("custom results guard");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "Title");
+        doc.put("content", "Content");
+        searchResults.add(doc);
+
+        final String prompt = client.testBuildEvaluationPrompt("question", "query", searchResults);
+
+        assertTrue(prompt.contains("--- SEARCH RESULTS START ---\ncustom results guard\n\n"));
+        assertTrue(prompt.contains("--- SEARCH RESULTS END ---\n"));
+    }
+
     // ========== Testable subclass ==========
 
     @FunctionalInterface
@@ -1740,6 +1821,13 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         private String testIntentDetectionPrompt = "{{conversationHistory}}\nQuestion: {{userMessage}}\n{{languageInstruction}}";
         private String testSystemPrompt = "You are a test assistant.";
         private String testSummarySystemPrompt = "{{systemPrompt}}\n{{documentContent}}\n{{languageInstruction}}";
+        private String testEvaluationPrompt = "eval prompt";
+        private String testEvaluationSystemPrompt = "evaluation system prompt";
+        private String testIntentDetectionGuardPrompt = "intent guard prompt";
+        private String testLanguageInstructionPrompt = "IMPORTANT: You MUST respond in {{language}}.";
+        private String testSearchResultsGuardPrompt = "search results guard";
+        private String testReferenceDocumentsGuardPrompt = "reference documents guard";
+        private Locale testUserLocale;
         private int testContextMaxChars = 50000;
         private String chatResponseContent;
         private String chatResponseFinishReason;
@@ -1801,6 +1889,34 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
             this.testSummarySystemPrompt = prompt;
         }
 
+        void setTestEvaluationPrompt(final String prompt) {
+            this.testEvaluationPrompt = prompt;
+        }
+
+        void setTestEvaluationSystemPrompt(final String prompt) {
+            this.testEvaluationSystemPrompt = prompt;
+        }
+
+        void setTestIntentDetectionGuardPrompt(final String prompt) {
+            this.testIntentDetectionGuardPrompt = prompt;
+        }
+
+        void setTestLanguageInstructionPrompt(final String prompt) {
+            this.testLanguageInstructionPrompt = prompt;
+        }
+
+        void setTestSearchResultsGuardPrompt(final String prompt) {
+            this.testSearchResultsGuardPrompt = prompt;
+        }
+
+        void setTestReferenceDocumentsGuardPrompt(final String prompt) {
+            this.testReferenceDocumentsGuardPrompt = prompt;
+        }
+
+        void setTestUserLocale(final Locale locale) {
+            this.testUserLocale = locale;
+        }
+
         void setTestContextMaxChars(final int maxChars) {
             this.testContextMaxChars = maxChars;
         }
@@ -1849,6 +1965,14 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
 
         String testBuildContext(final List<Map<String, Object>> documents) {
             return buildContext(documents, "answer");
+        }
+
+        String testBuildEvaluationPrompt(final String userMessage, final String query, final List<Map<String, Object>> searchResults) {
+            return buildEvaluationPrompt(userMessage, query, searchResults);
+        }
+
+        String testGetLanguageInstruction() {
+            return getLanguageInstruction();
         }
 
         String testStripHtmlTags(final String text) {
@@ -1981,7 +2105,7 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
 
         @Override
         protected String getEvaluationPrompt() {
-            return "eval prompt";
+            return testEvaluationPrompt;
         }
 
         @Override
@@ -2007,6 +2131,36 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         @Override
         protected String getQueryRegenerationPrompt() {
             return "query regen prompt {{userMessage}} {{failedQuery}} {{failureReason}} {{languageInstruction}}";
+        }
+
+        @Override
+        protected String getEvaluationSystemPrompt() {
+            return testEvaluationSystemPrompt;
+        }
+
+        @Override
+        protected String getIntentDetectionGuardPrompt() {
+            return testIntentDetectionGuardPrompt;
+        }
+
+        @Override
+        protected String getLanguageInstructionPrompt() {
+            return testLanguageInstructionPrompt;
+        }
+
+        @Override
+        protected String getSearchResultsGuardPrompt() {
+            return testSearchResultsGuardPrompt;
+        }
+
+        @Override
+        protected String getReferenceDocumentsGuardPrompt() {
+            return testReferenceDocumentsGuardPrompt;
+        }
+
+        @Override
+        protected Locale getUserLocale() {
+            return testUserLocale != null ? testUserLocale : super.getUserLocale();
         }
 
         @Override
