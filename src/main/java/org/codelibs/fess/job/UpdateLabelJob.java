@@ -87,7 +87,7 @@ public class UpdateLabelJob {
             });
             resultBuf.append(count).append(" documents").append("\n");
         } catch (final Exception e) {
-            logger.error("Could not update labels.", e);
+            logger.warn("Could not update labels.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 

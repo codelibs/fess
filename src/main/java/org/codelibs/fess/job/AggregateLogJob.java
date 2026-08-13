@@ -49,7 +49,7 @@ public class AggregateLogJob {
         try {
             searchLogHelper.storeSearchLog();
         } catch (final Exception e) {
-            logger.error("Failed to store a search log.", e);
+            logger.warn("Failed to store a search log.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 

@@ -50,7 +50,7 @@ public class PurgeThumbnailJob {
             final long count = ComponentUtil.getThumbnailManager().purge(getExpiry());
             return "Deleted " + count + " thumbnail files.";
         } catch (final Exception e) {
-            logger.error("Failed to purge thumbnails.", e);
+            logger.warn("Failed to purge thumbnails.", e);
             return e.getMessage();
         }
     }
