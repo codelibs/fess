@@ -133,6 +133,14 @@ import jakarta.servlet.http.HttpSession;
  * saml.default.groups=user
  * saml.default.roles=user
  * </pre>
+ * <p>An assertion that carries the same attribute name on more than one element is refused, and
+ * the login fails before any of the mapping above is reached. An IdP that emits one
+ * {@code <Attribute>} element per value produces such an assertion -- Keycloak does unless the
+ * {@code single} option of its role and group mappers is enabled -- and the repeats are accepted
+ * and merged only with:</p>
+ * <pre>
+ * saml.security.allow_duplicated_attribute_name=true
+ * </pre>
  *
  * <h2>Security Settings (Production)</h2>
  * <p>For production environments, consider enabling these security features:</p>
@@ -484,7 +492,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
                             // request can be repeated for the whole TTL. A stack trace per attempt
                             // would let an unauthenticated client fill the log; SsoAction already
                             // makes this split for SsoStateException.
-                            logger.warn("Authentication failed: {}", describeSamlFailure(e));
+                            if (isDuplicatedAttributeName(e)) {
+                                logDuplicatedAttributeName();
+                            } else {
+                                logger.warn("Authentication failed: {}", describeSamlFailure(e));
+                            }
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Authentication failed.", e);
                             }
@@ -769,6 +781,58 @@ public class SamlAuthenticator implements SsoAuthenticator {
                  the session, and with it the AuthnRequest ID it held, was discarded by the\
                  container's session timeout rather than by {}, so raising that value does not help.\
                  Starting the login again resolves it.""", SAML_REQUEST_ID_TTL);
+    }
+
+    /**
+     * Returns whether the given failure is the library refusing an assertion that carries the same
+     * attribute name more than once.
+     *
+     * <p>Matched on {@link ValidationException#DUPLICATED_ATTRIBUTE_NAME_FOUND} rather than on the
+     * message, which is the library's to change.</p>
+     *
+     * @param e The failure that ended the login.
+     * @return True if the assertion repeated an attribute name.
+     */
+    protected boolean isDuplicatedAttributeName(final SAMLException e) {
+        return e instanceof final ValidationException ve && ve.getErrorCode() == ValidationException.DUPLICATED_ATTRIBUTE_NAME_FOUND;
+    }
+
+    /**
+     * Logs the one line reported when the IdP put the same attribute name on more than one
+     * element of the assertion.
+     *
+     * <p>Told apart from the generic failure line because the generic one -- "Found an Attribute
+     * element with duplicated Name" -- names a fact about the XML and leaves an administrator with
+     * nothing to change. The setting that accepts the repeats exists, but nothing in Fess mentions
+     * it, so without this line the deployment is a dead end.</p>
+     *
+     * <p>It is worth its own line because of how it is reached rather than how rare it is: this
+     * refusal happens in {@code Auth#processResponse} after {@code SamlResponse#isValid} has
+     * already returned true, while the attributes are being read, so the signature, the
+     * InResponseTo comparison and the replay check all passed. An administrator who is told only
+     * that an assertion was refused reasonably suspects the certificate or the clock, none of
+     * which is involved.</p>
+     *
+     * <p>Keycloak is named because it is listed as a supported IdP and produces this on a stock
+     * configuration: its role and group mappers emit one {@code <Attribute>} element per value
+     * unless their {@code single} option is enabled, and every Keycloak account carries several
+     * default realm roles, so every login of every user fails. The failure does not depend on
+     * Fess mapping those attributes -- a deployment that sets no
+     * {@code saml.attribute.role.name} at all fails identically, because the refusal is in the
+     * library, before Fess is given anything to map.</p>
+     *
+     * <p>The pending AuthnRequest ID is not consumed by this failure, so a login retried after the
+     * IdP or Fess is reconfigured still has its ID to match against.</p>
+     */
+    protected void logDuplicatedAttributeName() {
+        logger.warn("""
+                The IdP repeated an attribute name in the SAML assertion, which is refused, so the login failed\
+                 while the attributes were being read; the assertion itself passed validation and no group or\
+                 role was mapped. An IdP that emits one <Attribute> element per value produces this: Keycloak\
+                 does unless the "single" option of its role and group mappers is enabled, and every Keycloak\
+                 account carries several default roles. Either aggregate each attribute into a single element\
+                 at the IdP, or set {}=true in system.properties to accept the repeats and merge their values.""",
+                SAML_PREFIX + "security.allow_duplicated_attribute_name");
     }
 
     /**

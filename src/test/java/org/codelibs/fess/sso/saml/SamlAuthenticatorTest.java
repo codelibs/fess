@@ -1107,6 +1107,52 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLoginCredential_duplicatedAttributeNameNamesTheSettingThatAcceptsIt() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            final MockletHttpServletRequest request = postRawSamlResponse(authenticator, BROKEN_XML);
+            // what an IdP that emits one <Attribute> element per value produces; the library
+            // raises it from getAttributes(), after the assertion has already validated
+            final RuntimeException failure = new ValidationException("Found an Attribute element with duplicated Name",
+                    ValidationException.DUPLICATED_ATTRIBUTE_NAME_FOUND);
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                assertNull(failingAuthenticator(failure).getLoginCredential());
+
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                final String warning = appender.warnings().get(0);
+                // the setting is the whole point of the line: without it an administrator is told
+                // a fact about the XML and has nothing to change
+                assertTrue(warning, warning.contains("saml.security.allow_duplicated_attribute_name"));
+                // and it must not be mistaken for the two cookie/timing diagnoses
+                assertFalse(warning, warning.contains("tomcat.sameSiteCookies"));
+                assertFalse(warning, warning.contains("saml.request.id.ttl"));
+                appender.eventsAt(Level.WARN).forEach(e -> assertNull(e.getThrown(), e.getMessage().getFormattedMessage()));
+            } finally {
+                appender.detach();
+            }
+            // the ID is still there, so the login works as soon as either side is reconfigured
+            assertEquals(1, pendingRequestIds(request.getSession(false)).size());
+        } finally {
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_isDuplicatedAttributeName_matchesOnlyThatErrorCode() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        assertTrue(authenticator
+                .isDuplicatedAttributeName(new ValidationException("duplicated", ValidationException.DUPLICATED_ATTRIBUTE_NAME_FOUND)));
+        // the code a retried candidate produces, which processSamlResponse handles on its own
+        assertFalse(authenticator.isDuplicatedAttributeName(new ValidationException("mismatch", ValidationException.WRONG_INRESPONSETO)));
+        assertFalse(authenticator.isDuplicatedAttributeName(new SAMLException("not a validation failure")));
+    }
+
+    @Test
     public void test_hasExpiredSession_needsASessionIdThatIsNoLongerValid() throws Exception {
         final SamlAuthenticator authenticator = new SamlAuthenticator();
         // one request, walked through the three states, because getMockRequest() hands out the
