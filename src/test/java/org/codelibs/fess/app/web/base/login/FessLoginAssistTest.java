@@ -15,14 +15,19 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.PasswordHashHelper;
+import org.codelibs.fess.ldap.LdapUser;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
@@ -31,8 +36,11 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.time.TimeManager;
+import org.lastaflute.web.login.TypicalLoginAssist;
 
 /**
  * Unit tests for {@link FessLoginAssist}, focusing on the BCrypt-aware local
@@ -340,20 +348,202 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
+    // needsLoginSessionSyncCheck
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_needsSyncCheck_samlUser_staleCheckTime_skipsCheck() {
+        final FessUserBean bean = new FessUserBean(newSamlUser("saml-admin"));
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_ldapUser_staleCheckTime_skipsCheck() {
+        final FessUserBean bean = new FessUserBean(new LdapUser(new Hashtable<>(), "ldap-admin"));
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_openIdUser_staleCheckTime_skipsCheck() {
+        final FessUserBean bean = new FessUserBean(newOpenIdUser("oidc-admin"));
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_externalUser_neverCheckedYet_skipsCheck() {
+        // super returns true for "no check yet"; the external-user guard must run first.
+        final FessUserBean bean = new FessUserBean(newSamlUser("saml-admin"));
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.empty(), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_localUser_staleCheckTime_performsCheck() {
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        assertTrue(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_localUser_withinInterval_skipsCheck() {
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(FRESH_CHECK_DT), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_localUser_neverCheckedYet_performsCheck() {
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        assertTrue(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.empty(), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_emptyUserBean_skipsCheck() {
+        final FessUserBean bean = FessUserBean.empty(); // wraps a null FessUser
+        assertNull(bean.getFessUser());
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
+    }
+
+    @Test
+    public void test_needsSyncCheck_nullBackedUserBean_skipsCheck() {
+        final FessUserBean bean = new FessUserBean(null);
+        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.empty(), NOW));
+    }
+
+    // ---------------------------------------------------------------------
+    // syncCheckLoginSessionIfNeeds (end-to-end through TypicalLoginAssist)
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_syncCheckLoginSession_externalUser_keepsSessionWithoutQuery() {
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, null);
+        final FessUserBean bean = new FessUserBean(newSamlUser("saml-admin"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertTrue(assist.callSyncCheckLoginSession(bean));
+        assertEquals(0, bhv.selectCalls.get());
+        assertEquals(0, assist.logoutCalls.get());
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_localUserDeleted_logsOut() {
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, null); // the document is gone
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertFalse(assist.callSyncCheckLoginSession(bean));
+        assertEquals(1, bhv.selectCalls.get());
+        assertEquals(1, assist.logoutCalls.get());
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_localUserStillPresent_keepsSession() {
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, newLocalUser("alice"));
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertTrue(assist.callSyncCheckLoginSession(bean));
+        assertEquals(1, bhv.selectCalls.get());
+        assertEquals(0, assist.logoutCalls.get());
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_localUserWithinInterval_keepsSessionWithoutQuery() {
+        // pins that the fixed clock is honoured: with the real clock, FRESH_CHECK_DT would be
+        // stale and the check would issue a query.
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, newLocalUser("alice"));
+        final FessUserBean bean = new FessUserBean(newLocalUser("alice"));
+        bean.manageLastestSyncCheckTime(FRESH_CHECK_DT);
+
+        assertTrue(assist.callSyncCheckLoginSession(bean));
+        assertEquals(0, bhv.selectCalls.get());
+        assertEquals(0, assist.logoutCalls.get());
+    }
+
+    @Test
+    public void test_syncCheckLoginSession_ldapUserWithLocalDocument_keepsSessionWithoutQuery() {
+        // the behaviour the javadoc says is given up: resolveCredential prefers LDAP, so a user
+        // present in both LDAP and the user index logs in as an LdapUser. Deleting that user in
+        // the admin UI no longer ends the session, because the check is skipped, not answered.
+        final ExposedLoginAssist assist = newExposedAssist();
+        final CountingUserBhv bhv = installCountingUserBhv(assist, newLocalUser("bob")); // document exists
+        final FessUserBean bean = new FessUserBean(new LdapUser(new Hashtable<>(), "bob"));
+        bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
+
+        assertTrue(assist.callSyncCheckLoginSession(bean));
+        assertEquals(0, bhv.selectCalls.get());
+        assertEquals(0, assist.logoutCalls.get());
+    }
+
+    // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
 
+    /** Fixed "now" used by the sync-check tests. */
+    private static final LocalDateTime NOW = LocalDateTime.of(2026, 1, 2, 3, 4, 5);
+
+    /** Older than the 300-second default sync-check interval. */
+    private static final LocalDateTime STALE_CHECK_DT = NOW.minusSeconds(310);
+
+    /** Well within the 300-second default sync-check interval. */
+    private static final LocalDateTime FRESH_CHECK_DT = NOW.minusSeconds(10);
+
+    private static SamlCredential.SamlUser newSamlUser(final String nameId) {
+        return new SamlCredential.SamlUser(nameId, "session-index", null, null, null, new String[0], new String[] { "admin" });
+    }
+
+    private static OpenIdConnectCredential.OpenIdUser newOpenIdUser(final String name) {
+        return new OpenIdConnectCredential.OpenIdUser(name, new String[0], new String[] { "admin" });
+    }
+
+    private static User newLocalUser(final String name) {
+        final User user = new User();
+        user.setName(name);
+        return user;
+    }
+
+    private ExposedLoginAssist newExposedAssist() {
+        final ExposedLoginAssist assist = new ExposedLoginAssist();
+        setField(TypicalLoginAssist.class, assist, "timeManager", newFixedTimeManager(NOW));
+        return assist;
+    }
+
+    private static TimeManager newFixedTimeManager(final LocalDateTime fixed) {
+        return (TimeManager) Proxy.newProxyInstance(TimeManager.class.getClassLoader(), new Class<?>[] { TimeManager.class },
+                (proxy, method, args) -> {
+                    final String name = method.getName();
+                    if ("currentDateTime".equals(name)) {
+                        return fixed;
+                    }
+                    if ("toString".equals(name)) {
+                        return "fixedTimeManager:" + fixed;
+                    }
+                    if ("hashCode".equals(name)) {
+                        return Integer.valueOf(System.identityHashCode(proxy));
+                    }
+                    if ("equals".equals(name)) {
+                        return Boolean.valueOf(proxy == args[0]);
+                    }
+                    throw new UnsupportedOperationException(name);
+                });
+    }
+
     private void installUserBhv(final User stored) {
-        final UserBhv bhv = new UserBhv() {
-            @Override
-            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
-                return stored == null ? OptionalEntity.empty() : OptionalEntity.of(stored);
-            }
-        };
+        installCountingUserBhv(loginAssist, stored);
+    }
+
+    private CountingUserBhv installCountingUserBhv(final FessLoginAssist target, final User stored) {
+        final CountingUserBhv bhv = new CountingUserBhv(stored);
+        setField(FessLoginAssist.class, target, "userBhv", bhv);
+        return bhv;
+    }
+
+    private static void setField(final Class<?> declaringType, final Object target, final String name, final Object value) {
         try {
-            final java.lang.reflect.Field f = FessLoginAssist.class.getDeclaredField("userBhv");
+            final java.lang.reflect.Field f = declaringType.getDeclaredField(name);
             f.setAccessible(true);
-            f.set(loginAssist, bhv);
+            f.set(target, value);
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
@@ -378,6 +568,39 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     // ---------------------------------------------------------------------
     // Fakes
     // ---------------------------------------------------------------------
+
+    /** Counts the {@code .fess_user} lookups issued by the login-session sync check. */
+    private static class CountingUserBhv extends UserBhv {
+        final AtomicInteger selectCalls = new AtomicInteger(0);
+        private final User stored;
+
+        CountingUserBhv(final User stored) {
+            this.stored = stored;
+        }
+
+        @Override
+        public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+            selectCalls.incrementAndGet();
+            return stored == null ? OptionalEntity.empty() : OptionalEntity.of(stored);
+        }
+    }
+
+    /**
+     * Exposes the protected sync-check entry point of {@code TypicalLoginAssist} and replaces
+     * {@code logout()} with a counter, so the whole flow can run without a servlet session.
+     */
+    private static class ExposedLoginAssist extends FessLoginAssist {
+        final AtomicInteger logoutCalls = new AtomicInteger(0);
+
+        @Override
+        public void logout() {
+            logoutCalls.incrementAndGet();
+        }
+
+        boolean callSyncCheckLoginSession(final FessUserBean userBean) {
+            return syncCheckLoginSessionIfNeeds(userBean);
+        }
+    }
 
     private static class RecordingUserService extends UserService {
         final AtomicInteger updateCalls = new AtomicInteger(0);

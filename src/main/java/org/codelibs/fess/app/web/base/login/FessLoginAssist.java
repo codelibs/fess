@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.base.login;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -183,6 +184,54 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
         // nothing
     }
 
+    // ===================================================================================
+    //                                                                         Login Check
+    //                                                                         ===========
+    // -----------------------------------------------------
+    //                                LoginSession SyncCheck
+    //                                ----------------------
+    /**
+     * Determines whether the login session of the given user bean should be sync-checked.
+     *
+     * <p>The sync check asks "can this user still log in?" and answers it with
+     * {@link #doFindLoginUser(String)}, i.e. a lookup of {@link FessUserBean#getUserId()} in the
+     * {@code fess_user.user} index; when that lookup finds nothing,
+     * {@code syncCheckLoginSessionIfNeeds} logs the user out and invalidates the session. Only a
+     * {@link User} entity lives in that index, so only for a {@link User} is the question
+     * answerable, and the check is restricted to one here.</p>
+     *
+     * <p>A user authenticated by an external identity provider (LDAP, SAML, OpenID Connect, Entra
+     * ID or SPNEGO) is built from the provider's response, and no login path writes a user
+     * document for one. Without this restriction such a user is logged out at the first check
+     * interval and sent to the local password form, which offers no way back to the identity
+     * provider. For them the identity provider, not Fess, owns the account lifecycle.</p>
+     *
+     * <p>Local users are unaffected: deleting one in the admin UI still ends that user's admin
+     * session within the check interval. What is given up is that same revocation for an
+     * externally authenticated user who <em>does</em> have a local document, which is not merely
+     * hypothetical - {@link #resolveCredential(CredentialResolver)} prefers LDAP over the local
+     * index, so with LDAP configured a user present in both logs in as an
+     * {@link org.codelibs.fess.ldap.LdapUser}, and with {@code ldap.admin.enabled} the admin UI
+     * creates and deletes the LDAP entry and the user document together. Deleting such a user
+     * still blocks further logins, but no longer ends an admin session that is already open.</p>
+     *
+     * @param userBean the logged-in user bean to be checked (NotNull)
+     * @param checkDt the date-time of the latest sync check, empty if not checked yet (NotNull)
+     * @param currentDt the current date-time (NotNull)
+     * @return true if the sync check should be performed
+     */
+    @Override
+    protected boolean needsLoginSessionSyncCheck(final FessUserBean userBean, final OptionalThing<LocalDateTime> checkDt,
+            final LocalDateTime currentDt) {
+        if (!(userBean.getFessUser() instanceof User)) {
+            return false;
+        }
+        return super.needsLoginSessionSyncCheck(userBean, checkDt, currentDt);
+    }
+
+    // -----------------------------------------------------
+    //                                            Permission
+    //                                            ----------
     /**
      * Checks if the current user has permission to access the given resource.
      * For admin actions, verifies that the user has appropriate admin roles or
