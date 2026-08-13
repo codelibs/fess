@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -193,7 +192,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             final String proxyUsername = paramMap.get(CRAWLER_WEB_PREFIX + "proxyUsername");
             final String proxyPassword = paramMap.get(CRAWLER_WEB_PREFIX + "proxyPassword");
             if (proxyUsername != null && proxyPassword != null) {
-                factoryParamMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+                factoryParamMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY,
+                        CrawlingConfig.createProxyCredentials(proxyUsername, proxyPassword));
             }
         } else {
             initializeDefaultHttpProxy(factoryParamMap);

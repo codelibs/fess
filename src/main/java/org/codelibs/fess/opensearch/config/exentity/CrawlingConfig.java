@@ -18,12 +18,13 @@ package org.codelibs.fess.opensearch.config.exentity;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
+import org.codelibs.fess.crawler.client.http.config.CredentialsConfig;
+import org.codelibs.fess.crawler.client.http.config.WebAuthenticationConfig;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -50,6 +51,23 @@ public interface CrawlingConfig {
 
     Map<String, String> getConfigParameterMap(ConfigName name);
 
+    /**
+     * Creates the credentials to authenticate with the proxy, in the library-independent shape the
+     * crawler clients read them in.
+     *
+     * @param username the proxy user name
+     * @param password the proxy password
+     * @return the proxy credentials
+     */
+    static WebAuthenticationConfig createProxyCredentials(final String username, final String password) {
+        final CredentialsConfig credentials = new CredentialsConfig();
+        credentials.setUsername(username);
+        credentials.setPassword(password);
+        final WebAuthenticationConfig config = new WebAuthenticationConfig();
+        config.setCredentials(credentials);
+        return config;
+    }
+
     default void initializeDefaultHttpProxy(final Map<String, Object> paramMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String proxyHost = fessConfig.getHttpProxyHost();
@@ -60,7 +78,7 @@ public interface CrawlingConfig {
             final String proxyUsername = fessConfig.getHttpProxyUsername();
             final String proxyPassword = fessConfig.getHttpProxyPassword();
             if (proxyUsername != null && proxyPassword != null) {
-                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, createProxyCredentials(proxyUsername, proxyPassword));
             }
 
         }
