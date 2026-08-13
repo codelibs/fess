@@ -17,6 +17,7 @@ package org.codelibs.fess.sso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,13 +69,7 @@ public class SsoManager {
      *         or no credential could be obtained
      */
     public LoginCredential getLoginCredential() {
-        if (available()) {
-            final SsoAuthenticator authenticator = getAuthenticator();
-            if (authenticator != null) {
-                return authenticator.getLoginCredential();
-            }
-        }
-        return null;
+        return withAuthenticator(SsoAuthenticator::getLoginCredential);
     }
 
     /**
@@ -84,13 +79,7 @@ public class SsoManager {
      * @return The action response from the SSO authenticator, or null if SSO is not available
      */
     public ActionResponse getResponse(final SsoResponseType responseType) {
-        if (available()) {
-            final SsoAuthenticator authenticator = getAuthenticator();
-            if (authenticator != null) {
-                return authenticator.getResponse(responseType);
-            }
-        }
-        return null;
+        return withAuthenticator(authenticator -> authenticator.getResponse(responseType));
     }
 
     /**
@@ -100,13 +89,23 @@ public class SsoManager {
      * @return The logout URL from the SSO authenticator, or null if SSO is not available
      */
     public String logout(final FessUserBean user) {
-        if (available()) {
-            final SsoAuthenticator authenticator = getAuthenticator();
-            if (authenticator != null) {
-                return authenticator.logout(user);
-            }
+        return withAuthenticator(authenticator -> authenticator.logout(user));
+    }
+
+    /**
+     * Applies the given operation to the configured SSO authenticator.
+     *
+     * @param <T> The result type of the operation.
+     * @param operation The operation to apply.
+     * @return The result of the operation, or null if SSO is unavailable or no authenticator is
+     *         registered for the configured type.
+     */
+    protected <T> T withAuthenticator(final Function<SsoAuthenticator, T> operation) {
+        if (!available()) {
+            return null;
         }
-        return null;
+        final SsoAuthenticator authenticator = getAuthenticator();
+        return authenticator != null ? operation.apply(authenticator) : null;
     }
 
     /**
@@ -142,7 +141,7 @@ public class SsoManager {
      * @return Array of all registered SSO authenticators
      */
     public SsoAuthenticator[] getAuthenticators() {
-        return authenticatorList.toArray(new SsoAuthenticator[authenticatorList.size()]);
+        return authenticatorList.toArray(new SsoAuthenticator[0]);
     }
 
     /**

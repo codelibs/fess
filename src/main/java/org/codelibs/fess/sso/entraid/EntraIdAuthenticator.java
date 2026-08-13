@@ -37,12 +37,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlException;
@@ -59,14 +57,12 @@ import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
-import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
-import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -217,6 +213,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected static final long MAX_GRAPH_THROTTLE_SECONDS = 60L * 60L;
 
+    /** The Microsoft Graph scope that asks for the permissions granted to the app registration. */
+    protected static final String GRAPH_DEFAULT_SCOPE = "https://graph.microsoft.com/.default";
+
+    /** Base URL of the Microsoft Graph v1.0 endpoint. */
+    protected static final String GRAPH_V1_URL = "https://graph.microsoft.com/v1.0";
+
     /**
      * Scopes requested at the v2.0 authorization endpoint. msal4j already prepends
      * {@code openid profile offline_access} to the token request (its
@@ -224,7 +226,10 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * asked for the same set the token exchange goes on to request, rather than relying on the
      * app registration's static permissions happening to include them.
      */
-    protected static final String V2_SCOPES = "openid profile offline_access https://graph.microsoft.com/.default";
+    protected static final String V2_SCOPES = "openid profile offline_access " + GRAPH_DEFAULT_SCOPE;
+
+    /** {@link #V2_SCOPES} percent-encoded once, since it never varies. */
+    protected static final String V2_SCOPES_ENCODED = URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET);
 
     /**
      * Response parameters whose values are credentials. Their values are truncated before being
@@ -463,10 +468,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         storeStateInSession(request.getSession(), state, nonce);
 
         final String responseMode = getResponseMode();
-        final String authUrl = getAuthority() + getTenant() + "/oauth2/v2.0/authorize?response_type=code&scope="
-                + URLEncoder.encode(V2_SCOPES, Constants.UTF_8_CHARSET) + "&response_mode=" + responseMode + "&redirect_uri="
-                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
-                + "&nonce=" + nonce;
+        final String authUrl = getAuthorityUrl() + "oauth2/v2.0/authorize?response_type=code&scope=" + V2_SCOPES_ENCODED + "&response_mode="
+                + responseMode + "&redirect_uri=" + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id="
+                + getClientId() + "&state=" + state + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {}", authUrl);
         }
@@ -650,7 +654,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("nonce={}", nonce);
             }
-            if (StringUtils.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
+            if (StringUtil.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
                 throw new SsoStateException("could not validate nonce");
             }
         } catch (final SsoLoginException e) {
@@ -695,7 +699,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             }
             final String clientId = getClientId();
             final String clientSecret = getClientSecret();
-            final String authority = getAuthority() + getTenant() + "/";
+            final String authority = getAuthorityUrl();
             if (logger.isDebugEnabled()) {
                 logger.debug("Building a client application for authority={}", authority);
             }
@@ -719,7 +723,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The key.
      */
     protected String buildClientApplicationKey() {
-        return buildClientApplicationKey(getClientId(), getClientSecret(), getAuthority() + getTenant() + "/");
+        return buildClientApplicationKey(getClientId(), getClientSecret(), getAuthorityUrl());
     }
 
     /**
@@ -780,7 +784,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The authentication result containing the access token.
      */
     public IAuthenticationResult getAccessToken(final String refreshToken) {
-        final String authority = getAuthority() + getTenant() + "/";
+        final String authority = getAuthorityUrl();
         if (logger.isDebugEnabled()) {
             logger.debug("refreshToken={}, authority={}", maskSecret(refreshToken), authority);
         }
@@ -788,7 +792,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             final ConfidentialClientApplication app = getClientApplication();
 
             final RefreshTokenParameters parameters =
-                    RefreshTokenParameters.builder(Collections.singleton("https://graph.microsoft.com/.default"), refreshToken).build();
+                    RefreshTokenParameters.builder(Collections.singleton(GRAPH_DEFAULT_SCOPE), refreshToken).build();
 
             final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
@@ -807,7 +811,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The authentication result containing the access token.
      */
     protected IAuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
-        final String authority = getAuthority() + getTenant() + "/";
+        final String authority = getAuthorityUrl();
         final String authCode = authorizationCode.getValue();
         if (logger.isDebugEnabled()) {
             logger.debug("authCode={}, authority={}, uri={}", maskSecret(authCode), authority, currentUri);
@@ -816,7 +820,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             final ConfidentialClientApplication app = getClientApplication();
 
             final AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(authCode, new URI(currentUri))
-                    .scopes(Collections.singleton("https://graph.microsoft.com/.default"))
+                    .scopes(Collections.singleton(GRAPH_DEFAULT_SCOPE))
                     .build();
 
             final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
@@ -838,9 +842,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         try {
             final ConfidentialClientApplication app = getClientApplication();
 
-            final SilentParameters parameters = SilentParameters
-                    .builder(Collections.singleton("https://graph.microsoft.com/.default"), user.getAuthenticationResult().account())
-                    .build();
+            final SilentParameters parameters =
+                    SilentParameters.builder(Collections.singleton(GRAPH_DEFAULT_SCOPE), user.getAuthenticationResult().account()).build();
 
             final IAuthenticationResult result = app.acquireTokenSilently(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (logger.isDebugEnabled()) {
@@ -872,7 +875,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The validated state data.
      */
     protected StateData validateState(final HttpSession session, final String state) {
-        if (StringUtils.isNotEmpty(state)) {
+        if (StringUtil.isNotEmpty(state)) {
             final StateData stateDataInSession = removeStateFromSession(session, state);
             if (stateDataInSession != null) {
                 return stateDataInSession;
@@ -989,8 +992,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
 
         // Retrieve direct group/role memberships; group IDs are collected for the parent walk below.
-        final boolean resolved =
-                processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, "https://graph.microsoft.com/v1.0/me/memberOf");
+        final boolean resolved = processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, GRAPH_V1_URL + "/me/memberOf");
 
         if (logger.isDebugEnabled()) {
             logger.debug("[updateMemberOf] Direct groups retrieved. Total groups: {}, Total roles: {}, Group IDs for parent lookup: {}",
@@ -1025,8 +1027,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             }
         }
 
-        user.setGroups(groupList.stream().distinct().toArray(n -> new String[n]));
-        user.setRoles(roleList.stream().distinct().toArray(n -> new String[n]));
+        user.setGroups(groupList.stream().distinct().toArray(String[]::new));
+        user.setRoles(roleList.stream().distinct().toArray(String[]::new));
         user.resetPermissions();
 
         // No firstResolution guard: the only case that must not touch the state -- a re-resolution
@@ -1070,8 +1072,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param user The Entra ID user to seed.
      */
     public void applyDefaultMemberships(final EntraIdUser user) {
-        user.setGroups(getDefaultGroupList().stream().distinct().toArray(n -> new String[n]));
-        user.setRoles(getDefaultRoleList().stream().distinct().toArray(n -> new String[n]));
+        user.setGroups(getDefaultGroupList().stream().distinct().toArray(String[]::new));
+        user.setRoles(getDefaultRoleList().stream().distinct().toArray(String[]::new));
     }
 
     /**
@@ -1126,6 +1128,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 @SuppressWarnings("unchecked")
                 final List<Map<String, Object>> memberOfList = (List<Map<String, Object>>) contentMap.get("value");
                 final FessConfig fessConfig = ComponentUtil.getFessConfig();
+                final String[] names = fessConfig.getEntraIdPermissionFields();
+                final boolean useDomainServices = fessConfig.isEntraIdUseDomainServices();
                 for (final Map<String, Object> memberOf : memberOfList) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("member={}", memberOf);
@@ -1160,21 +1164,13 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     } else {
                         logger.warn("id is empty: {}", memberOf);
                     }
-                    final String[] names = fessConfig.getEntraIdPermissionFields();
-                    final boolean useDomainServices = fessConfig.isEntraIdUseDomainServices();
                     for (final String name : names) {
                         final String value = (String) memberOf.get(name);
                         if (StringUtil.isNotBlank(value)) {
                             if (logger.isDebugEnabled()) {
                                 logger.debug("{} is a member of {}", name, value);
                             }
-                            if (memberType.contains("group")) {
-                                addGroupOrRoleName(groupList, value, useDomainServices);
-                            } else if (memberType.contains("role")) {
-                                addGroupOrRoleName(roleList, value, useDomainServices);
-                            } else {
-                                addGroupOrRoleName(groupList, value, useDomainServices);
-                            }
+                            addGroupOrRoleName(memberType.contains("role") ? roleList : groupList, value, useDomainServices);
                         } else if (logger.isDebugEnabled()) {
                             logger.debug("{} is empty: {}", name, memberOf);
                         }
@@ -1277,8 +1273,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
         final AtomicBoolean failed = new AtomicBoolean();
         final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, id, depth, failed);
-        StreamUtil.stream(groupsAndRoles.getFirst()).of(stream -> stream.forEach(groupList::add));
-        StreamUtil.stream(groupsAndRoles.getSecond()).of(stream -> stream.forEach(roleList::add));
+        Collections.addAll(groupList, groupsAndRoles.getFirst());
+        Collections.addAll(roleList, groupsAndRoles.getSecond());
         if (logger.isDebugEnabled()) {
             logger.debug("[processParentGroup] Completed for id: {}, depth: {}, added groups: {}, added roles: {}, failed: {}", id, depth,
                     groupsAndRoles.getFirst().length, groupsAndRoles.getSecond().length, failed.get());
@@ -1472,12 +1468,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     logger.debug("[getParentGroup] Recursively getting parent groups for: {}", value);
                 }
                 final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1, failed);
-                StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
-                StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
+                Collections.addAll(groupList, groupsAndRoles.getFirst());
+                Collections.addAll(roleList, groupsAndRoles.getSecond());
             }
         }
-        final Pair<String[], String[]> result = new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
-                roleList.stream().distinct().toArray(n2 -> new String[n2]));
+        final Pair<String[], String[]> result =
+                new Pair<>(groupList.stream().distinct().toArray(String[]::new), roleList.stream().distinct().toArray(String[]::new));
         if (logger.isDebugEnabled()) {
             logger.debug("[getParentGroup] Result for id {}: {} groups, {} roles", id, result.getFirst().length, result.getSecond().length);
         }
@@ -1503,7 +1499,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @throws IOException If Microsoft Graph could not be reached or returned an error.
      */
     protected String[] getMemberGroupIds(final EntraIdUser user, final String id) throws IOException {
-        return getMemberGroupIds(user, id, "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups");
+        return getMemberGroupIds(user, id, GRAPH_V1_URL + "/groups/" + id + "/getMemberGroups");
     }
 
     /**
@@ -1580,7 +1576,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      *         {@link #processGroup(EntraIdUser, List, List, String, String)}.
      */
     protected boolean processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
-        return processGroup(user, groupList, roleList, id, "https://graph.microsoft.com/v1.0/groups/" + id);
+        return processGroup(user, groupList, roleList, id, GRAPH_V1_URL + "/groups/" + id);
     }
 
     /**
@@ -1648,19 +1644,51 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Reads an Entra ID setting, preferring the {@code entraid.*} key and falling back to the
+     * legacy {@code aad.*} key.
+     *
+     * <p>{@code getSystemProperty} only substitutes the default when a key is absent, so a key that
+     * is present but empty would otherwise arrive at the caller as {@code ""}. Both keys are
+     * therefore tested with {@link StringUtil#isBlank(String)} and the default is returned when
+     * neither holds a value.
+     *
+     * @param key The {@code entraid.*} configuration key.
+     * @param legacyKey The legacy {@code aad.*} configuration key.
+     * @param defaultValue The value to use when neither key holds a value.
+     * @return The configured value, or defaultValue.
+     */
+    protected String getEntraIdProperty(final String key, final String legacyKey, final String defaultValue) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String value = fessConfig.getSystemProperty(key);
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        }
+        final String legacyValue = fessConfig.getSystemProperty(legacyKey);
+        return StringUtil.isBlank(legacyValue) ? defaultValue : legacyValue;
+    }
+
+    /**
+     * Reads a comma-separated Entra ID setting as a list of trimmed, non-blank values.
+     *
+     * @param key The {@code entraid.*} configuration key.
+     * @param legacyKey The legacy {@code aad.*} configuration key.
+     * @return The configured values, or an empty list when neither key holds a value.
+     */
+    protected List<String> getDefaultList(final String key, final String legacyKey) {
+        final String value = getEntraIdProperty(key, legacyKey, StringUtil.EMPTY);
+        if (StringUtil.isBlank(value)) {
+            return Collections.emptyList();
+        }
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
+    }
+
+    /**
      * Gets the default group list for users.
      * Uses new entraid.default.groups key with fallback to legacy aad.default.groups.
      * @return The default group list.
      */
     protected List<String> getDefaultGroupList() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_DEFAULT_GROUPS);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_DEFAULT_GROUPS);
-        }
-        if (StringUtil.isBlank(value)) {
-            return Collections.emptyList();
-        }
-        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
+        return getDefaultList(ENTRAID_DEFAULT_GROUPS, AAD_DEFAULT_GROUPS);
     }
 
     /**
@@ -1669,14 +1697,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The default role list.
      */
     protected List<String> getDefaultRoleList() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_DEFAULT_ROLES);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_DEFAULT_ROLES);
-        }
-        if (StringUtil.isBlank(value)) {
-            return Collections.emptyList();
-        }
-        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
+        return getDefaultList(ENTRAID_DEFAULT_ROLES, AAD_DEFAULT_ROLES);
     }
 
     /**
@@ -1724,11 +1745,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The client ID.
      */
     protected String getClientId() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_CLIENT_ID);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_CLIENT_ID, StringUtil.EMPTY);
-        }
-        return value;
+        return getEntraIdProperty(ENTRAID_CLIENT_ID, AAD_CLIENT_ID, StringUtil.EMPTY);
     }
 
     /**
@@ -1737,11 +1754,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The client secret.
      */
     protected String getClientSecret() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_CLIENT_SECRET);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_CLIENT_SECRET, StringUtil.EMPTY);
-        }
-        return value;
+        return getEntraIdProperty(ENTRAID_CLIENT_SECRET, AAD_CLIENT_SECRET, StringUtil.EMPTY);
     }
 
     /**
@@ -1750,11 +1763,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The tenant ID.
      */
     protected String getTenant() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_TENANT);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_TENANT, StringUtil.EMPTY);
-        }
-        return value;
+        return getEntraIdProperty(ENTRAID_TENANT, AAD_TENANT, StringUtil.EMPTY);
     }
 
     /**
@@ -1763,17 +1772,16 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The authority URL.
      */
     protected String getAuthority() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_AUTHORITY);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_AUTHORITY, DEFAULT_AUTHORITY);
-        }
-        if (StringUtil.isBlank(value)) {
-            // getSystemProperty only falls back to the default when the key is absent, so a legacy
-            // aad.authority that is present but empty arrives here as "". Left alone, getAuthUrl
-            // would build a scheme-less URL and redirect the browser back inside Fess.
-            return DEFAULT_AUTHORITY;
-        }
-        return value;
+        return getEntraIdProperty(ENTRAID_AUTHORITY, AAD_AUTHORITY, DEFAULT_AUTHORITY);
+    }
+
+    /**
+     * Builds the tenant's authority URL, the prefix every Entra ID endpoint is hung off.
+     *
+     * @return The authority URL, with a trailing slash.
+     */
+    protected String getAuthorityUrl() {
+        return getAuthority() + getTenant() + "/";
     }
 
     /**
@@ -1783,10 +1791,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      *         that has already been divided by 1000.
      */
     protected long getStateTtl() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_STATE_TTL);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_STATE_TTL, DEFAULT_STATE_TTL);
-        }
+        final String value = getEntraIdProperty(ENTRAID_STATE_TTL, AAD_STATE_TTL, DEFAULT_STATE_TTL);
         try {
             return Long.parseLong(value.trim());
         } catch (final NumberFormatException e) {
@@ -1802,14 +1807,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return The reply URL.
      */
     protected String getReplyUrl(final HttpServletRequest request) {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_REPLY_URL);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_REPLY_URL, StringUtil.EMPTY);
-        }
-        if (StringUtil.isNotBlank(value)) {
-            return value;
-        }
-        return request.getRequestURL().toString();
+        final String value = getEntraIdProperty(ENTRAID_REPLY_URL, AAD_REPLY_URL, StringUtil.EMPTY);
+        return StringUtil.isNotBlank(value) ? value : request.getRequestURL().toString();
     }
 
     /**
@@ -1825,14 +1824,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return Either {@code query} or {@code form_post}.
      */
     protected String getResponseMode() {
-        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_RESPONSE_MODE);
-        if (StringUtil.isBlank(value)) {
-            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_RESPONSE_MODE, RESPONSE_MODE_QUERY);
-        }
-        if (StringUtil.isBlank(value)) {
-            return RESPONSE_MODE_QUERY;
-        }
-        value = value.trim();
+        final String value = getEntraIdProperty(ENTRAID_RESPONSE_MODE, AAD_RESPONSE_MODE, RESPONSE_MODE_QUERY).trim();
         if (RESPONSE_MODE_QUERY.equals(value) || RESPONSE_MODE_FORM_POST.equals(value)) {
             return value;
         }
@@ -1875,11 +1867,6 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     public void setMaxGroupDepth(final int maxGroupDepth) {
         this.maxGroupDepth = maxGroupDepth;
-    }
-
-    @Override
-    public ActionResponse getResponse(final SsoResponseType responseType) {
-        return null;
     }
 
     @Override
