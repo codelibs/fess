@@ -103,7 +103,7 @@ public class AllJobScheduler implements LaJobScheduler {
                 try {
                     jobHelper.register(scheduledJob);
                 } catch (final Exception e) {
-                    logger.warn("Failed to update schedule: job={}", scheduledJob, e);
+                    logger.error("Failed to update schedule: job={}", scheduledJob, e);
                 }
             });
             schedulerTime = now;

@@ -371,7 +371,7 @@ public class IndexUpdater extends Thread {
             }
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
-                logger.error("IndexUpdater is terminated.", e);
+                logger.debug("IndexUpdater is terminated.", e);
             } else if (logger.isInfoEnabled()) {
                 logger.info("IndexUpdater is terminated.");
             }
@@ -380,7 +380,7 @@ public class IndexUpdater extends Thread {
             if (ComponentUtil.available()) {
                 logger.error("IndexUpdater is terminated.", t);
             } else if (logger.isDebugEnabled()) {
-                logger.error("IndexUpdater is terminated.", t);
+                logger.debug("IndexUpdater is terminated.", t);
                 org.codelibs.fess.exec.Crawler.addError(t.getClass().getSimpleName());
             } else if (logger.isInfoEnabled()) {
                 logger.info("IndexUpdater is terminated.");

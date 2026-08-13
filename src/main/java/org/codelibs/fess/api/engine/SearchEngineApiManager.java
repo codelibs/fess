@@ -250,7 +250,7 @@ public class SearchEngineApiManager extends BaseApiManager {
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
-                logger.error("Failed to read file: path={}, filePath={}", path, filePath);
+                logger.warn("Failed to read file: path={}, filePath={}", path, filePath, e);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         } else {
@@ -260,7 +260,7 @@ public class SearchEngineApiManager extends BaseApiManager {
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
-                logger.error("Failed to read file: path={}, filePath={}", path, filePath);
+                logger.warn("Failed to send a not-found response: path={}", path, e);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         }

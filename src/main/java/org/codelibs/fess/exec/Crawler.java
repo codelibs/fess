@@ -703,7 +703,7 @@ public class Crawler {
 
             return Constants.EXIT_OK;
         } catch (final Throwable t) {
-            logger.warn("Crawl task failed with an exception.", t);
+            logger.error("Crawl task failed with an exception.", t);
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);

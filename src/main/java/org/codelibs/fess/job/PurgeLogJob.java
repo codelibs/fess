@@ -67,7 +67,7 @@ public class PurgeLogJob {
         try {
             crawlingInfoService.deleteBefore(systemHelper.getCurrentTimeAsLong());
         } catch (final Exception e) {
-            logger.error("Failed to purge crawling sessions.", e);
+            logger.warn("Failed to purge crawling sessions.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -80,7 +80,7 @@ public class PurgeLogJob {
                 resultBuf.append("Skipped to purge search logs.\n");
             }
         } catch (final Exception e) {
-            logger.error("Failed to purge search logs.", e);
+            logger.warn("Failed to purge search logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -93,7 +93,7 @@ public class PurgeLogJob {
                 resultBuf.append("Skipped to purge click logs.\n");
             }
         } catch (final Exception e) {
-            logger.error("Failed to purge click logs.", e);
+            logger.warn("Failed to purge click logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -106,7 +106,7 @@ public class PurgeLogJob {
                 resultBuf.append("Skipped to purge favorite logs.\n");
             }
         } catch (final Exception e) {
-            logger.error("Failed to purge favorite logs.", e);
+            logger.warn("Failed to purge favorite logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -119,7 +119,7 @@ public class PurgeLogJob {
                 resultBuf.append("Skipped to purge job logs.\n");
             }
         } catch (final Exception e) {
-            logger.error("Failed to purge job logs.", e);
+            logger.warn("Failed to purge job logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -132,7 +132,7 @@ public class PurgeLogJob {
                 resultBuf.append("Skipped to purge user info logs.\n");
             }
         } catch (final Exception e) {
-            logger.error("Failed to purge user info.", e);
+            logger.warn("Failed to purge user info.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -140,7 +140,7 @@ public class PurgeLogJob {
         try {
             jobLogService.updateStatus();
         } catch (final Exception e) {
-            logger.error("Failed to purge job logs.", e);
+            logger.warn("Failed to purge job logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
