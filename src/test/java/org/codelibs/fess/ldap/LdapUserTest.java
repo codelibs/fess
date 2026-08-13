@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -223,12 +224,16 @@ public class LdapUserTest extends UnitFessTestCase {
 
         String[] permissions = ldapUser.getPermissions();
 
-        // Verify permissions include both LDAP roles and user permission
+        // The stub publishes through the callback before returning, which is what the nested-group
+        // walk does when it wins the race with the synchronous assignment. The published set is
+        // what survives; this used to assert the opposite -- the synchronous return value -- which
+        // pinned the walk's result being thrown away.
         assertNotNull(permissions);
         assertEquals(3, permissions.length);
-        assertEquals("Rgroup1", permissions[0]);
-        assertEquals("Rgroup2", permissions[1]);
-        assertEquals("Utestuser", permissions[2]);
+        final String rendered = java.util.Arrays.toString(permissions);
+        assertTrue(rendered, rendered.contains("role1"));
+        assertTrue(rendered, rendered.contains("role2"));
+        assertTrue(rendered, rendered.contains("Utestuser"));
 
         // Verify callback was called
         assertTrue(activityHelperCalled.get());
@@ -529,5 +534,137 @@ public class LdapUserTest extends UnitFessTestCase {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void test_getPermissionState_defaultsToResolved() {
+        // Unlike an Entra ID user, an LdapUser resolves inline on first read and only schedules the
+        // nested-group walk when ldap.group.filter is configured. With the shipped defaults nothing
+        // is scheduled, so there is no window to report and the state must not start PENDING --
+        // that would strand the notice on screen for every LDAP deployment.
+        assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
+    }
+
+    @Test
+    public void test_getPermissions_lazyWriteKeepsTheUserPermission() {
+        // LdapManager derives its own user entry through getCanonicalLdapName, which drops a
+        // NetBIOS "DOMAIN\\" prefix, and adds it only when ldap.role.search.user.enabled is set. So
+        // the roles it hands the callback need not contain the user's own permission, and a lazy
+        // write that published only those would hand back a strictly smaller set than the
+        // synchronous pass -- the user losing their own permission at the exact moment the nested
+        // group walk succeeded.
+        final AtomicReference<String[]> publishedByCallback = new AtomicReference<>();
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapBaseDn() {
+                return "dc=example,dc=com";
+            }
+
+            @Override
+            public String getLdapAccountFilter() {
+                return "(uid=%s)";
+            }
+
+            @Override
+            public String getRoleSearchUserPrefix() {
+                return "1";
+            }
+        });
+
+        ComponentUtil.register(new LdapManager() {
+            @Override
+            public String[] getRoles(final LdapUser user, final String baseDn, final String accountFilter, final String groupFilter,
+                    final Consumer<String[]> callback) {
+                // What the nested-group walk publishes: groups only, no user entry.
+                callback.accept(new String[] { "2group1", "2parent1" });
+                publishedByCallback.set(user.permissions);
+                return new String[] { "2group1" };
+            }
+
+            @Override
+            public String normalizePermissionName(final String name) {
+                return name;
+            }
+        }, "ldapManager");
+
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void permissionChanged(final OptionalThing<FessUserBean> user) {
+                // no-op
+            }
+        }, "activityHelper");
+
+        ldapUser.getPermissions();
+
+        final String[] afterLazyWrite = publishedByCallback.get();
+        assertNotNull(afterLazyWrite);
+        boolean hasUserPermission = false;
+        for (final String permission : afterLazyWrite) {
+            if ("1testuser".equals(permission)) {
+                hasUserPermission = true;
+            }
+        }
+        assertTrue("user permission missing from " + java.util.Arrays.toString(afterLazyWrite), hasUserPermission);
+    }
+
+    @Test
+    public void test_getPermissionState_survivesADeserializedSessionWithoutTheField() {
+        // LdapUser is Serializable and lives in the session, and serialVersionUID is unchanged, so a
+        // session written by a release without this field deserializes with it null -- field
+        // initializers do not run during deserialization. FessSearchAction#hookBefore switches on
+        // this on every front page, and a bare switch on a null selector throws, so a null here
+        // would be a 500 on every request until the session is dropped.
+        ldapUser.permissionState = null;
+        assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
+    }
+
+    @Test
+    public void test_getPermissions_doesNotOverwriteAWalkThatAlreadyPublished() {
+        // getRoles schedules the nested-group walk and then returns, so assigning its return value
+        // happens after the walk was handed to the timer. If the walk finished in between, assigning
+        // would replace the fuller set with the direct-only one -- and the state would then report
+        // RESOLVED over it. Here the stub publishes before returning, which is that interleaving.
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapBaseDn() {
+                return "dc=example,dc=com";
+            }
+
+            @Override
+            public String getLdapAccountFilter() {
+                return "(uid=%s)";
+            }
+
+            @Override
+            public String getRoleSearchUserPrefix() {
+                return "1";
+            }
+        });
+
+        ComponentUtil.register(new LdapManager() {
+            @Override
+            public String[] getRoles(final LdapUser user, final String baseDn, final String accountFilter, final String groupFilter,
+                    final Consumer<String[]> callback) {
+                callback.accept(new String[] { "2group1", "2parent1" });
+                return new String[] { "2group1" };
+            }
+
+            @Override
+            public String normalizePermissionName(final String name) {
+                return name;
+            }
+        }, "ldapManager");
+
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void permissionChanged(final OptionalThing<FessUserBean> user) {
+                // no-op
+            }
+        }, "activityHelper");
+
+        final String permissions = java.util.Arrays.toString(ldapUser.getPermissions());
+        assertTrue("nested group lost from " + permissions, permissions.contains("2parent1"));
+        assertTrue("user permission lost from " + permissions, permissions.contains("1testuser"));
     }
 }
