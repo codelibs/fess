@@ -29,6 +29,18 @@ info:
     `403 forbidden` (not `401 auth_required`). `/auth/login` is exempt from
     CSRF since no token can exist prior to login.
 
+    **Login requirement.** When the administrator enables `login.required`,
+    every endpoint answers `401 auth_required` unless the request carries an
+    authenticated session. Only `GET /health`, `GET /auth/me`,
+    `POST /auth/login`, `POST /auth/logout` and `GET /ui/config` stay
+    reachable, so that a client can still probe the service and complete the
+    login flow. The policy is default-deny: an endpoint introduced later is
+    gated until it is listed as reachable before login. While
+    `login.required` is disabled — the default — no endpoint returns
+    `401 auth_required` on this ground, and the individual `401` responses
+    documented below apply only to the endpoints that require a user
+    regardless of the setting.
+
     `/chat/stream` emits Server-Sent Events (`text/event-stream`).
     `/documents/all` emits NDJSON (`application/x-ndjson`); each line is a
     `{"data": {...}}` object except the final line on a mid-stream failure,
@@ -42,7 +54,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 15.7.0
+  version: 15.8.0
 externalDocs:
   description: API Documentation
   url: https://fess.codelibs.org/15.7/api/
@@ -234,6 +246,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -327,6 +340,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -370,6 +384,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuggestWordsResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -385,6 +400,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LabelsResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -421,6 +437,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PopularWordsResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -442,6 +459,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RelatedQueriesResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -464,6 +482,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RelatedContentResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -666,6 +685,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ClickResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
@@ -705,6 +725,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
@@ -771,6 +792,7 @@ paths:
                   event: done
                   data: {"session_id":"abc"}
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
@@ -806,6 +828,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatClearResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
@@ -860,6 +883,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FavoriteGetResponse'
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
