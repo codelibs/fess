@@ -15,6 +15,7 @@
 	<component name="v2JsonBody" class="org.codelibs.fess.api.v2.handlers.V2JsonBody" />
 	<component name="v2UserPayloads" class="org.codelibs.fess.api.v2.handlers.UserPayloads" />
 	<component name="v2CsrfRequirement" class="org.codelibs.fess.api.v2.handlers.CsrfRequirement" />
+	<component name="v2LoginRequirement" class="org.codelibs.fess.api.v2.handlers.LoginRequirement" />
 	<component name="v2DocIdValidator" class="org.codelibs.fess.api.v2.handlers.DocIdValidator" />
 	<component name="sseResponseHelper" class="org.codelibs.fess.helper.SseResponseHelper" />
 </components>

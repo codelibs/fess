@@ -43,7 +43,10 @@ import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -229,6 +232,15 @@ public class SearchApiV2Manager extends BaseApiManager {
                 return;
             }
         }
+        // Layer 3: honor app login.required. The v1 actions redirect an anonymous caller to
+        // the login page; without this the v2 surface answered every request anonymously, so
+        // the setting stopped short of the endpoint the single-page application searches with.
+        // The policy table is default-deny, so an endpoint added later is gated until it is
+        // explicitly listed as reachable before login.
+        if (ComponentUtil.getV2LoginRequirement().requiresLogin(sub) && isLoginRequiredForAnonymous(sub, response)) {
+            return;
+        }
+
         try {
             // Path components that vary (docId) are matched before the static switch so the
             // exhaustive switch below can keep its readable shape. Order is important:
@@ -314,6 +326,48 @@ public class SearchApiV2Manager extends BaseApiManager {
             // information the SPA must not see.
             ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INTERNAL_ERROR, "internal error");
         }
+    }
+
+    /**
+     * Rejects an anonymous caller when {@code login.required} is enabled.
+     *
+     * <p>Mirrors the v1 actions, which redirect to the login page instead of answering. A
+     * browser follows that redirect; an API client cannot, so the v2 surface reports the same
+     * decision as {@code 401 auth_required}.</p>
+     *
+     * <p>A failure to resolve the caller is reported as an internal error rather than being
+     * treated as "anonymous" or as "signed in": the former turns a broken dependency into a
+     * misleading session-expired message for a user who is in fact signed in, and the latter
+     * would open the very hole this gate closes.</p>
+     *
+     * @param sub the v2 sub-path, used for logging only
+     * @param response the response to write the error envelope to
+     * @return {@code true} when an error envelope was written and dispatch must stop
+     * @throws IOException if the error envelope cannot be written
+     */
+    protected boolean isLoginRequiredForAnonymous(final String sub, final HttpServletResponse response) throws IOException {
+        try {
+            if (!ComponentUtil.getFessConfig().isLoginRequired()) {
+                return false;
+            }
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2{}: could not read login.required", sub, e);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2" + sub);
+            return true;
+        }
+        final OptionalThing<FessUserBean> userBean;
+        try {
+            userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2{}: could not resolve the current user", sub, e);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2" + sub);
+            return true;
+        }
+        if (userBean.isPresent()) {
+            return false;
+        }
+        ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.AUTH_REQUIRED, "login required");
+        return true;
     }
 
     /**
