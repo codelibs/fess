@@ -132,3 +132,62 @@ describe("parseMarkdown: inline constructs", () => {
     expect(parseMarkdown(undefined)).toBe("");
   });
 });
+
+describe("parseMarkdown: code content is restored literally", () => {
+  // String.prototype.replace() reads $&, $`, $' and $n in a *string* replacement
+  // as substitution patterns. escapeHtml() rewrites ' to &#39;, so an apostrophe
+  // after a '$' reaches the restore step as "$&#39;", where $& expands to the
+  // matched text -- the internal placeholder itself. Passing a replacer function
+  // instead is what keeps these verbatim, so each case below is a live check of
+  // that, not of the escaping.
+  it.each([
+    ["a$&b", "a$&amp;b"],
+    ["a$'b", "a$&#39;b"],
+    ["a$`b", "a$`b"],
+    ["a$1b", "a$1b"],
+  ])("keeps %s verbatim inside a fenced block", (code, expected) => {
+    expect(parseMarkdown("```\n" + code + "\n```")).toBe("<pre><code>" + expected + "</code></pre>");
+  });
+
+  // No backtick row here: a single-backtick span closes at the first inner
+  // backtick, so "$`" is not expressible inline.
+  it.each([
+    ["a$&b", "a$&amp;b"],
+    ["a$'b", "a$&#39;b"],
+    ["a$1b", "a$1b"],
+  ])("keeps %s verbatim inside an inline code span", (code, expected) => {
+    expect(parseMarkdown("x `" + code + "` y")).toBe("<p>x <code>" + expected + "</code> y</p>");
+  });
+});
+
+describe("parseMarkdown: a fence never carries its neighbours out unescaped", () => {
+  // splitBlocks() splits on blank lines, so without the placeholder-boundary
+  // split a fence not followed by a blank line shares a block with the text
+  // after it, and processBlock() returned that whole block early -- reaching the
+  // output without ever passing through escapeHtml().
+  it("escapes text following a fence with no blank line between them", () => {
+    expect(parseMarkdown("```\nc\n```\n<script>alert(1)</script>")).toBe(
+      "<pre><code>c</code></pre>\n<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>"
+    );
+  });
+
+  it("escapes text preceding a fence with no blank line between them", () => {
+    expect(parseMarkdown("<b>lead</b>\n```\nc\n```")).toBe(
+      "<p>&lt;b&gt;lead&lt;/b&gt;</p>\n<pre><code>c</code></pre>"
+    );
+  });
+
+  it("renders two fences with no blank line between them as sibling blocks", () => {
+    expect(parseMarkdown("```\na\n```\n```\nb\n```")).toBe(
+      "<pre><code>a</code></pre>\n<pre><code>b</code></pre>"
+    );
+  });
+
+  it("strips NUL so input cannot forge a code-block placeholder", () => {
+    // Placeholders are the only strings that bypass escaping; a forged one used
+    // to reproduce the raw passthrough with no fence present at all.
+    expect(parseMarkdown("\u0000CODEBLOCK0\u0000<script>alert(1)</script>")).toBe(
+      "<p>CODEBLOCK0&lt;script&gt;alert(1)&lt;/script&gt;</p>"
+    );
+  });
+});
