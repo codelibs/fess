@@ -29,7 +29,6 @@ public class SchedulerPager implements Serializable {
      * Constructor.
      */
     public SchedulerPager() {
-        super();
     }
 
     private static final long serialVersionUID = 1L;

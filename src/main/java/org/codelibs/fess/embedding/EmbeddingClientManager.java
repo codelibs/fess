@@ -54,10 +54,7 @@ public class EmbeddingClientManager {
      */
     public boolean available() {
         final String embeddingType = getEmbeddingType();
-        if (Constants.NONE.equals(embeddingType)) {
-            return false;
-        }
-        if (!isContentChunkerEnabled()) {
+        if (Constants.NONE.equals(embeddingType) || !isContentChunkerEnabled()) {
             return false;
         }
         // resolveClient() (not getClient()) so a merely-unregistered client -- a legitimate
@@ -225,10 +222,7 @@ public class EmbeddingClientManager {
      */
     protected EmbeddingClient getAvailableClient() {
         final String embeddingType = getEmbeddingType();
-        if (Constants.NONE.equals(embeddingType)) {
-            throw new EmbeddingException("Embedding client is not available");
-        }
-        if (!isContentChunkerEnabled()) {
+        if (Constants.NONE.equals(embeddingType) || !isContentChunkerEnabled()) {
             throw new EmbeddingException("Embedding client is not available");
         }
         final EmbeddingClient client = getClient();

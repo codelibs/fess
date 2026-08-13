@@ -300,20 +300,15 @@ public class DocumentHelper {
             final ResultData resultData = transformer.transform(responseData);
             final Object rawData = resultData.getRawData();
             if (rawData != null) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> responseDataMap = (Map<String, Object>) rawData;
-                return responseDataMap;
-            } else {
-                final byte[] data = resultData.getData();
-                if (data != null) {
-                    try {
-                        final DataSerializer dataSerializer = ComponentUtil.getComponent("dataSerializer");
-                        @SuppressWarnings("unchecked")
-                        final Map<String, Object> responseDataMap = (Map<String, Object>) dataSerializer.fromBinaryToObject(data);
-                        return responseDataMap;
-                    } catch (final Exception e) {
-                        throw new CrawlerSystemException("Could not create an instance from bytes.", e);
-                    }
+                return (Map<String, Object>) rawData;
+            }
+            final byte[] data = resultData.getData();
+            if (data != null) {
+                try {
+                    final DataSerializer dataSerializer = ComponentUtil.getComponent("dataSerializer");
+                    return (Map<String, Object>) dataSerializer.fromBinaryToObject(data);
+                } catch (final Exception e) {
+                    throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                 }
             }
             return null;

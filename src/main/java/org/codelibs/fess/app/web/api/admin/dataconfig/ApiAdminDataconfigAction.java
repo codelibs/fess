@@ -52,7 +52,6 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDataconfigAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDataconfigAction.class);

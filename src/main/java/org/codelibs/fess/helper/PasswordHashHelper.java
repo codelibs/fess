@@ -192,7 +192,7 @@ public class PasswordHashHelper {
         if (cost == null) {
             return 10;
         }
-        final int c = cost.intValue();
+        final int c = cost;
         if (c < 4) {
             return 4;
         }
@@ -268,10 +268,7 @@ public class PasswordHashHelper {
      */
     public boolean upgradeEncoding(final String storedPassword) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (!fessConfig.isAppPasswordUpgradeEnabled()) {
-            return false;
-        }
-        if (storedPassword == null || storedPassword.isEmpty()) {
+        if (!fessConfig.isAppPasswordUpgradeEnabled() || storedPassword == null || storedPassword.isEmpty()) {
             return false;
         }
         final String idForEncode = resolveIdForEncode();
@@ -415,18 +412,12 @@ public class PasswordHashHelper {
      */
     protected String toJcaDigestName(final String algorithm) {
         final String lower = algorithm.toLowerCase(Locale.ROOT);
-        switch (lower) {
-        case "sha256":
-        case "sha-256":
-            return "SHA-256";
-        case "sha512":
-        case "sha-512":
-            return "SHA-512";
-        case "md5":
-            return "MD5";
-        default:
-            return null;
-        }
+        return switch (lower) {
+        case "sha256", "sha-256" -> "SHA-256";
+        case "sha512", "sha-512" -> "SHA-512";
+        case "md5" -> "MD5";
+        default -> null;
+        };
     }
 
     /**

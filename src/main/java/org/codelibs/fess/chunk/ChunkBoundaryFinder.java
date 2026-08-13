@@ -502,23 +502,19 @@ public class ChunkBoundaryFinder {
      * @return true if the code point is a breakable space
      */
     protected boolean isBreakableSpace(final int cp) {
-        if (cp == ' ') {
-            // By far the most common code point in extracted text: check it before anything else.
+        if ((cp == ' ') || Character.isWhitespace(cp)) {
             return true;
         }
-        if (Character.isWhitespace(cp)) {
-            return true;
-        }
-        switch (cp) {
+        return switch (cp) {
         case 0x0085: // NEXT LINE (NEL) -- Character.isWhitespace() rejects it
         case 0x00A0: // NO-BREAK SPACE
         case 0x2007: // FIGURE SPACE
         case 0x202F: // NARROW NO-BREAK SPACE
         case 0x200B: // ZERO WIDTH SPACE
-            return true;
+            yield true;
         default:
-            return false;
-        }
+            yield false;
+        };
     }
 
     /**
@@ -538,7 +534,7 @@ public class ChunkBoundaryFinder {
      * @return true if the code point is a sentence terminator
      */
     protected boolean isSentenceTerminator(final int cp) {
-        switch (cp) {
+        return switch (cp) {
         case '.':
         case '!':
         case '?':
@@ -572,10 +568,10 @@ public class ChunkBoundaryFinder {
         case 0x10FB: // ჻ Georgian paragraph separator
         case 0x0E5B: // ๛ Thai khomut (end of a passage)
         case 0x2E3C: // stenographic full stop
-            return true;
+            yield true;
         default:
-            return false;
-        }
+            yield false;
+        };
     }
 
     /**
@@ -585,7 +581,7 @@ public class ChunkBoundaryFinder {
      * @return true if the code point is a clause separator
      */
     protected boolean isClauseSeparator(final int cp) {
-        switch (cp) {
+        return switch (cp) {
         case ',':
         case ';':
         case ':':
@@ -613,10 +609,10 @@ public class ChunkBoundaryFinder {
         case 0x17D6: // ៖ Khmer camnuc pii kuuh
         case 0x0F0B: // ་ Tibetan tsheg -- the intersyllabic separator Tibetan uses for a space
         case 0x0E5A: // ๚ Thai angkhankhu
-            return true;
+            yield true;
         default:
-            return false;
-        }
+            yield false;
+        };
     }
 
     /**
@@ -652,7 +648,7 @@ public class ChunkBoundaryFinder {
      * @return true if a following digit disqualifies this code point as a boundary
      */
     protected boolean isPunctuationRequiringNonDigit(final int cp) {
-        switch (cp) {
+        return switch (cp) {
         case '-':
         case 0x2010: // ‐
         case 0xFF0E: // ．
@@ -660,10 +656,10 @@ public class ChunkBoundaryFinder {
         case 0xFF1A: // ：
         case 0x301C: // 〜
         case 0xFF5E: // ～
-            return true;
+            yield true;
         default:
-            return false;
-        }
+            yield false;
+        };
     }
 
     /**
@@ -673,7 +669,7 @@ public class ChunkBoundaryFinder {
      * @return true if the code point is a closing mark
      */
     protected boolean isClosingBracket(final int cp) {
-        switch (cp) {
+        return switch (cp) {
         case ')':
         case ']':
         case '}':
@@ -691,10 +687,10 @@ public class ChunkBoundaryFinder {
         case 0x3009: // 〉
         case 0x2019: // ’
         case 0x201D: // ”
-            return true;
+            yield true;
         default:
-            return false;
-        }
+            yield false;
+        };
     }
 
     /**
@@ -704,7 +700,7 @@ public class ChunkBoundaryFinder {
      * @return true if the code point is an opening mark
      */
     protected boolean isOpeningBracket(final int cp) {
-        switch (cp) {
+        return switch (cp) {
         case '(':
         case '[':
         case '{':
@@ -720,10 +716,10 @@ public class ChunkBoundaryFinder {
         case 0x3008: // 〈
         case 0x2018: // ‘
         case 0x201C: // “
-            return true;
+            yield true;
         default:
-            return false;
-        }
+            yield false;
+        };
     }
 
     /**
@@ -814,11 +810,7 @@ public class ChunkBoundaryFinder {
         if (cp >= 0xFE00 && cp <= 0xFE0F || cp >= 0xE0100 && cp <= 0xE01EF) {
             return true;
         }
-        if (cp >= 0x1F3FB && cp <= 0x1F3FF) {
-            // Emoji modifiers (skin tone): general category Sk, so getType() misses them.
-            return true;
-        }
-        if (cp >= 0xE0020 && cp <= 0xE007F) {
+        if ((cp >= 0x1F3FB && cp <= 0x1F3FF) || (cp >= 0xE0020 && cp <= 0xE007F)) {
             // Tag characters: the payload of an emoji tag sequence such as the Scotland flag.
             return true;
         }
@@ -845,23 +837,6 @@ public class ChunkBoundaryFinder {
     }
 
     /**
-     * Returns true if the code point, when it appears immediately before a candidate boundary,
-     * joins that boundary's code point into the same grapheme cluster -- so a boundary must not
-     * be placed right after it either.
-     *
-     * <p>This is the backward-looking counterpart of {@link #isClusterContinuation}, which asks
-     * the same question about the code point <em>at</em> the candidate boundary. It carries the
-     * cases where the <em>preceding</em> code point is an ordinary spacing letter that
-     * nonetheless owns the one after it -- the Khmer coeng and the Thai/Lao pre-base vowels. {@link
-     * #adjustToClusterStart} tests both directions, so both must be overridable for a subclass
-     * that redefines cluster joining to take full effect: overriding only
-     * {@link #isClusterContinuation} would leave this direction on the built-in zero-width-joiner
-     * rule.</p>
-     *
-     * @param cp the code point immediately before the candidate boundary
-     * @return true if a boundary must not be placed right after this code point
-     */
-    /**
      * Returns true if the code point exists specifically to forbid a break on both of its sides.
      *
      * <p>{@code U+2060} WORD JOINER and {@code U+FEFF} ZWNBSP are defined as no-break glue, and
@@ -879,15 +854,25 @@ public class ChunkBoundaryFinder {
         return cp == 0x2060 || cp == 0xFEFF || cp == 0x200C;
     }
 
+    /**
+     * Returns true if the code point, when it appears immediately before a candidate boundary,
+     * joins that boundary's code point into the same grapheme cluster -- so a boundary must not
+     * be placed right after it either.
+     *
+     * <p>This is the backward-looking counterpart of {@link #isClusterContinuation}, which asks
+     * the same question about the code point <em>at</em> the candidate boundary. It carries the
+     * cases where the <em>preceding</em> code point is an ordinary spacing letter that
+     * nonetheless owns the one after it -- the Khmer coeng and the Thai/Lao pre-base vowels. {@link
+     * #adjustToClusterStart} tests both directions, so both must be overridable for a subclass
+     * that redefines cluster joining to take full effect: overriding only
+     * {@link #isClusterContinuation} would leave this direction on the built-in zero-width-joiner
+     * rule.</p>
+     *
+     * @param cp the code point immediately before the candidate boundary
+     * @return true if a boundary must not be placed right after this code point
+     */
     protected boolean isClusterJoiner(final int cp) {
-        if (cp == ZWJ) {
-            return true;
-        }
-        if (cp == '\r') {
-            // UAX #29 GB3: CR and LF are one cluster, so a boundary may not fall between them.
-            return true;
-        }
-        if (isNoBreakGlue(cp)) {
+        if ((cp == ZWJ) || (cp == '\r') || isNoBreakGlue(cp)) {
             return true;
         }
         if (cp >= 0x2066 && cp <= 0x2068 || cp >= 0x202A && cp <= 0x202B || cp >= 0x202D && cp <= 0x202E) {

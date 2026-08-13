@@ -43,7 +43,6 @@ public class RelatedContentService extends FessAppService {
      * Creates a new instance of RelatedContentService.
      */
     public RelatedContentService() {
-        super();
     }
 
     /**

@@ -60,7 +60,6 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminBadwordAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminBadwordAction.class);

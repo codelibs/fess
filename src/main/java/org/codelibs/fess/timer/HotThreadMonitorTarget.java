@@ -40,7 +40,6 @@ public class HotThreadMonitorTarget extends MonitorTarget {
      * Default constructor for HotThreadMonitorTarget.
      */
     public HotThreadMonitorTarget() {
-        super();
     }
 
     @Override

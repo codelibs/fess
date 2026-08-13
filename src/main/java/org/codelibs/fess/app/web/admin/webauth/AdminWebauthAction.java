@@ -54,7 +54,6 @@ public class AdminWebauthAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminWebauthAction() {
-        super();
     }
 
     /** Role name for admin web auth operations */

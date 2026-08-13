@@ -113,7 +113,7 @@ public class SearchHelper {
     protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
 
     /** Jackson ObjectMapper for JSON serialization/deserialization. */
-    protected ObjectMapper mapper = new ObjectMapper();;
+    protected ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Default constructor for creating a new SearchHelper instance.
@@ -668,14 +668,11 @@ public class SearchHelper {
                             final List<?> list = mapper.readValue(jsonBytes, List.class);
 
                             final List<RequestParameter> result = new ArrayList<>();
-                            for (Object item : list) {
-                                if (item instanceof List<?> pair) {
-                                    if (pair.size() == 2 && pair.get(0) instanceof String name
-                                            && pair.get(1) instanceof List<?> valueList) {
-                                        final String[] values =
-                                                valueList.stream().filter(v -> v instanceof String).toArray(n -> new String[n]);
-                                        result.add(new RequestParameter(name, values));
-                                    }
+                            for (final Object item : list) {
+                                if ((item instanceof final List<?> pair) && (pair.size() == 2 && pair.get(0) instanceof final String name
+                                        && pair.get(1) instanceof final List<?> valueList)) {
+                                    final String[] values = valueList.stream().filter(String.class::isInstance).toArray(n -> new String[n]);
+                                    result.add(new RequestParameter(name, values));
                                 }
                             }
                             LaResponseUtil.getOptionalResponse().ifPresent(res -> {

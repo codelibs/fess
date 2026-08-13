@@ -1246,8 +1246,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String QUERY_FACET_FIELDS_SIZE = "query.facet.fields.size";
 
+    /** The key of the configuration. e.g. 1000 */
+    String QUERY_FACET_FIELDS_SIZE_MAX = "query.facet.fields.size.max";
+
     /** The key of the configuration. e.g. 1 */
     String QUERY_FACET_FIELDS_min_doc_count = "query.facet.fields.min_doc_count";
+
+    /** The key of the configuration. e.g. 2147483647 */
+    String QUERY_FACET_FIELDS_min_doc_count_MAX = "query.facet.fields.min_doc_count.max";
 
     /** The key of the configuration. e.g. count.desc */
     String QUERY_FACET_FIELDS_SORT = "query.facet.fields.sort";
@@ -1506,6 +1512,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 100 */
     String PAGING_SEARCH_PAGE_MAX_SIZE = "paging.search.page.max.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String API_PARAM_MAX_LENGTH = "api.param.max.length";
+
+    /** The key of the configuration. e.g. 100 */
+    String API_PARAM_MAX_ARRAY_SIZE = "api.param.max.array.size";
+
+    /** The key of the configuration. e.g. 9999999999999 */
+    String API_CLICK_MAX_TIMESTAMP = "api.click.max.timestamp";
 
     /** The key of the configuration. e.g. -1 */
     String SEARCHLOG_AGG_SHARD_SIZE = "searchlog.agg.shard.size";
@@ -2014,6 +2029,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 8 */
     String PASSWORD_MIN_LENGTH = "password.min.length";
 
+    /** The key of the configuration. e.g. 100 */
+    String PASSWORD_MAX_LENGTH = "password.max.length";
+
     /** The key of the configuration. e.g. false */
     String PASSWORD_REQUIRE_UPPERCASE = "password.require.uppercase";
 
@@ -2150,7 +2168,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES = "theme.api.login.rate.limit.max.entries";
 
     /** The key of the configuration. e.g. 15000 */
-    String API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS = "api.v2.chat.stream.keepalive.interval.ms";
+    String API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS = "api.chat.stream.keepalive.interval.ms";
 
     /**
      * Get the value of property as {@link String}.
@@ -2526,7 +2544,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * -Dlog4j2.formatMsgNoLookups=true<br>
      * -Dlog4j.skipJansi=true<br>
      *  <br>
-     * comment: JVM options for the chunk vector indexer process.
+     * comment: <br>
+     * With the shipped defaults the worst case is roughly 190-250 MB live (and ~235 MB of vectors alone<br>
+     * at dimension=1536), which does not fit a 256 MB heap with any GC headroom. Raise -Xmx further if<br>
+     * you raise bulk_size, max_chunks_per_document, concurrency, or the embedding dimension.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmChunkOptions();
@@ -2935,7 +2956,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.json.response.headers'. <br>
      * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
-     * comment: Headers for API JSON response.
+     * comment: Headers for API JSON response. Access-Control-* and Timing-Allow-Origin are ignored here (CORS is controlled by api.cors.* / CorsFilter). Do not set Vary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiJsonResponseHeaders();
@@ -2959,7 +2980,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.gsa.response.headers'. <br>
      * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
-     * comment: Headers for API GSA response.
+     * comment: Headers for API GSA response. Access-Control-* and Timing-Allow-Origin are ignored here (CORS is controlled by api.cors.* / CorsFilter). Do not set Vary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiGsaResponseHeaders();
@@ -2983,7 +3004,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.dashboard.response.headers'. <br>
      * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
-     * comment: Headers for API dashboard response.
+     * comment: Headers for API dashboard response. Access-Control-* and Timing-Allow-Origin are ignored here (CORS is controlled by api.cors.* / CorsFilter). Do not set Vary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiDashboardResponseHeaders();
@@ -2991,7 +3012,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.allow.origin'. <br>
      * The value is, e.g. * <br>
-     * comment: Allowed origins for CORS.
+     * comment: Allowed origins for CORS. "*" returns a literal "*" (the request Origin is NOT reflected) and disables credentials. Set explicit origins (newline- or comma-separated) to allow credentialed cross-origin access.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowOrigin();
@@ -3032,7 +3053,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.allow.credentials'. <br>
      * The value is, e.g. true <br>
-     * comment: Whether to allow credentials for CORS.
+     * comment: Whether to allow credentials for CORS. Honored only for an exact match of an explicit Origin; ignored when api.cors.allow.origin is "*".
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowCredentials();
@@ -3040,7 +3061,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.cors.allow.credentials' true? <br>
      * The value is, e.g. true <br>
-     * comment: Whether to allow credentials for CORS.
+     * comment: Whether to allow credentials for CORS. Honored only for an exact match of an explicit Origin; ignored when api.cors.allow.origin is "*".
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiCorsAllowCredentials();
@@ -4821,7 +4842,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * text/html=Content-Security-Policy: reflected-xss block<br>
      * text/html=X-Frame-Options: SAMEORIGIN<br>
      *  <br>
-     * comment: HTTP headers for the response.
+     * comment: HTTP headers for the response. Access-Control-* and Timing-Allow-Origin are ignored (CORS is controlled by api.cors.* / CorsFilter). Do not set Vary here.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseHeaders();
@@ -5715,7 +5736,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.api.response.fields'. <br>
      * The value is, e.g.  <br>
-     * comment: Additional API response fields for queries.
+     * comment: <br>
+     * Additional API response fields for queries.<br>
+     * This key only appends fields to the v2 API response allow-list (add-only).<br>
+     * Do not add ACL or internal fields (for example role, virtual_host); adding<br>
+     * them would expose access-control information in the search API response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalApiResponseFields();
@@ -5723,7 +5748,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.api.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
-     * comment: Additional API response fields for queries.
+     * comment: <br>
+     * Additional API response fields for queries.<br>
+     * This key only appends fields to the v2 API response allow-list (add-only).<br>
+     * Do not add ACL or internal fields (for example role, virtual_host); adding<br>
+     * them would expose access-control information in the search API response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6502,6 +6531,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getQueryFacetFieldsSizeAsInteger();
 
     /**
+     * Get the value for the key 'query.facet.fields.size.max'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Upper clamp for facet.size (applied at the search chokepoint).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFieldsSizeMax();
+
+    /**
+     * Get the value for the key 'query.facet.fields.size.max' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Upper clamp for facet.size (applied at the search chokepoint).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFacetFieldsSizeMaxAsInteger();
+
+    /**
      * Get the value for the key 'query.facet.fields.min_doc_count'. <br>
      * The value is, e.g. 1 <br>
      * comment: Minimum document count for facet fields.
@@ -6517,6 +6563,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryFacetFieldsMinDocCountAsInteger();
+
+    /**
+     * Get the value for the key 'query.facet.fields.min_doc_count.max'. <br>
+     * The value is, e.g. 2147483647 <br>
+     * comment: Upper clamp for facet.minDocCount (applied at the search chokepoint).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryFacetFieldsMinDocCountMax();
+
+    /**
+     * Get the value for the key 'query.facet.fields.min_doc_count.max' as {@link Integer}. <br>
+     * The value is, e.g. 2147483647 <br>
+     * comment: Upper clamp for facet.minDocCount (applied at the search chokepoint).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryFacetFieldsMinDocCountMaxAsInteger();
 
     /**
      * Get the value for the key 'query.facet.fields.sort'. <br>
@@ -6893,7 +6956,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.guest.permissions'. <br>
      * The value is, e.g. {role}guest <br>
-     * comment: Guest permissions for search roles.
+     * comment: <br>
+     * Keep role.search.guest.permissions non-empty. It seeds the guest role that<br>
+     * keeps the anonymous search role set non-empty; if the resolved role set is<br>
+     * empty the role filter is skipped (fail-open), which can disable role-based<br>
+     * access control and expose documents to anonymous users.<br>
+     * Guest permissions for search roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchGuestPermissions();
@@ -6984,10 +7052,31 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'session.cookie.secure'. <br>
      * The value is, e.g.  <br>
-     * comment: Whether to add the Secure attribute to the session cookie (JSESSIONID) at startup.
+     * comment: <br>
+     * Whether to add the Secure attribute to the session cookie (JSESSIONID) at startup.<br>
+     * When blank (default), Tomcat's automatic behavior is used (Secure is added only for HTTPS requests).<br>
+     * Set to true for production HTTPS deployments, especially when TLS is terminated at a reverse proxy.<br>
+     * When true, the cookie is not sent over HTTP, so sessions will not be established for plain HTTP;<br>
+     * keep it blank for localhost development. The Secure attribute is also required when SameSite=none is used.<br>
+     * Changing this value requires a restart.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSessionCookieSecure();
+
+    /**
+     * Get the value for the key 'session.cookie.secure' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: <br>
+     * Whether to add the Secure attribute to the session cookie (JSESSIONID) at startup.<br>
+     * When blank (default), Tomcat's automatic behavior is used (Secure is added only for HTTPS requests).<br>
+     * Set to true for production HTTPS deployments, especially when TLS is terminated at a reverse proxy.<br>
+     * When true, the cookie is not sent over HTTP, so sessions will not be established for plain HTTP;<br>
+     * keep it blank for localhost development. The Secure attribute is also required when SameSite=none is used.<br>
+     * Changing this value requires a restart.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSessionCookieSecureAsInteger();
 
     /**
      * Get the value for the key 'cookie.search.parameter.keys'. <br>
@@ -7739,6 +7828,57 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPagingSearchPageMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'api.param.max.length'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum length of a v2 API string query parameter (q, sort, sdh). OWASP API4:2023.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiParamMaxLength();
+
+    /**
+     * Get the value for the key 'api.param.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum length of a v2 API string query parameter (q, sort, sdh). OWASP API4:2023.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiParamMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'api.param.max.array.size'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of values for a v2 API repeatable query parameter.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiParamMaxArraySize();
+
+    /**
+     * Get the value for the key 'api.param.max.array.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of values for a v2 API repeatable query parameter.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiParamMaxArraySizeAsInteger();
+
+    /**
+     * Get the value for the key 'api.click.max.timestamp'. <br>
+     * The value is, e.g. 9999999999999 <br>
+     * comment: Maximum click-log timestamp (rt, epoch ms) accepted by the v2 click API. OWASP API4:2023.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiClickMaxTimestamp();
+
+    /**
+     * Get the value for the key 'api.click.max.timestamp' as {@link Long}. <br>
+     * The value is, e.g. 9999999999999 <br>
+     * comment: Maximum click-log timestamp (rt, epoch ms) accepted by the v2 click API. OWASP API4:2023.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not long.
+     */
+    Long getApiClickMaxTimestampAsLong();
 
     /**
      * Get the value for the key 'searchlog.agg.shard.size'. <br>
@@ -9576,6 +9716,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPasswordMinLengthAsInteger();
 
     /**
+     * Get the value for the key 'password.max.length'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum length of a password field.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordMaxLength();
+
+    /**
+     * Get the value for the key 'password.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum length of a password field.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPasswordMaxLengthAsInteger();
+
+    /**
      * Get the value for the key 'password.require.uppercase'. <br>
      * The value is, e.g. false <br>
      * comment: Require uppercase letters in password.
@@ -10175,9 +10332,29 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'theme.api.csrf.server.origins'. <br>
      * The value is, e.g.  <br>
+     * comment: <br>
+     * Optional: canonical external origin(s) of this Fess instance (comma/newline separated),<br>
+     * e.g. https://fess.example.com. When set, these are treated as same-origin for the v2 CSRF<br>
+     * Origin check WITHOUT trusting forwarded headers. Recommended behind reverse proxies that are<br>
+     * not listed in rate.limit.trusted.proxies. When empty, the target origin is reconstructed from<br>
+     * trusted-proxy X-Forwarded-* headers, then from the servlet request.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThemeApiCsrfServerOrigins();
+
+    /**
+     * Get the value for the key 'theme.api.csrf.server.origins' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: <br>
+     * Optional: canonical external origin(s) of this Fess instance (comma/newline separated),<br>
+     * e.g. https://fess.example.com. When set, these are treated as same-origin for the v2 CSRF<br>
+     * Origin check WITHOUT trusting forwarded headers. Recommended behind reverse proxies that are<br>
+     * not listed in rate.limit.trusted.proxies. When empty, the target origin is reconstructed from<br>
+     * trusted-proxy X-Forwarded-* headers, then from the servlet request.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiCsrfServerOriginsAsInteger();
 
     /**
      * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute'. <br>
@@ -10240,7 +10417,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getThemeApiLoginRateLimitMaxEntriesAsInteger();
 
     /**
-     * Get the value for the key 'api.v2.chat.stream.keepalive.interval.ms'. <br>
+     * Get the value for the key 'api.chat.stream.keepalive.interval.ms'. <br>
      * The value is, e.g. 15000 <br>
      * comment: <br>
      * Interval between SSE keep-alive pings emitted by /api/v2/chat/stream. The<br>
@@ -10252,10 +10429,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * disable. Unit: milliseconds.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getApiV2ChatStreamKeepaliveIntervalMs();
+    String getApiChatStreamKeepaliveIntervalMs();
 
     /**
-     * Get the value for the key 'api.v2.chat.stream.keepalive.interval.ms' as {@link Integer}. <br>
+     * Get the value for the key 'api.chat.stream.keepalive.interval.ms' as {@link Integer}. <br>
      * The value is, e.g. 15000 <br>
      * comment: <br>
      * Interval between SSE keep-alive pings emitted by /api/v2/chat/stream. The<br>
@@ -10268,7 +10445,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger();
+    Integer getApiChatStreamKeepaliveIntervalMsAsInteger();
 
     /**
      * The simple implementation for configuration.
@@ -12251,12 +12428,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.QUERY_FACET_FIELDS_SIZE);
         }
 
+        public String getQueryFacetFieldsSizeMax() {
+            return get(FessConfig.QUERY_FACET_FIELDS_SIZE_MAX);
+        }
+
+        public Integer getQueryFacetFieldsSizeMaxAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FACET_FIELDS_SIZE_MAX);
+        }
+
         public String getQueryFacetFieldsMinDocCount() {
             return get(FessConfig.QUERY_FACET_FIELDS_min_doc_count);
         }
 
         public Integer getQueryFacetFieldsMinDocCountAsInteger() {
             return getAsInteger(FessConfig.QUERY_FACET_FIELDS_min_doc_count);
+        }
+
+        public String getQueryFacetFieldsMinDocCountMax() {
+            return get(FessConfig.QUERY_FACET_FIELDS_min_doc_count_MAX);
+        }
+
+        public Integer getQueryFacetFieldsMinDocCountMaxAsInteger() {
+            return getAsInteger(FessConfig.QUERY_FACET_FIELDS_min_doc_count_MAX);
         }
 
         public String getQueryFacetFieldsSort() {
@@ -12485,6 +12678,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getSessionCookieSecure() {
             return get(FessConfig.SESSION_COOKIE_SECURE);
+        }
+
+        public Integer getSessionCookieSecureAsInteger() {
+            return getAsInteger(FessConfig.SESSION_COOKIE_SECURE);
         }
 
         public String getCookieSearchParameterKeys() {
@@ -12841,6 +13038,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPagingSearchPageMaxSizeAsInteger() {
             return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE);
+        }
+
+        public String getApiParamMaxLength() {
+            return get(FessConfig.API_PARAM_MAX_LENGTH);
+        }
+
+        public Integer getApiParamMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.API_PARAM_MAX_LENGTH);
+        }
+
+        public String getApiParamMaxArraySize() {
+            return get(FessConfig.API_PARAM_MAX_ARRAY_SIZE);
+        }
+
+        public Integer getApiParamMaxArraySizeAsInteger() {
+            return getAsInteger(FessConfig.API_PARAM_MAX_ARRAY_SIZE);
+        }
+
+        public String getApiClickMaxTimestamp() {
+            return get(FessConfig.API_CLICK_MAX_TIMESTAMP);
+        }
+
+        public Long getApiClickMaxTimestampAsLong() {
+            return getAsLong(FessConfig.API_CLICK_MAX_TIMESTAMP);
         }
 
         public String getSearchlogAggShardSize() {
@@ -13739,6 +13960,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PASSWORD_MIN_LENGTH);
         }
 
+        public String getPasswordMaxLength() {
+            return get(FessConfig.PASSWORD_MAX_LENGTH);
+        }
+
+        public Integer getPasswordMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.PASSWORD_MAX_LENGTH);
+        }
+
         public String getPasswordRequireUppercase() {
             return get(FessConfig.PASSWORD_REQUIRE_UPPERCASE);
         }
@@ -14035,6 +14264,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.THEME_API_CSRF_SERVER_ORIGINS);
         }
 
+        public Integer getThemeApiCsrfServerOriginsAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_CSRF_SERVER_ORIGINS);
+        }
+
         public String getThemeApiLoginRateLimitPerIpPerMinute() {
             return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE);
         }
@@ -14067,12 +14300,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES);
         }
 
-        public String getApiV2ChatStreamKeepaliveIntervalMs() {
-            return get(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
+        public String getApiChatStreamKeepaliveIntervalMs() {
+            return get(FessConfig.API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
         }
 
-        public Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger() {
-            return getAsInteger(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
+        public Integer getApiChatStreamKeepaliveIntervalMsAsInteger() {
+            return getAsInteger(FessConfig.API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
         }
 
         @Override
@@ -14419,7 +14652,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_FUZZY_TRANSPOSITIONS, "true");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS, "label");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE, "100");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SIZE_MAX, "1000");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count, "1");
+            defaultMap.put(FessConfig.QUERY_FACET_FIELDS_min_doc_count_MAX, "2147483647");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_SORT, "count.desc");
             defaultMap.put(FessConfig.QUERY_FACET_FIELDS_MISSING, "");
             defaultMap.put(FessConfig.QUERY_FACET_QUERIES,
@@ -14508,6 +14743,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_START, "0");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_SIZE, "10");
             defaultMap.put(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE, "100");
+            defaultMap.put(FessConfig.API_PARAM_MAX_LENGTH, "1000");
+            defaultMap.put(FessConfig.API_PARAM_MAX_ARRAY_SIZE, "100");
+            defaultMap.put(FessConfig.API_CLICK_MAX_TIMESTAMP, "9999999999999");
             defaultMap.put(FessConfig.SEARCHLOG_AGG_SHARD_SIZE, "-1");
             defaultMap.put(FessConfig.SEARCHLOG_REQUEST_HEADERS, "");
             defaultMap.put(FessConfig.SEARCHLOG_PROCESS_batch_size, "100");
@@ -14678,6 +14916,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE, "1000");
             defaultMap.put(FessConfig.PASSWORD_INVALID_ADMIN_PASSWORDS, "admin");
             defaultMap.put(FessConfig.PASSWORD_MIN_LENGTH, "8");
+            defaultMap.put(FessConfig.PASSWORD_MAX_LENGTH, "100");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_UPPERCASE, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_LOWERCASE, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
@@ -14723,7 +14962,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
             defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES, "100000");
-            defaultMap.put(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS, "15000");
+            defaultMap.put(FessConfig.API_CHAT_STREAM_KEEPALIVE_INTERVAL_MS, "15000");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

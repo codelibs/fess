@@ -95,9 +95,7 @@ public class JsonIndexExportFormatter implements IndexExportFormatter {
                 appendJsonValue(json, entry.getValue());
             }
             json.append("}");
-        } else if (value instanceof Number) {
-            json.append(value);
-        } else if (value instanceof Boolean) {
+        } else if ((value instanceof Number) || (value instanceof Boolean)) {
             json.append(value);
         } else {
             json.append("\"").append(escapeJson(String.valueOf(value))).append("\"");

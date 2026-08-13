@@ -56,7 +56,6 @@ public class RoleQueryHelper {
      * Constructor.
      */
     public RoleQueryHelper() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(RoleQueryHelper.class);

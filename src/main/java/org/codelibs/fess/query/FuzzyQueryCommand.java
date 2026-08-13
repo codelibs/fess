@@ -43,7 +43,6 @@ public class FuzzyQueryCommand extends QueryCommand {
      * Default constructor.
      */
     public FuzzyQueryCommand() {
-        super();
     }
 
     @Override

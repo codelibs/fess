@@ -116,14 +116,14 @@ public class TargetOriginResolver {
         // X-Forwarded-Host may already include a port (host:port); if a separate
         // X-Forwarded-Port is supplied and the host lacks one, append it.
         final String trimmedHost = host.trim();
-        String origin = proto.trim() + "://" + trimmedHost;
+        final StringBuilder origin = new StringBuilder().append(proto.trim()).append("://").append(trimmedHost);
         if (!hasPort(trimmedHost)) {
             final String port = firstValue(request.getHeader("X-Forwarded-Port"));
             if (StringUtil.isNotBlank(port)) {
-                origin = origin + ":" + port.trim();
+                origin.append(":").append(port.trim());
             }
         }
-        return OriginUtil.canonicalize(origin);
+        return OriginUtil.canonicalize(origin.toString());
     }
 
     /**

@@ -79,7 +79,6 @@ public class GroovyEngine extends AbstractScriptEngine {
      * Default constructor for GroovyEngine.
      */
     public GroovyEngine() {
-        super();
         buildScriptCache();
     }
 
@@ -190,7 +189,7 @@ public class GroovyEngine extends AbstractScriptEngine {
                 }
                 final GroovyClassLoader classLoader = new GroovyClassLoader(parentClassLoader);
                 try {
-                    final Class<? extends Script> scriptClass = (Class<? extends Script>) classLoader.parseClass(template);
+                    final Class<? extends Script> scriptClass = classLoader.parseClass(template);
                     return new CachedScript(scriptClass, classLoader);
                 } catch (final Exception e) {
                     try {

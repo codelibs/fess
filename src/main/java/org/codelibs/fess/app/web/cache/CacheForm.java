@@ -55,6 +55,5 @@ public class CacheForm {
      * Default constructor for CacheForm.
      */
     public CacheForm() {
-        super();
     }
 }

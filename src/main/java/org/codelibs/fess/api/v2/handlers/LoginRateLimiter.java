@@ -166,7 +166,7 @@ public class LoginRateLimiter {
             // Conservative idle threshold: any hit older than the sweep interval is stale.
             // (The handler's sliding windows are bounded by 60s; we use 5min as a defensive
             // upper bound so this remains safe even if future callers raise window sizes.)
-            final long idleWindowMs = (long) SWEEP_INTERVAL_SECONDS * 1_000L;
+            final long idleWindowMs = SWEEP_INTERVAL_SECONDS * 1_000L;
             String victim = null;
             for (final Map.Entry<String, Entry> en : entries.entrySet()) {
                 final Entry candidate = en.getValue();
@@ -192,18 +192,15 @@ public class LoginRateLimiter {
                 if (capWarnLogged && entries.size() < effectiveCap / 2) {
                     capWarnLogged = false;
                 }
-            } else {
-                // All entries are either locked-out or have a recent hit. Best-effort policy:
-                // allow the map to grow by one rather than evicting a locked entry, and log
-                // WARN so operators see the cap-pressure signal.
-                if (!capWarnLogged) {
-                    logger.warn(
-                            "LoginRateLimiter entries map at cap={} but no idle entry to evict "
-                                    + "(all locked or active); growing temporarily. "
-                                    + "Consider increasing theme.api.login.rate.limit.max.entries or investigating traffic anomaly.",
-                            effectiveCap);
-                    capWarnLogged = true;
-                }
+            } else // All entries are either locked-out or have a recent hit. Best-effort policy:
+            // allow the map to grow by one rather than evicting a locked entry, and log
+            // WARN so operators see the cap-pressure signal.
+            if (!capWarnLogged) {
+                logger.warn("""
+                        LoginRateLimiter entries map at cap={} but no idle entry to evict \
+                        (all locked or active); growing temporarily. \
+                        Consider increasing theme.api.login.rate.limit.max.entries or investigating traffic anomaly.""", effectiveCap);
+                capWarnLogged = true;
             }
         }
         final Entry e = new Entry();
@@ -279,7 +276,7 @@ public class LoginRateLimiter {
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
-        final long windowMs = (long) windowSeconds * 1_000L;
+        final long windowMs = windowSeconds * 1_000L;
         final Entry e;
         synchronized (entries) {
             Entry existing = entries.get(mapKey);
@@ -330,7 +327,7 @@ public class LoginRateLimiter {
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
-        final long windowMs = (long) windowSeconds * 1_000L;
+        final long windowMs = windowSeconds * 1_000L;
         final Entry e;
         synchronized (entries) {
             e = entries.get(mapKey);
@@ -428,7 +425,7 @@ public class LoginRateLimiter {
                 // Retry-After stays truthful instead of self-extending on every retry.
                 return false;
             }
-            e.lockUntilEpochMs = now + (long) lockoutSeconds * 1_000L;
+            e.lockUntilEpochMs = now + lockoutSeconds * 1_000L;
             return true;
         }
     }

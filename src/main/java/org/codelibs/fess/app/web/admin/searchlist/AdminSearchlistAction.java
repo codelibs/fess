@@ -64,7 +64,6 @@ public class AdminSearchlistAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSearchlistAction() {
-        super();
     }
 
     /** Role name for admin search list operations */
@@ -604,8 +603,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 fessConfig.getIndexFieldSeqNo(), fessConfig.getIndexFieldPrimaryTerm());
 
         // Collect candidate fields from config definitions and document keys
-        final Set<String> candidateFields = new java.util.TreeSet<>();
-        candidateFields.addAll(arrayFieldSet);
+        final Set<String> candidateFields = new java.util.TreeSet<>(arrayFieldSet);
         candidateFields.addAll(dateFieldSet);
         candidateFields.addAll(integerFieldSet);
         candidateFields.addAll(longFieldSet);
@@ -702,7 +700,6 @@ public class AdminSearchlistAction extends FessAdminAction {
          * Default constructor.
          */
         protected WebRenderData() {
-            super();
         }
 
         /**

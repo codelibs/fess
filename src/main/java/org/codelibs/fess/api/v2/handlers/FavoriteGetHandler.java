@@ -118,7 +118,7 @@ public class FavoriteGetHandler {
             final Map<String, Object> doc = docOpt.get();
             final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
             final Long countValue = DocumentUtil.getValue(doc, fessConfig.getIndexFieldFavoriteCount(), Long.class);
-            final long count = countValue == null ? 0L : countValue.longValue();
+            final long count = countValue == null ? 0L : countValue;
 
             boolean favorite = false;
             final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();

@@ -30,7 +30,6 @@ public class RolePager implements Serializable {
      * Constructor.
      */
     public RolePager() {
-        super();
     }
 
     private static final long serialVersionUID = 1L;

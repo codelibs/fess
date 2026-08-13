@@ -52,7 +52,6 @@ public class AdminPluginAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminPluginAction() {
-        super();
     }
 
     /**

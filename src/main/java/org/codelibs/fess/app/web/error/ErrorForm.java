@@ -47,6 +47,5 @@ public class ErrorForm {
      * Default constructor for ErrorForm.
      */
     public ErrorForm() {
-        super();
     }
 }

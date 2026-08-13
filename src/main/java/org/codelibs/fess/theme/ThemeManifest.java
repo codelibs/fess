@@ -120,7 +120,7 @@ public final class ThemeManifest {
                 checkFieldLength("supportedLocales[" + i + "]", locales.get(i));
             }
             b.supportedLocales = locales;
-        } else if (loc instanceof String s) {
+        } else if (loc instanceof final String s) {
             b.supportedLocales = List.of(checkFieldLength("supportedLocales", s));
         }
         b.entry = checkFieldLength("entry", str(raw, "entry"));
@@ -177,16 +177,7 @@ public final class ThemeManifest {
         if (e == null) {
             return false; // null entry will default to index.html
         }
-        if (e.startsWith("/")) {
-            return true;
-        }
-        if (e.contains("..")) {
-            return true;
-        }
-        if (e.contains("\\")) {
-            return true;
-        }
-        if (e.contains("\0")) {
+        if (e.startsWith("/") || e.contains("..") || e.contains("\\") || e.contains("\0")) {
             return true;
         }
         if (e.contains(":")) {

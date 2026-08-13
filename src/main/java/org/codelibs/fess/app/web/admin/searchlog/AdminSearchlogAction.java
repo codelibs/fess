@@ -39,7 +39,6 @@ public class AdminSearchlogAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSearchlogAction() {
-        super();
     }
 
     /** Role name for admin search log operations */

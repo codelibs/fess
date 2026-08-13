@@ -16,7 +16,6 @@
 package org.codelibs.fess.embedding;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;

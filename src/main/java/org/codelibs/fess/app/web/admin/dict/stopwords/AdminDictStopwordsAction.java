@@ -54,7 +54,6 @@ public class AdminDictStopwordsAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictStopwordsAction() {
-        super();
     }
 
     /** The role for this action. */

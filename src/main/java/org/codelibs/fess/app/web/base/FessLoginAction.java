@@ -30,7 +30,6 @@ public abstract class FessLoginAction extends FessSearchAction {
      * Default constructor.
      */
     public FessLoginAction() {
-        super();
     }
 
     /**

@@ -545,7 +545,7 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger() {
+            public Integer getApiChatStreamKeepaliveIntervalMsAsInteger() {
                 throw new RuntimeException("not configured");
             }
         };

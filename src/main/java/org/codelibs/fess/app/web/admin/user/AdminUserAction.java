@@ -57,7 +57,6 @@ public class AdminUserAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminUserAction() {
-        super();
     }
 
     /** Role name for admin user operations */
@@ -450,27 +449,14 @@ public class AdminUserAction extends FessAdminAction {
      */
     protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
         switch (errorKey) {
-        case "errors.password_length":
-            messages.addErrorsPasswordLength("password", String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
-            break;
-        case "errors.password_no_uppercase":
-            messages.addErrorsPasswordNoUppercase("password");
-            break;
-        case "errors.password_no_lowercase":
-            messages.addErrorsPasswordNoLowercase("password");
-            break;
-        case "errors.password_no_digit":
-            messages.addErrorsPasswordNoDigit("password");
-            break;
-        case "errors.password_no_special_char":
-            messages.addErrorsPasswordNoSpecialChar("password");
-            break;
-        case "errors.password_is_blacklisted":
-            messages.addErrorsPasswordIsBlacklisted("password");
-            break;
-        default:
-            messages.addErrorsBlankPassword("password");
-            break;
+        case "errors.password_length" -> messages.addErrorsPasswordLength("password",
+                String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+        case "errors.password_no_uppercase" -> messages.addErrorsPasswordNoUppercase("password");
+        case "errors.password_no_lowercase" -> messages.addErrorsPasswordNoLowercase("password");
+        case "errors.password_no_digit" -> messages.addErrorsPasswordNoDigit("password");
+        case "errors.password_no_special_char" -> messages.addErrorsPasswordNoSpecialChar("password");
+        case "errors.password_is_blacklisted" -> messages.addErrorsPasswordIsBlacklisted("password");
+        default -> messages.addErrorsBlankPassword("password");
         }
     }
 

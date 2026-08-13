@@ -93,6 +93,7 @@ public class KnnQueryBuilder extends AbstractQueryBuilder<KnnQueryBuilder> {
      * @param filter the filter query
      * @return this builder
      */
+    @Override
     public KnnQueryBuilder filter(final QueryBuilder filter) {
         this.filter = filter;
         return this;

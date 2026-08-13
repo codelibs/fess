@@ -262,7 +262,7 @@ public class FavoritePostHandler {
                             throw new FavoriteAddFailedException("URL is null");
                         }
                         final Long existingCount = DocumentUtil.getValue(doc, cfg.getIndexFieldFavoriteCount(), Long.class);
-                        favoriteCountHolder[0] = existingCount == null ? 0L : existingCount.longValue();
+                        favoriteCountHolder[0] = existingCount == null ? 0L : existingCount;
 
                         // M-9: addUrl returns false when the (user, url) pair already exists
                         // (or the user info cannot be resolved). Treat the duplicate case as

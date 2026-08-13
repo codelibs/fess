@@ -119,10 +119,7 @@ public class ClickHandler {
 
     private String stringOrNull(final Map<String, Object> body, final String key) {
         final Object v = body.get(key);
-        if (v == null) {
-            return null;
-        }
-        if (!(v instanceof String)) {
+        if ((v == null) || !(v instanceof String)) {
             return null;
         }
         return (String) v;
@@ -204,7 +201,7 @@ public class ClickHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt must not be negative");
             return;
         }
-        if (rt instanceof Number && ((Number) rt).longValue() > cfg.getApiV2ClickMaxRtAsLong()) {
+        if (rt instanceof Number && ((Number) rt).longValue() > cfg.getApiClickMaxTimestampOrDefault()) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "rt exceeds the maximum");
             return;
         }

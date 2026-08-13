@@ -428,7 +428,7 @@ public class RankFusionProcessor implements AutoCloseable {
         if (size == 0 || startPosition >= size) {
             return Collections.emptyList();
         }
-        int fromIndex = Math.max(0, startPosition);
+        final int fromIndex = Math.max(0, startPosition);
         int toIndex = fromIndex + pageSize;
         if (toIndex >= size) {
             toIndex = size;
@@ -507,7 +507,6 @@ public class RankFusionProcessor implements AutoCloseable {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to parse float value: {}", s);
                 }
-                return 0.0f;
             }
         }
         return 0.0f;

@@ -49,7 +49,6 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminFailureurlAction() {
-        super();
     }
 
     // ===================================================================================

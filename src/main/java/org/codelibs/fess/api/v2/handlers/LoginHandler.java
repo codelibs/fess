@@ -179,7 +179,7 @@ public class LoginHandler {
             if (username.length() > 100) {
                 throw new InvalidRequestParameterException("username exceeds the maximum length of 100");
             }
-            if (password.length() > fessConfig.getPasswordMaxLengthAsInteger()) {
+            if (password.length() > fessConfig.getPasswordMaxLengthOrDefault()) {
                 throw new InvalidRequestParameterException("password exceeds the maximum length");
             }
         } catch (final InvalidRequestParameterException e) {
@@ -391,11 +391,8 @@ public class LoginHandler {
      * paths below the app root are always safe.
      */
     private void addReturnTo(final Map<String, Object> payload, final String returnTo) {
-        if (returnTo == null) {
-            return;
-        }
         // Silent-drop oversized return_to values before any further validation.
-        if (returnTo.length() > 10000) {
+        if ((returnTo == null) || (returnTo.length() > 10000)) {
             return;
         }
         // Reject if it contains any ASCII control character (includes \r, \n, \t, NUL).
@@ -421,7 +418,7 @@ public class LoginHandler {
      * is not what the wire contract intends.
      */
     private String stringOrNull(final Object v) {
-        return v instanceof String s ? s : null;
+        return v instanceof final String s ? s : null;
     }
 
     /** Separator for USER-scope composite keys. NUL cannot appear in a resolved IP. */

@@ -92,18 +92,16 @@ public class GcsStorageClient implements StorageClient {
             if (logger.isDebugEnabled()) {
                 logger.debug("Using custom GCS endpoint: {}", endpoint);
             }
-        } else {
-            // Production: use credentials file or default credentials
-            if (StringUtil.isNotBlank(credentialsPath)) {
-                try (FileInputStream fis = new FileInputStream(credentialsPath)) {
-                    final GoogleCredentials credentials = GoogleCredentials.fromStream(fis);
-                    builder.setCredentials(credentials);
-                } catch (final IOException e) {
-                    throw new StorageException("Failed to load GCS credentials from " + credentialsPath, e);
-                }
+        } else // Production: use credentials file or default credentials
+        if (StringUtil.isNotBlank(credentialsPath)) {
+            try (FileInputStream fis = new FileInputStream(credentialsPath)) {
+                final GoogleCredentials credentials = GoogleCredentials.fromStream(fis);
+                builder.setCredentials(credentials);
+            } catch (final IOException e) {
+                throw new StorageException("Failed to load GCS credentials from " + credentialsPath, e);
             }
-            // If no credentials path, uses default credentials (GOOGLE_APPLICATION_CREDENTIALS env var)
         }
+        // If no credentials path, uses default credentials (GOOGLE_APPLICATION_CREDENTIALS env var)
 
         this.storage = builder.build().getService();
     }
@@ -239,12 +237,11 @@ public class GcsStorageClient implements StorageClient {
     public void setObjectTags(final String objectName, final Map<String, String> tags) {
         try {
             final Blob blob = storage.get(BlobId.of(bucket, objectName));
-            if (blob != null) {
-                // GCS uses metadata instead of tags
-                blob.toBuilder().setMetadata(tags).build().update();
-            } else {
+            if (blob == null) {
                 throw new StorageException("Object not found: " + objectName);
             }
+            // GCS uses metadata instead of tags
+            blob.toBuilder().setMetadata(tags).build().update();
         } catch (final StorageException e) {
             throw e;
         } catch (final Exception e) {

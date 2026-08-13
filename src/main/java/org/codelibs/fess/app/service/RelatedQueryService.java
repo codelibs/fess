@@ -43,7 +43,6 @@ public class RelatedQueryService extends FessAppService {
      * This constructor is used by the DI container to create an instance of the service.
      */
     public RelatedQueryService() {
-        super();
     }
 
     /**

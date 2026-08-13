@@ -152,11 +152,10 @@ public class StaticThemeFilter implements Filter {
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         // Guard against non-HTTP invocations (e.g. cross-context dispatches in Tomcat).
-        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
+        if (!(request instanceof final HttpServletRequest req) || !(response instanceof HttpServletResponse)) {
             chain.doFilter(request, response);
             return;
         }
-        final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse res = (HttpServletResponse) response;
 
         // Only intercept GET requests

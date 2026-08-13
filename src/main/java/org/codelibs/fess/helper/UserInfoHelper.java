@@ -244,7 +244,7 @@ public class UserInfoHelper {
         }
 
         return LaRequestUtil.getOptionalRequest().map(req -> {
-            String forwardedProto = req.getHeader("X-Forwarded-Proto");
+            final String forwardedProto = req.getHeader("X-Forwarded-Proto");
             if ("https".equalsIgnoreCase(forwardedProto)) {
                 return true;
             }

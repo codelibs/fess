@@ -34,7 +34,6 @@ public class GoForm {
      * Default constructor for GoForm.
      */
     public GoForm() {
-        super();
     }
 
     /**

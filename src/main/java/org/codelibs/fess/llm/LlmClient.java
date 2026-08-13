@@ -79,7 +79,7 @@ public interface LlmClient {
      * @param history the conversation history for context
      * @return the detected intent with extracted keywords
      */
-    default IntentDetectionResult detectIntent(String userMessage, List<LlmMessage> history) {
+    default IntentDetectionResult detectIntent(final String userMessage, final List<LlmMessage> history) {
         return detectIntent(userMessage);
     }
 

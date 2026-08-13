@@ -403,7 +403,8 @@ public class StaticThemeInstaller {
             long lastRawCount = 0L;
             final byte[] buffer = new byte[8192];
             while ((entry = zis.getNextEntry()) != null) {
-                if (++entries > maxEntries) {
+                entries++;
+                if (entries > maxEntries) {
                     throw new InstallException(InstallException.Code.ENTRY_LIMIT, "Too many entries (>" + maxEntries + ")");
                 }
                 final String name = entry.getName();
@@ -572,7 +573,7 @@ public class StaticThemeInstaller {
         }
         int retentionDays = DEFAULT_ATTIC_RETENTION_DAYS;
         if (atticRetentionDaysOverride != null) {
-            retentionDays = atticRetentionDaysOverride.intValue();
+            retentionDays = atticRetentionDaysOverride;
         } else if (fessConfig != null) {
             try {
                 final Integer cfg = fessConfig.getThemeUploadAtticRetentionDaysAsInteger();

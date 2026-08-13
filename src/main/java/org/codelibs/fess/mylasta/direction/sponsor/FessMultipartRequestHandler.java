@@ -209,7 +209,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                   =================
     protected void mappingParameter(final HttpServletRequest request, final List<DiskFileItem> items) {
         showFieldLoggingTitle();
-        for (DiskFileItem item : items) {
+        for (final DiskFileItem item : items) {
             if (item.isFormField()) {
                 showFormFieldParameter(item);
                 addTextParameter(request, item);
@@ -336,7 +336,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                           =========
     @Override
     public void rollback() {
-        for (MultipartFormFile formFile : elementsFile.values()) {
+        for (final MultipartFormFile formFile : elementsFile.values()) {
             formFile.destroy();
         }
     }

@@ -55,7 +55,6 @@ public class RelatedContentHelper extends AbstractConfigHelper {
      * {@code @PostConstruct}.
      */
     public RelatedContentHelper() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(RelatedContentHelper.class);

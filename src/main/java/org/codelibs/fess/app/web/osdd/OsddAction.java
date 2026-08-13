@@ -28,7 +28,6 @@ public class OsddAction extends FessSearchAction {
      * Default constructor.
      */
     public OsddAction() {
-        super();
     }
 
     // ===================================================================================

@@ -82,7 +82,7 @@ public final class WebApiUtil {
             path = path.substring(contextPath.length());
         }
         // SearchApiV2Manager#matches accepts the prefix itself or any sub-path of it.
-        if (path.equals(API_V2_PATH_PREFIX) || path.startsWith(API_V2_PATH_PREFIX + "/")) {
+        if (API_V2_PATH_PREFIX.equals(path) || path.startsWith(API_V2_PATH_PREFIX + "/")) {
             return true;
         }
         // SearchEngineApiManager#matches accepts a plain prefix match: the access token is

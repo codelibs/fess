@@ -53,7 +53,6 @@ public class SystemMonitorTarget extends MonitorTarget {
      * Constructs a new system monitor target.
      */
     public SystemMonitorTarget() {
-        super();
     }
 
     @Override

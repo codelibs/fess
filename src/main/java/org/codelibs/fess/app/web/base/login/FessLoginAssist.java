@@ -65,7 +65,6 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * Default constructor.
      */
     public FessLoginAssist() {
-        super();
     }
 
     // ===================================================================================
@@ -378,7 +377,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
         final OptionalEntity<FessUser> userOpt = doFindLoginUser(username);
         if (userOpt.isPresent()) {
             final FessUser user = userOpt.get();
-            final String stored = (user instanceof User) ? ((User) user).getPassword() : null;
+            final String stored = (user instanceof final User u) ? u.getPassword() : null;
             if (stored != null && passwordHashHelper.matches(plainPassword, stored)) {
                 lazyUpgradePassword(username, plainPassword, stored, passwordHashHelper);
                 return userOpt;
@@ -474,7 +473,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             return OptionalEntity.empty();
         }
         final FessUser user = userOpt.get();
-        final String stored = (user instanceof User) ? ((User) user).getPassword() : null;
+        final String stored = (user instanceof final User u) ? u.getPassword() : null;
         if (stored != null && stored.equals(cipheredPassword)) {
             return userOpt;
         }

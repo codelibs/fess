@@ -53,7 +53,6 @@ public class AdminGeneralAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminGeneralAction() {
-        super();
     }
 
     /** The role name for general settings administration. */
@@ -537,10 +536,7 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     private boolean isRagSectionVisible() {
-        if (!fessConfig.isRagChatEnabled()) {
-            return false;
-        }
-        if (!ComponentUtil.hasComponent("llmClientManager")) {
+        if (!fessConfig.isRagChatEnabled() || !ComponentUtil.hasComponent("llmClientManager")) {
             return false;
         }
         final LlmClientManager llmClientManager = ComponentUtil.getComponent("llmClientManager");
@@ -560,10 +556,7 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     private static boolean isValidRagLlmName(final String name) {
-        if (!ComponentUtil.getFessConfig().isRagChatEnabled()) {
-            return false;
-        }
-        if (!ComponentUtil.hasComponent("llmClientManager")) {
+        if (!ComponentUtil.getFessConfig().isRagChatEnabled() || !ComponentUtil.hasComponent("llmClientManager")) {
             return false;
         }
         final LlmClientManager llmClientManager = ComponentUtil.getComponent("llmClientManager");

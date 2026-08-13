@@ -175,7 +175,7 @@ public class LdapManager {
      * @return The connection timeout, or 0 or less to leave it unbounded.
      */
     protected int getConnectTimeout() {
-        return fessConfig.getLdapConnectTimeoutAsInteger().intValue();
+        return fessConfig.getLdapConnectTimeoutAsInteger();
     }
 
     /**
@@ -184,7 +184,7 @@ public class LdapManager {
      * @return The read timeout, or 0 or less to leave it unbounded.
      */
     protected int getReadTimeout() {
-        return fessConfig.getLdapReadTimeoutAsInteger().intValue();
+        return fessConfig.getLdapReadTimeoutAsInteger();
     }
 
     /**
@@ -193,7 +193,7 @@ public class LdapManager {
      * @return The search time limit, or 0 or less for no limit.
      */
     protected int getSearchTimeLimit() {
-        return fessConfig.getLdapSearchTimeLimitAsInteger().intValue();
+        return fessConfig.getLdapSearchTimeLimitAsInteger();
     }
 
     /**
@@ -555,7 +555,7 @@ public class LdapManager {
                 if (logger.isDebugEnabled()) {
                     logger.debug("sAMAccountName: {}", attribute);
                 }
-                if (attribute != null && attribute.get() instanceof String sAMAccountName) {
+                if (attribute != null && attribute.get() instanceof final String sAMAccountName) {
                     return OptionalEntity.of(sAMAccountName);
                 }
             }

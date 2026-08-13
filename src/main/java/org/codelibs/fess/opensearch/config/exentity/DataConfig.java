@@ -321,11 +321,14 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         }
 
         // AuthSchemeType
-        if (Constants.BASIC.equals(scheme)) {
+        switch (scheme) {
+        case Constants.BASIC:
             config.setAuthSchemeType(AuthSchemeType.BASIC);
-        } else if (Constants.DIGEST.equals(scheme)) {
+            break;
+        case Constants.DIGEST:
             config.setAuthSchemeType(AuthSchemeType.DIGEST);
-        } else if (Constants.NTLM.equals(scheme)) {
+            break;
+        case Constants.NTLM: {
             config.setAuthSchemeType(AuthSchemeType.NTLM);
             // Pass jcifs.* properties via formParameters for NTLM configuration
             final Map<String, String> jcifsParams = paramMap.entrySet()
@@ -335,13 +338,20 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             if (!jcifsParams.isEmpty()) {
                 config.setNtlmParameters(jcifsParams);
             }
-        } else if (Constants.FORM.equals(scheme)) {
+            break;
+        }
+        case Constants.FORM: {
             config.setAuthSchemeType(AuthSchemeType.FORM);
             final Map<String, String> formParams = paramMap.entrySet()
                     .stream()
                     .filter(e -> e.getKey().startsWith(prefix))
                     .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), Entry::getValue));
             config.setFormParameters(formParams);
+            break;
+        }
+        case null:
+        default:
+            break;
         }
 
         // Credentials

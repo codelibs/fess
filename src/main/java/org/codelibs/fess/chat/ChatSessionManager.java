@@ -293,10 +293,8 @@ public class ChatSessionManager {
             }
         }
 
-        if (removed > 0) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Removed expired chat sessions. removedCount={}, remainingCount={}", removed, sessionCache.size());
-            }
+        if ((removed > 0) && logger.isDebugEnabled()) {
+            logger.debug("Removed expired chat sessions. removedCount={}, remainingCount={}", removed, sessionCache.size());
         }
     }
 

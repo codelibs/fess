@@ -51,7 +51,6 @@ public class RelatedQueryHelper extends AbstractConfigHelper {
      * Initializes the helper with an empty related query map.
      */
     public RelatedQueryHelper() {
-        super();
     }
 
     /**

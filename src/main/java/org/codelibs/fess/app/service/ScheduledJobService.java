@@ -42,7 +42,6 @@ public class ScheduledJobService {
      * Constructor.
      */
     public ScheduledJobService() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ScheduledJobService.class);

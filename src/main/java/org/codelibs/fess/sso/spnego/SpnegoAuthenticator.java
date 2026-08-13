@@ -509,7 +509,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public String getInitParameter(final String name) {
-            if (Constants.LOGGER_LEVEL.equals(name)) {
+            switch (name) {
+            case Constants.LOGGER_LEVEL: {
                 final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
                 if (StringUtil.isNotBlank(logLevel)) {
                     if (isSupportedLoggerLevel(logLevel)) {
@@ -530,49 +531,42 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 // the quietest setting it actually understands.
                 return "7";
             }
-            if (Constants.LOGIN_CONF.equals(name)) {
+            case Constants.LOGIN_CONF:
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
-            }
-            if (Constants.KRB5_CONF.equals(name)) {
+            case Constants.KRB5_CONF:
                 return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));
-            }
-            if (Constants.CLIENT_MODULE.equals(name)) {
+            case Constants.CLIENT_MODULE:
                 return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");
-            }
-            if (Constants.SERVER_MODULE.equals(name)) {
+            case Constants.SERVER_MODULE:
                 return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");
-            }
-            if (Constants.PREAUTH_USERNAME.equals(name)) {
+            case Constants.PREAUTH_USERNAME:
                 // Empty by default so that keytab-based server login is used when the server login
                 // module is configured for it (the library only uses a keytab when both preauth
                 // username and password are empty).
                 return getProperty(SPNEGO_PREAUTH_USERNAME, StringUtil.EMPTY);
-            }
-            if (Constants.PREAUTH_PASSWORD.equals(name)) {
+            case Constants.PREAUTH_PASSWORD:
                 return getProperty(SPNEGO_PREAUTH_PASSWORD, StringUtil.EMPTY);
-            }
-            if (Constants.ALLOW_BASIC.equals(name)) {
+            case Constants.ALLOW_BASIC:
                 // SECURITY NOTE: Basic authentication is enabled by default for compatibility.
                 // For production, consider setting spnego.allow.basic to false.
                 return getProperty(SPNEGO_ALLOW_BASIC, "true");
-            }
-            if (Constants.ALLOW_UNSEC_BASIC.equals(name)) {
+            case Constants.ALLOW_UNSEC_BASIC:
                 // SECURITY: unsecure basic authentication is disabled by default so that basic
                 // credentials are never offered over plain HTTP. When false, basic auth is only
                 // offered over HTTPS. Enable only if you fully understand the risk.
                 return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "false");
-            }
-            if (Constants.PROMPT_NTLM.equals(name)) {
+            case Constants.PROMPT_NTLM:
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");
-            }
-            if (Constants.ALLOW_LOCALHOST.equals(name)) {
+            case Constants.ALLOW_LOCALHOST:
                 // SECURITY: localhost bypass is disabled by default. When enabled, the spnego library
                 // authenticates same-host requests as the server OS user without Kerberos verification,
                 // which is unsafe behind a same-host reverse proxy. Opt in explicitly if required.
                 return getProperty(SPNEGO_ALLOW_LOCALHOST, "false");
-            }
-            if (Constants.ALLOW_DELEGATION.equals(name)) {
+            case Constants.ALLOW_DELEGATION:
                 return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
+            case null:
+            default:
+                break;
             }
             // NOTE: spnego.exclude.dirs is deliberately not mapped. Only SpnegoHttpFilter consumes it,
             // and Fess calls SpnegoAuthenticator#authenticate directly instead of installing that

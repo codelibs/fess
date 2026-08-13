@@ -54,7 +54,6 @@ public class AdminLabeltypeAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminLabeltypeAction() {
-        super();
     }
 
     /** The role name for label type administration. */

@@ -39,7 +39,6 @@ public class PhraseQueryCommand extends QueryCommand {
      * Default constructor.
      */
     public PhraseQueryCommand() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(PhraseQueryCommand.class);

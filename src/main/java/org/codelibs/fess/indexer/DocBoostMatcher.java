@@ -112,7 +112,6 @@ public class DocBoostMatcher {
                 return Float.parseFloat(value.toString());
             } catch (final NumberFormatException e) {
                 logger.warn("Failed to parse boost value: expression={}, value={}", boostExpression, value, e);
-                return 0.0f;
             }
         }
 

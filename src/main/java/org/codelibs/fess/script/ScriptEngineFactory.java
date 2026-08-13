@@ -31,7 +31,6 @@ public class ScriptEngineFactory {
      * Constructor.
      */
     public ScriptEngineFactory() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ScriptEngineFactory.class);

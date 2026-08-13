@@ -40,7 +40,6 @@ public class DefaultCorsHandler extends CorsHandler {
      * standard CORS headers based on application configuration.
      */
     public DefaultCorsHandler() {
-        super();
     }
 
     /**
@@ -54,9 +53,10 @@ public class DefaultCorsHandler extends CorsHandler {
         final java.util.List<String> origins = fessConfig.getApiCorsAllowOriginList();
         origins.forEach(s -> factory.add(s, this));
         if (origins.contains(ALLOW_ORIGIN_ALL) && fessConfig.isApiCorsAllowCredentials()) {
-            logger.warn("Credentials are NOT sent for the '*' entry in api.cors.allow.origin (a literal '*' is returned). "
-                    + "Credentials are honored only for an exact match of an explicit Origin. "
-                    + "To allow credentialed cross-origin access, set explicit origins in api.cors.allow.origin.");
+            logger.warn("""
+                    Credentials are NOT sent for the '*' entry in api.cors.allow.origin (a literal '*' is returned). \
+                    Credentials are honored only for an exact match of an explicit Origin. \
+                    To allow credentialed cross-origin access, set explicit origins in api.cors.allow.origin.""");
         }
     }
 

@@ -329,11 +329,6 @@ public class ChatClient {
                     final LlmStreamCallback docNotFoundCallback =
                             new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawDocNotFoundCallback);
                     llmClientManager.generateDocumentNotFoundResponse(userMessage, documentUrl, historyForAnswer, docNotFoundCallback);
-                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
-                                fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
-                    }
                 } else {
                     // Fetch full content and generate summary
                     phaseStartTime = System.currentTimeMillis();
@@ -361,11 +356,11 @@ public class ChatClient {
                     final LlmStreamCallback summaryCallback =
                             new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawSummaryCallback);
                     llmClientManager.generateSummaryResponse(userMessage, fullDocs, historyForAnswer, summaryCallback);
-                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
-                                fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
-                    }
+                }
+                callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                            fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
                 }
             } else {
                 // Phase 2: Search with query
@@ -373,7 +368,7 @@ public class ChatClient {
                 finalSearchQuery = query;
                 phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
-                ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
+                final ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
                 List<Map<String, Object>> searchResults = querySearchResult.getDocuments();
                 searchQueryId = querySearchResult.getQueryId();
                 searchRequestedTime = querySearchResult.getRequestedTime();
@@ -536,8 +531,8 @@ public class ChatClient {
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(fullResponse.toString());
             assistantMessage.setHtmlContent(htmlContent);
 
-            for (int i = 0; i < sources.size(); i++) {
-                populateUrlLink(sources.get(i));
+            for (final Map<String, Object> element : sources) {
+                populateUrlLink(element);
             }
             addSourcesToMessage(assistantMessage, sources, contextPath, searchQueryId, searchRequestedTime);
 
@@ -683,24 +678,17 @@ public class ChatClient {
      */
     protected String buildAssistantHistoryContent(final ChatMessage msg, final String mode, final int assistantMaxChars,
             final int summaryMaxChars) {
-        switch (mode) {
-        case "full":
-            return msg.getContent();
-        case "smart_summary":
-            // smart_summary is handled by extractHistoryForIntent / extractHistoryForAnswer;
-            // it must never reach this per-message renderer.
-            throw new IllegalStateException("smart_summary mode is not handled per-message");
-        case "source_titles":
-            return buildSourceTitlesContent(msg, summaryMaxChars);
-        case "source_titles_and_urls":
-            return buildSourceTitlesAndUrlsContent(msg);
-        case "truncated":
-            return buildTruncatedContent(msg, assistantMaxChars);
-        case "none":
-            return null;
-        default:
-            return msg.getContent();
-        }
+        return switch (mode) {
+        case "full" -> msg.getContent();
+        case "smart_summary" -> // smart_summary is handled by extractHistoryForIntent / extractHistoryForAnswer;
+                // it must never reach this per-message renderer.
+                throw new IllegalStateException("smart_summary mode is not handled per-message");
+        case "source_titles" -> buildSourceTitlesContent(msg, summaryMaxChars);
+        case "source_titles_and_urls" -> buildSourceTitlesAndUrlsContent(msg);
+        case "truncated" -> buildTruncatedContent(msg, assistantMaxChars);
+        case "none" -> null;
+        default -> msg.getContent();
+        };
     }
 
     /**
@@ -751,7 +739,8 @@ public class ChatClient {
             final String url = s.getUrl();
             if (title != null && !title.isEmpty() && url != null && !url.isEmpty()) {
                 return title + " (" + url + ")";
-            } else if (title != null && !title.isEmpty()) {
+            }
+            if (title != null && !title.isEmpty()) {
                 return title;
             } else if (url != null && !url.isEmpty()) {
                 return url;
@@ -780,17 +769,6 @@ public class ChatClient {
             return content;
         }
         return content.substring(0, maxChars) + "...";
-    }
-
-    /**
-     * Builds the source titles suffix string (e.g., "\n[Referenced documents: Title1, Title2]").
-     * Returns an empty string if no sources or titles are available.
-     *
-     * @param sources the source documents
-     * @return the source titles suffix, or empty string
-     */
-    private String buildSourceTitlesSuffix(final List<ChatSource> sources) {
-        return buildSourceTitlesSuffix(sources, Integer.MAX_VALUE);
     }
 
     private String buildSourceTitlesSuffix(final List<ChatSource> sources, final int maxSuffixLength) {
@@ -1143,7 +1121,7 @@ public class ChatClient {
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
             @SuppressWarnings("unchecked")
-            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
+            final List<Map<String, Object>> docs = data.getDocumentItems();
             if (docs != null) {
                 return new ChatSearchResult(docs, data.getQueryId(), data.getRequestedTime());
             }
@@ -1201,7 +1179,7 @@ public class ChatClient {
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
             @SuppressWarnings("unchecked")
-            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
+            final List<Map<String, Object>> docs = data.getDocumentItems();
             if (docs != null) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("[RAG] Document search completed. query={}, resultCount={}, elapsedTime={}ms", query, docs.size(),

@@ -34,7 +34,6 @@ public class AdminSuggestAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSuggestAction() {
-        super();
     }
 
     /** Role name for admin suggest operations */

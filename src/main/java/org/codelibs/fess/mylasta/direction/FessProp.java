@@ -1036,14 +1036,16 @@ public interface FessProp {
     String getJobTemplateTitleData();
 
     default String getJobTemplateTitle(final String type) {
-        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+        switch (type) {
+        case Constants.WEB_CRAWLER_TYPE:
             return getJobTemplateTitleWeb();
-        }
-        if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+        case Constants.FILE_CRAWLER_TYPE:
             return getJobTemplateTitleFile();
-        }
-        if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+        case Constants.DATA_CRAWLER_TYPE:
             return getJobTemplateTitleData();
+        case null:
+        default:
+            break;
         }
         return "None";
     }
@@ -2459,7 +2461,7 @@ public interface FessProp {
     }
 
     /**
-     * Resolves {@code api.v2.chat.rate.limit.per.user.per.minute} from the system
+     * Resolves {@code api.chat.rate.limit.per.user.per.minute} from the system
      * properties, defaulting to {@code 30} on absence or parse failure. A return
      * value &le; 0 disables the chat rate limit entirely.
      *
@@ -2472,7 +2474,7 @@ public interface FessProp {
      */
     default int getChatRateLimitPerMinute() {
         try {
-            return Integer.parseInt(getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
+            return Integer.parseInt(getSystemProperty("api.chat.rate.limit.per.user.per.minute", "30"));
         } catch (final NumberFormatException e) {
             return 30;
         }
@@ -2483,44 +2485,64 @@ public interface FessProp {
      * (e.g. {@code q}, {@code sort}, {@code sdh}). Enforced server-side per
      * OWASP API4:2023 guidance.
      *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
      * @return maximum character length; defaults to {@code 1000}
      */
-    default int getApiV2ParamMaxLengthAsInteger() {
-        final Integer value = getAsInteger("api.v2.param.max.length");
-        return value != null ? value.intValue() : 1000;
+    default int getApiParamMaxLengthOrDefault() {
+        final Integer value = getAsInteger("api.param.max.length");
+        return value != null ? value : 1000;
     }
 
     /**
      * Returns the maximum number of values allowed for a v2 API repeatable
      * query parameter (e.g. array-typed fields).
      *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
      * @return maximum item count; defaults to {@code 100}
      */
-    default int getApiV2ParamMaxArraySizeAsInteger() {
-        final Integer value = getAsInteger("api.v2.param.max.array.size");
-        return value != null ? value.intValue() : 100;
+    default int getApiParamMaxArraySizeOrDefault() {
+        final Integer value = getAsInteger("api.param.max.array.size");
+        return value != null ? value : 100;
     }
 
     /**
      * Returns the maximum allowed length for a password field submitted via the
      * v2 API.
      *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
      * @return maximum character length; defaults to {@code 100}
      */
-    default int getPasswordMaxLengthAsInteger() {
+    default int getPasswordMaxLengthOrDefault() {
         final Integer value = getAsInteger("password.max.length");
-        return value != null ? value.intValue() : 100;
+        return value != null ? value : 100;
     }
 
     /**
      * Returns the upper clamp for the {@code facet.size} parameter applied at
      * the search chokepoint.
      *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
      * @return maximum facet field size; defaults to {@code 1000}
      */
-    default int getQueryFacetFieldsSizeMaxAsInteger() {
+    default int getQueryFacetFieldsSizeMaxOrDefault() {
         final Integer value = getAsInteger("query.facet.fields.size.max");
-        return value != null ? value.intValue() : 1000;
+        return value != null ? value : 1000;
     }
 
     /**
@@ -2528,9 +2550,14 @@ public interface FessProp {
      * at the search chokepoint. Read as a long because the value (and its default)
      * may exceed the {@code int} range.
      *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
      * @return maximum facet minimum document count; defaults to {@code 2147483647}
      */
-    default long getQueryFacetFieldsMinDocCountMaxAsLong() {
+    default long getQueryFacetFieldsMinDocCountMaxOrDefault() {
         final String value = get("query.facet.fields.min_doc_count.max");
         if (value != null) {
             try {
@@ -2547,10 +2574,15 @@ public interface FessProp {
      * accepted by the v2 click API. Read as a long because the value (and its
      * default) exceeds the {@code int} range.
      *
+     * <p>Named {@code ...OrDefault} rather than {@code ...AsInteger}/{@code ...AsLong} on purpose: freegen
+     * emits those two suffixes for every key in {@code fess_config.properties}, and a generated declaration
+     * in {@link FessConfig} plus its {@code SimpleImpl} body would override this default and drop the
+     * fallback below.</p>
+     *
      * @return maximum accepted {@code rt}; defaults to {@code 9999999999999}
      */
-    default long getApiV2ClickMaxRtAsLong() {
-        final String value = get("api.v2.click.max.rt");
+    default long getApiClickMaxTimestampOrDefault() {
+        final String value = get("api.click.max.timestamp");
         if (value != null) {
             try {
                 return Long.parseLong(value.trim());

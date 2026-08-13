@@ -53,7 +53,6 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminStatsAction() {
-        super();
     }
 
     // ===================================================================================

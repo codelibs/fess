@@ -71,7 +71,6 @@ public abstract class FessSearchAction extends FessBaseAction {
      * Default constructor.
      */
     public FessSearchAction() {
-        super();
     }
 
     /** The field name used for label-based search filtering. */

@@ -28,7 +28,6 @@ public class EmptyGenerator extends BaseThumbnailGenerator {
      * Default constructor.
      */
     public EmptyGenerator() {
-        super();
     }
 
     /**

@@ -65,12 +65,9 @@ public final class OriginUtil {
         // "https://example.com\r\n..." slip through as a clean origin. Edge CR/LF/TAB
         // must be detected by the control-char scan below and rejected.
         final String value = stripSpaces(originOrUrl);
-        if (value.isEmpty()) {
-            return null;
-        }
         // Browsers emit the literal "null" for opaque origins (e.g. sandboxed
         // iframes, data: URLs). It is never a trustworthy same-origin value.
-        if ("null".equalsIgnoreCase(value)) {
+        if (value.isEmpty() || "null".equalsIgnoreCase(value)) {
             return null;
         }
         // Reject any remaining whitespace or control character. A well-formed

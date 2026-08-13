@@ -216,7 +216,7 @@ public class BCrypt {
      */
     private static String encode_base64(final byte d[], final int len) throws IllegalArgumentException {
         int off = 0;
-        final StringBuffer rs = new StringBuffer();
+        final StringBuilder rs = new StringBuilder();
         int c1, c2;
 
         if (len <= 0 || len > d.length) {
@@ -224,7 +224,8 @@ public class BCrypt {
         }
 
         while (off < len) {
-            c1 = d[off++] & 0xff;
+            c1 = d[off] & 0xff;
+            off++;
             rs.append(base64_code[(c1 >> 2) & 0x3f]);
             c1 = (c1 & 0x03) << 4;
             if (off >= len) {
@@ -270,7 +271,7 @@ public class BCrypt {
      * @throws IllegalArgumentException if maxolen is invalid
      */
     private static byte[] decode_base64(final String s, final int maxolen) throws IllegalArgumentException {
-        final StringBuffer rs = new StringBuffer();
+        final StringBuilder rs = new StringBuilder();
         int off = 0;
         final int slen = s.length();
         int olen = 0;
@@ -282,7 +283,8 @@ public class BCrypt {
         }
 
         while (off < slen - 1 && olen < maxolen) {
-            c1 = char64(s.charAt(off++));
+            c1 = char64(s.charAt(off));
+            off++;
             c2 = char64(s.charAt(off++));
             if (c1 == -1 || c2 == -1) {
                 break;
@@ -336,7 +338,8 @@ public class BCrypt {
             n += S[0x100 | ((l >> 16) & 0xff)];
             n ^= S[0x200 | ((l >> 8) & 0xff)];
             n += S[0x300 | (l & 0xff)];
-            r ^= n ^ P[++i];
+            i++;
+            r ^= n ^ P[i];
 
             // Feistel substitution on right word
             n = S[(r >> 24) & 0xff];
@@ -479,7 +482,8 @@ public class BCrypt {
 
         ret = new byte[clen * 4];
         for (i = 0, j = 0; i < clen; i++) {
-            ret[j++] = (byte) ((cdata[i] >> 24) & 0xff);
+            ret[j] = (byte) ((cdata[i] >> 24) & 0xff);
+            j++;
             ret[j++] = (byte) ((cdata[i] >> 16) & 0xff);
             ret[j++] = (byte) ((cdata[i] >> 8) & 0xff);
             ret[j++] = (byte) (cdata[i] & 0xff);
@@ -500,7 +504,7 @@ public class BCrypt {
         byte passwordb[], saltb[], hashed[];
         char minor = (char) 0;
         int rounds, off = 0;
-        final StringBuffer rs = new StringBuffer();
+        final StringBuilder rs = new StringBuilder();
 
         if (salt.charAt(0) != '$' || salt.charAt(1) != '2') {
             throw new IllegalArgumentException("Invalid salt version");
@@ -560,7 +564,7 @@ public class BCrypt {
      * @return    an encoded salt value
      */
     public static String gensalt(final int log_rounds, final SecureRandom random) {
-        final StringBuffer rs = new StringBuffer();
+        final StringBuilder rs = new StringBuilder();
         final byte rnd[] = new byte[BCRYPT_SALT_LEN];
 
         random.nextBytes(rnd);

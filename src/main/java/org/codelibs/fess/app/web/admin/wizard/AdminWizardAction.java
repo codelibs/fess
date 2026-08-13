@@ -54,7 +54,6 @@ public class AdminWizardAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminWizardAction() {
-        super();
     }
 
     /** Role name for admin wizard operations */

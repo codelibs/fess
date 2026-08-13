@@ -41,7 +41,6 @@ public class ProfileAction extends FessSearchAction {
      * Default constructor.
      */
     public ProfileAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ProfileAction.class);
@@ -145,27 +144,14 @@ public class ProfileAction extends FessSearchAction {
      */
     protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
         switch (errorKey) {
-        case "errors.password_length":
-            messages.addErrorsPasswordLength(GLOBAL, String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
-            break;
-        case "errors.password_no_uppercase":
-            messages.addErrorsPasswordNoUppercase(GLOBAL);
-            break;
-        case "errors.password_no_lowercase":
-            messages.addErrorsPasswordNoLowercase(GLOBAL);
-            break;
-        case "errors.password_no_digit":
-            messages.addErrorsPasswordNoDigit(GLOBAL);
-            break;
-        case "errors.password_no_special_char":
-            messages.addErrorsPasswordNoSpecialChar(GLOBAL);
-            break;
-        case "errors.password_is_blacklisted":
-            messages.addErrorsPasswordIsBlacklisted(GLOBAL);
-            break;
-        default:
-            messages.addErrorsBlankPassword(GLOBAL);
-            break;
+        case "errors.password_length" -> messages.addErrorsPasswordLength(GLOBAL,
+                String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+        case "errors.password_no_uppercase" -> messages.addErrorsPasswordNoUppercase(GLOBAL);
+        case "errors.password_no_lowercase" -> messages.addErrorsPasswordNoLowercase(GLOBAL);
+        case "errors.password_no_digit" -> messages.addErrorsPasswordNoDigit(GLOBAL);
+        case "errors.password_no_special_char" -> messages.addErrorsPasswordNoSpecialChar(GLOBAL);
+        case "errors.password_is_blacklisted" -> messages.addErrorsPasswordIsBlacklisted(GLOBAL);
+        default -> messages.addErrorsBlankPassword(GLOBAL);
         }
     }
 

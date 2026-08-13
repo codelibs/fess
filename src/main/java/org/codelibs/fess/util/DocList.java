@@ -42,7 +42,6 @@ public class DocList extends ArrayList<Map<String, Object>> {
      * Creates a new empty document list with zero content size and processing time.
      */
     public DocList() {
-        super();
     }
 
     /**

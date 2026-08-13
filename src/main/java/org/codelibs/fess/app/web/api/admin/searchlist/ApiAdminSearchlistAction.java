@@ -68,7 +68,6 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminSearchlistAction() {
-        super();
     }
 
     // ===================================================================================

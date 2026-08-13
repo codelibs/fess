@@ -42,7 +42,6 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminCrawlinginfoAction() {
-        super();
     }
 
     /** The role for this action. */

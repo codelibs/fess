@@ -48,7 +48,6 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminRoleAction() {
-        super();
     }
 
     // ===================================================================================

@@ -35,7 +35,6 @@ public class FessIntervalController extends DefaultIntervalController {
      * Default constructor.
      */
     public FessIntervalController() {
-        super();
     }
 
     /**
@@ -43,6 +42,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @return the delay time in milliseconds after processing
      */
+    @Override
     public long getDelayMillisAfterProcessing() {
         return delayMillisAfterProcessing;
     }
@@ -52,6 +52,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @param delayMillisAfterProcessing the delay time in milliseconds after processing
      */
+    @Override
     public void setDelayMillisAfterProcessing(final long delayMillisAfterProcessing) {
         this.delayMillisAfterProcessing = delayMillisAfterProcessing;
     }
@@ -61,6 +62,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @return the delay time in milliseconds when no URLs are available
      */
+    @Override
     public long getDelayMillisAtNoUrlInQueue() {
         return delayMillisAtNoUrlInQueue;
     }
@@ -70,6 +72,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @param delayMillisAtNoUrlInQueue the delay time in milliseconds when no URLs are available
      */
+    @Override
     public void setDelayMillisAtNoUrlInQueue(final long delayMillisAtNoUrlInQueue) {
         this.delayMillisAtNoUrlInQueue = delayMillisAtNoUrlInQueue;
     }
@@ -79,6 +82,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @return the delay time in milliseconds before processing
      */
+    @Override
     public long getDelayMillisBeforeProcessing() {
         return delayMillisBeforeProcessing;
     }
@@ -88,6 +92,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @param delayMillisBeforeProcessing the delay time in milliseconds before processing
      */
+    @Override
     public void setDelayMillisBeforeProcessing(final long delayMillisBeforeProcessing) {
         this.delayMillisBeforeProcessing = delayMillisBeforeProcessing;
     }
@@ -97,6 +102,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @return the delay time in milliseconds for waiting for new URLs
      */
+    @Override
     public long getDelayMillisForWaitingNewUrl() {
         return delayMillisForWaitingNewUrl;
     }
@@ -106,6 +112,7 @@ public class FessIntervalController extends DefaultIntervalController {
      *
      * @param delayMillisForWaitingNewUrl the delay time in milliseconds for waiting for new URLs
      */
+    @Override
     public void setDelayMillisForWaitingNewUrl(final long delayMillisForWaitingNewUrl) {
         this.delayMillisForWaitingNewUrl = delayMillisForWaitingNewUrl;
     }

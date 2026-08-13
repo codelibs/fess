@@ -683,16 +683,12 @@ public class SearchLogService {
      * @throws FessSystemException if the entity type is not recognized
      */
     public void deleteSearchLog(final Object e) {
-        if (e instanceof final ClickLog clickLog) {
-            clickLogBhv.delete(clickLog);
-        } else if (e instanceof final FavoriteLog favoriteLog) {
-            favoriteLogBhv.delete(favoriteLog);
-        } else if (e instanceof final UserInfo userInfo) {
-            userInfoBhv.delete(userInfo);
-        } else if (e instanceof final SearchLog searchLog) {
-            searchLogBhv.delete(searchLog);
-        } else {
-            throw new FessSystemException("Unknown log entity: " + e);
+        switch (e) {
+        case final ClickLog clickLog -> clickLogBhv.delete(clickLog);
+        case final FavoriteLog favoriteLog -> favoriteLogBhv.delete(favoriteLog);
+        case final UserInfo userInfo -> userInfoBhv.delete(userInfo);
+        case final SearchLog searchLog -> searchLogBhv.delete(searchLog);
+        case null, default -> throw new FessSystemException("Unknown log entity: " + e);
         }
     }
 }

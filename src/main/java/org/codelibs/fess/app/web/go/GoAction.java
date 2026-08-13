@@ -54,7 +54,6 @@ public class GoAction extends FessSearchAction {
      * Default constructor for GoAction.
      */
     public GoAction() {
-        super();
     }
 
     // ===================================================================================
@@ -157,11 +156,10 @@ public class GoAction extends FessSearchAction {
         if (!isFileSystemPath(targetUrl)) {
             if (isValidRedirectUrl(targetUrl)) {
                 return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
-            } else {
-                logger.warn("Invalid redirect URL detected: {}", targetUrl);
-                saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
-                return redirect(ErrorAction.class);
             }
+            logger.warn("Invalid redirect URL detected: {}", targetUrl);
+            saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
+            return redirect(ErrorAction.class);
         }
         if (!fessConfig.isSearchFileProxyEnabled()) {
             return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);

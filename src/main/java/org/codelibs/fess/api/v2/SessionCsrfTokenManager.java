@@ -57,7 +57,7 @@ public class SessionCsrfTokenManager {
      */
     public String issue(final HttpSession session) {
         final Object existing = session.getAttribute(SESSION_ATTR);
-        if (existing instanceof String s && !s.isEmpty()) {
+        if (existing instanceof final String s && !s.isEmpty()) {
             if (logger.isDebugEnabled()) {
                 // m-9: log token length only — NEVER log the token value itself.
                 // m-19: log a truncated SHA-256 of the session id instead of the raw id
@@ -92,7 +92,7 @@ public class SessionCsrfTokenManager {
             return false;
         }
         final Object stored = session.getAttribute(SESSION_ATTR);
-        if (!(stored instanceof String s) || s.isEmpty()) {
+        if (!(stored instanceof final String s) || s.isEmpty()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("[csrf.verify] rejected: no stored token in session; sessionIdHash={}", redactSessionId(session));
             }

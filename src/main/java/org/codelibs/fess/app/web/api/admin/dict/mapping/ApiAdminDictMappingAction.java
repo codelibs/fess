@@ -47,7 +47,6 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictMappingAction() {
-        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictMappingAction.class);

@@ -127,7 +127,6 @@ public class ApiResult {
          * Default constructor for ApiUpdateResponse.
          */
         public ApiUpdateResponse() {
-            super();
         }
 
         /**
@@ -167,7 +166,6 @@ public class ApiResult {
          * Default constructor for ApiStartJobResponse.
          */
         public ApiStartJobResponse() {
-            super();
         }
 
         /**
@@ -343,7 +341,6 @@ public class ApiResult {
          * Default constructor for ApiDocsResponse.
          */
         public ApiDocsResponse() {
-            super();
         }
 
         /**
@@ -494,7 +491,6 @@ public class ApiResult {
          * Default constructor for ApiLogResponse.
          */
         public ApiLogResponse() {
-            super();
         }
 
         /**
@@ -525,7 +521,6 @@ public class ApiResult {
          * Default constructor for ApiLogsResponse.
          */
         public ApiLogsResponse() {
-            super();
         }
 
         /**
@@ -570,7 +565,6 @@ public class ApiResult {
          * Default constructor for ApiLogFilesResponse.
          */
         public ApiLogFilesResponse() {
-            super();
         }
 
         /**
@@ -661,7 +655,6 @@ public class ApiResult {
          * Default constructor for ApiSystemInfoResponse.
          */
         public ApiSystemInfoResponse() {
-            super();
         }
 
         /** System properties. */
@@ -728,7 +721,6 @@ public class ApiResult {
          * Default constructor for ApiErrorResponse.
          */
         public ApiErrorResponse() {
-            super();
         }
 
         /**
@@ -768,7 +760,6 @@ public class ApiResult {
          * Default constructor for ApiPluginResponse.
          */
         public ApiPluginResponse() {
-            super();
         }
 
         /**
@@ -798,7 +789,6 @@ public class ApiResult {
          * Default constructor for ApiStorageResponse.
          */
         public ApiStorageResponse() {
-            super();
         }
 
         /**
@@ -828,7 +818,6 @@ public class ApiResult {
          * Default constructor for ApiStatsResponse.
          */
         public ApiStatsResponse() {
-            super();
         }
 
         /**

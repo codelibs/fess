@@ -65,7 +65,6 @@ public class CommandGenerator extends BaseThumbnailGenerator {
      * Default constructor for CommandGenerator.
      */
     public CommandGenerator() {
-        super();
     }
 
     /**
@@ -237,10 +236,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             }
 
             if (p.waitFor(commandTimeout + commandDestroyTimeout, TimeUnit.MILLISECONDS)) {
-                if (task.isExecuted()) {
-                    // Process was killed by the timer.
-                    logger.warn("{} was timed out and destroyed.", getName());
-                } else {
+                if (!task.isExecuted()) {
                     // Process finished normally.
                     final int exitValue = p.exitValue();
                     if (exitValue != 0) {
@@ -252,6 +248,8 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                     }
                     return exitValue;
                 }
+                // Process was killed by the timer.
+                logger.warn("{} was timed out and destroyed.", getName());
             } else {
                 // This is a secondary timeout, a safety net.
                 logger.warn("{} is unresponsive and could not be terminated within the safety timeout.", getName());
@@ -366,10 +364,8 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 } catch (final Exception e) {
                     logger.warn("Failed to stop destroyer.", e);
                 }
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Process {} is already executed.", p);
-                }
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Process {} is already executed.", p);
             }
         }
 
