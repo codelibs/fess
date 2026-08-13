@@ -298,4 +298,43 @@ public class FessSearchActionTest extends UnitFessTestCase {
             super(requestPath, null, null);
         }
     }
+
+    @Test
+    public void test_getPermissionStateMessageKey_toleratesANullState() {
+        // FessUser is Serializable and its implementations live in the session, so one that gains a
+        // permission-state field without changing serialVersionUID deserializes an older session
+        // with it null -- field initializers do not run during deserialization. A bare switch on a
+        // null selector throws, and this runs in hookBefore on every front page, so that would be a
+        // 500 on every request until the session is dropped.
+        final FessUser user = new FessUser() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "olduser";
+            }
+
+            @Override
+            public String[] getRoleNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getGroupNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getPermissions() {
+                return new String[0];
+            }
+
+            @Override
+            public FessUser.PermissionState getPermissionState() {
+                return null;
+            }
+        };
+        assertNull(new FessSearchAction() {
+        }.getPermissionStateMessageKey(user));
+    }
 }

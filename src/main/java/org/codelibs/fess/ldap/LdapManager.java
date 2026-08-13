@@ -22,6 +22,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,6 +54,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.exception.LdapConfigurationException;
 import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SystemHelper;
@@ -433,21 +435,93 @@ public class LdapManager {
         final String[] roles = roleSet.toArray(new String[roleSet.size()]);
 
         if (!subRoleSet.isEmpty()) {
-            TimeoutManager.getInstance().addTimeoutTarget(() -> {
-                sAMAccountGroupNameSet.stream().forEach(groupName -> {
-                    getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
-                        roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
-                    });
-                });
-                processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Roles (lazy loading): {}", roleSet);
-                }
-                lazyLoading.accept(roleSet.toArray(new String[roleSet.size()]));
-            }, 0, false);
+            // Set before scheduling, not inside the task: the task does not start until the timer
+            // notices it a second later, and the user is already being handed their direct groups
+            // right now. Only this branch schedules anything, so a deployment that leaves
+            // ldap.group.filter blank -- the shipped default -- never leaves RESOLVED.
+            ldapUser.setPermissionState(PermissionState.PENDING);
+            scheduleSubRoleUpdate(ldapUser, bindDn, subRoleSet, groupFilter, roleSet, sAMAccountGroupNameSet, lazyLoading);
         }
 
         return roles;
+    }
+
+    /**
+     * Schedules the nested-group resolution to run off the calling thread.
+     *
+     * <p>Split out from {@link #getRoles} so that the boundary is overridable: the body itself,
+     * {@link #updateSubRoles}, runs synchronously, so a test can drive the whole resolution
+     * without waiting on the shared timer.
+     *
+     * @param ldapUser the user whose groups are being resolved
+     * @param bindDn the bind DN for the search
+     * @param subRoleSet the group DNs to expand
+     * @param groupFilter the configured group filter
+     * @param roleSet the role set to add to
+     * @param sAMAccountGroupNameSet the group names still needing a sAMAccountName lookup
+     * @param lazyLoading the callback that publishes the resolved roles
+     */
+    protected void scheduleSubRoleUpdate(final LdapUser ldapUser, final String bindDn, final Set<String> subRoleSet,
+            final String groupFilter, final Set<String> roleSet, final Set<String> sAMAccountGroupNameSet,
+            final Consumer<String[]> lazyLoading) {
+        TimeoutManager.getInstance()
+                .addTimeoutTarget(
+                        () -> updateSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet, sAMAccountGroupNameSet, lazyLoading), 0,
+                        false);
+    }
+
+    /**
+     * Resolves the nested groups and publishes the result.
+     *
+     * <p>Everything here can throw {@link LdapOperationException}. Without the catch below that
+     * throw escapes the {@code TimeoutManager} task, where the only handler is corelib's own
+     * "Failed to process a task." -- a message that names neither LDAP nor the user -- and
+     * {@code lazyLoading} is never called, so the user keeps their direct groups for the whole
+     * session with nothing connecting the two. The permissions already published by the
+     * synchronous pass are deliberately left in place; what changes is that the user is now told
+     * the rest is missing.
+     *
+     * @param ldapUser the user whose groups are being resolved
+     * @param bindDn the bind DN for the search
+     * @param subRoleSet the group DNs to expand
+     * @param groupFilter the configured group filter
+     * @param roleSet the role set to add to
+     * @param sAMAccountGroupNameSet the group names still needing a sAMAccountName lookup
+     * @param lazyLoading the callback that publishes the resolved roles
+     */
+    protected void updateSubRoles(final LdapUser ldapUser, final String bindDn, final Set<String> subRoleSet, final String groupFilter,
+            final Set<String> roleSet, final Set<String> sAMAccountGroupNameSet, final Consumer<String[]> lazyLoading) {
+        boolean resolved = false;
+        try {
+            // Inside the try, not above it: ComponentUtil.getComponent throws when the container is
+            // gone, and that throw on a TimeoutManager thread would leave the state PENDING forever
+            // -- the notice stuck on screen for the whole session, which is exactly what this method
+            // exists to avoid.
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            sAMAccountGroupNameSet.stream().forEach(groupName -> {
+                getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
+                    roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
+                });
+            });
+            processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Roles (lazy loading): {}", roleSet);
+            }
+            lazyLoading.accept(roleSet.toArray(new String[roleSet.size()]));
+            resolved = true;
+        } catch (final Exception e) {
+            logger.warn("Failed to resolve the nested LDAP groups of {}. Keeping the groups resolved so far.", ldapUser.getName(), e);
+        } finally {
+            if (resolved) {
+                ldapUser.setPermissionState(PermissionState.RESOLVED);
+            } else if (ldapUser.getPermissionState() == PermissionState.PENDING) {
+                // Only PENDING is downgraded, so a walk that failed cannot overwrite a RESOLVED a
+                // concurrent one already settled -- the user holds those groups either way, and
+                // claiming otherwise would show a failure notice over a complete permission set.
+                // The read-then-write is not atomic, but both writers are only reporting.
+                ldapUser.setPermissionState(PermissionState.FAILED);
+            }
+        }
     }
 
     /**
@@ -517,6 +591,7 @@ public class LdapManager {
             logger.debug("Group filter: {}", filter);
         }
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final Set<String> sAMAccountGroupNameSet = new LinkedHashSet<>();
         search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
             for (final SearchResult srcrslt : result) {
                 final String groupDn = srcrslt.getNameInNamespace();
@@ -526,12 +601,29 @@ public class LdapManager {
                 final String groupName = getSearchRoleName(groupDn);
                 final String roleType = updateSearchRoles(roleSet, groupDn, groupName);
                 if (fessConfig.getRoleSearchGroupPrefix().equals(roleType) && fessConfig.isLdapSamaccountnameGroup()) {
-                    getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
-                        roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
-                    });
+                    sAMAccountGroupNameSet.add(groupName);
                 }
             }
         });
+        // Collected above and looked up here, once the search has returned. getSAMAccountGroupName
+        // asks for the admin credentials, but getDirContext discards that request whenever a
+        // context is already open on this thread -- and inside the consumer above one is, the one
+        // search() opened with the end user's own credentials. Running the lookups after search()
+        // has closed it makes this method bind as the same principal as the identical call in
+        // updateSubRoles, instead of as whoever happened to be logging in.
+        if (!sAMAccountGroupNameSet.isEmpty()) {
+            // One context for the whole batch. Without it each lookup would open, bind and close its
+            // own connection, because search() has already closed the thread-local one -- and a
+            // recursive AD group filter routinely yields tens of nested groups per user.
+            final Hashtable<String, String> env = createSearchEnv();
+            try (DirContextHolder holder = getDirContext(() -> env)) {
+                sAMAccountGroupNameSet.forEach(groupName -> {
+                    getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
+                        roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
+                    });
+                });
+            }
+        }
     }
 
     /**

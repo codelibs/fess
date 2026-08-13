@@ -41,8 +41,45 @@ public class LdapUser implements FessUser {
     /** The name of the user. */
     protected String name;
 
-    /** The permissions of the user. */
-    protected String[] permissions = null;
+    /**
+     * Whether the nested-group walk has already published its result.
+     *
+     * <p>Guards the synchronous write below. {@link LdapManager#getRoles} schedules that walk and
+     * then returns, so the assignment of its return value happens after the walk was handed to the
+     * timer -- and if the walk finished in between, assigning would overwrite the fuller set with
+     * the direct-only one and leave the state reporting {@code RESOLVED} over it. The remaining
+     * check-then-act window is a few instructions wide against an LDAP round trip.
+     */
+    protected volatile boolean nestedRolesPublished;
+
+    /**
+     * The permissions of the user.
+     *
+     * <p>Volatile because the nested-group resolution writes it from a {@code TimeoutManager}
+     * thread while request threads read it. It is deliberately not guarded by a lock the way
+     * {@code EntraIdUser} guards its own: the first read of this field performs the directory
+     * search inline, so a lock here would be held across an LDAP round trip and the background
+     * writer would block a pool thread behind it. The remaining race is two concurrent first
+     * requests each running the search, which costs duplicate work but converges.
+     */
+    protected volatile String[] permissions = null;
+
+    /**
+     * How far this user's group and role permissions have got.
+     *
+     * <p>Starts {@link PermissionState#RESOLVED} rather than {@code PENDING}: unlike an Entra ID
+     * user, this one resolves its permissions inline on first read, and the nested-group walk is
+     * only scheduled when {@code ldap.group.filter} is configured. With the shipped defaults no
+     * background work is ever scheduled, so the synchronous result is the whole answer and there
+     * is no window to report. {@link LdapManager#getRoles} moves it to {@code PENDING} at the
+     * moment it actually schedules that walk.
+     *
+     * <p>Volatile for the same reason as {@link #permissions}. {@code RESOLVED} and {@code FAILED}
+     * are always written <em>after</em> the permissions they describe, so a reader that sees
+     * {@code RESOLVED} cannot see stale ones. {@code PENDING} is written before the first
+     * permissions exist at all, which is the state's whole point.
+     */
+    protected volatile PermissionState permissionState = PermissionState.RESOLVED;
 
     /**
      * Constructs a new LDAP user.
@@ -69,15 +106,62 @@ public class LdapUser implements FessUser {
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 final LdapManager ldapManager = ComponentUtil.getLdapManager();
-                permissions = distinct(ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
-                    permissions = distinct(roles);
-                    ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
-                }), fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName())));
+                // Appended to both writes, not just the synchronous one. LdapManager derives its own
+                // user entry through getCanonicalLdapName, which drops a NetBIOS "DOMAIN\" prefix,
+                // and adds it only when ldap.role.search.user.enabled is set -- so a lazy write that
+                // carried only what LdapManager collected would hand back a strictly smaller set
+                // than the synchronous result, and the user would silently lose their own
+                // permission at the moment the nested-group walk succeeded.
+                final String userPermission = fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName());
+                final String[] directPermissions =
+                        distinct(ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
+                            permissions = distinct(ArrayUtils.addAll(roles, userPermission));
+                            // Written after the permissions it describes, so a reader that sees the
+                            // flag cannot see the set it replaced.
+                            nestedRolesPublished = true;
+                            ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
+                        }), userPermission));
+                if (!nestedRolesPublished) {
+                    permissions = directPermissions;
+                }
             } else {
                 permissions = StringUtil.EMPTY_STRINGS;
             }
         }
         return permissions;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>A bare field read. It must stay one: this is called on every request by
+     * {@code FessSearchAction#hookBefore}, and {@link #getPermissions()} performs the directory
+     * search inline, so anything that consulted the permissions here -- including
+     * {@link #getGroupNames()} and {@link #getRoleNames()}, which derive from them -- would turn a
+     * status check into an LDAP round trip.
+     */
+    @Override
+    public PermissionState getPermissionState() {
+        // Null-checked, not just returned. This class is Serializable and lives in the session, and
+        // serialVersionUID is unchanged, so a session written by a release without this field
+        // deserializes with it null -- field initializers do not run during deserialization. Tomcat's
+        // default StandardManager persists sessions across a restart into a directory that survives
+        // a package upgrade, so that stream is a real upgrade path, and the interface documents this
+        // as never null.
+        final PermissionState state = permissionState;
+        return state == null ? PermissionState.RESOLVED : state;
+    }
+
+    /**
+     * Records how far this user's group and role permissions have got.
+     *
+     * <p>Called by {@link LdapManager} around the nested-group walk. Always write the permissions
+     * before the state that describes them.
+     *
+     * @param permissionState The state, never null.
+     */
+    public void setPermissionState(final PermissionState permissionState) {
+        this.permissionState = permissionState;
     }
 
     @Override
