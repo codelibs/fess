@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -208,7 +207,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         if (StringUtil.isNotBlank(proxyHost) && StringUtil.isNotBlank(proxyPort)) {
             // proxy credentials
             if (paramMap.get(Param.Client.PROXY_USERNAME) != null && paramMap.get(Param.Client.PROXY_PASSWORD) != null) {
-                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, new UsernamePasswordCredentials(
+                paramMap.put(HcHttpClient.PROXY_CREDENTIALS_PROPERTY, CrawlingConfig.createProxyCredentials(
                         paramMap.remove(Param.Client.PROXY_USERNAME).toString(), paramMap.remove(Param.Client.PROXY_PASSWORD).toString()));
             }
         } else {
