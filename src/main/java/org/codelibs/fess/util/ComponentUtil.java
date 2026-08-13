@@ -29,6 +29,7 @@ import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
+import org.codelibs.fess.api.v2.handlers.LoginRequirement;
 import org.codelibs.fess.api.v2.handlers.DocIdValidator;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.api.v2.handlers.UserPayloads;
@@ -165,6 +166,8 @@ public final class ComponentUtil {
     private static final String V2_USER_PAYLOADS = "v2UserPayloads";
 
     private static final String V2_CSRF_REQUIREMENT = "v2CsrfRequirement";
+
+    private static final String V2_LOGIN_REQUIREMENT = "v2LoginRequirement";
 
     private static final String V2_DOC_ID_VALIDATOR = "v2DocIdValidator";
 
@@ -829,6 +832,14 @@ public final class ComponentUtil {
      */
     public static CsrfRequirement getV2CsrfRequirement() {
         return getComponent(V2_CSRF_REQUIREMENT);
+    }
+
+    /**
+     * Gets the v2 login requirement component.
+     * @return The v2 login requirement component.
+     */
+    public static LoginRequirement getV2LoginRequirement() {
+        return getComponent(V2_LOGIN_REQUIREMENT);
     }
 
     /**
