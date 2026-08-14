@@ -152,7 +152,7 @@ public class AccessTokenService {
                 final String name = accessToken.getParameterName();
                 stream(request.getParameterValues(name)).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(permissionSet::add));
                 return OptionalEntity.of(permissionSet);
-            }).orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "Invalid token: " + token));
+            }).orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "The access token is not registered."));
         }
         return OptionalEntity.empty();
     }

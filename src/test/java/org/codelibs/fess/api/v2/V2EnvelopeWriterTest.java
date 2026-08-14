@@ -276,6 +276,21 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         assertFalse(body.contains("10.0.0.1"), "should not leak host details: " + body);
     }
 
+    @Test
+    public void test_writeInternalError_classifiesInvalidAccessTokenAs401() throws Exception {
+        // Handlers funnel every unexpected failure here. A credential the caller presented and we
+        // would not accept is theirs, not ours, and used to leave here as a 500 with a stack trace.
+        final CapturingResponse res = new CapturingResponse();
+        final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
+        final Exception cause = new org.codelibs.fess.exception.InvalidAccessTokenException("invalid_token", "s3cr3tCredentialDetail");
+        new V2EnvelopeWriter().writeInternalError(res, cause, noopLogger, "/api/v2/search");
+        final String body = res.body();
+        assertEquals(401, res.status);
+        assertTrue(body.contains("\"code\":\"auth_required\""), body);
+        assertFalse(body.contains("internal error"), body);
+        assertFalse(body.contains("s3cr3tCredentialDetail"), body);
+    }
+
     /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
     private static class CapturingResponse implements HttpServletResponse {
         StringWriter sw = new StringWriter();

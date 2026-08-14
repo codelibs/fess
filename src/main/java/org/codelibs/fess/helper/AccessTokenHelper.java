@@ -57,20 +57,38 @@ public class AccessTokenHelper {
 
     /**
      * Get the access token from the request.
+     *
+     * <p>The Authorization header is read as a Fess access token only when it is addressed to us:
+     * either a bare token with no scheme, or the {@code Bearer} scheme, whose name RFC 7235 makes
+     * case-insensitive. A header naming any other scheme -- the {@code Negotiate} of a SPNEGO
+     * client, a {@code Basic} or {@code Digest} credential -- belongs to that scheme's own
+     * handler, so this request simply carries no access token and the method returns null.
+     * Reporting those as a malformed access token is what made every such API request a 500.</p>
+     *
+     * <p>What is thrown is a header that is ours and unusable: {@code Bearer} with no credential
+     * after it, or with more than one word after it. Neither message quotes the header, because
+     * the part after the scheme is the access token itself and these messages are logged.</p>
+     *
      * @param request The request.
-     * @return The access token.
+     * @return The access token, or null when the request carries none.
      */
     public String getAccessTokenFromRequest(final HttpServletRequest request) {
-        final String token = request.getHeader("Authorization");
-        if (token != null) {
-            final String[] values = token.trim().split(" ");
-            if (values.length == 2 && BEARER.equals(values[0])) {
-                return values[1];
-            }
-            if (values.length == 1 && !BEARER.equals(values[0])) {
+        final String authzHeader = request.getHeader("Authorization");
+        if (authzHeader != null) {
+            final String[] values = authzHeader.trim().split(" ");
+            if (values.length == 1) {
+                if (BEARER.equalsIgnoreCase(values[0])) {
+                    throw new InvalidAccessTokenException("invalid_request", "The Bearer scheme is missing its credential.");
+                }
                 return values[0];
             }
-            throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);
+            if (!BEARER.equalsIgnoreCase(values[0])) {
+                return null;
+            }
+            if (values.length == 2) {
+                return values[1];
+            }
+            throw new InvalidAccessTokenException("invalid_request", "The Bearer credential is not a single token.");
         }
         final String name = ComponentUtil.getFessConfig().getApiAccessTokenRequestParameter();
         if (StringUtil.isNotBlank(name)) {

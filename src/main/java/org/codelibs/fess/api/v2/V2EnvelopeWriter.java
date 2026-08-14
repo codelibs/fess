@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -203,6 +204,13 @@ public class V2EnvelopeWriter {
      * committed (e.g. SSE or NDJSON handlers that flushed before the failure),
      * the method returns silently to avoid corrupting the in-flight body.</p>
      *
+     * <p>Every handler funnels its unexpected failures here, which makes this the one place that
+     * can tell the caller's fault from ours. An {@link InvalidAccessTokenException} is the
+     * caller's: the request presented an access token that is not registered or has expired, or
+     * none at all where {@code api.access.token.required} demands one. Reporting that as a 500
+     * both misleads the caller and writes a stack trace per request; classifying it here rather
+     * than in each handler keeps a handler added later from reintroducing it.</p>
+     *
      * @param res the HTTP response to write to
      * @param cause the cause to log (may be null; only logged, never written to wire)
      * @param logger the caller's logger to use for WARN-level logging
@@ -211,6 +219,16 @@ public class V2EnvelopeWriter {
      */
     public void writeInternalError(final HttpServletResponse res, final Throwable cause, final Logger logger, final String contextTag)
             throws IOException {
+        if (cause instanceof InvalidAccessTokenException) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("v2 rejected the access token: {}", contextTag, cause);
+            }
+            if (res.isCommitted()) {
+                return;
+            }
+            writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid access token");
+            return;
+        }
         if (cause != null) {
             logger.warn("v2 internal error: {}", contextTag, cause);
         } else {
