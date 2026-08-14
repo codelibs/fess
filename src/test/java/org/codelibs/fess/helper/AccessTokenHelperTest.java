@@ -74,15 +74,37 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getAccessTokenFromRequest_bad1() {
-        final String token = "INVALID _TOKEN0";
+    public void test_getAccessTokenFromRequest_otherScheme() {
+        // A credential addressed to another authentication scheme is not a malformed access token,
+        // it is simply not one of ours. Throwing here reached the API caller as a 500.
+        for (final String header : new String[] { "Negotiate YIIGxQYGKwYBBQUCoIIG", "Basic dXNlcjpwYXNzd29yZA==", "NTLM TlRMTVNTUAABAAAA",
+                "INVALID _TOKEN0" }) {
+            MockletHttpServletRequest req = getMockRequest();
+            req.addHeader("Authorization", header);
+            assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
+        }
+    }
+
+    @Test
+    public void test_getAccessTokenFromRequest_otherSchemeWithSpaces() {
+        // Digest and friends carry comma-separated parameters, so the header runs to more than two
+        // words. The scheme still says the credential is not ours.
         MockletHttpServletRequest req = getMockRequest();
-        req.addHeader("Authorization", token);
+        req.addHeader("Authorization", "Digest username=\"u\", realm=\"r\", nonce=\"n\"");
+        assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
+    }
+
+    @Test
+    public void test_getAccessTokenFromRequest_doesNotEchoTheCredential() {
+        // The message is logged, and a Bearer credential is an access token.
+        final String secret = "s3cr3tAccessToken";
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "Bearer " + secret + " extra");
         try {
             accessTokenHelper.getAccessTokenFromRequest(req);
             fail();
-        } catch (InvalidAccessTokenException e) {
-            // ok
+        } catch (final InvalidAccessTokenException e) {
+            assertFalse(e.getMessage().contains(secret));
         }
     }
 
@@ -177,26 +199,22 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_getAccessTokenFromRequest_caseInsensitiveBearer() {
+        // RFC 7235 makes the scheme name case-insensitive, and the scheme is what decides whether
+        // the header is addressed to us at all. Without this, "bearer" would fall through to the
+        // other-scheme branch and the token would be ignored without a word.
         final String token = accessTokenHelper.generateAccessToken();
-        MockletHttpServletRequest req = getMockRequest();
-        req.addHeader("Authorization", "bearer " + token);
-        try {
-            accessTokenHelper.getAccessTokenFromRequest(req);
-            fail();
-        } catch (InvalidAccessTokenException e) {
-            // ok
+        for (final String scheme : new String[] { "bearer", "BEARER", "BeArEr" }) {
+            MockletHttpServletRequest req = getMockRequest();
+            req.addHeader("Authorization", scheme + " " + token);
+            assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
         }
     }
 
     @Test
     public void test_getAccessTokenFromRequest_invalidBearerFormat() {
+        // "InvalidBearer" is a different scheme, not a misspelt Bearer.
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", "InvalidBearer token");
-        try {
-            accessTokenHelper.getAccessTokenFromRequest(req);
-            fail();
-        } catch (InvalidAccessTokenException e) {
-            // ok
-        }
+        assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
     }
 }

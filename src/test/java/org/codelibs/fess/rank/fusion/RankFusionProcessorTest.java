@@ -473,6 +473,30 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_mainSearcher_propagatesInvalidAccessToken() throws Exception {
+        // RoleQueryHelper raises this while the query is being built. The generic catch used to
+        // swallow it and return an empty list, which reports a refused request as a successful
+        // search of nothing and logs a stack trace for a caller-supplied credential every time.
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSearcher(new RankFusionSearcher() {
+                @Override
+                protected SearchResult search(final String query, final SearchRequestParams params,
+                        final OptionalThing<FessUserBean> userBean) {
+                    throw new org.codelibs.fess.exception.InvalidAccessTokenException("invalid_token",
+                            "The access token is not registered.");
+                }
+            });
+            rankFusionProcessor.init();
+            try {
+                rankFusionProcessor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+                fail();
+            } catch (final org.codelibs.fess.exception.InvalidAccessTokenException e) {
+                // expected
+            }
+        }
+    }
+
     static class TestMainSearcher extends RankFusionSearcher {
 
         private long allRecordCount;

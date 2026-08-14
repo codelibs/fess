@@ -44,6 +44,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -338,6 +339,9 @@ public class RankFusionProcessor implements AutoCloseable {
                 if (e.getCause() instanceof final ResultOffsetExceededException roee) {
                     throw roee;
                 }
+                if (e.getCause() instanceof final InvalidAccessTokenException iate) {
+                    throw iate;
+                }
                 logger.warn("Search operation failed with exception", e.getCause());
                 return SearchResult.create().build();
             }
@@ -457,7 +461,10 @@ public class RankFusionProcessor implements AutoCloseable {
             return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
                     searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
                     searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
-        } catch (final InvalidQueryException | ResultOffsetExceededException e) {
+        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
+            // These say the request was refused, not that the searcher broke. Swallowing one and
+            // returning an empty list would report a refusal as a successful search of nothing,
+            // and would log a stack trace for a caller-supplied credential on every request.
             throw e;
         } catch (final Exception e) {
             logger.warn("Main searcher failed to execute search for query: {}", query, e);

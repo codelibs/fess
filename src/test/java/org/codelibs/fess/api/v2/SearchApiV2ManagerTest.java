@@ -245,6 +245,29 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_invalidAccessTokenMapsTo401() throws Exception {
+        // RoleQueryHelper raises this while building the role query, before any handler writes.
+        // The generic catch below it produced a 500, so a request presenting an unusable
+        // credential looked like a server fault.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        m.labelsHandler = new org.codelibs.fess.api.v2.handlers.LabelsHandler() {
+            @Override
+            public void handle(final jakarta.servlet.http.HttpServletRequest request,
+                    final jakarta.servlet.http.HttpServletResponse response) {
+                throw new org.codelibs.fess.exception.InvalidAccessTokenException("invalid_token", "s3cr3tCredentialDetail");
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/labels"), res, new NopChain());
+        assertEquals(401, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"status\":1"), body);
+        assertTrue(body.contains("\"code\":\"auth_required\""), body);
+        // The exception message describes the caller's own credential, so it stays out of the wire.
+        assertFalse(body.contains("s3cr3tCredentialDetail"), body);
+    }
+
+    @Test
     public void test_handleHealth_does_not_leak_exception_message() throws Exception {
         // Source-level assertion: the HealthHandler catch block must not pass e.getMessage()
         // to writeError. Uses writeInternalError which logs and emits a generic message.

@@ -44,6 +44,7 @@ import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -295,6 +296,18 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/related-queries" -> relatedQueriesHandler.handle(request, response);
             case "/related-content" -> relatedContentHandler.handle(request, response);
             default -> ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
+            }
+        } catch (final InvalidAccessTokenException e) {
+            // The request presented a credential we could not accept: an access token that is not
+            // registered or has expired, or none at all where api.access.token.required demands
+            // one. That is a refusal, not a server fault, and the generic handler below turned it
+            // into a 500. The envelope carries no detail from the exception because its message
+            // describes the caller's own credential.
+            if (logger.isDebugEnabled()) {
+                logger.debug("/api/v2 rejected the access token for {}", sub, e);
+            }
+            if (!response.isCommitted()) {
+                ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.AUTH_REQUIRED, "invalid access token");
             }
         } catch (final IOException e) {
             // Streaming handlers can disconnect mid-write (broken pipe, client abort). Once
