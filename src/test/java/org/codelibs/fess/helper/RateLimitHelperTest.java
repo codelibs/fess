@@ -132,6 +132,39 @@ public class RateLimitHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getClientIp_ipv6LoopbackProxy_isTrusted() {
+        // Java renders the IPv6 loopback as 0:0:0:0:0:0:0:1, while the shipped
+        // rate.limit.trusted.proxies lists it as "::1". The comparison used to be a plain string
+        // match, so a reverse proxy on IPv6 loopback -- what proxy_pass http://localhost:8080
+        // resolves to where localhost prefers IPv6 -- was silently untrusted, and every client
+        // behind it shared one rate-limit bucket.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("0:0:0:0:0:0:0:1");
+        request.addHeader("X-Forwarded-For", "203.0.113.50");
+        assertEquals("203.0.113.50", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_ipv6LoopbackShortForm_isTrusted() {
+        // The same address in the spelling the configuration uses. This one already matched
+        // before the fix -- it is the literal in the shipped default -- and is kept so that
+        // canonicalising the configured side cannot regress it.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("::1");
+        request.addHeader("X-Forwarded-For", "203.0.113.51");
+        assertEquals("203.0.113.51", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_untrustedIpv6_headersIgnored() {
+        // Control: canonicalising both sides must not make every IPv6 peer trusted.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("2001:db8::1");
+        request.addHeader("X-Forwarded-For", "203.0.113.52");
+        assertEquals("2001:db8::1", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
     public void test_blockIp() {
         rateLimitHelper.blockIp("192.168.1.100", 1000L);
         assertEquals(1, rateLimitHelper.getBlockedIpCount());

@@ -805,4 +805,49 @@ public class FessPropTest extends UnitFessTestCase {
             }
         };
     }
+
+    // ------------------------------------------------------------------
+    // Trusted-proxy address canonicalisation
+
+    @Test
+    public void test_normalizeIpAddress_ipv6LoopbackSpellingsAgree() {
+        // The whole point: the configuration writes "::1", getRemoteAddr() reports
+        // "0:0:0:0:0:0:0:1", and a plain string comparison between them is false.
+        assertEquals(FessProp.normalizeIpAddress("0:0:0:0:0:0:0:1"), FessProp.normalizeIpAddress("::1"));
+    }
+
+    @Test
+    public void test_normalizeIpAddress_ipv4IsUnchanged() {
+        assertEquals("127.0.0.1", FessProp.normalizeIpAddress("127.0.0.1"));
+        assertEquals("192.168.1.100", FessProp.normalizeIpAddress("192.168.1.100"));
+    }
+
+    @Test
+    public void test_normalizeIpAddress_distinctAddressesStayDistinct() {
+        assertFalse(FessProp.normalizeIpAddress("::1").equals(FessProp.normalizeIpAddress("2001:db8::1")));
+        assertFalse(FessProp.normalizeIpAddress("::1").equals(FessProp.normalizeIpAddress("::2")));
+        assertFalse(FessProp.normalizeIpAddress("127.0.0.1").equals(FessProp.normalizeIpAddress("127.0.0.2")));
+    }
+
+    @Test
+    public void test_normalizeIpAddress_nonLiteralIsLeftAlone() {
+        // A hostname must be returned untouched rather than resolved: this runs on the request
+        // path, and a DNS lookup there would be a far worse problem than the one being fixed.
+        assertEquals("proxy.example.com", FessProp.normalizeIpAddress("proxy.example.com"));
+        assertEquals("not an address", FessProp.normalizeIpAddress("not an address"));
+        assertEquals("", FessProp.normalizeIpAddress(""));
+        assertNull(FessProp.normalizeIpAddress(null));
+    }
+
+    @Test
+    public void test_normalizeIpAddress_malformedDottedQuadIsLeftAlone() {
+        // Shaped like IPv4 but not valid; it must come back unchanged, not throw.
+        assertEquals("999.999.999.999", FessProp.normalizeIpAddress("999.999.999.999"));
+    }
+
+    @Test
+    public void test_normalizeIpAddress_trimsSurroundingSpace() {
+        assertEquals("127.0.0.1", FessProp.normalizeIpAddress("  127.0.0.1  "));
+    }
+
 }

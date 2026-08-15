@@ -130,8 +130,7 @@ public class RateLimitHelper {
      * @return true if the IP is a trusted proxy
      */
     protected boolean isTrustedProxy(final String ip) {
-        final Set<String> trustedProxies = ComponentUtil.getFessConfig().getRateLimitTrustedProxiesAsSet();
-        final boolean trusted = trustedProxies.contains(ip);
+        final boolean trusted = ComponentUtil.getFessConfig().isRateLimitTrustedProxy(ip);
         if (logger.isDebugEnabled() && trusted) {
             logger.debug("Trusted proxy detected: ip={}", ip);
         }
