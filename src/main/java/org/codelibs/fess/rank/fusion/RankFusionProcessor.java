@@ -209,8 +209,7 @@ public class RankFusionProcessor implements AutoCloseable {
         }
         if (availableSearchers.length == 0) {
             logger.warn("No searchers available for query: {}", query);
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
-                    params.getPageSize(), 0);
+            return createDegradedResponseList(params, params.getPageSize());
         }
         if (availableSearchers.length == 1) {
             return searchWithMainSearcher(availableSearchers[0], query, params, userBean);
@@ -299,8 +298,7 @@ public class RankFusionProcessor implements AutoCloseable {
         final int rankConstant = fessConfig.getRankFusionRankConstantAsInteger();
         if (searchers.length == 0) {
             logger.warn("searchWithMultipleSearchers called with empty searcher array");
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
-                    params.getPageSize(), 0);
+            return createDegradedResponseList(params, params.getPageSize());
         }
         final int size = windowSize / searchers.length;
         if (logger.isDebugEnabled()) {
@@ -468,9 +466,30 @@ public class RankFusionProcessor implements AutoCloseable {
             throw e;
         } catch (final Exception e) {
             logger.warn("Main searcher failed to execute search for query: {}", query, e);
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
-                    pageSize, 0);
+            return createDegradedResponseList(params, pageSize);
         }
+    }
+
+    /**
+     * Creates the empty response returned when a search could not actually be executed.
+     * <p>
+     * Distinct from an ordinary zero-hit result: here the query never reached a searcher, or the
+     * searcher threw. Both used to be reported with {@code partialResults} set to {@code false},
+     * which tells every consumer -- the search UI, {@code /api/v1/documents}, {@code
+     * /api/v2/search}, and any MCP or other API client on top of them -- that this is a complete
+     * result set that happens to contain nothing. A caller then cannot distinguish "no document
+     * matches" from "the search engine is unreachable", and an automated one will report the
+     * former. The same flag is already set for a timeout, which is the milder version of exactly
+     * this condition.
+     * </p>
+     *
+     * @param params search request parameters, for the start position
+     * @param pageSize the page size to report
+     * @return an empty response list flagged as partial
+     */
+    protected QueryResponseList createDegradedResponseList(final SearchRequestParams params, final int pageSize) {
+        return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, true, null, params.getStartPosition(),
+                pageSize, 0);
     }
 
     /**

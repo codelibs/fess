@@ -29,6 +29,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
@@ -148,6 +149,42 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             // Should return empty results without crashing
             final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
+            assertTrue(results.isEmpty());
+            // ...and must say so. A caller that cannot tell this from a genuine zero-hit result
+            // will report "no document matches" while the search engine is unreachable.
+            assertTrue("a search that never ran must not be reported as complete", ((QueryResponseList) results).isPartialResults());
+        }
+    }
+
+    /**
+     * Test that a search with no searcher at all is also flagged as partial.
+     */
+    @Test
+    public void test_noSearchersAvailable_isPartial() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.init();
+
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            assertNotNull(results);
+            assertTrue(results.isEmpty());
+            assertTrue("a query that reached no searcher must not be reported as complete",
+                    ((QueryResponseList) results).isPartialResults());
+        }
+    }
+
+    /**
+     * Test that an ordinary zero-hit search is NOT flagged as partial.
+     */
+    @Test
+    public void test_genuineZeroHits_isNotPartial() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new TestSearcher(0));
+            processor.init();
+
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            assertNotNull(results);
+            assertTrue(results.isEmpty());
+            assertFalse("a search that ran and matched nothing is a complete result", ((QueryResponseList) results).isPartialResults());
         }
     }
 
