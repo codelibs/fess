@@ -228,7 +228,10 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             if (logger.isDebugEnabled()) {
                 logger.debug("jwtHeader={}", jwtHeader);
                 logger.debug("jwtClaim={}", jwtClaim);
-                logger.debug("jwtSignature={}", jwtSignature);
+                // The signature is raw bytes, not text. Writing the decoded string put control and
+                // invalid-UTF-8 bytes straight into fess.log, which makes the file itself count as
+                // binary: grep and the rest of the usual log tooling then skip it silently.
+                logger.debug("jwtSignature: {} encoded characters, not validated", jwt[2].length());
             }
 
             // SECURITY WARNING: JWT signature validation is not implemented.
@@ -246,7 +249,12 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             attributes.put("jwtsignature", jwtSignature);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("attributes={}", attributes);
+                // Not the whole attribute map: it holds the access token and the refresh token, which
+                // are bearer credentials for the provider. The documentation tells an administrator to
+                // turn this logger up to debug when a login misbehaves, so whatever it prints ends up
+                // in a file that is read, copied into issue reports and shipped to log collectors.
+                logger.debug("tokenType={}, expiresInSeconds={}, refreshToken={}", tr.getTokenType(), tr.getExpiresInSeconds(),
+                        tr.getRefreshToken() == null ? "absent" : "present");
             }
             parseJwtClaim(jwtClaim, attributes);
 
