@@ -61,6 +61,15 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
      * @return the user groups
      */
     public String[] getUserGroups() {
+        if (attributes.get("groups") instanceof final String singleGroup) {
+            // A provider that collapses a single-valued claim to a bare JSON string still named a
+            // group. DocumentUtil answers null when a String is asked for as a String[], which is the
+            // same answer it gives for a claim that was never sent, so this used to be indistinguishable
+            // from an absent claim and the user silently got oic.default.groups instead of their own
+            // group. An empty value is treated like an empty array: the claim was sent, so the default
+            // does not apply.
+            return StringUtil.isBlank(singleGroup) ? StringUtil.EMPTY_STRINGS : new String[] { singleGroup.trim() };
+        }
         String[] userGroups = DocumentUtil.getValue(attributes, "groups", String[].class);
         if (userGroups == null) {
             userGroups = getDefaultGroupsAsArray();
