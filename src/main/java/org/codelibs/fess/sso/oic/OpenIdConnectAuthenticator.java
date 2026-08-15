@@ -130,8 +130,22 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                     if (logger.isDebugEnabled()) {
                         logger.debug("code: {}, state(request): {}, state(session): {}", code, reqState, sesState);
                     }
-                    if (sesState.equals(reqState) && StringUtil.isNotBlank(code)) {
-                        return processCallback(request, code);
+                    if (sesState.equals(reqState)) {
+                        final String error = request.getParameter("error");
+                        if (StringUtil.isNotBlank(error)) {
+                            // The provider answered this login with an error response (RFC 6749 section
+                            // 4.1.2.1). Falling through to a new authorization request would either bounce
+                            // between the two servers until the browser gives up, when the provider keeps
+                            // refusing, or hand back a code and log the user in anyway, when it refuses only
+                            // because the user declined the consent. Report it instead, so the caller shows
+                            // the login error.
+                            logger.warn("The OpenID provider rejected the authorization request: error={}, error_description={}", error,
+                                    request.getParameter("error_description"));
+                            return null;
+                        }
+                        if (StringUtil.isNotBlank(code)) {
+                            return processCallback(request, code);
+                        }
                     }
                 }
             }
@@ -195,7 +209,18 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         try {
             final TokenResponse tr = getTokenUrl(code);
 
-            final String[] jwt = ((String) tr.get("id_token")).split("\\.");
+            // Everything below reads a document the provider controls. Each malformed shape has to end
+            // as a returned null, which the caller turns into the SSO login error, and not as a thrown
+            // RuntimeException, which leaves the browser on a system error page.
+            if (!(tr.get("id_token") instanceof final String idToken) || StringUtil.isBlank(idToken)) {
+                logger.warn("The token response carries no id_token, so there is no user to log in.");
+                return null;
+            }
+            final String[] jwt = idToken.split("\\.");
+            if (jwt.length != 3) {
+                logger.warn("The id_token is not a JWT: it has {} dot-separated segments instead of 3.", jwt.length);
+                return null;
+            }
             final String jwtHeader = new String(decodeBase64(jwt[0]), Constants.UTF_8_CHARSET);
             final String jwtClaim = new String(decodeBase64(jwt[1]), Constants.UTF_8_CHARSET);
             final String jwtSignature = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
@@ -225,8 +250,20 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             }
             parseJwtClaim(jwtClaim, attributes);
 
-            return new OpenIdConnectCredential(attributes);
-        } catch (final IOException e) {
+            final OpenIdConnectCredential credential = new OpenIdConnectCredential(attributes);
+            if (StringUtil.isBlank(credential.getUserId())) {
+                // The user id is the email claim. Without it the credential resolves to a user with a
+                // null name, which the login itself accepts and every later request then fails on, so
+                // the session has to be refused here rather than created and left unusable.
+                logger.warn("The ID token has no email claim, which is the user id. Check that {} requests it.", OIC_SCOPE);
+                return null;
+            }
+            return credential;
+        } catch (final IOException | IllegalArgumentException e) {
+            // This endpoint is anonymous, so anyone can drive a failing callback. A message keeps a
+            // misbehaving provider diagnosable; the stack trace stays behind the debug level so an
+            // unauthenticated client cannot fill the log with them.
+            logger.warn("Failed to process the OpenID Connect callback: {}", e.getMessage());
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process callback request.", e);
             }

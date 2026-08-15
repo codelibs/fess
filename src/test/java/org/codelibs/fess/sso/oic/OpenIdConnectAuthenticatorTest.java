@@ -17,6 +17,8 @@ package org.codelibs.fess.sso.oic;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,8 +30,12 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.login.credential.LoginCredential;
+
+import com.google.api.client.auth.oauth2.TokenResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -327,5 +333,140 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertEquals("abc123", attributes.get("nonce"));
         assertEquals("hashvalue", attributes.get("at_hash"));
         assertEquals("codehash", attributes.get("c_hash"));
+    }
+
+    // ===================================================================================
+    //                                                        Callback failure handling
+    //                                                        =========================
+
+    private static String segment(final String json) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String jwtOf(final String claimJson) {
+        return segment("{\"alg\":\"RS256\"}") + "." + segment(claimJson) + "." + segment("signature");
+    }
+
+    private static TokenResponse tokenResponseWith(final Object idToken) {
+        final TokenResponse tr = new TokenResponse();
+        tr.setAccessToken("access-token");
+        tr.setTokenType("Bearer");
+        tr.setExpiresInSeconds(300L);
+        if (idToken != null) {
+            tr.set("id_token", idToken);
+        }
+        return tr;
+    }
+
+    private OpenIdConnectAuthenticator authenticatorReturning(final TokenResponse tr) {
+        return new OpenIdConnectAuthenticator() {
+            @Override
+            protected TokenResponse getTokenUrl(final String code) {
+                return tr;
+            }
+        };
+    }
+
+    private LoginCredential callbackWith(final Object idToken) {
+        return authenticatorReturning(tokenResponseWith(idToken)).processCallback(getMockRequest(), "the-code");
+    }
+
+    @Test
+    public void test_processCallback_acceptsAWellFormedIdToken() {
+        final LoginCredential credential = callbackWith(jwtOf("{\"email\":\"user@example.com\"}"));
+        assertNotNull(credential);
+        assertEquals("{user@example.com}", credential.toString());
+    }
+
+    @Test
+    public void test_processCallback_withoutIdToken() {
+        // A token response that carries no id_token used to reach ((String) null).split and throw.
+        assertNull(callbackWith(null));
+    }
+
+    @Test
+    public void test_processCallback_withNonStringIdToken() {
+        assertNull(callbackWith(Long.valueOf(42)));
+    }
+
+    @Test
+    public void test_processCallback_withBlankIdToken() {
+        assertNull(callbackWith(""));
+    }
+
+    @Test
+    public void test_processCallback_withTwoSegmentIdToken() {
+        // jwt[2] used to throw ArrayIndexOutOfBoundsException, which no caller catches.
+        assertNull(callbackWith("header.claim"));
+    }
+
+    @Test
+    public void test_processCallback_withFourSegmentIdToken() {
+        // A JWE compact serialisation has five segments and is not a signed JWT either.
+        assertNull(callbackWith("a.b.c.d"));
+    }
+
+    @Test
+    public void test_processCallback_withUndecodableSegment() {
+        // decodeBase64 throws IllegalArgumentException, which only the IOException catch used to cover.
+        assertNull(callbackWith("aGVhZGVy.!!!not-base64!!!.c2ln"));
+    }
+
+    @Test
+    public void test_processCallback_withNonJsonClaim() {
+        assertNull(callbackWith(segment("{\"alg\":\"RS256\"}") + "." + segment("not json at all") + "." + segment("s")));
+    }
+
+    @Test
+    public void test_processCallback_withoutEmailClaim() {
+        // The email claim is the user id. A credential without one logs in as a null-named user and
+        // then fails on every later request, so it must not become a session at all.
+        assertNull(callbackWith(jwtOf("{\"sub\":\"1234\",\"groups\":[\"dev\"]}")));
+    }
+
+    @Test
+    public void test_processCallback_withBlankEmailClaim() {
+        assertNull(callbackWith(jwtOf("{\"email\":\"\"}")));
+    }
+
+    @Test
+    public void test_getLoginCredential_withProviderErrorResponse() {
+        // error=access_denied with the state we issued means the provider refused this login. Starting
+        // another authorization request would loop against a provider that keeps refusing, and would
+        // override the user's own refusal against one that does not.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.getSession().setAttribute(OpenIdConnectAuthenticator.OIC_STATE, "the-state");
+        request.setParameter("state", "the-state");
+        request.setParameter("error", "access_denied");
+        request.setParameter("error_description", "The user declined");
+
+        assertNull(authenticator.getLoginCredential());
+        assertNull(request.getSession().getAttribute(OpenIdConnectAuthenticator.OIC_STATE));
+    }
+
+    @Test
+    public void test_getLoginCredential_withErrorForAnotherState() {
+        // A state that is not the one in the session is not this login's error response, so the
+        // existing behaviour -- start a fresh authorization request -- is kept.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.getSession().setAttribute(OpenIdConnectAuthenticator.OIC_STATE, "the-state");
+        request.setParameter("state", "a-different-state");
+        request.setParameter("error", "access_denied");
+
+        final LoginCredential credential = authenticator.getLoginCredential();
+        assertNotNull(credential);
+        assertTrue(credential instanceof ActionResponseCredential);
+    }
+
+    @Test
+    public void test_getLoginCredential_withoutCodeOrError() {
+        // A bare callback with a matching state and neither parameter still restarts the flow.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.getSession().setAttribute(OpenIdConnectAuthenticator.OIC_STATE, "the-state");
+        request.setParameter("state", "the-state");
+
+        final LoginCredential credential = authenticator.getLoginCredential();
+        assertNotNull(credential);
+        assertTrue(credential instanceof ActionResponseCredential);
     }
 }
