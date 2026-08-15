@@ -19,11 +19,13 @@ import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.net.Authenticator;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2430,6 +2432,9 @@ public interface FessProp {
         return set;
     }
 
+    /** Matches a dotted-quad, so only real IPv4 literals reach InetAddress. */
+    Pattern IPV4_LITERAL_PATTERN = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+
     String RATE_LIMIT_TRUSTED_PROXIES_SET = "rateLimitTrustedProxiesSet";
 
     String getRateLimitTrustedProxies();
@@ -2438,11 +2443,61 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Set<String> set = (Set<String>) propMap.get(RATE_LIMIT_TRUSTED_PROXIES_SET);
         if (set == null) {
-            set = split(getRateLimitTrustedProxies(), ",")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            set = split(getRateLimitTrustedProxies(), ",").get(stream -> stream.map(String::trim)
+                    .filter(StringUtil::isNotEmpty)
+                    .map(FessProp::normalizeIpAddress)
+                    .collect(Collectors.toSet()));
             propMap.put(RATE_LIMIT_TRUSTED_PROXIES_SET, set);
         }
         return set;
+    }
+
+    /**
+     * Tells whether {@code ip} is one of the proxies listed in {@code rate.limit.trusted.proxies}.
+     * <p>
+     * Both sides are canonicalised first, because the comparison used to be a plain string match
+     * against {@code getRemoteAddr()} and the two spellings of the IPv6 loopback are not the same
+     * string: the shipped default lists {@code ::1}, while Java renders that address as
+     * {@code 0:0:0:0:0:0:0:1}. A reverse proxy reaching Fess over IPv6 loopback -- which is what
+     * {@code proxy_pass http://localhost:8080} resolves to on a host where {@code localhost}
+     * prefers IPv6 -- was therefore silently untrusted, so every client behind it shared one
+     * rate-limit bucket and the forwarded-header handling never applied.
+     * </p>
+     *
+     * @param ip the peer address to test, may be null
+     * @return true when the peer is a configured trusted proxy
+     */
+    default boolean isRateLimitTrustedProxy(final String ip) {
+        if (StringUtil.isBlank(ip)) {
+            return false;
+        }
+        return getRateLimitTrustedProxiesAsSet().contains(normalizeIpAddress(ip));
+    }
+
+    /**
+     * Canonicalises an IP address literal so that equivalent spellings compare equal.
+     * <p>
+     * Only literals are converted. A value that is neither an IPv4 nor an IPv6 literal is
+     * returned unchanged, so that a hostname left in the configuration can never make this a
+     * DNS lookup on the request path.
+     * </p>
+     *
+     * @param value the configured or observed address
+     * @return the canonical form, or {@code value} when it is not an address literal
+     */
+    static String normalizeIpAddress(final String value) {
+        if (value == null) {
+            return null;
+        }
+        final String trimmed = value.trim();
+        if (trimmed.isEmpty() || !(trimmed.indexOf(':') >= 0 || IPV4_LITERAL_PATTERN.matcher(trimmed).matches())) {
+            return trimmed;
+        }
+        try {
+            return InetAddress.getByName(trimmed).getHostAddress();
+        } catch (final UnknownHostException e) {
+            return trimmed;
+        }
     }
 
     String THEME_API_CSRF_SERVER_ORIGINS_SET = "themeApiCsrfServerOriginsSet";

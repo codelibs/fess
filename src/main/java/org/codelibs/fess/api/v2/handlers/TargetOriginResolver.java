@@ -86,7 +86,7 @@ public class TargetOriginResolver {
 
         // (2) Forwarded headers are trusted only when the immediate peer is a trusted proxy.
         final String remoteAddr = request.getRemoteAddr();
-        if (remoteAddr != null && fessConfig.getRateLimitTrustedProxiesAsSet().contains(remoteAddr)) {
+        if (fessConfig.isRateLimitTrustedProxy(remoteAddr)) {
             final String forwarded = reconstructFromForwardedHeaders(request);
             if (forwarded != null) {
                 return Collections.singleton(forwarded);
