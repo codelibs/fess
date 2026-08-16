@@ -33,9 +33,12 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.app.web.base.login.SamlCredential.SamlUser;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -44,6 +47,7 @@ import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.settings.Saml2Settings;
+import org.dbflute.optional.OptionalThing;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -1345,6 +1349,262 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    // ===================================================================================
+    //                                                                Single Logout Service
+    //                                                                =====================
+
+    /** The session attribute a test watches to tell an invalidated session from a kept one. */
+    private static final String SESSION_MARKER = "SLO_TEST_MARKER";
+
+    /** IdP settings that also make the single logout service reachable. */
+    private void setUpSlo(final DynamicProperties systemProperties) {
+        setUpIdp(systemProperties);
+        systemProperties.setProperty("saml.idp.single_logout_service.url", "https://idp.example.com/slo");
+    }
+
+    private void tearDownSlo(final DynamicProperties systemProperties) {
+        systemProperties.remove("saml.idp.single_logout_service.url");
+        tearDownIdp(systemProperties);
+    }
+
+    /**
+     * Builds an authenticator that reports the given user as logged in. The real
+     * {@code FessLoginAssist} cannot be resolved here because it injects the user index, which is
+     * exactly why reading the session user sits behind an overridable method.
+     */
+    private SamlAuthenticator createAuthenticatorLoggedInAs(final OptionalThing<FessUserBean> userBean) throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return userBean;
+            }
+        };
+        final Field field = SamlAuthenticator.class.getDeclaredField("defaultSettings");
+        field.setAccessible(true);
+        field.set(authenticator, authenticator.createDefaultSettings());
+        return authenticator;
+    }
+
+    /** The session bean a SAML login leaves behind; SamlUser.getName() is the NameID. */
+    private OptionalThing<FessUserBean> samlUserBean(final String nameId) {
+        return OptionalThing.of(new FessUserBean(new SamlUser(nameId, "_sessionIndex", null, null, null, new String[0], new String[0])));
+    }
+
+    /**
+     * Puts an IdP-initiated LogoutRequest on the request, shaped the way one that nobody
+     * authenticated looks: no signature, and neither {@code NotOnOrAfter} nor {@code Destination},
+     * both of which java-saml checks only when the attribute is present.
+     *
+     * @param request The request the IdP is pretending to send.
+     * @param id The LogoutRequest ID, which the replay cache keys on.
+     * @param nameId The NameID the LogoutRequest asks to log out.
+     */
+    private void sendLogoutRequest(final MockletHttpServletRequest request, final String id, final String nameId) {
+        final String xml = "<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                + " xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"" + id + "\" Version=\"2.0\""
+                + " IssueInstant=\"2026-01-01T00:00:00Z\">" + "<saml:Issuer>https://idp.example.com/metadata</saml:Issuer>"
+                + "<saml:NameID>" + nameId + "</saml:NameID></samlp:LogoutRequest>";
+        request.setParameter("SAMLRequest", Base64.getEncoder().encodeToString(xml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void test_getLogoutResponse_keepsTheSessionWhenTheLogoutRequestNamesAnotherUser() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(samlUserBean("victim@example.com"));
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            // /sso/logout is anonymous and SAML forces SameSite=none, so this request reaches the
+            // endpoint cross-site with the victim's session cookie on it
+            final MockletHttpServletRequest request = getMockRequest();
+            request.getSession().setAttribute(SESSION_MARKER, "kept");
+            sendLogoutRequest(request, "_crafted", "attacker@example.com");
+            // primed so that the insecure-settings warning is not one of the lines asserted below
+            authenticator.getSettings();
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                final ActionResponse response = authenticator.getResponse(SsoResponseType.LOGOUT);
+
+                assertEquals("kept", request.getSession(false).getAttribute(SESSION_MARKER));
+                // the IdP still gets an ordinary LogoutResponse: an error would tell the sender
+                // whether it guessed a live session, and would strand a confused-but-real IdP
+                assertTrue(String.valueOf(response), String.valueOf(response).contains("https://idp.example.com/slo?SAMLResponse="));
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("attacker@example.com"));
+                assertTrue(appender.warnings().get(0), appender.warnings().get(0).contains("victim@example.com"));
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLogoutResponse_endsTheSessionWhenTheLogoutRequestNamesTheSessionUser() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(samlUserBean("victim@example.com"));
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            request.getSession().setAttribute(SESSION_MARKER, "kept");
+            sendLogoutRequest(request, "_slo", "victim@example.com");
+            authenticator.getSettings();
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                final ActionResponse response = authenticator.getResponse(SsoResponseType.LOGOUT);
+
+                // the whole point of single logout: the IdP says so, so the session ends
+                assertNull(request.getSession(false).getAttribute(SESSION_MARKER), "the session must not survive its own logout");
+                assertTrue(String.valueOf(response), String.valueOf(response).contains("https://idp.example.com/slo?SAMLResponse="));
+                assertTrue(String.valueOf(appender.warnings()), appender.warnings().isEmpty());
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLogoutResponse_endsTheSessionWhenTheNameIdDiffersOnlyInFormatting() throws Exception {
+        // The two NameIDs are read from the text content of two different XML documents, and
+        // java-saml trims neither unless saml.parsing.trim_name_ids is turned on, which Fess
+        // leaves off. An IdP that pretty-prints its LogoutRequest but not its assertion, or that
+        // normalises the case of a UPN in one and not the other, must not end up unable to log
+        // anyone out -- that failure is silent and looks like the session refusing to die.
+        final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(samlUserBean("Victim@Example.com"));
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            request.getSession().setAttribute(SESSION_MARKER, "kept");
+            sendLogoutRequest(request, "_formatted", "\n            victim@example.com\n        ");
+            authenticator.getSettings();
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                authenticator.getResponse(SsoResponseType.LOGOUT);
+
+                assertNull(request.getSession(false).getAttribute(SESSION_MARKER), "a reformatted NameID is still the same user");
+                assertTrue(String.valueOf(appender.warnings()), appender.warnings().isEmpty());
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLogoutResponse_endsTheSessionWhenNobodyIsLoggedIn() throws Exception {
+        // With no session user there is no NameID to compare against, so the LogoutRequest keeps
+        // the effect it always had rather than being refused on a comparison that cannot be made.
+        final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(OptionalThing.empty());
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            final MockletHttpServletRequest request = getMockRequest();
+            request.getSession().setAttribute(SESSION_MARKER, "kept");
+            sendLogoutRequest(request, "_anonymous", "someone@example.com");
+
+            final ActionResponse response = authenticator.getResponse(SsoResponseType.LOGOUT);
+
+            assertNull(request.getSession(false).getAttribute(SESSION_MARKER), "the session must still be invalidated");
+            assertTrue(String.valueOf(response), String.valueOf(response).contains("https://idp.example.com/slo?SAMLResponse="));
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_isLogoutRequestForAnotherUser_leavesALogoutResponseAlone() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(samlUserBean("victim@example.com"));
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            // the IdP answering a LogoutRequest this SP sent. Handing such a request to the
+            // LogoutRequest parser would not parse anything: with no SAMLRequest parameter it
+            // builds a fresh outgoing message instead, whose NameID defaults to the IdP entity ID
+            // and therefore never matches the session user, leaving every SP-initiated logout with
+            // a session that refuses to end.
+            final MockletHttpServletRequest request = getMockRequest();
+            request.setParameter("SAMLResponse", "PHNhbWxwOkxvZ291dFJlc3BvbnNlIC8+");
+
+            assertFalse(authenticator.isLogoutRequestForAnotherUser(request, authenticator.getSettings()));
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getLogoutRequestNameId_returnsNullWhenTheNameIdCannotBeRead() throws Exception {
+        // A NameID this check cannot read must mean "cannot tell", which leaves the previous
+        // behaviour in place; throwing here would turn an unreadable message into a broken logout.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            final Saml2Settings settings = authenticator.getSettings();
+
+            final MockletHttpServletRequest wellFormed = getMockRequest();
+            sendLogoutRequest(wellFormed, "_readable", "victim@example.com");
+            assertEquals("victim@example.com", authenticator.getLogoutRequestNameId(wellFormed, settings));
+
+            final MockletHttpServletRequest notXml = getMockRequest();
+            notXml.setParameter("SAMLRequest", "................");
+            assertNull(authenticator.getLogoutRequestNameId(notXml, settings), "an undecodable message has no NameID");
+
+            final MockletHttpServletRequest withoutNameId = getMockRequest();
+            final String xml = "<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                    + " xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_bare\" Version=\"2.0\""
+                    + " IssueInstant=\"2026-01-01T00:00:00Z\"/>";
+            withoutNameId.setParameter("SAMLRequest", Base64.getEncoder().encodeToString(xml.getBytes(StandardCharsets.UTF_8)));
+            assertNull(authenticator.getLogoutRequestNameId(withoutNameId, settings), "java-saml rejects this one on its own later");
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
+    public void test_getSessionSamlNameId_ignoresAUserThatDidNotComeFromSaml() throws Exception {
+        // A local or LDAP login carries a user name, not a NameID, and comparing the two would
+        // reject every legitimate single logout on a mixed-authentication deployment.
+        assertEquals("victim@example.com", createAuthenticatorLoggedInAs(samlUserBean("victim@example.com")).getSessionSamlNameId());
+        assertNull(createAuthenticatorLoggedInAs(OptionalThing.of(new FessUserBean(new LocalUser("victim@example.com"))))
+                .getSessionSamlNameId(), "a non-SAML user has no NameID to compare");
+        assertNull(createAuthenticatorLoggedInAs(OptionalThing.empty()).getSessionSamlNameId(), "nobody is logged in");
+    }
+
+    @Test
+    public void test_isSameNameId_toleratesFormattingButNotADifferentUser() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        // the two sides come from different XML documents, which the IdP may format differently
+        assertTrue(authenticator.isSameNameId("victim@example.com", "  victim@example.com\n"));
+        // an IdP that normalises the case of a UPN in one message and not the other is a real
+        // deployment; a sender that does not know the NameID fails whatever case it picks
+        assertTrue(authenticator.isSameNameId("Victim@Example.com", "victim@example.com"));
+        assertFalse(authenticator.isSameNameId("victim@example.com", "attacker@example.com"));
+    }
+
+    @Test
+    public void test_sanitizeForLog_keepsAnUnauthenticatedNameIdFromForgingLogLines() throws Exception {
+        // the NameID of the LogoutRequest is written to the log before anything has authenticated
+        // the message, and it is XML text content, so it can carry a line break
+        assertEquals("victim@example.com? ERROR forged", SamlAuthenticator.sanitizeForLog("victim@example.com\n ERROR forged"));
+        assertEquals("victim@example.com? ERROR forged", SamlAuthenticator.sanitizeForLog("victim@example.com\r ERROR forged"));
+        // \p{Cntrl} is ASCII-only, so the Unicode break characters a log viewer still renders as
+        // a new line have to be covered separately
+        assertEquals("a?b?c", SamlAuthenticator.sanitizeForLog("a\u0085b\u2028c"));
+
+        final int max = SamlAuthenticator.MAX_LOGGED_NAME_ID_LENGTH;
+        assertEquals("x".repeat(max) + "...", SamlAuthenticator.sanitizeForLog("x".repeat(max + 10)));
+        // an ordinary NameID is passed through untouched
+        assertEquals("victim@example.com", SamlAuthenticator.sanitizeForLog("victim@example.com"));
+    }
+
     @Test
     public void test_buildDefaultUrl_withDefaultBaseUrl() throws Exception {
         assertEquals("http://localhost:8080/sso/metadata", new SamlAuthenticator().buildDefaultUrl("/sso/metadata"));
@@ -1386,6 +1646,38 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertEquals("http://localhost:8080/sso/logout", authenticator.buildDefaultUrl("/sso/logout"));
         } finally {
             systemProperties.remove(BASE_URL_KEY);
+        }
+    }
+
+    /** A user that did not authenticate through SAML, as a local or LDAP login leaves behind. */
+    private static class LocalUser implements FessUser {
+
+        private static final long serialVersionUID = 1L;
+
+        private final String name;
+
+        LocalUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
         }
     }
 }
