@@ -124,6 +124,44 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getPermissions_doesNotCollapseAGroupNameOnABackslash() {
+        // getCanonicalLdapName drops everything up to the first backslash, because a name a user
+        // types at login may be NetBIOS-qualified as DOMAIN\name. An identity provider's group
+        // name is not, so running it through that truncation let one group's name produce another
+        // group's permission: with entraid.permission.fields=displayName, a tenant user who can
+        // create a security group -- the Entra ID default -- names it "x\finance" and receives
+        // the permission of the unrelated group "finance", and with it every document that group
+        // can read. Verified end to end against a live tenant before this fix.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdUser user = newUser();
+        user.setGroups(new String[] { "x\\finance" });
+        user.setRoles(new String[] { "y\\admin" });
+
+        final List<String> permissions = Arrays.asList(user.getPermissions());
+
+        assertTrue(permissions.toString(), permissions.contains("2x\\finance"));
+        assertFalse(permissions.toString(), permissions.contains("2finance"));
+        assertTrue(permissions.toString(), permissions.contains("Ry\\admin"));
+        assertFalse(permissions.toString(), permissions.contains("Radmin"));
+    }
+
+    @Test
+    public void test_getPermissions_doesNotCollapseAUserNameOnABackslash() {
+        // The same truncation applied to the name the provider asserted for the user itself.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdUser user = newUser();
+        user.setGroups(new String[0]);
+        user.setRoles(new String[0]);
+
+        final List<String> permissions = Arrays.asList(user.getPermissions());
+
+        // The account username is taro@contoso.onmicrosoft.com, so nothing is truncated here; the
+        // assertion that matters is that the value arrives whole and prefixed.
+        assertTrue(permissions.toString(), permissions.contains("1taro@contoso.onmicrosoft.com"));
+        assertTrue(permissions.toString(), permissions.contains("1home-account-id"));
+    }
+
+    @Test
     public void test_getPermissions_doesNotPinAStaleValueWhenTheAsyncLookupLands() throws Exception {
         // The membership resolution scheduled at login runs on a TimeoutManager thread while the
         // user is already logged in and searching. getPermissions() is a check-then-act -- read
@@ -135,7 +173,7 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
         final CountDownLatch asyncTaskIsDone = new CountDownLatch(1);
         ComponentUtil.register(new SystemHelper() {
             @Override
-            public String getSearchRoleByGroup(final String name) {
+            public String getSearchRoleByDirectoryGroup(final String name) {
                 if ("direct-group".equals(name)) {
                     // The reader has read `groups` and is now mid-computation.
                     readerIsInside.countDown();
@@ -145,7 +183,7 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
                         Thread.currentThread().interrupt();
                     }
                 }
-                return super.getSearchRoleByGroup(name);
+                return super.getSearchRoleByDirectoryGroup(name);
             }
         }, "systemHelper");
 
