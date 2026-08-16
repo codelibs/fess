@@ -773,14 +773,52 @@ public class SystemHelper {
     }
 
     /**
-     * Creates a search role string.
+     * Gets the search role for a group named by a directory entry's own DN.
+     *
+     * @param name The group name, exactly as the entry carries it.
+     * @return The search role.
+     */
+    public String getSearchRoleByDirectoryGroup(final String name) {
+        return buildSearchRole(ComponentUtil.getFessConfig().getRoleSearchGroupPrefix(), name);
+    }
+
+    /**
+     * Gets the search role for a role named by a directory entry's own DN.
+     *
+     * @param name The role name, exactly as the entry carries it.
+     * @return The search role.
+     */
+    public String getSearchRoleByDirectoryRole(final String name) {
+        return buildSearchRole(ComponentUtil.getFessConfig().getRoleSearchRolePrefix(), name);
+    }
+
+    /**
+     * Creates a search role string from a name a user supplied.
      *
      * @param type The type of the role.
      * @param name The name of the role.
      * @return The search role string.
      */
     protected String createSearchRole(final String type, final String name) {
-        final String value = type + ComponentUtil.getFessConfig().getCanonicalLdapName(name);
+        return buildSearchRole(type, ComponentUtil.getFessConfig().getCanonicalLdapName(name));
+    }
+
+    /**
+     * Joins a permission prefix to an already-final name.
+     *
+     * <p>Split out from {@link #createSearchRole(String, String)} so that a name read out of a
+     * directory entry can skip {@code getCanonicalLdapName}. That canonicalisation exists to drop
+     * the {@code DOMAIN\} prefix from a name a user typed at login; a group's own name is not
+     * NetBIOS-qualified, so running it there would let a backslash inside the name rewrite the
+     * permission to whatever follows the backslash -- naming one group's permission from another
+     * group's entry.
+     *
+     * @param type The type of the role.
+     * @param name The final name.
+     * @return The search role string.
+     */
+    protected String buildSearchRole(final String type, final String name) {
+        final String value = type + name;
         if (logger.isDebugEnabled()) {
             logger.debug("Search Role: {}:{}={}", type, name, value);
         }

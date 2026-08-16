@@ -47,6 +47,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -638,13 +640,15 @@ public class LdapManager {
         if (StringUtil.isNotBlank(name)) {
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+            // The directory variants: the name already came out of this entry's own DN, so it must
+            // not be re-read as a NetBIOS-qualified "DOMAIN\name" and truncated to its tail.
             if (isRole) {
                 if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                    roleSet.add(systemHelper.getSearchRoleByRole(normalizePermissionName(name)));
+                    roleSet.add(systemHelper.getSearchRoleByDirectoryRole(normalizePermissionName(name)));
                     return fessConfig.getRoleSearchRolePrefix();
                 }
             } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-                roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(name)));
+                roleSet.add(systemHelper.getSearchRoleByDirectoryGroup(normalizePermissionName(name)));
                 return fessConfig.getRoleSearchGroupPrefix();
             }
         }
@@ -727,25 +731,63 @@ public class LdapManager {
     /**
      * Extracts the role name from an LDAP entry DN.
      *
+     * <p>The name is taken as an RDN value rather than by cutting the DN text at the first comma.
+     * A comma is legal inside a CN and appears in the DN escaped ({@code CN=sales\,EMEA}); cutting
+     * on it stops inside the name and yields a prefix of it, so two entries whose names share a
+     * prefix collapse onto one permission -- and a name whose prefix happens to be a privileged
+     * one is granted that privilege.
+     *
      * @param entryDn the LDAP entry DN
-     * @return the extracted role name, or null if not found
+     * @return the extracted role name, or null if the DN names no CN or cannot be parsed
      */
     protected String getSearchRoleName(final String entryDn) {
         if (entryDn == null) {
             return null;
         }
-        int start = entryDn.toLowerCase(Locale.ROOT).indexOf("cn=");
-        if (start == -1) {
+        final String value = getLeafCommonName(entryDn);
+        if (value == null) {
             return null;
         }
-        start += 3;
-
-        final int end = entryDn.indexOf(',', start);
-        final String value = end == -1 ? entryDn.substring(start) : entryDn.substring(start, end);
         if (fessConfig.isLdapGroupNameWithUnderscores()) {
             return replaceWithUnderscores(value);
         }
         return value;
+    }
+
+    /**
+     * Returns the value of the CN nearest the leaf of a DN.
+     *
+     * <p>Searches from the leaf so that it keeps naming the entry itself, which is what reading the
+     * first {@code cn=} in the DN text did. Returns null rather than falling back to a text scan
+     * when the DN does not parse: the DN comes from the directory through
+     * {@code SearchResult#getNameInNamespace()}, so a parse failure means the value cannot be
+     * trusted to name what it appears to name, and contributing no permission is the safe outcome.
+     *
+     * @param entryDn the LDAP entry DN
+     * @return the CN value, or null when the DN carries no CN or cannot be parsed
+     */
+    protected String getLeafCommonName(final String entryDn) {
+        try {
+            final LdapName name = new LdapName(entryDn);
+            final List<Rdn> rdns = name.getRdns();
+            for (int i = rdns.size() - 1; i >= 0; i--) {
+                // toAttributes(), not getValue(): getValue() on a multi-valued RDN such as
+                // "CN=a+OU=b" returns whichever half came first, which need not be the CN.
+                final Attribute cn = rdns.get(i).toAttributes().get("cn");
+                if (cn != null) {
+                    final Object cnValue = cn.get();
+                    if (cnValue != null) {
+                        return cnValue.toString();
+                    }
+                }
+            }
+        } catch (final NamingException | IllegalArgumentException e) {
+            // IllegalArgumentException as well as InvalidNameException: Rdn#unescapeValue reports a
+            // malformed escape by throwing unchecked, and letting that out of here would turn one
+            // unparseable group DN into a failed login rather than one missing permission.
+            logger.warn("Failed to read a common name from DN: {}", entryDn, e);
+        }
+        return null;
     }
 
     /**
