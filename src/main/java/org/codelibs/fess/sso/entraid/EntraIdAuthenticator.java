@@ -1793,12 +1793,23 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected long getStateTtl() {
         final String value = getEntraIdProperty(ENTRAID_STATE_TTL, AAD_STATE_TTL, DEFAULT_STATE_TTL);
+        final long ttl;
         try {
-            return Long.parseLong(value.trim());
+            ttl = Long.parseLong(value.trim());
         } catch (final NumberFormatException e) {
             logger.warn("Invalid {}: {}. Using {} seconds.", ENTRAID_STATE_TTL, value, DEFAULT_STATE_TTL);
             return Long.parseLong(DEFAULT_STATE_TTL);
         }
+        if (ttl <= 0L) {
+            // removeExpiredStates drops a state once (now - created) / 1000 exceeds this value, so
+            // a non-positive TTL expires every login attempt before the user can finish signing in
+            // at Microsoft. The callback then reports "could not validate state", which names
+            // neither this setting nor the reason, and no login on the server can ever succeed.
+            logger.warn("Invalid {}: {}. A login cannot outlive a state that expires immediately. Using {} seconds.", ENTRAID_STATE_TTL,
+                    value, DEFAULT_STATE_TTL);
+            return Long.parseLong(DEFAULT_STATE_TTL);
+        }
+        return ttl;
     }
 
     /**

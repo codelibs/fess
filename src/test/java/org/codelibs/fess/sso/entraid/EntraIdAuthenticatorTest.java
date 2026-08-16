@@ -1103,6 +1103,41 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getStateTtl_fallsBackWhenTheConfiguredValueIsNotPositive() {
+        // Long.parseLong accepts "0" and "-1", so these used to be taken at face value.
+        // removeExpiredStates then dropped every state one second after it was created, and the
+        // user -- who spends longer than that signing in at Microsoft -- came back to
+        // "could not validate state" on every attempt. Nothing in the log named the setting, so
+        // the server looked broken rather than misconfigured.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        for (final String value : new String[] { "0", "-1" }) {
+            final LogCapturingAppender logs = LogCapturingAppender.attach(EntraIdAuthenticator.class);
+            try {
+                fessConfig.setSystemProperty("entraid.state.ttl", value);
+
+                assertEquals(3600L, new EntraIdAuthenticator().getStateTtl());
+                assertTrue(logs.warnings().toString(),
+                        logs.warnings().stream().anyMatch(m -> m.contains("entraid.state.ttl") && m.contains(value)));
+            } finally {
+                logs.detach();
+                fessConfig.setSystemProperty("entraid.state.ttl", "");
+            }
+        }
+    }
+
+    @Test
+    public void test_getStateTtl_keepsAPositiveValue() {
+        // The guard must not round a deliberately short expiry up to the default.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.state.ttl", "1");
+            assertEquals(1L, new EntraIdAuthenticator().getStateTtl());
+        } finally {
+            fessConfig.setSystemProperty("entraid.state.ttl", "");
+        }
+    }
+
+    @Test
     public void test_addGroupOrRoleName() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         List<String> list = new ArrayList<>();
