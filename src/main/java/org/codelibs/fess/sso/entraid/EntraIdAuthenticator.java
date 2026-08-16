@@ -1078,6 +1078,40 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Field names from {@code entraid.permission.fields} that Microsoft Graph does not answer with
+     * a string. Reported once each, because the alternative is one warning per group per login.
+     */
+    protected final Set<String> unusablePermissionFields = ConcurrentHashMap.newKeySet();
+
+    /**
+     * Reads one of the fields named by {@code entraid.permission.fields} out of a Microsoft Graph
+     * object as a permission value.
+     *
+     * <p>Only a string can be one: a permission is matched against the {@code role} field of a
+     * document, which holds strings. Graph answers with the type the directory schema gives the
+     * field, so naming {@code securityEnabled} or {@code groupTypes} yields a boolean or an array.
+     * Casting those threw {@link ClassCastException} out of the middle of the membership loop,
+     * where the surrounding {@code catch} turned one mistyped field name into "no groups at all"
+     * for every user in the tenant. Skipping the value keeps the rest of the memberships, and the
+     * warning says which field is at fault.
+     *
+     * @param source The Graph object to read from.
+     * @param name The configured field name.
+     * @return The value, or null when the field is absent or is not a string.
+     */
+    protected String getPermissionFieldValue(final Map<String, Object> source, final String name) {
+        final Object value = source.get(name);
+        if (value == null || value instanceof String) {
+            return (String) value;
+        }
+        if (unusablePermissionFields.add(name)) {
+            logger.warn("entraid.permission.fields names {}, which Microsoft Graph answers with {} rather than a string. "
+                    + "It cannot be a permission value and is ignored.", name, value.getClass().getSimpleName());
+        }
+        return null;
+    }
+
+    /**
      * Adds a group or role name to the specified list.
      * @param list The list to add the group or role name to.
      * @param value The group or role name value.
@@ -1166,7 +1200,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                         logger.warn("id is empty: {}", memberOf);
                     }
                     for (final String name : names) {
-                        final String value = (String) memberOf.get(name);
+                        final String value = getPermissionFieldValue(memberOf, name);
                         if (StringUtil.isNotBlank(value)) {
                             if (logger.isDebugEnabled()) {
                                 logger.debug("{} is a member of {}", name, value);
@@ -1622,7 +1656,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 final String[] names = fessConfig.getEntraIdPermissionFields();
                 final int initialSize = groupList.size();
                 for (final String name : names) {
-                    final String value = (String) contentMap.get(name);
+                    final String value = getPermissionFieldValue(contentMap, name);
                     if (StringUtil.isNotBlank(value)) {
                         groupList.add(value);
                         if (logger.isDebugEnabled()) {
