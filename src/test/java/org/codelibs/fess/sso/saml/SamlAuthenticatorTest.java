@@ -1292,6 +1292,34 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLogoutResponse_rejectsAnUnusableLogoutMessageWithoutAStackTrace() throws Exception {
+        // The message here is one the sender supplied and java-saml refused. /sso/logout is
+        // anonymous and, because SAML requires SameSite=none, reachable cross-site, so an
+        // unauthenticated client can repeat this at will; a stack trace per attempt would let it
+        // fill the log. The cause is what SsoAction branches on to log the message alone.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            systemProperties.setProperty("saml.idp.single_logout_service.url", "https://idp.example.com/slo");
+            final MockletHttpServletRequest request = getMockRequest();
+            // a LogoutRequest with no NameID: java-saml parses it and then refuses it
+            final String xml = "<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                    + " xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_nonameid\" Version=\"2.0\""
+                    + " IssueInstant=\"2026-01-01T00:00:00Z\"/>";
+            request.setParameter("SAMLRequest", Base64.getEncoder().encodeToString(xml.getBytes(StandardCharsets.UTF_8)));
+
+            authenticator.getResponse(SsoResponseType.LOGOUT);
+            fail("SsoMessageException should be thrown");
+        } catch (final SsoMessageException e) {
+            assertTrue(String.valueOf(e.getCause()), e.getCause() instanceof SsoStateException);
+        } finally {
+            systemProperties.remove("saml.idp.single_logout_service.url");
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
     public void test_containsSamlLogoutMessage() throws Exception {
         final SamlAuthenticator authenticator = new SamlAuthenticator();
 

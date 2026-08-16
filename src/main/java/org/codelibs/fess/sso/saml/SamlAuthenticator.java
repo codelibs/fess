@@ -1211,8 +1211,14 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 final String redirectUrl = auth.processSLO(false, null, true);
                 final List<String> errors = auth.getErrors();
                 if (!errors.isEmpty()) {
+                    // java-saml refused the message the sender supplied -- a replayed ID, a bad
+                    // signature, a missing NameID, XML that will not parse. The endpoint is
+                    // anonymous and, because SAML requires SameSite=none, reachable cross-site, so
+                    // this is a rejected request rather than a fault: an SsoStateException gets it
+                    // logged without a stack trace, the way getLoginCredential already treats a
+                    // callback it did not start.
                     final String msg = String.join(", ", errors);
-                    throw processFailure("Failed to log out.", msg);
+                    throw processFailure("Failed to log out.", msg, new SsoStateException(msg));
                 }
                 if (StringUtil.isNotBlank(redirectUrl)) {
                     // an IdP-initiated LogoutRequest: send our LogoutResponse back to the IdP
