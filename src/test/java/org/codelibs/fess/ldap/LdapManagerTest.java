@@ -73,15 +73,76 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("aaa", ldapManager.getSearchRoleName("cn=aaa"));
         assertEquals("aaa", ldapManager.getSearchRoleName("CN=aaa"));
         assertEquals("aaa", ldapManager.getSearchRoleName("cn=aaa,du=test"));
-        assertEquals("aaa\\bbb", ldapManager.getSearchRoleName("cn=aaa\\bbb"));
-        assertEquals("aaa\\bbb", ldapManager.getSearchRoleName("cn=aaa\\bbb,du=test"));
-        assertEquals("aaa\\bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\bbb\\ccc"));
-        assertEquals("aaa\\bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\bbb\\ccc,du=test\""));
+        // A backslash inside a CN reaches this method escaped, the way a directory writes it into
+        // a DN.  It must survive here: stripping it is getCanonicalLdapName's job, and only for a
+        // name a user typed.
+        assertEquals("aaa\\bbb", ldapManager.getSearchRoleName("cn=aaa\\\\bbb"));
+        assertEquals("aaa\\bbb", ldapManager.getSearchRoleName("cn=aaa\\\\bbb,du=test"));
+        assertEquals("aaa\\bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\\\bbb\\\\ccc"));
+        assertEquals("aaa\\bbb\\ccc", ldapManager.getSearchRoleName("cn=aaa\\\\bbb\\\\ccc,du=test"));
 
         assertNull(ldapManager.getSearchRoleName(null));
         assertNull(ldapManager.getSearchRoleName(""));
         assertNull(ldapManager.getSearchRoleName(" "));
         assertNull(ldapManager.getSearchRoleName("aaa"));
+    }
+
+    /**
+     * A comma is legal inside a CN and a directory escapes it in the DN.  Reading the DN as text
+     * and cutting at the first comma stops inside the name and hands back a prefix of it, so
+     * "sales,EMEA" and "sales,APAC" both become the permission of the unrelated group "sales" --
+     * and a group named after a privileged name gains that privilege.
+     */
+    @SuppressWarnings("serial")
+    @Test
+    public void test_getSearchRoleName_escapedComma() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
+        });
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        assertEquals("sales,EMEA", ldapManager.getSearchRoleName("CN=sales\\,EMEA,CN=Users,DC=example,DC=com"));
+        assertEquals("sales,APAC", ldapManager.getSearchRoleName("CN=sales\\,APAC,CN=Users,DC=example,DC=com"));
+        assertEquals("admin,decoy", ldapManager.getSearchRoleName("CN=admin\\,decoy,OU=Role,DC=example,DC=com"));
+        // The hex form of the same escape has to read the same way.
+        assertEquals("sales,EMEA", ldapManager.getSearchRoleName("CN=sales\\2CEMEA,CN=Users,DC=example,DC=com"));
+        // Other escapes a CN can legally carry.
+        assertEquals("a+b", ldapManager.getSearchRoleName("CN=a\\+b,CN=Users,DC=example,DC=com"));
+        assertEquals(" pad ", ldapManager.getSearchRoleName("CN=\\ pad\\ ,CN=Users,DC=example,DC=com"));
+    }
+
+    /**
+     * The CN nearest the leaf names the entry itself.  A DN whose leaf RDN is not a CN must not
+     * report a container further up as the entry's name unless that container is the only CN.
+     */
+    @SuppressWarnings("serial")
+    @Test
+    public void test_getSearchRoleName_leafCommonName() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
+        });
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        assertEquals("leaf", ldapManager.getSearchRoleName("CN=leaf,CN=Users,DC=example,DC=com"));
+        assertEquals("Users", ldapManager.getSearchRoleName("OU=sub,CN=Users,DC=example,DC=com"));
+        // A multi-valued RDN must report its CN half, not whichever half sorts first.
+        assertEquals("multi", ldapManager.getSearchRoleName("OU=other+CN=multi,DC=example,DC=com"));
+        // A DN the provider cannot parse contributes no permission rather than a guessed one.
+        assertNull(ldapManager.getSearchRoleName("CN=broken\\q,DC=example,DC=com"));
     }
 
     @Test
