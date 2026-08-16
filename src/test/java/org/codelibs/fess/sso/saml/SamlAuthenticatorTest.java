@@ -1547,6 +1547,58 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLogoutResponse_keepsTheSessionWhenTheLogoutRequestNamesNobody() throws Exception {
+        // java-saml insists on the <saml:NameID> element being there but never on it carrying
+        // anything, so an empty one parses and names nobody. Treating that as "cannot tell" would
+        // hand back the whole bypass: the sender picks the value, and an empty element costs it
+        // nothing, so every session would be one crafted URL away from ending again.
+        for (final String nameId : new String[] { "", "   ", "\n" }) {
+            final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(samlUserBean("victim@example.com"));
+            final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+            try {
+                setUpSlo(systemProperties);
+                final MockletHttpServletRequest request = getMockRequest();
+                request.getSession().setAttribute(SESSION_MARKER, "kept");
+                sendLogoutRequest(request, "_empty" + nameId.length(), nameId);
+                authenticator.getSettings();
+
+                final ActionResponse response = authenticator.getResponse(SsoResponseType.LOGOUT);
+
+                assertEquals("a LogoutRequest that names nobody must not end a session", "kept",
+                        request.getSession(false).getAttribute(SESSION_MARKER));
+                // the IdP still gets an ordinary LogoutResponse: an error would tell an
+                // unauthenticated sender whether it guessed a live session
+                assertTrue(String.valueOf(response), String.valueOf(response).contains("https://idp.example.com/slo?SAMLResponse="));
+            } finally {
+                tearDownSlo(systemProperties);
+            }
+        }
+    }
+
+    @Test
+    public void test_getLogoutRequestNameId_tellsAnEmptyNameIdApartFromAnUnreadableOne() throws Exception {
+        // isLogoutRequestForAnotherUser branches on null, not on blank, so the two have to stay
+        // distinguishable here: null means java-saml is about to fail on the same bytes, while ""
+        // means the message parsed and simply named nobody.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpSlo(systemProperties);
+            final Saml2Settings settings = authenticator.getSettings();
+
+            final MockletHttpServletRequest empty = getMockRequest();
+            sendLogoutRequest(empty, "_emptyname", "");
+            assertEquals("", authenticator.getLogoutRequestNameId(empty, settings));
+
+            final MockletHttpServletRequest notXml = getMockRequest();
+            notXml.setParameter("SAMLRequest", "................");
+            assertNull(authenticator.getLogoutRequestNameId(notXml, settings));
+        } finally {
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
     public void test_isLogoutRequestForAnotherUser_leavesALogoutResponseAlone() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticatorLoggedInAs(samlUserBean("victim@example.com"));
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
@@ -1615,6 +1667,10 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         // deployment; a sender that does not know the NameID fails whatever case it picks
         assertTrue(authenticator.isSameNameId("Victim@Example.com", "victim@example.com"));
         assertFalse(authenticator.isSameNameId("victim@example.com", "attacker@example.com"));
+        // a NameID that names nobody is not the session user either, whatever it is padded with
+        assertFalse(authenticator.isSameNameId("victim@example.com", ""));
+        assertFalse(authenticator.isSameNameId("victim@example.com", "   "));
+        assertFalse(authenticator.isSameNameId("victim@example.com", "\n"));
     }
 
     @Test
