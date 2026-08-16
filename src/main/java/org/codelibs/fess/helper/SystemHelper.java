@@ -844,6 +844,16 @@ public class SystemHelper {
     }
 
     /**
+     * Gets the search role for a user named by an identity provider.
+     *
+     * @param name The user name, exactly as the provider asserted it.
+     * @return The search role.
+     */
+    public String getSearchRoleByDirectoryUser(final String name) {
+        return buildSearchRole(ComponentUtil.getFessConfig().getRoleSearchUserPrefix(), name);
+    }
+
+    /**
      * Gets the search role for a group named by a directory entry's own DN.
      *
      * @param name The group name, exactly as the entry carries it.

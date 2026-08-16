@@ -221,9 +221,9 @@ public class SamlCredential implements LoginCredential, FessCredential {
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
-                permissionSet.add(systemHelper.getSearchRoleByUser(nameId));
-                stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
-                stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
+                permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(nameId));
+                stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByDirectoryGroup(s))));
+                stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByDirectoryRole(s))));
                 permissions = permissionSet.toArray(new String[permissionSet.size()]);
             }
             return permissions;

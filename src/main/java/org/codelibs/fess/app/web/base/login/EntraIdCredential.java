@@ -176,16 +176,16 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 if (logger.isDebugEnabled()) {
                     logger.debug("homeAccountId={}, username={}", homeAccountId, username);
                 }
-                permissionSet.add(systemHelper.getSearchRoleByUser(homeAccountId));
-                permissionSet.add(systemHelper.getSearchRoleByUser(username));
+                permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(homeAccountId));
+                permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(username));
                 if (ComponentUtil.getFessConfig().isEntraIdUseDomainServices() && username.indexOf('@') >= 0) {
                     final String[] values = username.split("@");
                     if (values.length > 1) {
-                        permissionSet.add(systemHelper.getSearchRoleByUser(values[0]));
+                        permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(values[0]));
                     }
                 }
-                stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
-                stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
+                stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByDirectoryGroup(s))));
+                stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByDirectoryRole(s))));
                 permissions = permissionSet.stream().filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]);
             }
             return permissions;
