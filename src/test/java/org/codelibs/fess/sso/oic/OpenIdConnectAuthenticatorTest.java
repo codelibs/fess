@@ -25,9 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
@@ -468,5 +471,67 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         final LoginCredential credential = authenticator.getLoginCredential();
         assertNotNull(credential);
         assertTrue(credential instanceof ActionResponseCredential);
+    }
+
+    // ===================================================================================
+    //                                                            Debug log confidentiality
+    //                                                            =========================
+
+    private static String segment(final byte[] raw) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
+    }
+
+    /**
+     * Drives processCallback with a token response the test controls and returns everything this
+     * class logged while doing it.
+     */
+    private String debugOutputOfCallback(final TokenResponse tr) {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(OpenIdConnectAuthenticator.class.getName(), Level.DEBUG);
+        try {
+            authenticatorReturning(tr).processCallback(getMockRequest(), "the-code");
+        } finally {
+            appender.detach();
+        }
+        final StringBuilder buf = new StringBuilder();
+        for (final LogEvent event : appender.events()) {
+            buf.append(event.getMessage().getFormattedMessage()).append('\n');
+        }
+        return buf.toString();
+    }
+
+    private static TokenResponse secretCarryingTokenResponse() {
+        final TokenResponse tr = new TokenResponse();
+        tr.setAccessToken("ACCESS-TOKEN-MUST-NOT-BE-LOGGED");
+        tr.setRefreshToken("REFRESH-TOKEN-MUST-NOT-BE-LOGGED");
+        tr.setTokenType("Bearer");
+        tr.setExpiresInSeconds(300L);
+        // A signature is raw bytes; these are not valid UTF-8 text.
+        final byte[] signature = { 0x00, 0x01, (byte) 0xC3, (byte) 0x28, (byte) 0xA0, (byte) 0xA1, 0x07 };
+        tr.set("id_token", segment("{\"alg\":\"RS256\"}") + "." + segment("{\"email\":\"user@example.com\"}") + "." + segment(signature));
+        return tr;
+    }
+
+    @Test
+    public void test_processCallback_doesNotLogTheAccessOrRefreshToken() {
+        // The documentation tells administrators to raise this logger to debug when a login
+        // misbehaves, so anything it prints reaches log files, issue reports and log collectors.
+        final String output = debugOutputOfCallback(secretCarryingTokenResponse());
+
+        assertFalse(output.contains("ACCESS-TOKEN-MUST-NOT-BE-LOGGED"), "the access token was logged");
+        assertFalse(output.contains("REFRESH-TOKEN-MUST-NOT-BE-LOGGED"), "the refresh token was logged");
+        // What is actually needed to diagnose a login is still there.
+        assertTrue(output.contains("user@example.com"), "the claim set was not logged");
+        assertTrue(output.contains("Bearer"), "the token type was not logged");
+    }
+
+    @Test
+    public void test_processCallback_doesNotLogRawSignatureBytes() {
+        final String output = debugOutputOfCallback(secretCarryingTokenResponse());
+
+        // A single invalid byte in fess.log makes the whole file count as binary, and grep and the
+        // rest of the usual log tooling then skip it without saying so.
+        assertFalse(output.contains("\u0000"), "a NUL byte reached the log");
+        assertFalse(output.contains("\u0007"), "a control byte reached the log");
+        assertFalse(output.contains("\ufffd"), "an undecodable byte reached the log");
     }
 }
