@@ -301,8 +301,9 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected long groupCacheExpiry = 10 * 60L;
 
     /**
-     * Maximum number of groups kept in {@link #groupCache}. The cache is keyed by group id, so a
-     * tenant with many groups would otherwise grow it without bound until every entry expired.
+     * Maximum number of groups kept in {@link #groupCache}. The cache is keyed by group id and the
+     * configured permission fields, so a tenant with many groups would otherwise grow it without
+     * bound until every entry expired.
      */
     protected int maxGroupCacheSize = 10000;
 
@@ -1356,7 +1357,8 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
         // Check if cached
-        final Pair<String[], String[]> cachedResult = groupCache.getIfPresent(id);
+        final String cacheKey = buildGroupCacheKey(id);
+        final Pair<String[], String[]> cachedResult = groupCache.getIfPresent(cacheKey);
         if (cachedResult != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("[getParentGroup] Cache HIT for id: {}, groups: {}, roles: {}", id, cachedResult.getFirst().length,
@@ -1383,7 +1385,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
         try {
-            return groupCache.get(id, () -> loadParentGroup(user, id, depth, failed));
+            return groupCache.get(cacheKey, () -> loadParentGroup(user, id, depth, failed));
         } catch (final ExecutionException | UncheckedExecutionException e) {
             failed.set(true);
             // A loader that throws leaves nothing in the cache, which is the point: a throttled or
@@ -1399,6 +1401,29 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             }
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
+    }
+
+    /**
+     * The key {@link #groupCache} stores a parent group lookup under.
+     *
+     * <p>What is cached is not the raw Graph answer: {@link #processGroup} has already turned it
+     * into the permission values that {@code entraid.permission.fields} selects. Keying it by
+     * group id alone meant a change to that setting was ignored for the rest of the cache TTL, and
+     * only for nested groups -- direct memberships are read from Graph on every login, so they
+     * picked the new setting up immediately. A user was then granted permissions derived from the
+     * new setting for the groups they belong to directly and from the old one for the groups above
+     * them.
+     *
+     * <p>Narrowing the setting is the case that matters. The documentation warns that
+     * {@code displayName} is neither domain-qualified nor unique and can match documents it should
+     * not; removing it once that has happened left every nested group granting it for up to ten
+     * more minutes.
+     *
+     * @param id The group id.
+     * @return The cache key.
+     */
+    protected String buildGroupCacheKey(final String id) {
+        return id + '\n' + String.join(",", ComponentUtil.getFessConfig().getEntraIdPermissionFields());
     }
 
     /**
