@@ -181,6 +181,7 @@ public class SystemHelper {
         }
         updateSystemProperties();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        reportSearchRolePrefixProblems(fessConfig);
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
         langItemsCache = CacheBuilder.newBuilder()
@@ -740,6 +741,76 @@ public class SystemHelper {
             return permission.startsWith(ComponentUtil.getFessConfig().getRoleSearchUserPrefix());
         }
         return false;
+    }
+
+    /**
+     * Reports any search-role prefix that is not usable.
+     *
+     * <p>A permission is a prefix character followed by a name, and the prefix is what says whether
+     * the name is a user, a group, a role or a denial. Reading one back is a one-character
+     * operation ({@link org.codelibs.fess.ldap.LdapUser#getRoleNames()}), so a prefix that is not
+     * exactly one character does not round-trip.
+     *
+     * <p>Both ways of getting it wrong grant access rather than withhold it, which is why this is
+     * reported at ERROR:
+     *
+     * <ul>
+     * <li>An empty prefix matches every permission, so every group and user name is also read as a
+     * role name. A member of a group named in {@code authentication.admin.roles} -- {@code admin}
+     * by default -- is then an administrator. Measured: a user holding only the group {@code dev}
+     * was reported as {@code roles=[bob, dev] admin=true}.</li>
+     * <li>Two prefixes that are the same collapse the distinction they exist to draw: with the role
+     * prefix set to the group prefix, holding a group is holding the role of that name; with the
+     * denied prefix set to another, a denial is read as a grant.</li>
+     * </ul>
+     *
+     * <p>A prefix longer than one character fails the other way -- the rest of it stays on the
+     * front of the name, so nothing matches, and an LDAP-authenticated administrator loses the
+     * admin UI -- and is caught by the same length check.
+     *
+     * <p>Reports rather than throws. An exception raised from this {@link PostConstruct} does not
+     * stop the server: it is swallowed without reaching any log, and the rest of this method is
+     * skipped, so the only thing throwing would achieve is to disable initialisation silently.
+     * ERROR is the level that reaches an operator.
+     *
+     * @param fessConfig The configuration to check.
+     * @return The problems found, in the order they were checked; empty when the prefixes are usable.
+     */
+    protected List<String> validateSearchRolePrefixes(final FessConfig fessConfig) {
+        final Map<String, String> prefixes = new LinkedHashMap<>(4);
+        prefixes.put("role.search.user.prefix", fessConfig.getRoleSearchUserPrefix());
+        prefixes.put("role.search.group.prefix", fessConfig.getRoleSearchGroupPrefix());
+        prefixes.put("role.search.role.prefix", fessConfig.getRoleSearchRolePrefix());
+        prefixes.put("role.search.denied.prefix", fessConfig.getRoleSearchDeniedPrefix());
+
+        final List<String> problems = new ArrayList<>();
+        for (final Map.Entry<String, String> entry : prefixes.entrySet()) {
+            final String value = entry.getValue();
+            if (value == null || value.length() != 1) {
+                problems.add(entry.getKey() + " must be exactly one character, but is "
+                        + (value == null ? "not set" : "\"" + value + "\" (" + value.length() + " characters)"));
+            }
+        }
+
+        final Map<String, String> seen = new LinkedHashMap<>(4);
+        for (final Map.Entry<String, String> entry : prefixes.entrySet()) {
+            final String previous = seen.putIfAbsent(entry.getValue(), entry.getKey());
+            if (previous != null) {
+                problems.add("Search role prefixes must differ, but " + previous + " and " + entry.getKey() + " are both \""
+                        + entry.getValue() + "\"");
+            }
+        }
+        return problems;
+    }
+
+    /**
+     * Checks the search-role prefixes and reports every problem at ERROR.
+     *
+     * @param fessConfig The configuration to check.
+     */
+    protected void reportSearchRolePrefixProblems(final FessConfig fessConfig) {
+        validateSearchRolePrefixes(fessConfig).forEach(problem -> logger
+                .error("{} Group and role permissions will not be applied as configured until this is corrected.", problem));
     }
 
     /**
