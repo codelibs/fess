@@ -1280,9 +1280,16 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * outgoing message rather than parse anything.</p>
      *
      * <p>Anything that is not a clear mismatch keeps the previous behaviour of ending the session:
-     * no user logged in, a user who did not come from SAML, a NameID that cannot be read. Failing
-     * the other way would let an unreadable NameID keep sessions alive, which is the failure mode
-     * this method exists to avoid making worse.</p>
+     * no user logged in, a user who did not come from SAML, a message whose NameID cannot be read
+     * at all. Those are properties of this deployment or of a message java-saml is about to reject
+     * anyway, not values a sender chooses.</p>
+     *
+     * <p>A NameID that is read but empty is not one of them. It is the sender's own input, so
+     * treating it as "cannot tell" would hand back exactly the bypass this method exists to close:
+     * java-saml requires the {@code <saml:NameID>} element to be present but does not require it to
+     * carry anything, so {@code <saml:NameID/>} parses, names nobody, and would end any session it
+     * reached. It is therefore compared like any other value and, naming nobody, never matches. No
+     * IdP is lost by this: one that ends a session says whose.</p>
      *
      * @param request The HTTP request carrying the SAML logout message.
      * @param settings The SAML settings, used to parse the LogoutRequest the way java-saml
@@ -1298,7 +1305,8 @@ public class SamlAuthenticator implements SsoAuthenticator {
             return false;
         }
         final String logoutRequestNameId = getLogoutRequestNameId(request, settings);
-        if (StringUtil.isBlank(logoutRequestNameId)) {
+        if (logoutRequestNameId == null) {
+            // the message could not be read at all; java-saml is about to fail on the same bytes
             return false;
         }
         if (isSameNameId(sessionNameId, logoutRequestNameId)) {
@@ -1427,7 +1435,8 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * fails whatever the case, and one who does gains nothing from being allowed to change it.</p>
      *
      * @param sessionNameId The NameID this session was logged in with, not blank.
-     * @param logoutRequestNameId The NameID carried by the LogoutRequest, not blank.
+     * @param logoutRequestNameId The NameID carried by the LogoutRequest, never null but possibly
+     *            blank, which the session NameID cannot be and so never matches.
      * @return true if both name the same user.
      */
     protected boolean isSameNameId(final String sessionNameId, final String logoutRequestNameId) {
