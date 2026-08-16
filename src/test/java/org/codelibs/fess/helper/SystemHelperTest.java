@@ -102,6 +102,79 @@ public class SystemHelperTest extends UnitFessTestCase {
         ComponentUtil.register(systemHelper, "systemHelper");
     }
 
+    /** Builds a config whose four search-role prefixes are exactly the given values. */
+    @SuppressWarnings("serial")
+    private FessConfig prefixConfig(final String user, final String group, final String role, final String denied) {
+        return new FessConfig.SimpleImpl() {
+            @Override
+            public String getRoleSearchUserPrefix() {
+                return user;
+            }
+
+            @Override
+            public String getRoleSearchGroupPrefix() {
+                return group;
+            }
+
+            @Override
+            public String getRoleSearchRolePrefix() {
+                return role;
+            }
+
+            @Override
+            public String getRoleSearchDeniedPrefix() {
+                return denied;
+            }
+        };
+    }
+
+    private void assertOnlyProblem(final List<String> problems, final String expected) {
+        assertEquals(problems.toString(), 1, problems.size());
+        assertTrue(problems.get(0), problems.get(0).contains(expected));
+    }
+
+    @Test
+    public void test_validateSearchRolePrefixes_shipped() {
+        assertEquals(Collections.emptyList(), systemHelper.validateSearchRolePrefixes(prefixConfig("1", "2", "R", "D")));
+    }
+
+    @Test
+    public void test_validateSearchRolePrefixes_mustBeOneCharacter() {
+        // Empty matches every permission, so a group name is read as a role name too: a member of
+        // the group named in authentication.admin.roles becomes an administrator.
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("1", "2", "", "D")),
+                "role.search.role.prefix must be exactly one character");
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("", "2", "R", "D")),
+                "role.search.user.prefix must be exactly one character");
+        // Longer than one character fails the other way -- the remainder stays on the name -- and
+        // is caught by the same check.
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("1", "2", "R_", "D")),
+                "role.search.role.prefix must be exactly one character");
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("1", "G_", "R", "D")),
+                "role.search.group.prefix must be exactly one character");
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("1", "2", "R", null)),
+                "role.search.denied.prefix must be exactly one character");
+    }
+
+    @Test
+    public void test_validateSearchRolePrefixes_mustDiffer() {
+        // Role set to the group prefix: holding a group becomes holding the role of that name.
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("1", "2", "2", "D")),
+                "role.search.group.prefix and role.search.role.prefix are both \"2\"");
+        // Denied set to another prefix: a denial is read as a grant.
+        assertOnlyProblem(systemHelper.validateSearchRolePrefixes(prefixConfig("1", "2", "R", "R")),
+                "role.search.role.prefix and role.search.denied.prefix are both \"R\"");
+    }
+
+    @Test
+    public void test_validateSearchRolePrefixes_reportsEveryProblem() {
+        // One report per problem: an operator fixing one should not have to restart to find the next.
+        final List<String> problems = systemHelper.validateSearchRolePrefixes(prefixConfig("R_", "2", "2", "D"));
+        assertEquals(problems.toString(), 2, problems.size());
+        assertTrue(problems.get(0), problems.get(0).contains("role.search.user.prefix must be exactly one character"));
+        assertTrue(problems.get(1), problems.get(1).contains("are both"));
+    }
+
     @Test
     public void test_getUsername() {
         assertEquals("guest", systemHelper.getUsername());
