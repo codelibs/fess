@@ -906,6 +906,36 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getParentGroup_doesNotServeAnEntryBuiltFromAnotherPermissionFieldSetting() {
+        // The cached pair holds the permission values entraid.permission.fields selected, not the
+        // raw Graph answer. Keyed by group id alone, a change to the setting was ignored for
+        // nested groups until the entry expired -- while direct memberships, which are read from
+        // Graph on every login, picked it up at once. Narrowing the setting is the case that
+        // matters: displayName is neither domain-qualified nor unique, and removing it once it has
+        // matched the wrong documents must not keep granting it for another ten minutes.
+        final ScriptedAuthenticator authenticator = newScriptedAuthenticator();
+        authenticator.parents.put("group-a", new String[] { "group-b" });
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setSystemProperty("entraid.permission.fields", "mail");
+            authenticator.getParentGroup(null, "group-a", 0);
+            assertEquals(1, authenticator.lookups.stream().filter("group-a"::equals).count());
+
+            fessConfig.setSystemProperty("entraid.permission.fields", "mail,displayName");
+            authenticator.getParentGroup(null, "group-a", 0);
+
+            // Read again rather than served from the entry the old setting produced.
+            assertEquals(2, authenticator.lookups.stream().filter("group-a"::equals).count());
+            // The entry the first setting produced is still addressable under its own key, so the
+            // two settings do not evict each other.
+            fessConfig.setSystemProperty("entraid.permission.fields", "mail");
+            assertNotNull(authenticator.groupCache.getIfPresent(authenticator.buildGroupCacheKey("group-a")));
+        } finally {
+            fessConfig.setSystemProperty("entraid.permission.fields", "");
+        }
+    }
+
+    @Test
     public void test_getParentGroup_doesNotCacheAFailedLookup() {
         // A throttled or briefly unreachable Graph used to leave an empty result in the cache,
         // so the user silently lost their parent-group permissions for the whole cache TTL.
@@ -914,7 +944,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
         final Pair<String[], String[]> failed = authenticator.getParentGroup(null, "group-a", 0);
         assertEquals(0, failed.getFirst().length);
-        assertNull(authenticator.groupCache.getIfPresent("group-a"));
+        assertNull(authenticator.groupCache.getIfPresent(authenticator.buildGroupCacheKey("group-a")));
 
         authenticator.failing.remove("group-a");
         authenticator.parents.put("group-a", new String[] { "group-b" });
@@ -933,7 +963,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         final Pair<String[], String[]> result = authenticator.getParentGroup(null, "group-a", 0);
 
         assertEquals(0, result.getFirst().length);
-        assertNotNull(authenticator.groupCache.getIfPresent("group-a"));
+        assertNotNull(authenticator.groupCache.getIfPresent(authenticator.buildGroupCacheKey("group-a")));
     }
 
     @Test
@@ -971,7 +1001,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
         assertEquals(0, result.getFirst().length);
         assertEquals(0, result.getSecond().length);
-        assertNull(authenticator.groupCache.getIfPresent("group-a"));
+        assertNull(authenticator.groupCache.getIfPresent(authenticator.buildGroupCacheKey("group-a")));
     }
 
     @Test
@@ -1054,7 +1084,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
         assertEquals(0, throttled.getFirst().length);
         assertTrue(authenticator.lookups.isEmpty());
-        assertNull(authenticator.groupCache.getIfPresent("group-a"), "a skipped walk must not be cached");
+        assertNull(authenticator.groupCache.getIfPresent(authenticator.buildGroupCacheKey("group-a")), "a skipped walk must not be cached");
 
         clock.addAndGet(60_000L);
         final Pair<String[], String[]> recovered = authenticator.getParentGroup(null, "group-a", 0);
