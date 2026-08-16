@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1122,6 +1123,56 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
                 logs.detach();
                 fessConfig.setSystemProperty("entraid.state.ttl", "");
             }
+        }
+    }
+
+    @Test
+    public void test_getPermissionFieldValue_ignoresAFieldThatIsNotAString() {
+        // entraid.permission.fields is a list of Graph field names, and the documentation does not
+        // say the field has to hold a string. securityEnabled and groupTypes are the two most
+        // plausible wrong answers -- they are on every group object -- and both used to throw
+        // ClassCastException out of the middle of processDirectMemberOf, where the catch turned a
+        // single mistyped field name into "no group permissions at all" for the whole tenant.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> group = new HashMap<>();
+        group.put("displayName", "Engineering");
+        group.put("securityEnabled", Boolean.TRUE);
+        group.put("groupTypes", Arrays.asList("Unified"));
+
+        final LogCapturingAppender logs = LogCapturingAppender.attach(EntraIdAuthenticator.class);
+        try {
+            assertEquals("Engineering", authenticator.getPermissionFieldValue(group, "displayName"));
+            assertNull(authenticator.getPermissionFieldValue(group, "securityEnabled"));
+            assertNull(authenticator.getPermissionFieldValue(group, "groupTypes"));
+            // Absent is not a misconfiguration worth a warning: a group without a mail address is
+            // the normal case for a security group.
+            assertNull(authenticator.getPermissionFieldValue(group, "mail"));
+
+            assertEquals(logs.warnings().toString(), 2L,
+                    logs.warnings().stream().filter(m -> m.contains("entraid.permission.fields")).count());
+            assertTrue(logs.warnings().toString(), logs.warnings().stream().anyMatch(m -> m.contains("securityEnabled")));
+            assertTrue(logs.warnings().toString(), logs.warnings().stream().anyMatch(m -> m.contains("groupTypes")));
+        } finally {
+            logs.detach();
+        }
+    }
+
+    @Test
+    public void test_getPermissionFieldValue_warnsOncePerFieldName() {
+        // The read runs once per group per login, so warning every time would bury the rest of the
+        // log under a message that says the same thing.
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        final Map<String, Object> group = new HashMap<>();
+        group.put("securityEnabled", Boolean.TRUE);
+
+        final LogCapturingAppender logs = LogCapturingAppender.attach(EntraIdAuthenticator.class);
+        try {
+            for (int i = 0; i < 5; i++) {
+                assertNull(authenticator.getPermissionFieldValue(group, "securityEnabled"));
+            }
+            assertEquals(logs.warnings().toString(), 1L, logs.warnings().stream().filter(m -> m.contains("securityEnabled")).count());
+        } finally {
+            logs.detach();
         }
     }
 
