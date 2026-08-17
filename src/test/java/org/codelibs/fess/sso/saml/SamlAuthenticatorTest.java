@@ -18,6 +18,7 @@ package org.codelibs.fess.sso.saml;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPairGenerator;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashSet;
@@ -211,6 +212,60 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertEquals("https://fess.example.com/sso/metadata", authenticator.getSettings().getSpEntityId());
         } finally {
             systemProperties.remove(BASE_URL_KEY);
+        }
+    }
+
+    /**
+     * Generates a throwaway SP private key in the shape
+     * {@code onelogin.saml2.sp.privatekey} expects: base64 PKCS#8, no PEM header.
+     *
+     * <p>The key is generated rather than checked in so that no private key material
+     * lives in the repository.</p>
+     *
+     * @return the encoded private key
+     * @throws Exception if the key cannot be generated
+     */
+    private static String generateSpPrivateKey() throws Exception {
+        final KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048);
+        return java.util.Base64.getEncoder().encodeToString(generator.generateKeyPair().getPrivate().getEncoded());
+    }
+
+    @Test
+    public void test_logSecurityWarnings_reportsUnrestrictedKeyTransport() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            // no SP private key: nothing can be decrypted, so the allow-list is moot
+            authenticator.getSettings();
+            assertEquals(1, appender.warnings().size());
+            assertFalse(appender.warnings().get(0), appender.warnings().get(0).contains("key_transport_algorithms_not_restricted"));
+
+            systemProperties.setProperty("saml.sp.privatekey", generateSpPrivateKey());
+            authenticator.getSettings();
+
+            // a key is configured and every key transport algorithm is accepted
+            assertEquals(2, appender.warnings().size());
+            assertTrue(appender.warnings().get(1), appender.warnings().get(1).contains("key_transport_algorithms_not_restricted"));
+
+            systemProperties.setProperty("saml.security.allowed_key_transport_algorithms", "http://www.w3.org/2009/xmlenc11#rsa-oaep");
+            authenticator.getSettings();
+
+            assertEquals(3, appender.warnings().size());
+            assertFalse(appender.warnings().get(2), appender.warnings().get(2).contains("key_transport_algorithms_not_restricted"));
+
+            // a blank value is not a restriction: the library treats an empty set as "accept
+            // everything", so the warning has to come back
+            systemProperties.setProperty("saml.security.allowed_key_transport_algorithms", "");
+            authenticator.getSettings();
+
+            assertEquals(4, appender.warnings().size());
+            assertTrue(appender.warnings().get(3), appender.warnings().get(3).contains("key_transport_algorithms_not_restricted"));
+        } finally {
+            systemProperties.remove("saml.sp.privatekey");
+            systemProperties.remove("saml.security.allowed_key_transport_algorithms");
+            appender.detach();
         }
     }
 
