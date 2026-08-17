@@ -90,6 +90,17 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksPrivateKeyMaterial() {
+        // The SAML SP private key signs this SP's AuthnRequests and decrypts the assertions an
+        // IdP encrypts for it. It lives in conf/system.properties next to saml.sp.x509cert and
+        // was rendered in cleartext on the admin screen and in the bug report.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("saml.sp.privatekey"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("saml.keystore.key.password"));
+        // The rule matches on shape, so a private key added under another name is masked too.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("something.else.privatekey"));
+    }
+
+    @Test
     public void test_isMaskedValue_doesNotMaskOrdinaryKeys() {
         // Other content_chunker.embedding.* keys are plain diagnostic config, not credentials,
         // and must stay visible on the admin screen.
@@ -108,6 +119,14 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertFalse(AdminSysteminfoAction.isMaskedValue("rag.llm.openai.retry.max"));
         assertFalse(AdminSysteminfoAction.isMaskedValue("rag.chat.enabled"));
 
+        // Certificates are public by definition -- the IdP's is published in its metadata and
+        // the SP's is published in /sso/metadata -- so masking them would only make the admin
+        // screen less useful for diagnosing a trust problem.
+        assertFalse(AdminSysteminfoAction.isMaskedValue("saml.idp.x509cert"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("saml.sp.x509cert"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("saml.sp.base.url"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("saml.keystore.alias"));
+
         // The rest of the Entra ID settings are plain configuration, not credentials.
         assertFalse(AdminSysteminfoAction.isMaskedValue("entraid.tenant"));
         assertFalse(AdminSysteminfoAction.isMaskedValue("entraid.authority"));
@@ -123,6 +142,8 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         ComponentUtil.getSystemProperties().setProperty("rag.llm.openai.api.key", "sk-chat-secret");
         ComponentUtil.getSystemProperties().setProperty("entraid.client.secret", "entraid-super-secret");
         ComponentUtil.getSystemProperties().setProperty("entraid.tenant", "contoso.onmicrosoft.com");
+        ComponentUtil.getSystemProperties().setProperty("saml.sp.privatekey", "MIIEvgIBADANBgkq-private-key");
+        ComponentUtil.getSystemProperties().setProperty("saml.sp.x509cert", "MIIDGTCCAgGg-public-cert");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.dimension", "768");
 
         final List<Map<String, String>> itemList = AdminSysteminfoAction.getBugReportItems();
@@ -134,8 +155,10 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertEquals(MASKED_VALUE, findValue(itemList, "content_chunker.embedding.opensearch.password"));
         assertEquals(MASKED_VALUE, findValue(itemList, "rag.llm.openai.api.key"));
         assertEquals(MASKED_VALUE, findValue(itemList, "entraid.client.secret"));
+        assertEquals(MASKED_VALUE, findValue(itemList, "saml.sp.privatekey"));
 
         // An ordinary diagnostic key is unaffected and keeps its real value.
+        assertEquals("MIIDGTCCAgGg-public-cert", findValue(itemList, "saml.sp.x509cert"));
         assertEquals("768", findValue(itemList, "content_chunker.embedding.dimension"));
         assertEquals("contoso.onmicrosoft.com", findValue(itemList, "entraid.tenant"));
     }
