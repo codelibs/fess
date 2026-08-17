@@ -631,6 +631,44 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLoginCredential_reportsWhyTheResponseWasRefused() throws Exception {
+        // getErrors() answers a category: "invalid_response" covers a bad signature, an expired
+        // assertion, a foreign audience, a replay and a rewritten destination alike. On its own it
+        // tells an administrator only that the login failed, so the reason has to reach the log
+        // too -- and not only when saml.debug is on, which is off in every shipped configuration.
+        final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            setUpIdp(systemProperties);
+            systemProperties.setProperty("saml.security.want_xml_validation", "false");
+            assertNull(systemProperties.getProperty("saml.debug"));
+            final MockletHttpServletRequest request = getMockRequest();
+            authenticator.getLoginCredential();
+            final String requestId = pendingRequestIds(request.getSession(false)).iterator().next();
+
+            final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+            try {
+                postSamlResponse(request, requestId);
+                assertNull(authenticator.getLoginCredential());
+
+                assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
+                final String failure = appender.warnings().get(0);
+                // measured: "... - Reason: The Assertion must include a Conditions element", which
+                // is the part an administrator can act on. The wording belongs to java-saml, so the
+                // assertion is that a reason follows the category rather than what it says.
+                final String prefix = "Authentication Failure: invalid_response - Reason: ";
+                assertTrue(failure, failure.startsWith(prefix));
+                assertTrue(failure, failure.length() > prefix.length());
+            } finally {
+                appender.detach();
+            }
+        } finally {
+            systemProperties.remove("saml.security.want_xml_validation");
+            tearDownIdp(systemProperties);
+        }
+    }
+
+    @Test
     public void test_getLoginCredential_answersTheOlderOfTwoPendingRequestIds() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticatorWithControlledClock();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
@@ -648,28 +686,27 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
             assertEquals(2, pending.size(), String.valueOf(pending));
 
             final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
-            // java-saml reports each rejected candidate itself, which is how a test can see that
-            // the response was tried against more than the newest pending ID
-            final LogCapturingAppender samlAppender = LogCapturingAppender.attach("org.codelibs.saml2.core.authn.SamlResponse");
             try {
                 // the first tab's assertion comes back while the second tab's AuthnRequest is the
                 // most recent one, which is the case that used to fail both logins
                 postSamlResponse(request, olderRequestId);
                 assertNull(authenticator.getLoginCredential());
 
-                final List<String> samlWarnings = samlAppender.warnings();
-                assertEquals(2, samlWarnings.size(), String.valueOf(samlWarnings));
-                // the newest ID is tried first and rejected on InResponseTo alone
-                assertTrue(samlWarnings.get(0), samlWarnings.get(0).contains("does not match the ID of the AuthNRequest"));
-                assertTrue(samlWarnings.get(0), samlWarnings.get(0).contains(olderRequestId));
-                // the older ID then matched, so the response was rejected on its own merits, which
-                // is as far as an unsigned response can get
-                assertFalse(samlWarnings.get(1), samlWarnings.get(1).contains("does not match the ID of the AuthNRequest"));
                 assertEquals(1, appender.warnings().size(), String.valueOf(appender.warnings()));
-                assertFalse(appender.warnings().get(0), appender.warnings().get(0).contains("no matching AuthnRequest ID"));
-                assertTrue(appender.warnings().get(0), appender.warnings().get(0).startsWith("Authentication Failure:"));
+                final String failure = appender.warnings().get(0);
+                // reaching the failure line at all means the loop went past the newest pending ID:
+                // a response matching none of them is reported by logUnmatchedSamlResponse instead
+                assertTrue(failure, failure.startsWith("Authentication Failure:"));
+                assertFalse(failure, failure.contains("no matching AuthnRequest ID"));
+                // and the reason reported is the older candidate's own rejection rather than the
+                // InResponseTo mismatch the newest candidate was ruled out on, which is what shows
+                // the response was tried against more than one. Read from our own log line rather
+                // than java-saml's, so that the test does not depend on the level that library
+                // reports a ruled-out candidate at.
+                assertTrue(failure, failure.contains("- Reason:"));
+                assertFalse(failure, failure.contains("does not match the ID of the AuthNRequest"));
+                assertFalse(failure, failure.contains(olderRequestId));
             } finally {
-                samlAppender.detach();
                 appender.detach();
             }
         } finally {
@@ -1687,6 +1724,14 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("x".repeat(max) + "...", SamlAuthenticator.sanitizeForLog("x".repeat(max + 10)));
         // an ordinary NameID is passed through untouched
         assertEquals("victim@example.com", SamlAuthenticator.sanitizeForLog("victim@example.com"));
+
+        // a rejection reason quotes the message it objected to, so it is sender-supplied in the
+        // same way and gets the same treatment at a bound that leaves the sentence readable
+        final int reasonMax = SamlAuthenticator.MAX_LOGGED_FAILURE_REASON_LENGTH;
+        assertTrue(String.valueOf(reasonMax), reasonMax > max);
+        assertEquals("Invalid issuer in the Assertion/Response. Was '?ERROR forged'",
+                SamlAuthenticator.sanitizeForLog("Invalid issuer in the Assertion/Response. Was '\nERROR forged'", reasonMax));
+        assertEquals("y".repeat(reasonMax) + "...", SamlAuthenticator.sanitizeForLog("y".repeat(reasonMax + 1), reasonMax));
     }
 
     @Test
