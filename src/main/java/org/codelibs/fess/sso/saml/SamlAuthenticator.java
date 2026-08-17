@@ -1183,6 +1183,32 @@ public class SamlAuthenticator implements SsoAuthenticator {
      *
      * @return The metadata response.
      */
+    /**
+     * Warns when metadata signing was asked for but cannot happen.
+     *
+     * <p>{@code Saml2Settings#getSPMetadata()} signs with the SP key and certificate and swallows
+     * any failure at debug level, returning the unsigned document. So with
+     * {@code saml.security.sign_metadata=true} and no key material, {@code /sso/metadata} answers
+     * 200 with unsigned metadata and nothing says the request was dropped. An operator who turned
+     * signing on has no way to tell it is not happening.</p>
+     *
+     * <p>This is reported rather than refused: the metadata is still correct, only unsigned, and
+     * an IdP that does not check the signature keeps working. Refusing would turn a working
+     * deployment into a broken one on upgrade.</p>
+     *
+     * @param settings The SAML settings.
+     */
+    protected void warnIfMetadataCannotBeSigned(final Saml2Settings settings) {
+        if (settings.getSignMetadata() && (settings.getSPkey() == null || settings.getSPcert() == null)) {
+            logger.warn(
+                    "saml.security.sign_metadata is enabled but the SP metadata cannot be signed, so it is published unsigned. "
+                            + "Signing needs both saml.sp.privatekey and saml.sp.x509cert; missing: {}.",
+                    settings.getSPkey() == null
+                            ? (settings.getSPcert() == null ? "saml.sp.privatekey, saml.sp.x509cert" : "saml.sp.privatekey")
+                            : "saml.sp.x509cert");
+        }
+    }
+
     protected ActionResponse getMetadataResponse() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
             if (logger.isDebugEnabled()) {
@@ -1198,6 +1224,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
                     final String msg = String.join(", ", settingsErrors);
                     throw processFailure("Failed to process metadata.", msg);
                 }
+                warnIfMetadataCannotBeSigned(settings);
                 final String metadata = settings.getSPMetadata();
                 final List<String> errors = Saml2Settings.validateMetadata(metadata);
                 if (!errors.isEmpty()) {
