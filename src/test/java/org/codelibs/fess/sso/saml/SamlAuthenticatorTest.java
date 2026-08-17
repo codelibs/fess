@@ -1685,6 +1685,33 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLogoutRequestNameId_parsesTheMessageOnce() throws Exception {
+        // A message that does not parse is not free to look at: java-saml answers null and logs
+        // the failure with its stack trace, so every parse of one writes about ninety lines. The
+        // endpoint is anonymous and, because SAML requires SameSite=none, reachable cross-site
+        // with a victim's cookie attached, which is the only case in which this method runs at
+        // all -- so a second parse would land on precisely the sessions an attacker aims at.
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender library = LogCapturingAppender.attach("org.codelibs.saml2.core.util.Util");
+        try {
+            setUpSlo(systemProperties);
+            final Saml2Settings settings = authenticator.getSettings();
+
+            final MockletHttpServletRequest notXml = getMockRequest();
+            notXml.setParameter("SAMLRequest", "................");
+
+            assertNull(authenticator.getLogoutRequestNameId(notXml, settings));
+            // one failed parse, one warning: reaching the XML through a LogoutRequest instead
+            // parses it a second time and doubles this
+            assertEquals(1, library.warnings().size());
+        } finally {
+            library.detach();
+            tearDownSlo(systemProperties);
+        }
+    }
+
+    @Test
     public void test_getSessionSamlNameId_ignoresAUserThatDidNotComeFromSaml() throws Exception {
         // A local or LDAP login carries a user name, not a NameID, and comparing the two would
         // reject every legitimate single logout on a mixed-authentication deployment.

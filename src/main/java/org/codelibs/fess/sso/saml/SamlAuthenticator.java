@@ -59,7 +59,6 @@ import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.codelibs.saml2.core.util.Util;
-import org.codelibs.saml2.servlet.ServletUtils;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.message.UserMessages;
@@ -1406,30 +1405,41 @@ public class SamlAuthenticator implements SsoAuthenticator {
     /**
      * Returns the NameID carried by the incoming LogoutRequest, or null when it cannot be read.
      *
-     * <p>The message is parsed with java-saml rather than by hand. {@code /sso/logout} is
-     * anonymous, so hand-parsing the base64 {@code SAMLRequest} here would put an XML parser --
+     * <p>The message is decoded and parsed with java-saml rather than by hand. {@code /sso/logout}
+     * is anonymous, so hand-parsing the base64 {@code SAMLRequest} here would put an XML parser --
      * and therefore an XXE surface -- in front of an unauthenticated sender, whereas
-     * {@link LogoutRequest} decodes and loads it through the hardened path the library already
-     * uses. The arguments mirror {@code LogoutRequest.isValid()} exactly, including the allowed
-     * key transport algorithms, so an encrypted NameID is read here under the same restrictions it
-     * would be read under a moment later and this adds no decryption the message was not going to
-     * get anyway.</p>
+     * {@code Util.base64decodedInflated} and {@code Util.loadXML} are the hardened path the
+     * library uses on the same bytes a moment later. The arguments mirror
+     * {@code LogoutRequest.isValid()} exactly, including the allowed key transport algorithms, so
+     * an encrypted NameID is read here under the same restrictions it would be read under a moment
+     * later and this adds no decryption the message was not going to get anyway.</p>
+     *
+     * <p>It parses once. Constructing a {@link LogoutRequest} to reach the decoded XML would parse
+     * it a second time, because that constructor loads the document itself and then discards it,
+     * and a parse that fails is not free: java-saml logs the failure with its stack trace, so each
+     * extra parse of a message that will not parse writes another ~90 lines to the log. This
+     * endpoint is anonymous and, because SAML requires {@code SameSite=none}, reachable cross-site
+     * with the victim's cookie attached, which is exactly when this method runs -- so the second
+     * parse fell on the sessions an attacker targets.</p>
      *
      * <p>Nothing here is allowed to abort the logout. A malformed message, an {@code EncryptedID}
      * with no SP private key configured to open it, an unreadable NameID: all of them mean "cannot
      * tell", which {@link #isLogoutRequestForAnotherUser} turns back into the previous behaviour.
-     * Constructing the {@link LogoutRequest} touches no replay cache -- only {@code isValid()}
-     * registers a message ID -- so parsing it twice does not make java-saml reject its own copy as
-     * a replay.</p>
+     * Parsing here touches no replay cache -- only {@code isValid()} registers a message ID -- so
+     * reading the NameID does not make java-saml reject its own copy as a replay.</p>
      *
      * @param request The HTTP request carrying the LogoutRequest.
      * @param settings The SAML settings.
      * @return The NameID of the LogoutRequest, or null when it cannot be read.
      */
     protected String getLogoutRequestNameId(final HttpServletRequest request, final Saml2Settings settings) {
+        final String logoutRequestMessage = request.getParameter("SAMLRequest");
+        if (StringUtil.isBlank(logoutRequestMessage)) {
+            // a LogoutResponse, or no SAML message at all: there is no LogoutRequest to read
+            return null;
+        }
         try {
-            final LogoutRequest logoutRequest = new LogoutRequest(settings, ServletUtils.makeHttpRequest(request));
-            final Document document = Util.loadXML(logoutRequest.getLogoutRequestXml());
+            final Document document = Util.loadXML(Util.base64decodedInflated(logoutRequestMessage));
             if (document == null) {
                 // Util.loadXML answers unparsable XML, and anything holding an ENTITY, with null
                 return null;
