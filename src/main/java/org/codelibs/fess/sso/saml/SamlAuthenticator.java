@@ -222,6 +222,14 @@ public class SamlAuthenticator implements SsoAuthenticator {
     protected static final int MAX_LOGGED_NAME_ID_LENGTH = 64;
 
     /**
+     * Upper bound on the length of a rejection reason embedded in a log message. Longer than a
+     * NameID because the reason is a sentence that quotes what it objected to -- an entity ID, a
+     * destination, an audience -- and truncating it to a NameID's length would cut off the part
+     * that identifies the problem.
+     */
+    protected static final int MAX_LOGGED_FAILURE_REASON_LENGTH = 512;
+
+    /**
      * Characters that must not be copied verbatim into a log message. {@code \p{Cntrl}} alone is
      * ASCII-only, so the Unicode break characters a log viewer still renders as a new line are
      * listed explicitly.
@@ -651,8 +659,17 @@ public class SamlAuthenticator implements SsoAuthenticator {
             return null;
         }
         final String errors = String.join(", ", lastAuth.getErrors());
-        if (lastAuth.isDebugActive() && StringUtil.isNotBlank(lastAuth.getLastErrorReason())) {
-            logger.warn("Authentication Failure: {} - Reason: {}", errors, lastAuth.getLastErrorReason());
+        // The reason is reported whatever saml.debug is set to. getErrors() answers a category --
+        // "invalid_response" for a bad signature, an expired assertion, a foreign audience and a
+        // replay alike -- so on its own it tells an administrator only that the login failed. The
+        // detail used to reach the log anyway because java-saml logged it at warn as well; it now
+        // leaves that to whoever calls it, and getLastErrorReason() carries it either way.
+        final String reason = lastAuth.getLastErrorReason();
+        if (StringUtil.isNotBlank(reason)) {
+            // The reason quotes the message it objected to -- an issuer, a destination, an
+            // audience -- and this endpoint is anonymous, so the quoted part is a sender's own
+            // input and is bounded and stripped of control characters like any other.
+            logger.warn("Authentication Failure: {} - Reason: {}", errors, sanitizeForLog(reason, MAX_LOGGED_FAILURE_REASON_LENGTH));
         } else {
             logger.warn("Authentication Failure: {}", errors);
         }
@@ -1332,7 +1349,19 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * @return A value safe to embed in a log message.
      */
     protected static String sanitizeForLog(final String value) {
-        final String bounded = value.length() > MAX_LOGGED_NAME_ID_LENGTH ? value.substring(0, MAX_LOGGED_NAME_ID_LENGTH) + "..." : value;
+        return sanitizeForLog(value, MAX_LOGGED_NAME_ID_LENGTH);
+    }
+
+    /**
+     * Bounds a value to {@code maxLength} and strips its control characters so that it can be
+     * embedded in a log message.
+     *
+     * @param value The value to embed in a log message.
+     * @param maxLength The number of characters to keep before truncating.
+     * @return A value safe to embed in a log message.
+     */
+    protected static String sanitizeForLog(final String value, final int maxLength) {
+        final String bounded = value.length() > maxLength ? value.substring(0, maxLength) + "..." : value;
         return LOG_UNSAFE_PATTERN.matcher(bounded).replaceAll("?");
     }
 
