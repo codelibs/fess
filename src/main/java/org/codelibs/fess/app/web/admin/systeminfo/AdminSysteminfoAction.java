@@ -208,8 +208,28 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || "app.cipher.key".equals(key) //
                 || "content_chunker.embedding.opensearch.password".equals(key) //
                 || isSsoClientCredential(key) //
+                || isPrivateKeyMaterial(key) //
                 || isEmbeddingApiKey(key) //
                 || isLlmApiKey(key);
+    }
+
+    /**
+     * Checks if a key holds private key material, e.g. {@code saml.sp.privatekey} or
+     * {@code saml.keystore.key.password}. Matching on the {@code .privatekey} /
+     * {@code .key.password} shape, instead of listing every key by name, means a future
+     * setting that carries a private key is masked by default.
+     *
+     * <p>The SAML SP private key was rendered in cleartext under System Info &gt; Config Info,
+     * and was also copied verbatim into the bug report that users paste into public issues.
+     * That key signs this SP's AuthnRequests and decrypts the assertions an IdP encrypts for
+     * it, so disclosing it is worse than disclosing a client secret: whoever holds it can mint
+     * messages this SP will treat as its own and read assertions intended for it.
+     *
+     * @param key the property key to check
+     * @return true if the key matches the private key material shape
+     */
+    protected static boolean isPrivateKeyMaterial(final String key) {
+        return key != null && (key.endsWith(".privatekey") || key.endsWith(".key.password"));
     }
 
     /**
