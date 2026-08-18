@@ -187,6 +187,14 @@ public class LdapUserTest extends UnitFessTestCase {
             public String getRoleSearchUserPrefix() {
                 return "U";
             }
+
+            @Override
+
+            public boolean isLdapRoleSearchUserEnabled() {
+
+                return true;
+
+            }
         });
 
         ComponentUtil.register(new LdapManager() {
@@ -263,6 +271,14 @@ public class LdapUserTest extends UnitFessTestCase {
             public String getRoleSearchUserPrefix() {
                 return "U";
             }
+
+            @Override
+
+            public boolean isLdapRoleSearchUserEnabled() {
+
+                return true;
+
+            }
         });
 
         ComponentUtil.register(new LdapManager() {
@@ -319,6 +335,14 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String getRoleSearchUserPrefix() {
                 return "U";
+            }
+
+            @Override
+
+            public boolean isLdapRoleSearchUserEnabled() {
+
+                return true;
+
             }
         });
 
@@ -390,6 +414,14 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String getRoleSearchUserPrefix() {
                 return "U";
+            }
+
+            @Override
+
+            public boolean isLdapRoleSearchUserEnabled() {
+
+                return true;
+
             }
         });
 
@@ -545,6 +577,70 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
     }
 
+    /**
+     * {@code ldap.role.search.user.enabled} says whether a user is granted a permission named
+     * after themselves.  Both writes have to honour it: the synchronous one and the one the
+     * nested-group walk publishes.
+     */
+    @Test
+    public void test_getPermissions_userPermissionFollowsTheSwitch() {
+        final AtomicReference<String[]> publishedByCallback = new AtomicReference<>();
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapBaseDn() {
+                return "dc=example,dc=com";
+            }
+
+            @Override
+            public String getLdapAccountFilter() {
+                return "(uid=%s)";
+            }
+
+            @Override
+            public String getRoleSearchUserPrefix() {
+                return "1";
+            }
+
+            @Override
+            public boolean isLdapRoleSearchUserEnabled() {
+                return false;
+            }
+        });
+
+        ComponentUtil.register(new LdapManager() {
+            @Override
+            public String[] getRoles(final LdapUser user, final String baseDn, final String accountFilter, final String groupFilter,
+                    final Consumer<String[]> callback) {
+                // What LdapManager returns when the switch is off: groups only.
+                callback.accept(new String[] { "2group1", "2parent1" });
+                publishedByCallback.set(user.permissions);
+                return new String[] { "2group1" };
+            }
+
+            @Override
+            public String normalizePermissionName(final String name) {
+                return name;
+            }
+        }, "ldapManager");
+
+        ComponentUtil.register(new ActivityHelper() {
+            @Override
+            public void permissionChanged(final OptionalThing<FessUserBean> user) {
+                // no-op
+            }
+        }, "activityHelper");
+
+        final String[] permissions = ldapUser.getPermissions();
+        assertFalse("switched off, but " + java.util.Arrays.toString(permissions) + " still names the user",
+                java.util.Arrays.asList(permissions).contains("1testuser"));
+
+        final String[] afterLazyWrite = publishedByCallback.get();
+        assertNotNull(afterLazyWrite);
+        assertFalse("the lazy write re-added it: " + java.util.Arrays.toString(afterLazyWrite),
+                java.util.Arrays.asList(afterLazyWrite).contains("1testuser"));
+    }
+
     @Test
     public void test_getPermissions_lazyWriteKeepsTheUserPermission() {
         // LdapManager derives its own user entry through getCanonicalLdapName, which drops a
@@ -569,6 +665,14 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String getRoleSearchUserPrefix() {
                 return "1";
+            }
+
+            @Override
+
+            public boolean isLdapRoleSearchUserEnabled() {
+
+                return true;
+
             }
         });
 
@@ -639,6 +743,14 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String getRoleSearchUserPrefix() {
                 return "1";
+            }
+
+            @Override
+
+            public boolean isLdapRoleSearchUserEnabled() {
+
+                return true;
+
             }
         });
 
