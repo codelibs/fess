@@ -232,6 +232,53 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_warnIfMetadataCannotBeSigned_reportsSilentlyUnsignedMetadata() throws Exception {
+        final SamlAuthenticator authenticator = createAuthenticator();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            // signing not requested: nothing to report whatever the key material is
+            authenticator.warnIfMetadataCannotBeSigned(authenticator.getSettings());
+            assertTrue(appender.warnings().toString(), appender.warnings().stream().noneMatch(w -> w.contains("sign_metadata")));
+
+            systemProperties.setProperty("saml.security.sign_metadata", "true");
+            authenticator.warnIfMetadataCannotBeSigned(authenticator.getSettings());
+
+            // getSPMetadata() swallows the signing failure at debug level and returns the
+            // unsigned document, so without this warning the downgrade is invisible
+            final String bothMissing = lastWarning(appender, "sign_metadata");
+            assertTrue(bothMissing, bothMissing.contains("saml.sp.privatekey, saml.sp.x509cert"));
+
+            systemProperties.setProperty("saml.sp.privatekey", generateSpPrivateKey());
+            authenticator.warnIfMetadataCannotBeSigned(authenticator.getSettings());
+            final String certMissing = lastWarning(appender, "sign_metadata");
+            assertTrue(certMissing, certMissing.contains("missing: saml.sp.x509cert."));
+        } finally {
+            systemProperties.remove("saml.security.sign_metadata");
+            systemProperties.remove("saml.sp.privatekey");
+            appender.detach();
+        }
+    }
+
+    /**
+     * The most recent captured warning containing {@code needle}, or the whole capture
+     * rendered as text so a failing assertion says what was logged instead.
+     *
+     * @param appender the capturing appender
+     * @param needle the substring to look for
+     * @return the matching warning, or the full capture when nothing matched
+     */
+    private static String lastWarning(final LogCapturingAppender appender, final String needle) {
+        String found = null;
+        for (final String w : appender.warnings()) {
+            if (w.contains(needle)) {
+                found = w;
+            }
+        }
+        return found != null ? found : ("no warning contained " + needle + ": " + appender.warnings());
+    }
+
+    @Test
     public void test_logSecurityWarnings_reportsUnrestrictedKeyTransport() throws Exception {
         final SamlAuthenticator authenticator = createAuthenticator();
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
