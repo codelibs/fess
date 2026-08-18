@@ -418,11 +418,10 @@ public class LdapManager {
      */
     public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter, final String groupFilter,
             final Consumer<String[]> lazyLoading) {
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Set<String> roleSet = new HashSet<>();
 
         if (fessConfig.isLdapRoleSearchUserEnabled()) {
-            roleSet.add(normalizePermissionName(getUserSearchRole(ldapUser, systemHelper)));
+            roleSet.add(getUserPermissionName(ldapUser));
         }
 
         // LDAP: cn=%s
@@ -644,7 +643,19 @@ public class LdapManager {
     }
 
     /**
-     * Names the user's own permission from the name this user logged in with.
+     * Names the permission that stands for this user themselves.
+     *
+     * <p>The one place that name is spelled. {@link LdapUser#getPermissions()} needs it too -- it
+     * appends the user's own permission to both the synchronous result and the nested-group walk's
+     * later write, so that the lazy write does not hand back a strictly smaller set -- and building
+     * it there from its parts instead let the two spellings diverge, putting two permissions for
+     * one identity into the same set.
+     *
+     * <p>Folding applies to the name, never to a string the prefix is already part of. The prefix
+     * marks which kind of permission this is; it is not a character of anybody's name, and it is
+     * configurable to a letter -- {@code role.search.role.prefix} ships as {@code R}. Every other
+     * permission {@code ldap.lowercase.permission.name} touches has been folded that way since the
+     * setting was added.
      *
      * <p>{@code getCanonicalLdapName} drops everything up to the first backslash, which is what
      * turns a NetBIOS-qualified {@code DOMAIN\alice} typed at the login form into the {@code alice}
@@ -655,14 +666,15 @@ public class LdapManager {
      * what {@code getLeafCommonName} closed for group and role names.
      *
      * @param ldapUser the user logging in
-     * @param systemHelper the helper that joins a prefix to a name
-     * @return the user's own search role
+     * @return the user's own permission name
      */
-    protected String getUserSearchRole(final LdapUser ldapUser, final SystemHelper systemHelper) {
+    public String getUserPermissionName(final LdapUser ldapUser) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final String name = normalizePermissionName(ldapUser.getName());
         if (ldapUser.isNameFromProvider()) {
-            return systemHelper.getSearchRoleByDirectoryUser(ldapUser.getName());
+            return systemHelper.getSearchRoleByDirectoryUser(name);
         }
-        return systemHelper.getSearchRoleByUser(ldapUser.getName());
+        return systemHelper.getSearchRoleByUser(name);
     }
 
     /**
