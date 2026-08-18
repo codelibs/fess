@@ -42,6 +42,17 @@ public class LdapUser implements FessUser {
     protected String name;
 
     /**
+     * Whether {@link #name} was asserted by an identity provider rather than typed at a login form.
+     *
+     * <p>Decides whether the user permission may be re-read as a NetBIOS-qualified {@code
+     * DOMAIN\name}. A name typed at the login form may carry that qualifier and dropping it is what
+     * makes the permission match the documents; a name an identity provider asserted carries the
+     * account's own characters, so taking the tail of a backslash inside it names a different
+     * account's permission.
+     */
+    protected final boolean nameFromProvider;
+
+    /**
      * Whether the nested-group walk has already published its result.
      *
      * <p>Guards the synchronous write below. {@link LdapManager#getRoles} schedules that walk and
@@ -88,8 +99,30 @@ public class LdapUser implements FessUser {
      * @param name The name of the user.
      */
     public LdapUser(final Hashtable<String, String> env, final String name) {
+        this(env, name, false);
+    }
+
+    /**
+     * Constructs a new LDAP user.
+     *
+     * @param env The environment for LDAP connection.
+     * @param name The name of the user.
+     * @param nameFromProvider Whether the name was asserted by an identity provider rather than
+     *            typed at a login form.
+     */
+    public LdapUser(final Hashtable<String, String> env, final String name, final boolean nameFromProvider) {
         this.env = env;
         this.name = name;
+        this.nameFromProvider = nameFromProvider;
+    }
+
+    /**
+     * Returns whether this user's name was asserted by an identity provider.
+     *
+     * @return true when the name came from a provider, false when a user typed it.
+     */
+    public boolean isNameFromProvider() {
+        return nameFromProvider;
     }
 
     @Override

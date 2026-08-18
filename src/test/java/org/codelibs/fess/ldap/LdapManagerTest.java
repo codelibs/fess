@@ -145,6 +145,37 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertNull(ldapManager.getSearchRoleName("CN=broken\\q,DC=example,DC=com"));
     }
 
+    /**
+     * A name a user typed at a login form may be NetBIOS-qualified, and dropping the domain half
+     * is what makes it match the documents.  A name an identity provider asserted carries no such
+     * qualifier, so reading one out of it takes the tail of a backslash that is part of the name --
+     * naming the permission after a different account.
+     */
+    @SuppressWarnings("serial")
+    @Test
+    public void test_getUserSearchRole_assertedNameKeepsItsBackslash() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            public String getRoleSearchUserPrefix() {
+                return "1";
+            }
+        });
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+
+        // Typed at the login form: the NetBIOS domain is dropped, as it always was.
+        assertEquals("1alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "EXAMPLE\\alice"), systemHelper));
+        // Asserted by an identity provider: the whole name is the name.
+        assertEquals("1zz\\alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "zz\\alice", true), systemHelper));
+        // A name with no backslash reads the same either way.
+        assertEquals("1alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "alice"), systemHelper));
+        assertEquals("1alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "alice", true), systemHelper));
+    }
+
     @Test
     public void test_replaceWithUnderscores() {
         LdapManager ldapManager = new LdapManager();

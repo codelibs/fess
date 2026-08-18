@@ -340,7 +340,9 @@ public class LdapManager {
             final Hashtable<String, String> env = createSearchEnv();
             try (DirContextHolder holder = getDirContext(() -> env)) {
                 final DirContext context = holder.get();
-                final LdapUser ldapUser = createLdapUser(username, env);
+                // This overload is the SSO entry point -- no password, because an identity provider
+                // already authenticated the user and asserted this name.
+                final LdapUser ldapUser = createLdapUser(username, env, true);
                 if (!allowEmptyGroupAndRole(ldapUser)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Login failed. No permissions. {}", context);
@@ -388,7 +390,20 @@ public class LdapManager {
      * @return a new LdapUser instance
      */
     protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
-        return new LdapUser(env, username);
+        return createLdapUser(username, env, false);
+    }
+
+    /**
+     * Creates an LDAP user.
+     *
+     * @param username the user name
+     * @param env the LDAP environment
+     * @param nameFromProvider whether an identity provider asserted the name rather than a user
+     *            typing it at the login form
+     * @return the LDAP user
+     */
+    protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env, final boolean nameFromProvider) {
+        return new LdapUser(env, username, nameFromProvider);
     }
 
     /**
@@ -407,7 +422,7 @@ public class LdapManager {
         final Set<String> roleSet = new HashSet<>();
 
         if (fessConfig.isLdapRoleSearchUserEnabled()) {
-            roleSet.add(normalizePermissionName(systemHelper.getSearchRoleByUser(ldapUser.getName())));
+            roleSet.add(normalizePermissionName(getUserSearchRole(ldapUser, systemHelper)));
         }
 
         // LDAP: cn=%s
@@ -626,6 +641,28 @@ public class LdapManager {
                 });
             }
         }
+    }
+
+    /**
+     * Names the user's own permission from the name this user logged in with.
+     *
+     * <p>{@code getCanonicalLdapName} drops everything up to the first backslash, which is what
+     * turns a NetBIOS-qualified {@code DOMAIN\alice} typed at the login form into the {@code alice}
+     * the documents are indexed under. A name an identity provider asserted is not qualified that
+     * way, so running it through the same step takes the tail of a backslash that belongs to the
+     * name -- and hands the account holding it the permission of whatever follows. The account
+     * does not have to be able to reach that permission any other way, so this is the user half of
+     * what {@code getLeafCommonName} closed for group and role names.
+     *
+     * @param ldapUser the user logging in
+     * @param systemHelper the helper that joins a prefix to a name
+     * @return the user's own search role
+     */
+    protected String getUserSearchRole(final LdapUser ldapUser, final SystemHelper systemHelper) {
+        if (ldapUser.isNameFromProvider()) {
+            return systemHelper.getSearchRoleByDirectoryUser(ldapUser.getName());
+        }
+        return systemHelper.getSearchRoleByUser(ldapUser.getName());
     }
 
     /**
