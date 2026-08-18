@@ -488,6 +488,19 @@ public class SamlAuthenticator implements SsoAuthenticator {
             // are still ended by it.
             warnings.add("unsigned_logoutrequest_accepted");
         }
+        final Set<String> allowedKeyTransport = settings.getAllowedKeyTransportAlgorithms();
+        if (settings.getSPkey() != null && (allowedKeyTransport == null || allowedKeyTransport.isEmpty())) {
+            // With an SP private key configured, /sso/ decrypts an EncryptedAssertion before it
+            // validates anything: SamlResponse decrypts in its constructor, and processResponse()
+            // only calls isValid() afterwards. The endpoint is anonymous, and an AuthnRequest ID
+            // to quote back is one GET /sso/ away, so an unauthenticated caller can drive the SP
+            // private key through RSA decryption with a ciphertext of their choosing.
+            // java-saml accepts every key transport algorithm when the allow-list is unset, which
+            // includes the RSA-1_5 padding that Bleichenbacher-style attacks target. Fess does not
+            // set it, so say so rather than changing a default that would break an IdP relying on
+            // the old algorithm.
+            warnings.add("key_transport_algorithms_not_restricted");
+        }
         if (!warnings.equals(loggedSecurityWarnings.getAndSet(warnings)) && !warnings.isEmpty()) {
             logger.warn("Insecure SAML settings: {}. See the SAML SSO documentation for the recommended values.",
                     String.join(", ", warnings));
