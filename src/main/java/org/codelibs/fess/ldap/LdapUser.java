@@ -141,19 +141,25 @@ public class LdapUser implements FessUser {
                 final LdapManager ldapManager = ComponentUtil.getLdapManager();
                 // Appended to both writes, not just the synchronous one. LdapManager derives its own
                 // user entry through getCanonicalLdapName, which drops a NetBIOS "DOMAIN\" prefix,
-                // and adds it only when ldap.role.search.user.enabled is set -- so a lazy write that
-                // carried only what LdapManager collected would hand back a strictly smaller set
-                // than the synchronous result, and the user would silently lose their own
-                // permission at the moment the nested-group walk succeeded.
-                final String userPermission = fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName());
+                // so the two are not always the same string -- and a lazy write that carried only
+                // what LdapManager collected would hand back a strictly smaller set than the
+                // synchronous result, the user losing their own permission at the moment the
+                // nested-group walk succeeded.
+                //
+                // Both writes are also gated on ldap.role.search.user.enabled, which is what that
+                // setting has always claimed to control. Adding it here regardless made the setting
+                // unable to withhold anything.
+                final String[] userPermissions = fessConfig.isLdapRoleSearchUserEnabled()
+                        ? new String[] { fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName()) }
+                        : StringUtil.EMPTY_STRINGS;
                 final String[] directPermissions =
                         distinct(ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
-                            permissions = distinct(ArrayUtils.addAll(roles, userPermission));
+                            permissions = distinct(ArrayUtils.addAll(roles, userPermissions));
                             // Written after the permissions it describes, so a reader that sees the
                             // flag cannot see the set it replaced.
                             nestedRolesPublished = true;
                             ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(this)));
-                        }), userPermission));
+                        }), userPermissions));
                 if (!nestedRolesPublished) {
                     permissions = directPermissions;
                 }
