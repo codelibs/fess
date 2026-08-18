@@ -145,6 +145,7 @@ public class RoleQueryHelper {
      */
     public Set<String> build(final SearchRequestType searchRequestType) {
         final Set<String> roleSet = new HashSet<>();
+        final boolean[] loggedIn = { false };
         final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final boolean isApiRequest =
@@ -181,16 +182,17 @@ public class RoleQueryHelper {
 
             final RequestManager requestManager = ComponentUtil.getRequestManager();
             try {
-                findUserBean(requestManager)
-                        .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add)))
-                        .orElse(() -> {
-                            if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
-                                throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
-                            }
-                            if (!hasAccessToken || roleSet.isEmpty()) {
-                                roleSet.addAll(fessConfig.getSearchGuestRoleList());
-                            }
-                        });
+                findUserBean(requestManager).ifPresent(fessUserBean -> {
+                    loggedIn[0] = true;
+                    stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add));
+                }).orElse(() -> {
+                    if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
+                        throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
+                    }
+                    if (!hasAccessToken || roleSet.isEmpty()) {
+                        roleSet.addAll(fessConfig.getSearchGuestRoleList());
+                    }
+                });
             } catch (final RuntimeException e) {
                 try {
                     requestManager.findLoginManager(FessUserBean.class).ifPresent(LoginManager::logout);
@@ -199,10 +201,30 @@ public class RoleQueryHelper {
                 }
                 throw e;
             }
+
         }
 
         if (defaultRoleList != null) {
             roleSet.addAll(defaultRoleList);
+        }
+
+        // An empty set is read downstream as "role based search is not in use" and the role filter
+        // is then not applied at all, so a user whose permissions resolved to nothing would be
+        // answered from the whole index -- more than the anonymous visitor this same method gives
+        // the guest roles to. Nothing in the permission resolution guarantees a non-empty result:
+        // ldap.role.search.user.enabled withholds the user's own permission, and a member of no
+        // group then contributes none at all.
+        //
+        // Checked after the default permissions above, so a deployment that configures them keeps
+        // exactly what it configured and gains nothing here. Falling back to the guest roles keeps
+        // the two ends consistent, and a deployment that really has opted out of role based search
+        // has an empty guest list too, so the filter is still skipped for logged-in and anonymous
+        // callers alike.
+        if (loggedIn[0] && roleSet.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No permission is resolved for the logged-in user. Falling back to the guest roles.");
+            }
+            roleSet.addAll(ComponentUtil.getFessConfig().getSearchGuestRoleList());
         }
 
         if (logger.isDebugEnabled()) {

@@ -492,6 +492,148 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * The same invariant from the other end: a request that <em>does</em> carry a logged-in user
+     * whose permissions resolved to nothing.
+     *
+     * <p>The anonymous branch above backfills the guest roles, but the present branch only copies
+     * {@code FessUserBean#getPermissions}, and nothing guarantees that array is non-empty:
+     * {@code ldap.role.search.user.enabled=false} withholds the user's own permission, and an
+     * account belonging to no group then contributes none at all. An empty set is read by
+     * {@code QueryHelper#buildRoleQuery} and {@code SearchHelper} as "role based search is not in
+     * use" -- they skip the filter entirely -- so an empty set here answers the caller from the
+     * whole index, which is strictly more than the anonymous visitor gets.
+     */
+    @Test
+    public void test_build_loggedInWithNoPermissions_fallsBackToGuestRole() {
+        final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+                return false;
+            }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                // A logged-in user carrying no permission at all. Resolved here rather than through
+                // the container for the same reason as the anonymous test above.
+                return org.dbflute.optional.OptionalThing
+                        .of(new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.entity.FessUser() {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public String getName() {
+                                return "no-permission-user";
+                            }
+
+                            @Override
+                            public String[] getRoleNames() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public String[] getGroupNames() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public String[] getPermissions() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public boolean isEditable() {
+                                return false;
+                            }
+                        }));
+            }
+        };
+        roleQueryHelper.init();
+
+        getMockRequest();
+
+        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.JSON);
+
+        assertFalse(roleSet.isEmpty(), "a logged-in user with no permissions must not produce an empty role set "
+                + "(the role filter would be skipped and the whole index returned): " + roleSet);
+
+        final List<String> guestRoleList = ComponentUtil.getFessConfig().getSearchGuestRoleList();
+        assertFalse(guestRoleList.isEmpty(), "search.guest.role must be non-empty; emptying it fails the role filter open");
+        for (final String guestRole : guestRoleList) {
+            assertTrue(roleSet.contains(guestRole),
+                    "a logged-in user with no permissions must fall back to guest role '" + guestRole + "': " + roleSet);
+        }
+    }
+
+    /**
+     * The fallback must not reach a user who does have permissions: adding the guest roles to
+     * everyone would hand every logged-in account whatever the guest role can read.
+     */
+    @Test
+    public void test_build_loggedInWithPermissions_keepsOnlyItsOwn() {
+        final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+                return false;
+            }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                return org.dbflute.optional.OptionalThing
+                        .of(new org.codelibs.fess.mylasta.action.FessUserBean(new org.codelibs.fess.entity.FessUser() {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public String getName() {
+                                return "permitted-user";
+                            }
+
+                            @Override
+                            public String[] getRoleNames() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public String[] getGroupNames() {
+                                return org.codelibs.core.lang.StringUtil.EMPTY_STRINGS;
+                            }
+
+                            @Override
+                            public String[] getPermissions() {
+                                return new String[] { "1permitted-user" };
+                            }
+
+                            @Override
+                            public boolean isEditable() {
+                                return false;
+                            }
+                        }));
+            }
+        };
+        roleQueryHelper.init();
+
+        getMockRequest();
+
+        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.JSON);
+
+        assertTrue(roleSet.contains("1permitted-user"), "the user's own permission must survive: " + roleSet);
+        for (final String guestRole : ComponentUtil.getFessConfig().getSearchGuestRoleList()) {
+            assertFalse(roleSet.contains(guestRole),
+                    "a user with permissions must not also receive guest role '" + guestRole + "': " + roleSet);
+        }
+    }
+
     @Test
     public void test_build_withRequest() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
