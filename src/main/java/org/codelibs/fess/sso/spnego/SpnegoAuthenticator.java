@@ -40,6 +40,7 @@ import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.codelibs.spnego.SpnegoHttpServletResponse;
 import org.codelibs.spnego.SpnegoPrincipal;
 import org.dbflute.optional.OptionalEntity;
+import org.ietf.jgss.GSSException;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -250,36 +251,15 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             } catch (final Exception e) {
                 final String msg = "Failed to process Authorization Header: " + maskAuthzHeader(request.getHeader(Constants.AUTHZ_HEADER));
                 if (logger.isDebugEnabled()) {
-                    logger.debug(msg);
+                    // Carries the exception, so the stack trace a refusal no longer writes at warn
+                    // level is still one log level away when an SSO failure has to be diagnosed.
+                    logger.debug(msg, e);
                 }
                 // The library reports why the handshake failed; keep it, but not every exception
                 // carries a message and "null <msg>" helps nobody diagnose an SSO failure.
                 final String detail = e.getMessage();
                 final String reason = detail == null ? msg : detail + " " + msg;
-                if (e instanceof UnsupportedOperationException || e instanceof IllegalArgumentException) {
-                    // Both types describe a header the client got wrong, never a fault of this
-                    // server. UnsupportedOperationException is what the library raises for a header
-                    // it refuses to even try: a scheme that is neither Negotiate nor Basic, a Basic
-                    // header carrying no token, Basic while basic authentication is not supported,
-                    // or an NTLM token it cannot downgrade. IllegalArgumentException is what the
-                    // token itself raises: SpnegoProvider#parseAuthHeader does not validate the
-                    // token, so the strict Base64 decoder behind SpnegoAuthScheme#getToken rejects
-                    // it, and that decode runs at the top of SpnegoProvider#negotiate before any
-                    // scheme dispatch -- so "Negotiate ###" reaches it whatever the spnego.allow.*
-                    // settings say. A decoded Basic token with no ':' raises it from doBasicAuth
-                    // as well.
-                    //
-                    // The client decides every one of those, and /sso is anonymous, so a stack
-                    // trace per attempt would let an unauthenticated client fill the log. It is not
-                    // only an abuse path either: basic support is off unless the request is secure,
-                    // so a TLS-terminating proxy that leaves isSecure() false sends ordinary
-                    // browser traffic down here.
-                    //
-                    // A genuine server fault cannot arrive as either type. Initialization faults
-                    // are wrapped by getAuthenticator() in a plain SsoLoginException -- which is a
-                    // FessSystemException, so it is neither of these types -- and that keeps its
-                    // stack trace. A broken keytab, an unreachable KDC, clock skew or a wrong SPN
-                    // surface from authenticate() as GSSException, which also keeps its trace.
+                if (isHandshakeRefusal(e)) {
                     throw new SsoStateException(reason, e);
                 }
                 throw new SsoLoginException(reason, e);
@@ -321,6 +301,51 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             return new SpnegoCredential(username[0]);
         }).orElse(null);
 
+    }
+
+    /**
+     * Tells whether a failed handshake is a request this server refused rather than a fault it
+     * suffered, so that it is reported by message instead of by stack trace.
+     *
+     * <p>{@code /sso} is anonymous, so whatever one rejected request writes to the log is what an
+     * unbounded loop of them writes. Three kinds of failure arrive here and all three are decided
+     * by what the client sent:
+     *
+     * <ul>
+     * <li>{@link UnsupportedOperationException} -- a header the library refuses to even try: a
+     * scheme that is neither Negotiate nor Basic, a Basic header carrying no token, Basic while
+     * basic authentication is not supported, or an NTLM token it cannot downgrade.</li>
+     * <li>{@link IllegalArgumentException} -- the token itself:
+     * {@code SpnegoProvider#parseAuthHeader} does not validate it, so the strict Base64 decoder
+     * behind {@code SpnegoAuthScheme#getToken} rejects it, and that decode runs at the top of
+     * {@code SpnegoProvider#negotiate} before any scheme dispatch -- so {@code "Negotiate ###"}
+     * reaches it whatever the {@code spnego.allow.*} settings say. A decoded Basic token with no
+     * {@code ':'} raises it from {@code doBasicAuth} as well.</li>
+     * <li>{@link GSSException} -- the token decoded but the acceptor would not take it: not a GSS
+     * structure at all, a replayed authenticator, a ticket for another service, clock skew.</li>
+     * </ul>
+     *
+     * <p>The first two already reported by message. The third did not, and it is the cheapest of
+     * the three to provoke: a token of three Base64 characters decodes successfully and then fails
+     * inside {@code acceptSecContext}, which cost about ninety lines of stack per request -- some
+     * two orders of magnitude more than the same request without an {@code Authorization} header.
+     *
+     * <p>A misconfigured server also surfaces from {@code authenticate()} as {@code GSSException}
+     * -- a broken keytab, a wrong SPN -- and those keep being reported, by the message that names
+     * them ("Cannot find key of appropriate type to decrypt AP-REQ", "Checksum failed"). What they
+     * lose is a stack trace whose frames are the same JDK GSS internals whatever the cause, so it
+     * never distinguished a server fault from a client one; the message always did, and it is
+     * still logged at warn level for every refusal. The trace itself remains at debug level.
+     *
+     * <p>A genuine fault of this server cannot arrive as any of the three. Initialization failures
+     * are wrapped by {@link #getAuthenticator()} in a plain {@code SsoLoginException}, which is a
+     * {@code FessSystemException} and therefore none of these types, and it keeps its stack trace.
+     *
+     * @param e the exception the handshake failed with
+     * @return true when the client determined the failure
+     */
+    protected boolean isHandshakeRefusal(final Exception e) {
+        return e instanceof UnsupportedOperationException || e instanceof IllegalArgumentException || e instanceof GSSException;
     }
 
     /**

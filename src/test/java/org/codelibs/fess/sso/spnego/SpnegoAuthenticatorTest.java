@@ -30,6 +30,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.codelibs.spnego.SpnegoProvider;
+import org.ietf.jgss.GSSException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -74,6 +75,35 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
     /** Builds a one-character string without a source escape, keeping raw break characters out of this file. */
     private static String ch(final int codePoint) {
         return String.valueOf((char) codePoint);
+    }
+
+    /**
+     * {@code /sso} is anonymous, so whatever one rejected handshake writes to the log is what an
+     * unbounded loop of them writes. Every failure the client's own token decides must therefore be
+     * reported by message ({@code SsoStateException}) rather than by stack trace
+     * ({@code SsoLoginException}).
+     *
+     * <p>{@code GSSException} is the one that used to be reported by trace, and it is the cheapest
+     * of the three to provoke: a token of three Base64 characters decodes and then fails inside
+     * {@code acceptSecContext}. A replayed authenticator lands here too.
+     */
+    @Test
+    public void test_isHandshakeRefusal_coversEveryClientChosenFailure() {
+        final SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
+
+        // The header the library refuses to try at all.
+        assertTrue(authenticator.isHandshakeRefusal(new UnsupportedOperationException("NTLM not supported")));
+        // The token the strict Base64 decoder rejects.
+        assertTrue(authenticator.isHandshakeRefusal(new IllegalArgumentException("Illegal base64 character")));
+        // The token that decodes but the acceptor will not take.
+        assertTrue(authenticator.isHandshakeRefusal(new GSSException(GSSException.DEFECTIVE_TOKEN)));
+        assertTrue(authenticator.isHandshakeRefusal(new GSSException(GSSException.FAILURE, -1, "Request is a replay (34)")));
+
+        // A fault of this server keeps its stack trace: initialization failures are wrapped in a
+        // plain SsoLoginException, and anything unforeseen from the library is not one of the three.
+        assertFalse(authenticator.isHandshakeRefusal(new SsoLoginException("Failed to initialize SPNEGO.")));
+        assertFalse(authenticator.isHandshakeRefusal(new NullPointerException()));
+        assertFalse(authenticator.isHandshakeRefusal(new RuntimeException("unexpected")));
     }
 
     @Test
