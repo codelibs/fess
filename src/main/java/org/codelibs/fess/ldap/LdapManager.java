@@ -517,7 +517,7 @@ public class LdapManager {
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             sAMAccountGroupNameSet.stream().forEach(groupName -> {
                 getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
-                    roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
+                    roleSet.add(systemHelper.getSearchRoleByDirectoryGroup(normalizePermissionName(sAMAccountGroupName)));
                 });
             });
             processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
@@ -636,7 +636,7 @@ public class LdapManager {
             try (DirContextHolder holder = getDirContext(() -> env)) {
                 sAMAccountGroupNameSet.forEach(groupName -> {
                     getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
-                        roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
+                        roleSet.add(systemHelper.getSearchRoleByDirectoryGroup(normalizePermissionName(sAMAccountGroupName)));
                     });
                 });
             }
