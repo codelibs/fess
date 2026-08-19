@@ -260,6 +260,29 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     /**
+     * The other half of authentication.admin.*: a role list written with a space after the comma
+     * lost every entry but the first, and with it the administrator's access to every admin screen.
+     */
+    @Test
+    public void test_getAuthenticationAdminRolesAsArray_trimsEachEntry() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAuthenticationAdminRoles() {
+                return "admin, operator ,, ";
+            }
+        };
+
+        final String[] roles = fessConfig.getAuthenticationAdminRolesAsArray();
+
+        assertEquals(2, roles.length);
+        assertEquals("admin", roles[0]);
+        assertEquals("operator", roles[1]);
+    }
+
+    /**
      * isLdapAdminEnabled refuses to make a reserved name editable in the directory, and reads the same
      * comparison -- so the switch moves that decision too.
      */
