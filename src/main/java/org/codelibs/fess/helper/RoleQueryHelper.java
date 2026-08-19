@@ -217,9 +217,14 @@ public class RoleQueryHelper {
         //
         // Checked after the default permissions above, so a deployment that configures them keeps
         // exactly what it configured and gains nothing here. Falling back to the guest roles keeps
-        // the two ends consistent, and a deployment that really has opted out of role based search
-        // has an empty guest list too, so the filter is still skipped for logged-in and anonymous
-        // callers alike.
+        // the two ends consistent: this is what an anonymous caller is answered with, and a
+        // logged-in one should never be answered with more.
+        //
+        // The guest roles are never empty -- getSearchGuestRoleList appends <user-prefix>guest
+        // whatever role.search.guest.permissions says -- so this does apply the filter, including
+        // in a deployment that indexes no permissions at all. There, a user who resolves none is
+        // now answered with nothing rather than with everything. That is the point, but it is a
+        // change of behaviour for such a deployment and belongs in the upgrade notes.
         if (loggedIn[0] && roleSet.isEmpty()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("No permission is resolved for the logged-in user. Falling back to the guest roles.");
