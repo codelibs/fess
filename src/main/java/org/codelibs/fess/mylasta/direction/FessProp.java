@@ -856,10 +856,22 @@ public interface FessProp {
 
     String getAuthenticationAdminRoles();
 
+    /**
+     * The roles that make a user an administrator.
+     *
+     * <p>Each entry is trimmed and the blank ones are dropped, for the same reason
+     * {@link #isAdminUser(String)} does it: a list written with a space after the comma compared its
+     * second entry as " name", which no role name can equal. That direction is closed rather than
+     * open -- the administrator simply stops being one, on every screen at once -- but it is just as
+     * silent, and the two halves of authentication.admin.* should not disagree about what a list is.
+     *
+     * @return the role names
+     */
     default String[] getAuthenticationAdminRolesAsArray() {
         String[] roles = (String[]) propMap.get(AUTHENTICATION_ADMIN_ROLES);
         if (roles == null) {
-            roles = getAuthenticationAdminRoles().split(",");
+            roles = split(getAuthenticationAdminRoles(), ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
             propMap.put(AUTHENTICATION_ADMIN_ROLES, roles);
         }
         return roles;
