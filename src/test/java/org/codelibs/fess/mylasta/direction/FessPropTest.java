@@ -212,6 +212,54 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     /**
+     * A comma-separated list is ordinarily written with a space after the comma. Untrimmed, every
+     * entry but the first is compared as " name" and reserves nothing -- and for SSO that is the
+     * fail-open direction: the account logs in and is handed the permission named after it.
+     */
+    @Test
+    public void test_isAdminUser_trimsEachEntry() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl("ldap://localhost:389/");
+        final FessConfig fessConfig = createAdminUsersConfig("admin, operator , backup", "auto");
+
+        assertTrue(fessConfig.isAdminUser("admin"));
+        assertTrue(fessConfig.isAdminUser("operator"));
+        assertTrue(fessConfig.isAdminUser("backup"));
+        // The space is not part of any name, so it must not become part of one either.
+        assertFalse(fessConfig.isAdminUser(" operator"));
+        assertFalse(fessConfig.isAdminUser("operator "));
+    }
+
+    /**
+     * The exact comparison reads the same list, so it has to trim the same way.
+     */
+    @Test
+    public void test_isAdminUser_trimsEachEntryWithExactComparison() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl(null);
+        final FessConfig fessConfig = createAdminUsersConfig("admin, operator", "false");
+
+        assertTrue(fessConfig.isAdminUser("operator"));
+        assertFalse(fessConfig.isAdminUser("OPERATOR"));
+        assertFalse(fessConfig.isAdminUser(" operator"));
+    }
+
+    /**
+     * A trailing comma leaves an empty entry, which must reserve nothing rather than the empty name.
+     */
+    @Test
+    public void test_isAdminUser_dropsBlankEntries() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl("ldap://localhost:389/");
+        final FessConfig fessConfig = createAdminUsersConfig("admin,,  ,", "auto");
+
+        assertTrue(fessConfig.isAdminUser("admin"));
+        assertFalse(fessConfig.isAdminUser(""));
+        assertFalse(fessConfig.isAdminUser(" "));
+        assertFalse(fessConfig.isAdminUser(null));
+    }
+
+    /**
      * isLdapAdminEnabled refuses to make a reserved name editable in the directory, and reads the same
      * comparison -- so the switch moves that decision too.
      */
