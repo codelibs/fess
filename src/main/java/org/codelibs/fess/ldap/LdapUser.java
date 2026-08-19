@@ -139,19 +139,24 @@ public class LdapUser implements FessUser {
             final String groupFilter = fessConfig.getLdapGroupFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 final LdapManager ldapManager = ComponentUtil.getLdapManager();
-                // Appended to both writes, not just the synchronous one. LdapManager derives its own
-                // user entry through getCanonicalLdapName, which drops a NetBIOS "DOMAIN\" prefix,
-                // so the two are not always the same string -- and a lazy write that carried only
-                // what LdapManager collected would hand back a strictly smaller set than the
-                // synchronous result, the user losing their own permission at the moment the
-                // nested-group walk succeeded.
+                // Appended to both writes, not just the synchronous one: a lazy write that carried
+                // only what the nested-group walk collected would hand back a strictly smaller set
+                // than the synchronous result, the user losing their own permission at the moment
+                // that walk succeeded.
+                //
+                // Taken from LdapManager rather than assembled here from the prefix and the name.
+                // Only LdapManager knows whether this name was asserted by a provider -- which
+                // decides whether a backslash in it is a NetBIOS qualifier to drop or a character
+                // of the name -- and it is the one place that decides how far folding reaches.
+                // Assembling it here produced a second, differently spelled permission for the
+                // same identity, in the same set as the first.
                 //
                 // Both writes are also gated on ldap.role.search.user.enabled, which is what that
                 // setting has always claimed to control. Adding it here regardless made the setting
                 // unable to withhold anything.
-                final String[] userPermissions = fessConfig.isLdapRoleSearchUserEnabled()
-                        ? new String[] { fessConfig.getRoleSearchUserPrefix() + ldapManager.normalizePermissionName(getName()) }
-                        : StringUtil.EMPTY_STRINGS;
+                final String[] userPermissions =
+                        fessConfig.isLdapRoleSearchUserEnabled() ? new String[] { ldapManager.getUserPermissionName(this) }
+                                : StringUtil.EMPTY_STRINGS;
                 final String[] directPermissions =
                         distinct(ArrayUtils.addAll(ldapManager.getRoles(this, baseDn, accountFilter, groupFilter, roles -> {
                             permissions = distinct(ArrayUtils.addAll(roles, userPermissions));

@@ -219,6 +219,13 @@ public class LdapUserTest extends UnitFessTestCase {
             public String normalizePermissionName(String name) {
                 return name.toLowerCase();
             }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "U" + normalizePermissionName(user.getName());
+            }
         }, "ldapManager");
 
         ComponentUtil.register(new ActivityHelper() {
@@ -294,6 +301,13 @@ public class LdapUserTest extends UnitFessTestCase {
             public String normalizePermissionName(String name) {
                 return "user";
             }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "U" + normalizePermissionName(user.getName());
+            }
         }, "ldapManager");
 
         ComponentUtil.register(new ActivityHelper() {
@@ -355,6 +369,13 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String normalizePermissionName(String name) {
                 return name;
+            }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "U" + normalizePermissionName(user.getName());
             }
         }, "ldapManager");
 
@@ -434,6 +455,13 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String normalizePermissionName(String name) {
                 return name;
+            }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "U" + normalizePermissionName(user.getName());
             }
         }, "ldapManager");
 
@@ -622,6 +650,13 @@ public class LdapUserTest extends UnitFessTestCase {
             public String normalizePermissionName(final String name) {
                 return name;
             }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "1" + normalizePermissionName(user.getName());
+            }
         }, "ldapManager");
 
         ComponentUtil.register(new ActivityHelper() {
@@ -689,6 +724,13 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String normalizePermissionName(final String name) {
                 return name;
+            }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "1" + normalizePermissionName(user.getName());
             }
         }, "ldapManager");
 
@@ -765,6 +807,13 @@ public class LdapUserTest extends UnitFessTestCase {
             @Override
             public String normalizePermissionName(final String name) {
                 return name;
+            }
+
+            @Override
+            public String getUserPermissionName(final LdapUser user) {
+                // LdapUser takes the whole permission name from LdapManager instead of
+                // joining the prefix to it, so the stub spells what it used to build.
+                return "1" + normalizePermissionName(user.getName());
             }
         }, "ldapManager");
 

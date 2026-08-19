@@ -153,7 +153,7 @@ public class LdapManagerTest extends UnitFessTestCase {
      */
     @SuppressWarnings("serial")
     @Test
-    public void test_getUserSearchRole_assertedNameKeepsItsBackslash() {
+    public void test_getUserPermissionName_assertedNameKeepsItsBackslash() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             public boolean isLdapIgnoreNetbiosName() {
                 return true;
@@ -162,18 +162,60 @@ public class LdapManagerTest extends UnitFessTestCase {
             public String getRoleSearchUserPrefix() {
                 return "1";
             }
+
+            public boolean isLdapLowercasePermissionName() {
+                return false;
+            }
         });
         final LdapManager ldapManager = new LdapManager();
         ldapManager.init();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         // Typed at the login form: the NetBIOS domain is dropped, as it always was.
-        assertEquals("1alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "EXAMPLE\\alice"), systemHelper));
+        assertEquals("1alice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "EXAMPLE\\alice")));
         // Asserted by an identity provider: the whole name is the name.
-        assertEquals("1zz\\alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "zz\\alice", true), systemHelper));
+        assertEquals("1zz\\alice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "zz\\alice", true)));
         // A name with no backslash reads the same either way.
-        assertEquals("1alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "alice"), systemHelper));
-        assertEquals("1alice", ldapManager.getUserSearchRole(new LdapUser(new Hashtable<>(), "alice", true), systemHelper));
+        assertEquals("1alice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "alice")));
+        assertEquals("1alice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "alice", true)));
+    }
+
+    /**
+     * The user's own permission has one spelling, and folding reaches the name only.
+     *
+     * <p>This class built it as {@code normalizePermissionName(prefix + name)} while LdapUser built
+     * it as {@code prefix + normalizePermissionName(name)}, and both landed in the same set. The
+     * two agree only while the prefix has no case of its own -- the shipped user prefix is "1" --
+     * and diverge as soon as it has one, which a prefix may: {@code role.search.role.prefix} ships
+     * as "R". Folding the joined string is also what no other permission does; the group, role and
+     * SID-derived names have all folded the name alone since the setting was added.
+     */
+    @SuppressWarnings("serial")
+    @Test
+    public void test_getUserPermissionName_foldsTheNameNotThePrefix() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            @Override
+            public String getRoleSearchUserPrefix() {
+                return "U";
+            }
+
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return true;
+            }
+        });
+        final LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // One spelling for one identity: "Ualice" here and "Ualice" in LdapUser, not "ualice" here.
+        assertEquals("Ualice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "Alice")));
+        assertEquals("Ualice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "EXAMPLE\\Alice")));
+        // And the asserted-name distinction survives folding.
+        assertEquals("Uzz\\alice", ldapManager.getUserPermissionName(new LdapUser(new Hashtable<>(), "zz\\Alice", true)));
     }
 
     @Test
