@@ -1318,7 +1318,45 @@ public interface FessProp {
 
     String getAuthenticationAdminUsers();
 
+    String getAuthenticationAdminUsersIgnoreCase();
+
+    /**
+     * Tells whether the names authentication.admin.users reserves are compared without regard to case.
+     *
+     * <p>auto -- the shipped value -- answers that by whether this Fess resolves names through a
+     * directory. With ldap.provider.url set, the reserved names are compared the way a directory
+     * compares an account name: it does not distinguish case in one, and Active Directory issues a
+     * ticket for any casing. Without it neither path that consults the reserved names can reach a
+     * directory -- LdapManager#login returns nothing either way -- so the comparison stays exact, as it
+     * always was. true and false decide it outright.
+     *
+     * @return true when the comparison ignores case
+     */
+    private boolean isAdminUserNameIgnoreCase() {
+        final String value = getAuthenticationAdminUsersIgnoreCase();
+        if (Constants.TRUE.equalsIgnoreCase(value)) {
+            return true;
+        }
+        if (Constants.FALSE.equalsIgnoreCase(value)) {
+            return false;
+        }
+        return StringUtil.isNotBlank(getLdapProviderUrl());
+    }
+
+    /**
+     * Tells whether the given name is one of the names authentication.admin.users reserves.
+     *
+     * <p>For SSO the setting is a block list -- SpnegoAuthenticator resolves no credential for a name it
+     * matches, and FessLoginAssist keeps such a name off the LDAP path -- so where the comparison
+     * ignores case the same account cannot come back in under a different spelling.
+     *
+     * @param username the name to test, as the user typed it or the provider asserted it
+     * @return true when the name is reserved
+     */
     default boolean isAdminUser(final String username) {
+        if (isAdminUserNameIgnoreCase()) {
+            return split(getAuthenticationAdminUsers(), ",").get(stream -> stream.anyMatch(s -> s.equalsIgnoreCase(username)));
+        }
         return split(getAuthenticationAdminUsers(), ",").get(stream -> stream.anyMatch(s -> s.equals(username)));
     }
 

@@ -1336,6 +1336,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
+    /** The key of the configuration. e.g. auto */
+    String AUTHENTICATION_ADMIN_USERS_IGNORE_CASE = "authentication.admin.users.ignore.case";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
@@ -6919,6 +6922,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminUsers();
+
+    /**
+     * Get the value for the key 'authentication.admin.users.ignore.case'. <br>
+     * The value is, e.g. auto <br>
+     * comment: Whether to match authentication.admin.users without regard to case: auto, true or false. auto ignores case when ldap.provider.url is set.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAuthenticationAdminUsersIgnoreCase();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -12614,6 +12625,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getAuthenticationAdminUsers() {
             return get(FessConfig.AUTHENTICATION_ADMIN_USERS);
+        }
+
+        public String getAuthenticationAdminUsersIgnoreCase() {
+            return get(FessConfig.AUTHENTICATION_ADMIN_USERS_IGNORE_CASE);
         }
 
         public String getAuthenticationAdminRoles() {

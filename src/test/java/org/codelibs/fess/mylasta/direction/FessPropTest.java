@@ -94,6 +94,137 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("1234567890@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal("12345678901"));
     }
 
+    /**
+     * Builds a config whose only answers are the two keys the admin-user comparison reads.
+     *
+     * @param adminUsers the value of authentication.admin.users
+     * @param ignoreCase the value of authentication.admin.users.ignore.case
+     * @return the config
+     */
+    private FessConfig createAdminUsersConfig(final String adminUsers, final String ignoreCase) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAuthenticationAdminUsers() {
+                return adminUsers;
+            }
+
+            @Override
+            public String getAuthenticationAdminUsersIgnoreCase() {
+                return ignoreCase;
+            }
+
+            @Override
+            public boolean isLdapAdminEnabled() {
+                return true;
+            }
+        };
+    }
+
+    /**
+     * Sets ldap.provider.url on the running container, which is what auto reads.
+     *
+     * @param url the URL, or null to leave the setting empty
+     */
+    private void setLdapProviderUrl(final String url) {
+        final DynamicProperties systemProps = SingletonLaContainerFactory.getContainer().getComponent("systemProperties");
+        if (url == null) {
+            systemProps.remove(Constants.LDAP_PROVIDER_URL);
+        } else {
+            systemProps.setProperty(Constants.LDAP_PROVIDER_URL, url);
+        }
+    }
+
+    /**
+     * Without a directory the comparison cannot change any outcome: both branches of
+     * FessLoginAssist#resolveCredential end at doAuthenticateLocal, and SpnegoAuthenticator resolves
+     * nothing either way. So auto leaves such an installation comparing exactly, as it always did.
+     */
+    @Test
+    public void test_isAdminUser_autoComparesExactlyWithoutLdap() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl(null);
+        final FessConfig fessConfig = createAdminUsersConfig("admin,operator", "auto");
+
+        assertTrue(fessConfig.isAdminUser("admin"));
+        assertTrue(fessConfig.isAdminUser("operator"));
+        assertFalse(fessConfig.isAdminUser("ADMIN"));
+        assertFalse(fessConfig.isAdminUser("Admin"));
+        assertFalse(fessConfig.isAdminUser("OPERATOR"));
+        assertFalse(fessConfig.isAdminUser("admin2"));
+        assertFalse(fessConfig.isAdminUser(""));
+        assertFalse(fessConfig.isAdminUser(null));
+    }
+
+    /**
+     * A directory does not distinguish case in an account name -- Active Directory issues a ticket for
+     * any casing of one -- so once ldap.provider.url names one, auto compares the reserved names the
+     * way that directory does.
+     */
+    @Test
+    public void test_isAdminUser_autoIgnoresCaseWithLdap() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl("ldap://localhost:389/");
+        final FessConfig fessConfig = createAdminUsersConfig("admin,operator", "auto");
+
+        assertTrue(fessConfig.isAdminUser("admin"));
+        assertTrue(fessConfig.isAdminUser("ADMIN"));
+        assertTrue(fessConfig.isAdminUser("Admin"));
+        assertTrue(fessConfig.isAdminUser("aDmIn"));
+        assertTrue(fessConfig.isAdminUser("OPERATOR"));
+
+        // Only the names it lists, whatever their case: a longer or shorter name is a different one.
+        assertFalse(fessConfig.isAdminUser("admin2"));
+        assertFalse(fessConfig.isAdminUser("adm"));
+        assertFalse(fessConfig.isAdminUser("alice"));
+        assertFalse(fessConfig.isAdminUser(""));
+        assertFalse(fessConfig.isAdminUser(null));
+    }
+
+    /**
+     * true asks for the directory comparison whether or not this Fess resolves names through one.
+     */
+    @Test
+    public void test_isAdminUser_trueIgnoresCaseWithoutLdap() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl(null);
+        final FessConfig fessConfig = createAdminUsersConfig("admin,operator", "true");
+
+        assertTrue(fessConfig.isAdminUser("ADMIN"));
+        assertTrue(fessConfig.isAdminUser("OPERATOR"));
+        assertFalse(fessConfig.isAdminUser("admin2"));
+    }
+
+    /**
+     * false is the way out for an installation that has an account whose name differs from a reserved
+     * one only in case and that must keep logging in.
+     */
+    @Test
+    public void test_isAdminUser_falseComparesExactlyWithLdap() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl("ldap://localhost:389/");
+        final FessConfig fessConfig = createAdminUsersConfig("admin,operator", "false");
+
+        assertTrue(fessConfig.isAdminUser("admin"));
+        assertFalse(fessConfig.isAdminUser("ADMIN"));
+        assertFalse(fessConfig.isAdminUser("Admin"));
+    }
+
+    /**
+     * isLdapAdminEnabled refuses to make a reserved name editable in the directory, and reads the same
+     * comparison -- so the switch moves that decision too.
+     */
+    @Test
+    public void test_isLdapAdminEnabled_readsTheSameComparison() {
+        FessProp.propMap.clear();
+        setLdapProviderUrl("ldap://localhost:389/");
+        assertFalse(createAdminUsersConfig("admin", "auto").isLdapAdminEnabled("ADMIN"));
+        assertTrue(createAdminUsersConfig("admin", "false").isLdapAdminEnabled("ADMIN"));
+        assertTrue(createAdminUsersConfig("admin", "auto").isLdapAdminEnabled("alice"));
+        assertFalse(createAdminUsersConfig("admin", "auto").isLdapAdminEnabled("admin"));
+    }
+
     @Test
     public void test_validateIndexRequiredFields() {
         FessProp.propMap.clear();
