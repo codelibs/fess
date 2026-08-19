@@ -32,6 +32,7 @@ import org.lastaflute.web.validation.VaMessenger;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Abstract base class for Fess API actions that provides common functionality
@@ -82,7 +83,8 @@ public abstract class FessApiAction extends FessBaseAction {
 
     /**
      * Pre-processes API requests by checking access authorization before executing the action.
-     * If access is not allowed, returns an unauthorized error response.
+     * If access is not allowed, returns an unauthorized error response with HTTP 401 so that
+     * a rejected call is distinguishable from a successful one by status alone.
      *
      * @param runtime the action runtime context containing request information
      * @return ActionResponse with unauthorized error if access denied, otherwise delegates to parent
@@ -92,7 +94,7 @@ public abstract class FessApiAction extends FessBaseAction {
         if (!isAccessAllowed()) {
             return asJson(new ApiErrorResponse().message(getMessage(messages -> messages.addErrorsUnauthorizedRequest(GLOBAL)))
                     .status(Status.UNAUTHORIZED)
-                    .result());
+                    .result()).httpStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
         return super.godHandPrologue(runtime);
     }
