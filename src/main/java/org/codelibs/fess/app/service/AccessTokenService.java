@@ -131,29 +131,78 @@ public class AccessTokenService {
     }
 
     /**
-     * Get the permissions.
+     * Get the permissions a request carries: the ones the registered token was issued with, plus
+     * the ones the caller named in the token's own request parameter.
+     *
+     * <p>These are the permissions a search is filtered by, which is what the request parameter
+     * exists for -- an application that embeds Fess passes the end user's permissions per request
+     * rather than issuing a token each. Anything that decides what the CALLER may do, rather than
+     * which documents it may see, has to read {@link #getTokenPermissions(HttpServletRequest)}
+     * instead.
+     *
      * @param request The request.
      * @return The permissions.
      */
     public OptionalEntity<Set<String>> getPermissions(final HttpServletRequest request) {
+        return resolvePermissions(request, true);
+    }
+
+    /**
+     * Get only the permissions the registered token itself was issued with.
+     *
+     * <p>The request parameter is deliberately not read. Its values come from the caller, so a set
+     * that included them could be raised by the caller to any permission at all -- which is exactly
+     * what it is for while the set decides which documents come back, and exactly what it must not
+     * do while the set decides whether the administration API answers.
+     *
+     * @param request The request.
+     * @return The permissions the token carries.
+     */
+    public OptionalEntity<Set<String>> getTokenPermissions(final HttpServletRequest request) {
+        return resolvePermissions(request, false);
+    }
+
+    /**
+     * Resolves the registered token and collects its permissions.
+     *
+     * @param request The request.
+     * @param withRequestParameter Whether to add the values of the token's request parameter.
+     * @return The permissions, empty when the request carries no token.
+     */
+    protected OptionalEntity<Set<String>> resolvePermissions(final HttpServletRequest request, final boolean withRequestParameter) {
         final String token = ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request);
         if (StringUtil.isNotBlank(token)) {
             return accessTokenBhv.selectEntity(cb -> {
                 cb.query().setToken_Term(token);
-            }).map(accessToken -> {
-                final Set<String> permissionSet = new HashSet<>();
-                final Long expiredTime = accessToken.getExpiredTime();
-                if (expiredTime != null && expiredTime.longValue() > 0
-                        && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
-                    throw new InvalidAccessTokenException("invalid_token",
-                            "The token is expired(" + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
-                }
-                stream(accessToken.getPermissions()).of(stream -> stream.forEach(permissionSet::add));
-                final String name = accessToken.getParameterName();
-                stream(request.getParameterValues(name)).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(permissionSet::add));
-                return OptionalEntity.of(permissionSet);
-            }).orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "The access token is not registered."));
+            })
+                    .map(accessToken -> OptionalEntity.of(collectPermissions(accessToken, request, withRequestParameter)))
+                    .orElseThrow(() -> new InvalidAccessTokenException("invalid_token", "The access token is not registered."));
         }
         return OptionalEntity.empty();
+    }
+
+    /**
+     * Collects the permissions of a resolved token.
+     *
+     * @param accessToken The registered token.
+     * @param request The request, read only for the token's own parameter.
+     * @param withRequestParameter Whether to add the values of that parameter.
+     * @return The permissions.
+     */
+    protected Set<String> collectPermissions(final AccessToken accessToken, final HttpServletRequest request,
+            final boolean withRequestParameter) {
+        final Set<String> permissionSet = new HashSet<>();
+        final Long expiredTime = accessToken.getExpiredTime();
+        if (expiredTime != null && expiredTime.longValue() > 0
+                && expiredTime.longValue() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
+            throw new InvalidAccessTokenException("invalid_token",
+                    "The token is expired(" + FessFunctions.formatDate(FessFunctions.date(expiredTime)) + ").");
+        }
+        stream(accessToken.getPermissions()).of(stream -> stream.forEach(permissionSet::add));
+        if (withRequestParameter) {
+            final String name = accessToken.getParameterName();
+            stream(request.getParameterValues(name)).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(permissionSet::add));
+        }
+        return permissionSet;
     }
 }

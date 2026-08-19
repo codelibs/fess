@@ -44,12 +44,19 @@ public abstract class FessApiAdminAction extends FessApiAction {
      * This method validates the access token and checks if the associated permissions
      * allow admin access according to the Fess configuration.
      *
+     * <p>Only the permissions the token was issued with are consulted. A token may also name a
+     * request parameter through which the caller supplies further permissions, and those are what
+     * a search is filtered by -- but they are chosen by the caller, so admitting them here let any
+     * token whatsoever reach the administration API by naming
+     * {@code api.admin.access.permissions} in that parameter. Granting a token administrative
+     * access is the issuing screen's decision, and it is recorded on the token.
+     *
      * @return true if admin access is allowed, false otherwise
      */
     @Override
     protected boolean isAccessAllowed() {
         try {
-            return accessTokenService.getPermissions(request)
+            return accessTokenService.getTokenPermissions(request)
                     .map(permissions -> fessConfig.isApiAdminAccessAllowed(permissions))
                     .orElse(false);
         } catch (final InvalidAccessTokenException e) {
