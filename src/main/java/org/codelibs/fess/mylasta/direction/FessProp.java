@@ -1350,14 +1350,21 @@ public interface FessProp {
      * matches, and FessLoginAssist keeps such a name off the LDAP path -- so where the comparison
      * ignores case the same account cannot come back in under a different spelling.
      *
+     * <p>Each entry is trimmed. A comma-separated list is ordinarily written with a space after the
+     * comma, and the untrimmed entry is compared as " name", which no user name can equal: every
+     * entry but the first would stop reserving anything, silently, in the direction that lets a
+     * directory account of that name log in. Every other comma list this interface parses -- the LDAP
+     * object classes, the additional sort fields, the trusted proxies -- already trims. Blank entries
+     * are dropped for the same reason: a trailing comma cannot be allowed to reserve the empty name.
+     *
      * @param username the name to test, as the user typed it or the provider asserted it
      * @return true when the name is reserved
      */
     default boolean isAdminUser(final String username) {
-        if (isAdminUserNameIgnoreCase()) {
-            return split(getAuthenticationAdminUsers(), ",").get(stream -> stream.anyMatch(s -> s.equalsIgnoreCase(username)));
-        }
-        return split(getAuthenticationAdminUsers(), ",").get(stream -> stream.anyMatch(s -> s.equals(username)));
+        final boolean ignoreCase = isAdminUserNameIgnoreCase();
+        return split(getAuthenticationAdminUsers(), ",").get(stream -> stream.map(String::trim)
+                .filter(StringUtil::isNotBlank)
+                .anyMatch(s -> ignoreCase ? s.equalsIgnoreCase(username) : s.equals(username)));
     }
 
     boolean isLdapAdminEnabled();
