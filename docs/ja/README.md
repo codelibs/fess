@@ -7,7 +7,7 @@
 
 Fessは非常に強力で、簡単に導入できるエンタープライズ検索サーバーです。FessはJavaランタイム環境が動作する任意のプラットフォーム上で簡単にインストールして実行できます。Fessは[Apache License 2.0](LICENSE)の下で提供されています。
 
-Fessは[OpenSearch](https://github.com/opensearch-project/OpenSearch)をベースにしていますが、OpenSearchに関する知識や経験は**不要**です。Fessは、ブラウザを介してシステムを簡単に設定できる管理者向けのGUIを提供しています。Fessにはクローラも含まれており、[Webサーバー](https://fess.codelibs.org/15.6/admin/webconfig-guide.html)、[ファイルシステム](https://fess.codelibs.org/15.6/admin/fileconfig-guide.html)、または[データストア](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html)（CSVやデータベースなど）のドキュメントをクロールできます。Microsoft Office、PDF、zipなど、多くのファイル形式に対応しています。
+Fessは[OpenSearch](https://github.com/opensearch-project/OpenSearch)をベースにしていますが、OpenSearchに関する知識や経験は**不要**です。Fessは、ブラウザを介してシステムを簡単に設定できる管理者向けのGUIを提供しています。Fessにはクローラも含まれており、[Webサーバー](https://fess.codelibs.org/15.8/admin/webconfig-guide.html)、[ファイルシステム](https://fess.codelibs.org/15.8/admin/fileconfig-guide.html)、または[データストア](https://fess.codelibs.org/15.8/admin/dataconfig-guide.html)（CSVやデータベースなど）のドキュメントをクロールできます。Microsoft Office、PDF、zipなど、多くのファイル形式に対応しています。
 
 *[Fess Site Search](https://github.com/codelibs/fess-site-search)*は、[Google Site Search](https://enterprise.google.com/search/products/gss.html)の無料代替です。詳細については、[FSS JS Generatorのドキュメント](https://fss-generator.codelibs.org/docs/manual)を参照してください。
 
@@ -25,15 +25,15 @@ Fessを試す方法は2つあります。1つは自分でダウンロードし�
 
 ### ダウンロードおよびインストール/実行
 
-Fess 15.6が利用可能で、[リリースページ](https://github.com/codelibs/fess/releases "download")からダウンロードできます。ダウンロードには、deb、rpm、zipの3つの形式があります。
+Fess 15.8が利用可能で、[リリースページ](https://github.com/codelibs/fess/releases "download")からダウンロードできます。ダウンロードには、deb、rpm、zipの3つの形式があります。
 
 以下のコマンドは、zipファイルを使用する例です：
 
-    $ unzip fess-15.6.x.zip
-    $ cd fess-15.6.x
+    $ unzip fess-15.8.x.zip
+    $ cd fess-15.8.x
     $ ./bin/fess
 
-詳細については、[インストールガイド](https://fess.codelibs.org/15.6/install/index.html)を参照してください。
+詳細については、[インストールガイド](https://fess.codelibs.org/15.8/install/index.html)を参照してください。
 
 ### Docker
 
@@ -49,7 +49,7 @@ Fess 15.6が利用可能で、[リリースページ](https://github.com/codelib
 
 ![Admin UI](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-管理者UIでは、（Web、ファイル、データストア）クローラの設定ページでクロール対象を登録し、[スケジューラページ](https://fess.codelibs.org/15.6/admin/scheduler-guide.html)から手動でクローラを開始できます。
+管理者UIでは、（Web、ファイル、データストア）クローラの設定ページでクロール対象を登録し、[スケジューラページ](https://fess.codelibs.org/15.8/admin/scheduler-guide.html)から手動でクローラを開始できます。
 
 ## 他の検索プロバイダーからの移行
 
@@ -57,7 +57,7 @@ Fess 15.6が利用可能で、[リリースページ](https://github.com/codelib
 
 ## データストア
 
-現在、Fessは以下の[ストレージロケーションとAPI](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html)のクロールをサポートしています：
+現在、Fessは以下の[ストレージロケーションとAPI](https://fess.codelibs.org/15.8/admin/dataconfig-guide.html)のクロールをサポートしています：
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
