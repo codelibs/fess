@@ -59,7 +59,11 @@ public class LogoutAction extends FessSearchAction {
     @Execute
     public HtmlResponse index() {
         final OptionalThing<FessUserBean> userBean = getUserBean();
-        activityHelper.logout(userBean);
+        // Only a logout that ended a session is an event. This endpoint is anonymous, so writing
+        // the record unconditionally let any client append "action:LOGOUT user:-" to audit.log
+        // once per request, for as long as it cared to - lines that name nobody, in the log an
+        // operator reads to find out who did.
+        userBean.ifPresent(user -> activityHelper.logout(userBean));
         final String redirectUrl = userBean.map(user -> ComponentUtil.getSsoManager().logout(user)).orElse(null);
         fessLoginAssist.logout();
         userInfoHelper.deleteUserCodeFromCookie(request);

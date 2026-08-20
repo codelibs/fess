@@ -98,9 +98,9 @@ public class LogoutHandler {
 
     /**
      * Writes the {@code LOGOUT} activity record, mirroring {@code LogoutAction.index()} so the
-     * v2 endpoint produces the same audit.log line as the classic flow. When no user is bound
-     * the record still carries {@code user:-}, matching the classic behaviour for an
-     * already-anonymous caller.
+     * v2 endpoint produces the same audit.log line as the classic flow. Nothing is written when
+     * no user is bound: a logout that ended no session is not an event, and a line naming nobody
+     * only dilutes the log an operator reads to find out who did what.
      *
      * <p>Audit-sink failures are logged and swallowed so the actual logout still runs and the
      * endpoint stays idempotent.</p>
@@ -109,7 +109,7 @@ public class LogoutHandler {
      */
     private void recordLogoutActivity(final FessLoginAssist assist) {
         try {
-            ComponentUtil.getActivityHelper().logout(assist.getSavedUserBean());
+            assist.getSavedUserBean().ifPresent(user -> ComponentUtil.getActivityHelper().logout(assist.getSavedUserBean()));
         } catch (final RuntimeException e) {
             logger.warn("[v2/logout] failed to write the LOGOUT audit record", e);
         }
