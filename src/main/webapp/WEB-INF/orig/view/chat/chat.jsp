@@ -188,7 +188,22 @@ ${fe:html(true)}
 						rate_limit: '${fe:escapeJs(fe:message("labels.chat_error_rate_limit", ""))}',
 						auth_error: '${fe:escapeJs(fe:message("labels.chat_error_auth", ""))}',
 						service_unavailable: '${fe:escapeJs(fe:message("labels.chat_error_service_unavailable", ""))}',
+						timeout: '${fe:escapeJs(fe:message("labels.chat_error_timeout", ""))}',
+						context_length_exceeded: '${fe:escapeJs(fe:message("labels.chat_error_context_length_exceeded", ""))}',
+						model_not_found: '${fe:escapeJs(fe:message("labels.chat_error_model_not_found", ""))}',
+						invalid_response: '${fe:escapeJs(fe:message("labels.chat_error_invalid_response", ""))}',
+						connection_error: '${fe:escapeJs(fe:message("labels.chat_error_connection", ""))}',
 						unknown: '${fe:escapeJs(fe:message("labels.chat_error", ""))}'
+					},
+					retrying: '${fe:escapeJs(fe:message("labels.chat_retrying", ""))}',
+					waitingQueue: '${fe:escapeJs(fe:message("labels.chat_waiting_queue", ""))}',
+					hitCount: '${fe:escapeJs(fe:message("labels.chat_hit_count", ""))}',
+					fallback: {
+						no_results: '${fe:escapeJs(fe:message("labels.chat_fallback_no_results", ""))}',
+						no_relevant_results: '${fe:escapeJs(fe:message("labels.chat_fallback_no_relevant_results", ""))}'
+					},
+					warning: {
+						reasoning_token_exhausted: '${fe:escapeJs(fe:message("labels.chat_warning_token_exhausted", ""))}'
 					}
 				}
 			});

@@ -24,7 +24,7 @@ A built-in crawler collects documents from [web sites](https://fess.codelibs.org
 
 ## Requirements
 
-- Java 21 or later, for the TAR.GZ, ZIP, RPM, and DEB packages
+- Java 21 or later, for the ZIP, RPM, and DEB packages
 - OpenSearch as the search engine backend. The Docker images bundle it; for other installations you set it up separately.
 
 See the [Installation Guide](https://fess.codelibs.org/15.8/install/index.html) for supported versions and setup details.
