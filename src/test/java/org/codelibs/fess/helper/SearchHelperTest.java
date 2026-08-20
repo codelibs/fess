@@ -180,6 +180,44 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals(1, searchHelper.getSearchParameters().length);
     }
 
+    @Test
+    public void test_getSearchParameters_dropsNamesTheWriteSideWouldNeverStore() {
+        // storeSearchParameters copies only the names in cookie.search.parameter.keys into the
+        // cookie. The cookie comes back from the client, so a name outside that list did not come
+        // from this server -- and the caller feeds these names into a redirect URL.
+        final String encoded = searchHelper.serializeParameters(new RequestParameter[] {
+                new RequestParameter("q", new String[] { "kerberos" }), new RequestParameter("evil", new String[] { "1" }) });
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+
+        final RequestParameter[] result = searchHelper.getSearchParameters();
+        assertEquals(1, result.length);
+        assertEquals("q", result[0].getName());
+    }
+
+    @Test
+    public void test_getSearchParameters_keepsEveryNameTheWriteSideDoesStore() {
+        // The falsification: the filter must not be so tight that it drops the mechanism's own
+        // output. MockFessConfig configures the keys as "q,lang".
+        final String encoded = searchHelper.serializeParameters(new RequestParameter[] {
+                new RequestParameter("q", new String[] { "kerberos" }), new RequestParameter("lang", new String[] { "en" }) });
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+
+        assertEquals(2, searchHelper.getSearchParameters().length);
+    }
+
+    @Test
+    public void test_getCookieSearchParameterKeySet_trimsAndSkipsBlanks() {
+        final FessConfig config = new MockFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCookieSearchParameterKeys() {
+                return " q , ,num,";
+            }
+        };
+        assertEquals(java.util.Set.of("q", "num"), searchHelper.getCookieSearchParameterKeySet(config));
+    }
+
     // Test addRewriter method
     @Test
     public void test_addRewriter() {
