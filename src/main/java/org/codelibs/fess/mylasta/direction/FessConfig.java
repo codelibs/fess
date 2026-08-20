@@ -1384,6 +1384,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String COOKIE_SEARCH_PARAMETER_MAX_LENGTH = "cookie.search.parameter.max.length";
 
+    /** The key of the configuration. e.g. 65536 */
+    String COOKIE_SEARCH_PARAMETER_MAX_DECOMPRESSED_LENGTH = "cookie.search.parameter.max.decompressed.length";
+
+    /** The key of the configuration. e.g. 4096 */
+    String COOKIE_SEARCH_PARAMETER_MAX_RESTORED_LENGTH = "cookie.search.parameter.max.restored.length";
+
     /** The key of the configuration. e.g. fsrp */
     String COOKIE_SEARCH_PARAMETER_NAME = "cookie.search.parameter.name";
 
@@ -7123,6 +7129,40 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getCookieSearchParameterMaxLengthAsInteger();
 
     /**
+     * Get the value for the key 'cookie.search.parameter.max.decompressed.length'. <br>
+     * The value is, e.g. 65536 <br>
+     * comment: Maximum size in bytes the stored search parameters may decompress to.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterMaxDecompressedLength();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max.decompressed.length' as {@link Integer}. <br>
+     * The value is, e.g. 65536 <br>
+     * comment: Maximum size in bytes the stored search parameters may decompress to.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCookieSearchParameterMaxDecompressedLengthAsInteger();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max.restored.length'. <br>
+     * The value is, e.g. 4096 <br>
+     * comment: Maximum length of the query string built when restoring the stored search parameters after login.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterMaxRestoredLength();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max.restored.length' as {@link Integer}. <br>
+     * The value is, e.g. 4096 <br>
+     * comment: Maximum length of the query string built when restoring the stored search parameters after login.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCookieSearchParameterMaxRestoredLengthAsInteger();
+
+    /**
      * Get the value for the key 'cookie.search.parameter.name'. <br>
      * The value is, e.g. fsrp <br>
      * comment: Cookie name used to store encoded search parameters before SSO login.
@@ -12715,6 +12755,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH);
         }
 
+        public String getCookieSearchParameterMaxDecompressedLength() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_DECOMPRESSED_LENGTH);
+        }
+
+        public Integer getCookieSearchParameterMaxDecompressedLengthAsInteger() {
+            return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_DECOMPRESSED_LENGTH);
+        }
+
+        public String getCookieSearchParameterMaxRestoredLength() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_RESTORED_LENGTH);
+        }
+
+        public Integer getCookieSearchParameterMaxRestoredLengthAsInteger() {
+            return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_RESTORED_LENGTH);
+        }
+
         public String getCookieSearchParameterName() {
             return get(FessConfig.COOKIE_SEARCH_PARAMETER_NAME);
         }
@@ -14714,6 +14770,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS, "q,num,sort");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_required_keys, "q");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH, "1000");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_DECOMPRESSED_LENGTH, "65536");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_RESTORED_LENGTH, "4096");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_NAME, "fsrp");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_http_only, "true");
             defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_SECURE, "");

@@ -18,6 +18,10 @@ package org.codelibs.fess.app.web.sso;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.codelibs.fess.entity.RequestParameter;
+import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+
 import org.apache.logging.log4j.Level;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoProcessException;
@@ -30,6 +34,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.web.UrlChain;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaMessenger;
@@ -131,6 +136,92 @@ public class SsoActionTest extends UnitFessTestCase {
         }
     }
 
+    // ===================================================================================
+    //                                                       Restoring the stored search query
+    //                                                       =================================
+
+    /**
+     * Builds an action whose stored search parameters are exactly the given ones.
+     */
+    private TestableSsoAction actionWithStoredParameters(final RequestParameter... parameters) {
+        return actionWithStoredParameters(4096, parameters);
+    }
+
+    /** @param maxRestoredLength the value of cookie.search.parameter.max.restored.length */
+    private TestableSsoAction actionWithStoredParameters(final int maxRestoredLength, final RequestParameter... parameters) {
+        final TestableSsoAction action = new TestableSsoAction();
+        action.storeParameters(maxRestoredLength, parameters);
+        return action;
+    }
+
+    @Test
+    public void test_redirectToSearchPage_restoresAQueryThatFits() {
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "kerberos" }));
+
+        assertTrue(action.redirectToSearchPage().isPresent());
+        assertEquals(List.of("q", "kerberos"), action.redirectParams);
+    }
+
+    @Test
+    public void test_redirectToSearchPage_dropsAQueryTooLongToRedirectWith() {
+        // cookie.search.parameter.max.length bounds the COMPRESSED cookie, so it is no bound at
+        // all on the URL built from it: percent-encoding a CJK query multiplies its length by
+        // nine. A query the search page accepts can therefore produce a Location header the
+        // container refuses to write, and the login answers 500 instead of succeeding.
+        final StringBuilder cjk = new StringBuilder();
+        while (cjk.length() < 850) {
+            cjk.append('\u691c');
+        }
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { cjk.toString() }));
+
+        assertFalse(action.redirectToSearchPage().isPresent(), "the login must not be lost to the query it was going to restore");
+    }
+
+    @Test
+    public void test_redirectToSearchPage_dropsTheWholeRestoreRatherThanHalfOfIt() {
+        // A partial restore would run a DIFFERENT search from the one the user asked for -- the
+        // paging and sorting parameters would be gone while q stayed. Nothing is restored.
+        final StringBuilder cjk = new StringBuilder();
+        while (cjk.length() < 850) {
+            cjk.append('\u691c');
+        }
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { cjk.toString() }),
+                new RequestParameter("num", new String[] { "20" }));
+
+        assertFalse(action.redirectToSearchPage().isPresent());
+        assertTrue(action.redirectParams.isEmpty());
+    }
+
+    @Test
+    public void test_redirectToSearchPage_honoursTheConfiguredBound() {
+        // The bound is a configuration key because the container bound it protects against is one
+        // too (tomcat.maxHttpHeaderSize). A deployment that raised that has to be able to raise
+        // this, or the query it can now carry is still dropped.
+        final StringBuilder cjk = new StringBuilder();
+        while (cjk.length() < 850) {
+            cjk.append('\u691c');
+        }
+        final RequestParameter q = new RequestParameter("q", new String[] { cjk.toString() });
+
+        assertFalse(actionWithStoredParameters(4096, q).redirectToSearchPage().isPresent(), "the shipped bound drops it");
+        assertTrue(actionWithStoredParameters(65536, q).redirectToSearchPage().isPresent(), "a raised bound restores it");
+    }
+
+    @Test
+    public void test_redirectToSearchPage_fallsBackWhenTheBoundIsBlank() {
+        // getAsInteger answers null for a blank value, and this is read on the login path: a blank
+        // key must fall back to the shipped default, not throw.
+        final TestableSsoAction action = new TestableSsoAction();
+        action.storeParametersWithNoConfiguredBound(new RequestParameter("q", new String[] { "kerberos" }));
+
+        assertTrue(action.redirectToSearchPage().isPresent());
+    }
+
+    @Test
+    public void test_redirectToSearchPage_withNothingStored() {
+        assertFalse(actionWithStoredParameters().redirectToSearchPage().isPresent());
+    }
+
     /**
      * SsoAction with the seams that need the DI container replaced: the message stores and the
      * action path resolver are not available to a plain unit test.
@@ -138,6 +229,44 @@ public class SsoActionTest extends UnitFessTestCase {
     private static class TestableSsoAction extends SsoAction {
         final List<String> savedErrors = new CopyOnWriteArrayList<>();
         final List<String> savedInfos = new CopyOnWriteArrayList<>();
+        final List<Object> redirectParams = new CopyOnWriteArrayList<>();
+
+        @Override
+        protected HtmlResponse redirectWith(final Class<?> actionType, final UrlChain moreUrl) {
+            redirectParams.addAll(List.of(moreUrl.getParamsOnGet()));
+            return REDIRECT_TO_LOGIN;
+        }
+
+        /** searchHelper and fessConfig are protected in another package, so they are set here. */
+        void storeParameters(final int maxRestoredLength, final RequestParameter... parameters) {
+            searchHelper = new SearchHelper() {
+                @Override
+                public RequestParameter[] getSearchParameters() {
+                    return parameters;
+                }
+            };
+            fessConfig = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public Integer getCookieSearchParameterMaxRestoredLengthAsInteger() {
+                    return maxRestoredLength;
+                }
+            };
+        }
+
+        /** The same seams, with the bound left blank so the fallback is what answers. */
+        void storeParametersWithNoConfiguredBound(final RequestParameter... parameters) {
+            storeParameters(4096, parameters);
+            fessConfig = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public Integer getCookieSearchParameterMaxRestoredLengthAsInteger() {
+                    return null;
+                }
+            };
+        }
 
         @Override
         protected void saveError(final VaMessenger<FessMessages> validationMessagesLambda) {
