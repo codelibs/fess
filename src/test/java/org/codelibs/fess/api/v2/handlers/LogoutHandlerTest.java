@@ -115,6 +115,21 @@ public class LogoutHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void logout_writesNoAuditRecordWhenNobodyWasLoggedIn() throws Exception {
+        // The endpoint is idempotent and reachable without a session, so an unconditional write
+        // let a caller append "action:LOGOUT user:-" once per request for as long as it cared to.
+        // A logout that ended no session is not an event.
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new StubLoginAssist(null), FessLoginAssist.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+        assertEquals(200, res.status, res.body());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(), audit,
+                "a logout that ended no session must not name one in the audit log");
+    }
+
+    @Test
     public void logout_auditFailureStillLogsOutAndReturnsOk() throws Exception {
         // A broken audit sink must not prevent the actual logout: the endpoint stays idempotent
         // and FessLoginAssist.logout() must still run.
@@ -248,7 +263,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         int logoutCount;
 
         StubLoginAssist(final String userId) {
-            bound = new FessUserBean(new StubFessUser(userId));
+            bound = userId == null ? null : new FessUserBean(new StubFessUser(userId));
         }
 
         @Override
