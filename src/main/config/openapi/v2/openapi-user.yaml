@@ -57,7 +57,7 @@ info:
   version: 15.8.0
 externalDocs:
   description: API Documentation
-  url: https://fess.codelibs.org/15.7/api/
+  url: https://fess.codelibs.org/15.8/api/
 servers:
   - url: http://localhost:8080/api/v2
 tags:

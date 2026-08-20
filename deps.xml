@@ -7,7 +7,7 @@
 	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
 	<property name="chunk.dir" value="${basedir}/src/main/webapp/WEB-INF/env/chunk" />
 	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
-	<property name="kopf.version" value="15.7.0" />
+	<property name="kopf.version" value="15.8.0" />
 	<property name="kopf.url" value="https://github.com/codelibs/fess-kopf/archive/refs/tags/v${kopf.version}.zip" />
 	<!-- property name="kopf.version" value="main" / -->
 	<!-- property name="kopf.url" value="https://github.com/codelibs/fess-kopf/archive/refs/heads/${kopf.version}.zip" / -->

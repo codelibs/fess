@@ -7,7 +7,7 @@
 
 Fess 是一个功能强大且易于部署的企业搜索服务器。您可以在任何可以运行 Java 运行时环境的平台上快速安装和运行 Fess。Fess 根据 [Apache 许可证 2.0](LICENSE) 提供。
 
-Fess 基于 [OpenSearch](https://github.com/opensearch-project/OpenSearch)，但不需要 OpenSearch 的知识或经验。Fess 提供了一个易于使用的管理 GUI，您可以通过浏览器配置系统。Fess 还包含一个爬虫，能够抓取 [Web 服务器](https://fess.codelibs.org/15.6/admin/webconfig-guide.html)、[文件系统](https://fess.codelibs.org/15.6/admin/fileconfig-guide.html)或[数据存储](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html)（如 CSV 或数据库）中的文档。Fess 支持多种文件格式，包括但不限于：Microsoft Office、PDF 和 zip。
+Fess 基于 [OpenSearch](https://github.com/opensearch-project/OpenSearch)，但不需要 OpenSearch 的知识或经验。Fess 提供了一个易于使用的管理 GUI，您可以通过浏览器配置系统。Fess 还包含一个爬虫，能够抓取 [Web 服务器](https://fess.codelibs.org/15.8/admin/webconfig-guide.html)、[文件系统](https://fess.codelibs.org/15.8/admin/fileconfig-guide.html)或[数据存储](https://fess.codelibs.org/15.8/admin/dataconfig-guide.html)（如 CSV 或数据库）中的文档。Fess 支持多种文件格式，包括但不限于：Microsoft Office、PDF 和 zip。
 
 *[Fess 网站搜索](https://github.com/codelibs/fess-site-search)* 是 [Google 网站搜索](https://enterprise.google.com/search/products/gss.html)的免费替代品。更多详情请参阅 [FSS JS 生成器文档](https://fss-generator.codelibs.org/docs/manual)。
 
@@ -25,15 +25,15 @@ Fess 基于 [OpenSearch](https://github.com/opensearch-project/OpenSearch)，但
 
 ### 下载并安装/运行
 
-Fess 15.6 现已发布，可在 [发布页面](https://github.com/codelibs/fess/releases "download") 下载。提供三种下载形式：deb、rpm、zip。
+Fess 15.8 现已发布，可在 [发布页面](https://github.com/codelibs/fess/releases "download") 下载。提供三种下载形式：deb、rpm、zip。
 
 以下命令展示了如何使用 zip 下载：
 
-    $ unzip fess-15.6.x.zip
-    $ cd fess-15.6.x
+    $ unzip fess-15.8.x.zip
+    $ cd fess-15.8.x
     $ ./bin/fess
 
-更多详情请参阅 [安装指南](https://fess.codelibs.org/15.6/install/index.html)。
+更多详情请参阅 [安装指南](https://fess.codelibs.org/15.8/install/index.html)。
 
 ### Docker
 
@@ -49,7 +49,7 @@ Fess 15.6 现已发布，可在 [发布页面](https://github.com/codelibs/fess/
 
 ![Admin UI](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-您可以在管理 UI 的 (Web、文件、数据存储) 爬虫配置页面中注册爬取目标，然后在 [调度器页面](https://fess.codelibs.org/15.6/admin/scheduler-guide.html)手动启动爬虫。
+您可以在管理 UI 的 (Web、文件、数据存储) 爬虫配置页面中注册爬取目标，然后在 [调度器页面](https://fess.codelibs.org/15.8/admin/scheduler-guide.html)手动启动爬虫。
 
 ## 从其他搜索提供商迁移
 
@@ -57,7 +57,7 @@ Fess 15.6 现已发布，可在 [发布页面](https://github.com/codelibs/fess/
 
 ## 数据存储
 
-当前，Fess 支持抓取以下[存储位置和 API](https://fess.codelibs.org/15.6/admin/dataconfig-guide.html)：
+当前，Fess 支持抓取以下[存储位置和 API](https://fess.codelibs.org/15.8/admin/dataconfig-guide.html)：
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
