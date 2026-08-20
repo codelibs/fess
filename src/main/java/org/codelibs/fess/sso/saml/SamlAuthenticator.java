@@ -1290,7 +1290,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 // it is still answered with an ordinary LogoutResponse: an error would tell an
                 // unauthenticated sender whether it guessed a live session, and would leave a
                 // confused-but-legitimate IdP with no way of finishing its own logout.
-                final boolean keepLocalSession = isLogoutRequestForAnotherUser(request, settings);
+                //
+                // A LogoutResponse never ends a session at all; see isLogoutResponse.
+                final boolean keepLocalSession = isLogoutResponse(request) || isLogoutRequestForAnotherUser(request, settings);
+                warnIfLogoutResponseReachedALiveLogin(request);
                 // stay=true keeps java-saml from committing the servlet response itself
                 final String redirectUrl = auth.processSLO(keepLocalSession, null, true);
                 final List<String> errors = auth.getErrors();
@@ -1318,6 +1321,83 @@ public class SamlAuthenticator implements SsoAuthenticator {
     }
 
     /**
+     * Returns whether the incoming logout message is a LogoutResponse, in which case it must not
+     * end the local session.
+     *
+     * <p>A LogoutResponse is the answer to a LogoutRequest this SP sent, and {@code LogoutAction}
+     * has already ended the local login by the time one can arrive: it asks the SSO manager for
+     * the redirect URL and then calls {@code logout()}, which invalidates the session. Whatever
+     * session the answer lands on is therefore a fresh one, so invalidating it ends nothing that
+     * was still running -- and that is the only thing a legitimate LogoutResponse gave up here.</p>
+     *
+     * <p>What it costs is the rest of the deployment. {@code /sso/logout} is anonymous and,
+     * because SAML requires {@code SameSite=none}, reachable cross-site with the victim's session
+     * cookie attached. {@code Auth#processSLO} is given no request ID to bind the answer to -- the
+     * SP has none to give, having just discarded the session that would have held it -- so
+     * java-saml skips the {@code InResponseTo} comparison, and with the shipped
+     * {@code saml.security.want_messages_signed=false} every remaining check is conditional on an
+     * attribute the sender may simply omit: {@code Issuer}, {@code Destination}, and the
+     * {@code InResponseTo} attribute itself. A LogoutResponse carrying nothing but a Success
+     * status was therefore enough to invalidate any session it was pointed at -- a SAML login, a
+     * local one, or a login still in flight, whose pending AuthnRequest ID went with the session
+     * and left the user unable to log in while the page kept firing. No signature, no guess, and
+     * nothing in the log.</p>
+     *
+     * <p>This is the same exposure {@link #isLogoutRequestForAnotherUser} closes for the other
+     * kind of message, where the NameID is what costs the sender a guess. A LogoutResponse carries
+     * no NameID, so there is nothing to compare -- and nothing that needs comparing, because there
+     * is nothing left for it to end.</p>
+     *
+     * @param request The HTTP request carrying the SAML logout message.
+     * @return true if the message is a LogoutResponse.
+     */
+    protected boolean isLogoutResponse(final HttpServletRequest request) {
+        return StringUtil.isBlank(request.getParameter("SAMLRequest")) && StringUtil.isNotBlank(request.getParameter("SAMLResponse"));
+    }
+
+    /**
+     * Reports a LogoutResponse that reached a session which is still logged in.
+     *
+     * <p>The legitimate answer arrives after {@code LogoutAction} has ended the login, so this
+     * says nothing on the path a logout actually takes. It says something on the one it does not:
+     * a LogoutResponse aimed at a live login answers a logout that was never started, which is
+     * either a stale replay out of a browser's history or a request forged to end somebody's
+     * session. Reporting it is what makes the attempt visible; the session is kept either way.</p>
+     *
+     * <p>One bounded line and no stack trace, for the reason the rest of this endpoint gives: it
+     * is anonymous, so a rejected message must not let an unauthenticated client fill the log.
+     * Nothing the sender supplied is echoed, because nothing in the message was validated.</p>
+     *
+     * @param request The HTTP request carrying the SAML logout message.
+     */
+    protected void warnIfLogoutResponseReachedALiveLogin(final HttpServletRequest request) {
+        if (!isLogoutResponse(request) || !isLoggedIn()) {
+            return;
+        }
+        logger.warn("A SAML LogoutResponse reached a session that is still logged in, so it is answered without ending it."
+                + " A LogoutResponse answers a LogoutRequest this server sent, and this server had not sent one:"
+                + " the message is a replay or was forged to end the session. An IdP that starts a logout sends a LogoutRequest instead.");
+    }
+
+    /**
+     * Returns whether this session is logged in, answering false when that cannot be determined.
+     *
+     * @return true if a user is logged in.
+     */
+    protected boolean isLoggedIn() {
+        try {
+            return getSavedUserBean().isPresent();
+        } catch (final Exception e) {
+            // this endpoint has to keep working for a request that reaches it outside a login
+            // scope, so being unable to look at the session means "cannot tell", not "fail"
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to read the session user.", e);
+            }
+            return false;
+        }
+    }
+
+    /**
      * Returns whether an IdP-initiated LogoutRequest names somebody other than the user this
      * session is logged in as, in which case the session must survive it.
      *
@@ -1330,10 +1410,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * comparison as well. The NameID is the one element java-saml insists on, so it is the one
      * thing left worth checking, and comparing it with the session costs an attacker the guess.</p>
      *
-     * <p>A LogoutResponse the IdP is answering ({@code SAMLResponse}) is left alone: it is the
-     * reply to a LogoutRequest this SP itself sent, so it carries no NameID to compare, and
-     * constructing a {@link LogoutRequest} from such a request would silently build a fresh
-     * outgoing message rather than parse anything.</p>
+     * <p>A LogoutResponse the IdP is answering ({@code SAMLResponse}) is left alone here: it
+     * carries no NameID to compare, and constructing a {@link LogoutRequest} from such a request
+     * would silently build a fresh outgoing message rather than parse anything.
+     * {@link #isLogoutResponse(HttpServletRequest)} keeps the session for that kind of message
+     * instead, on the ground that there is nothing left for it to end.</p>
      *
      * <p>Anything that is not a clear mismatch keeps the previous behaviour of ending the session:
      * no user logged in, a user who did not come from SAML, a message whose NameID cannot be read

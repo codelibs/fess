@@ -1907,6 +1907,90 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_isLogoutResponse() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator();
+        // getMockRequest() hands out the one request of this test, so each step overwrites the
+        // parameter the previous one set rather than starting from a clean request.
+        final MockletHttpServletRequest request = getMockRequest();
+
+        // No logout message at all.
+        assertFalse(authenticator.isLogoutResponse(request));
+
+        request.setParameter("SAMLResponse", "   ");
+        assertFalse(authenticator.isLogoutResponse(request));
+
+        request.setParameter("SAMLResponse", "PHNhbWxwOkxvZ291dFJlc3BvbnNlIC8+");
+        assertTrue(authenticator.isLogoutResponse(request));
+
+        // Auth#processSLO reads SAMLResponse first, but a request carrying both has to be treated
+        // as the LogoutRequest it also is: the NameID comparison is what guards that branch, and
+        // an IdP-initiated logout does end the session.
+        request.setParameter("SAMLRequest", "PHNhbWxwOkxvZ291dFJlcXVlc3QgLz4=");
+        assertFalse(authenticator.isLogoutResponse(request));
+
+        request.setParameter("SAMLRequest", "");
+        assertTrue(authenticator.isLogoutResponse(request));
+    }
+
+    @Test
+    public void test_warnIfLogoutResponseReachedALiveLogin_reportsOnlyTheLoginThatIsStillLive() throws Exception {
+        final boolean[] loggedIn = { true };
+        final SamlAuthenticator authenticator = new SamlAuthenticator() {
+            @Override
+            protected boolean isLoggedIn() {
+                return loggedIn[0];
+            }
+        };
+        final MockletHttpServletRequest request = getMockRequest();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SamlAuthenticator.class);
+        try {
+            // A LogoutRequest is the other branch, reported by its own NameID comparison.
+            request.setParameter("SAMLRequest", "PHNhbWxwOkxvZ291dFJlcXVlc3QgLz4=");
+            authenticator.warnIfLogoutResponseReachedALiveLogin(request);
+            assertEquals(String.valueOf(appender.warnings()), 0, appender.warnings().size());
+
+            // The legitimate answer arrives after LogoutAction has ended the login, so the path a
+            // logout actually takes stays silent.
+            request.setParameter("SAMLRequest", "");
+            request.setParameter("SAMLResponse", "PHNhbWxwOkxvZ291dFJlc3BvbnNlIC8+");
+            loggedIn[0] = false;
+            authenticator.warnIfLogoutResponseReachedALiveLogin(request);
+            assertEquals(String.valueOf(appender.warnings()), 0, appender.warnings().size());
+
+            // A LogoutResponse aimed at a live login answers a logout that was never started.
+            loggedIn[0] = true;
+            authenticator.warnIfLogoutResponseReachedALiveLogin(request);
+
+            final List<String> warnings = appender.warnings();
+            assertEquals(String.valueOf(warnings), 1, warnings.size());
+            final String message = warnings.get(0);
+            assertTrue(message, message.contains("LogoutResponse"));
+            assertTrue(message, message.contains("still logged in"));
+            // The endpoint is anonymous and nothing in the message was validated: one bounded
+            // line, no stack trace, and nothing the sender supplied.
+            assertFalse(message, message.contains("PHNhbWxwOkxvZ291dFJlc3BvbnNlIC8+"));
+            assertEquals(String.valueOf(appender.errors()), 0, appender.errors().size());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_isLoggedIn_answersFalseWhenTheSessionCannotBeRead() throws Exception {
+        final SamlAuthenticator authenticator = new SamlAuthenticator() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                throw new IllegalStateException("no login scope");
+            }
+        };
+
+        // /sso/logout has to keep working for a request that reaches it outside a login scope, so
+        // "cannot tell" must not become "fail" -- and must not become "logged in" either, which
+        // would report every legitimate logout.
+        assertFalse(authenticator.isLoggedIn());
+    }
+
     /** A user that did not authenticate through SAML, as a local or LDAP login leaves behind. */
     private static class LocalUser implements FessUser {
 
