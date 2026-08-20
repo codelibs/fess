@@ -663,8 +663,17 @@ public class SearchHelper {
                     if (cookieName.equals(cookie.getName())) {
                         try {
                             final String encoded = cookie.getValue();
+                            // The write side refuses to store a cookie longer than this, so a
+                            // longer one did not come from this server. Applying the same bound
+                            // here keeps the two sides symmetric and rejects an oversized value
+                            // before it is decompressed.
+                            final int maxLength = fessConfig.getCookieSearchParameterMaxLengthAsInteger();
+                            if (encoded.length() > maxLength) {
+                                logger.warn("Ignoring stored search parameters: the cookie is longer than {} characters.", maxLength);
+                                return new RequestParameter[0];
+                            }
                             final byte[] compressed = Base64.getUrlDecoder().decode(encoded);
-                            final byte[] jsonBytes = gzipDecompress(compressed);
+                            final byte[] jsonBytes = gzipDecompress(compressed, getMaxDecompressedParameterLength(fessConfig));
                             final List<?> list = mapper.readValue(jsonBytes, List.class);
 
                             final List<RequestParameter> result = new ArrayList<>();
@@ -696,19 +705,47 @@ public class SearchHelper {
     }
 
     /**
-     * Decompresses GZIP-compressed data.
+     * Resolves how far the stored search parameters may be allowed to decompress.
+     *
+     * <p>{@code cookie.search.parameter.max.length} bounds the <em>encoded</em> cookie, which is
+     * gzip, so it is no bound on what that cookie expands to -- and the cookie arrives from the
+     * client. Hence a bound of its own, and a configurable one: the shipped value is far above
+     * anything the write side can produce, but a deployment that raises the encoded bound has to
+     * be able to raise this with it.</p>
+     *
+     * <p>The generated accessor answers null for a <em>blank</em> value, and this is read on the
+     * login path, so a blank one falls back to the shipped default rather than throwing.</p>
+     *
+     * @param fessConfig the configuration to read the bound from
+     * @return the maximum number of decompressed bytes to accept
+     */
+    protected int getMaxDecompressedParameterLength(final FessConfig fessConfig) {
+        final Integer value = fessConfig.getCookieSearchParameterMaxDecompressedLengthAsInteger();
+        return value != null ? value : 65536;
+    }
+
+    /**
+     * Decompresses GZIP-compressed data, refusing to expand beyond the given bound.
+     *
+     * The only caller that does not compress its own input is the stored-parameter cookie, which
+     * the client supplies. Stopping at the bound rather than reading to EOF keeps a small, highly
+     * compressible cookie from allocating without limit.
      *
      * @param compressed The GZIP-compressed data to decompress
+     * @param maxLength The maximum number of decompressed bytes to accept
      * @return Decompressed data
-     * @throws IORuntimeException if decompression fails
+     * @throws IORuntimeException if decompression fails or the data expands beyond maxLength
      */
-    protected byte[] gzipDecompress(final byte[] compressed) {
+    protected byte[] gzipDecompress(final byte[] compressed, final int maxLength) {
         try (final ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
                 final GZIPInputStream gzipIn = new GZIPInputStream(bis);
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             final byte[] buffer = new byte[1024];
             int len;
             while ((len = gzipIn.read(buffer)) > 0) {
+                if (bos.size() + len > maxLength) {
+                    throw new IORuntimeException(new IOException("Compressed data expands beyond " + maxLength + " bytes."));
+                }
                 bos.write(buffer, 0, len);
             }
             return bos.toByteArray();

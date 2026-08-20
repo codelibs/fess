@@ -199,14 +199,50 @@ public class SsoAction extends FessLoginAction {
      * @return Optional HtmlResponse containing the redirect to search page with parameters,
      *         or empty if no search parameters were found
      */
+    /**
+     * Resolves how long a query string {@link #redirectToSearchPage()} may build.
+     *
+     * <p>The bound exists because the container has one: a longer {@code Location} cannot be
+     * written and the login fails with an empty 500. It is configurable because the container's
+     * bound is configurable too -- {@code tomcat.maxHttpHeaderSize} in
+     * {@code tomcat_config.properties}, which the SPNEGO documentation asks deployments with large
+     * Kerberos tickets to raise. Raise the two together.</p>
+     *
+     * <p>The generated accessor answers null for a <em>blank</em> value, and this is read on the
+     * login path, so a blank one falls back to the shipped default rather than throwing.</p>
+     *
+     * @return the maximum encoded query-string length to build
+     */
+    protected int getMaxRestoredQueryLength() {
+        final Integer value = fessConfig.getCookieSearchParameterMaxRestoredLengthAsInteger();
+        return value != null ? value : 4096;
+    }
+
     protected OptionalThing<HtmlResponse> redirectToSearchPage() {
         final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
         if (searchParameters.length > 0) {
             final List<String> paramList = new ArrayList<>();
+            final int maxLength = getMaxRestoredQueryLength();
+            int length = 0;
             for (final RequestParameter param : searchParameters) {
                 for (final String value : param.getValues()) {
+                    final String encoded = URLEncoder.encode(value, Constants.CHARSET_UTF_8);
+                    // Restoring the query is a convenience; the login is not. cookie.search.
+                    // parameter.max.length bounds the COMPRESSED cookie and is therefore no bound
+                    // at all on the URL built from it -- percent-encoding a CJK query multiplies
+                    // its length by nine, so a query well inside query.max.length can produce a
+                    // Location header the container refuses to write, and the login that would
+                    // otherwise have succeeded answers 500 instead. Dropping the restore leaves
+                    // the user logged in on the search top page. The bound is configurable because
+                    // the container bound it protects against is: see tomcat.maxHttpHeaderSize.
+                    length += param.getName().length() + encoded.length() + 2;
+                    if (length > maxLength) {
+                        logger.warn("Stored search parameters exceed {} characters once encoded; " + "logging in without restoring them.",
+                                maxLength);
+                        return OptionalThing.empty();
+                    }
                     paramList.add(param.getName());
-                    paramList.add(URLEncoder.encode(value, Constants.CHARSET_UTF_8));
+                    paramList.add(encoded);
                 }
             }
             if (logger.isDebugEnabled()) {

@@ -57,7 +57,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         String encoded = searchHelper.serializeParameters(params);
         assertNotNull(encoded);
         byte[] compressed = Base64.getUrlDecoder().decode(encoded);
-        byte[] jsonBytes = searchHelper.gzipDecompress(compressed);
+        byte[] jsonBytes = searchHelper.gzipDecompress(compressed, 65536);
         String json = new String(jsonBytes);
         assertTrue(json.contains("q"));
         assertTrue(json.contains("lang"));
@@ -85,6 +85,99 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals("lang", result[1].getName());
         assertEquals("en", result[1].getValues()[0]);
         assertEquals("ja", result[1].getValues()[1]);
+    }
+
+    @Test
+    public void test_getSearchParameters_rejectsCookieLongerThanTheWriteSideStores() {
+        // storeSearchParameters refuses to write a cookie longer than
+        // cookie.search.parameter.max.length, so a longer one did not come from this server.
+        // The cookie built here is perfectly VALID -- it round-trips through the same serializer
+        // the write side uses -- so only the length check can reject it. A malformed oversized
+        // value would be rejected by the base64 decoder instead and prove nothing.
+        final StringBuilder incompressible = new StringBuilder();
+        for (int i = 0; incompressible.length() < 8192; i++) {
+            incompressible.append(Long.toHexString(i * 2654435761L % 0xFFFFFFFFL));
+        }
+        final String encoded = searchHelper
+                .serializeParameters(new RequestParameter[] { new RequestParameter("q", new String[] { incompressible.toString() }) });
+        assertTrue("the cookie has to exceed the bound for this to test anything", encoded.length() > 4096);
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+
+        assertEquals(0, searchHelper.getSearchParameters().length);
+    }
+
+    @Test
+    public void test_getSearchParameters_acceptsACookieInsideThatBound() {
+        // The falsification for the test above: the same shape, short enough, is still restored.
+        final String encoded =
+                searchHelper.serializeParameters(new RequestParameter[] { new RequestParameter("q", new String[] { "kerberos" }) });
+        assertTrue(encoded.length() <= 4096);
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+
+        final RequestParameter[] result = searchHelper.getSearchParameters();
+        assertEquals(1, result.length);
+        assertEquals("kerberos", result[0].getValues()[0]);
+    }
+
+    @Test
+    public void test_getSearchParameters_survivesACookieThatExpandsWithoutBound() {
+        // A cookie inside the encoded bound whose gzip expands far past it. Before the bound in
+        // gzipDecompress this allocated the whole expansion; the contract asserted here is only
+        // that nothing is restored and nothing is thrown to the caller.
+        final StringBuilder value = new StringBuilder("[[\"q\",[\"");
+        for (int i = 0; i < 2_000_000; i++) {
+            value.append('A');
+        }
+        value.append("\"]]]");
+        final String encoded =
+                Base64.getUrlEncoder().withoutPadding().encodeToString(searchHelper.gzipCompress(value.toString().getBytes()));
+        assertTrue("the bomb has to fit inside the encoded bound to test anything", encoded.length() <= 4096);
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+
+        assertEquals(0, searchHelper.getSearchParameters().length);
+    }
+
+    @Test
+    public void test_gzipDecompress_stopsAtTheBound() {
+        final byte[] payload = new byte[1025];
+        try {
+            searchHelper.gzipDecompress(searchHelper.gzipCompress(payload), 1024);
+            fail("expected the bound to stop the decompression");
+        } catch (final Exception e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void test_gzipDecompress_leavesAnythingInsideTheBoundAlone() {
+        // The falsification for the test above: the bound must not reject the round trip the
+        // mechanism actually performs.
+        final byte[] payload = new byte[1024];
+        assertEquals(payload.length, searchHelper.gzipDecompress(searchHelper.gzipCompress(payload), 1024).length);
+    }
+
+    @Test
+    public void test_getSearchParameters_honoursTheConfiguredDecompressedBound() {
+        // The bound is a configuration key, not a constant: an operator who narrows it must see
+        // the narrower bound applied, and the shipped default must leave the same cookie alone.
+        final String encoded =
+                searchHelper.serializeParameters(new RequestParameter[] { new RequestParameter("q", new String[] { "k".repeat(4000) }) });
+        assertTrue("the cookie has to fit the encoded bound for this to test the decompressed one", encoded.length() <= 4096);
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+        ComponentUtil.setFessConfig(new MockFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getCookieSearchParameterMaxDecompressedLengthAsInteger() {
+                return 100;
+            }
+        });
+        assertEquals(0, searchHelper.getSearchParameters().length);
+
+        // Control: the shipped default restores exactly the same cookie.
+        getMockRequest().addCookie(new Cookie("FESS_SEARCH_PARAM", encoded));
+        ComponentUtil.setFessConfig(new MockFessConfig());
+        assertEquals(1, searchHelper.getSearchParameters().length);
     }
 
     // Test addRewriter method
@@ -373,7 +466,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         byte[] originalBytes = testData.getBytes();
 
         byte[] compressed = searchHelper.gzipCompress(originalBytes);
-        byte[] decompressed = searchHelper.gzipDecompress(compressed);
+        byte[] decompressed = searchHelper.gzipDecompress(compressed, 65536);
 
         assertEquals(testData, new String(decompressed));
         // For small strings, gzip overhead might make compressed data larger
@@ -403,6 +496,16 @@ public class SearchHelperTest extends UnitFessTestCase {
 
         @Override
         public Integer getCookieSearchParameterMaxLengthAsInteger() {
+            return 4096;
+        }
+
+        @Override
+        public Integer getCookieSearchParameterMaxDecompressedLengthAsInteger() {
+            return 65536;
+        }
+
+        @Override
+        public Integer getCookieSearchParameterMaxRestoredLengthAsInteger() {
             return 4096;
         }
 
