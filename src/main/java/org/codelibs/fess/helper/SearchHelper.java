@@ -676,10 +676,21 @@ public class SearchHelper {
                             final byte[] jsonBytes = gzipDecompress(compressed, getMaxDecompressedParameterLength(fessConfig));
                             final List<?> list = mapper.readValue(jsonBytes, List.class);
 
+                            // The write side stores only the names in cookie.search.parameter.keys.
+                            // The cookie is supplied by the client, so a name outside that list did
+                            // not come from this server and there is nothing to restore it to.
+                            final Set<String> allowedKeys = getCookieSearchParameterKeySet(fessConfig);
                             final List<RequestParameter> result = new ArrayList<>();
                             for (final Object item : list) {
                                 if ((item instanceof final List<?> pair) && (pair.size() == 2 && pair.get(0) instanceof final String name
                                         && pair.get(1) instanceof final List<?> valueList)) {
+                                    if (!allowedKeys.contains(name)) {
+                                        if (logger.isDebugEnabled()) {
+                                            logger.debug("Skipping a stored search parameter outside {}: {}",
+                                                    fessConfig.getCookieSearchParameterKeys(), name);
+                                        }
+                                        continue;
+                                    }
                                     final String[] values = valueList.stream().filter(String.class::isInstance).toArray(n -> new String[n]);
                                     result.add(new RequestParameter(name, values));
                                 }
@@ -702,6 +713,21 @@ public class SearchHelper {
             }
             return new RequestParameter[0];
         }).orElse(new RequestParameter[0]);
+    }
+
+    /**
+     * Resolves {@code cookie.search.parameter.keys} into the set of names that may be restored.
+     *
+     * @param fessConfig the configuration to read the key list from
+     * @return the allowed parameter names, empty when the list is blank
+     */
+    protected Set<String> getCookieSearchParameterKeySet(final FessConfig fessConfig) {
+        final String keysStr = fessConfig.getCookieSearchParameterKeys();
+        if (StringUtil.isBlank(keysStr)) {
+            return Set.of();
+        }
+        return StreamUtil.split(keysStr, ",")
+                .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
     }
 
     /**

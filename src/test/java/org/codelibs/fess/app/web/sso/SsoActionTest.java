@@ -218,6 +218,26 @@ public class SsoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_redirectToSearchPage_encodesTheNameAsWellAsTheValue() {
+        // Both halves reach this point from a client-supplied cookie. Encoding only the value
+        // leaves an '&' in the name splitting into a query parameter of its own once the redirect
+        // URL is assembled.
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q&injected=1&x", new String[] { "ok" }));
+
+        assertTrue(action.redirectToSearchPage().isPresent());
+        assertEquals(List.of("q%26injected%3D1%26x", "ok"), action.redirectParams);
+    }
+
+    @Test
+    public void test_redirectToSearchPage_leavesAnOrdinaryNameReadable() {
+        // The falsification: encoding must not disturb the names the mechanism actually stores.
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("num", new String[] { "20" }));
+
+        assertTrue(action.redirectToSearchPage().isPresent());
+        assertEquals(List.of("num", "20"), action.redirectParams);
+    }
+
+    @Test
     public void test_redirectToSearchPage_withNothingStored() {
         assertFalse(actionWithStoredParameters().redirectToSearchPage().isPresent());
     }

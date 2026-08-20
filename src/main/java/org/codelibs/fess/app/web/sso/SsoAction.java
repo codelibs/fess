@@ -226,6 +226,10 @@ public class SsoAction extends FessLoginAction {
             int length = 0;
             for (final RequestParameter param : searchParameters) {
                 for (final String value : param.getValues()) {
+                    // The name is encoded for the same reason the value is: both reach this point
+                    // from a client-supplied cookie, and an unencoded '&' or '=' in a name splits
+                    // into query parameters of its own once the redirect URL is assembled.
+                    final String encodedName = URLEncoder.encode(param.getName(), Constants.CHARSET_UTF_8);
                     final String encoded = URLEncoder.encode(value, Constants.CHARSET_UTF_8);
                     // Restoring the query is a convenience; the login is not. cookie.search.
                     // parameter.max.length bounds the COMPRESSED cookie and is therefore no bound
@@ -235,13 +239,13 @@ public class SsoAction extends FessLoginAction {
                     // otherwise have succeeded answers 500 instead. Dropping the restore leaves
                     // the user logged in on the search top page. The bound is configurable because
                     // the container bound it protects against is: see tomcat.maxHttpHeaderSize.
-                    length += param.getName().length() + encoded.length() + 2;
+                    length += encodedName.length() + encoded.length() + 2;
                     if (length > maxLength) {
                         logger.warn("Stored search parameters exceed {} characters once encoded; " + "logging in without restoring them.",
                                 maxLength);
                         return OptionalThing.empty();
                     }
-                    paramList.add(param.getName());
+                    paramList.add(encodedName);
                     paramList.add(encoded);
                 }
             }
