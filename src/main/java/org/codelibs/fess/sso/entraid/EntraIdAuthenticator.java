@@ -311,6 +311,24 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected int maxGroupDepth = 10;
 
     /**
+     * How many consecutive parent group lookups Microsoft Graph may fail to answer before
+     * {@link #updateMemberOf} stops walking the rest of the user's direct groups.
+     *
+     * <p>The walk costs one {@code POST /groups/{id}/getMemberGroups} per direct group. A 429 or a
+     * 503 records a tenant-wide backoff, so the rest of that walk is skipped without reaching
+     * Graph at all; a 500/502/504 or a transport failure -- DNS, connection refused, or the
+     * {@link #graphConnectTimeout} / {@link #graphReadTimeout} expiring -- records nothing, so
+     * without this bound every direct group costs a full request and a stack trace, on every
+     * login, each waiting out the timeouts. That runs on corelib's shared {@code TimeoutManager}
+     * pool, whose {@code CallerRunsPolicy} pushes the overflow onto the timer thread itself.
+     *
+     * <p>Consecutive rather than total is deliberate: one permanently broken group id must not
+     * stop the rest of the walk, while a Graph that has stopped answering trips the bound
+     * immediately.
+     */
+    protected int maxConsecutiveGroupLookupFailures = 3;
+
+    /**
      * Connection timeout for Microsoft Graph requests in milliseconds. curl4j leaves this unset,
      * which means an unbounded wait, and the direct-membership lookup runs on the login thread.
      */
@@ -1055,11 +1073,33 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
 
         // Every direct group is still walked after one of them fails: a partial parent set is worth
-        // more than none, so the failures are collected rather than short-circuited.
+        // more than none, so the failures are collected rather than short-circuited. What does end
+        // the walk early is maxConsecutiveGroupLookupFailures answers in a row that Graph did not
+        // give -- past that point the tenant is unreachable rather than one group being broken,
+        // and continuing only buys one request, one timeout and one stack trace per remaining
+        // group. Whatever was collected before that is still applied below.
         boolean parentsResolved = true;
+        int walkedCount = 0;
+        int consecutiveFailures = 0;
         for (final String groupId : groupIdsForParentLookup) {
-            if (!processParentGroup(user, groupList, roleList, groupId)) {
-                parentsResolved = false;
+            ++walkedCount;
+            if (processParentGroup(user, groupList, roleList, groupId)) {
+                consecutiveFailures = 0;
+                continue;
+            }
+            parentsResolved = false;
+            if (isGraphThrottled()) {
+                // A lookup skipped for the backoff never reached Graph: it costs nothing, and the
+                // backoff already bounds the tenant. Counting it would end the walk -- and log the
+                // WARN below -- on every login for as long as the throttle lasts, for no saving.
+                continue;
+            }
+            if (++consecutiveFailures >= maxConsecutiveGroupLookupFailures) {
+                logger.warn(
+                        "Stopped resolving the nested groups of {} after {} consecutive Microsoft Graph failures."
+                                + " {} of {} direct groups were not walked.",
+                        user.getName(), consecutiveFailures, groupIdsForParentLookup.size() - walkedCount, groupIdsForParentLookup.size());
+                break;
             }
         }
 
@@ -1999,6 +2039,14 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     public void setMaxGroupDepth(final int maxGroupDepth) {
         this.maxGroupDepth = maxGroupDepth;
+    }
+
+    /**
+     * Sets how many consecutive unanswered parent group lookups end the walk.
+     * @param maxConsecutiveGroupLookupFailures The maximum number of consecutive failures.
+     */
+    public void setMaxConsecutiveGroupLookupFailures(final int maxConsecutiveGroupLookupFailures) {
+        this.maxConsecutiveGroupLookupFailures = maxConsecutiveGroupLookupFailures;
     }
 
     @Override
