@@ -672,7 +672,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,ftp,storage,s3,gcs";
+                return "file,smb,ftp,s3,gcs";
             }
         });
 
@@ -710,7 +710,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,ftp,storage,s3,gcs";
+                return "file,smb,ftp,s3,gcs";
             }
         });
 
@@ -738,21 +738,20 @@ public class ProtocolHelperTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,storage,s3,gcs";
+                return "file,smb,smb1,ftp,s3,gcs";
             }
         });
 
         final ProtocolHelper protocolHelper = new ProtocolHelper();
         protocolHelper.init();
 
-        assertEquals(7, protocolHelper.getFileProtocols().length);
+        assertEquals(6, protocolHelper.getFileProtocols().length);
 
         // All file protocols should be valid
         assertTrue(protocolHelper.isValidFileProtocol("file:///path/to/file"));
         assertTrue(protocolHelper.isValidFileProtocol("smb://server/share"));
         assertTrue(protocolHelper.isValidFileProtocol("smb1://server/share"));
         assertTrue(protocolHelper.isValidFileProtocol("ftp://ftp.example.com/file"));
-        assertTrue(protocolHelper.isValidFileProtocol("storage://container/blob"));
         assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/key"));
         assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/object"));
 
@@ -834,7 +833,6 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isFileSystemPath("smb://server/share"));
         assertTrue(protocolHelper.isFileSystemPath("smb1://server/share"));
         assertTrue(protocolHelper.isFileSystemPath("ftp://ftp.example.com/file"));
-        assertTrue(protocolHelper.isFileSystemPath("storage://container/blob"));
         assertTrue(protocolHelper.isFileSystemPath("s3://bucket/path"));
         assertTrue(protocolHelper.isFileSystemPath("gcs://bucket/path"));
     }
@@ -891,7 +889,6 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.hasKnownProtocol("smb://server/share"));
         assertTrue(protocolHelper.hasKnownProtocol("smb1://server/share"));
         assertTrue(protocolHelper.hasKnownProtocol("ftp://ftp.example.com/file"));
-        assertTrue(protocolHelper.hasKnownProtocol("storage://container/blob"));
         assertTrue(protocolHelper.hasKnownProtocol("s3://bucket/path"));
         assertTrue(protocolHelper.hasKnownProtocol("gcs://bucket/path"));
     }

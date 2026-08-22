@@ -252,11 +252,11 @@ public class ProtocolHelper {
      * Used to determine if special handling is needed for file system URLs.
      *
      * @param url the URL to check
-     * @return true if the URL is a file system path (file, smb, smb1, ftp, storage, s3, gcs)
+     * @return true if the URL is a file system path (file, smb, smb1, ftp, s3, gcs)
      */
     public boolean isFileSystemPath(final String url) {
         return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
-                || url.startsWith("storage:") || url.startsWith("s3:") || url.startsWith("gcs:");
+                || url.startsWith("s3:") || url.startsWith("gcs:");
     }
 
     /**
@@ -280,6 +280,6 @@ public class ProtocolHelper {
      */
     public boolean hasKnownProtocol(final String path) {
         return path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
-                || path.startsWith("ftp:") || path.startsWith("storage:") || path.startsWith("s3:") || path.startsWith("gcs:");
+                || path.startsWith("ftp:") || path.startsWith("s3:") || path.startsWith("gcs:");
     }
 }

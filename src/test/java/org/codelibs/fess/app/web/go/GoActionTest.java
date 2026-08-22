@@ -48,7 +48,7 @@ public class GoActionTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,storage,s3,gcs";
+                return "file,smb,smb1,ftp,s3,gcs";
             }
         });
         final ProtocolHelper protocolHelper = new ProtocolHelper();
@@ -243,13 +243,6 @@ public class GoActionTest extends UnitFessTestCase {
         assertTrue(goAction.isFileSystemPath("ftp://ftp.example.com/path/file.txt"));
         assertTrue(goAction.isFileSystemPath("ftp://user:pass@ftp.example.com/file.txt"));
         assertTrue(goAction.isFileSystemPath("ftp://192.168.1.1/file.txt"));
-    }
-
-    @Test
-    public void test_isFileSystemPath_storage_protocol() {
-        assertTrue(goAction.isFileSystemPath("storage://container/path/file.txt"));
-        assertTrue(goAction.isFileSystemPath("storage://bucket/folder/document.pdf"));
-        assertTrue(goAction.isFileSystemPath("storage://my-storage/"));
     }
 
     @Test

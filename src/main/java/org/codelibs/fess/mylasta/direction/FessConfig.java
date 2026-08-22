@@ -3567,7 +3567,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.file.protocols'. <br>
-     * The value is, e.g. file,smb,smb1,ftp,storage,s3,gcs <br>
+     * The value is, e.g. file,smb,smb1,ftp,s3,gcs <br>
      * comment: Supported file protocols for crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
