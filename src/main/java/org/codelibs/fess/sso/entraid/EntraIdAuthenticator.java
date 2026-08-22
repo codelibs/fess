@@ -1872,10 +1872,37 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     /**
      * Builds the tenant's authority URL, the prefix every Entra ID endpoint is hung off.
      *
+     * <p>The authority and the tenant are joined with exactly one {@code /}. This used to be a
+     * raw concatenation, and the only guard on {@link #getAuthority()} maps a <em>blank</em> value
+     * onto {@link #DEFAULT_AUTHORITY}, which already carries a trailing slash -- a non-blank value
+     * without one was passed through untouched. So
+     * {@code entraid.authority=https://login.microsoftonline.com} plus
+     * {@code entraid.tenant=contoso.onmicrosoft.com} produced
+     * {@code https://login.microsoftonline.comcontoso.onmicrosoft.com/}: the host and the tenant
+     * fuse into a single bogus hostname, the browser gets NXDOMAIN, and because the authorization
+     * URL is only logged at debug level nothing points back at the setting.
+     * {@code https://login.microsoftonline.com} is how the endpoint is written wherever it is
+     * documented, so omitting the trailing slash is the expected mistake rather than an exotic one.
+     *
+     * <p>A tenant that already starts with a slash joins correctly against a slashless authority,
+     * so the separator is inserted only when neither side supplies one and a doubled separator is
+     * collapsed; a naive "always append a slash to the authority" fix would break that working
+     * configuration. Nothing is lowercased or trimmed, and the value still carries at least one
+     * path segment, which msal4j's {@code Authority.detectAuthorityType} requires.
+     *
      * @return The authority URL, with a trailing slash.
      */
     protected String getAuthorityUrl() {
-        return getAuthority() + getTenant() + "/";
+        final String authority = getAuthority();
+        final String tenant = getTenant();
+        if (StringUtil.isEmpty(tenant)) {
+            // Left byte-identical to what a blank tenant produced before. validateConfiguration
+            // refuses one on the login path, and the doubled slash it leaves behind is quoted in
+            // that method's own javadoc as the symptom an unconfigured server shows.
+            return authority + "/";
+        }
+        final String base = authority.endsWith("/") ? authority : authority + "/";
+        return base + (tenant.startsWith("/") ? tenant.substring(1) : tenant) + "/";
     }
 
     /**
