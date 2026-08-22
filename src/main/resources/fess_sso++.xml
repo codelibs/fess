@@ -11,6 +11,7 @@
 		<property name="groupCacheExpiry">600</property>
 		<property name="maxGroupCacheSize">10000</property>
 		<property name="maxGroupDepth">10</property>
+		<property name="maxConsecutiveGroupLookupFailures">3</property>
 		<property name="maxCachedAccounts">10000</property>
 		-->
 	</component>

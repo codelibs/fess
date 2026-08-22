@@ -2911,4 +2911,112 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
             fessConfig.setSystemProperty("entraid.reply.url", "");
         }
     }
+
+    /**
+     * An authenticator whose direct membership lookup hands back a fixed set of group ids without
+     * reaching Microsoft Graph, and whose parent group walk is scripted by {@code walkResult}.
+     * Every id the walk is asked for is appended to {@code walked}, so a test can tell how far the
+     * walk got as well as what it produced.
+     */
+    private EntraIdAuthenticator newAuthenticatorWithScriptedWalk(final List<String> groupIds, final List<String> walked,
+            final java.util.function.Predicate<String> walkResult, final boolean throttled) {
+        return new EntraIdAuthenticator() {
+            @Override
+            protected boolean processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final List<String> groupIdsForParentLookup, final String url) {
+                groupIdsForParentLookup.addAll(groupIds);
+                groupList.add("direct-group");
+                return true;
+            }
+
+            @Override
+            protected boolean processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+                    final String id) {
+                walked.add(id);
+                if (walkResult.test(id)) {
+                    groupList.add("parent-of-" + id);
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            protected boolean isGraphThrottled() {
+                return throttled;
+            }
+        };
+    }
+
+    @Test
+    public void test_updateMemberOf_stopsTheWalkAfterConsecutiveGraphFailures() {
+        // Graph answers /me/memberOf and then fails every getMemberGroups with something that
+        // records no backoff -- a 500/502/504, or a transport failure such as DNS, connection
+        // refused or the graphConnectTimeout/graphReadTimeout expiring. Without the bound that is
+        // one request, one waited-out timeout and one stack trace per direct group, on every
+        // login, on the shared TimeoutManager pool.
+        final List<String> walked = new ArrayList<>();
+        final EntraIdAuthenticator authenticator =
+                newAuthenticatorWithScriptedWalk(List.of("g1", "g2", "g3", "g4", "g5", "g6"), walked, id -> false, false);
+        final EntraIdUser user = newUserWithoutGraph();
+        final int before = permissionChangedCount.get();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(3, walked.size(), "the walk has to stop at maxConsecutiveGroupLookupFailures");
+        assertEquals(List.of("g1", "g2", "g3"), walked);
+        // Still applied, and still announced: a partial parent set is worth more than none, and
+        // FAILED is what tells the user their permissions fell short.
+        assertTrue(List.of(user.getGroupNames()).contains("direct-group"));
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+        assertEquals(before + 1, permissionChangedCount.get());
+    }
+
+    @Test
+    public void test_updateMemberOf_letsASuccessResetTheFailureCounter() {
+        // Consecutive, not total: one group id that is permanently broken -- deleted, or one the
+        // application has no permission for -- must not stop the rest of the walk.
+        final List<String> walked = new ArrayList<>();
+        final EntraIdAuthenticator authenticator = newAuthenticatorWithScriptedWalk(List.of("g1", "g2", "g3", "g4", "g5", "g6"), walked,
+                id -> "g3".equals(id) || "g6".equals(id), false);
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(6, walked.size(), "a success between failures has to clear the counter");
+        assertTrue(List.of(user.getGroupNames()).contains("parent-of-g3"));
+        assertTrue(List.of(user.getGroupNames()).contains("parent-of-g6"));
+        // Some parents were still missed, so the user is not fully resolved.
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+    }
+
+    @Test
+    public void test_updateMemberOf_doesNotCountAThrottledSkipTowardsTheBound() {
+        // A lookup skipped for the tenant-wide backoff never reaches Graph, so it costs nothing
+        // and the backoff already bounds it. Counting it would end the walk -- and log the WARN --
+        // on every login for as long as the throttle lasts, buying nothing.
+        final List<String> walked = new ArrayList<>();
+        final EntraIdAuthenticator authenticator =
+                newAuthenticatorWithScriptedWalk(List.of("g1", "g2", "g3", "g4", "g5", "g6"), walked, id -> false, true);
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(6, walked.size(), "a throttled skip must not consume the bound");
+        assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+    }
+
+    @Test
+    public void test_updateMemberOf_honoursAConfiguredFailureBound() {
+        // The bound is a fess_sso++.xml property, so an operator can widen it for a tenant whose
+        // groups genuinely fail one by one, or narrow it to 1 to give up at the first failure.
+        final List<String> walked = new ArrayList<>();
+        final EntraIdAuthenticator authenticator =
+                newAuthenticatorWithScriptedWalk(List.of("g1", "g2", "g3", "g4", "g5", "g6"), walked, id -> false, false);
+        authenticator.setMaxConsecutiveGroupLookupFailures(1);
+        final EntraIdUser user = newUserWithoutGraph();
+
+        authenticator.updateMemberOf(user);
+
+        assertEquals(1, walked.size());
+    }
 }
