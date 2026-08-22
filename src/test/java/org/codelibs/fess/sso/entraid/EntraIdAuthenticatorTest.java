@@ -22,6 +22,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2813,5 +2814,101 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         }
 
         assertEquals(FessUser.PermissionState.FAILED, user.getPermissionState());
+    }
+
+    /**
+     * Sets the authority and the tenant, reads the joined value and restores both. Both keys are
+     * written back as "" rather than removed because getSystemProperty keeps them for the life of
+     * the container; the class asks for a one-time container so that stays inside this class.
+     */
+    private String authorityUrlOf(final String authority, final String tenant) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            fessConfig.setSystemProperty("entraid.authority", authority);
+            fessConfig.setSystemProperty("entraid.tenant", tenant);
+            return authenticator.getAuthorityUrl();
+        } finally {
+            fessConfig.setSystemProperty("entraid.authority", "");
+            fessConfig.setSystemProperty("entraid.tenant", "");
+        }
+    }
+
+    @Test
+    public void test_getAuthorityUrl_keepsASlashTerminatedAuthorityByteIdentical() {
+        // The normal case, and the shape DEFAULT_AUTHORITY has. It must not move.
+        assertEquals("https://login.microsoftonline.com/contoso.onmicrosoft.com/",
+                authorityUrlOf("https://login.microsoftonline.com/", "contoso.onmicrosoft.com"));
+    }
+
+    @Test
+    public void test_getAuthorityUrl_insertsTheMissingSeparator() {
+        // https://login.microsoftonline.com is how the endpoint is written everywhere it is
+        // documented, so an admin typing it without the trailing slash is the expected mistake.
+        // Concatenated raw it produced login.microsoftonline.comcontoso.onmicrosoft.com -- one
+        // bogus hostname -- and the browser got NXDOMAIN.
+        assertEquals("https://login.microsoftonline.com/contoso.onmicrosoft.com/",
+                authorityUrlOf("https://login.microsoftonline.com", "contoso.onmicrosoft.com"));
+    }
+
+    @Test
+    public void test_getAuthorityUrl_leavesASlashPrefixedTenantAlone() {
+        // A slashless authority plus a slash-prefixed tenant already joins correctly today. A fix
+        // that always appends a slash to the authority would break this working configuration.
+        assertEquals("https://login.microsoftonline.com/contoso.onmicrosoft.com/",
+                authorityUrlOf("https://login.microsoftonline.com", "/contoso.onmicrosoft.com"));
+    }
+
+    @Test
+    public void test_getAuthorityUrl_collapsesADoubledSeparator() {
+        assertEquals("https://login.microsoftonline.com/contoso.onmicrosoft.com/",
+                authorityUrlOf("https://login.microsoftonline.com/", "/contoso.onmicrosoft.com"));
+    }
+
+    @Test
+    public void test_getAuthorityUrl_leavesABlankTenantByteIdentical() {
+        // validateConfiguration refuses a blank tenant before any of this is reached on the login
+        // path, and the doubled slash below is the symptom its own javadoc quotes. Normalising it
+        // here would only change a URL an operator has already been told about.
+        assertEquals("https://login.microsoftonline.com//", authorityUrlOf("https://login.microsoftonline.com/", ""));
+        assertEquals("https://login.microsoftonline.com/", authorityUrlOf("https://login.microsoftonline.com", ""));
+    }
+
+    @Test
+    public void test_getAuthorityUrl_doesNotLowercaseTheAuthority() {
+        assertEquals("https://Login.MicrosoftOnline.com/Contoso.onmicrosoft.com/",
+                authorityUrlOf("https://Login.MicrosoftOnline.com", "Contoso.onmicrosoft.com"));
+    }
+
+    @Test
+    public void test_getAuthUrl_separatesASlashlessAuthorityFromTheTenant() {
+        // Pins the whole authorization URL, not just the join: the failure was silent because the
+        // URL is only logged at debug level, so the browser was the first thing to see it.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
+        try {
+            fessConfig.setSystemProperty("entraid.authority", "https://login.microsoftonline.com");
+            fessConfig.setSystemProperty("entraid.tenant", "contoso.onmicrosoft.com");
+            fessConfig.setSystemProperty("entraid.client.id", "11111111-1111-1111-1111-111111111111");
+            fessConfig.setSystemProperty("entraid.reply.url", "https://fess.example.com/sso/");
+
+            final String authUrl = authenticator.getAuthUrl(newAuthUrlRequest());
+
+            final String expected =
+                    "https://login.microsoftonline.com/contoso.onmicrosoft.com/oauth2/v2.0/authorize" + "?response_type=code&scope="
+                            + URLEncoder.encode("openid profile offline_access https://graph.microsoft.com/.default",
+                                    StandardCharsets.UTF_8)
+                            + "&response_mode=query&redirect_uri="
+                            + URLEncoder.encode("https://fess.example.com/sso/", StandardCharsets.UTF_8)
+                            + "&client_id=11111111-1111-1111-1111-111111111111";
+            // state and nonce are random per call; everything before them is fixed.
+            assertEquals(expected, authUrl.replaceFirst("&state=.*$", ""));
+        } finally {
+            fessConfig.setSystemProperty("entraid.authority", "");
+            fessConfig.setSystemProperty("entraid.tenant", "");
+            fessConfig.setSystemProperty("entraid.client.id", "");
+            fessConfig.setSystemProperty("entraid.reply.url", "");
+        }
     }
 }
