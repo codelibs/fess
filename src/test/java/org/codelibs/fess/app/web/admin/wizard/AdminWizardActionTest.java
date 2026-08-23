@@ -42,7 +42,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,storage,s3,gcs";
+                return "file,smb,smb1,ftp,s3,gcs";
             }
         });
         final ProtocolHelper protocolHelper = new ProtocolHelper();
@@ -99,12 +99,6 @@ public class AdminWizardActionTest extends UnitFessTestCase {
     public void test_convertCrawlingPath_ftp_protocol() {
         assertEquals("ftp://ftp.example.com/path", wizardAction.convertCrawlingPath("ftp://ftp.example.com/path"));
         assertEquals("ftp://192.168.1.1/files", wizardAction.convertCrawlingPath("ftp://192.168.1.1/files"));
-    }
-
-    @Test
-    public void test_convertCrawlingPath_storage_protocol() {
-        assertEquals("storage://container/path", wizardAction.convertCrawlingPath("storage://container/path"));
-        assertEquals("storage://bucket/folder/file.txt", wizardAction.convertCrawlingPath("storage://bucket/folder/file.txt"));
     }
 
     @Test

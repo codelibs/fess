@@ -98,7 +98,7 @@ public class GsaConfigParser extends DefaultHandler {
     protected String[] webProtocols = { "http:", "https:" };
 
     /** Array of supported file protocols for URL classification. */
-    protected String[] fileProtocols = { "file:", "smb:", "smb1:", "ftp:", "storage:" };
+    protected String[] fileProtocols = { "file:", "smb:", "smb1:", "ftp:" };
 
     /** Queue to track the current XML element hierarchy during parsing. */
     protected LinkedList<String> tagQueue;

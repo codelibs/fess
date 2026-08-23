@@ -46,7 +46,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,storage,s3,gcs";
+                return "file,smb,smb1,ftp,s3,gcs";
             }
 
             @Override
@@ -161,10 +161,6 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
 
         url = "file://example.com/test%E3%81%82.txt";
-        exp = "testあ.txt";
-        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
-
-        url = "storage://example.com/test%E3%81%82.txt";
         exp = "testあ.txt";
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
 
