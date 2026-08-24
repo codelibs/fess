@@ -111,7 +111,9 @@
 				<include name="reindex/httpcore5-*" />
 				<include name="reindex/slf4j-api-*" />
 				<include name="transport-grpc/failureaccess-*" />
+				<include name="transport-grpc/grpc-*" />
 				<include name="transport-grpc/guava-*" />
+				<include name="transport-grpc/perfmark-api-*" />
 			</fileset>
 		</delete>
 	</target>
