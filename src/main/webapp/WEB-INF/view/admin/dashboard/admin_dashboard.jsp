@@ -16,7 +16,7 @@ ${fe:html(true)}
 
     <main class="content-wrapper position-relative">
         <iframe class="w-100 h-100 position-absolute" style="border: 0;"
-                src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>"
+                src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>?lang=${f:u(kopfLang)}"
                 title="<la:message key="labels.dashboard_plugin" />"></iframe>
     </main>
 

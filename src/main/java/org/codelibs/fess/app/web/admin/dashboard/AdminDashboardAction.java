@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.dashboard;
 
+import java.util.Locale;
+
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.api.engine.SearchEngineApiManager;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -75,6 +77,14 @@ public class AdminDashboardAction extends FessAdminAction {
         searchEngineApiManager.saveToken();
         return asHtml(path_AdminDashboard_AdminDashboardJsp).renderWith(data -> {
             RenderDataUtil.register(data, "serverPath", searchEngineApiManager.getServerPath());
+            // kopf renders in an iframe, which is a separate document and so
+            // inherits nothing from this page. The locale has to be handed over
+            // explicitly: the plugin cannot re-derive it, because Accept-Language
+            // and the browser_lang parameter can disagree with each other.
+            // Null-checked as FessSearchAction does: the dashboard must not fail
+            // to render over a locale it could not resolve.
+            final Locale locale = requestManager.getUserLocale();
+            RenderDataUtil.register(data, "kopfLang", (locale != null ? locale : Locale.ENGLISH).toLanguageTag());
         });
     }
 
