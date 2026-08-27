@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.helper.jprop.ObjectiveProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
@@ -376,6 +383,70 @@ public class FessConfigImplTest extends UnitFessTestCase {
             assertEquals(dottedValue, value);
         } finally {
             System.clearProperty(Constants.FESS_CONFIG_PREFIX + dottedKey);
+        }
+    }
+
+    // ===================================================================================
+    //                                                              Bundled Default Config
+    //                                                              ======================
+    /** Stands in for the fess_config.properties an upgraded installation kept from its previous version. */
+    private static final String PARTIAL_CONFIG_PATH = "test_fess_config_partial.properties";
+
+    /** A key the partial file above does not carry, as a key added by a newer version would not be. */
+    private static final String KEY_ONLY_IN_BUNDLED_DEFAULT = "authentication.admin.users.ignore.case";
+
+    private ObjectiveProperties loadPartialProperties() {
+        final ObjectiveProperties prop = fessConfig.newObjectiveProperties(PARTIAL_CONFIG_PATH, (key, value) -> value);
+        prop.encodeAsUTF8();
+        prop.load();
+        return prop;
+    }
+
+    private Properties loadShippedConfig() throws Exception {
+        final Properties props = new Properties();
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("fess_config.properties");
+                Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+            props.load(reader);
+        }
+        return props;
+    }
+
+    // A key the deployed file does carry keeps its value; the bundled defaults never override it.
+    @Test
+    public void test_bundledDefault_deployedValueWins() {
+        assertEquals("Test Domain Title", loadPartialProperties().get("domain.title"));
+    }
+
+    // A key the deployed file is missing resolves to the value this build ships, which is what
+    // keeps an installation running when fess_config.properties was not merged during an upgrade.
+    @Test
+    public void test_bundledDefault_fallsBackForMissingKey() throws Exception {
+        final String shippedValue = loadShippedConfig().getProperty(KEY_ONLY_IN_BUNDLED_DEFAULT);
+        assertNotNull("The key this test reads no longer exists in fess_config.properties", shippedValue);
+        assertEquals(shippedValue.trim(), loadPartialProperties().get(KEY_ONLY_IN_BUNDLED_DEFAULT));
+    }
+
+    // The system property channel stays ahead of the bundled defaults, so an administrator can
+    // still pin a value for a key the deployed file has not caught up with.
+    @Test
+    public void test_bundledDefault_systemPropertyWins() {
+        System.setProperty(Constants.FESS_CONFIG_PREFIX + KEY_ONLY_IN_BUNDLED_DEFAULT, "true");
+        try {
+            assertEquals("true", loadPartialProperties().get(KEY_ONLY_IN_BUNDLED_DEFAULT));
+        } finally {
+            System.clearProperty(Constants.FESS_CONFIG_PREFIX + KEY_ONLY_IN_BUNDLED_DEFAULT);
+        }
+    }
+
+    // A key no channel knows still fails, so a genuine typo does not read as a configured value.
+    @Test
+    public void test_bundledDefault_unknownKeyStillThrows() {
+        final ObjectiveProperties prop = loadPartialProperties();
+        try {
+            prop.get("nonexistent.property.for.bundled.default.test");
+            fail("Should throw ConfigPropertyNotFoundException");
+        } catch (final ConfigPropertyNotFoundException e) {
+            // expected
         }
     }
 }
