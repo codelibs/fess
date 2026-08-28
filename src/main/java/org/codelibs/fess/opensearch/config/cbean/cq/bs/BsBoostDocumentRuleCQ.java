@@ -816,6 +816,230 @@ public abstract class BsBoostDocumentRuleCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setScriptType_Equal(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Equal(String scriptType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setScriptType_Term(scriptType, opLambda);
+    }
+
+    public void setScriptType_Term(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Term(String scriptType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_NotEqual(String scriptType) {
+        setScriptType_NotTerm(scriptType, null);
+    }
+
+    public void setScriptType_NotTerm(String scriptType) {
+        setScriptType_NotTerm(scriptType, null);
+    }
+
+    public void setScriptType_NotEqual(String scriptType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setScriptType_NotTerm(scriptType, opLambda);
+    }
+
+    public void setScriptType_NotTerm(String scriptType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setScriptType_Term(scriptType), opLambda);
+    }
+
+    public void setScriptType_Terms(Collection<String> scriptTypeList) {
+        setScriptType_Terms(scriptTypeList, null);
+    }
+
+    public void setScriptType_Terms(Collection<String> scriptTypeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("scriptType", scriptTypeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_InScope(Collection<String> scriptTypeList) {
+        setScriptType_Terms(scriptTypeList, null);
+    }
+
+    public void setScriptType_InScope(Collection<String> scriptTypeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setScriptType_Terms(scriptTypeList, opLambda);
+    }
+
+    public void setScriptType_Match(String scriptType) {
+        setScriptType_Match(scriptType, null);
+    }
+
+    public void setScriptType_Match(String scriptType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_MatchPhrase(String scriptType) {
+        setScriptType_MatchPhrase(scriptType, null);
+    }
+
+    public void setScriptType_MatchPhrase(String scriptType, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_MatchPhrasePrefix(String scriptType) {
+        setScriptType_MatchPhrasePrefix(scriptType, null);
+    }
+
+    public void setScriptType_MatchPhrasePrefix(String scriptType, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Fuzzy(String scriptType) {
+        setScriptType_Fuzzy(scriptType, null);
+    }
+
+    public void setScriptType_Fuzzy(String scriptType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Prefix(String scriptType) {
+        setScriptType_Prefix(scriptType, null);
+    }
+
+    public void setScriptType_Prefix(String scriptType, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Wildcard(String scriptType) {
+        setScriptType_Wildcard(scriptType, null);
+    }
+
+    public void setScriptType_Wildcard(String scriptType, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Regexp(String scriptType) {
+        setScriptType_Regexp(scriptType, null);
+    }
+
+    public void setScriptType_Regexp(String scriptType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_SpanTerm(String scriptType) {
+        setScriptType_SpanTerm("scriptType", null);
+    }
+
+    public void setScriptType_SpanTerm(String scriptType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_GreaterThan(String scriptType) {
+        setScriptType_GreaterThan(scriptType, null);
+    }
+
+    public void setScriptType_GreaterThan(String scriptType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = scriptType;
+        RangeQueryBuilder builder = regRangeQ("scriptType", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_LessThan(String scriptType) {
+        setScriptType_LessThan(scriptType, null);
+    }
+
+    public void setScriptType_LessThan(String scriptType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = scriptType;
+        RangeQueryBuilder builder = regRangeQ("scriptType", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_GreaterEqual(String scriptType) {
+        setScriptType_GreaterEqual(scriptType, null);
+    }
+
+    public void setScriptType_GreaterEqual(String scriptType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = scriptType;
+        RangeQueryBuilder builder = regRangeQ("scriptType", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_LessEqual(String scriptType) {
+        setScriptType_LessEqual(scriptType, null);
+    }
+
+    public void setScriptType_LessEqual(String scriptType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = scriptType;
+        RangeQueryBuilder builder = regRangeQ("scriptType", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Exists() {
+        setScriptType_Exists(null);
+    }
+
+    public void setScriptType_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setScriptType_CommonTerms(String scriptType) {
+        setScriptType_CommonTerms(scriptType, null);
+    }
+
+    @Deprecated
+    public void setScriptType_CommonTerms(String scriptType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsBoostDocumentRuleCQ addOrderBy_ScriptType_Asc() {
+        regOBA("scriptType");
+        return this;
+    }
+
+    public BsBoostDocumentRuleCQ addOrderBy_ScriptType_Desc() {
+        regOBD("scriptType");
+        return this;
+    }
+
     public void setSortOrder_Equal(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }

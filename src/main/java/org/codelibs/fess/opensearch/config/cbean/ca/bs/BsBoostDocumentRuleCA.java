@@ -603,6 +603,139 @@ public abstract class BsBoostDocumentRuleCA extends EsAbstractConditionAggregati
         }
     }
 
+    public void setScriptType_Terms() {
+        setScriptType_Terms(null);
+    }
+
+    public void setScriptType_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setScriptType_Terms("scriptType", opLambda, null);
+    }
+
+    public void setScriptType_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        setScriptType_Terms("scriptType", opLambda, aggsLambda);
+    }
+
+    public void setScriptType_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            BoostDocumentRuleCA ca = new BoostDocumentRuleCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setScriptType_SignificantTerms() {
+        setScriptType_SignificantTerms(null);
+    }
+
+    public void setScriptType_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setScriptType_SignificantTerms("scriptType", opLambda, null);
+    }
+
+    public void setScriptType_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        setScriptType_SignificantTerms("scriptType", opLambda, aggsLambda);
+    }
+
+    public void setScriptType_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            BoostDocumentRuleCA ca = new BoostDocumentRuleCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setScriptType_IpRange() {
+        setScriptType_IpRange(null);
+    }
+
+    public void setScriptType_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setScriptType_IpRange("scriptType", opLambda, null);
+    }
+
+    public void setScriptType_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        setScriptType_IpRange("scriptType", opLambda, aggsLambda);
+    }
+
+    public void setScriptType_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            BoostDocumentRuleCA ca = new BoostDocumentRuleCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setScriptType_Count() {
+        setScriptType_Count(null);
+    }
+
+    public void setScriptType_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setScriptType_Count("scriptType", opLambda);
+    }
+
+    public void setScriptType_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Cardinality() {
+        setScriptType_Cardinality(null);
+    }
+
+    public void setScriptType_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setScriptType_Cardinality("scriptType", opLambda);
+    }
+
+    public void setScriptType_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Missing() {
+        setScriptType_Missing(null);
+    }
+
+    public void setScriptType_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setScriptType_Missing("scriptType", opLambda, null);
+    }
+
+    public void setScriptType_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        setScriptType_Missing("scriptType", opLambda, aggsLambda);
+    }
+
+    public void setScriptType_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsBoostDocumentRuleCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            BoostDocumentRuleCA ca = new BoostDocumentRuleCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setSortOrder_Avg() {
         setSortOrder_Avg(null);
     }

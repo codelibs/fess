@@ -188,6 +188,10 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
+        public void columnScriptType() {
+            doColumn("scriptType");
+        }
+
         public void columnSortOrder() {
             doColumn("sortOrder");
         }

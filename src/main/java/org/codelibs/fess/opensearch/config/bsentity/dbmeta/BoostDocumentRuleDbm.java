@@ -85,6 +85,8 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
                 (et, vl) -> ((BoostDocumentRule) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getCreatedTime(),
                 (et, vl) -> ((BoostDocumentRule) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getScriptType(),
+                (et, vl) -> ((BoostDocumentRule) et).setScriptType(DfTypeUtil.toString(vl)), "scriptType");
         setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getSortOrder(),
                 (et, vl) -> ((BoostDocumentRule) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
         setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getUpdatedBy(),
@@ -135,6 +137,8 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnScriptType = cci("scriptType", "scriptType", null, null, String.class, "scriptType", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
@@ -154,6 +158,10 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnScriptType() {
+        return _columnScriptType;
     }
 
     public ColumnInfo columnSortOrder() {
@@ -177,6 +185,7 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
         ls.add(columnBoostExpr());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnScriptType());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());

@@ -13,6 +13,9 @@
           "createdTime" : {
             "type" : "long"
           },
+          "scriptType" : {
+            "type" : "keyword"
+          },
           "sortOrder" : {
             "type" : "integer"
           },
