@@ -272,6 +272,27 @@
 							</target>
 						</configuration>
 					</execution>
+					<execution>
+						<!-- The plugins the distribution bundles. This is a separate execution because
+						     the fetch must not run during mvn test: the plugin release it downloads is
+						     published on its own cadence and may not exist yet. It is bound to
+						     prepare-package so it runs after install.jars, which empties WEB-INF/plugin
+						     and which the plugin-level target below runs. combine.self="override" keeps
+						     the plugin-level target out of this one. Maven merges it into every execution
+						     otherwise, and what survives that merge depends on how Xpp3Dom pairs
+						     same-named children: today this ant task wins and the plugin-level ones are
+						     dropped, but renaming or reordering the tasks below changes that silently. -->
+						<id>install-webapp-plugins</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target combine.self="override">
+								<ant antfile="${basedir}/deps.xml" target="install.webapp.plugins" />
+							</target>
+						</configuration>
+					</execution>
 				</executions>
 				<configuration>
 					<target>
