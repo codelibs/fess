@@ -17,13 +17,17 @@ package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
+import org.codelibs.fess.script.ScriptEngine;
+import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -34,6 +38,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
         pathMappingHelper = new PathMappingHelper();
         pathMappingHelper.init();
     }
@@ -401,5 +406,110 @@ public class PathMappingHelperTest extends UnitFessTestCase {
 
         final String url = "file:///home/user with spaces/";
         assertEquals("http://localhost/user with spaces/", pathMappingHelper.replaceUrl(sessionId, url));
+    }
+
+    @Test
+    public void test_replaceUrl_javascriptPrefix() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add("javascript", (template, paramMap) -> "js:" + paramMap.get("url"));
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("^http://example.com/");
+        pathMapping.setReplacement("javascript:url");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("js:http://example.com/a.html", helper.replaceUrl(list, "http://example.com/a.html"));
+    }
+
+    @Test
+    public void test_replaceUrl_unknownPrefixIsPlainReplacement() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("^http://example.com/");
+        pathMapping.setReplacement("https://example.net/");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("https://example.net/a.html", helper.replaceUrl(list, "http://example.com/a.html"));
+    }
+
+    @Test
+    public void test_replaceUrl_groovyPrefix() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add("groovy", (template, paramMap) -> "groovy:" + paramMap.get("url"));
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("^http://example.com/");
+        pathMapping.setReplacement("groovy:url");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("groovy:http://example.com/a.html", helper.replaceUrl(list, "http://example.com/a.html"));
+    }
+
+    @Test
+    public void test_replaceUrl_missingGroovyEngineIsPlainReplacement() {
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("^http://example.com/");
+        pathMapping.setReplacement("groovy:url");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("groovy:urla.html", helper.replaceUrl(list, "http://example.com/a.html"));
+    }
+
+    @Test
+    public void test_replaceUrl_plainReplacementWhenEngineLookupFails() {
+        ComponentUtil.register(new ScriptEngineFactory() {
+            @Override
+            public boolean hasScriptEngine(final String name) {
+                throw new IllegalStateException("no script engine registry");
+            }
+        }, "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("ftp:");
+        pathMapping.setReplacement("file:");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("file:/home/taro/test.txt", helper.replaceUrl(list, "ftp:/home/taro/test.txt"));
+    }
+
+    @Test
+    public void test_replaceUrl_engineResolvedOncePerReplacement() {
+        final AtomicInteger lookupCount = new AtomicInteger();
+        final ScriptEngineFactory factory = new ScriptEngineFactory() {
+            @Override
+            public ScriptEngine getScriptEngine(final String name) {
+                lookupCount.incrementAndGet();
+                return super.getScriptEngine(name);
+            }
+        };
+        factory.add("javascript", (template, paramMap) -> "js:" + paramMap.get("url"));
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("^http://example.com/");
+        pathMapping.setReplacement("javascript:url");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("js:http://example.com/a.html", helper.replaceUrl(list, "http://example.com/a.html"));
+        assertEquals("js:http://example.com/b.html", helper.replaceUrl(list, "http://example.com/b.html"));
+        assertEquals(1, lookupCount.get());
     }
 }
