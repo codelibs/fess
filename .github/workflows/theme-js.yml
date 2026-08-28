@@ -10,9 +10,6 @@ on:
     - master
     - "*.x"
   pull_request:
-    branches:
-    - master
-    - "*.x"
   workflow_dispatch:
 
 jobs:
