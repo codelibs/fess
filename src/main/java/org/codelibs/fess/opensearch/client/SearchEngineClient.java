@@ -123,6 +123,7 @@ import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.ClearScrollRequest;
 import org.opensearch.action.search.ClearScrollRequestBuilder;
 import org.opensearch.action.search.ClearScrollResponse;
+import org.opensearch.action.search.CreatePitAction;
 import org.opensearch.action.search.CreatePitRequest;
 import org.opensearch.action.search.CreatePitResponse;
 import org.opensearch.action.search.DeletePitRequest;
@@ -170,8 +171,10 @@ import org.opensearch.search.SearchHits;
 import org.opensearch.search.aggregations.AggregationBuilders;
 import org.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.opensearch.search.builder.PointInTimeBuilder;
 import org.opensearch.search.collapse.CollapseBuilder;
 import org.opensearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.threadpool.ThreadPool;
 import org.opensearch.transport.client.AdminClient;
 import org.opensearch.transport.client.Client;
@@ -224,19 +227,19 @@ public class SearchEngineClient implements Client {
     /** Map of configuration types to their respective configuration files */
     protected Map<String, List<String>> configListMap = new HashMap<>();
 
-    /** Scroll timeout for search operations */
+    /** Keep-alive of the point in time that search operations page over */
     protected String scrollForSearch = "1m";
 
     /** Batch size for delete operations */
     protected int sizeForDelete = 100;
 
-    /** Scroll timeout for delete operations */
+    /** Keep-alive of the point in time that delete operations page over */
     protected String scrollForDelete = "1m";
 
     /** Batch size for update operations */
     protected int sizeForUpdate = 100;
 
-    /** Scroll timeout for update operations */
+    /** Keep-alive of the point in time that update operations page over */
     protected String scrollForUpdate = "1m";
 
     /** Maximum retry attempts for configuration synchronization status checks */
@@ -1669,48 +1672,26 @@ public class SearchEngineClient implements Client {
             final BiFunction<UpdateRequestBuilder, SearchHit, UpdateRequestBuilder> builder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        SearchResponse response = option.apply(client.prepareSearch(index)
-                .setScroll(scrollForUpdate)
-                .setSize(sizeForUpdate)
-                .setPreference(Constants.SEARCH_PREFERENCE_LOCAL)).execute().actionGet(fessConfig.getIndexScrollSearchTimeout());
+        final SearchRequestBuilder searchRequestBuilder =
+                option.apply(client.prepareSearch().setSize(sizeForUpdate).setPreference(Constants.SEARCH_PREFERENCE_LOCAL));
 
-        int count = 0;
-        String scrollId = response.getScrollId();
-        try {
-            while (scrollId != null) {
-                final SearchHits searchHits = response.getHits();
-                final SearchHit[] hits = searchHits.getHits();
-                if (hits.length == 0) {
-                    break;
+        final long[] count = { 0 };
+        pitSearch(index, scrollForUpdate, fessConfig.getIndexScrollSearchTimeout(), searchRequestBuilder, response -> {
+            final BulkRequestBuilder bulkRequest = client.prepareBulk();
+            for (final SearchHit hit : response.getHits().getHits()) {
+                final UpdateRequestBuilder requestBuilder = builder.apply(client.prepareUpdate().setIndex(index).setId(hit.getId()), hit);
+                if (requestBuilder != null) {
+                    bulkRequest.add(requestBuilder);
                 }
-
-                final BulkRequestBuilder bulkRequest = client.prepareBulk();
-                for (final SearchHit hit : hits) {
-                    final UpdateRequestBuilder requestBuilder =
-                            builder.apply(client.prepareUpdate().setIndex(index).setId(hit.getId()), hit);
-                    if (requestBuilder != null) {
-                        bulkRequest.add(requestBuilder);
-                    }
-                    count++;
-                }
-                final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
-                if (bulkResponse.hasFailures()) {
-                    throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
-                }
-
-                response = client.prepareSearchScroll(scrollId)
-                        .setScroll(scrollForUpdate)
-                        .execute()
-                        .actionGet(fessConfig.getIndexBulkTimeout());
-                if (!scrollId.equals(response.getScrollId())) {
-                    deleteScrollContext(scrollId);
-                }
-                scrollId = response.getScrollId();
+                count[0]++;
             }
-        } finally {
-            deleteScrollContext(scrollId);
-        }
-        return count;
+            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
+            if (bulkResponse.hasFailures()) {
+                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+            }
+            return true;
+        });
+        return count[0];
     }
 
     /**
@@ -1723,60 +1704,94 @@ public class SearchEngineClient implements Client {
     public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        SearchResponse response = client.prepareSearch(index)
-                .setScroll(scrollForDelete)
+        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch()
                 .setSize(sizeForDelete)
                 .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null)
                 .setQuery(queryBuilder)
-                .setPreference(Constants.SEARCH_PREFERENCE_LOCAL)
-                .execute()
-                .actionGet(fessConfig.getIndexScrollSearchTimeout());
+                .setPreference(Constants.SEARCH_PREFERENCE_LOCAL);
 
-        int count = 0;
-        String scrollId = response.getScrollId();
-        try {
-            while (scrollId != null) {
-                final SearchHits searchHits = response.getHits();
-                final SearchHit[] hits = searchHits.getHits();
-                if (hits.length == 0) {
-                    break;
-                }
-
-                final BulkRequestBuilder bulkRequest = client.prepareBulk();
-                for (final SearchHit hit : hits) {
-                    bulkRequest.add(client.prepareDelete().setIndex(index).setId(hit.getId()));
-                    count++;
-                }
-                final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
-                if (bulkResponse.hasFailures()) {
-                    throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
-                }
-
-                response = client.prepareSearchScroll(scrollId)
-                        .setScroll(scrollForDelete)
-                        .execute()
-                        .actionGet(fessConfig.getIndexBulkTimeout());
-                if (!scrollId.equals(response.getScrollId())) {
-                    deleteScrollContext(scrollId);
-                }
-                scrollId = response.getScrollId();
+        final long[] count = { 0 };
+        pitSearch(index, scrollForDelete, fessConfig.getIndexScrollSearchTimeout(), searchRequestBuilder, response -> {
+            final BulkRequestBuilder bulkRequest = client.prepareBulk();
+            for (final SearchHit hit : response.getHits().getHits()) {
+                bulkRequest.add(client.prepareDelete().setIndex(index).setId(hit.getId()));
+                count[0]++;
             }
-        } finally {
-            deleteScrollContext(scrollId);
-        }
-        return count;
+            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
+            if (bulkResponse.hasFailures()) {
+                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+            }
+            return true;
+        });
+        return count[0];
     }
 
     /**
-     * Deletes a scroll context to free resources.
+     * Pages over every document the given search matches, using a point in time and
+     * {@code search_after}.
      *
-     * @param scrollId the scroll ID to delete
+     * <p>A {@code _shard_doc} tiebreaker is appended to whatever sort the caller set, which makes
+     * the order total so that {@code search_after} can walk it without skipping or repeating a
+     * document. That sort field requires an OpenSearch 3.x server; 2.x does not implement it.</p>
+     *
+     * <p>A point in time carries the indices, routing and preference itself, and a search that
+     * repeats any of them is rejected with a 400. Over HTTP such a 400 on a request with a body
+     * does not surface as an error, it hangs. So the search is issued without an index and the
+     * routing and preference are moved onto the create request.</p>
+     *
+     * @param index the index the point in time is opened on
+     * @param keepAlive how long the point in time stays alive; every page extends it
+     * @param searchTimeout how long to wait for each page
+     * @param builder the search to page over, already configured by the caller
+     * @param pageHandler called once per page; returning false ends the walk
      */
-    protected void deleteScrollContext(final String scrollId) {
-        if (scrollId != null) {
-            client.prepareClearScroll()
-                    .addScrollId(scrollId)
-                    .execute(wrap(res -> {}, e -> logger.warn("Failed to clear the scroll context.", e)));
+    protected void pitSearch(final String index, final String keepAlive, final String searchTimeout, final SearchRequestBuilder builder,
+            final BooleanFunction<SearchResponse> pageHandler) {
+        builder.addSort(SortBuilders.shardDocSort());
+
+        final SearchRequest request = builder.request();
+        final TimeValue keepAliveValue = TimeValue.parseTimeValue(keepAlive, "keepAlive");
+        final CreatePitRequest createPitRequest = new CreatePitRequest(keepAliveValue, true, index);
+        if (request.preference() != null) {
+            createPitRequest.setPreference(request.preference());
+            request.preference(null);
+        }
+        if (request.routing() != null) {
+            createPitRequest.setRouting(request.routing());
+            request.routing((String) null);
+        }
+        final String pitId = client.execute(CreatePitAction.INSTANCE, createPitRequest).actionGet(searchTimeout).getId();
+        try {
+            builder.setPointInTime(new PointInTimeBuilder(pitId).setKeepAlive(keepAliveValue));
+            Object[] searchAfter = null;
+            while (true) {
+                if (searchAfter != null) {
+                    builder.searchAfter(searchAfter);
+                }
+                final SearchResponse response = builder.execute().actionGet(searchTimeout);
+                final SearchHit[] hits = response.getHits().getHits();
+                if (hits.length == 0) {
+                    break;
+                }
+                if (!pageHandler.apply(response)) {
+                    break;
+                }
+                searchAfter = hits[hits.length - 1].getSortValues();
+            }
+        } finally {
+            deletePitContext(pitId);
+        }
+    }
+
+    /**
+     * Releases a point in time. Failures are logged rather than propagated, so that releasing in a
+     * finally block cannot mask an exception that is already unwinding.
+     *
+     * @param pitId the point in time to release
+     */
+    protected void deletePitContext(final String pitId) {
+        if (pitId != null) {
+            client.deletePits(new DeletePitRequest(pitId), wrap(res -> {}, e -> logger.warn("Failed to delete the point in time.", e)));
         }
     }
 
@@ -1878,52 +1893,31 @@ public class SearchEngineClient implements Client {
      */
     public <T> long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator, final BooleanFunction<T> cursor) {
-        long count = 0;
+        final long[] count = { 0 };
 
-        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setScroll(scrollForSearch);
+        final SearchRequestBuilder searchRequestBuilder = client.prepareSearch();
         if (condition.build(searchRequestBuilder)) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
-
-            String scrollId = null;
             try {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Query DSL: {}", searchRequestBuilder);
                 }
-                SearchResponse response = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
-
-                scrollId = response.getScrollId();
-                while (scrollId != null) {
-                    final SearchHits searchHits = response.getHits();
-                    final SearchHit[] hits = searchHits.getHits();
-                    if (hits.length == 0) {
-                        break;
-                    }
-
-                    for (final SearchHit hit : hits) {
-                        count++;
+                pitSearch(index, scrollForSearch, fessConfig.getIndexSearchTimeout(), searchRequestBuilder, response -> {
+                    for (final SearchHit hit : response.getHits().getHits()) {
+                        count[0]++;
                         if (!cursor.apply(creator.build(response, hit))) {
-                            break;
+                            return false;
                         }
                     }
-
-                    response = client.prepareSearchScroll(scrollId)
-                            .setScroll(scrollForDelete)
-                            .execute()
-                            .actionGet(fessConfig.getIndexBulkTimeout());
-                    if (!scrollId.equals(response.getScrollId())) {
-                        deleteScrollContext(scrollId);
-                    }
-                    scrollId = response.getScrollId();
-                }
+                    return true;
+                });
             } catch (final SearchPhaseExecutionException e) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query: " + searchRequestBuilder, e);
-            } finally {
-                deleteScrollContext(scrollId);
             }
         }
 
-        return count;
+        return count[0];
     }
 
     /**

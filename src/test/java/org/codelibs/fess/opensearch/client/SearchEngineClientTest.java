@@ -15,13 +15,23 @@
  */
 package org.codelibs.fess.opensearch.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.BooleanFunction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.action.search.SearchAction;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.action.search.SearchResponse;
+import org.opensearch.common.xcontent.json.JsonXContent;
+import org.opensearch.core.xcontent.DeprecationHandler;
+import org.opensearch.core.xcontent.NamedXContentRegistry;
+import org.opensearch.core.xcontent.XContentParser;
 
 public class SearchEngineClientTest extends UnitFessTestCase {
 
@@ -118,6 +128,120 @@ public class SearchEngineClientTest extends UnitFessTestCase {
             }
         }.warnUnlessOpenSearch3();
         assertEquals(0, reports.get());
+    }
+
+    /**
+     * Builds a SearchResponse holding one hit per given id, as if it came back over HTTP. Each hit
+     * carries a sort value so that the pager can derive its next search_after.
+     */
+    private SearchResponse responseWithIds(final String... ids) throws Exception {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("{\"took\":1,\"timed_out\":false,\"_shards\":{\"total\":1,\"successful\":1,\"skipped\":0,\"failed\":0},");
+        buf.append("\"hits\":{\"total\":{\"value\":").append(ids.length).append(",\"relation\":\"eq\"},\"max_score\":null,\"hits\":[");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                buf.append(',');
+            }
+            buf.append("{\"_index\":\"test\",\"_id\":\"").append(ids[i]).append("\",\"_score\":null,");
+            buf.append("\"_source\":{\"doc_id\":\"").append(ids[i]).append("\"},\"sort\":[").append(i + 1).append("]}");
+        }
+        buf.append("]}}");
+        try (XContentParser parser = JsonXContent.jsonXContent.createParser(NamedXContentRegistry.EMPTY,
+                DeprecationHandler.IGNORE_DEPRECATIONS, buf.toString())) {
+            return SearchResponse.fromXContent(parser);
+        }
+    }
+
+    /**
+     * A cursor returning false must end the whole walk, not just the current page. Before this was
+     * fixed the pager kept fetching further pages after the cursor had asked to stop.
+     */
+    @Test
+    public void test_scrollSearch_cursorReturningFalseStopsTheWalk() throws Exception {
+        final AtomicInteger pagesOffered = new AtomicInteger(0);
+        final SearchResponse page1 = responseWithIds("1", "2");
+        final SearchResponse page2 = responseWithIds("3", "4");
+        final SearchEngineClient client = new SearchEngineClient() {
+            {
+                // scrollSearch builds its request through the delegate; point it back at this
+                // instance so the overridden prepareSearch below is the one that answers.
+                this.client = this;
+            }
+
+            @Override
+            public SearchRequestBuilder prepareSearch(final String... indices) {
+                // The pager is stubbed out below, so the builder is never executed.
+                return new SearchRequestBuilder(null, SearchAction.INSTANCE);
+            }
+
+            @Override
+            protected void pitSearch(final String index, final String keepAlive, final String searchTimeout,
+                    final SearchRequestBuilder builder, final BooleanFunction<SearchResponse> pageHandler) {
+                for (final SearchResponse page : new SearchResponse[] { page1, page2 }) {
+                    pagesOffered.incrementAndGet();
+                    if (!pageHandler.apply(page)) {
+                        return;
+                    }
+                }
+            }
+        };
+
+        final List<String> seen = new ArrayList<>();
+        final long count = client.scrollSearch("test", requestBuilder -> true, (response, hit) -> hit.getSourceAsMap(),
+                (final Map<String, Object> source) -> {
+                    seen.add((String) source.get("doc_id"));
+                    return false;
+                });
+
+        assertEquals(1, pagesOffered.get());
+        assertEquals(1, seen.size());
+        assertEquals("1", seen.get(0));
+        assertEquals(1L, count);
+    }
+
+    /**
+     * A cursor that keeps returning true must be offered every page.
+     */
+    @Test
+    public void test_scrollSearch_cursorReturningTrueWalksEveryPage() throws Exception {
+        final AtomicInteger pagesOffered = new AtomicInteger(0);
+        final SearchResponse page1 = responseWithIds("1", "2");
+        final SearchResponse page2 = responseWithIds("3", "4");
+        final SearchEngineClient client = new SearchEngineClient() {
+            {
+                // scrollSearch builds its request through the delegate; point it back at this
+                // instance so the overridden prepareSearch below is the one that answers.
+                this.client = this;
+            }
+
+            @Override
+            public SearchRequestBuilder prepareSearch(final String... indices) {
+                // The pager is stubbed out below, so the builder is never executed.
+                return new SearchRequestBuilder(null, SearchAction.INSTANCE);
+            }
+
+            @Override
+            protected void pitSearch(final String index, final String keepAlive, final String searchTimeout,
+                    final SearchRequestBuilder builder, final BooleanFunction<SearchResponse> pageHandler) {
+                for (final SearchResponse page : new SearchResponse[] { page1, page2 }) {
+                    pagesOffered.incrementAndGet();
+                    if (!pageHandler.apply(page)) {
+                        return;
+                    }
+                }
+            }
+        };
+
+        final List<String> seen = new ArrayList<>();
+        final long count = client.scrollSearch("test", requestBuilder -> true, (response, hit) -> hit.getSourceAsMap(),
+                (final Map<String, Object> source) -> {
+                    seen.add((String) source.get("doc_id"));
+                    return true;
+                });
+
+        assertEquals(2, pagesOffered.get());
+        assertEquals(List.of("1", "2", "3", "4"), seen);
+        assertEquals(4L, count);
     }
 
     @Test
