@@ -204,5 +204,9 @@ map:{
     #    ; versionNoFieldName = VERSION_NO
     #}
     # - - - - - - - - - -/
+
+    # The generated classes use jakarta.annotation instead of javax.annotation.
+    # Without this the freegen task emits javax.annotation.Resource, which does not compile.
+    ; isMigrateOldJavaxToJakarta = true
 }
 # ----------------/

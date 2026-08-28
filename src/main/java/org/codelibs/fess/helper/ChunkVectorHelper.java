@@ -413,13 +413,8 @@ public class ChunkVectorHelper {
      * to bound the memory a single run holds; with it disabled a very large corpus materializes its
      * entire pending-ID set at once, so the chunk indexer JVM heap ({@code jvm.chunk.options}) may need
      * raising. The remaining pending documents stay pending and are picked up by the next (idempotent)
-     * scheduled run. The cap is enforced by throwing a private
-     * {@link ScrollLimitReachedException} from the scroll cursor rather than by returning
-     * {@code false} from it: {@code SearchEngineClient#scrollSearch} only stops iterating the
-     * <em>current</em> page when the cursor returns {@code false} and then keeps fetching further
-     * pages, so a bare {@code false} would drain the whole (potentially millions-of-pages) scroll
-     * instead of stopping it -- the throw exits the scroll immediately, with its {@code finally}
-     * still releasing the scroll context.</p>
+     * scheduled run. The cap is enforced by returning {@code false} from the cursor, which ends
+     * the walk immediately; the point in time is released either way.</p>
      *
      * @param embeddingActive whether embedding is active for this run (widens the pending query to
      *            include {@code "chunked"} upgrade documents)
@@ -433,28 +428,25 @@ public class ChunkVectorHelper {
         final int maxDocuments = getJobMaxDocumentsPerRun();
         final boolean unlimited = isUnlimitedMaxDocuments(maxDocuments);
         final List<String> idList = new ArrayList<>();
-        try {
-            searchEngineClient.scrollSearch(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
-                requestBuilder.setQuery(buildPendingQuery(embeddingActive))
-                        .setSize(SCROLL_SIZE)
-                        .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null);
-                return true;
-            }, source -> {
-                final Object idObj = source.get(fessConfig.getIndexFieldId());
-                if (idObj != null) {
-                    idList.add(idObj.toString());
-                }
-                if (!unlimited && idList.size() >= maxDocuments) {
-                    throw new ScrollLimitReachedException();
-                }
-                return true;
-            });
-        } catch (final ScrollLimitReachedException e) {
-            if (logger.isInfoEnabled()) {
-                logger.info("[ChunkVector] Reached the per-run document cap ({}); the remaining pending documents will be "
-                        + "processed on the next scheduled run.", maxDocuments);
+        searchEngineClient.scrollSearch(fessConfig.getIndexDocumentUpdateIndex(), requestBuilder -> {
+            requestBuilder.setQuery(buildPendingQuery(embeddingActive))
+                    .setSize(SCROLL_SIZE)
+                    .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null);
+            return true;
+        }, source -> {
+            final Object idObj = source.get(fessConfig.getIndexFieldId());
+            if (idObj != null) {
+                idList.add(idObj.toString());
             }
-        }
+            if (!unlimited && idList.size() >= maxDocuments) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("[ChunkVector] Reached the per-run document cap ({}); the remaining pending documents will be "
+                            + "processed on the next scheduled run.", maxDocuments);
+                }
+                return false;
+            }
+            return true;
+        });
         return idList;
     }
 
@@ -502,20 +494,6 @@ public class ChunkVectorHelper {
      */
     protected boolean isRetryFailedEnabled() {
         return Boolean.parseBoolean(ComponentUtil.getFessConfig().getSystemProperty(JOB_RETRY_FAILED_PROPERTY, "false"));
-    }
-
-    /**
-     * Internal control-flow signal thrown from {@link #scrollPendingIds(boolean)}'s scroll cursor
-     * once {@link #getJobMaxDocumentsPerRun()} document IDs have been collected, to stop the scroll
-     * early without materializing the whole corpus. Never escapes {@link #scrollPendingIds(boolean)};
-     * stack trace and suppression are disabled since it carries no diagnostic value.
-     */
-    private static final class ScrollLimitReachedException extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-
-        ScrollLimitReachedException() {
-            super(null, null, false, false);
-        }
     }
 
     /**
