@@ -30,10 +30,14 @@ public abstract class AbstractScriptEngine implements ScriptEngine {
     }
 
     /**
-     * Register this script engine.
+     * Register this script engine under its name and all of its aliases.
      */
     public void register() {
-        ComponentUtil.getScriptEngineFactory().add(getName(), this);
+        final ScriptEngineFactory factory = ComponentUtil.getScriptEngineFactory();
+        factory.add(getName(), this);
+        for (final String alias : getAliases()) {
+            factory.add(alias, this);
+        }
     }
 
     /**
@@ -41,4 +45,12 @@ public abstract class AbstractScriptEngine implements ScriptEngine {
      * @return The name of this script engine.
      */
     protected abstract String getName();
+
+    /**
+     * Get the alternative names this script engine is also registered under.
+     * @return The aliases. Empty by default.
+     */
+    protected String[] getAliases() {
+        return new String[0];
+    }
 }

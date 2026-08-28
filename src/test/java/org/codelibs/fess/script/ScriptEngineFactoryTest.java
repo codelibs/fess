@@ -209,7 +209,9 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.getScriptEngine("nonexistent");
             fail("Should throw ScriptEngineException for non-existent engine");
         } catch (ScriptEngineException e) {
-            assertEquals("nonexistent is not found.", e.getMessage());
+            assertEquals(
+                    "nonexistent is not found. Available script engines: []. A plugin may be missing, such as fess-script-groovy for groovy.",
+                    e.getMessage());
         }
     }
 
@@ -220,7 +222,8 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.getScriptEngine("");
             fail("Should throw ScriptEngineException for empty string");
         } catch (ScriptEngineException e) {
-            assertEquals(" is not found.", e.getMessage());
+            assertEquals(" is not found. Available script engines: []. A plugin may be missing, such as fess-script-groovy for groovy.",
+                    e.getMessage());
         }
     }
 
@@ -266,7 +269,9 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.getScriptEngine("MyNonExistentEngine");
             fail("Should throw ScriptEngineException");
         } catch (ScriptEngineException e) {
-            assertEquals("MyNonExistentEngine is not found.", e.getMessage());
+            assertEquals(
+                    "MyNonExistentEngine is not found. Available script engines: []. A plugin may be missing, such as fess-script-groovy for groovy.",
+                    e.getMessage());
         }
     }
 
@@ -345,6 +350,32 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
         @Override
         public Object evaluate(String template, Map<String, Object> paramMap) {
             return "LongNameEngine: " + template;
+        }
+    }
+
+    @Test
+    public void test_hasScriptEngine() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        final ScriptEngine engine = (template, paramMap) -> "dummy";
+        factory.add("dummy", engine);
+
+        assertTrue(factory.hasScriptEngine("dummy"));
+        assertTrue(factory.hasScriptEngine("DUMMY"));
+        assertFalse(factory.hasScriptEngine("nothing"));
+        assertFalse(factory.hasScriptEngine(null));
+    }
+
+    @Test
+    public void test_getScriptEngine_notFoundListsKnownNames() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add("dummy", (template, paramMap) -> "dummy");
+
+        try {
+            factory.getScriptEngine("nothing");
+            fail("ScriptEngineException should be thrown");
+        } catch (final ScriptEngineException e) {
+            assertTrue(e.getMessage().contains("nothing"));
+            assertTrue(e.getMessage().contains("dummy"));
         }
     }
 }
