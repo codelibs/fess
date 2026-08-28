@@ -554,4 +554,31 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals(100, configResult.get(ConfigName.CLIENT).size());
         assertEquals("value50", configResult.get(ConfigName.CONFIG).get("key50"));
     }
+
+    @Test
+    public void test_addIfAbsent() {
+        assertEquals("config.script.type=javascript", ParameterUtil.addIfAbsent(null, "config.script.type", "javascript"));
+        assertEquals("config.script.type=javascript", ParameterUtil.addIfAbsent("", "config.script.type", "javascript"));
+        assertEquals("client.userAgent=Fess\nconfig.script.type=javascript",
+                ParameterUtil.addIfAbsent("client.userAgent=Fess", "config.script.type", "javascript"));
+        assertEquals("client.userAgent=Fess\nconfig.script.type=javascript",
+                ParameterUtil.addIfAbsent("client.userAgent=Fess\n", "config.script.type", "javascript"));
+    }
+
+    @Test
+    public void test_addIfAbsent_keepsExistingValue() {
+        assertEquals("config.script.type=groovy",
+                ParameterUtil.addIfAbsent("config.script.type=groovy", "config.script.type", "javascript"));
+        assertEquals("config.script.type=", ParameterUtil.addIfAbsent("config.script.type=", "config.script.type", "javascript"));
+        assertEquals(" config.script.type = groovy ",
+                ParameterUtil.addIfAbsent(" config.script.type = groovy ", "config.script.type", "javascript"));
+        assertEquals("script_type=groovy\nother=1", ParameterUtil.addIfAbsent("script_type=groovy\nother=1", "script_type", "javascript"));
+    }
+
+    @Test
+    public void test_addIfAbsent_keyThatIsAPrefixOfAnother() {
+        // A longer key starting with this one is a different key, not a match.
+        assertEquals("config.script.type.extra=x\nconfig.script.type=javascript",
+                ParameterUtil.addIfAbsent("config.script.type.extra=x", "config.script.type", "javascript"));
+    }
 }

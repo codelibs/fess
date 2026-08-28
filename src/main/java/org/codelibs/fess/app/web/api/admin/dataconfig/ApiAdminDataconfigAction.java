@@ -37,6 +37,7 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ParameterUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
@@ -112,6 +113,10 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
+        // The create screens fill this in through CreateForm#initialize, which an API request
+        // never runs. Without it the setting records no script type, and an unset type means
+        // Groovy, which is wrong for a setting created on 15.9. A value the caller sent is kept.
+        body.handlerParameter = ParameterUtil.addIfAbsent(body.handlerParameter, "script_type", Constants.DEFAULT_SCRIPT);
         final DataConfig dataConfig = getDataConfig(body).map(entity -> {
             try {
                 dataConfigService.store(entity);

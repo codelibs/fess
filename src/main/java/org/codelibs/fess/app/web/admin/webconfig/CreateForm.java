@@ -213,5 +213,6 @@ public class CreateForm {
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         permissions = fessConfig.getSearchDefaultDisplayPermission();
+        configParameter = "config.script.type=" + Constants.DEFAULT_SCRIPT;
     }
 }

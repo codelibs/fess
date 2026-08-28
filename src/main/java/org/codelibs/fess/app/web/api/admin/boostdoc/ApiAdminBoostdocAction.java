@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BoostDocPager;
 import org.codelibs.fess.app.service.BoostDocumentRuleService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -111,6 +113,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
+        // The create screen fills this in through CreateForm#initialize, which an API request
+        // never runs. Without it the rule records no script type, and an unset type means
+        // Groovy, which is wrong for a rule created on 15.9. A value the caller sent is kept.
+        if (StringUtil.isBlank(body.scriptType)) {
+            body.scriptType = Constants.DEFAULT_SCRIPT;
+        }
         final BoostDocumentRule boostDoc = getBoostDocumentRule(body).map(entity -> {
             try {
                 boostDocumentRuleService.store(entity);

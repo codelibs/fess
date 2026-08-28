@@ -99,6 +99,32 @@ public class ParameterUtil {
     }
 
     /**
+     * Appends a parameter line unless the key is already present.
+     *
+     * <p>Used where a setting is created without a screen having filled the defaults in, so a
+     * value the caller supplied - including an empty one, which is a deliberate choice - is left
+     * alone.</p>
+     *
+     * @param parameters the parameter string, may be null or blank
+     * @param key the parameter key
+     * @param value the value to add when the key is absent
+     * @return the parameter string containing the key
+     */
+    public static String addIfAbsent(final String parameters, final String key, final String value) {
+        if (parameters != null && parse(parameters).containsKey(key)) {
+            return parameters;
+        }
+        final String line = key + "=" + value;
+        if (StringUtil.isBlank(parameters)) {
+            return line;
+        }
+        if (parameters.endsWith("\n") || parameters.endsWith("\r")) {
+            return parameters + line;
+        }
+        return parameters + "\n" + line;
+    }
+
+    /**
      * Encrypts sensitive parameter values.
      *
      * @param value the parameter string

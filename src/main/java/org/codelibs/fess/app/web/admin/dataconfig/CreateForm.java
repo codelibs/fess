@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.dataconfig;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
@@ -108,5 +109,6 @@ public class CreateForm {
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         permissions = ComponentUtil.getFessConfig().getSearchDefaultDisplayPermission();
+        handlerParameter = "script_type=" + Constants.DEFAULT_SCRIPT;
     }
 }

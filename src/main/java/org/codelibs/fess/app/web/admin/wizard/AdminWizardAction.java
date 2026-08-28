@@ -231,6 +231,9 @@ public class AdminWizardAction extends FessAdminAction {
                 wConfig.setUrls(configPath);
                 wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", fessConfig.getUserAgentName()));
                 wConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultDisplayEncodedPermissions());
+                // Recorded explicitly because an unset script type means Groovy, which is what a
+                // config written before 15.9 needs and not what one created here does.
+                wConfig.setConfigParameter("config.script.type=" + Constants.DEFAULT_SCRIPT);
 
                 webConfigService.store(wConfig);
 
@@ -259,6 +262,9 @@ public class AdminWizardAction extends FessAdminAction {
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
                 fConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultDisplayEncodedPermissions());
+                // Recorded explicitly because an unset script type means Groovy, which is what a
+                // config written before 15.9 needs and not what one created here does.
+                fConfig.setConfigParameter("config.script.type=" + Constants.DEFAULT_SCRIPT);
 
                 fileConfigService.store(fConfig);
             }

@@ -259,7 +259,10 @@ public class GsaConfigParser extends DefaultHandler {
                     webConfig.setName("Default");
                     webConfig.setAvailable(true);
                     webConfig.setBoost(1.0f);
-                    webConfig.setConfigParameter(StringUtil.EMPTY);
+                    // Recorded explicitly because an unset script type means Groovy, which is what
+                    // a config written before 15.9 needs and not what an import creates today.
+                    webConfig.setConfigParameter(
+                            ParameterUtil.addIfAbsent(StringUtil.EMPTY, "config.script.type", Constants.DEFAULT_SCRIPT));
                     webConfig.setIntervalTime(1000);
                     webConfig.setNumOfThread(3);
                     webConfig.setSortOrder(1);
@@ -284,7 +287,10 @@ public class GsaConfigParser extends DefaultHandler {
                     fileConfig.setName("Default");
                     fileConfig.setAvailable(true);
                     fileConfig.setBoost(1.0f);
-                    fileConfig.setConfigParameter(StringUtil.EMPTY);
+                    // Recorded explicitly because an unset script type means Groovy, which is what
+                    // a config written before 15.9 needs and not what an import creates today.
+                    fileConfig.setConfigParameter(
+                            ParameterUtil.addIfAbsent(StringUtil.EMPTY, "config.script.type", Constants.DEFAULT_SCRIPT));
                     fileConfig.setIntervalTime(0);
                     fileConfig.setNumOfThread(5);
                     fileConfig.setSortOrder(2);
