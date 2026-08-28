@@ -52,6 +52,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fesen.client.EngineInfo;
+import org.codelibs.fesen.client.EngineInfo.EngineType;
 import org.codelibs.fesen.client.HttpClient;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
@@ -438,6 +439,8 @@ public class SearchEngineClient implements Client {
         }
 
         waitForYellowStatus(fessConfig);
+
+        warnUnlessOpenSearch3();
 
         indexConfigList.forEach(configName -> {
             final String[] values = configName.split("/");
@@ -2799,6 +2802,46 @@ public class SearchEngineClient implements Client {
      */
     public void setClusterName(final String clusterName) {
         this.clusterName = clusterName;
+    }
+
+    /**
+     * Logs an error unless the backend is OpenSearch 3.x or later.
+     *
+     * <p>Fess walks whole result sets -- document export, purge, label updates, backup, the
+     * scroll search API, suggest dictionary builds -- over a point in time ordered by a
+     * {@code _shard_doc} tiebreaker. That sort field is only implemented from OpenSearch 3.x;
+     * an earlier backend answers {@code 400 No mapping found for [_shard_doc] in order to sort
+     * on}. Worse, over HTTP a 400 on a request carrying a body does not surface as an error but
+     * hangs, because the client's socket timeout is disabled by default, so those jobs would
+     * stall rather than fail visibly.</p>
+     *
+     * <p>Startup is not aborted: search itself still works, and an operator may be mid-upgrade.
+     * The error is logged so the mismatch is noticed before a scheduled job hangs.</p>
+     */
+    protected void warnUnlessOpenSearch3() {
+        final EngineType engineType;
+        try {
+            engineType = getEngineInfo().getType();
+        } catch (final Exception e) {
+            logger.debug("Failed to detect the search engine type.", e);
+            return;
+        }
+        if (engineType == EngineType.OPENSEARCH3) {
+            return;
+        }
+        reportUnsupportedEngine(engineType);
+    }
+
+    /**
+     * Reports a backend Fess cannot walk result sets on.
+     *
+     * @param engineType the engine the backend reported
+     */
+    protected void reportUnsupportedEngine(final EngineType engineType) {
+        logger.error("The search engine reports {}, but Fess requires OpenSearch 3.x or later. Operations that walk every "
+                + "matching document (document export, purge, label update, backup, the scroll search API and "
+                + "suggest dictionary builds) sort by _shard_doc, which earlier engines do not implement; over "
+                + "HTTP they will hang rather than report an error.", engineType);
     }
 
     /**
