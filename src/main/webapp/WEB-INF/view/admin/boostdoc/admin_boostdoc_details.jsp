@@ -68,6 +68,10 @@ ${fe:html(true)}
                                         <td>${f:h(boostExpr)}<la:hidden property="boostExpr"/></td>
                                     </tr>
                                     <tr>
+                                        <th><la:message key="labels.boost_document_rule_script_type"/></th>
+                                        <td>${f:h(scriptType)}<la:hidden property="scriptType"/></td>
+                                    </tr>
+                                    <tr>
                                         <th><la:message
                                                 key="labels.boost_document_rule_sort_order"/></th>
                                         <td>${f:h(sortOrder)}<la:hidden property="sortOrder"/></td>

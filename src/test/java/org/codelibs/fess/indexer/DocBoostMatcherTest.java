@@ -19,50 +19,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.exception.JobProcessingException;
-import org.codelibs.fess.script.AbstractScriptEngine;
+import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.script.ScriptEngineFactory;
+import org.codelibs.fess.script.javascript.JavaScriptEngine;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyShell;
 
 public class DocBoostMatcherTest extends UnitFessTestCase {
+
+    /** Name of the stub engine used where no JavaScript literal can produce the value under test. */
+    private static final String FIXED_VALUE_ENGINE = "fixed-value-stub";
 
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
-        ScriptEngineFactory scriptEngineFactory = new ScriptEngineFactory();
-        ComponentUtil.register(scriptEngineFactory, "scriptEngineFactory");
-        new AbstractScriptEngine() {
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
+        // The real engine, not a stub: a matcher with no rule runs on Constants.DEFAULT_SCRIPT,
+        // and these tests are about what that engine makes of the expressions.
+        new JavaScriptEngine().register();
+    }
 
-            @Override
-            public Object evaluate(String template, Map<String, Object> paramMap) {
-                final Map<String, Object> bindingMap = new HashMap<>(paramMap);
-                bindingMap.put("container", SingletonLaContainerFactory.getContainer());
-                final GroovyShell groovyShell = new GroovyShell(new Binding(bindingMap));
-                try {
-                    return groovyShell.evaluate(template);
-                } catch (final JobProcessingException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    return null;
-                } finally {
-                    final GroovyClassLoader loader = groovyShell.getClassLoader();
-                    loader.clearCache();
-                }
-            }
-
-            @Override
-            protected String getName() {
-                return Constants.DEFAULT_SCRIPT;
-            }
-        }.register();
+    /**
+     * A matcher whose engine returns the given object whatever the expression. JavaScript numbers
+     * are all Double, so the Float and Long branches of getValue have no literal to reach them.
+     *
+     * @param value the value the engine returns
+     * @return a matcher bound to the stub engine
+     */
+    private DocBoostMatcher fixedValueMatcher(final Object value) {
+        ComponentUtil.getScriptEngineFactory().add(FIXED_VALUE_ENGINE, (template, paramMap) -> value);
+        final BoostDocumentRule rule = new BoostDocumentRule();
+        rule.setBoostExpr("value");
+        rule.setScriptType(FIXED_VALUE_ENGINE);
+        return new DocBoostMatcher(rule);
     }
 
     @Test
@@ -92,7 +83,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
     public void test_string() {
         final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
         docBoostMatcher.setBoostExpression("10");
-        docBoostMatcher.setMatchExpression("data1 != null && data1.matches(\"test\")");
+        docBoostMatcher.setMatchExpression("data1 != null && /^test$/.test(data1)");
 
         final Map<String, Object> map = new HashMap<String, Object>();
 
@@ -111,7 +102,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         map.put("data2", "hoge");
         assertFalse(docBoostMatcher.match(map));
 
-        docBoostMatcher.setMatchExpression("data1.matches(\".*test.*\")");
+        docBoostMatcher.setMatchExpression("/.*test.*/.test(data1)");
         map.put("data1", "aaa test bbb");
         assertTrue(docBoostMatcher.match(map));
     }
@@ -139,8 +130,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
 
     @Test
     public void test_getValue_floatReturn() {
-        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
-        docBoostMatcher.setBoostExpression("1.5f");
+        final DocBoostMatcher docBoostMatcher = fixedValueMatcher(Float.valueOf(1.5f));
 
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("data1", 1);
@@ -150,7 +140,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
     @Test
     public void test_getValue_doubleReturn() {
         final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
-        docBoostMatcher.setBoostExpression("2.5d");
+        docBoostMatcher.setBoostExpression("2.5");
 
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("data1", 1);
@@ -159,8 +149,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
 
     @Test
     public void test_getValue_longReturn() {
-        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
-        docBoostMatcher.setBoostExpression("100L");
+        final DocBoostMatcher docBoostMatcher = fixedValueMatcher(Long.valueOf(100L));
 
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("data1", 1);
@@ -253,5 +242,24 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
         docBoostMatcher.setBoostExpression("10");
         assertEquals(0.0f, docBoostMatcher.getValue(new HashMap<>()));
+    }
+
+    @Test
+    public void test_scriptTypeFromRule() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add("javascript", (template, paramMap) -> "from-javascript");
+        factory.add("groovy", (template, paramMap) -> "from-groovy");
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final BoostDocumentRule explicit = new BoostDocumentRule();
+        explicit.setUrlExpr("url != null");
+        explicit.setBoostExpr("1");
+        explicit.setScriptType("javascript");
+        assertEquals("javascript", new DocBoostMatcher(explicit).getScriptType());
+
+        final BoostDocumentRule legacy = new BoostDocumentRule();
+        legacy.setUrlExpr("url != null");
+        legacy.setBoostExpr("1");
+        assertEquals(Constants.LEGACY_SCRIPT, new DocBoostMatcher(legacy).getScriptType());
     }
 }
