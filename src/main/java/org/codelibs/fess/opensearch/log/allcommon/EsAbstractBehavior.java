@@ -25,8 +25,13 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Function;
 
+import jakarta.annotation.Resource;
+
+import org.codelibs.fess.opensearch.log.allcommon.EsAbstractEntity;
 import org.codelibs.fess.opensearch.log.allcommon.EsAbstractEntity.DocMeta;
 import org.codelibs.fess.opensearch.log.allcommon.EsAbstractEntity.RequestOptionCall;
+import org.codelibs.fess.opensearch.log.allcommon.EsAbstractConditionBean;
+import org.codelibs.fess.opensearch.log.allcommon.EsPagingResultBean;
 import org.dbflute.Entity;
 import org.dbflute.bhv.AbstractBehaviorWritable;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -48,16 +53,22 @@ import org.opensearch.action.delete.DeleteRequestBuilder;
 import org.opensearch.action.delete.DeleteResponse;
 import org.opensearch.action.index.IndexRequestBuilder;
 import org.opensearch.action.index.IndexResponse;
+import org.opensearch.action.search.CreatePitAction;
+import org.opensearch.action.search.CreatePitRequest;
+import org.opensearch.action.search.DeletePitAction;
+import org.opensearch.action.search.DeletePitRequest;
+import org.opensearch.action.search.SearchRequest;
 import org.opensearch.action.search.SearchRequestBuilder;
 import org.opensearch.action.search.SearchResponse;
 import org.opensearch.action.update.UpdateRequestBuilder;
+import org.opensearch.common.unit.TimeValue;
 import org.opensearch.core.action.ActionListener;
 import org.opensearch.index.seqno.SequenceNumbers;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
+import org.opensearch.search.builder.PointInTimeBuilder;
+import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.transport.client.Client;
-
-import jakarta.annotation.Resource;
 
 /**
  * @param <ENTITY> The type of entity.
@@ -69,6 +80,8 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     @Resource
     private Client client;
 
+    // The two "scroll" values below are the keep-alive of the point in time that query delete and
+    // cursor select page over. The names are kept for compatibility with existing DI settings.
     protected int sizeForDelete = 100;
     protected String scrollForDelete = "1m";
     protected int sizeForCursor = 100;
@@ -227,16 +240,56 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected void delegateBulkRequest(final ConditionBean cb, Function<SearchHits, Boolean> handler) {
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForCursor).setSize(sizeForCursor);
-        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        pitSearch((EsAbstractConditionBean) cb, sizeForCursor, scrollForCursor, handler);
+    }
+
+    /**
+     * Walks every hit matching the condition bean, one page at a time, over a point in time.
+     *
+     * <p>The pages are ordered by the condition bean's own sort followed by a {@code _shard_doc}
+     * tiebreaker, which makes the order total so that {@code search_after} can walk it without
+     * skipping or repeating a document. The point in time is released in every case, and the walk
+     * stops as soon as the handler returns {@code false}.</p>
+     *
+     * @param esCb the condition bean selecting the documents.
+     * @param pageSize the number of hits fetched per page.
+     * @param keepAlive how long the point in time stays alive, extended by every page.
+     * @param handler called once per page; returning false ends the walk.
+     */
+    protected void pitSearch(final EsAbstractConditionBean esCb, final int pageSize, final String keepAlive,
+            final Function<SearchHits, Boolean> handler) {
+        final SearchRequestBuilder builder = client.prepareSearch().setSize(pageSize);
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
         }
         esCb.request().build(builder);
-        SearchResponse response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
-        String scrollId = response.getScrollId();
+        final SearchRequestBuilder searchBuilder = esCb.build(builder);
+        searchBuilder.addSort(SortBuilders.shardDocSort());
+
+        // A point in time carries the indices, routing and preference itself, and a search that
+        // repeats any of them is rejected with a 400 ("[indices]/[routing]/[preference] cannot be
+        // used with point in time"). Over HTTP such a 400 on a request with a body does not surface
+        // as an error, it hangs. So move them onto the point in time and strip them off the search.
+        final SearchRequest searchRequest = searchBuilder.request();
+        final TimeValue keepAliveValue = TimeValue.parseTimeValue(keepAlive, "keepAlive");
+        final CreatePitRequest createPitRequest = new CreatePitRequest(keepAliveValue, true, asEsIndex());
+        if (searchRequest.preference() != null) {
+            createPitRequest.setPreference(searchRequest.preference());
+            searchRequest.preference(null);
+        }
+        if (searchRequest.routing() != null) {
+            createPitRequest.setRouting(searchRequest.routing());
+            searchRequest.routing((String) null);
+        }
+        final String pitId = client.execute(CreatePitAction.INSTANCE, createPitRequest).actionGet(scrollSearchTimeout).getId();
         try {
-            while (scrollId != null) {
+            searchBuilder.setPointInTime(new PointInTimeBuilder(pitId).setKeepAlive(keepAliveValue));
+            Object[] searchAfter = null;
+            while (true) {
+                if (searchAfter != null) {
+                    searchBuilder.searchAfter(searchAfter);
+                }
+                final SearchResponse response = searchBuilder.execute().actionGet(scrollSearchTimeout);
                 final SearchHits searchHits = getSearchHits(response);
                 final SearchHit[] hits = searchHits.getHits();
                 if (hits.length == 0) {
@@ -247,20 +300,16 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
                     break;
                 }
 
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
-                if (!scrollId.equals(response.getScrollId())) {
-                    deleteScrollContext(scrollId);
-                }
-                scrollId = response.getScrollId();
+                searchAfter = hits[hits.length - 1].getSortValues();
             }
         } finally {
-            deleteScrollContext(scrollId);
+            deletePitContext(pitId);
         }
     }
 
-    protected void deleteScrollContext(final String scrollId) {
-        if (scrollId != null) {
-            client.prepareClearScroll().addScrollId(scrollId).execute(ActionListener.wrap(() -> {}));
+    protected void deletePitContext(final String pitId) {
+        if (pitId != null) {
+            client.deletePits(new DeletePitRequest(pitId), ActionListener.wrap(() -> {}));
         }
     }
 
@@ -364,42 +413,21 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     @Override
     protected int delegateQueryDelete(final ConditionBean cb, final DeleteOption<? extends ConditionBean> option) {
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setScroll(scrollForDelete).setSize(sizeForDelete);
-        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
-        if (esCb.getPreference() != null) {
-            esCb.setPreference(esCb.getPreference());
-        }
-        esCb.request().build(builder);
-        SearchResponse response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
-        String scrollId = response.getScrollId();
-        int count = 0;
-        try {
-            while (scrollId != null) {
-                final SearchHits searchHits = getSearchHits(response);
-                final SearchHit[] hits = searchHits.getHits();
-                if (hits.length == 0) {
-                    break;
-                }
-
-                final BulkRequestBuilder bulkRequest = client.prepareBulk();
-                for (final SearchHit hit : hits) {
-                    bulkRequest.add(client.prepareDelete().setIndex(asEsIndex()).setId(hit.getId()));
-                }
-                count += hits.length;
-                final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
-                if (bulkResponse.hasFailures()) {
-                    throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
-                }
-
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
-                if (!scrollId.equals(response.getScrollId())) {
-                    deleteScrollContext(scrollId);
-                }
+        final int[] count = new int[1];
+        pitSearch((EsAbstractConditionBean) cb, sizeForDelete, scrollForDelete, searchHits -> {
+            final SearchHit[] hits = searchHits.getHits();
+            final BulkRequestBuilder bulkRequest = client.prepareBulk();
+            for (final SearchHit hit : hits) {
+                bulkRequest.add(client.prepareDelete().setIndex(asEsIndex()).setId(hit.getId()));
             }
-        } finally {
-            deleteScrollContext(scrollId);
-        }
-        return count;
+            count[0] += hits.length;
+            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(bulkTimeout);
+            if (bulkResponse.hasFailures()) {
+                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+            }
+            return true;
+        });
+        return count[0];
     }
 
     protected int[] delegateBatchInsert(final List<? extends Entity> entityList, final InsertOption<? extends ConditionBean> option) {
