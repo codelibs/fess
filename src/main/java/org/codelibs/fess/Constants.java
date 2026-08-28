@@ -558,9 +558,6 @@ public class Constants extends CoreLibConstants {
     /** Default job target value (all configurations). */
     public static final String DEFAULT_JOB_TARGET = "all";
 
-    /** Default job script type (Groovy). */
-    public static final String DEFAULT_JOB_SCRIPT_TYPE = "groovy";
-
     /** Exit code for successful operation. */
     public static final int EXIT_OK = 0;
 
