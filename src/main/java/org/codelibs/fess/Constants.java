@@ -875,8 +875,17 @@ public class Constants extends CoreLibConstants {
     /** Execution type for content chunk vector indexing operations. */
     public static final String EXECUTE_TYPE_CHUNK = "chunk";
 
-    /** Default script type (Groovy). */
-    public static final String DEFAULT_SCRIPT = "groovy";
+    /** Default script type for newly created settings. */
+    public static final String DEFAULT_SCRIPT = "javascript";
+
+    /**
+     * Script type used when a setting does not name one.
+     *
+     * <p>A setting created before 15.9 has no explicit script type, and its script is written in
+     * Groovy, so an unset type means Groovy. Groovy itself lives in the fess-script-groovy plugin
+     * from 15.9 on.</p>
+     */
+    public static final String LEGACY_SCRIPT = "groovy";
 
     // ============================================================
     // Text Fragment Constants

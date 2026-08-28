@@ -36,7 +36,7 @@ public class ScheduledJob extends BsScheduledJob {
     public String getScriptType() {
         final String st = super.getScriptType();
         if (StringUtil.isBlank(st)) {
-            return "groovy";
+            return Constants.LEGACY_SCRIPT;
         }
         return st;
     }
