@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.opensearch.client;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -47,6 +51,73 @@ public class SearchEngineClientTest extends UnitFessTestCase {
         String testValue = "test";
         assertNotNull(testValue);
         assertEquals("test", testValue);
+    }
+
+    /**
+     * A client reporting the given backend, recording whether the unsupported-engine report fired.
+     */
+    private SearchEngineClient clientReporting(final String distribution, final String number, final AtomicInteger reports) {
+        return new SearchEngineClient() {
+            @Override
+            public EngineInfo getEngineInfo() {
+                return new EngineInfo(Map.of("version", Map.of("number", number, "distribution", distribution)));
+            }
+
+            @Override
+            protected void reportUnsupportedEngine(final EngineInfo.EngineType engineType) {
+                reports.incrementAndGet();
+            }
+        };
+    }
+
+    /**
+     * OpenSearch 3.x is what Fess needs, so startup must stay quiet.
+     */
+    @Test
+    public void test_warnUnlessOpenSearch3_quietOnOpenSearch3() {
+        final AtomicInteger reports = new AtomicInteger(0);
+        clientReporting("opensearch", "3.8.0", reports).warnUnlessOpenSearch3();
+        assertEquals(0, reports.get());
+    }
+
+    /**
+     * OpenSearch 2.x cannot sort by _shard_doc, so the mismatch must be reported.
+     */
+    @Test
+    public void test_warnUnlessOpenSearch3_reportsOpenSearch2() {
+        final AtomicInteger reports = new AtomicInteger(0);
+        clientReporting("opensearch", "2.19.4", reports).warnUnlessOpenSearch3();
+        assertEquals(1, reports.get());
+    }
+
+    /**
+     * Elasticsearch has no _shard_doc sort either, so it is reported the same way.
+     */
+    @Test
+    public void test_warnUnlessOpenSearch3_reportsElasticsearch() {
+        final AtomicInteger reports = new AtomicInteger(0);
+        clientReporting("elasticsearch", "8.11.0", reports).warnUnlessOpenSearch3();
+        assertEquals(1, reports.get());
+    }
+
+    /**
+     * A client that cannot report its engine must not break startup.
+     */
+    @Test
+    public void test_warnUnlessOpenSearch3_survivesUndetectableEngine() {
+        final AtomicInteger reports = new AtomicInteger(0);
+        new SearchEngineClient() {
+            @Override
+            public EngineInfo getEngineInfo() {
+                throw new IllegalStateException("client is not HttpClient.");
+            }
+
+            @Override
+            protected void reportUnsupportedEngine(final EngineInfo.EngineType engineType) {
+                reports.incrementAndGet();
+            }
+        }.warnUnlessOpenSearch3();
+        assertEquals(0, reports.get());
     }
 
     @Test
