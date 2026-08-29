@@ -22,6 +22,7 @@ import java.io.StringReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ResourceUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.GsaConfigException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.LabelType;
@@ -49,9 +50,11 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         }
         parser.getWebConfig().ifPresent(c -> {
             logger.debug(c.toString());
+            assertEquals("config.script.type=" + Constants.DEFAULT_SCRIPT, c.getConfigParameter());
         }).orElse(() -> fail());
         parser.getFileConfig().ifPresent(c -> {
             logger.debug(c.toString());
+            assertEquals("config.script.type=" + Constants.DEFAULT_SCRIPT, c.getConfigParameter());
         }).orElse(() -> fail());
         LabelType[] labelTypes = parser.getLabelTypes();
         assertEquals(3, labelTypes.length);
