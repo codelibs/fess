@@ -15,6 +15,14 @@
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://central.sonatype.com/repository/maven-snapshots" />
 	<property name="maven.release.repo.url" value="https://repo1.maven.org/maven2" />
+	<property name="maven.codelibs.release.repo.url" value="https://maven.codelibs.org/release" />
+
+	<!-- webapp plugins bundled with the distribution -->
+	<!-- Hand-bump this for each Fess release: fess-script-groovy is released on its own
+	     cadence, and ${project.version} would resolve to a SNAPSHOT the release repo never serves.
+	     Fess 15.10 drops the plugin: delete this property, the install.webapp.plugins target
+	     below and the install-webapp-plugins execution in pom.xml then, don't bump it. -->
+	<property name="fess.script.groovy.version" value="15.9.0" />
 
 	<target name="install.jars">
 		<mkdir dir="${target.dir}" />
@@ -54,6 +62,20 @@
 		</delete>
 	</target>
 
+	<!-- Fetches the plugins the distribution bundles into WEB-INF/plugin. Kept out of
+	     install.jars, which that directory's jars are deleted by and which runs on every
+	     mvn test through the antrun plugin-level configuration: a test run must not depend
+	     on a plugin release being published. pom.xml calls this at prepare-package. -->
+	<target name="install.webapp.plugins">
+		<mkdir dir="${target.dir}" />
+		<antcall target="install.webapp.plugin">
+			<param name="repo.url" value="${maven.codelibs.release.repo.url}" />
+			<param name="jar.groupId" value="org/codelibs/fess" />
+			<param name="jar.artifactId" value="fess-script-groovy" />
+			<param name="jar.version" value="${fess.script.groovy.version}" />
+		</antcall>
+	</target>
+
 	<target name="install.env.jar">
 		<get dest="${target.dir}">
 			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
@@ -62,5 +84,12 @@
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${suggest.dir}/lib" />
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${thumbnail.dir}/lib" />
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${chunk.dir}/lib" />
+	</target>
+
+	<target name="install.webapp.plugin">
+		<get dest="${target.dir}">
+			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${jar.version}.jar" />
+		</get>
+		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar" todir="${webinf.dir}/plugin" />
 	</target>
 </project>
