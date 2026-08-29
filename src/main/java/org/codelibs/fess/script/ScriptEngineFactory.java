@@ -18,6 +18,7 @@ package org.codelibs.fess.script;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,18 @@ public class ScriptEngineFactory {
     }
 
     /**
+     * Returns whether a script engine is registered under the given name.
+     * @param name The name of the script engine. May be null.
+     * @return true if the engine is registered.
+     */
+    public boolean hasScriptEngine(final String name) {
+        if (name == null) {
+            return false;
+        }
+        return scriptEngineMap.containsKey(name.toLowerCase(Locale.ROOT));
+    }
+
+    /**
      * Gets a script engine.
      * @param name The name of the script engine.
      * @return The script engine.
@@ -70,6 +83,7 @@ public class ScriptEngineFactory {
         if (scriptEngine != null) {
             return scriptEngine;
         }
-        throw new ScriptEngineException(name + " is not found.");
+        throw new ScriptEngineException(name + " is not found. Available script engines: " + new TreeSet<>(scriptEngineMap.keySet())
+                + ". A plugin may be missing, such as fess-script-groovy for groovy.");
     }
 }

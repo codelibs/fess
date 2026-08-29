@@ -204,4 +204,32 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
             return "processed: " + template + " with params";
         }
     }
+
+    @Test
+    public void test_register_withAliases() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final AbstractScriptEngine engine = new AbstractScriptEngine() {
+            @Override
+            public Object evaluate(final String template, final Map<String, Object> paramMap) {
+                return "aliased";
+            }
+
+            @Override
+            protected String getName() {
+                return "primary";
+            }
+
+            @Override
+            protected String[] getAliases() {
+                return new String[] { "alias1", "alias2" };
+            }
+        };
+        engine.register();
+
+        assertSame(engine, factory.getScriptEngine("primary"));
+        assertSame(engine, factory.getScriptEngine("alias1"));
+        assertSame(engine, factory.getScriptEngine("alias2"));
+    }
 }

@@ -13,13 +13,16 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.script.groovy;
+package org.codelibs.fess.script.javascript;
 
-import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,40 +32,47 @@ import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.script.AbstractScriptEngine;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.sai.api.scripting.SaiScriptEngineFactory;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.job.LaJobRuntime;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalNotification;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.Script;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 /**
- * Groovy script engine implementation that extends AbstractScriptEngine.
- * This class provides support for executing Groovy scripts with parameter binding
- * and DI container integration.
+ * JavaScript script engine backed by Sai, the Nashorn fork maintained by CodeLibs.
  *
- * <p>Thread Safety: This class is thread-safe. Each cached entry holds its own
- * GroovyClassLoader. The cache uses Guava Cache with segment-based locking for
- * lock-free concurrent reads. Each evaluate() call creates a new Script instance
- * to ensure thread isolation of bindings.</p>
+ * <p>Scripts are evaluated as ECMAScript 6. Sai parses ECMAScript 5.1 unless
+ * <code>--language=es6</code> is given, and the option can only be passed through the factory,
+ * which is why the engine is built from {@link SaiScriptEngineFactory} rather than looked up
+ * through <code>ScriptEngineManager</code>. This matches
+ * <code>FessJavaScriptExpressionEngine</code>, which does the same for Di xml expressions.</p>
  *
- * <p>Note on class-level isolation: Compiled Script classes are cached and reused.
- * Class-level state (static fields, metaclass mutations) persists across evaluations
- * of the same script. In Fess, scripts are short expressions configured by
- * administrators (e.g., "data1 &gt; 10", "10 * boost1 + boost2") and do not use
- * static state, so this is acceptable.</p>
+ * <p><b>Two-phase compilation.</b> A Fess script is written in one of two shapes. Scheduler jobs
+ * and crawler config scripts are statements starting with <code>return</code>, which is a syntax
+ * error at the top level of a JavaScript program. Data store field scripts and document boost
+ * expressions are bare expressions such as <code>content.length()</code>, whose value must be
+ * returned. So the template is first compiled as an expression, and only if that fails to parse
+ * is it compiled as a statement block. The decision is made at compile time and cached, so
+ * evaluation stays deterministic.</p>
  *
- * <p>Resource Management: Each cached entry's GroovyClassLoader is closed on
- * eviction via RemovalListener. All remaining entries are cleaned up via close() (@PreDestroy).</p>
+ * <p><b>Thread safety.</b> One engine instance is shared and a fresh {@link Bindings} is created
+ * for every evaluation. Sai gives each Bindings its own global scope, so evaluations do not see
+ * each other. Building an engine per evaluation costs about a millisecond and would also defeat
+ * the compiled-script cache.</p>
  */
-public class GroovyEngine extends AbstractScriptEngine {
-    private static final Logger logger = LogManager.getLogger(GroovyEngine.class);
+public class JavaScriptEngine extends AbstractScriptEngine {
+
+    private static final Logger logger = LogManager.getLogger(JavaScriptEngine.class);
+
+    /** The arguments for the Sai engine. "-doe" is the default of SaiScriptEngineFactory#getScriptEngine(). */
+    protected static final String[] ENGINE_ARGS = { "-doe", "--language=es6" };
+
+    /** The factory of the Sai engine. It is thread-safe and holds no state. */
+    protected static final SaiScriptEngineFactory ENGINE_FACTORY = new SaiScriptEngineFactory();
 
     /** Maximum number of compiled scripts to cache. Configurable via DI. */
     protected int scriptCacheSize = 1000;
@@ -73,18 +83,19 @@ public class GroovyEngine extends AbstractScriptEngine {
     /** Whether to log script execution details for auditing purposes. Configurable via DI. */
     protected boolean scriptAuditLogEnabled;
 
-    private Cache<String, CachedScript> scriptCache;
+    private final javax.script.ScriptEngine engine = ENGINE_FACTORY.getScriptEngine(ENGINE_ARGS);
+
+    private Cache<String, CompiledScript> scriptCache;
 
     /**
-     * Default constructor for GroovyEngine.
+     * Default constructor.
      */
-    public GroovyEngine() {
+    public JavaScriptEngine() {
         buildScriptCache();
     }
 
     /**
      * Rebuilds the script cache after DI injection.
-     * Called by the DI container after property injection.
      */
     @PostConstruct
     public void init() {
@@ -94,13 +105,8 @@ public class GroovyEngine extends AbstractScriptEngine {
     }
 
     private void buildScriptCache() {
-        final Cache<String, CachedScript> oldCache = scriptCache;
-        scriptCache = CacheBuilder.newBuilder()
-                .maximumSize(scriptCacheSize)
-                .removalListener((final RemovalNotification<String, CachedScript> notification) -> {
-                    notification.getValue().close();
-                })
-                .build();
+        final Cache<String, CompiledScript> oldCache = scriptCache;
+        scriptCache = CacheBuilder.newBuilder().maximumSize(scriptCacheSize).build();
         if (oldCache != null) {
             oldCache.invalidateAll();
         }
@@ -124,19 +130,6 @@ public class GroovyEngine extends AbstractScriptEngine {
         this.maxScriptLogLength = maxScriptLogLength;
     }
 
-    /**
-     * Evaluates a Groovy script template with the provided parameters.
-     *
-     * <p>This method caches compiled Script classes per script text.
-     * Each evaluation creates a new Script instance to ensure thread-safe binding isolation.
-     * The DI container is automatically injected into the binding map as "container".</p>
-     *
-     * @param template the Groovy script to evaluate (null-safe, returns null if empty)
-     * @param paramMap the parameters to bind to the script (null-safe, treated as empty map if null)
-     * @return the result of script evaluation, or null if the template is empty or evaluation fails
-     * @throws JobProcessingException if the script explicitly throws this exception
-     *         (allows scripts to signal job-specific errors that should propagate)
-     */
     @Override
     public Object evaluate(final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isBlank(template)) {
@@ -148,19 +141,17 @@ public class GroovyEngine extends AbstractScriptEngine {
 
         final Map<String, Object> safeParamMap = paramMap != null ? paramMap : Collections.emptyMap();
 
-        final Map<String, Object> bindingMap = new HashMap<>(safeParamMap);
-        bindingMap.put("container", SingletonLaContainerFactory.getContainer());
-
         try {
-            final CachedScript cached = getOrCompile(template);
-            final Script script = cached.scriptClass.getDeclaredConstructor().newInstance();
-            script.setBinding(new Binding(bindingMap));
+            final CompiledScript compiledScript = getOrCompile(template);
+            final Bindings bindings = engine.createBindings();
+            bindings.putAll(safeParamMap);
+            bindings.put("container", SingletonLaContainerFactory.getContainer());
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Evaluating Groovy script: template={}", template);
+                logger.debug("Evaluating JavaScript: template={}", template);
             }
 
-            final Object result = script.run();
+            final Object result = compiledScript.eval(bindings);
             logScriptExecution(template, "success");
             return result;
         } catch (final JobProcessingException e) {
@@ -172,43 +163,43 @@ public class GroovyEngine extends AbstractScriptEngine {
         } catch (final Exception e) {
             final String truncatedScript =
                     template.length() > maxScriptLogLength ? template.substring(0, maxScriptLogLength) + "..." : template;
-            logger.warn("Failed to evaluate Groovy script: script(length={})={}, parameterKeys={}", template.length(), truncatedScript,
+            logger.warn("Failed to evaluate JavaScript: script(length={})={}, parameterKeys={}", template.length(), truncatedScript,
                     safeParamMap.keySet(), e);
             logScriptExecution(template, "failure:" + e.getClass().getSimpleName());
             return null;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private CachedScript getOrCompile(final String template) {
+    /**
+     * Compiles the template, first as an expression and then as a statement block.
+     *
+     * @param template the script text
+     * @return the compiled script
+     */
+    protected CompiledScript getOrCompile(final String template) {
         try {
             return scriptCache.get(template, () -> {
-                ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
-                if (parentClassLoader == null) {
-                    parentClassLoader = GroovyEngine.class.getClassLoader();
-                }
-                final GroovyClassLoader classLoader = new GroovyClassLoader(parentClassLoader);
+                final Compilable compilable = (Compilable) engine;
                 try {
-                    final Class<? extends Script> scriptClass = classLoader.parseClass(template);
-                    return new CachedScript(scriptClass, classLoader);
-                } catch (final Exception e) {
-                    try {
-                        classLoader.clearCache();
-                        classLoader.close();
-                    } catch (final IOException closeEx) {
-                        logger.warn("Failed to close GroovyClassLoader after compilation failure", closeEx);
+                    return compilable.compile("(function(){ return (" + template + "\n); })()");
+                } catch (final ScriptException asExpression) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Not an expression, compiling as statements: {}", asExpression.getMessage());
                     }
-                    throw e;
+                    return compilable.compile("(function(){ " + template + "\n})()");
                 }
             });
         } catch (final ExecutionException e) {
-            throw (RuntimeException) e.getCause();
+            final Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            throw new IllegalStateException("Failed to compile the script.", cause);
         }
     }
 
     /**
-     * Closes all cached GroovyClassLoaders and clears the script cache.
-     * Called by the DI container on shutdown.
+     * Clears the compiled script cache.
      */
     @PreDestroy
     public void close() {
@@ -216,14 +207,14 @@ public class GroovyEngine extends AbstractScriptEngine {
         scriptCache.cleanUp();
     }
 
-    /**
-     * Returns the name identifier for this script engine.
-     *
-     * @return "groovy" - the identifier used to register and retrieve this engine
-     */
     @Override
     protected String getName() {
-        return "groovy";
+        return "javascript";
+    }
+
+    @Override
+    protected String[] getAliases() {
+        return new String[] { "js", "sai" };
     }
 
     /**
@@ -255,7 +246,7 @@ public class GroovyEngine extends AbstractScriptEngine {
      * Logs script execution to the audit log.
      *
      * @param script the script content that was executed
-     * @param result the execution result (e.g., "success" or "failure:ExceptionType")
+     * @param result the execution result
      */
     protected void logScriptExecution(final String script, final String result) {
         if (!scriptAuditLogEnabled) {
@@ -286,28 +277,4 @@ public class GroovyEngine extends AbstractScriptEngine {
             }
         }
     }
-
-    /**
-     * Holds a compiled Script class and its associated GroovyClassLoader.
-     * When evicted from the cache, close() releases the class loader resources.
-     */
-    private static class CachedScript {
-        final Class<? extends Script> scriptClass;
-        private final GroovyClassLoader classLoader;
-
-        CachedScript(final Class<? extends Script> scriptClass, final GroovyClassLoader classLoader) {
-            this.scriptClass = scriptClass;
-            this.classLoader = classLoader;
-        }
-
-        void close() {
-            try {
-                classLoader.clearCache();
-                classLoader.close();
-            } catch (final IOException e) {
-                LogManager.getLogger(GroovyEngine.class).warn("Failed to close GroovyClassLoader", e);
-            }
-        }
-    }
-
 }
