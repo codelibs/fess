@@ -8,6 +8,20 @@
 	<!-- Register systemProperties for test environment -->
 	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
 
+	<!-- UrlQueueOrder components, registered directly (not crawler_opensearch.xml, which pulls in
+	     fesenClient and the crawler stack that needs a running OpenSearch) for
+	     FessUrlQueueServiceTest's crawl.order resolution tests. -->
+	<component name="sequentialUrlQueueOrder"
+		class="org.codelibs.fess.crawler.order.impl.SequentialUrlQueueOrder" />
+	<component name="randomUrlQueueOrder"
+		class="org.codelibs.fess.crawler.order.impl.RandomUrlQueueOrder" />
+	<component name="depthFirstUrlQueueOrder"
+		class="org.codelibs.fess.crawler.order.impl.DepthFirstUrlQueueOrder" />
+	<component name="newestFirstUrlQueueOrder"
+		class="org.codelibs.fess.crawler.order.impl.NewestFirstUrlQueueOrder" />
+	<component name="weightFirstUrlQueueOrder"
+		class="org.codelibs.fess.crawler.order.impl.WeightFirstUrlQueueOrder" />
+
 	<!-- Stateless helper used by v2 chat API handlers/tests (its getUserId DI path is exercised
 	     only in production; handler tests override the handler getUserId seam). -->
 	<component name="chatApiHelper" class="org.codelibs.fess.helper.ChatApiHelper" />
