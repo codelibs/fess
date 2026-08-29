@@ -21,6 +21,7 @@ import org.codelibs.fess.crawler.order.impl.RandomUrlQueueOrder;
 import org.codelibs.fess.crawler.order.impl.SequentialUrlQueueOrder;
 import org.codelibs.fess.crawler.util.OpenSearchCrawlerConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 public class FessUrlQueueServiceTest extends UnitFessTestCase {
@@ -51,7 +52,11 @@ public class FessUrlQueueServiceTest extends UnitFessTestCase {
     @Test
     public void test_resolvesLegacySequential() {
         final UrlQueueOrder order = new TestFessUrlQueueService("sequential").getUrlQueueOrder("s1");
-        assertTrue(order instanceof SequentialUrlQueueOrder);
+        // Assert identity against the container instance so the alias is actually exercised:
+        // the fallback path (LEGACY_ORDER_NAMES not containing "sequential") also returns a
+        // SequentialUrlQueueOrder, but a different instance, so only an identity check catches
+        // the alias being removed.
+        assertSame(ComponentUtil.getComponent("sequentialUrlQueueOrder"), order);
     }
 
     @Test

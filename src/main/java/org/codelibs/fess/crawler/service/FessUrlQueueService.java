@@ -76,7 +76,10 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
             }
             logger.warn("Component {} is not a UrlQueueOrder. Falling back to the default order.", name);
         } catch (final Exception e) {
-            logger.warn("Invalid crawl order specified: {}. Falling back to the default order.", configured, e);
+            logger.warn("Invalid crawl order specified: {}. Falling back to the default order.", configured);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to resolve crawl order component: {}", name, e);
+            }
         }
         return super.getUrlQueueOrder(sessionId);
     }
