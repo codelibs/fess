@@ -20,6 +20,9 @@
       },
       "updatedTime": {
         "type": "long"
+      },
+      "scriptType": {
+        "type": "keyword"
       }
     }
 }

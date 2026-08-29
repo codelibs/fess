@@ -2466,6 +2466,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Boost Expression */
     public static final String LABELS_boost_document_rule_boost_expr = "{labels.boost_document_rule_boost_expr}";
 
+    /** The key of the message: Script Type */
+    public static final String LABELS_boost_document_rule_script_type = "{labels.boost_document_rule_script_type}";
+
     /** The key of the message: Sort Order */
     public static final String LABELS_boost_document_rule_sort_order = "{labels.boost_document_rule_sort_order}";
 

@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.util.ComponentUtil;
@@ -58,7 +59,17 @@ public class DocBoostMatcher {
     public DocBoostMatcher(final BoostDocumentRule rule) {
         matchExpression = rule.getUrlExpr();
         boostExpression = rule.getBoostExpr();
-        scriptType = Constants.LEGACY_SCRIPT;
+        final String ruleScriptType = rule.getScriptType();
+        scriptType = StringUtil.isBlank(ruleScriptType) ? Constants.LEGACY_SCRIPT : ruleScriptType;
+    }
+
+    /**
+     * Gets the script engine type used to evaluate this rule's expressions.
+     *
+     * @return the script type
+     */
+    public String getScriptType() {
+        return scriptType;
     }
 
     /**

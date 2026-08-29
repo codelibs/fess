@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.boostdoc;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
@@ -52,6 +53,10 @@ public class CreateForm {
     @Size(max = 10000)
     public String boostExpr;
 
+    /** The script type used to evaluate the expressions. */
+    @Size(max = 100)
+    public String scriptType;
+
     /** Sort order for displaying boost configurations */
     @Required
     @Min(value = 0)
@@ -73,6 +78,7 @@ public class CreateForm {
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;
+        scriptType = Constants.DEFAULT_SCRIPT;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
     }

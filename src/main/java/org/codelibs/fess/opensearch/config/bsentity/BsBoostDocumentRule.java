@@ -46,6 +46,9 @@ public class BsBoostDocumentRule extends EsAbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
+    /** scriptType */
+    protected String scriptType;
+
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -88,6 +91,9 @@ public class BsBoostDocumentRule extends EsAbstractEntity {
         if (createdTime != null) {
             addFieldToSource(sourceMap, "createdTime", createdTime);
         }
+        if (scriptType != null) {
+            addFieldToSource(sourceMap, "scriptType", scriptType);
+        }
         if (sortOrder != null) {
             addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
@@ -116,6 +122,7 @@ public class BsBoostDocumentRule extends EsAbstractEntity {
         sb.append(dm).append(boostExpr);
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
+        sb.append(dm).append(scriptType);
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
@@ -158,6 +165,16 @@ public class BsBoostDocumentRule extends EsAbstractEntity {
     public void setCreatedTime(Long value) {
         registerModifiedProperty("createdTime");
         this.createdTime = value;
+    }
+
+    public String getScriptType() {
+        checkSpecifiedProperty("scriptType");
+        return convertEmptyToNull(scriptType);
+    }
+
+    public void setScriptType(String value) {
+        registerModifiedProperty("scriptType");
+        this.scriptType = value;
     }
 
     public Integer getSortOrder() {

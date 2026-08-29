@@ -42,8 +42,8 @@ public class BoostDocumentRule extends BsBoostDocumentRule {
 
     @Override
     public String toString() {
-        return "BoostDocumentRule [boostExpr=" + boostExpr + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", sortOrder="
-                + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", urlExpr=" + urlExpr + ", docMeta=" + docMeta
-                + "]";
+        return "BoostDocumentRule [boostExpr=" + boostExpr + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", scriptType="
+                + scriptType + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", urlExpr="
+                + urlExpr + ", docMeta=" + docMeta + "]";
     }
 }

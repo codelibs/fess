@@ -70,6 +70,14 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
+                                    <label for="scriptType" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.boost_document_rule_script_type"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="scriptType"/>
+                                        <la:text styleId="scriptType" property="scriptType" styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="sortOrder" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.boost_document_rule_sort_order"/></label>
                                     <div class="form-inline col-sm-9">
