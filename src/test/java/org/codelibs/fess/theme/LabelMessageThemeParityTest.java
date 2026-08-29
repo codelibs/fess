@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Verifies cross-locale key parity for the bundled bootstrap theme i18n bundles.

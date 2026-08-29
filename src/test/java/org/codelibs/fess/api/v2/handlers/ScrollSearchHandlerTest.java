@@ -101,7 +101,7 @@ public class ScrollSearchHandlerTest extends UnitFessTestCase {
         errBody.put("code", "internal_error");
         errBody.put("message", "stream error");
         errLine.put("error", errBody);
-        new com.fasterxml.jackson.databind.ObjectMapper().writeValue(res.getWriter(), errLine);
+        new tools.jackson.databind.ObjectMapper().writeValue(res.getWriter(), errLine);
         res.getWriter().write('\n');
         final String body = res.body();
         // The terminator line must be valid NDJSON and contain the expected keys.

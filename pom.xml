@@ -1562,36 +1562,58 @@
 			<version>2.33</version>
 		</dependency>
 
-		<!-- json -->
+		<!-- json: Jackson 3 (tools.jackson.*) is what Fess code compiles against -->
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
+			<groupId>tools.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>tools.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<!-- Annotations are shared by both lines and keep the com.fasterxml groupId -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 			<version>${jackson.annotations.version}</version>
 		</dependency>
+		<!-- Jackson 2 (com.fasterxml.jackson.*) still ships alongside Jackson 3. OpenSearch
+		     declares jackson-core and the three dataformats at ${jackson2.version}, but with a
+		     blanket exclusion, so it supplies no databind/annotations. These direct declarations
+		     are therefore the only pinned source of Jackson 2 for the plugin repositories that
+		     still compile against it; dropping them silently falls back to the 2.18.3 that
+		     google-cloud-storage drags in, rather than failing the build. -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson2.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson2.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-cbor</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson2.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-smile</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson2.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson2.version}</version>
 		</dependency>
 
 		<!-- template -->

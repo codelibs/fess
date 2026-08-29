@@ -58,8 +58,8 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.opensearch.action.update.UpdateRequest;
 import org.opensearch.script.Script;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -664,7 +664,7 @@ public class SearchLogHelper {
         try {
             final Map<String, Object> source = toSource(event);
             searchLogLogger.info(objectMapper.writeValueAsString(source));
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             logger.warn("Failed to write {}", event, e);
         }
     }
