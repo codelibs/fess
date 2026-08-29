@@ -18,8 +18,11 @@ package org.codelibs.fess.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.SearchEngineUtil.XContentBuilderCallback;
 import org.junit.jupiter.api.Test;
@@ -28,6 +31,7 @@ import org.opensearch.common.xcontent.XContentType;
 import org.opensearch.core.xcontent.MediaType;
 import org.opensearch.core.xcontent.ToXContent;
 import org.opensearch.core.xcontent.XContentBuilder;
+import org.opensearch.search.SearchHit;
 
 public class SearchEngineUtilTest extends UnitFessTestCase {
 
@@ -264,6 +268,88 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         } catch (NoSuchMethodException e) {
             fail("scroll method should exist with correct signature");
         }
+    }
+
+    /**
+     * Registers a search engine client whose walk hands out the given ids, honouring a cursor that
+     * asks to stop. Records the index it was asked to walk.
+     */
+    private String[] registerWalkingClient(final String... ids) {
+        final String[] capturedIndex = { null };
+        ComponentUtil.register(new SearchEngineClient() {
+            @Override
+            public <T> long scrollSearch(final String index,
+                    final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+                    final org.codelibs.fess.opensearch.client.SearchEngineClient.EntityCreator<T, org.opensearch.action.search.SearchResponse, SearchHit> creator,
+                    final org.codelibs.fess.util.BooleanFunction<T> cursor) {
+                capturedIndex[0] = index;
+                long count = 0;
+                for (final String id : ids) {
+                    final SearchHit hit = new SearchHit(0, id, null, null);
+                    count++;
+                    @SuppressWarnings("unchecked")
+                    final T entity = (T) hit;
+                    if (!cursor.apply(entity)) {
+                        break;
+                    }
+                }
+                return count;
+            }
+        }, "searchEngineClient");
+        return capturedIndex;
+    }
+
+    /**
+     * Every hit of the walk reaches the callback, in order, and the count comes back. This is what
+     * the backup download and the diagnostic dump rely on to emit a complete bulk stream.
+     */
+    @Test
+    public void test_scroll_deliversEveryHit() {
+        final String[] capturedIndex = registerWalkingClient("a", "b", "c");
+        final List<String> seen = new ArrayList<>();
+
+        final long count = SearchEngineUtil.scroll("fess_config.bulk", hit -> {
+            seen.add(hit.getId());
+            return true;
+        });
+
+        assertEquals(List.of("a", "b", "c"), seen);
+        assertEquals(3L, count);
+        assertEquals("fess_config.bulk", capturedIndex[0]);
+    }
+
+    /**
+     * A callback returning false ends the walk rather than draining the whole index. A backup
+     * stream whose writer has failed asks to stop this way.
+     */
+    @Test
+    public void test_scroll_callbackReturningFalseStopsTheWalk() {
+        registerWalkingClient("a", "b", "c");
+        final List<String> seen = new ArrayList<>();
+
+        SearchEngineUtil.scroll("fess_config.bulk", hit -> {
+            seen.add(hit.getId());
+            return false;
+        });
+
+        assertEquals(List.of("a"), seen);
+    }
+
+    /**
+     * An empty index yields no callback and a zero count.
+     */
+    @Test
+    public void test_scroll_emptyIndex() {
+        registerWalkingClient();
+        final AtomicInteger calls = new AtomicInteger(0);
+
+        final long count = SearchEngineUtil.scroll("fess_config.bulk", hit -> {
+            calls.incrementAndGet();
+            return true;
+        });
+
+        assertEquals(0, calls.get());
+        assertEquals(0L, count);
     }
 
     @Test
