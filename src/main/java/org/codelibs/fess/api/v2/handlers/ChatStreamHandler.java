@@ -44,8 +44,8 @@ import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -691,7 +691,7 @@ public class ChatStreamHandler {
             writer.write("event: " + event + "\n");
             writer.write("data: " + MAPPER.writeValueAsString(data) + "\n\n");
             writer.flush();
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             logger.warn("[RAG] failed to serialize SSE data. event={}", event, e);
         }
     }

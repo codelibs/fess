@@ -23,11 +23,11 @@ import java.util.Map;
 
 import org.codelibs.fess.Constants;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -139,7 +139,7 @@ public class V2JsonBody {
         final byte[] jsonBytes = offset == 0 ? buf : java.util.Arrays.copyOfRange(buf, offset, buf.length);
         try {
             return mapper.readValue(new String(jsonBytes, StandardCharsets.UTF_8), TYPE);
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             throw new MalformedJsonException(e.getMessage());
         }
     }

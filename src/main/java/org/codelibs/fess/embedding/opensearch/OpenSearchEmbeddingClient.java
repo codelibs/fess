@@ -47,8 +47,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.SystemUtil;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Embedding client implementation for OpenSearch ML Commons.
@@ -447,7 +448,7 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
         final JsonNode jsonNode;
         try {
             jsonNode = objectMapper.readTree(responseBody);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             throw new EmbeddingException("Failed to parse OpenSearch ML predict response", e);
         }
         final JsonNode resultsNode = jsonNode.path("inference_results");

@@ -35,7 +35,8 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -147,8 +148,11 @@ public class ScrollSearchHandler {
                     writer.write(MAPPER.writeValueAsString(line));
                     writer.write('\n');
                     wroteAnyLine[0] = true;
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
+                } catch (final JacksonException e) {
+                    // Jackson 3 throws unchecked JacksonException instead of Jackson 2's
+                    // JsonProcessingException (an IOException), so wrap to keep feeding the
+                    // UncheckedIOException handler below unchanged.
+                    throw new UncheckedIOException(new IOException(e));
                 }
                 return true;
             }, OptionalThing.empty());

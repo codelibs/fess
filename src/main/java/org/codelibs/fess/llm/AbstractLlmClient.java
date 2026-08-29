@@ -49,8 +49,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaRequestUtil;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpSession;
 
