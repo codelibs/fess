@@ -16,13 +16,16 @@
 	<property name="maven.snapshot.repo.url" value="https://central.sonatype.com/repository/maven-snapshots" />
 	<property name="maven.release.repo.url" value="https://repo1.maven.org/maven2" />
 	<property name="maven.codelibs.release.repo.url" value="https://maven.codelibs.org/release" />
+	<property name="maven.codelibs.snapshot.repo.url" value="https://maven.codelibs.org/snapshot" />
 
 	<!-- webapp plugins bundled with the distribution -->
 	<!-- Hand-bump this for each Fess release: fess-script-groovy is released on its own
 	     cadence, and ${project.version} would resolve to a SNAPSHOT the release repo never serves.
+	     15.9.0 is not going to be published for a while, so this names the snapshot; see
+	     install.webapp.plugins for what to undo once a release exists.
 	     Fess 15.10 drops the plugin: delete this property, the install.webapp.plugins target
 	     below and the install-webapp-plugins execution in pom.xml then, don't bump it. -->
-	<property name="fess.script.groovy.version" value="15.9.0" />
+	<property name="fess.script.groovy.version" value="15.9.0-SNAPSHOT" />
 
 	<target name="install.jars">
 		<mkdir dir="${target.dir}" />
@@ -68,11 +71,32 @@
 	     on a plugin release being published. pom.xml calls this at prepare-package. -->
 	<target name="install.webapp.plugins">
 		<mkdir dir="${target.dir}" />
+		<!-- A snapshot is served under a timestamped file name
+		     (fess-script-groovy-15.9.0-20260829.021938-2.jar): the plain -SNAPSHOT.jar is a 404, and
+		     maven-metadata.xml is the only place the real name is written down. Its metadata/version
+		     is still the -SNAPSHOT one and its snapshotVersions hold one entry per artifact, which
+		     xmlproperty joins with commas, so the name is rebuilt from the parts that are single
+		     valued. Once fess-script-groovy has a release, delete these three tasks and pass
+		     maven.codelibs.release.repo.url as repo.url and fess.script.groovy.version as
+		     file.version. -->
+		<get src="${maven.codelibs.snapshot.repo.url}/org/codelibs/fess/fess-script-groovy/${fess.script.groovy.version}/maven-metadata.xml"
+			dest="${target.dir}/fess-script-groovy-maven-metadata.xml" />
+		<xmlproperty file="${target.dir}/fess-script-groovy-maven-metadata.xml" prefix="script.groovy" />
+		<loadresource property="fess.script.groovy.release.version">
+			<string value="${fess.script.groovy.version}" />
+			<filterchain>
+				<tokenfilter>
+					<replacestring from="-SNAPSHOT" to="" />
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
 		<antcall target="install.webapp.plugin">
-			<param name="repo.url" value="${maven.codelibs.release.repo.url}" />
+			<param name="repo.url" value="${maven.codelibs.snapshot.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-script-groovy" />
 			<param name="jar.version" value="${fess.script.groovy.version}" />
+			<param name="file.version"
+				value="${fess.script.groovy.release.version}-${script.groovy.metadata.versioning.snapshot.timestamp}-${script.groovy.metadata.versioning.snapshot.buildNumber}" />
 		</antcall>
 	</target>
 
@@ -86,10 +110,13 @@
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${chunk.dir}/lib" />
 	</target>
 
+	<!-- file.version is the version in the file name on the server, which is not jar.version for a
+	     snapshot; the copy renames it back so what Fess ships is named the same on every build. -->
 	<target name="install.webapp.plugin">
 		<get dest="${target.dir}">
-			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${jar.version}.jar" />
+			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
 		</get>
-		<copy file="${target.dir}/${jar.artifactId}-${jar.version}.jar" todir="${webinf.dir}/plugin" />
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
+			tofile="${webinf.dir}/plugin/${jar.artifactId}-${jar.version}.jar" />
 	</target>
 </project>

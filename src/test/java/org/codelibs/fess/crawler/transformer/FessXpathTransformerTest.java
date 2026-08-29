@@ -67,7 +67,6 @@ import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.nekohtml.parsers.DOMParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -133,28 +132,38 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         FieldUtil.set(field, obj, value);
     }
 
-    /** Guards the one-time container registration in {@link #registerCrawlingHelpers()}; the
-     *  LastaDi container is a JVM-wide singleton that is not reset between test methods, and
-     *  registering the same component name into it twice throws TooManyRegistrationComponentException. */
-    private static boolean crawlingHelpersRegistered = false;
-
     /**
      * Registers the helpers needed to run a full {@link FessXpathTransformer#transform(ResponseData)}
      * call (mirrors the original setup in {@link #test_transform()}), and returns a fresh session id
      * to use with {@link ResponseData#setSessionId(String)} so {@code getCrawlingConfig(responseData)}
      * resolves a freshly-stored {@link WebConfig}. Safe to call from multiple test methods.
+     *
+     * <p>The helpers are registered with {@link ComponentUtil}, not with the LastaDi container.
+     * {@link ComponentUtil#getComponent(String)} asks the container first and only falls back to
+     * what {@code ComponentUtil.register} holds, and the container is a JVM-wide singleton that is
+     * never reset between test classes: a component registered there shadows, for the rest of the
+     * JVM, every {@code ComponentUtil.register} another test class makes under the same name -
+     * silently, because the shadowed call neither fails nor logs. Registering {@code systemHelper}
+     * that way left {@code SamlAuthenticatorTest} holding the real clock instead of the fake one it
+     * installs, so its two tests that move the clock failed whenever this class happened to run
+     * before them in the same surefire fork. What {@code ComponentUtil} holds is cleared by
+     * {@code UnitFessTestCase#tearDown}, so nothing outlives a test method and the registration is
+     * simply repeated per method.</p>
+     *
+     * <p>The instances are bare, as they were before: {@code LaContainerImpl.register(Class, name)}
+     * builds a {@code ComponentDefImpl} with no init-method definition, so none of these helpers
+     * ever had its {@code @PostConstruct init()} run here either. {@link SystemHelper#init()} in
+     * particular reads {@code WEB-INF/project.properties}, which a unit test has no copy of, and
+     * would fail if it were called.</p>
      */
     private String registerCrawlingHelpers() {
-        if (!crawlingHelpersRegistered) {
-            SingletonLaContainerFactory.getContainer().register(CrawlingInfoHelper.class, "crawlingInfoHelper");
-            SingletonLaContainerFactory.getContainer().register(PathMappingHelper.class, "pathMappingHelper");
-            SingletonLaContainerFactory.getContainer().register(CrawlingConfigHelper.class, "crawlingConfigHelper");
-            SingletonLaContainerFactory.getContainer().register(SystemHelper.class, "systemHelper");
-            SingletonLaContainerFactory.getContainer().register(FileTypeHelper.class, "fileTypeHelper");
-            SingletonLaContainerFactory.getContainer().register(DocumentHelper.class, "documentHelper");
-            SingletonLaContainerFactory.getContainer().register(LabelTypeHelper.class, "labelTypeHelper");
-            crawlingHelpersRegistered = true;
-        }
+        ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
+        ComponentUtil.register(new PathMappingHelper(), "pathMappingHelper");
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.register(new FileTypeHelper(), "fileTypeHelper");
+        ComponentUtil.register(new DocumentHelper(), "documentHelper");
+        ComponentUtil.register(new LabelTypeHelper(), "labelTypeHelper");
 
         final WebConfig webConfig = new WebConfig();
         // A real crawl always stores a WebConfig with a DB-assigned id; give it one here too, since
