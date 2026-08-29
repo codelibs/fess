@@ -158,7 +158,7 @@ public abstract class AbstractDataStore implements DataStore {
     protected String getScriptType(final DataStoreParams paramMap) {
         final String value = paramMap.getAsString(SCRIPT_TYPE);
         if (StringUtil.isBlank(value)) {
-            return Constants.DEFAULT_SCRIPT;
+            return Constants.LEGACY_SCRIPT;
         }
         return value;
     }

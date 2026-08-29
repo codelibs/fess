@@ -120,7 +120,7 @@ public class CreateForm {
     public void initialize() {
         target = Constants.DEFAULT_JOB_TARGET;
         cronExpression = Constants.DEFAULT_CRON_EXPRESSION;
-        scriptType = Constants.DEFAULT_JOB_SCRIPT_TYPE;
+        scriptType = ComponentUtil.getFessConfig().getJobDefaultScript();
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

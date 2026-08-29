@@ -115,7 +115,7 @@ public class ScriptExecutorJob implements LaJob {
                 logger.info("Starting job: id={}", id);
             }
 
-            final Object ret = jobExecutor.execute(Constants.DEFAULT_SCRIPT, script);
+            final Object ret = jobExecutor.execute(scriptType, script);
             if (ret == null) {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
                     logger.info("Finished job: id={}", id);

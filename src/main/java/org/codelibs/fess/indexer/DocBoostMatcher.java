@@ -58,7 +58,7 @@ public class DocBoostMatcher {
     public DocBoostMatcher(final BoostDocumentRule rule) {
         matchExpression = rule.getUrlExpr();
         boostExpression = rule.getBoostExpr();
-        scriptType = ComponentUtil.getFessConfig().getCrawlerDefaultScript();
+        scriptType = Constants.LEGACY_SCRIPT;
     }
 
     /**

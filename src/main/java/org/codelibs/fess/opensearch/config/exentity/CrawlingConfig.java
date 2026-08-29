@@ -89,7 +89,7 @@ public interface CrawlingConfig {
         if (StringUtil.isNotBlank(scriptType)) {
             return scriptType;
         }
-        return Constants.DEFAULT_SCRIPT;
+        return Constants.LEGACY_SCRIPT;
     }
 
     public enum ConfigType {

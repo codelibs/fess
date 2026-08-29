@@ -18,7 +18,10 @@ package org.codelibs.fess.helper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 
@@ -28,6 +31,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
+import org.codelibs.fess.script.ScriptEngine;
+import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
@@ -52,8 +57,16 @@ public class PathMappingHelper extends AbstractConfigHelper {
     /** Function matcher for encode URL. */
     protected static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
 
-    /** Groovy matcher prefix. */
-    protected static final String GROOVY_MATCHER = "groovy:";
+    /**
+     * Replacement prefixes that name a script engine rather than a URL scheme.
+     *
+     * <p>Both are valid URI schemes, so the prefix alone cannot tell them apart. These are the
+     * script types Fess itself records in settings, so a mapping using one of them and finding no
+     * engine is a missing plugin worth reporting, while any other unregistered prefix -
+     * <code>http:</code>, <code>https:</code>, <code>file:</code>, <code>ftp:</code>,
+     * <code>smb:</code> and the rest - is an ordinary replacement and stays silent.</p>
+     */
+    protected static final Set<String> SCRIPT_ENGINE_NAMES = Set.of(Constants.DEFAULT_SCRIPT, Constants.LEGACY_SCRIPT);
 
     /** Map of path mappings by process type. */
     protected final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
@@ -225,16 +238,67 @@ public class PathMappingHelper extends AbstractConfigHelper {
         if (FUNCTION_ENCODEURL_MATCHER.equals(replacement)) {
             return (u, m) -> DocumentUtil.encodeUrl(u);
         }
-        if (!replacement.startsWith(GROOVY_MATCHER)) {
+        final int separatorIndex = replacement.indexOf(':');
+        if (separatorIndex <= 0) {
             return (u, m) -> m.replaceAll(replacement);
         }
-        final String template = replacement.substring(GROOVY_MATCHER.length());
+        final String engineName = replacement.substring(0, separatorIndex);
+        final String template = replacement.substring(separatorIndex + 1);
+        // The engine is looked up on the first evaluation, not here: engines register during DI
+        // post-construction, after these functions are built, so a decision made now would depend
+        // on registration order. The decision is then kept, because the registered set no longer
+        // changes once startup is over.
+        final AtomicReference<BiFunction<String, Matcher, String>> resolvedRef = new AtomicReference<>();
+        return (u, m) -> {
+            BiFunction<String, Matcher, String> resolved = resolvedRef.get();
+            if (resolved == null) {
+                resolved = resolveEngineMatcher(engineName, template, replacement);
+                resolvedRef.set(resolved);
+            }
+            return resolved.apply(u, m);
+        };
+    }
+
+    /**
+     * Resolves the engine named by a replacement prefix, falling back to a plain replacement.
+     *
+     * <p>A replacement containing a colon is far more often an ordinary path mapping such as
+     * <code>file:</code> than a script, so every way of failing to reach an engine has to end in
+     * the plain replacement. Throwing here would leave {@code PathMapping#process} logging a
+     * warning and returning the raw URL, which indexes the wrong URL for a mapping that never
+     * wanted an engine in the first place.</p>
+     *
+     * @param engineName the prefix before the first colon
+     * @param template the script text after the first colon
+     * @param replacement the whole replacement, used when falling back
+     * @return the matcher function to use for every evaluation of this replacement
+     */
+    protected BiFunction<String, Matcher, String> resolveEngineMatcher(final String engineName, final String template,
+            final String replacement) {
+        ScriptEngine scriptEngine = null;
+        try {
+            final ScriptEngineFactory scriptEngineFactory = ComponentUtil.getScriptEngineFactory();
+            if (scriptEngineFactory.hasScriptEngine(engineName)) {
+                scriptEngine = scriptEngineFactory.getScriptEngine(engineName);
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to load a script engine for {}.", replacement, e);
+            }
+        }
+        if (scriptEngine == null) {
+            if (SCRIPT_ENGINE_NAMES.contains(engineName.toLowerCase(Locale.ROOT))) {
+                logger.warn("No script engine is registered for {}, so \"{}\" is used as a plain replacement."
+                        + " Install the plugin providing it, such as fess-script-groovy for groovy.", engineName, replacement);
+            }
+            return (u, m) -> m.replaceAll(replacement);
+        }
+        final ScriptEngine engine = scriptEngine;
         return (u, m) -> {
             final Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("url", u);
             paramMap.put("matcher", m);
-            final Object value =
-                    ComponentUtil.getScriptEngineFactory().getScriptEngine(Constants.DEFAULT_SCRIPT).evaluate(template, paramMap);
+            final Object value = engine.evaluate(template, paramMap);
             if (value == null) {
                 return u;
             }

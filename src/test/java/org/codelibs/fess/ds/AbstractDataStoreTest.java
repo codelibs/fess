@@ -22,19 +22,13 @@ import java.util.concurrent.CountDownLatch;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.entity.DataStoreParams;
-import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
-import org.codelibs.fess.script.AbstractScriptEngine;
 import org.codelibs.fess.script.ScriptEngineFactory;
+import org.codelibs.fess.script.javascript.JavaScriptEngine;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyShell;
 
 public class AbstractDataStoreTest extends UnitFessTestCase {
     public AbstractDataStore dataStore;
@@ -55,32 +49,10 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
             }
         };
 
-        ScriptEngineFactory scriptEngineFactory = new ScriptEngineFactory();
-        ComponentUtil.register(scriptEngineFactory, "scriptEngineFactory");
-        new AbstractScriptEngine() {
-
-            @Override
-            public Object evaluate(String template, Map<String, Object> paramMap) {
-                final Map<String, Object> bindingMap = new HashMap<>(paramMap);
-                bindingMap.put("container", SingletonLaContainerFactory.getContainer());
-                final GroovyShell groovyShell = new GroovyShell(new Binding(bindingMap));
-                try {
-                    return groovyShell.evaluate(template);
-                } catch (final JobProcessingException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    return null;
-                } finally {
-                    final GroovyClassLoader loader = groovyShell.getClassLoader();
-                    loader.clearCache();
-                }
-            }
-
-            @Override
-            protected String getName() {
-                return Constants.DEFAULT_SCRIPT;
-            }
-        }.register();
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
+        // The real engine, not a stub: these tests are about what Constants.DEFAULT_SCRIPT
+        // evaluates a data store field script to, which only the engine behind that name answers.
+        new JavaScriptEngine().register();
     }
 
     @Test
