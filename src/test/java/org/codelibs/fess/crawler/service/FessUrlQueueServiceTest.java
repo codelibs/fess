@@ -79,6 +79,17 @@ public class FessUrlQueueServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_invalidNameIsReportedOnceNotPerPoll() {
+        final TestFessUrlQueueService service = new TestFessUrlQueueService("noSuchOrder");
+        for (int i = 0; i < 5; i++) {
+            assertTrue(service.getUrlQueueOrder("s1") instanceof SequentialUrlQueueOrder);
+        }
+        // getUrlQueueOrder runs once per queue poll; the warning must not.
+        assertEquals(1, service.reportedInvalidOrders.size());
+        assertTrue(service.reportedInvalidOrders.contains("noSuchOrder"));
+    }
+
+    @Test
     public void test_wrongTypeFallsBackToDefault() {
         // systemProperties is a registered component (test_app.xml) that is not a UrlQueueOrder.
         final UrlQueueOrder order = new TestFessUrlQueueService("systemProperties").getUrlQueueOrder("s1");
