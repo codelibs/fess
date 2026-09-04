@@ -62,10 +62,15 @@ public class ChatAction extends FessSearchAction {
     /**
      * Displays the chat page.
      *
-     * @return the HTML response for the chat page, or redirects to search if chat is not available
+     * @return the HTML response for the chat page, a redirect to login while login.required is set
+     *         and nobody is signed in, or a redirect to search if chat is not available
      */
     @Execute
     public HtmlResponse index() {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("Chat page requested. Checking availability...");
         }
@@ -98,10 +103,15 @@ public class ChatAction extends FessSearchAction {
      * Clears the chat session.
      *
      * @param form the chat form containing the session ID to clear
-     * @return the HTML response redirecting to the chat page
+     * @return the HTML response redirecting to the chat page, or to login while login.required is
+     *         set and nobody is signed in
      */
     @Execute
     public HtmlResponse clear(final ChatForm form) {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
+
         if (form.sessionId != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Clearing chat session. sessionId={}", form.sessionId);
