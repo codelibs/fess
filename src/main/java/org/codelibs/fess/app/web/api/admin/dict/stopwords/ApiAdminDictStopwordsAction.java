@@ -71,7 +71,7 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(stopwordsService.getStopwordsList(body.dictId, pager)
                 .stream()
                 .map(stopwordsItem -> createEditBody(stopwordsItem, dictId))
-                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
+                .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     /**

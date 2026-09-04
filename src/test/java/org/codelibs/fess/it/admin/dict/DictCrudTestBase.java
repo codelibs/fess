@@ -87,8 +87,20 @@ public abstract class DictCrudTestBase extends CrudTestBase {
         String response = checkGetMethod(searchBody, getListEndpointSuffix()).asString();
         final int total = JsonPath.from(response).getInt("response.total");
         final List<Map<String, String>> items = JsonPath.from(response).getList("response.settings");
-        final int status = JsonPath.from(response).getInt("response.status");
-        assertEquals(total, items.size());
-        assertEquals(0, status);
+        assertEquals(0, JsonPath.from(response).getInt("response.status"));
+
+        // A page holds at most paging.page.size entries while total counts every record, so the
+        // two are only equal when the dictionary fits on one page. Asserting them equal would
+        // hold just as well if total were derived from the rows, which is what it used to be.
+        assertTrue(total >= items.size(), "total " + total + " is smaller than the page of " + items.size());
+
+        // Asking for one entry must not make the dictionary look one entry long: a caller that
+        // pages has nothing else to tell it that more exist.
+        final Map<String, Object> onePerPage = new HashMap<>();
+        onePerPage.put("size", 1);
+        response = checkGetMethod(onePerPage, getListEndpointSuffix()).asString();
+        assertEquals(0, JsonPath.from(response).getInt("response.status"));
+        assertEquals(1, JsonPath.from(response).getList("response.settings").size());
+        assertEquals(total, JsonPath.from(response).getInt("response.total"));
     }
 }

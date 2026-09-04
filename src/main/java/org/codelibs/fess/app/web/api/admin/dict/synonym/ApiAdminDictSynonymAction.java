@@ -71,7 +71,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(synonymService.getSynonymList(body.dictId, pager)
                 .stream()
                 .map(protwordsItem -> createEditBody(protwordsItem, dictId))
-                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
+                .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     /**

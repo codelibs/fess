@@ -21,6 +21,8 @@ import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -117,5 +119,29 @@ public class ApiResultTest extends UnitFessTestCase {
     @Test
     public void test_Status_SYSTEM_ERROR() {
         assertEquals(2, Status.SYSTEM_ERROR.getId());
+    }
+
+    /**
+     * settings() fills total in from the rows it was handed, which is only the record count when
+     * the whole list fits on one page. A caller that asks for a page therefore cannot tell whether
+     * more exist, so an endpoint that pages has to set the real count afterwards.
+     */
+    @Test
+    public void test_apiConfigsResponse_totalCanCarryTheRecordCount() {
+        final ApiResult.ApiConfigsResponse<String> response =
+                new ApiResult.ApiConfigsResponse<String>().settings(List.of("a", "b")).total(33);
+
+        assertEquals(2, response.settings.size());
+        assertEquals(33L, response.total);
+    }
+
+    /**
+     * Without that call the count still reflects the rows, which is what the single-page case wants.
+     */
+    @Test
+    public void test_apiConfigsResponse_totalDefaultsToTheRowCount() {
+        final ApiResult.ApiConfigsResponse<String> response = new ApiResult.ApiConfigsResponse<String>().settings(List.of("a", "b"));
+
+        assertEquals(2L, response.total);
     }
 }

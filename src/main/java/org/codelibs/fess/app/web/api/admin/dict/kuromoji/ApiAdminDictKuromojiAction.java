@@ -72,7 +72,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(kuromojiService.getKuromojiList(body.dictId, pager)
                 .stream()
                 .map(protwordsItem -> createEditBody(protwordsItem, dictId))
-                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
+                .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     /**
