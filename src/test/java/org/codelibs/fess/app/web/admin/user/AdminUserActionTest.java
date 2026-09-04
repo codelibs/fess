@@ -19,7 +19,10 @@ import java.util.Map;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -170,5 +173,59 @@ public class AdminUserActionTest extends UnitFessTestCase {
         assertEquals(2, CrudMode.EDIT);
         assertEquals(3, CrudMode.DELETE);
         assertEquals(4, CrudMode.DETAILS);
+    }
+
+    /**
+     * The password policy is shared with the REST API, so a password the screens refuse cannot be
+     * set through an API call instead. A blacklisted password is one such case.
+     */
+    @Test
+    public void test_verifyPasswordPolicy_rejectsABlacklistedPassword() {
+        assertTrue(policyErrorOf("admin").contains("password"));
+    }
+
+    /**
+     * A password shorter than password.min.length is refused too.
+     */
+    @Test
+    public void test_verifyPasswordPolicy_rejectsATooShortPassword() {
+        assertTrue(policyErrorOf("x").contains("password"));
+    }
+
+    /**
+     * A password that satisfies the policy reports nothing, and the form keeps it.
+     */
+    @Test
+    public void test_verifyPasswordPolicy_acceptsACompliantPassword() {
+        assertEquals("", policyErrorOf("Str0ng-Passw0rd!"));
+    }
+
+    /**
+     * An edit that leaves the password empty keeps the stored one, so a blank value is not a policy
+     * violation at this point.
+     */
+    @Test
+    public void test_verifyPasswordPolicy_ignoresABlankPassword() {
+        assertEquals("", policyErrorOf(null));
+        assertEquals("", policyErrorOf(""));
+    }
+
+    /**
+     * Runs the shared policy check over one password and returns what it reported, or an empty
+     * string when it reported nothing.
+     */
+    private String policyErrorOf(final String password) {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final CreateForm form = new CreateForm();
+        form.crudMode = CrudMode.CREATE;
+        form.password = password;
+        form.confirmPassword = password;
+        final StringBuilder reported = new StringBuilder();
+        AdminUserAction.verifyPasswordPolicy(form, messenger -> {
+            final FessMessages messages = new FessMessages();
+            messenger.message(messages);
+            reported.append(messages.toString());
+        });
+        return reported.toString();
     }
 }

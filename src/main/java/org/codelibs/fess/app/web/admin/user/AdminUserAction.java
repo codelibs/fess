@@ -430,14 +430,25 @@ public class AdminUserAction extends FessAdminAction {
                 messages.addErrorsInvalidConfirmPassword("confirmPassword");
             }, validationErrorLambda);
         }
-        if (StringUtil.isNotBlank(form.password)) {
-            final String validationError = ComponentUtil.getSystemHelper().validatePassword(form.password);
-            if (StringUtil.isNotBlank(validationError)) {
-                resetPassword(form);
-                throwValidationError(messages -> {
-                    addPasswordValidationError(messages, validationError);
-                }, validationErrorLambda);
-            }
+        verifyPasswordPolicy(form, messages -> throwValidationError(messages, validationErrorLambda));
+    }
+
+    /**
+     * Applies the configured password policy to the form's password, reporting the first rule it
+     * breaks. Shared with the REST API so that a password the admin screens refuse cannot be set
+     * through an API call instead.
+     *
+     * @param form the form carrying the password to check
+     * @param throwError callback to report a policy violation
+     */
+    public static void verifyPasswordPolicy(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
+        if (StringUtil.isBlank(form.password)) {
+            return;
+        }
+        final String validationError = ComponentUtil.getSystemHelper().validatePassword(form.password);
+        if (StringUtil.isNotBlank(validationError)) {
+            resetPassword(form);
+            throwError.accept(messages -> addPasswordValidationError(messages, validationError));
         }
     }
 
@@ -447,7 +458,7 @@ public class AdminUserAction extends FessAdminAction {
      * @param messages the FessMessages object to add the error to
      * @param errorKey the error key identifying the type of password validation error
      */
-    protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
+    protected static void addPasswordValidationError(final FessMessages messages, final String errorKey) {
         switch (errorKey) {
         case "errors.password_length" -> messages.addErrorsPasswordLength("password",
                 String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
