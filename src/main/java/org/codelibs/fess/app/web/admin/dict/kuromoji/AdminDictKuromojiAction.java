@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.dict.kuromoji;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,7 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -39,6 +41,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.validation.VaMessenger;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -504,15 +507,25 @@ public class AdminDictKuromojiAction extends FessAdminAction {
      * @param form The create form.
      */
     protected void verifyForm(final CreateForm form) {
+        verifyKuromojiEntry(form, messages -> throwValidationError(messages, this::asEditHtml));
+    }
+
+    /**
+     * Checks an entry against the rules the user dictionary itself enforces: a token may not
+     * contain a space, and the segmentation and the reading must be split into the same number of
+     * tokens. Shared with the REST API, because an entry that breaks either rule is only rejected
+     * when the search engine next loads the dictionary -- and it refuses to open the index at all
+     * at that point, which is a long way from where the entry was added.
+     *
+     * @param form the entry to check
+     * @param throwError callback to report a violation
+     */
+    public static void verifyKuromojiEntry(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
         if (form.token != null && form.token.split(" ").length > 1) {
-            throwValidationError(messages -> {
-                messages.addErrorsInvalidKuromojiToken("token", form.token);
-            }, this::asEditHtml);
+            throwError.accept(messages -> messages.addErrorsInvalidKuromojiToken("token", form.token));
         }
         if (form.segmentation != null && form.reading != null && form.segmentation.split(" ").length != form.reading.split(" ").length) {
-            throwValidationError(messages -> {
-                messages.addErrorsInvalidKuromojiSegmentation("segmentation", form.segmentation, form.reading);
-            }, this::asEditHtml);
+            throwError.accept(messages -> messages.addErrorsInvalidKuromojiSegmentation("segmentation", form.segmentation, form.reading));
         }
     }
 
