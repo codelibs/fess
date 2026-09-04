@@ -40,11 +40,49 @@ public class RateLimitHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_getClientIp_xForwardedFor_trustedProxy() {
-        // 127.0.0.1 is configured as a trusted proxy by default
+        // 127.0.0.1 is configured as a trusted proxy by default. Only the last entry was actually
+        // observed by a hop we trust; everything to its left is whatever the client chose to send.
         final MockletHttpServletRequest request = getMockRequest();
         request.setRemoteAddr("127.0.0.1");
         request.addHeader("X-Forwarded-For", "203.0.113.50, 70.41.3.18, 150.172.238.178");
+        assertEquals("150.172.238.178", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_xForwardedFor_ignoresAClientSuppliedPrefix() {
+        // A proxy that appends (nginx's proxy_add_x_forwarded_for) leaves anything the client sent
+        // in front of the address it saw. Attributing the request to the front entry would let the
+        // caller pick its own rate limit bucket, and simply changing it would lift a block.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Forwarded-For", "10.9.9.9, 203.0.113.50");
         assertEquals("203.0.113.50", rateLimitHelper.getClientIp(request));
+
+        final MockletHttpServletRequest spoofed = getMockRequest();
+        spoofed.setRemoteAddr("127.0.0.1");
+        spoofed.addHeader("X-Forwarded-For", "10.8.8.8, 203.0.113.50");
+        assertEquals("203.0.113.50", rateLimitHelper.getClientIp(spoofed));
+    }
+
+    @Test
+    public void test_getClientIp_xForwardedFor_skipsOurOwnProxies() {
+        // A chain made only of trusted hops says nothing about the caller, so the request falls
+        // back to the address the connection actually came from.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Forwarded-For", "127.0.0.1, ::1");
+        assertEquals("127.0.0.1", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_xForwardedFor_fallsBackWhenEveryHopIsTrusted() {
+        // X-Real-IP is set by the proxy rather than appended to, so it is still usable when the
+        // forwarded chain carries nothing we can attribute.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Forwarded-For", "127.0.0.1");
+        request.addHeader("X-Real-IP", "203.0.113.75");
+        assertEquals("203.0.113.75", rateLimitHelper.getClientIp(request));
     }
 
     @Test
@@ -92,13 +130,12 @@ public class RateLimitHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_getClientIp_trustedProxy_xffWithSpaces_trimsTokens() {
-        // RFC 7239-style: each token in the XFF list may have surrounding whitespace.
-        // The leftmost (client-provided) address must be returned as a trimmed string.
+        // RFC 7239-style: each token in the XFF list may have surrounding whitespace, and the one
+        // that is used must come back trimmed.
         final MockletHttpServletRequest request = getMockRequest();
         request.setRemoteAddr("127.0.0.1"); // trusted proxy by default config
         request.addHeader("X-Forwarded-For", "  1.1.1.1  ,  2.2.2.2  ");
-        // The helper takes [0].trim() — leading/trailing spaces around "1.1.1.1" must be stripped.
-        assertEquals("1.1.1.1", rateLimitHelper.getClientIp(request));
+        assertEquals("2.2.2.2", rateLimitHelper.getClientIp(request));
     }
 
     @Test
@@ -121,14 +158,16 @@ public class RateLimitHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getClientIp_trustedProxy_xffMultiHop_returnsLeftmost() {
-        // Multi-hop proxy chain: "client, proxy1, proxy2". The leftmost entry is the
-        // originating client address; we always return it (the rightmost non-trusted entry
-        // per RFC 7239 for strict mode, but the current implementation uses index 0).
+    public void test_getClientIp_trustedProxy_xffMultiHop_returnsRightmostUntrusted() {
+        // Multi-hop chain "client, proxy1, proxy2". Only the last entry was observed by a hop we
+        // trust; everything to its left is only as trustworthy as whoever wrote it, and the
+        // caller writes the front of the chain. Rate limiting has to attribute the request to
+        // something the caller cannot choose, so the rightmost entry that is not one of our own
+        // proxies is used.
         final MockletHttpServletRequest request = getMockRequest();
         request.setRemoteAddr("127.0.0.1");
         request.addHeader("X-Forwarded-For", "1.1.1.1, 2.2.2.2, 3.3.3.3");
-        assertEquals("1.1.1.1", rateLimitHelper.getClientIp(request));
+        assertEquals("3.3.3.3", rateLimitHelper.getClientIp(request));
     }
 
     @Test
