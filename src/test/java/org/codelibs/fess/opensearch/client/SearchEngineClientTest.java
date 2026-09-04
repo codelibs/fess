@@ -25,13 +25,28 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.action.ActionRequest;
+import org.opensearch.action.ActionType;
+import org.opensearch.action.search.CreatePitAction;
+import org.opensearch.action.search.CreatePitResponse;
+import org.opensearch.action.search.DeletePitRequest;
+import org.opensearch.action.search.DeletePitResponse;
 import org.opensearch.action.search.SearchAction;
 import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.action.search.SearchRequest;
 import org.opensearch.action.search.SearchResponse;
+import org.opensearch.action.search.ShardSearchFailure;
+import org.opensearch.action.support.PlainActionFuture;
+import org.opensearch.common.action.ActionFuture;
+import org.opensearch.core.action.ActionListener;
+import org.opensearch.core.action.ActionResponse;
 import org.opensearch.common.xcontent.json.JsonXContent;
 import org.opensearch.core.xcontent.DeprecationHandler;
 import org.opensearch.core.xcontent.NamedXContentRegistry;
 import org.opensearch.core.xcontent.XContentParser;
+import org.opensearch.search.sort.FieldSortBuilder;
+import org.opensearch.search.sort.SortBuilder;
+import org.opensearch.search.sort.SortOrder;
 
 public class SearchEngineClientTest extends UnitFessTestCase {
 
@@ -128,6 +143,90 @@ public class SearchEngineClientTest extends UnitFessTestCase {
             }
         }.warnUnlessOpenSearch3();
         assertEquals(0, reports.get());
+    }
+
+    /**
+     * A point in time opened on an alias covers every index behind it, and _shard_doc restarts per
+     * index -- the same value shows up in several of them. search_after asks for values strictly
+     * greater than the last one on the page, so without a second key a page ending on a repeated
+     * value silently drops whatever another index still holds at or below it. The index name is
+     * therefore sorted on as well.
+     */
+    @Test
+    public void test_pitSearch_ordersByIndexAfterShardDoc() throws Exception {
+        final List<SearchRequest> searches = new ArrayList<>();
+        final SearchEngineClient client = pitStub(searches, "pit-1");
+
+        client.pitSearch("fess_config", "1m", "10s", new SearchRequestBuilder(client, SearchAction.INSTANCE), response -> true);
+
+        assertEquals(1, searches.size());
+        final List<SortBuilder<?>> sorts = searches.get(0).source().sorts();
+        assertNotNull(sorts);
+        assertTrue(sorts.size() >= 2);
+        assertEquals("_shard_doc", sorts.get(sorts.size() - 2).getWriteableName());
+        final SortBuilder<?> last = sorts.get(sorts.size() - 1);
+        assertTrue(last instanceof FieldSortBuilder);
+        assertEquals("_index", ((FieldSortBuilder) last).getFieldName());
+        assertEquals(SortOrder.ASC, ((FieldSortBuilder) last).order());
+    }
+
+    /**
+     * A closed or otherwise unavailable index answers the create request with no identifier instead
+     * of an error. Building the point in time from that null used to fail with a bare
+     * NullPointerException, which said nothing about which index was at fault.
+     */
+    @Test
+    public void test_pitSearch_reportsAMissingPitId() throws Exception {
+        final List<SearchRequest> searches = new ArrayList<>();
+        final SearchEngineClient client = pitStub(searches, null);
+
+        try {
+            client.pitSearch("fess_config", "1m", "10s", new SearchRequestBuilder(client, SearchAction.INSTANCE), response -> true);
+            fail("a missing point in time must be reported");
+        } catch (final SearchEngineClientException e) {
+            assertTrue(e.getMessage().contains("fess_config"));
+        }
+        assertTrue(searches.isEmpty());
+    }
+
+    /**
+     * A client whose create-point-in-time answers with the given identifier and whose searches
+     * always come back empty, so a walk ends after one page.
+     */
+    private SearchEngineClient pitStub(final List<SearchRequest> searches, final String pitId) {
+        return new SearchEngineClient() {
+            {
+                // pitSearch talks to the delegate; point it back at this instance so the overrides
+                // below are the ones that answer.
+                this.client = this;
+            }
+
+            @Override
+            public void deletePits(final DeletePitRequest request, final ActionListener<DeletePitResponse> listener) {
+                listener.onResponse(new DeletePitResponse(List.of()));
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(
+                    final ActionType<Response> action, final Request request) {
+                final PlainActionFuture<Response> future = PlainActionFuture.newFuture();
+                if (CreatePitAction.INSTANCE.equals(action)) {
+                    future.onResponse(
+                            (Response) new CreatePitResponse(pitId, System.currentTimeMillis(), 1, 1, 0, 0, new ShardSearchFailure[0]));
+                } else if (SearchAction.INSTANCE.equals(action)) {
+                    searches.add((SearchRequest) request);
+                    try {
+                        future.onResponse((Response) responseWithIds());
+                    } catch (final Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+                } else {
+                    future.onResponse(null);
+                }
+                return future;
+            }
+        };
     }
 
     /**

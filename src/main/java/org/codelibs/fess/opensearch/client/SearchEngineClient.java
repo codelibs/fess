@@ -175,6 +175,7 @@ import org.opensearch.search.builder.PointInTimeBuilder;
 import org.opensearch.search.collapse.CollapseBuilder;
 import org.opensearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.opensearch.search.sort.SortBuilders;
+import org.opensearch.search.sort.SortOrder;
 import org.opensearch.threadpool.ThreadPool;
 import org.opensearch.transport.client.AdminClient;
 import org.opensearch.transport.client.Client;
@@ -1747,7 +1748,13 @@ public class SearchEngineClient implements Client {
      */
     protected void pitSearch(final String index, final String keepAlive, final String searchTimeout, final SearchRequestBuilder builder,
             final BooleanFunction<SearchResponse> pageHandler) {
+        // _shard_doc alone is not a total order once the point in time spans more than one index:
+        // the value restarts per index, so the same number appears in several of them. search_after
+        // asks for values strictly greater than the last one on the page, so a page that ends on a
+        // repeated value drops every document another index still holds at or below it. Ordering by
+        // the index name as well makes the pair unique again.
         builder.addSort(SortBuilders.shardDocSort());
+        builder.addSort(SortBuilders.fieldSort("_index").order(SortOrder.ASC));
 
         final SearchRequest request = builder.request();
         final TimeValue keepAliveValue = TimeValue.parseTimeValue(keepAlive, "keepAlive");
@@ -1761,6 +1768,12 @@ public class SearchEngineClient implements Client {
             request.routing((String) null);
         }
         final String pitId = client.execute(CreatePitAction.INSTANCE, createPitRequest).actionGet(searchTimeout).getId();
+        if (pitId == null) {
+            // A closed or otherwise unavailable index answers with no identifier rather than an
+            // error, and the builder below would then fail with a bare NullPointerException that
+            // says nothing about the index.
+            throw new SearchEngineClientException("[" + index + "] Failed to open a point in time.");
+        }
         try {
             builder.setPointInTime(new PointInTimeBuilder(pitId).setKeepAlive(keepAliveValue));
             Object[] searchAfter = null;

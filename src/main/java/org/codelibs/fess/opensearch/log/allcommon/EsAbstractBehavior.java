@@ -68,6 +68,7 @@ import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
 import org.opensearch.search.builder.PointInTimeBuilder;
 import org.opensearch.search.sort.SortBuilders;
+import org.opensearch.search.sort.SortOrder;
 import org.opensearch.transport.client.Client;
 
 /**
@@ -264,7 +265,11 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         }
         esCb.request().build(builder);
         final SearchRequestBuilder searchBuilder = esCb.build(builder);
+        // _shard_doc restarts per index, so it is only a total order while the point in time covers
+        // a single one. Ordering by the index name as well keeps search_after from skipping
+        // documents if it ever covers more.
         searchBuilder.addSort(SortBuilders.shardDocSort());
+        searchBuilder.addSort(SortBuilders.fieldSort("_index").order(SortOrder.ASC));
 
         // A point in time carries the indices, routing and preference itself, and a search that
         // repeats any of them is rejected with a 400 ("[indices]/[routing]/[preference] cannot be
