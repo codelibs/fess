@@ -32,6 +32,8 @@ import org.lastaflute.web.login.credential.LoginCredential;
 
 import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 
 /**
  * Microsoft Entra ID credential implementation for Fess authentication.
@@ -193,12 +195,14 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
                 final IAccount account = authResult.account();
-                final String homeAccountId = account.homeAccountId();
+                final String objectId = getObjectId();
                 final String username = account.username();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("homeAccountId={}, username={}", homeAccountId, username);
+                    logger.debug("objectId={}, username={}", objectId, username);
                 }
-                permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(homeAccountId));
+                if (StringUtil.isNotBlank(objectId)) {
+                    permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(objectId));
+                }
                 permissionSet.add(systemHelper.getSearchRoleByDirectoryUser(username));
                 if (ComponentUtil.getFessConfig().isEntraIdUseDomainServices() && username.indexOf('@') >= 0) {
                     final String[] values = username.split("@");
@@ -211,6 +215,36 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 permissions = permissionSet.stream().filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]);
             }
             return permissions;
+        }
+
+        /**
+         * Reads the {@code oid} claim -- the user's object id in this tenant -- out of the ID
+         * token.
+         *
+         * <p>Microsoft Graph names a user by that object id, so it is the value a crawler writes
+         * into the {@code role} field of a document this user owns. {@code IAccount} exposes no
+         * plain object id of its own: {@code homeAccountId()} is MSAL4J's own account key, and
+         * {@code getTenantProfiles()} is null on the account an {@code IAuthenticationResult}
+         * carries.
+         *
+         * @return The object id, or null when the ID token carries none.
+         */
+        protected String getObjectId() {
+            final String idToken = authResult.idToken();
+            if (StringUtil.isBlank(idToken)) {
+                logger.warn("No ID token for {}. The object id permission is not granted.", getName());
+                return null;
+            }
+            try {
+                final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
+                if (claimsSet != null) {
+                    return claimsSet.getStringClaim("oid");
+                }
+                logger.warn("The ID token of {} carries no claims. The object id permission is not granted.", getName());
+            } catch (final Exception e) {
+                logger.warn("Failed to read the oid claim of {}. The object id permission is not granted.", getName(), e);
+            }
+            return null;
         }
 
         @Override

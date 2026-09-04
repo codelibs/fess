@@ -40,14 +40,26 @@ import org.junit.jupiter.api.Test;
 import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.ITenantProfile;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.PlainJWT;
 
 public class EntraIdUserPermissionTest extends UnitFessTestCase {
+
+    /** The user's object id in the tenant, as the ID token's {@code oid} claim carries it. */
+    private static final String OBJECT_ID = "3f7a1c9e-0b52-4d18-9a6c-2e5b8d41f0aa";
+
+    /** An ID token carrying {@link #OBJECT_ID}, in the shape MSAL4J hands back. */
+    private static final String ID_TOKEN = new PlainJWT(new JWTClaimsSet.Builder().claim("oid", OBJECT_ID).build()).serialize();
 
     private static IAuthenticationResult authResult() {
         return authResult(new Date(Long.MAX_VALUE), "access-token");
     }
 
     private static IAuthenticationResult authResult(final Date expiresOn, final String accessToken) {
+        return authResult(expiresOn, accessToken, ID_TOKEN);
+    }
+
+    private static IAuthenticationResult authResult(final Date expiresOn, final String accessToken, final String idToken) {
         final IAccount account = new IAccount() {
             private static final long serialVersionUID = 1L;
 
@@ -81,7 +93,7 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
 
             @Override
             public String idToken() {
-                return "id-token";
+                return idToken;
             }
 
             @Override
@@ -115,13 +127,17 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
      * Builds an EntraIdUser without letting its constructor talk to Microsoft Graph.
      */
     private EntraIdUser newUser() {
+        return newUser(authResult());
+    }
+
+    private EntraIdUser newUser(final IAuthenticationResult authResult) {
         ComponentUtil.register(new EntraIdAuthenticator() {
             @Override
             public void scheduleUpdateMemberOf(final EntraIdUser user) {
                 // the test drives setGroups/setRoles itself
             }
         }, EntraIdAuthenticator.class.getCanonicalName());
-        return new EntraIdUser(authResult());
+        return new EntraIdUser(authResult);
     }
 
     @Test
@@ -159,7 +175,40 @@ public class EntraIdUserPermissionTest extends UnitFessTestCase {
         // The account username is taro@contoso.onmicrosoft.com, so nothing is truncated here; the
         // assertion that matters is that the value arrives whole and prefixed.
         assertTrue(permissions.toString(), permissions.contains("1taro@contoso.onmicrosoft.com"));
-        assertTrue(permissions.toString(), permissions.contains("1home-account-id"));
+        assertTrue(permissions.toString(), permissions.contains("1" + OBJECT_ID));
+    }
+
+    @Test
+    public void test_getPermissions_namesTheUserByTheObjectIdInTheIdToken() {
+        // Microsoft Graph names a user by the object id, so that is the value a crawler writes
+        // into the role field of a document the user owns. homeAccountId() is MSAL4J's own
+        // account key -- "<object id>.<tenant id>" -- and a permission built from it matches no
+        // such role, so the user never saw a document granted to them by object id.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdUser user = newUser();
+        user.setGroups(new String[0]);
+        user.setRoles(new String[0]);
+
+        final List<String> permissions = Arrays.asList(user.getPermissions());
+
+        assertTrue(permissions.toString(), permissions.contains("1" + OBJECT_ID));
+        assertFalse(permissions.toString(), permissions.contains("1home-account-id"));
+    }
+
+    @Test
+    public void test_getPermissions_grantsNoObjectIdPermissionWhenTheIdTokenCarriesNone() {
+        // A missing or unreadable oid claim must drop the permission, not encode a literal "null"
+        // -- which is not blank, so the trailing filter would keep it, and a document whose role
+        // field held it would be readable by every such session.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final EntraIdUser user = newUser(authResult(new Date(Long.MAX_VALUE), "access-token", "not-a-jwt"));
+        user.setGroups(new String[0]);
+        user.setRoles(new String[0]);
+
+        final List<String> permissions = Arrays.asList(user.getPermissions());
+
+        assertFalse(permissions.toString(), permissions.stream().anyMatch(p -> p.contains("null")));
+        assertTrue(permissions.toString(), permissions.contains("1taro@contoso.onmicrosoft.com"));
     }
 
     @Test
