@@ -163,8 +163,8 @@ public class JavaScriptEngine extends AbstractScriptEngine {
         } catch (final Exception e) {
             final String truncatedScript =
                     template.length() > maxScriptLogLength ? template.substring(0, maxScriptLogLength) + "..." : template;
-            logger.warn("Failed to evaluate JavaScript: script(length={})={}, parameterKeys={}", template.length(), truncatedScript,
-                    safeParamMap.keySet(), e);
+            logger.warn("Failed to evaluate JavaScript: job={}, script(length={})={}, parameterKeys={}", describeCurrentJob(),
+                    template.length(), truncatedScript, safeParamMap.keySet(), e);
             logScriptExecution(template, "failure:" + e.getClass().getSimpleName());
             return null;
         }
@@ -240,6 +240,25 @@ public class JavaScriptEngine extends AbstractScriptEngine {
             }
         }
         return null;
+    }
+
+    /**
+     * Describes the scheduled job the current evaluation belongs to, for the warning in
+     * {@link #evaluate(String, Map)}.
+     *
+     * <p>A failed evaluation returns null instead of propagating, so a scheduler job whose script
+     * cannot be evaluated is still recorded with a successful status. Naming the job here is what
+     * ties that job log entry back to the warning; the script text on its own does not say which
+     * job produced it.</p>
+     *
+     * @return the job name and id, or "none" when the evaluation is not part of a scheduled job
+     */
+    protected String describeCurrentJob() {
+        final ScheduledJob job = getCurrentScheduledJob();
+        if (job == null) {
+            return "none";
+        }
+        return job.getName() + "(id=" + job.getId() + ")";
     }
 
     /**

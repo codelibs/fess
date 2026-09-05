@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -184,6 +186,44 @@ public class JavaScriptEngineTest extends UnitFessTestCase {
             }
         } finally {
             executor.shutdown();
+        }
+    }
+
+    @Test
+    public void test_evaluate_failureWarnsWithTheJobName() {
+        // A swallowed failure leaves the scheduler job with a successful status, so the warning is
+        // the only record of it. Without the job name the warning cannot be matched to the job.
+        final ScheduledJob scheduledJob = new ScheduledJob();
+        scheduledJob.setId("J1");
+        scheduledJob.setName("Migrated Crawler");
+        final JavaScriptEngine engine = new JavaScriptEngine() {
+            @Override
+            protected ScheduledJob getCurrentScheduledJob() {
+                return scheduledJob;
+            }
+        };
+        engine.init();
+        final LogCapturingAppender capture = LogCapturingAppender.attach(JavaScriptEngine.class);
+        try {
+            assertNull(engine.evaluate("def x = 1; return \"${x}\";", new HashMap<>()));
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("job=Migrated Crawler(id=J1)")),
+                    "the warning must name the job whose script failed: " + capture.warnings());
+        } finally {
+            capture.detach();
+            engine.close();
+        }
+    }
+
+    @Test
+    public void test_evaluate_failureWarnsWithoutAJob() {
+        // Document boosts, crawler field scripts and path mappings run outside the scheduler.
+        final LogCapturingAppender capture = LogCapturingAppender.attach(JavaScriptEngine.class);
+        try {
+            assertNull(javaScriptEngine.evaluate("def x = 1; return \"${x}\";", new HashMap<>()));
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("job=none")),
+                    "an evaluation outside a scheduled job must say so: " + capture.warnings());
+        } finally {
+            capture.detach();
         }
     }
 
