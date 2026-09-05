@@ -2,7 +2,7 @@
 ${fe:html(true)}
 <head>
     <meta charset="UTF-8">
-    <title><<la:message ke="labels.admin_brand_title"/> | <<la:message ke="labels.error_title"/></title>
+    <title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.error_title"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="hold-transition sidebar-mini">
