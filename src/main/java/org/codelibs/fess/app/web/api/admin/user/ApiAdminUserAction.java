@@ -17,16 +17,19 @@ package org.codelibs.fess.app.web.api.admin.user;
 
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.getUser;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.validateAttributes;
+import static org.codelibs.fess.app.web.admin.user.AdminUserAction.verifyPasswordPolicy;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.UserPager;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.app.web.admin.user.CreateForm;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.lastaflute.web.Execute;
@@ -104,6 +107,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
+        verifyPassword(body, true);
         body.crudMode = CrudMode.CREATE;
         final User entity = getUser(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -132,6 +136,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         validateAttributes(body.attributes, this::throwValidationErrorApi);
+        verifyPassword(body, false);
         body.crudMode = CrudMode.EDIT;
         final User entity = getUser(body).orElseGet(() -> {
             throwValidationErrorApi(messages -> {
@@ -146,6 +151,26 @@ public class ApiAdminUserAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
+    }
+
+    /**
+     * Runs the password checks the admin screens run. Without this the API could store a password
+     * the screens refuse, and the account is then usable to log in with it.
+     *
+     * <p>The confirmation field is a typing aid rather than part of the policy, so it is only
+     * compared when the caller sends one; an API client that omits it keeps working.</p>
+     *
+     * @param body the request body carrying the password
+     * @param creating true while creating a user, when a password is mandatory
+     */
+    protected void verifyPassword(final CreateForm body, final boolean creating) {
+        if (creating && StringUtil.isBlank(body.password)) {
+            throwValidationErrorApi(messages -> messages.addErrorsBlankPassword("password"));
+        }
+        if (body.confirmPassword != null && !body.confirmPassword.equals(body.password)) {
+            throwValidationErrorApi(messages -> messages.addErrorsInvalidConfirmPassword("confirmPassword"));
+        }
+        verifyPasswordPolicy(body, this::throwValidationErrorApi);
     }
 
     /**
