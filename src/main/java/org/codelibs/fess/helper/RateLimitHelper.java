@@ -102,11 +102,13 @@ public class RateLimitHelper {
         if (isTrustedProxy(remoteAddr)) {
             final String xForwardedFor = request.getHeader("X-Forwarded-For");
             if (StringUtil.isNotBlank(xForwardedFor)) {
-                final String clientIp = xForwardedFor.split(",")[0].trim();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Client IP from X-Forwarded-For: clientIp={}, remoteAddr={}", clientIp, remoteAddr);
+                final String clientIp = clientIpFromForwardedFor(xForwardedFor);
+                if (clientIp != null) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Client IP from X-Forwarded-For: clientIp={}, remoteAddr={}", clientIp, remoteAddr);
+                    }
+                    return clientIp;
                 }
-                return clientIp;
             }
             final String xRealIp = request.getHeader("X-Real-IP");
             if (StringUtil.isNotBlank(xRealIp)) {
@@ -122,6 +124,30 @@ public class RateLimitHelper {
             logger.debug("Client IP from remoteAddr: ip={}", remoteAddr);
         }
         return remoteAddr;
+    }
+
+    /**
+     * Picks the address to attribute a request to out of an X-Forwarded-For chain.
+     *
+     * <p>Each proxy appends the address it received the request from, so the leftmost entry is the
+     * one furthest from us and, unless every hop in front is trusted, it is whatever the client
+     * chose to send. A client that sends its own header therefore decides which bucket it is
+     * counted in, and the limit stops holding. The chain is walked from the right instead, and the
+     * first entry that is not one of our own proxies is used: that is the last address a trusted
+     * hop actually observed.</p>
+     *
+     * @param xForwardedFor the raw header value
+     * @return the address to attribute the request to, or null when every entry is a trusted proxy
+     */
+    protected String clientIpFromForwardedFor(final String xForwardedFor) {
+        final String[] hops = xForwardedFor.split(",");
+        for (int i = hops.length - 1; i >= 0; i--) {
+            final String hop = hops[i].trim();
+            if (StringUtil.isNotBlank(hop) && !isTrustedProxy(hop)) {
+                return hop;
+            }
+        }
+        return null;
     }
 
     /**
