@@ -4,7 +4,7 @@ ${fe:html(true)}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><la:message key="labels.system_error_title" /></title>
+<title><la:message key="labels.error_title" /></title>
 <link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${fe:url('/css/style.css')}" rel="stylesheet"
