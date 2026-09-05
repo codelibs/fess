@@ -72,7 +72,7 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(stemmerOverrideService.getStemmerOverrideList(body.dictId, pager)
                         .stream()
                         .map(protwordsItem -> createEditBody(protwordsItem, dictId))
-                        .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
+                        .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
     /**
