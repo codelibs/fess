@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.api.admin.user;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.getUser;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.validateAttributes;
 import static org.codelibs.fess.app.web.admin.user.AdminUserAction.verifyPasswordPolicy;
+import static org.codelibs.fess.app.web.admin.user.AdminUserAction.verifyRolesAndGroups;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.UserPager;
+import org.codelibs.fess.app.service.GroupService;
+import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -61,6 +64,14 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     /** The user service for managing user settings. */
     @Resource
     private UserService userService;
+
+    /** The role service, used to check that a role id the caller sent exists. */
+    @Resource
+    private RoleService roleService;
+
+    /** The group service, used to check that a group id the caller sent exists. */
+    @Resource
+    private GroupService groupService;
 
     /**
      * Retrieves user settings with pagination.
@@ -107,6 +118,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
+        verifyRolesAndGroups(body, roleService, groupService, this::throwValidationErrorApi);
         verifyPassword(body, true);
         body.crudMode = CrudMode.CREATE;
         final User entity = getUser(body).orElseGet(() -> {
@@ -136,6 +148,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         validateAttributes(body.attributes, this::throwValidationErrorApi);
+        verifyRolesAndGroups(body, roleService, groupService, this::throwValidationErrorApi);
         verifyPassword(body, false);
         body.crudMode = CrudMode.EDIT;
         final User entity = getUser(body).orElseGet(() -> {

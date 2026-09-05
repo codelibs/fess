@@ -23,7 +23,10 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -34,6 +37,8 @@ import org.codelibs.fess.util.ComponentUtil;
  * @author FreeGen
  */
 public class User extends BsUser implements FessUser {
+
+    private static final Logger logger = LogManager.getLogger(User.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -59,16 +64,31 @@ public class User extends BsUser implements FessUser {
 
     @Override
     public String[] getRoleNames() {
-        return stream(getRoles()).get(stream -> stream.map(this::decode).toArray(n -> new String[n]));
+        return stream(getRoles()).get(stream -> stream.map(this::decode).filter(Objects::nonNull).toArray(n -> new String[n]));
     }
 
     @Override
     public String[] getGroupNames() {
-        return stream(getGroups()).get(stream -> stream.map(this::decode).toArray(n -> new String[n]));
+        return stream(getGroups()).get(stream -> stream.map(this::decode).filter(Objects::nonNull).toArray(n -> new String[n]));
     }
 
+    /**
+     * Decodes a stored role or group id back to its name. A value that is not an id was written by
+     * a caller that sent a name instead, and decoding it throws. Skipping it keeps the rest of the
+     * account readable, so it can still be listed and repaired, rather than failing every read of
+     * this user and therefore every login.
+     *
+     * @param value the stored role or group id
+     * @return the decoded name, or null when the value is not a valid id
+     */
     private String decode(final String value) {
-        return new String(Base64.getDecoder().decode(value), Constants.CHARSET_UTF_8);
+        try {
+            return new String(Base64.getDecoder().decode(value), Constants.CHARSET_UTF_8);
+        } catch (final IllegalArgumentException e) {
+            logger.warn("Skipped an unreadable role or group id on user {}: {} is not a Base64-encoded name. "
+                    + "Reassign the roles and groups of this user to repair it.", name, value);
+            return null;
+        }
     }
 
     @Override
@@ -97,8 +117,12 @@ public class User extends BsUser implements FessUser {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> list = new ArrayList<>();
         list.add(fessConfig.getRoleSearchUserPrefix() + getName());
-        stream(getRoles()).of(stream -> stream.forEach(s -> list.add(fessConfig.getRoleSearchRolePrefix() + decode(s))));
-        stream(getGroups()).of(stream -> stream.forEach(s -> list.add(fessConfig.getRoleSearchGroupPrefix() + decode(s))));
+        stream(getRoles()).of(stream -> stream.map(this::decode)
+                .filter(Objects::nonNull)
+                .forEach(s -> list.add(fessConfig.getRoleSearchRolePrefix() + s)));
+        stream(getGroups()).of(stream -> stream.map(this::decode)
+                .filter(Objects::nonNull)
+                .forEach(s -> list.add(fessConfig.getRoleSearchGroupPrefix() + s)));
         return list.toArray(new String[list.size()]);
     }
 

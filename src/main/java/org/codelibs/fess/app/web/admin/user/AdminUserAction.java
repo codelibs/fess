@@ -19,6 +19,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -271,6 +272,7 @@ public class AdminUserAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         validateAttributes(form.attributes, v -> throwValidationError(v, this::asEditHtml));
+        verifyRolesAndGroups(form, roleService, groupService, v -> throwValidationError(v, this::asEditHtml));
         verifyPassword(form, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getUser(form).ifPresent(entity -> {
@@ -301,6 +303,7 @@ public class AdminUserAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         validateAttributes(form.attributes, v -> throwValidationError(v, this::asEditHtml));
+        verifyRolesAndGroups(form, roleService, groupService, v -> throwValidationError(v, this::asEditHtml));
         verifyPassword(form, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getUser(form).ifPresent(entity -> {
@@ -479,6 +482,44 @@ public class AdminUserAction extends FessAdminAction {
     public static void resetPassword(final CreateForm form) {
         form.password = null;
         form.confirmPassword = null;
+    }
+
+    /**
+     * Rejects a role or group the caller identified by anything other than its id. A user stores
+     * roles and groups by id, and {@link User#getRoleNames()} reads them back by Base64-decoding
+     * them, so a value that is not an id - a role name, which an API caller has every reason to
+     * think is what is wanted - is written without complaint and cannot be read back afterwards.
+     * Shared with the REST API so that both paths refuse the same values.
+     *
+     * @param form the form carrying the role and group ids
+     * @param roleService the service used to resolve a role id
+     * @param groupService the service used to resolve a group id
+     * @param throwError callback to report an id that does not resolve
+     */
+    public static void verifyRolesAndGroups(final CreateForm form, final RoleService roleService, final GroupService groupService,
+            final Consumer<VaMessenger<FessMessages>> throwError) {
+        verifyIds(form.roles, "roles", id -> roleService.getRole(id).isPresent(), throwError);
+        verifyIds(form.groups, "groups", id -> groupService.getGroup(id).isPresent(), throwError);
+    }
+
+    /**
+     * Reports the first id in the given array that does not resolve.
+     *
+     * @param ids the ids to check, which may be null
+     * @param property the form property the ids came from
+     * @param resolvable tells whether one id resolves to a stored entity
+     * @param throwError callback to report an id that does not resolve
+     */
+    protected static void verifyIds(final String[] ids, final String property, final Predicate<String> resolvable,
+            final Consumer<VaMessenger<FessMessages>> throwError) {
+        if (ids == null) {
+            return;
+        }
+        for (final String id : ids) {
+            if (StringUtil.isBlank(id) || !resolvable.test(id)) {
+                throwError.accept(messages -> messages.addErrorsInvalidRoleOrGroupId(property, id));
+            }
+        }
     }
 
     /**

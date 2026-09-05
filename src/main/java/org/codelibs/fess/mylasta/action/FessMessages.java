@@ -308,6 +308,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {1} is invalid for {0}. */
     public static final String ERRORS_invalid_str_is_included = "{errors.invalid_str_is_included}";
 
+    /** The key of the message: {0} is not a registered role or group id. Use the id from the role or group list, not the name. */
+    public static final String ERRORS_invalid_role_or_group_id = "{errors.invalid_role_or_group_id}";
+
     /** The key of the message: Password is required. */
     public static final String ERRORS_blank_password = "{errors.blank_password}";
 
@@ -2020,6 +2023,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidStrIsIncluded(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_str_is_included, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_role_or_group_id' with parameters.
+     * <pre>
+     * message: {0} is not a registered role or group id. Use the id from the role or group list, not the name.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidRoleOrGroupId(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_role_or_group_id, arg0));
         return this;
     }
 
