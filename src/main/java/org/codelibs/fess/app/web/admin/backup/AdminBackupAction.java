@@ -457,6 +457,7 @@ public class AdminBackupAction extends FessAdminAction {
                     index = "basic_" + fessConfig.getIndexConfigIndex();
                 }
                 final String alias = index;
+                assertBackupIndexReadable(alias);
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
                         SearchEngineUtil.scroll(alias, hit -> {
@@ -471,12 +472,39 @@ public class AdminBackupAction extends FessAdminAction {
                             return true;
                         });
                         writer.flush();
+                    } catch (final RuntimeException e) {
+                        // The response is committed by now, so the client keeps the truncated file.
+                        // Leaving a trace is all that is left to do.
+                        logger.warn("Failed to write the backup of {}.", alias, e);
+                        throw e;
                     }
                 });
             }
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), this::asListHtml);
         return redirect(getClass()); // no-op
+    }
+
+    /**
+     * Walks one page of the backup target so that an unreadable index fails the request itself.
+     *
+     * <p>A closed index is routine: reindexing from the maintenance screen closes one, so does a
+     * rolling restart, and a malformed Kuromoji entry leaves one behind. Closing a single member of
+     * an alias makes the point in time fail, and the walk that discovers that runs inside the
+     * stream callback, after the framework has committed 200 and the Content-Disposition header.
+     * The browser then saves a named attachment holding nothing, and neither the client nor the log
+     * says anything went wrong. Probing here costs one page and moves the failure to a point where
+     * the request can still carry it.</p>
+     *
+     * @param index The index or alias to be written as a bulk file.
+     */
+    public static void assertBackupIndexReadable(final String index) {
+        try {
+            SearchEngineUtil.scroll(index, hit -> false);
+        } catch (final RuntimeException e) {
+            logger.warn("Failed to read the backup index {}.", index, e);
+            throw e;
+        }
     }
 
     /**
