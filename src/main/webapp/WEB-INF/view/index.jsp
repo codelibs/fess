@@ -20,6 +20,9 @@ ${fe:html(true)}
 	<la:form action="/search" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
+			<a href="#mainContent"
+				class="visually-hidden-focusable position-absolute top-0 start-0 m-2"><la:message
+					key="labels.skip_to_main_content" /></a>
 			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
 				<div id="content" class="container">
 					<div class="navbar-brand"></div>
@@ -112,7 +115,7 @@ ${fe:html(true)}
 				</div>
 			</div>
 		</div>
-		<main class="container">
+		<main id="mainContent" class="container">
 			<div class="row">
 				<div class="col text-center searchFormBox">
 					<h1 class="mainLogo">
@@ -132,6 +135,8 @@ ${fe:html(true)}
 						<legend><la:message key="labels.search" /></legend>
 						<div class="clearfix">
 							<div class="mx-auto col-10 col-sm-8 col-md-8 col-lg-6">
+								<label for="contentQuery" class="visually-hidden"><la:message
+										key="labels.search_query_label" /></label>
 								<la:text styleClass="query form-control"
 									property="q" size="50" maxlength="1000" styleId="contentQuery"
 									autocomplete="off" />

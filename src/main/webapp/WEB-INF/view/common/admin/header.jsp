@@ -1,4 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
+<a href="#mainContent" class="sr-only sr-only-focusable"><la:message
+		key="labels.skip_to_main_content" /></a>
 <nav class="main-header navbar navbar-expand navbar-dark navbar-secondary">
 	<ul class="navbar-nav">
 		<li class="nav-item">

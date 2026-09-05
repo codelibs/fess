@@ -13,7 +13,7 @@ ${fe:html(true)}
 </head>
 <body>
 	<jsp:include page="header.jsp" />
-	<main class="container">
+	<main id="mainContent" class="container">
 		<div class="row">
 			<div class="col">
 

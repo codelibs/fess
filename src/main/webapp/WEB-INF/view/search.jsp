@@ -20,7 +20,10 @@ ${fe:html(true)}
 </head>
 <body class="search">
 	<jsp:include page="header.jsp" />
-	<main id="content" class="container">
+	<main id="mainContent" class="container">
+		<h1 class="visually-hidden">
+			<la:message key="labels.search_result_heading" />
+		</h1>
 		<div>
 			<la:info id="msg" message="true">
 				<div class="alert alert-info">${msg}</div>

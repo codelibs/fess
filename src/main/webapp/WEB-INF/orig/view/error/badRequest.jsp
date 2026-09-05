@@ -15,7 +15,7 @@ ${fe:html(true)}
 </head>
 <body class="error">
 	<jsp:include page="../header.jsp" />
-	<main class="container">
+	<main id="mainContent" class="container">
 		<div class="text-center">
 			<h2>
 				<la:message key="labels.request_error_title" />
