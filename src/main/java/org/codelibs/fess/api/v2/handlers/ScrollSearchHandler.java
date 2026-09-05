@@ -34,6 +34,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.UserMessages;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -162,11 +163,19 @@ public class ScrollSearchHandler {
             }
         } catch (final InvalidRequestParameterException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
-        } catch (final InvalidQueryException | ResultOffsetExceededException e) {
+        } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/documents/all request", e);
             }
-            ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(), e.getMessageCode());
+        } catch (final ResultOffsetExceededException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("invalid /api/v2/documents/all request", e);
+            }
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(),
+                            messages -> messages.addErrorsResultSizeExceeded(UserMessages.GLOBAL_PROPERTY_KEY));
         } catch (final UncheckedIOException e) {
             // Surface the underlying IOException so the servlet container can log/respond.
             throw e.getCause();

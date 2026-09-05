@@ -23,13 +23,22 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
+import org.codelibs.fess.entity.SearchRequestParams;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.core.message.UserMessages;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -300,6 +309,66 @@ public class SearchHandlerTest extends UnitFessTestCase {
         public Map<String, Long> getValueCountMap() {
             return overrideValueCountMap.isEmpty() ? super.getValueCountMap() : overrideValueCountMap;
         }
+    }
+
+    /**
+     * A rejected query must not hand the caller the request the engine was given.
+     *
+     * <p>{@code SearchEngineClient} put the whole {@code SearchRequestBuilder} into the exception
+     * message, and the handler forwarded that message as {@code error.message}: an anonymous caller
+     * read back the role filter terms, the {@code _source} allow-list, the internal field names and
+     * the per-field boosts from one request. The caller now sees only the message the exception was
+     * raised with.</p>
+     */
+    @Test
+    public void test_search_invalidQuery_reportsUserMessageNotTheQueryBuilder() throws Exception {
+        final String builderDump = "{\"from\":10001,\"size\":10,\"timeout\":\"10000ms\",\"query\":{\"bool\":{\"must\":"
+                + "[{\"function_score\":{\"query\":{\"bool\":{\"filter\":[{\"terms\":{\"role\":[\"Rfilter-term\"]}}]}}}}]}},"
+                + "\"_source\":{\"includes\":[\"content\",\"title\"]}}";
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+                        "Failed query: " + builderDump);
+            }
+        }, "searchHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 400, res.status);
+        assertFalse(body.contains("Failed query"), body);
+        assertFalse(body.contains("function_score"), body);
+        assertFalse(body.contains("Rfilter-term"), body);
+        assertFalse(body.contains("_source"), body);
+        assertTrue(body.contains(ComponentUtil.getMessageManager().getMessage(Locale.ROOT, "errors.invalid_query_cannot_process")), body);
+    }
+
+    /**
+     * The offset ceiling has its own message; it used to arrive as the exception's own text.
+     */
+    @Test
+    public void test_search_resultOffsetExceeded_reportsUserMessage() throws Exception {
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new ResultOffsetExceededException("The number of result size is exceeded.");
+            }
+        }, "searchHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 400, res.status);
+        assertTrue(body.contains(ComponentUtil.getMessageManager().getMessage(Locale.ROOT, "errors.result_size_exceeded")), body);
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
