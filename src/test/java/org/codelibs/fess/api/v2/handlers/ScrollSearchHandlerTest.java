@@ -21,9 +21,11 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -33,6 +35,7 @@ import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.core.message.UserMessages;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -229,6 +232,56 @@ public class ScrollSearchHandlerTest extends UnitFessTestCase {
     }
 
     /** Minimal HttpServletResponse stub. */
+    /**
+     * The scroll endpoint forwarded the exception message the same way {@code /search} did, so the
+     * {@code SearchRequestBuilder} dump reached the caller here too. Only the message the exception
+     * was raised with may go on the wire.
+     */
+    @Test
+    public void test_scroll_invalidQuery_reportsUserMessageNotTheQueryBuilder() throws Exception {
+        final FessConfig originalConfig = ComponentUtil.getFessConfig();
+        final String builderDump = "{\"from\":0,\"size\":100,\"query\":{\"bool\":{\"filter\":"
+                + "[{\"terms\":{\"role\":[\"Rfilter-term\"]}}]}},\"_source\":{\"includes\":[\"content\"]}}";
+        try {
+            ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public boolean isApiSearchScroll() {
+                    return true;
+                }
+            });
+            ComponentUtil.register(new SearchHelper() {
+                @Override
+                public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,
+                        final OptionalThing<FessUserBean> userBean) {
+                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
+                            "Invalid query: " + builderDump);
+                }
+            }, "searchHelper");
+            ComponentUtil.register(new QueryFieldConfig() {
+                @Override
+                public boolean isApiResponseField(final String field) {
+                    return true;
+                }
+            }, "queryFieldConfig");
+
+            final CapturingResponse res = new CapturingResponse();
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            new ScrollSearchHandler().handle(new StubRequest("/api/v2/documents/all", params), res);
+
+            final String body = res.body();
+            assertEquals(body, 400, res.status);
+            assertFalse(body.contains("Invalid query:"), body);
+            assertFalse(body.contains("Rfilter-term"), body);
+            assertFalse(body.contains("_source"), body);
+            assertTrue(body.contains(ComponentUtil.getMessageManager().getMessage(Locale.ROOT, "errors.invalid_query_parse_error")), body);
+        } finally {
+            ComponentUtil.setFessConfig(originalConfig);
+        }
+    }
+
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);

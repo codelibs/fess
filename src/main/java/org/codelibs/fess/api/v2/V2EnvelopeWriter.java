@@ -17,10 +17,15 @@ package org.codelibs.fess.api.v2;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.validation.VaMessenger;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -142,6 +147,33 @@ public class V2EnvelopeWriter {
      */
     public void writeError(final HttpServletResponse res, final V2ErrorCode code, final String message) throws IOException {
         writeErrorWithDetails(res, code, message, null);
+    }
+
+    /**
+     * Writes an error envelope whose message is resolved from the application message resources.
+     *
+     * <p>An exception's own {@code getMessage()} is written for the log, not for the wire.
+     * {@code SearchEngineClient} used to put the whole {@code SearchRequestBuilder} dump there, and
+     * a handler that forwarded it handed the role filter terms, the {@code _source} allow-list, the
+     * internal field names and the per-field boosts to whoever issued the request. Handlers
+     * therefore pass the message code the exception was raised with, and only the message a user is
+     * meant to read reaches the caller.</p>
+     *
+     * @param res the HTTP response to write to
+     * @param code the v2 error code; its default HTTP status is applied to the response
+     * @param locale the caller's locale; {@code null} falls back to English
+     * @param messageCode the message code to resolve against {@code fess_message}
+     * @throws IOException if writing the envelope fails
+     */
+    public void writeUserMessageError(final HttpServletResponse res, final V2ErrorCode code, final Locale locale,
+            final VaMessenger<FessMessages> messageCode) throws IOException {
+        final FessMessages messages = new FessMessages();
+        messageCode.message(messages);
+        writeError(res, code,
+                ComponentUtil.getMessageManager()
+                        .toMessageList(locale != null ? locale : Locale.ENGLISH, messages)
+                        .stream()
+                        .collect(Collectors.joining(" ")));
     }
 
     /**

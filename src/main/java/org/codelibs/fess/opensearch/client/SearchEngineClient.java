@@ -1864,14 +1864,20 @@ public class SearchEngineClient implements Client {
                 }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
+                // The builder dump goes to the log, never into the exception message: callers
+                // report that message to the client, and the dump carries the role filter terms,
+                // the _source allow-list, internal field names and the per-field boosts.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid query {}", searchRequestBuilder, e);
+                }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
-                        "Invalid query: " + searchRequestBuilder, e);
+                        "Invalid query.", e);
             } catch (final OpenSearchException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Cannot process {}", searchRequestBuilder, e);
                 }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
-                        "Failed query: " + searchRequestBuilder, e);
+                        "Failed to process the query.", e);
             }
         }
         final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
@@ -1925,8 +1931,13 @@ public class SearchEngineClient implements Client {
                     return true;
                 });
             } catch (final SearchPhaseExecutionException e) {
+                // Same contract as search(): the dump is for the log, the exception message is
+                // what the scroll API hands back to the caller.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid query {}", searchRequestBuilder, e);
+                }
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
-                        "Invalid query: " + searchRequestBuilder, e);
+                        "Invalid query.", e);
             }
         }
 
