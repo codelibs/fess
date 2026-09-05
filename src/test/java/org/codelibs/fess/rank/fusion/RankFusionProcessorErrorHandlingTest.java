@@ -189,6 +189,42 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     }
 
     /**
+     * Test that a search which never ran does not declare its zero count exact.
+     */
+    @Test
+    public void test_degradedResponse_countIsNotExact() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new ExceptionThrowingSearcher(new RuntimeException("Main searcher failed")));
+            processor.init();
+
+            final QueryResponseList results =
+                    (QueryResponseList) processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            assertEquals(0L, results.getAllRecordCount());
+            // EQUAL_TO would tell the caller that exactly zero documents match, contradicting the
+            // partialResults flag set beside it: no total was ever obtained here.
+            assertEquals("a total that was never obtained must not be reported as exact", Relation.GREATER_THAN_OR_EQUAL_TO.toString(),
+                    results.getAllRecordCountRelation());
+        }
+    }
+
+    /**
+     * Test that a search which ran and matched nothing still reports an exact zero.
+     */
+    @Test
+    public void test_genuineZeroHits_countIsExact() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new TestSearcher(0));
+            processor.init();
+
+            final QueryResponseList results =
+                    (QueryResponseList) processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            assertEquals(0L, results.getAllRecordCount());
+            assertEquals("a search that ran and matched nothing knows the count exactly", Relation.EQUAL_TO.toString(),
+                    results.getAllRecordCountRelation());
+        }
+    }
+
+    /**
      * Test handling of very slow searcher (simulates timeout scenario).
      */
     @Test
