@@ -43,9 +43,18 @@ import jakarta.servlet.http.HttpServletResponse;
  * whose callback the logging filter invokes from {@code sendInternalServerError} — that is, on
  * the 500 path only. Client errors ({@code RequestClientErrorException}, e.g. 404) go through a
  * separate callback and deliberate redirects never raise at all, so neither reaches this class.
- * The handler is per-thread, hence this wrapper: it is registered through
- * {@code FwWebDirection#directServletFilter(filter, false)} so that it runs outside the logging
- * filter, and installs the callback for the duration of the request.</p>
+ * The handler is per-thread, hence this wrapper: {@code web.xml} maps it just ahead of
+ * {@code lastaShowbaseFilter} so that it runs outside the logging filter, and it installs the
+ * callback for the duration of the request.</p>
+ *
+ * <p>The registration lives in {@code web.xml} rather than in
+ * {@code FessFwAssistantDirector#prepareWebDirection}, which is where a LastaFlute application
+ * would normally put it with {@code FwWebDirection#directServletFilter(filter, false)}. The
+ * assistant director is named by {@code lastaflute_director.xml}, which the crawler, thumbnail,
+ * suggest and chunk child processes also read: their classpath is
+ * {@code WEB-INF/classes} plus {@code WEB-INF/lib} plus {@code WEB-INF/env/<type>/lib} and
+ * carries no servlet API, so a servlet type reachable from that class fails its verification
+ * and kills every child process at DI container startup.</p>
  */
 public class ServerErrorLoggingFilter implements Filter {
 
