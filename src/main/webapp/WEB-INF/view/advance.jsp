@@ -18,6 +18,9 @@ ${fe:html(true)}
 	<la:form styleClass="form-stacked" action="/search/" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
+			<a href="#mainContent"
+				class="visually-hidden-focusable position-absolute top-0 start-0 m-2"><la:message
+					key="labels.skip_to_main_content" /></a>
 			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
 				<div class="container">
 					<la:link styleClass="navbar-brand d-inline-flex" href="/">
@@ -88,7 +91,7 @@ ${fe:html(true)}
 			</nav>
 		</header>
 
-		<main id="content" class="container">
+		<main id="mainContent" class="container">
 			<h2>
 				<la:message key="labels.advance_search_title" />
 			</h2>

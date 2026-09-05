@@ -3,6 +3,9 @@
 	role="search">
 	${fe:facetForm()}${fe:geoForm()}
 	<header>
+		<a href="#mainContent"
+			class="visually-hidden-focusable position-absolute top-0 start-0 m-2"><la:message
+				key="labels.skip_to_main_content" /></a>
 		<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none">
 			<div id="content" class="container">
 				<la:link styleClass="navbar-brand d-inline-flex" href="/">
@@ -15,6 +18,8 @@
 					class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0"
 					role="search">
 					<div class="input-group">
+						<label for="query" class="visually-hidden"><la:message
+								key="labels.search_query_label" /></label>
 						<la:text property="q" maxlength="1000" styleId="query"
 							styleClass="form-control" autocomplete="off" />
 						<button type="submit" name="search" id="searchButton"

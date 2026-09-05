@@ -13,7 +13,7 @@ ${fe:html(true)}
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="accessToken"/>
     </jsp:include>
-    <main class="content-wrapper">
+    <main id="mainContent" class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">

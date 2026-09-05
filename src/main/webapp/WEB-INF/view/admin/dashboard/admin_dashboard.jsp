@@ -14,7 +14,7 @@ ${fe:html(true)}
         <jsp:param name="menuType" value="dashboard"/>
     </jsp:include>
 
-    <main class="content-wrapper position-relative">
+    <main id="mainContent" class="content-wrapper position-relative">
         <iframe class="w-100 h-100 position-absolute" style="border: 0;"
                 src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>?lang=${f:u(kopfLang)}"
                 title="<la:message key="labels.dashboard_plugin" />"></iframe>
