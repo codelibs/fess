@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.api.admin.backup;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.NDJSON_EXTENTION;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.assertBackupIndexReadable;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getBackupItems;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getClickLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getDocJsonPath;
@@ -39,6 +40,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -56,6 +59,8 @@ import org.lastaflute.web.response.StreamResponse;
  *
  */
 public class ApiAdminBackupAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminBackupAction.class);
 
     /**
      * Default constructor.
@@ -113,6 +118,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                     index = id;
                     filename = id + ".bulk";
                 }
+                assertBackupIndexReadable(index);
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
                         SearchEngineUtil.scroll(index, hit -> {
@@ -130,6 +136,11 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                             return true;
                         });
                         writer.flush();
+                    } catch (final RuntimeException e) {
+                        // The response is committed by now, so the client keeps the truncated file.
+                        // Leaving a trace is all that is left to do.
+                        logger.warn("Failed to write the backup of {}.", index, e);
+                        throw e;
                     }
                 });
             }

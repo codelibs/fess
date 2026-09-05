@@ -30,9 +30,11 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.admin.backup.AdminBackupAction;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
+import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
@@ -112,6 +114,31 @@ public class ApiAdminBackupActionTest extends UnitFessTestCase {
         final String served = served(response);
         assertTrue(walked.isEmpty(), "a mapping file must not be looked up in the search engine: " + walked);
         assertEquals(served(adminDownload("doc.json")), served);
+    }
+
+    // ===================================================================================
+    //                                                                  Unreadable index
+    //                                                                  ================
+
+    /**
+     * The API streams the same way the admin screen does, so it loses the same way: an index that
+     * cannot be walked - one closed member of the alias is enough - only shows up once the response
+     * is committed, and the caller receives 200 and an empty file. The request has to fail before
+     * that instead.
+     */
+    @Test
+    public void test_get$file_failsBeforeTheResponseIsCommitted() {
+        ComponentUtil.register(new SearchEngineClient() {
+            @Override
+            public <T> long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
+                    final EntityCreator<T, SearchResponse, SearchHit> creator, final BooleanFunction<T> cursor) {
+                throw new SearchEngineClientException("[" + index + "] Failed to open a point in time.");
+            }
+        }, "searchEngineClient");
+
+        final SearchEngineClientException e =
+                Assertions.assertThrows(SearchEngineClientException.class, () -> new ApiAdminBackupAction().get$file("fess_config.bulk"));
+        assertTrue(e.getMessage().contains("fess_config"), "the failure must name the index: " + e.getMessage());
     }
 
     // ===================================================================================
