@@ -107,7 +107,10 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
                         SearchEngineUtil.scroll(index, hit -> {
                             try {
-                                writer.write("{\"index\":{\"_index\":\"" + index + "\",\"_id\":\""
+                                // The requested id is an alias, and a bulk file naming an alias cannot be
+                                // replayed. Write the index the document actually came from, as the admin
+                                // screen does.
+                                writer.write("{\"index\":{\"_index\":\"" + hit.getIndex() + "\",\"_id\":\""
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
                                 writer.write(hit.getSourceAsString());
                                 writer.write("\n");
