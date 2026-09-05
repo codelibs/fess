@@ -19,11 +19,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.admin.backup.AdminBackupAction;
+import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
@@ -72,6 +77,44 @@ public class ApiAdminBackupActionTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                                       Mapping files
+    //                                                                       =============
+
+    /**
+     * fess.json is an index mapping shipped with the product, not an index that can be walked. The
+     * API routed it into the bulk branch, which searched for an index literally called "fess.json"
+     * and answered 200 with an empty body while the admin screen served 41,137 bytes.
+     */
+    @Test
+    public void test_get$file_fessJsonIsServedAsTheMappingFile() throws Exception {
+        final List<String> walked = registerWalkingClient();
+
+        final StreamResponse response = new ApiAdminBackupAction().get$file("fess.json");
+
+        // The bulk branch appends ".bulk" to an id that does not already carry it.
+        assertEquals("fess.json", response.getFileName());
+        final String served = served(response);
+        assertTrue(walked.isEmpty(), "a mapping file must not be looked up in the search engine: " + walked);
+        assertEquals(served(adminDownload("fess.json")), served);
+    }
+
+    /**
+     * The same holds for doc.json, which the admin screen served as 12,754 bytes while the API
+     * answered 200 with an empty body.
+     */
+    @Test
+    public void test_get$file_docJsonIsServedAsTheMappingFile() throws Exception {
+        final List<String> walked = registerWalkingClient();
+
+        final StreamResponse response = new ApiAdminBackupAction().get$file("doc.json");
+
+        assertEquals("doc.json", response.getFileName());
+        final String served = served(response);
+        assertTrue(walked.isEmpty(), "a mapping file must not be looked up in the search engine: " + walked);
+        assertEquals(served(adminDownload("doc.json")), served);
+    }
+
+    // ===================================================================================
     //                                                                            Helpers
     //                                                                            =======
 
@@ -87,13 +130,16 @@ public class ApiAdminBackupActionTest extends UnitFessTestCase {
     }
 
     /**
-     * Registers a search engine client whose walk hands out the given hits.
+     * Registers a search engine client whose walk hands out the given hits, and returns the list of
+     * indices it was asked to walk.
      */
-    private void registerWalkingClient(final SearchHit... hits) {
+    private List<String> registerWalkingClient(final SearchHit... hits) {
+        final List<String> walked = new ArrayList<>();
         ComponentUtil.register(new SearchEngineClient() {
             @Override
             public <T> long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
                     final EntityCreator<T, SearchResponse, SearchHit> creator, final BooleanFunction<T> cursor) {
+                walked.add(index);
                 long count = 0;
                 for (final SearchHit hit : hits) {
                     count++;
@@ -106,6 +152,32 @@ public class ApiAdminBackupActionTest extends UnitFessTestCase {
                 return count;
             }
         }, "searchEngineClient");
+        return walked;
+    }
+
+    /**
+     * Runs the admin screen download for the same id, which is the behaviour the API has to match.
+     */
+    private StreamResponse adminDownload(final String id) throws Exception {
+        final AdminBackupAction action = new AdminBackupAction();
+        final Field field = FessBaseAction.class.getDeclaredField("fessConfig");
+        field.setAccessible(true);
+        field.set(action, ComponentUtil.getFessConfig());
+        return (StreamResponse) action.download(id);
+    }
+
+    /**
+     * Returns what the client would actually receive: the streamed text, or the failure that
+     * reached it instead. The mapping files are read from the built webapp rather than from the
+     * unit test tree, so both paths may legitimately fail to find one here; what must never differ
+     * is which of the two happens.
+     */
+    private String served(final StreamResponse response) {
+        try {
+            return drain(response);
+        } catch (final Exception e) {
+            return e.getClass().getSimpleName() + ": " + e.getMessage();
+        }
     }
 
     /**
