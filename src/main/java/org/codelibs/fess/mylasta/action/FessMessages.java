@@ -359,6 +359,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The specified facet {0} is unsupported. */
     public static final String ERRORS_invalid_query_unsupported_facet_field = "{errors.invalid_query_unsupported_facet_field}";
 
+    /** The key of the message: The specified track_total_hits {0} is unsupported. */
+    public static final String ERRORS_invalid_query_unsupported_track_total_hits = "{errors.invalid_query_unsupported_track_total_hits}";
+
     /** The key of the message: Could not process the specified query. */
     public static final String ERRORS_invalid_query_cannot_process = "{errors.invalid_query_cannot_process}";
 
@@ -2260,6 +2263,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidQueryUnsupportedFacetField(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_query_unsupported_facet_field, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_unsupported_track_total_hits' with parameters.
+     * <pre>
+     * message: The specified track_total_hits {0} is unsupported.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryUnsupportedTrackTotalHits(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_invalid_query_unsupported_track_total_hits, arg0));
         return this;
     }
 
