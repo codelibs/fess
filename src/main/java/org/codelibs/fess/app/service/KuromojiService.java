@@ -22,6 +22,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KuromojiPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.kuromoji.KuromojiFile;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
@@ -34,6 +35,10 @@ import jakarta.annotation.Resource;
  * Service class for Kuromoji.
  */
 public class KuromojiService {
+
+    /** Message prefix for a dictionary id that resolves to no dictionary file. */
+    protected static final String NOT_FOUND_MESSAGE = "Kuromoji dictionary is not found: ";
+
     /** The dictionary manager. */
     @Resource
     protected DictionaryManager dictionaryManager;
@@ -99,15 +104,15 @@ public class KuromojiService {
      *
      * @param dictId The dictionary ID.
      * @param kuromojiItem The Kuromoji item to store.
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void store(final String dictId, final KuromojiItem kuromojiItem) {
-        getKuromojiFile(dictId).ifPresent(file -> {
-            if (kuromojiItem.getId() == 0) {
-                file.insert(kuromojiItem);
-            } else {
-                file.update(kuromojiItem);
-            }
-        });
+        final KuromojiFile file = getKuromojiFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId));
+        if (kuromojiItem.getId() == 0) {
+            file.insert(kuromojiItem);
+        } else {
+            file.update(kuromojiItem);
+        }
     }
 
     /**
@@ -115,10 +120,9 @@ public class KuromojiService {
      *
      * @param dictId The dictionary ID.
      * @param kuromojiItem The Kuromoji item to delete.
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void delete(final String dictId, final KuromojiItem kuromojiItem) {
-        getKuromojiFile(dictId).ifPresent(file -> {
-            file.delete(kuromojiItem);
-        });
+        getKuromojiFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId)).delete(kuromojiItem);
     }
 }
