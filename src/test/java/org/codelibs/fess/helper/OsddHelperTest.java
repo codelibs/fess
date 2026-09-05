@@ -18,17 +18,60 @@ package org.codelibs.fess.helper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.dbflute.utflute.mocklet.MockletServletContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
 public class OsddHelperTest extends UnitFessTestCase {
+
+    private String originalContextPath;
+
+    @Override
+    protected void tearDown(final TestInfo testInfo) throws Exception {
+        if (originalContextPath != null) {
+            // the servlet context is shared by every test case, so put it back
+            ((MockletServletContext) getMockRequest().getServletContext()).setContextPath(originalContextPath);
+            originalContextPath = null;
+        }
+        super.tearDown(testInfo);
+    }
+
+    private void prepareRequest(final String scheme, final String serverName, final int serverPort, final String contextPath) {
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setScheme(scheme);
+        request.setServerName(serverName);
+        request.setServerPort(serverPort);
+        final MockletServletContext servletContext = (MockletServletContext) request.getServletContext();
+        originalContextPath = servletContext.getContextPath();
+        servletContext.setContextPath(contextPath);
+    }
+
+    private String toText(final StreamResponse streamResponse) throws IOException {
+        final AtomicReference<String> ref = new AtomicReference<>();
+        streamResponse.getStreamCall().callback(new WrittenStreamOut() {
+
+            @Override
+            public void write(final InputStream ins) throws IOException {
+                ref.set(new String(InputStreamUtil.getBytes(ins), Constants.UTF_8));
+            }
+
+            @Override
+            public OutputStream stream() {
+                return null;
+            }
+        });
+        return ref.get();
+    }
 
     @Test
     public void test_init_nofile() {
@@ -69,6 +112,7 @@ public class OsddHelperTest extends UnitFessTestCase {
                 return "none";
             }
         });
+        prepareRequest("https", "search.example.com", 8443, "/fess");
         final OsddHelper osddHelper = new OsddHelper();
         osddHelper.setOsddPath("osdd/osdd.xml");
         osddHelper.setEncoding(Constants.UTF_8);
@@ -77,30 +121,57 @@ public class OsddHelperTest extends UnitFessTestCase {
 
         final StreamResponse streamResponse = osddHelper.asStream();
         assertEquals("text/xml; charset=UTF-8", streamResponse.getContentType());
-        streamResponse.getStreamCall().callback(new WrittenStreamOut() {
+        assertEquals("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+                  <ShortName>Fess</ShortName>
+                  <Description>Full Text Search for Your Documents.</Description>
+                  <Tags>Full Text Search</Tags>
+                  <Contact>fess-user@lists.sourceforge.jp</Contact>
+                  <SearchForm>https://search.example.com:8443/fess/</SearchForm>
+                  <Url type="text/html" template="https://search.example.com:8443/fess/search?q={searchTerms}"/>
+                  <InputEncoding>UTF-8</InputEncoding>
+                  <OutputEncoding>UTF-8</OutputEncoding>
+                </OpenSearchDescription>
+                """, toText(streamResponse));
+    }
 
+    @Test
+    public void test_asStream_rootContextPath() throws IOException {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
-            public void write(final InputStream ins) throws IOException {
-                assertEquals("""
-                        <?xml version="1.0" encoding="UTF-8"?>
-                        <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
-                          <ShortName>Fess</ShortName>
-                          <Description>Full Text Search for Your Documents.</Description>
-                          <Tags>Full Text Search</Tags>
-                          <Contact>fess-user@lists.sourceforge.jp</Contact>
-                          <SearchForm>http://localhost:8080/fess/</SearchForm>
-                          <Url type="text/html" template="http://localhost:8080/fess/search?q={searchTerms}"/>
-                          <InputEncoding>UTF-8</InputEncoding>
-                          <OutputEncoding>UTF-8</OutputEncoding>
-                        </OpenSearchDescription>
-                        """, new String(InputStreamUtil.getBytes(ins)));
-            }
-
-            @Override
-            public OutputStream stream() {
-                return null;
+            public String getOsddLinkEnabled() {
+                return "true";
             }
         });
+        prepareRequest("http", "search.example.com", 8081, "/");
+        final OsddHelper osddHelper = new OsddHelper();
+        osddHelper.setOsddPath("osdd/osdd.xml");
+        osddHelper.init();
+
+        final String content = toText(osddHelper.asStream());
+        assertTrue(content.contains("<SearchForm>http://search.example.com:8081/</SearchForm>"));
+        assertTrue(content.contains("template=\"http://search.example.com:8081/search?q={searchTerms}\""));
+        assertFalse(content.contains("localhost"));
+        assertFalse(content.contains(OsddHelper.CONTEXT_URL_PLACEHOLDER));
+    }
+
+    @Test
+    public void test_asStream_defaultPortOmitted() throws IOException {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getOsddLinkEnabled() {
+                return "true";
+            }
+        });
+        prepareRequest("https", "search.example.com", 443, "/");
+        final OsddHelper osddHelper = new OsddHelper();
+        osddHelper.setOsddPath("osdd/osdd.xml");
+        osddHelper.init();
+
+        final String content = toText(osddHelper.asStream());
+        assertTrue(content.contains("<SearchForm>https://search.example.com/</SearchForm>"));
+        assertTrue(content.contains("template=\"https://search.example.com/search?q={searchTerms}\""));
     }
 
     @Test
