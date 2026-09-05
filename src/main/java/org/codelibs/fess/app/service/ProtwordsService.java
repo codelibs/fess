@@ -22,6 +22,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ProtwordsPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.protwords.ProtwordsFile;
 import org.codelibs.fess.dict.protwords.ProtwordsItem;
@@ -35,6 +36,9 @@ import jakarta.annotation.Resource;
  * This service provides operations for managing protected words dictionary files and items.
  */
 public class ProtwordsService {
+
+    /** Message prefix for a dictionary id that resolves to no dictionary file. */
+    protected static final String NOT_FOUND_MESSAGE = "Protwords dictionary is not found: ";
 
     /**
      * Default constructor.
@@ -98,25 +102,24 @@ public class ProtwordsService {
      * Stores a protected words item (insert or update).
      * @param dictId the dictionary ID
      * @param protwordsItem the item to store
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void store(final String dictId, final ProtwordsItem protwordsItem) {
-        getProtwordsFile(dictId).ifPresent(file -> {
-            if (protwordsItem.getId() == 0) {
-                file.insert(protwordsItem);
-            } else {
-                file.update(protwordsItem);
-            }
-        });
+        final ProtwordsFile file = getProtwordsFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId));
+        if (protwordsItem.getId() == 0) {
+            file.insert(protwordsItem);
+        } else {
+            file.update(protwordsItem);
+        }
     }
 
     /**
      * Deletes a protected words item.
      * @param dictId the dictionary ID
      * @param protwordsItem the item to delete
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void delete(final String dictId, final ProtwordsItem protwordsItem) {
-        getProtwordsFile(dictId).ifPresent(file -> {
-            file.delete(protwordsItem);
-        });
+        getProtwordsFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId)).delete(protwordsItem);
     }
 }

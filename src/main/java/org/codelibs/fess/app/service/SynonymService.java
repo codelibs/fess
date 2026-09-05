@@ -22,6 +22,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SynonymPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.synonym.SynonymFile;
 import org.codelibs.fess.dict.synonym.SynonymItem;
@@ -36,6 +37,9 @@ import jakarta.annotation.Resource;
  * including retrieving, storing, and deleting synonyms.
  */
 public class SynonymService {
+
+    /** Message prefix for a dictionary id that resolves to no dictionary file. */
+    protected static final String NOT_FOUND_MESSAGE = "Synonym dictionary is not found: ";
     /** The dictionary manager for accessing dictionary files. */
     @Resource
     protected DictionaryManager dictionaryManager;
@@ -101,15 +105,15 @@ public class SynonymService {
      *
      * @param dictId      The ID of the dictionary.
      * @param synonymItem The synonym item to store.
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void store(final String dictId, final SynonymItem synonymItem) {
-        getSynonymFile(dictId).ifPresent(file -> {
-            if (synonymItem.getId() == 0) {
-                file.insert(synonymItem);
-            } else {
-                file.update(synonymItem);
-            }
-        });
+        final SynonymFile file = getSynonymFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId));
+        if (synonymItem.getId() == 0) {
+            file.insert(synonymItem);
+        } else {
+            file.update(synonymItem);
+        }
     }
 
     /**
@@ -117,10 +121,9 @@ public class SynonymService {
      *
      * @param dictId      The ID of the dictionary.
      * @param synonymItem The synonym item to delete.
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void delete(final String dictId, final SynonymItem synonymItem) {
-        getSynonymFile(dictId).ifPresent(file -> {
-            file.delete(synonymItem);
-        });
+        getSynonymFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId)).delete(synonymItem);
     }
 }

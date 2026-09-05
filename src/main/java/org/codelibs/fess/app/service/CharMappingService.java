@@ -22,6 +22,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CharMappingPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.mapping.CharMappingFile;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
@@ -39,6 +40,9 @@ import jakarta.annotation.Resource;
  * </p>
  */
 public class CharMappingService {
+
+    /** Message prefix for a dictionary id that resolves to no dictionary file. */
+    protected static final String NOT_FOUND_MESSAGE = "CharMapping dictionary is not found: ";
 
     /**
      * Creates a new instance of CharMappingService.
@@ -127,15 +131,15 @@ public class CharMappingService {
      *
      * @param dictId the dictionary ID to store the character mapping item in
      * @param charMappingItem the character mapping item to store
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void store(final String dictId, final CharMappingItem charMappingItem) {
-        getCharMappingFile(dictId).ifPresent(file -> {
-            if (charMappingItem.getId() == 0) {
-                file.insert(charMappingItem);
-            } else {
-                file.update(charMappingItem);
-            }
-        });
+        final CharMappingFile file = getCharMappingFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId));
+        if (charMappingItem.getId() == 0) {
+            file.insert(charMappingItem);
+        } else {
+            file.update(charMappingItem);
+        }
     }
 
     /**
@@ -147,10 +151,9 @@ public class CharMappingService {
      *
      * @param dictId the dictionary ID to delete the character mapping item from
      * @param charMappingItem the character mapping item to delete
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void delete(final String dictId, final CharMappingItem charMappingItem) {
-        getCharMappingFile(dictId).ifPresent(file -> {
-            file.delete(charMappingItem);
-        });
+        getCharMappingFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId)).delete(charMappingItem);
     }
 }

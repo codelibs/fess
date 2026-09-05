@@ -22,6 +22,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.StopwordsPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.stopwords.StopwordsFile;
 import org.codelibs.fess.dict.stopwords.StopwordsItem;
@@ -36,6 +37,9 @@ import jakarta.annotation.Resource;
  * including retrieving, storing, and deleting stopwords.
  */
 public class StopwordsService {
+
+    /** Message prefix for a dictionary id that resolves to no dictionary file. */
+    protected static final String NOT_FOUND_MESSAGE = "Stopwords dictionary is not found: ";
     /** The dictionary manager for accessing dictionary files. */
     @Resource
     protected DictionaryManager dictionaryManager;
@@ -102,15 +106,15 @@ public class StopwordsService {
      *
      * @param dictId        The ID of the dictionary.
      * @param stopwordsItem The stopword item to store.
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void store(final String dictId, final StopwordsItem stopwordsItem) {
-        getStopwordsFile(dictId).ifPresent(file -> {
-            if (stopwordsItem.getId() == 0) {
-                file.insert(stopwordsItem);
-            } else {
-                file.update(stopwordsItem);
-            }
-        });
+        final StopwordsFile file = getStopwordsFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId));
+        if (stopwordsItem.getId() == 0) {
+            file.insert(stopwordsItem);
+        } else {
+            file.update(stopwordsItem);
+        }
     }
 
     /**
@@ -118,10 +122,9 @@ public class StopwordsService {
      *
      * @param dictId        The ID of the dictionary.
      * @param stopwordsItem The stopword item to delete.
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void delete(final String dictId, final StopwordsItem stopwordsItem) {
-        getStopwordsFile(dictId).ifPresent(file -> {
-            file.delete(stopwordsItem);
-        });
+        getStopwordsFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId)).delete(stopwordsItem);
     }
 }

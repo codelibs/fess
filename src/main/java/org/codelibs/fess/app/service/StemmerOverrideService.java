@@ -22,6 +22,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.StemmerOverridePager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
+import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.stemmeroverride.StemmerOverrideFile;
 import org.codelibs.fess.dict.stemmeroverride.StemmerOverrideItem;
@@ -39,6 +40,9 @@ import jakarta.annotation.Resource;
  * specific terms, improving search accuracy for domain-specific vocabularies.
  */
 public class StemmerOverrideService {
+
+    /** Message prefix for a dictionary id that resolves to no dictionary file. */
+    protected static final String NOT_FOUND_MESSAGE = "StemmerOverride dictionary is not found: ";
 
     /** Dictionary manager for accessing dictionary files. */
     @Resource
@@ -112,15 +116,16 @@ public class StemmerOverrideService {
      *
      * @param dictId The ID of the stemmer override dictionary
      * @param stemmerOvberrideItem The stemmer override item to store
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void store(final String dictId, final StemmerOverrideItem stemmerOvberrideItem) {
-        getStemmerOverrideFile(dictId).ifPresent(file -> {
-            if (stemmerOvberrideItem.getId() == 0) {
-                file.insert(stemmerOvberrideItem);
-            } else {
-                file.update(stemmerOvberrideItem);
-            }
-        });
+        final StemmerOverrideFile file =
+                getStemmerOverrideFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId));
+        if (stemmerOvberrideItem.getId() == 0) {
+            file.insert(stemmerOvberrideItem);
+        } else {
+            file.update(stemmerOvberrideItem);
+        }
     }
 
     /**
@@ -128,10 +133,9 @@ public class StemmerOverrideService {
      *
      * @param dictId The ID of the stemmer override dictionary
      * @param stemmerOvberrideItem The stemmer override item to delete
+     * @throws org.codelibs.fess.dict.DictionaryException if the dictionary ID resolves to no dictionary file
      */
     public void delete(final String dictId, final StemmerOverrideItem stemmerOvberrideItem) {
-        getStemmerOverrideFile(dictId).ifPresent(file -> {
-            file.delete(stemmerOvberrideItem);
-        });
+        getStemmerOverrideFile(dictId).orElseThrow(() -> new DictionaryException(NOT_FOUND_MESSAGE + dictId)).delete(stemmerOvberrideItem);
     }
 }

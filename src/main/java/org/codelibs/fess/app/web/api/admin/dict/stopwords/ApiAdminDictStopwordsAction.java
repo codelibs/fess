@@ -113,7 +113,12 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
             return null;
         });
-        stopwordsService.store(body.dictId, entity);
+        try {
+            stopwordsService.store(body.dictId, entity);
+        } catch (final Exception e) {
+            logger.warn("Failed to create a dictionary entry: dictId={}", body.dictId, e);
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
+        }
         return asJson(
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
@@ -138,7 +143,12 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(body.id)));
             return null;
         });
-        stopwordsService.store(body.dictId, entity);
+        try {
+            stopwordsService.store(body.dictId, entity);
+        } catch (final Exception e) {
+            logger.warn("Failed to update a dictionary entry: dictId={}", body.dictId, e);
+            throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
+        }
         return asJson(
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
