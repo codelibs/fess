@@ -15,16 +15,19 @@
  */
 package org.codelibs.fess.filter;
 
+import java.io.File;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.logging.log4j.Level;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
-import org.lastaflute.core.direction.FwAssistantDirector;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
-import org.lastaflute.web.servlet.filter.hook.FilterHook;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +40,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * on the 500 path and only there.</p>
  */
 public class ServerErrorLoggingFilterTest extends UnitFessTestCase {
+
+    private static final String WEB_XML_PATH = "src/main/webapp/WEB-INF/web.xml";
+
+    /** The {@code filter-name} web.xml gives this filter. */
+    private static final String FILTER_NAME = "serverErrorLoggingFilter";
+
+    /** The filter that runs {@link RequestLoggingFilter} inside itself. */
+    private static final String LOGGING_FILTER_NAME = "lastaShowbaseFilter";
 
     @Override
     protected String prepareMockServletPath() {
@@ -90,21 +101,62 @@ public class ServerErrorLoggingFilterTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * Asserts that {@code web.xml} maps this filter, and maps it ahead of the filter that runs
+     * {@link RequestLoggingFilter}.
+     *
+     * <p>The order is the whole registration: the handler has to be on the thread before the
+     * logging filter looks it up, so a mapping placed after {@code lastaShowbaseFilter} would
+     * leave the 500 unreported again -- with nothing failing anywhere to say so.</p>
+     */
     @Test
-    public void test_registeredOutsideTheLoggingFilter() throws Exception {
-        final List<FilterHook> hooks =
-                ComponentUtil.getComponent(FwAssistantDirector.class).assistWebDirection().assistOutsideFilterHookList();
-        assertEquals("expected one outside filter hook, got " + hooks, 1, hooks.size());
-        final LogCapturingAppender appender = LogCapturingAppender.attach(ServerErrorLoggingFilter.class);
-        try {
-            final ExposedLoggingFilter loggingFilter = new ExposedLoggingFilter();
-            hooks.get(0)
-                    .hook(getMockRequest(), getMockResponse(),
-                            (req, res) -> loggingFilter.fireServerError(req, res, new IllegalStateException("registered hook")));
-            assertEquals("the registered hook must produce the WARN line, got " + appender.events(), 1, appender.warnings().size());
-        } finally {
-            appender.detach();
+    public void test_mappedAheadOfTheLoggingFilter() throws Exception {
+        final Document webXml = parseWebXml();
+        assertEquals("web.xml should declare the filter", ServerErrorLoggingFilter.class.getName(), filterClassOf(webXml, FILTER_NAME));
+        final int ownIndex = mappingIndexOf(webXml, FILTER_NAME);
+        final int loggingIndex = mappingIndexOf(webXml, LOGGING_FILTER_NAME);
+        assertTrue(FILTER_NAME + " should be mapped in web.xml", ownIndex >= 0);
+        assertTrue(LOGGING_FILTER_NAME + " should be mapped in web.xml", loggingIndex >= 0);
+        assertTrue(FILTER_NAME + " (" + ownIndex + ") must be mapped before " + LOGGING_FILTER_NAME + " (" + loggingIndex + ")",
+                ownIndex < loggingIndex);
+    }
+
+    private Document parseWebXml() throws Exception {
+        final File file = new File(WEB_XML_PATH);
+        assertTrue(WEB_XML_PATH + " should exist", file.exists());
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        // web.xml carries a schema rather than a DOCTYPE today, so nothing external is fetched;
+        // the guard is here so that adding one can never make this test reach the network.
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        return factory.newDocumentBuilder().parse(file);
+    }
+
+    /** Returns the {@code filter-class} declared for the given {@code filter-name}, or null. */
+    private String filterClassOf(final Document webXml, final String filterName) {
+        final NodeList filters = webXml.getElementsByTagName("filter");
+        for (int i = 0; i < filters.getLength(); i++) {
+            final Element filter = (Element) filters.item(i);
+            if (filterName.equals(textOf(filter, "filter-name"))) {
+                return textOf(filter, "filter-class");
+            }
         }
+        return null;
+    }
+
+    /** Returns the position of the given filter in the {@code filter-mapping} order, or -1. */
+    private int mappingIndexOf(final Document webXml, final String filterName) {
+        final NodeList mappings = webXml.getElementsByTagName("filter-mapping");
+        for (int i = 0; i < mappings.getLength(); i++) {
+            if (filterName.equals(textOf((Element) mappings.item(i), "filter-name"))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private String textOf(final Element parent, final String tagName) {
+        final NodeList elements = parent.getElementsByTagName(tagName);
+        return elements.getLength() == 0 ? null : elements.item(0).getTextContent().trim();
     }
 
     @Test

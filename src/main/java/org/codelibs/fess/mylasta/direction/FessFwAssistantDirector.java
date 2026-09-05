@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.filter.ServerErrorLoggingFilter;
 import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
@@ -174,9 +173,6 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directAdjustment(createActionAdjustmentProvider());
         direction.directMessage(createMessageNameList(), "fess_label");
         direction.directApiCall(createApiFailureHook());
-        // outside the logging filter (inside=false) so that the per-thread server error handler
-        // is installed before RequestLoggingFilter swallows the exception behind errorLogging=false
-        direction.directServletFilter(createServerErrorLoggingFilter(), false);
         direction.directMultipart(FessMultipartRequestHandler::new);
         direction.directHtmlRendering(new JspHtmlRenderingProvider() {
             @Override
@@ -212,9 +208,5 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
 
     protected FessApiFailureHook createApiFailureHook() {
         return new FessApiFailureHook();
-    }
-
-    protected ServerErrorLoggingFilter createServerErrorLoggingFilter() {
-        return new ServerErrorLoggingFilter();
     }
 }

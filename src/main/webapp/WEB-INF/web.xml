@@ -67,6 +67,11 @@
   </filter>
 
   <filter>
+    <filter-name>serverErrorLoggingFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.ServerErrorLoggingFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>lastaShowbaseFilter</filter-name>
     <filter-class>org.lastaflute.web.servlet.filter.LastaShowbaseFilter</filter-class>
     <init-param>
@@ -160,6 +165,22 @@
 
   <filter-mapping>
     <filter-name>webApiFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <!--
+    serverErrorLoggingFilter MUST come BEFORE lastaShowbaseFilter: it installs the per-thread
+    server error handler that RequestLoggingFilter - which lastaShowbaseFilter runs inside
+    itself - calls when a request ends as a 500. Mapped after lastaShowbaseFilter it would
+    never be on the thread by the time the handler is looked up, and the 500 would again go
+    unreported. It is declared here rather than through FwWebDirection#directServletFilter
+    because the assistant director is also loaded by the crawler, thumbnail, suggest and chunk
+    child processes, whose classpath has no servlet API: a servlet type reachable from that
+    class kills every child process at DI container startup.
+  -->
+  <filter-mapping>
+    <filter-name>serverErrorLoggingFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
