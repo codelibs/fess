@@ -43,6 +43,9 @@ import org.opensearch.common.xcontent.json.JsonXContent;
 import org.opensearch.core.action.ActionResponse;
 import org.opensearch.core.xcontent.DeprecationHandler;
 import org.opensearch.core.xcontent.NamedXContentRegistry;
+import org.opensearch.search.sort.FieldSortBuilder;
+import org.opensearch.search.sort.SortBuilder;
+import org.opensearch.search.sort.SortOrder;
 import org.opensearch.core.xcontent.XContentParser;
 import org.opensearch.action.search.ShardSearchFailure;
 import org.opensearch.search.SearchHits;
@@ -228,7 +231,8 @@ public class EsAbstractBehaviorPitTest extends UnitFessTestCase {
 
     /**
      * The sort ends with the _shard_doc tiebreaker, without which search_after has no total order
-     * to walk and can repeat or skip documents.
+     * to walk and can repeat or skip documents. _shard_doc restarts per index, so the index name
+     * follows it to keep the pair unique if the point in time ever covers more than one.
      */
     @Test
     public void test_pitSearch_appendsShardDocTiebreaker() throws Exception {
@@ -239,9 +243,13 @@ public class EsAbstractBehaviorPitTest extends UnitFessTestCase {
 
         final SearchRequest search = searchRequests().get(0);
         assertNotNull(search.source().sorts());
-        assertFalse(search.source().sorts().isEmpty());
-        final String last = search.source().sorts().get(search.source().sorts().size() - 1).getWriteableName();
-        assertEquals("_shard_doc", last);
+        final List<SortBuilder<?>> sorts = search.source().sorts();
+        assertTrue(sorts.size() >= 2);
+        assertEquals("_shard_doc", sorts.get(sorts.size() - 2).getWriteableName());
+        final SortBuilder<?> last = sorts.get(sorts.size() - 1);
+        assertTrue(last instanceof FieldSortBuilder);
+        assertEquals("_index", ((FieldSortBuilder) last).getFieldName());
+        assertEquals(SortOrder.ASC, ((FieldSortBuilder) last).order());
     }
 
     /**
