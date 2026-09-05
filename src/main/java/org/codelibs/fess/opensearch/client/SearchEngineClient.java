@@ -2478,15 +2478,26 @@ public class SearchEngineClient implements Client {
         /**
          * Builds the track total hits configuration.
          *
+         * <p>Turning the total off is not supported. OpenSearch answers such a request by leaving
+         * {@code hits.total} out of the response, and the record count derived from it is what the
+         * pager, the result screen and the {@code record_count} of the API are all built on: without
+         * it the response handler reads a null total and every search comes back empty. The value is
+         * refused wherever it is given, as a search parameter and in
+         * {@code query.track.total.hits} alike.</p>
+         *
          * @param fessConfig the Fess configuration
+         * @throws InvalidQueryException if the total was asked not to be tracked
          */
         protected void buildTrackTotalHits(final FessConfig fessConfig) {
             if (isScroll) {
                 return;
             }
             if (StringUtil.isNotBlank(trackTotalHits)) {
-                if (Constants.TRUE.equalsIgnoreCase(trackTotalHits) || Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
-                    searchRequestBuilder.setTrackTotalHits(Boolean.parseBoolean(trackTotalHits));
+                if (Constants.FALSE.equalsIgnoreCase(trackTotalHits)) {
+                    throw unsupportedTrackTotalHits(trackTotalHits);
+                }
+                if (Constants.TRUE.equalsIgnoreCase(trackTotalHits)) {
+                    searchRequestBuilder.setTrackTotalHits(true);
                     return;
                 }
                 try {
@@ -2497,11 +2508,27 @@ public class SearchEngineClient implements Client {
                 }
             }
             final Object trackTotalHitsValue = fessConfig.getQueryTrackTotalHitsValue();
+            if (Boolean.FALSE.equals(trackTotalHitsValue)) {
+                throw unsupportedTrackTotalHits(fessConfig.getQueryTrackTotalHits());
+            }
             if (trackTotalHitsValue instanceof Boolean) {
                 searchRequestBuilder.setTrackTotalHits((Boolean) trackTotalHitsValue);
             } else if (trackTotalHitsValue instanceof Number) {
                 searchRequestBuilder.setTrackTotalHitsUpTo(((Number) trackTotalHitsValue).intValue());
             }
+        }
+
+        /**
+         * Builds the failure for a track total hits value that would leave the response without a
+         * total.
+         *
+         * @param value the value that was given
+         * @return the exception to throw
+         */
+        protected InvalidQueryException unsupportedTrackTotalHits(final String value) {
+            return new InvalidQueryException(
+                    messages -> messages.addErrorsInvalidQueryUnsupportedTrackTotalHits(UserMessages.GLOBAL_PROPERTY_KEY, value),
+                    "Unsupported track_total_hits: " + value);
         }
 
         /**
