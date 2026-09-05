@@ -62,9 +62,11 @@ ${fe:html(true)}
                             </div>
                             <la:form action="/admin/searchlist" styleClass="form-inline" method="GET">
                                 <div class="form-group">
+                                    <c:set var="title_query"><la:message key="labels.search"/></c:set>
+                                    <c:set var="ph_query"><la:message key="labels.searchlist_query_placeholder"/></c:set>
                                     <la:text styleClass="query form-control" property="q"
-                                             title="Search" size="50" maxlength="1000"
-                                             placeholder="Type a search query"/>
+                                             title="${title_query}" size="50" maxlength="1000"
+                                             placeholder="${ph_query}"/>
                                 </div>
                                 <div class="form-group ml-sm-2">
                                     <button type="submit" class="btn btn-primary" id="submit"
