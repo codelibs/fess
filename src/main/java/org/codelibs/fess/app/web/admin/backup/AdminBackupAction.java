@@ -479,11 +479,19 @@ public class AdminBackupAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    private Path getDocJsonPath() {
+    /**
+     * Get the path of the document mapping file.
+     * @return The path of doc.json.
+     */
+    public static Path getDocJsonPath() {
         return ResourceUtil.getClassesPath("fess_indices", "fess", "doc.json");
     }
 
-    private Path getFessJsonPath() {
+    /**
+     * Get the path of the index mapping file.
+     * @return The path of fess.json.
+     */
+    public static Path getFessJsonPath() {
         return ResourceUtil.getClassesPath("fess_indices", "fess.json");
     }
 

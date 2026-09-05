@@ -19,7 +19,9 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.NDJSON_EXTENTION;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getBackupItems;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getClickLogNdjsonWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getDocJsonPath;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFavoriteLogNdjsonWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFessJsonPath;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getUserInfoNdjsonWriteCall;
 
@@ -30,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -93,6 +97,12 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                     }
                 });
             }
+            if ("fess.json".equals(id)) {
+                return streamMappingFile(id, getFessJsonPath());
+            }
+            if ("doc.json".equals(id)) {
+                return streamMappingFile(id, getDocJsonPath());
+            }
             if (!id.endsWith(NDJSON_EXTENTION)) {
                 final String index;
                 final String filename;
@@ -141,6 +151,14 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
 
         throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL));
         return StreamResponse.asEmptyBody(); // no-op
+    }
+
+    private StreamResponse streamMappingFile(final String id, final Path path) {
+        return asStream(id).contentTypeOctetStream().stream(out -> {
+            try (final InputStream in = Files.newInputStream(path)) {
+                out.write(in);
+            }
+        });
     }
 
     private StreamResponse writeNdjsonResponse(final String id, final Consumer<Writer> writeCall) {
