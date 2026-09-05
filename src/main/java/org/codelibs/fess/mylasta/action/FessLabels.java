@@ -2886,6 +2886,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: The search processing time has exceeded the limit. The displayed results may be partial. */
     public static final String LABELS_process_time_is_exceeded = "{labels.process_time_is_exceeded}";
 
+    /** The key of the message: The search could not be completed, so no results can be shown. This does not mean that no document matched. Please try again later. */
+    public static final String LABELS_search_could_not_be_completed = "{labels.search_could_not_be_completed}";
+
     /** The key of the message: Given Name */
     public static final String LABELS_user_given_name = "{labels.user_given_name}";
 

@@ -1,5 +1,12 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%-- query did not match any document --%>
+<c:if test="${partialResults}">
+	<div class="alert alert-warning">
+		<p>
+			<la:message key="labels.search_could_not_be_completed" />
+		</p>
+	</div>
+</c:if>
 <div id="result" class="row">
 	<div class="col-md-8">
 		<div class="text-center py-4">

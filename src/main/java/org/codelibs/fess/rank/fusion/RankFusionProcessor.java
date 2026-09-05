@@ -482,14 +482,20 @@ public class RankFusionProcessor implements AutoCloseable {
      * former. The same flag is already set for a timeout, which is the milder version of exactly
      * this condition.
      * </p>
+     * <p>
+     * The count relation carries the same distinction. No total was ever obtained here, so the
+     * response says {@code GREATER_THAN_OR_EQUAL_TO} rather than {@code EQUAL_TO}: zero or more
+     * documents match, which is all that is actually known. Declaring the zero exact would
+     * contradict the {@code partialResults} flag set beside it.
+     * </p>
      *
      * @param params search request parameters, for the start position
      * @param pageSize the page size to report
      * @return an empty response list flagged as partial
      */
     protected QueryResponseList createDegradedResponseList(final SearchRequestParams params, final int pageSize) {
-        return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, true, null, params.getStartPosition(),
-                pageSize, 0);
+        return createResponseList(Collections.emptyList(), 0, Relation.GREATER_THAN_OR_EQUAL_TO.toString(), 0, true, null,
+                params.getStartPosition(), pageSize, 0);
     }
 
     /**
