@@ -103,13 +103,14 @@ public class SearchAction extends FessSearchAction {
      */
     @Execute
     public HtmlResponse advance(final SearchForm form) {
-        if (isLoginRequired()) {
-            return redirectToLogin();
-        }
         validate(form, messages -> {}, () -> asHtml(virtualHost(path_IndexJsp)).renderWith(data -> {
             buildInitParams();
             RenderDataUtil.register(data, "notification", fessConfig.getNotificationSearchTop());
         }));
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
+
         if (!form.hasConditionQuery()) {
             if (StringUtil.isNotBlank(form.q)) {
                 form.as.put("q", new String[] { form.q });
