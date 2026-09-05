@@ -18,11 +18,16 @@ package org.codelibs.fess.app.web.admin.user;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.GroupService;
+import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.opensearch.user.exentity.Group;
+import org.codelibs.fess.opensearch.user.exentity.Role;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -208,6 +213,85 @@ public class AdminUserActionTest extends UnitFessTestCase {
     public void test_verifyPasswordPolicy_ignoresABlankPassword() {
         assertEquals("", policyErrorOf(null));
         assertEquals("", policyErrorOf(""));
+    }
+
+    /**
+     * Roles are stored by id, and a user entity Base64-decodes those ids to read them back. A role
+     * name is a natural thing for an API caller to send and is not an id, so it has to be refused
+     * here; storing it leaves an account that can no longer log in.
+     */
+    @Test
+    public void test_verifyRolesAndGroups_rejectsARoleName() {
+        final String reported = roleAndGroupErrorOf(new String[] { "guest" }, null);
+        assertTrue(reported.contains("roles"));
+        assertTrue(reported.contains("errors.invalid_role_or_group_id"));
+    }
+
+    /**
+     * Groups have the same shape and the same failure, so they are checked the same way.
+     */
+    @Test
+    public void test_verifyRolesAndGroups_rejectsAGroupName() {
+        final String reported = roleAndGroupErrorOf(null, new String[] { "sales" });
+        assertTrue(reported.contains("groups"));
+        assertTrue(reported.contains("errors.invalid_role_or_group_id"));
+    }
+
+    /**
+     * An id that is valid Base64 but names no stored role is refused too: it would give the account
+     * a permission for a role that does not exist.
+     */
+    @Test
+    public void test_verifyRolesAndGroups_rejectsAnUnknownId() {
+        assertTrue(roleAndGroupErrorOf(new String[] { "bm9ib2R5" }, null).contains("errors.invalid_role_or_group_id"));
+    }
+
+    /**
+     * The ids the screens offer resolve, so nothing is reported for them.
+     */
+    @Test
+    public void test_verifyRolesAndGroups_acceptsStoredIds() {
+        assertEquals("", roleAndGroupErrorOf(new String[] { "Z3Vlc3Q=" }, new String[] { "c2FsZXM=" }));
+    }
+
+    /**
+     * A user with no roles and no groups is allowed, as it always was.
+     */
+    @Test
+    public void test_verifyRolesAndGroups_acceptsNothingAssigned() {
+        assertEquals("", roleAndGroupErrorOf(null, null));
+    }
+
+    /**
+     * Runs the shared role and group check over one set of ids and returns what it reported, or an
+     * empty string when it reported nothing. Only "Z3Vlc3Q=" resolves as a role and only "c2FsZXM="
+     * as a group.
+     */
+    private String roleAndGroupErrorOf(final String[] roles, final String[] groups) {
+        final CreateForm form = new CreateForm();
+        form.crudMode = CrudMode.CREATE;
+        form.name = "tester";
+        form.roles = roles;
+        form.groups = groups;
+        final RoleService roleService = new RoleService() {
+            @Override
+            public OptionalEntity<Role> getRole(final String id) {
+                return "Z3Vlc3Q=".equals(id) ? OptionalEntity.of(new Role()) : OptionalEntity.empty();
+            }
+        };
+        final GroupService groupService = new GroupService() {
+            @Override
+            public OptionalEntity<Group> getGroup(final String id) {
+                return "c2FsZXM=".equals(id) ? OptionalEntity.of(new Group()) : OptionalEntity.empty();
+            }
+        };
+        final StringBuilder reported = new StringBuilder();
+        AdminUserAction.verifyRolesAndGroups(form, roleService, groupService, messenger -> {
+            final FessMessages messages = new FessMessages();
+            messenger.message(messages);
+            reported.append(messages.toString());
+        });
+        return reported.toString();
     }
 
     /**
