@@ -15,11 +15,17 @@
  */
 package org.codelibs.fess.app.web.chat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.VaMore;
+import org.lastaflute.web.validation.ValidationSuccess;
 
 /**
  * The chat screens sit alongside the other search-side screens, so login.required has to close
@@ -57,11 +63,43 @@ public class ChatActionTest extends UnitFessTestCase {
     }
 
     /**
+     * ChatForm carries validator annotations, so the framework insists that clear() call
+     * validate() on every path out of the method, and it reports a method that never did once the
+     * method has already returned. The call has to come before the login gate, because a call
+     * placed after it is skipped again on the path that redirects to login.
+     */
+    @Test
+    public void test_clear_validatesBeforeTheLoginGate() {
+        final List<String> calls = new ArrayList<>();
+        final ChatAction action = gated(new AtomicInteger(0), calls);
+
+        final ChatForm form = new ChatForm();
+        form.sessionId = "s1";
+        assertNull(action.clear(form));
+        assertEquals("validate redirectToLogin", String.join(" ", calls));
+    }
+
+    /**
      * An action that reports login as required and counts how often it sends the visitor there.
      * Nothing else is wired, so a call that reaches past the gate fails loudly.
      */
     private ChatAction gated(final AtomicInteger redirects) {
+        return gated(redirects, new ArrayList<>());
+    }
+
+    /**
+     * The same action, recording what it does in order. validate() is recorded rather than run,
+     * since the real one wants a request and a message resource behind it.
+     */
+    private ChatAction gated(final AtomicInteger redirects, final List<String> calls) {
         return new ChatAction() {
+            @Override
+            public ValidationSuccess validate(final Object form, final VaMore<FessMessages> moreValidationLambda,
+                    final VaErrorHook validationErrorLambda) {
+                calls.add("validate");
+                return new ValidationSuccess(new FessMessages());
+            }
+
             @Override
             protected boolean isLoginRequired() {
                 return true;
@@ -69,6 +107,7 @@ public class ChatActionTest extends UnitFessTestCase {
 
             @Override
             protected HtmlResponse redirectToLogin() {
+                calls.add("redirectToLogin");
                 redirects.incrementAndGet();
                 return null;
             }

@@ -108,6 +108,7 @@ public class ChatAction extends FessSearchAction {
      */
     @Execute
     public HtmlResponse clear(final ChatForm form) {
+        validate(form, messages -> {}, () -> redirect(getClass()));
         if (isLoginRequired()) {
             return redirectToLogin();
         }
