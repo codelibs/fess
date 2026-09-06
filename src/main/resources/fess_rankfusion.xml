@@ -16,4 +16,9 @@
 		class="org.codelibs.fess.rank.fusion.SemanticChunkSearcher">
 		<postConstruct name="register"></postConstruct>
 	</component>
+	<!-- Registers only when rank.fusion.searchers names "legacy"; see LegacySearcher#register. -->
+	<component name="legacySearcher"
+		class="org.codelibs.fess.rank.fusion.LegacySearcher">
+		<postConstruct name="register"></postConstruct>
+	</component>
 </components>

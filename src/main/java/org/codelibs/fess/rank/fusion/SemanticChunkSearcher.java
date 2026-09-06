@@ -83,7 +83,7 @@ import jakarta.annotation.PostConstruct;
  * query syntax (field filters, boolean operators, wildcards) — only plain keyword
  * or natural-language queries take the semantic branch.</p>
  */
-public class SemanticChunkSearcher extends DefaultSearcher {
+public class SemanticChunkSearcher extends AbstractDocumentSearcher {
 
     private static final Logger logger = LogManager.getLogger(SemanticChunkSearcher.class);
 

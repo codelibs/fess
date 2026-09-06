@@ -209,9 +209,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     public void test_search_degradesToEmptyWhenEngineCallFails() {
         final GuardedSearcher guarded = new GuardedSearcher() {
             @Override
-            protected org.dbflute.optional.OptionalEntity<org.opensearch.action.search.SearchResponse> sendRequest(final String query,
-                    final org.codelibs.fess.entity.SearchRequestParams params,
-                    final org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> userBean) {
+            protected OptionalEntity<SearchResponse> sendRequest(final SearchRequestParams params,
+                    final SearchCondition<SearchRequestBuilder> condition) {
                 throw new RuntimeException("engine boom");
             }
         };
@@ -525,8 +524,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         }
 
         @Override
-        protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
-                final OptionalThing<FessUserBean> userBean) {
+        protected OptionalEntity<SearchResponse> sendRequest(final SearchRequestParams params,
+                final SearchCondition<SearchRequestBuilder> condition) {
             if (failSendRequest) {
                 throw new RuntimeException("engine boom");
             }
@@ -537,8 +536,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     /** Guarded searcher whose engine round-trip is short-circuited to an empty response. */
     private static class EmptyResponseSearcher extends GuardedSearcher {
         @Override
-        protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
-                final OptionalThing<FessUserBean> userBean) {
+        protected OptionalEntity<SearchResponse> sendRequest(final SearchRequestParams params,
+                final SearchCondition<SearchRequestBuilder> condition) {
             return OptionalEntity.empty();
         }
     }
