@@ -29,6 +29,8 @@ import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.query.StructuredQuerySplitter;
+import org.codelibs.fess.query.StubProcessorSplitter;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.unit.LogCapturingAppender;
@@ -286,6 +288,63 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     // -------------------------------------------------------------------------------------
+    //                                                                     conditions in a query
+    //                                                                     ---------------------
+
+    @Test
+    public void test_prepare_narrowedQueryStillReachesTheVectorBranch() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        // Clicking a facet appends label:"news" to the query. Refusing the whole string for
+        // carrying syntax is what used to make the vector branch disappear the moment a user
+        // narrowed a search.
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context =
+                searcher.prepare("opensearch label:\"news\"", new StubSearchRequestParams(0, 10));
+        assertTrue(context.isPresent(), "a narrowed search must still reach the vector branch");
+        assertNotNull(context.get().getConditionFilter(), "the narrowing must survive as a filter");
+        assertEquals(1, searcher.splitter.converted.size(), searcher.splitter.converted.toString());
+    }
+
+    @Test
+    public void test_prepare_embedsTheWordsWithoutTheConditions() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.prepare("opensearch label:\"news\"", new StubSearchRequestParams(0, 10));
+        // label:"news" is noise to an embedding model
+        assertEquals("opensearch", searcher.embeddedQuery);
+    }
+
+    @Test
+    public void test_prepare_skipsWhatCannotBeSplit() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        // allintitle: narrows to one field, and a chunk vector covers the document rather than a
+        // field, so the branch cannot honour it and must not run without it
+        assertFalse(searcher.prepare("allintitle:opensearch", new StubSearchRequestParams(0, 10)).isPresent());
+    }
+
+    @Test
+    public void test_buildSemanticQuery_appliesConditionsToBothPlaces() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final QueryBuilder conditionFilter = QueryBuilders.termQuery("label", "news");
+        final SemanticChunkSearcher.SemanticQueryContext context =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, conditionFilter);
+        final String json = searcher.buildSemanticQuery(context, new StubSearchRequestParams(0, 10)).toString().replaceAll("\\s", "");
+        // the outer clause enforces the narrowing; the copy inside the knn query keeps the
+        // approximate search from spending its k on documents that are about to be discarded
+        assertEquals(2, countOccurrences(json, "\"label\":{\"value\":\"news\""), json);
+    }
+
+    @Test
+    public void test_buildSemanticQuery_leavesTheFilterAloneWithoutConditions() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final SemanticChunkSearcher.SemanticQueryContext context =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, null);
+        final String json = searcher.buildSemanticQuery(context, new StubSearchRequestParams(0, 10)).toString().replaceAll("\\s", "");
+        assertFalse(json.contains("\"label\""), json);
+        assertEquals(2, countOccurrences(json, "\"role\":{\"value\":\"Rguest\""), json);
+    }
+
+    // -------------------------------------------------------------------------------------
     //                                                                               min_score
     //                                                                               ---------
 
@@ -511,6 +570,12 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         RuntimeException probeFailure;
         private Settings settings = Settings.EMPTY;
         private Map<String, Object> properties = Map.of();
+        private final StubProcessorSplitter splitter = new StubProcessorSplitter();
+
+        @Override
+        protected StructuredQuerySplitter getQuerySplitter() {
+            return splitter;
+        }
 
         ProbeSearcher withSettings(final Settings settings) {
             this.settings = settings;
@@ -612,6 +677,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         boolean available = true;
         boolean managerTouched = false;
         Float minScore = null;
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        String embeddedQuery;
 
         @Override
         protected boolean isSearchEnabled() {
@@ -621,6 +688,13 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         @Override
         protected OptionalThing<Float> getMinScore() {
             return minScore == null ? OptionalThing.empty() : OptionalThing.of(minScore);
+        }
+
+        @Override
+        protected StructuredQuerySplitter getQuerySplitter() {
+            // the real one needs the query command container; the split itself is covered by
+            // StructuredQuerySplitterTest
+            return splitter;
         }
 
         @Override
@@ -639,6 +713,7 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
 
                 @Override
                 public float[] embedQuery(final String query) {
+                    embeddedQuery = query;
                     return new float[] { 0.1f, 0.2f };
                 }
             };
