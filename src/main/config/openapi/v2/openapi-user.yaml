@@ -195,7 +195,7 @@ paths:
           description: |-
             Forwarded to the search engine to control exact hit counting
             (e.g. `true` or an integer threshold). Affects whether
-            `record_count_relation` is `eq` or `gte`.
+            `record_count_relation` is `EQUAL_TO` or `GREATER_THAN_OR_EQUAL_TO`.
           required: false
           schema: { type: string, maxLength: 100 }
         - name: facet.field
@@ -409,7 +409,7 @@ paths:
       tags: [popularword]
       summary: List popular search words
       description: |-
-        Returns `invalid_request` (400) when `web.api.popular.word=false`,
+        Returns `invalid_request` (400) when `web.api.popularword=false`,
         matching v1's "unsupported operation" semantics.
       operationId: popularWordsV2
       parameters:
@@ -1130,7 +1130,10 @@ components:
                   properties:
                     status:
                       type: string
-                      enum: [green, yellow, red]
+                      description: |-
+                        The cluster health as the search engine reports it, or `UNAVAILABLE`
+                        when the engine could not be reached at all.
+                      enum: [GREEN, YELLOW, RED, UNAVAILABLE]
                     ping_status: { type: integer }
 
     # --- Search ------------------------------------------------------
@@ -1145,7 +1148,7 @@ components:
               properties:
                 q: { type: string, nullable: true }
                 query_id: { type: string }
-                exec_time: { type: number, format: double }
+                exec_time: { type: string, description: 'Elapsed time in seconds, as a decimal string.' }
                 query_time: { type: integer, format: int64 }
                 page_size: { type: integer }
                 page_number: { type: integer }
@@ -1153,7 +1156,9 @@ components:
                 record_count_relation:
                   type: string
                   description: |-
-                    `eq` when the count is exact, `gte` when only a lower bound is known.
+                    `EQUAL_TO` when the count is exact, `GREATER_THAN_OR_EQUAL_TO` when only a
+                    lower bound is known.
+                  enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL_TO]
                 page_count: { type: integer }
                 highlight_params: { type: string }
                 next_page: { type: boolean }

@@ -113,6 +113,12 @@
 			</excludes>
 			<filtered>false</filtered>
 		</fileSet>
+		<!-- OpenAPI -->
+		<fileSet>
+			<directory>src/main/config/openapi</directory>
+			<outputDirectory>fess-${project.version}/openapi</outputDirectory>
+			<filtered>false</filtered>
+		</fileSet>
 	</fileSets>
 	<files>
 		<file>

@@ -77,7 +77,7 @@ public class SearchApiV2Manager extends BaseApiManager {
     // after construction; unit tests that instantiate this manager directly (e.g.
     // {@code new SearchApiV2Manager()}) must set the handler fields they exercise.
 
-    /** Handles {@code POST /api/v2/search}. */
+    /** Handles {@code GET /api/v2/search}. */
     @Resource
     protected SearchHandler searchHandler;
 
