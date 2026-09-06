@@ -42,4 +42,15 @@ public abstract class DictionaryItem {
         return id;
     }
 
+    /**
+     * Sets the unique identifier for this dictionary item.
+     * The id of an entry is its position among the entries of the file, so it is only known once
+     * the file has been rewritten; a freshly created item carries 0 until then.
+     *
+     * @param id the ID of this dictionary item
+     */
+    public void setId(final long id) {
+        this.id = id;
+    }
+
 }

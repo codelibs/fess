@@ -263,6 +263,24 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertTrue(found);
     }
 
+    /**
+     * The id of an entry is its position among the entries of the file, and is only known once
+     * the file has been rewritten. The item handed to insert() carries 0 until then, and that 0
+     * is what the REST API reported as the id of the entry it had just created -- an id that
+     * reads back as "deleted by another process" and cannot be edited or removed.
+     */
+    @Test
+    public void test_insert_assignsTheIdOfTheAppendedEntry() {
+        loadTestData();
+        final int existing = stopwordsFile.stopwordsItemList.size();
+
+        final StopwordsItem newItem = new StopwordsItem(0, "test");
+        stopwordsFile.insert(newItem);
+
+        assertEquals(existing + 1, newItem.getId());
+        assertEquals("test", stopwordsFile.get(newItem.getId()).get().getInput());
+    }
+
     // Test update method
     @Test
     public void test_update() {

@@ -174,6 +174,11 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             if (updater != null) {
                 final ProtwordsItem item = updater.commit();
                 if (item != null) {
+                    // The entry was appended after the last one that was read, so it takes the
+                    // next id -- the same id it will be given when the file is read back. Without
+                    // this it keeps the 0 it was created with, and the caller cannot read, edit or
+                    // delete the entry by the id the write reported.
+                    item.setId(id + 1);
                     itemList.add(item);
                 }
             }
