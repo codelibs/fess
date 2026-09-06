@@ -93,11 +93,36 @@ public class HealthHandlerTest extends UnitFessTestCase {
             assertTrue(body.contains("\"engine\""), body);
             assertTrue(body.contains("\"ping_status\""), body);
         } else {
-            // No engine in this JVM → handler emits a structured 503 (cluster red /
-            // unavailable) or 500 (ping threw). Accept both so the test stays stable.
-            assertTrue(res.status == 503 || res.status == 500, "unexpected status " + res.status + ": " + body);
-            assertTrue(body.contains("\"code\":\"service_unavailable\"") || body.contains("\"code\":\"internal_error\""), body);
+            // No engine in this JVM. A red cluster and an unreachable engine are both reported
+            // as 503 service_unavailable, and both keep the engine snapshot in the details, so
+            // a monitoring client always has a status to show. This endpoint never answers 500.
+            assertEquals(503, res.status, body);
+            assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+            assertTrue(body.contains("\"engine\""), body);
+            assertTrue(body.contains("\"ping_status\""), body);
         }
+    }
+
+    /**
+     * An unreachable engine is the outcome an operator most needs the endpoint to report, and
+     * the one the exception path used to turn into an undocumented 500 with no engine details.
+     */
+    @Test
+    public void test_health_unreachableEngine_isServiceUnavailableWithDetails() throws Exception {
+        final HealthHandler handler = new HealthHandler() {
+            @Override
+            protected org.codelibs.fess.entity.PingResponse ping() {
+                throw new IllegalStateException("node is not available");
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("/api/v2/health"), res);
+        final String body = res.body();
+        assertEquals(503, res.status, body);
+        assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+        assertTrue(body.contains("\"status\":\"UNAVAILABLE\""), body);
+        assertTrue(body.contains("\"ping_status\""), body);
+        assertFalse(body.contains("\"cluster_name\""), body);
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */

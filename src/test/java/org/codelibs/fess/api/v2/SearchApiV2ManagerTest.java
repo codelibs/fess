@@ -282,18 +282,20 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_handleHealth_does_not_leak_exception_message() throws Exception {
-        // Source-level assertion: the HealthHandler catch block must not pass e.getMessage()
-        // to writeError. Uses writeInternalError which logs and emits a generic message.
-        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/handlers/HealthHandler.java");
-        org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
-                "skipping: source file not present at runtime cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
-        final String source = java.nio.file.Files.readString(src);
-        final int healthIdx = source.indexOf("public void handle");
-        assertTrue(healthIdx >= 0, "HealthHandler.handle not found in source");
-        final String healthSection = source.substring(healthIdx, Math.min(source.length(), healthIdx + 2000));
-        // The catch must use writeInternalError, not writeError with e.getMessage()
-        assertTrue(healthSection.contains("writeInternalError"), "HealthHandler catch must use writeInternalError: " + healthSection);
-        assertFalse(healthSection.contains("e.getMessage()"), "HealthHandler must not leak e.getMessage(): " + healthSection);
+        // Why the engine could not be reached can name hosts and credentials, so the reason is
+        // logged and never written to the wire: the body carries a fixed message instead.
+        final org.codelibs.fess.api.v2.handlers.HealthHandler handler = new org.codelibs.fess.api.v2.handlers.HealthHandler() {
+            @Override
+            protected org.codelibs.fess.entity.PingResponse ping() {
+                throw new IllegalStateException("s3cr3tEngineDetail");
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("/api/v2/health"), res);
+        assertEquals(503, res.status);
+        final String body = res.body();
+        assertFalse(body.contains("s3cr3tEngineDetail"), body);
+        assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
     }
 
     @Test

@@ -35,11 +35,27 @@ public class HealthHandler {
 
     private static final Logger logger = LogManager.getLogger(HealthHandler.class);
 
+    /** The engine status reported when the search engine cannot be reached at all. */
+    protected static final String UNAVAILABLE_STATUS = "UNAVAILABLE";
+
+    /** The ping status reported when there was no response to read one from. */
+    protected static final int PING_STATUS_ERROR = 1;
+
     /**
      * Default constructor used by the DI container.
      */
     public HealthHandler() {
         // default constructor
+    }
+
+    /**
+     * Asks the search engine for its cluster health. Separated so a test can drive the
+     * unreachable path without a search engine.
+     *
+     * @return the ping response
+     */
+    protected PingResponse ping() {
+        return ComponentUtil.getSearchEngineClient().ping();
     }
 
     /**
@@ -56,7 +72,7 @@ public class HealthHandler {
             return;
         }
         try {
-            final PingResponse ping = ComponentUtil.getSearchEngineClient().ping();
+            final PingResponse ping = ping();
             final String clusterStatus = ping.getClusterStatus();
             final Map<String, Object> engine = new LinkedHashMap<>();
             // The OpenSearch cluster name is intentionally omitted from this anonymous endpoint
@@ -72,7 +88,17 @@ public class HealthHandler {
                 ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, Map.of("engine", engine));
             }
         } catch (final Exception e) {
-            ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/health");
+            // The engine could not be reached at all. Fess cannot answer a search either way,
+            // so this is reported like a red cluster rather than as an internal error: the
+            // documented response set for this endpoint has no 500, and a monitoring client
+            // reading error.details.engine has nothing to show when the snapshot is dropped.
+            logger.warn("/api/v2/health: the search engine is not reachable", e);
+            final Map<String, Object> engine = new LinkedHashMap<>();
+            engine.put("status", UNAVAILABLE_STATUS);
+            engine.put("ping_status", PING_STATUS_ERROR);
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(response, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine is not reachable",
+                            Map.of("engine", engine));
         }
     }
 }
