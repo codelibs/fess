@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -107,15 +108,26 @@ public class JavaScriptEngineTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_evaluate_compilationFailureReturnsNull() {
+    public void test_evaluate_compilationFailureIsReported() {
+        // A script that does not compile has to leave the method as a failure: returning null
+        // made it indistinguishable from a script that evaluates to null, and a scheduled job
+        // running one was recorded as ok.
         final Map<String, Object> params = new HashMap<>();
-        assertNull(javaScriptEngine.evaluate("this is not ( valid javascript", params));
+        org.junit.jupiter.api.Assertions.assertThrows(ScriptEngineException.class,
+                () -> javaScriptEngine.evaluate("this is not ( valid javascript", params));
     }
 
     @Test
-    public void test_evaluate_runtimeFailureReturnsNull() {
+    public void test_evaluate_runtimeFailureIsReported() {
         final Map<String, Object> params = new HashMap<>();
-        assertNull(javaScriptEngine.evaluate("undefinedVariable", params));
+        org.junit.jupiter.api.Assertions.assertThrows(ScriptEngineException.class,
+                () -> javaScriptEngine.evaluate("undefinedVariable", params));
+    }
+
+    @Test
+    public void test_evaluate_aScriptThatEvaluatesToNullIsNotAFailure() {
+        // The reason the failure could not be reported before: both outcomes were null.
+        assertNull(javaScriptEngine.evaluate("null", new HashMap<>()));
     }
 
     @Test
@@ -205,7 +217,8 @@ public class JavaScriptEngineTest extends UnitFessTestCase {
         engine.init();
         final LogCapturingAppender capture = LogCapturingAppender.attach(JavaScriptEngine.class);
         try {
-            assertNull(engine.evaluate("def x = 1; return \"${x}\";", new HashMap<>()));
+            org.junit.jupiter.api.Assertions.assertThrows(ScriptEngineException.class,
+                    () -> engine.evaluate("def x = 1; return \"${x}\";", new HashMap<>()));
             assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("job=Migrated Crawler(id=J1)")),
                     "the warning must name the job whose script failed: " + capture.warnings());
         } finally {
@@ -219,7 +232,8 @@ public class JavaScriptEngineTest extends UnitFessTestCase {
         // Document boosts, crawler field scripts and path mappings run outside the scheduler.
         final LogCapturingAppender capture = LogCapturingAppender.attach(JavaScriptEngine.class);
         try {
-            assertNull(javaScriptEngine.evaluate("def x = 1; return \"${x}\";", new HashMap<>()));
+            org.junit.jupiter.api.Assertions.assertThrows(ScriptEngineException.class,
+                    () -> javaScriptEngine.evaluate("def x = 1; return \"${x}\";", new HashMap<>()));
             assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("job=none")),
                     "an evaluation outside a scheduled job must say so: " + capture.warnings());
         } finally {

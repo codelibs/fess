@@ -31,7 +31,10 @@ public interface ScriptEngine {
      *
      * @param template the template string to evaluate
      * @param paramMap the map of parameters to substitute into the template
-     * @return the result of evaluating the template, or null if evaluation fails
+     * @return the result of evaluating the template, which may be null when the script itself
+     *         evaluates to null
+     * @throws org.codelibs.fess.exception.ScriptEngineException if the template cannot be
+     *         evaluated
      */
     Object evaluate(final String template, final Map<String, Object> paramMap);
 }

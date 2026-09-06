@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.script.AbstractScriptEngine;
 import org.codelibs.fess.util.ComponentUtil;
@@ -166,7 +167,13 @@ public class JavaScriptEngine extends AbstractScriptEngine {
             logger.warn("Failed to evaluate JavaScript: job={}, script(length={})={}, parameterKeys={}", describeCurrentJob(),
                     template.length(), truncatedScript, safeParamMap.keySet(), e);
             logScriptExecution(template, "failure:" + e.getClass().getSimpleName());
-            return null;
+            // A failure has to leave the method as a failure. Returning null made it
+            // indistinguishable from a script that evaluates to null, and a scheduled job whose
+            // script does not even compile was recorded as ok in the job log. The message names
+            // the script rather than repeating the cause, which is carried by the cause itself
+            // and logged above; ScriptExecutorJob puts this message in the job log's
+            // script_result, where naming the script that failed is what identifies it.
+            throw new ScriptEngineException("Failed to evaluate the script: " + truncatedScript, e);
         }
     }
 

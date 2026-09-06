@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -84,12 +85,37 @@ public class DocBoostMatcher {
             return false;
         }
 
-        final Object value = ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(matchExpression, map);
+        final Object value = evaluate(matchExpression, map);
         if (value instanceof Boolean) {
             return (Boolean) value;
         }
 
         return false;
+    }
+
+    /**
+     * Evaluates one of the expressions against a document.
+     * <p>
+     * A boost document is matched against every crawled document, and its expression names
+     * fields that most of them do not carry, so an expression that cannot be evaluated is an
+     * ordinary "this document does not match" rather than a failure: it must not stop the
+     * document from being indexed. This is the one caller for which that holds; everywhere else
+     * a script that cannot be evaluated is reported.
+     * </p>
+     *
+     * @param expression the expression to evaluate
+     * @param map the document data
+     * @return the result, or null when the expression did not apply to this document
+     */
+    protected Object evaluate(final String expression, final Map<String, Object> map) {
+        try {
+            return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(expression, map);
+        } catch (final ScriptEngineException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("The boost expression did not apply to the document: expression={}", expression, e);
+            }
+            return null;
+        }
     }
 
     /**
@@ -105,7 +131,7 @@ public class DocBoostMatcher {
             return 0.0f;
         }
 
-        final Object value = ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(boostExpression, map);
+        final Object value = evaluate(boostExpression, map);
         if (value instanceof Integer) {
             return ((Integer) value).floatValue();
         }
