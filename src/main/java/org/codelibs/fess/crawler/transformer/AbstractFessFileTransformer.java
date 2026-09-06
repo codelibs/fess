@@ -467,9 +467,13 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (!fessConfig.isCrawlerIgnoreContentException()) {
                 throw e;
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Could not get a text.", e);
-            }
+            // The document is still indexed, with no text at all, and nothing downstream says
+            // so: the crawl is not failed, so no failure url is recorded either. A document that
+            // exceeds the maximum content length ends here too, which is the common case. This
+            // is the only place the loss can be reported, so it is reported at a level an
+            // operator watching the crawler log will see.
+            logger.warn("Could not extract a text, indexing the document without content: url={}, extractor={}",
+                    params.get(ExtractData.URL), extractor.getClass().getSimpleName(), e);
         }
         return new ExtractData();
     }

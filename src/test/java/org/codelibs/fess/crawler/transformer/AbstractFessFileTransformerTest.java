@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
+import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +23,13 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.exception.MaxLengthExceededException;
 import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -212,6 +216,30 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
     /**
      * Testable implementation of AbstractFessFileTransformer for unit testing.
      */
+    /**
+     * A document whose text cannot be extracted -- because it exceeds the maximum content
+     * length, most often -- is still indexed, with no text at all. The crawl is not failed, so
+     * no failure url is recorded either, and nothing downstream reports the loss. The warning is
+     * the only record of it.
+     */
+    @Test
+    public void test_getExtractData_reportsADocumentIndexedWithoutContent() {
+        final Map<String, String> params = new HashMap<>();
+        params.put(ExtractData.URL, "file:/share/huge.pdf");
+        final Extractor failing = (in, p) -> {
+            throw new MaxLengthExceededException("Content length (20000000 bytes) exceeds the maximum allowed length (10485760 bytes).");
+        };
+        final LogCapturingAppender capture = LogCapturingAppender.attach(AbstractFessFileTransformer.class);
+        try {
+            final ExtractData extractData = transformer.getExtractData(failing, new ByteArrayInputStream(new byte[0]), params);
+            assertTrue(extractData.getContent() == null || extractData.getContent().isEmpty());
+            assertTrue(capture.warnings().stream().anyMatch(m -> m.contains("file:/share/huge.pdf")),
+                    "the document that lost its content must be named: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
     private static class TestableAbstractFessFileTransformer extends AbstractFessFileTransformer {
 
         private static final Logger logger = LogManager.getLogger(TestableAbstractFessFileTransformer.class);
