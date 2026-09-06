@@ -198,6 +198,7 @@ public class GenerateThumbnailJob extends ExecJob {
         addFessSystemProperties(cmdList);
         addFessCustomSystemProperties(cmdList, fessConfig.getJobSystemPropertyFilterPattern());
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
+        addSystemProperty(cmdList, Constants.FESS_HOME, null, null);
         cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");

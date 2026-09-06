@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -120,24 +121,45 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return false;
     }
 
+    /**
+     * Builds the directories a {@code ${path}} generator command is looked for in.
+     * <p>
+     * The bin directory of this installation comes first: the packages put the generator scripts
+     * next to the startup script, and the ZIP -- which is unpacked anywhere and started with
+     * {@code bin/fess} -- has no other way of being found. {@code /usr/share/fess/bin} keeps the
+     * RPM and DEB layout working when {@code fess.home} is not set, and {@code PATH} is searched
+     * last so a generator installed system-wide is still picked up.
+     * </p>
+     *
+     * @return the directories to search, in order
+     */
+    protected List<String> getSearchPathList() {
+        final List<String> pathList = new ArrayList<>();
+        final String fessHome = System.getProperty(Constants.FESS_HOME);
+        if (StringUtil.isNotBlank(fessHome)) {
+            pathList.add(new File(fessHome, "bin").getAbsolutePath());
+        }
+        pathList.add("/usr/share/fess/bin");
+        String path = System.getenv("PATH");
+        if (path == null) {
+            path = System.getenv("Path");
+        }
+        if (path == null) {
+            path = System.getenv("path");
+        }
+        if (path != null) {
+            stream(path.split(File.pathSeparator)).of(stream -> stream.map(String::trim).forEach(pathList::add));
+        }
+        return pathList;
+    }
+
     @Override
     public boolean isAvailable() {
         if (available != null) {
             return available;
         }
         if (generatorList != null && !generatorList.isEmpty()) {
-            String path = System.getenv("PATH");
-            if (path == null) {
-                path = System.getenv("Path");
-            }
-            if (path == null) {
-                path = System.getenv("path");
-            }
-            final List<String> pathList = new ArrayList<>();
-            pathList.add("/usr/share/fess/bin");
-            if (path != null) {
-                stream(path.split(File.pathSeparator)).of(stream -> stream.map(String::trim).forEach(s -> pathList.add(s)));
-            }
+            final List<String> pathList = getSearchPathList();
             if (logger.isDebugEnabled()) {
                 logger.debug("search paths: {}", pathList);
             }

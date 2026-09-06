@@ -816,6 +816,9 @@ public class Constants extends CoreLibConstants {
     /** Fess variable path configuration key. */
     public static final String FESS_VAR_PATH = "fess.var.path";
 
+    /** Fess installation directory configuration key. */
+    public static final String FESS_HOME = "fess.home";
+
     /** Fess log level configuration key. */
     public static final String FESS_LOG_LEVEL = "fess.log.level";
 

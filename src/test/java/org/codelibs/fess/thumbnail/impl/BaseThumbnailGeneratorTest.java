@@ -17,8 +17,10 @@ package org.codelibs.fess.thumbnail.impl;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -445,6 +447,46 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
             assertFalse("SVG should NOT match with unescaped + pattern", generator.isTarget(svgDocMap));
         } finally {
             ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    /**
+     * The generator commands are declared as ${path}/generate-thumbnail, so the directories
+     * ${path} stands for decide whether a thumbnail is ever produced. An installation unpacked
+     * from the ZIP keeps them in its own bin directory, which is neither the packaged location
+     * nor on PATH, so that directory is searched first.
+     */
+    @Test
+    public void test_getSearchPathList_startsAtTheInstallationBinDirectory() {
+        final String previous = System.getProperty(Constants.FESS_HOME);
+        System.setProperty(Constants.FESS_HOME, "/opt/fess-example");
+        try {
+            final List<String> pathList = new CommandGenerator().getSearchPathList();
+            assertEquals(new File("/opt/fess-example", "bin").getAbsolutePath(), pathList.get(0));
+            assertTrue(pathList.contains("/usr/share/fess/bin"));
+        } finally {
+            if (previous == null) {
+                System.clearProperty(Constants.FESS_HOME);
+            } else {
+                System.setProperty(Constants.FESS_HOME, previous);
+            }
+        }
+    }
+
+    /**
+     * Without fess.home the packaged location is still searched first, so an RPM or DEB install
+     * keeps working.
+     */
+    @Test
+    public void test_getSearchPathList_keepsThePackagedLocation() {
+        final String previous = System.getProperty(Constants.FESS_HOME);
+        System.clearProperty(Constants.FESS_HOME);
+        try {
+            assertEquals("/usr/share/fess/bin", new CommandGenerator().getSearchPathList().get(0));
+        } finally {
+            if (previous != null) {
+                System.setProperty(Constants.FESS_HOME, previous);
+            }
         }
     }
 }
