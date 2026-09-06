@@ -40,12 +40,14 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.di.core.exception.AutoBindingFailureException;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.HtmlResponse;
@@ -1525,5 +1527,71 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.containsSpecialChar("123"));
         assertFalse(systemHelper.containsSpecialChar("abc123"));
         assertFalse(systemHelper.containsSpecialChar(""));
+    }
+
+    // -------------------------------------------------------------------------------------
+    //                                                                            getUsername
+    //                                                                            -----------
+
+    @Test
+    public void test_getUsername_guestWhenTheLoginManagerCannotBeProvided() {
+        // LastaFlute already treats a login manager it cannot look up as "nobody is logged in":
+        // SimpleRequestManager#findLoginManager catches ComponentNotFoundException and
+        // TooManyRegistrationComponentException and returns empty. It does not catch the case
+        // where the component is found but cannot be built, which is what a container missing
+        // one of FessLoginAssist's dependencies produces - and that used to escape as a 500 on
+        // every admin screen whose form asks who is creating the entry.
+        assertEquals(Constants.GUEST_USER, newSystemHelperWithUnavailableLoginManager().getUsername());
+    }
+
+    @Test
+    public void test_getUsername_reportsEveryOccurrence() {
+        // not latched to the first one: a container that cannot build the login manager is a
+        // misconfiguration to fix, and it should be rare enough that each occurrence is worth
+        // seeing rather than being folded into a single startup-time line
+        final SystemHelper systemHelper = newSystemHelperWithUnavailableLoginManager();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SystemHelper.class);
+        try {
+            systemHelper.getUsername();
+            systemHelper.getUsername();
+            assertEquals(2, appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("login manager")).toList().size(),
+                    appender.messagesAt(Level.WARN).toString());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getUsername_doesNotSwallowOtherFailures() {
+        // only the "cannot be provided" case is an answer of its own; anything else is a bug
+        // that has to stay visible
+        final SystemHelper systemHelper = new SystemHelper() {
+            @Override
+            protected RequestManager getRequestManager() {
+                throw new IllegalStateException("boom");
+            }
+        };
+        try {
+            systemHelper.getUsername();
+            fail("an unrelated failure must not be reported as a guest user");
+        } catch (final IllegalStateException e) {
+            assertEquals("boom", e.getMessage());
+        }
+    }
+
+    /** A helper whose request manager fails the way a container missing userBhv makes it fail. */
+    private SystemHelper newSystemHelperWithUnavailableLoginManager() {
+        return new SystemHelper() {
+            @Override
+            protected RequestManager getRequestManager() {
+                return (RequestManager) java.lang.reflect.Proxy.newProxyInstance(RequestManager.class.getClassLoader(),
+                        new Class<?>[] { RequestManager.class }, (proxy, method, args) -> {
+                            if ("findUserBean".equals(method.getName())) {
+                                throw new AutoBindingFailureException("Failed to auto-inject to the resource field. userBhv");
+                            }
+                            throw new UnsupportedOperationException(method.getName());
+                        });
+            }
+        };
     }
 }

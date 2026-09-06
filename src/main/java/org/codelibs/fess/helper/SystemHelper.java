@@ -83,6 +83,7 @@ import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.di.core.exception.AutoBindingFailureException;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.ActionValidator;
@@ -264,7 +265,23 @@ public class SystemHelper {
      * @return The username, or "guest" if not logged in.
      */
     public String getUsername() {
-        return getRequestManager().findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(Constants.GUEST_USER);
+        try {
+            return getRequestManager().findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(Constants.GUEST_USER);
+        } catch (final AutoBindingFailureException e) {
+            // LastaFlute already answers "nobody is logged in" when it cannot look the login
+            // manager up: SimpleRequestManager#findLoginManager catches ComponentNotFoundException
+            // and TooManyRegistrationComponentException and returns empty. It does not cover the
+            // case where the component is found but cannot be built, which is what a container
+            // missing one of FessLoginAssist's dependencies produces - and that escaped from here,
+            // failing every admin screen whose form records who is creating the entry.
+            //
+            // Answer the question that was asked, and report every occurrence: a login manager
+            // that cannot be built is a misconfiguration rather than a state to live with
+            // quietly, and it should be rare enough that each one is worth seeing.
+            logger.warn("The login manager could not be provided, so the current user is reported as {}. "
+                    + "Check that the container can build FessLoginAssist.", Constants.GUEST_USER, e);
+            return Constants.GUEST_USER;
+        }
     }
 
     /**
