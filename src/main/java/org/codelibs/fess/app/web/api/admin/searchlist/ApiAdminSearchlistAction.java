@@ -277,14 +277,24 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     // DELETE /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> delete$doc(final String id) {
+        final long count;
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id);
-            searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
-            saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
+            count = searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
         } catch (final Exception e) {
             logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL));
+            return null; // ignore
         }
+        if (count == 0) {
+            // A query that matched nothing is a successful delete by query, so an id that is not
+            // a doc_id -- the _id the document list reports, for one -- used to be answered with
+            // status 0 while the document stayed in the index. Automation built on that could
+            // not tell a delete from a no-op.
+            logger.debug("No document was deleted: doc_id={}", id);
+            throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
+        }
+        saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 

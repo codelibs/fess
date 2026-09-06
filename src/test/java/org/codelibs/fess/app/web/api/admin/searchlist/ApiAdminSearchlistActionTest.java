@@ -27,6 +27,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * Contract tests for the raw-document admin REST API.
@@ -173,6 +174,35 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
     }
 
     /**
+     * Deleting by an id no document carries is a delete by query that matches nothing. It used to
+     * answer with status 0, so automation that listed documents and deleted them by the reported
+     * _id was told every delete had succeeded while nothing left the index.
+     */
+    @Test
+    public void test_delete$doc_reportsAnIdThatMatchedNoDocument() throws Exception {
+        final FakeSearchEngineClient client = new FakeSearchEngineClient();
+        client.deletedCount = 0L;
+        final ApiAdminSearchlistAction action = createInjectedAction(client, buildFullFessConfig());
+        try {
+            action.delete$doc("nosuchdocid");
+            fail("a delete that removed nothing must be reported");
+        } catch (final ValidationErrorException e) {
+            // expected
+        }
+    }
+
+    /**
+     * A delete that did remove a document still answers with status 0.
+     */
+    @Test
+    public void test_delete$doc_acceptsAnIdThatMatchedADocument() throws Exception {
+        final FakeSearchEngineClient client = new FakeSearchEngineClient();
+        client.deletedCount = 1L;
+        final ApiAdminSearchlistAction action = createInjectedAction(client, buildFullFessConfig());
+        assertNotNull(action.delete$doc("adocid"));
+    }
+
+    /**
      * Mirrors {@code AdminSearchlistActionTest#createInjectedAction}: UTFlute {@code inject()} for
      * the framework fields that {@code validateApi()}/{@code throwValidationErrorApi()}/
      * {@code saveInfo()} need, then the fess-specific collaborators that {@code fess.xml} (not
@@ -314,6 +344,7 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
     private static final class FakeSearchEngineClient extends SearchEngineClient {
         Map<String, Object> documentToReturn;
         Map<String, Object> lastStoredDoc;
+        long deletedCount;
 
         @Override
         public OptionalEntity<Map<String, Object>> getDocument(final String index,
@@ -332,6 +363,11 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
         @Override
         public boolean delete(final String index, final String id, final Number seqNo, final Number primaryTerm) {
             return true;
+        }
+
+        @Override
+        public long deleteByQuery(final String index, final org.opensearch.index.query.QueryBuilder queryBuilder) {
+            return deletedCount;
         }
     }
 }
