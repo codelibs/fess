@@ -209,6 +209,19 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_documentsFavoriteWithoutADocIdIsNotFound() throws Exception {
+        // "/documents/favorite" satisfies both ends of the favorite pattern and leaves no doc id
+        // between them. Cutting the id out of it used to ask for substring(11, 10) and answer
+        // with 500 internal_error, without any authentication.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/favorite"), res, new NopChain());
+        assertEquals(404, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"not_found\""), body);
+    }
+
+    @Test
     public void test_process_documentsFavoriteRejectsMalformedDocId() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();

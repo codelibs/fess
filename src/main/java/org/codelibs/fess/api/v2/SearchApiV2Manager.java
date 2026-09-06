@@ -251,7 +251,11 @@ public class SearchApiV2Manager extends BaseApiManager {
                 scrollSearchHandler.handle(request, response);
                 return;
             }
-            if (sub.startsWith("/documents/") && sub.endsWith("/favorite")) {
+            // "/documents/favorite" satisfies both ends of the pattern while leaving no doc id
+            // between them, so the length is checked before the id is cut out. It falls through
+            // to the not_found arm below with every other unknown path under /documents/.
+            if (sub.startsWith("/documents/") && sub.endsWith("/favorite")
+                    && sub.length() > "/documents/".length() + "/favorite".length()) {
                 final String docId = sub.substring("/documents/".length(), sub.length() - "/favorite".length());
                 if ("POST".equalsIgnoreCase(request.getMethod())) {
                     favoritePostHandler.handle(request, response, docId);
