@@ -25,6 +25,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.cbean.KeyMatchCB;
 import org.codelibs.fess.opensearch.config.exbhv.KeyMatchBhv;
 import org.codelibs.fess.opensearch.config.exentity.KeyMatch;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -83,6 +84,9 @@ public class KeyMatchService extends FessAppService {
 
     /**
      * Store a key match.
+     * After storing, reloads the key match helper so the boost takes effect on the next search.
+     * The helper otherwise keeps the documents it loaded until the Config Reloader job runs, a
+     * crawl finishes or the server restarts, and the change is invisible for up to ten minutes.
      *
      * @param keyMatch The key match to store.
      */
@@ -91,11 +95,12 @@ public class KeyMatchService extends FessAppService {
         keyMatchBhv.insertOrUpdate(keyMatch, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
-
+        ComponentUtil.getKeyMatchHelper().update();
     }
 
     /**
      * Delete a key match.
+     * After deletion, reloads the key match helper so the boost stops being applied at once.
      *
      * @param keyMatch The key match to delete.
      */
@@ -104,7 +109,7 @@ public class KeyMatchService extends FessAppService {
         keyMatchBhv.delete(keyMatch, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
-
+        ComponentUtil.getKeyMatchHelper().update();
     }
 
     /**

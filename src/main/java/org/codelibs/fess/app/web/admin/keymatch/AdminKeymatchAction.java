@@ -277,7 +277,6 @@ public class AdminKeymatchAction extends FessAdminAction {
             try {
                 keyMatchService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                ComponentUtil.getKeyMatchHelper().update();
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -305,7 +304,6 @@ public class AdminKeymatchAction extends FessAdminAction {
             try {
                 keyMatchService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                ComponentUtil.getKeyMatchHelper().update();
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -334,7 +332,6 @@ public class AdminKeymatchAction extends FessAdminAction {
             try {
                 keyMatchService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                ComponentUtil.getKeyMatchHelper().update();
             } catch (final Exception e) {
                 logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
