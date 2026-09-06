@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.app.service.FavoriteLogService;
+import org.codelibs.fess.app.service.FavoriteLogService.FavoriteResult;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SearchHelper;
@@ -251,16 +252,16 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(searchHelperStub, "searchHelper");
         ComponentUtil.register(searchHelperStub, SearchHelper.class.getCanonicalName());
 
-        // The duplicate-on-second-call FavoriteLogService stub: returns true the first call,
-        // false on every subsequent call. The handler is invoked twice; the second invocation
-        // is the idempotency assertion target.
+        // The duplicate-on-second-call FavoriteLogService stub: reports a fresh add the first
+        // call and an existing entry on every subsequent call. The handler is invoked twice; the
+        // second invocation is the idempotency assertion target.
         final int[] addUrlCalls = { 0 };
         final FavoriteLogService favLogStub = new FavoriteLogService() {
             @Override
-            public boolean addUrl(final String userCode,
+            public FavoriteResult addUrl(final String userCode,
                     final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
                 addUrlCalls[0]++;
-                return addUrlCalls[0] == 1;
+                return addUrlCalls[0] == 1 ? FavoriteResult.ADDED : FavoriteResult.ALREADY_ADDED;
             }
         };
         ComponentUtil.register(favLogStub, "favoriteLogService");
@@ -302,6 +303,95 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
                     "duplicate POST must carry already_existed:true: " + second.body());
             assertTrue(second.body().contains("\"favorite\":true"), "duplicate POST must carry favorite:true: " + second.body());
             assertTrue(second.body().contains("\"count\":"), "duplicate POST must carry count: " + second.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /**
+     * A user code that resolves to no user writes nothing, so it must not be reported as an
+     * idempotent no-op: answering 200 with {@code already_existed: true} would tell the client
+     * the document had been favorited when no favorite log entry exists.
+     */
+    @Test
+    public void favoritePost_unresolvedUser_isNotReportedAsAlreadyFavorited() throws Exception {
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("alice"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        // Use setFessConfig so ComponentUtil.getFessConfig() returns this stub —
+        // the static cache is checked first and bypasses the DI lookup entirely.
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "alice-code";
+            }
+
+            @Override
+            public String[] getResultDocIds(final String queryId) {
+                return new String[] { "abc" };
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+
+        final SearchHelper searchHelperStub = new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> ub) {
+                final Map<String, Object> doc = new HashMap<>();
+                doc.put("url", "http://example.com/abc");
+                doc.put("_id", "abc-id");
+                return OptionalEntity.of(doc);
+            }
+        };
+        ComponentUtil.register(searchHelperStub, "searchHelper");
+        ComponentUtil.register(searchHelperStub, SearchHelper.class.getCanonicalName());
+
+        // Nothing is ever written: the user code resolves to no user.
+        final FavoriteLogService favLogStub = new FavoriteLogService() {
+            @Override
+            public FavoriteResult addUrl(final String userCode,
+                    final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
+                return FavoriteResult.NO_SUCH_USER;
+            }
+        };
+        ComponentUtil.register(favLogStub, "favoriteLogService");
+        ComponentUtil.register(favLogStub, FavoriteLogService.class.getCanonicalName());
+
+        // SystemHelper is fetched before the search try-block — register a minimal stub so
+        // ComponentUtil.getSystemHelper() does not throw ComponentNotFoundException.
+        final org.codelibs.fess.helper.SystemHelper systemHelperStub = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public java.time.LocalDateTime getCurrentTimeAsLocalDateTime() {
+                return java.time.LocalDateTime.now();
+            }
+        };
+        ComponentUtil.register(systemHelperStub, "systemHelper");
+        ComponentUtil.register(systemHelperStub, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new FavoritePostHandler()
+                    .handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"q1\"}"), res, "abc");
+            assertFalse(res.body().contains("\"already_existed\":true"),
+                    "nothing was written, so the request must not be reported as already favorited: " + res.body());
+            assertFalse(res.body().contains("\"ok\":true"), res.body());
+            org.junit.jupiter.api.Assertions.assertEquals(500, res.status, res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
@@ -371,9 +461,9 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         // addUrl always succeeds (fresh add).
         final FavoriteLogService favLogStub = new FavoriteLogService() {
             @Override
-            public boolean addUrl(final String userCode,
+            public FavoriteResult addUrl(final String userCode,
                     final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
-                return true;
+                return FavoriteResult.ADDED;
             }
         };
         ComponentUtil.register(favLogStub, "favoriteLogService");
@@ -602,9 +692,9 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
 
         final FavoriteLogService favLogStub = new FavoriteLogService() {
             @Override
-            public boolean addUrl(final String userCode,
+            public FavoriteResult addUrl(final String userCode,
                     final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
-                return true;
+                return FavoriteResult.ADDED;
             }
         };
         ComponentUtil.register(favLogStub, "favoriteLogService");

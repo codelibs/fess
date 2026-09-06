@@ -27,6 +27,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.service.FavoriteLogService;
+import org.codelibs.fess.app.service.FavoriteLogService.FavoriteResult;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -264,20 +265,23 @@ public class FavoritePostHandler {
                         final Long existingCount = DocumentUtil.getValue(doc, cfg.getIndexFieldFavoriteCount(), Long.class);
                         favoriteCountHolder[0] = existingCount == null ? 0L : existingCount;
 
-                        // M-9: addUrl returns false when the (user, url) pair already exists
-                        // (or the user info cannot be resolved). Treat the duplicate case as
-                        // an idempotent no-op success — re-POSTing the same favorite should
-                        // not be a 500. We signal "already favorited" via a dedicated marker
-                        // exception so the outer catch can short-circuit the favorite-count
-                        // bump and emit a 200 success envelope.
-                        if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
+                        // M-9: re-POSTing the same favorite is an idempotent no-op success, not
+                        // a 500. The duplicate is signalled via a marker exception so the outer
+                        // catch can short-circuit the favorite-count bump and emit a 200 success
+                        // envelope. A user code that resolves to no user is a different outcome:
+                        // nothing was written, so it must not be reported as already favorited.
+                        final FavoriteResult result = favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
                             favoriteLog.setUserInfoId(userInfo.getId());
                             favoriteLog.setUrl(favoriteUrl);
                             favoriteLog.setDocId(docId);
                             favoriteLog.setQueryId(queryId);
                             favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-                        })) {
+                        });
+                        if (result == FavoriteResult.ALREADY_ADDED) {
                             throw new AlreadyFavoritedException();
+                        }
+                        if (result == FavoriteResult.NO_SUCH_USER) {
+                            throw new FavoriteAddFailedException("no user for the given user code");
                         }
                         // Optimistically bump the count for the fresh-add case.
                         favoriteCountHolder[0] = favoriteCountHolder[0] + 1L;

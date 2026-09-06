@@ -62,24 +62,49 @@ public class FavoriteLogService {
     protected FessConfig fessConfig;
 
     /**
+     * The outcome of adding a URL to a user's favorite list.
+     */
+    public enum FavoriteResult {
+        /** The URL was added to the user's favorites. */
+        ADDED,
+        /** The user already had the URL in their favorites, and nothing was written. */
+        ALREADY_ADDED,
+        /** The user code resolved to no user, and nothing was written. */
+        NO_SUCH_USER
+    }
+
+    /**
      * Adds a URL to a user's favorite list.
      * This method looks up the user by their code and creates a new favorite log entry
      * using the provided lambda function to populate the favorite log data.
+     * <p>
+     * A URL the user has already marked is not written again. favorite_count is a documented
+     * sort key, so a repeated request -- a double click, or a client retrying -- would otherwise
+     * move a document up the ranking without anyone else favoriting it. The index is refreshed
+     * after an insert so that a repeat sees the entry that was just written.
+     * </p>
      *
      * @param userCode the unique code identifying the user
      * @param favoriteLogLambda a lambda function that accepts UserInfo and FavoriteLog to populate the favorite log data
-     * @return true if the URL was successfully added to favorites, false if the user was not found
+     * @return what happened: the URL was added, the user already had it, or the user was not found
      */
-    public boolean addUrl(final String userCode, final BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
+    public FavoriteResult addUrl(final String userCode, final BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
         return userInfoBhv.selectByPK(userCode).map(userInfo -> {
             final FavoriteLog favoriteLog = new FavoriteLog();
             favoriteLogLambda.accept(userInfo, favoriteLog);
+            if (favoriteLogBhv.selectCount(cb -> {
+                cb.query().setUserInfoId_Equal(userInfo.getId());
+                cb.query().setUrl_Equal(favoriteLog.getUrl());
+            }) > 0) {
+                return FavoriteResult.ALREADY_ADDED;
+            }
             favoriteLogBhv.insert(favoriteLog);
+            favoriteLogBhv.refresh();
             if (fessConfig.isLoggingSearchUseLogfile()) {
                 ComponentUtil.getSearchLogHelper().writeSearchLogEvent(favoriteLog);
             }
-            return true;
-        }).orElse(false);
+            return FavoriteResult.ADDED;
+        }).orElse(FavoriteResult.NO_SUCH_USER);
     }
 
     /**
