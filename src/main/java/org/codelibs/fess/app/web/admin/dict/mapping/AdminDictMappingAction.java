@@ -19,7 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +37,7 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -44,6 +48,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.VaMessenger;
 import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 import jakarta.annotation.Resource;
@@ -365,6 +370,7 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
+        verifyForm(form);
         createCharMappingItem(form, this::asEditHtml).ifPresent(entity -> {
             try {
                 charMappingService.store(form.dictId, entity);
@@ -391,6 +397,7 @@ public class AdminDictMappingAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
+        verifyForm(form);
         createCharMappingItem(form, this::asEditHtml).ifPresent(entity -> {
             try {
                 charMappingService.store(form.dictId, entity);
@@ -500,6 +507,37 @@ public class AdminDictMappingAction extends FessAdminAction {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, () -> asListHtml(dictId));
+        }
+    }
+
+    /**
+     * Runs the shared rules over a submitted entry.
+     *
+     * @param form the entry to check
+     */
+    protected void verifyForm(final CreateForm form) {
+        verifyCharMappingEntry(charMappingService, form, messages -> throwValidationError(messages, this::asEditHtml));
+    }
+
+    /**
+     * Checks an entry against the rule the mapping dictionary itself enforces: no input may be
+     * mapped twice, neither within one entry nor across two of them. Shared with the REST API,
+     * because a repeated input is only rejected when the search engine next builds the normalize
+     * char map -- it then refuses to open the index, which is a long way from where the entry was
+     * added.
+     *
+     * @param charMappingService the service used to read the entries the dictionary already holds
+     * @param form the entry to check
+     * @param throwError callback to report a violation
+     */
+    public static void verifyCharMappingEntry(final CharMappingService charMappingService, final CreateForm form,
+            final Consumer<VaMessenger<FessMessages>> throwError) {
+        final Long excludeId = form instanceof final EditForm editForm ? editForm.id : null;
+        final Set<String> submitted = new HashSet<>();
+        for (final String input : splitLine(form.inputs)) {
+            if (!submitted.add(input) || charMappingService.containsInput(form.dictId, input, excludeId)) {
+                throwError.accept(messages -> messages.addErrorsDuplicateCharMappingInput("inputs", input));
+            }
         }
     }
 

@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.dict.mapping;
 
 import static org.codelibs.fess.app.web.admin.dict.mapping.AdminDictMappingAction.createCharMappingItem;
+import static org.codelibs.fess.app.web.admin.dict.mapping.AdminDictMappingAction.verifyCharMappingEntry;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,6 +105,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
+        verifyCharMappingEntry(charMappingService, body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
         final CharMappingItem entity = createCharMappingItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
@@ -134,6 +136,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
+        verifyCharMappingEntry(charMappingService, body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;
         final CharMappingItem entity = createCharMappingItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));

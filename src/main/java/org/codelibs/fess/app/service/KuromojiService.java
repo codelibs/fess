@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KuromojiPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
@@ -97,6 +98,30 @@ public class KuromojiService {
      */
     public OptionalEntity<KuromojiItem> getKuromojiItem(final String dictId, final long id) {
         return getKuromojiFile(dictId).map(file -> file.get(id).get());
+    }
+
+    /**
+     * Determines whether another entry in the dictionary already uses the given token.
+     * <p>
+     * The user dictionary loader refuses a file that repeats a term, and the dictionary is only
+     * read when the search engine opens the index, so a duplicate has to be caught here: by the
+     * time the loader sees it, the index no longer opens and search is down.
+     * </p>
+     *
+     * @param dictId The dictionary ID.
+     * @param token The token to look for.
+     * @param excludeId The ID of the entry being edited, or null while a new entry is being created.
+     * @return true if another entry already uses the token.
+     */
+    public boolean containsToken(final String dictId, final String token, final Long excludeId) {
+        if (StringUtil.isBlank(token)) {
+            return false;
+        }
+        return getKuromojiFile(dictId).map(file -> {
+            final PagingList<KuromojiItem> itemList = file.selectList(0, Integer.MAX_VALUE);
+            return itemList.stream()
+                    .anyMatch(item -> (excludeId == null || excludeId.longValue() != item.getId()) && token.equals(item.getToken()));
+        }).orElse(Boolean.FALSE).booleanValue();
     }
 
     /**

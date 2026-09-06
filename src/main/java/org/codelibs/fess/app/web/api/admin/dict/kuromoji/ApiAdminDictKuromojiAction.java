@@ -106,7 +106,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        verifyKuromojiEntry(body, this::throwValidationErrorApi);
+        verifyKuromojiEntry(kuromojiService, body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
         final KuromojiItem entity = createKuromojiItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
@@ -137,7 +137,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
-        verifyKuromojiEntry(body, this::throwValidationErrorApi);
+        verifyKuromojiEntry(kuromojiService, body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;
         final KuromojiItem entity = createKuromojiItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));

@@ -305,6 +305,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The number of segmentation for {0} and {1} is different. */
     public static final String ERRORS_invalid_kuromoji_segmentation = "{errors.invalid_kuromoji_segmentation}";
 
+    /** The key of the message: {0} is already registered as a token. */
+    public static final String ERRORS_duplicate_kuromoji_token = "{errors.duplicate_kuromoji_token}";
+
+    /** The key of the message: {0} is already registered as an input. */
+    public static final String ERRORS_duplicate_char_mapping_input = "{errors.duplicate_char_mapping_input}";
+
     /** The key of the message: {1} is invalid for {0}. */
     public static final String ERRORS_invalid_str_is_included = "{errors.invalid_str_is_included}";
 
@@ -2007,6 +2013,36 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidKuromojiSegmentation(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_kuromoji_segmentation, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.duplicate_kuromoji_token' with parameters.
+     * <pre>
+     * message: {0} is already registered as a token.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsDuplicateKuromojiToken(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_duplicate_kuromoji_token, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.duplicate_char_mapping_input' with parameters.
+     * <pre>
+     * message: {0} is already registered as an input.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsDuplicateCharMappingInput(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_duplicate_char_mapping_input, arg0));
         return this;
     }
 

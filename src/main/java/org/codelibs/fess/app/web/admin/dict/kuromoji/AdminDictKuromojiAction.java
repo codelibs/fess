@@ -507,26 +507,43 @@ public class AdminDictKuromojiAction extends FessAdminAction {
      * @param form The create form.
      */
     protected void verifyForm(final CreateForm form) {
-        verifyKuromojiEntry(form, messages -> throwValidationError(messages, this::asEditHtml));
+        verifyKuromojiEntry(kuromojiService, form, messages -> throwValidationError(messages, this::asEditHtml));
     }
 
     /**
      * Checks an entry against the rules the user dictionary itself enforces: a token may not
-     * contain a space, and the segmentation and the reading must be split into the same number of
-     * tokens. Shared with the REST API, because an entry that breaks either rule is only rejected
-     * when the search engine next loads the dictionary -- and it refuses to open the index at all
-     * at that point, which is a long way from where the entry was added.
+     * contain a space, the segmentation and the reading must be split into the same number of
+     * tokens, and no two entries may declare the same token. Shared with the REST API, because an
+     * entry that breaks any of them is only rejected when the search engine next loads the
+     * dictionary -- and it refuses to open the index at all at that point, which is a long way
+     * from where the entry was added.
      *
+     * @param kuromojiService the service used to read the entries the dictionary already holds
      * @param form the entry to check
      * @param throwError callback to report a violation
      */
-    public static void verifyKuromojiEntry(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
+    public static void verifyKuromojiEntry(final KuromojiService kuromojiService, final CreateForm form,
+            final Consumer<VaMessenger<FessMessages>> throwError) {
         if (form.token != null && form.token.split(" ").length > 1) {
             throwError.accept(messages -> messages.addErrorsInvalidKuromojiToken("token", form.token));
         }
         if (form.segmentation != null && form.reading != null && form.segmentation.split(" ").length != form.reading.split(" ").length) {
             throwError.accept(messages -> messages.addErrorsInvalidKuromojiSegmentation("segmentation", form.segmentation, form.reading));
         }
+        if (form.token != null && kuromojiService.containsToken(form.dictId, form.token, editedId(form))) {
+            throwError.accept(messages -> messages.addErrorsDuplicateKuromojiToken("token", form.token));
+        }
+    }
+
+    /**
+     * Returns the ID of the entry an edit is replacing, so that the entry does not count as a
+     * duplicate of itself, or null when a new entry is being created.
+     *
+     * @param form the submitted entry
+     * @return the ID being edited, or null
+     */
+    private static Long editedId(final CreateForm form) {
+        return form instanceof final EditForm editForm ? editForm.id : null;
     }
 
     // ===================================================================================

@@ -15,10 +15,12 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CharMappingPager;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
@@ -119,6 +121,32 @@ public class CharMappingService {
      */
     public OptionalEntity<CharMappingItem> getCharMappingItem(final String dictId, final long id) {
         return getCharMappingFile(dictId).map(file -> file.get(id).get());
+    }
+
+    /**
+     * Determines whether another entry in the dictionary already maps the given input.
+     * <p>
+     * The normalize char map the search engine builds from this dictionary rejects an input that
+     * is mapped twice, and the dictionary is only read when the index is opened, so a duplicate
+     * has to be caught here: by the time the map is built, the index no longer opens and search
+     * is down.
+     * </p>
+     *
+     * @param dictId the dictionary ID to search
+     * @param input the input term to look for
+     * @param excludeId the ID of the entry being edited, or null while a new entry is being created
+     * @return true if another entry already maps the input
+     */
+    public boolean containsInput(final String dictId, final String input, final Long excludeId) {
+        if (StringUtil.isBlank(input)) {
+            return false;
+        }
+        return getCharMappingFile(dictId).map(file -> {
+            final PagingList<CharMappingItem> itemList = file.selectList(0, Integer.MAX_VALUE);
+            return itemList.stream()
+                    .anyMatch(item -> (excludeId == null || excludeId.longValue() != item.getId()) && item.getInputs() != null
+                            && Arrays.asList(item.getInputs()).contains(input));
+        }).orElse(Boolean.FALSE).booleanValue();
     }
 
     /**
