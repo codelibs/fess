@@ -17,13 +17,17 @@ package org.codelibs.fess.rank.fusion;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.collection.ArrayUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -38,6 +42,8 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.opensearch.action.search.SearchRequestBuilder;
 import org.opensearch.action.search.SearchResponse;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.common.document.DocumentField;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
@@ -215,6 +221,35 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
                     .minScore(params.getMinScore())
                     .build();
         };
+    }
+
+    /**
+     * Builds the constraint that decides which documents this request is allowed to see: the
+     * caller's roles and, when one is active, the virtual host.
+     *
+     * <p>It lives here so that every searcher applies the same clause, however it retrieves.
+     * A branch that bypasses {@code SearchConditionBuilder} - the vector branches do, because
+     * they replace the whole query - must still apply this, and it must be the same clause the
+     * keyword branch gets from {@code QueryHelper}, not a re-derivation of it.</p>
+     *
+     * @param params the search request parameters
+     * @return the permission query, with no clauses when the request is exempt
+     */
+    protected BoolQueryBuilder buildPermissionQuery(final SearchRequestParams params) {
+        final BoolQueryBuilder permissionQuery = QueryBuilders.boolQuery();
+        if (params.getType() == SearchRequestType.ADMIN_SEARCH) {
+            return permissionQuery;
+        }
+        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(params.getType());
+        if (!roleSet.isEmpty()) {
+            queryHelper.buildRoleQuery(roleSet, permissionQuery);
+        }
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        if (StringUtil.isNotBlank(virtualHostKey)) {
+            permissionQuery.filter(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), virtualHostKey));
+        }
+        return permissionQuery;
     }
 
     /**

@@ -235,11 +235,11 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     // -------------------------------------------------------------------------------------
-    //                                                              createSearchCondition
+    //                                                      createSemanticSearchCondition
     //                                                              ----------------------
 
     @Test
-    public void test_createSearchCondition_annCarriesPermissionFilterIntoKnn() {
+    public void test_createSemanticSearchCondition_annCarriesPermissionFilterIntoKnn() {
         givenPermissionContext();
         final String json = buildQueryJson(new GuardedSearcher(), true, new StubSearchRequestParams(0, 10));
         final int knnIndex = json.indexOf("\"knn\"");
@@ -260,7 +260,7 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_createSearchCondition_exactKeepsPermissionOnOuterQueryOnly() {
+    public void test_createSemanticSearchCondition_exactKeepsPermissionOnOuterQueryOnly() {
         givenPermissionContext();
         final String json = buildQueryJson(new GuardedSearcher(), false, new StubSearchRequestParams(0, 10));
         assertTrue(json.contains("script_score"), json);
@@ -271,7 +271,7 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_createSearchCondition_doesNotTrackTotalHits() {
+    public void test_createSemanticSearchCondition_doesNotTrackTotalHits() {
         givenPermissionContext();
         final SearchRequestBuilder builder = buildRequest(new GuardedSearcher(), false, new StubSearchRequestParams(0, 10));
         // RankFusionProcessor derives allRecordCount from the main searcher only, so the
@@ -419,18 +419,13 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     private SearchRequestBuilder buildRequest(final SemanticChunkSearcher target, final boolean annMode, final SearchRequestParams params) {
-        target.queryVectorHolder.set(new float[] { 0.1f, 0.2f });
-        target.annModeHolder.set(annMode);
-        try {
-            final SearchCondition<SearchRequestBuilder> condition =
-                    target.createSearchCondition("plain query", params, OptionalThing.empty());
-            final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
-            assertTrue(condition.build(builder));
-            return builder;
-        } finally {
-            target.queryVectorHolder.remove();
-            target.annModeHolder.remove();
-        }
+        final SemanticChunkSearcher.SemanticQueryContext context =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, annMode);
+        final SearchCondition<SearchRequestBuilder> condition =
+                target.createSemanticSearchCondition(context, "plain query", params, OptionalThing.empty());
+        final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
+        assertTrue(condition.build(builder));
+        return builder;
     }
 
     private String buildQueryJson(final SemanticChunkSearcher target, final boolean annMode, final SearchRequestParams params) {
