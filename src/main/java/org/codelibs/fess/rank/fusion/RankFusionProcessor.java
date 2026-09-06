@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,6 +56,7 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
+import org.opensearch.index.query.QueryBuilder;
 import org.lastaflute.di.core.ExternalContext;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -74,6 +77,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * and provides a unified search interface.
  */
 public class RankFusionProcessor implements AutoCloseable {
+
+    /** One-time warn latch for a main searcher that cannot fuse in the search engine. */
+    protected final AtomicBoolean engineFusionUnsupportedWarned = new AtomicBoolean(false);
 
     private static final Logger logger = LogManager.getLogger(RankFusionProcessor.class);
 
@@ -214,7 +220,76 @@ public class RankFusionProcessor implements AutoCloseable {
         if (availableSearchers.length == 1) {
             return searchWithMainSearcher(availableSearchers[0], query, params, userBean);
         }
+        if (ComponentUtil.getFessConfig().isRankFusionEngineEnabled()) {
+            final List<Map<String, Object>> fused = searchWithEngineFusion(availableSearchers, query, params, userBean);
+            if (fused != null) {
+                return fused;
+            }
+        }
         return searchWithMultipleSearchers(availableSearchers, query, params, userBean);
+    }
+
+    /**
+     * Answers the search with a single request that the search engine ranks across every
+     * searcher, instead of merging separate result lists here.
+     *
+     * <p>The main searcher is asked to host the request and the rest to contribute their queries.
+     * Either side can decline - a branch that cannot be expressed as a query, a host that cannot
+     * fuse - and declining is explicit rather than silent, so a request never goes out having
+     * quietly dropped a branch.</p>
+     *
+     * @param searchers the available searchers, the main one first
+     * @param query the search query string
+     * @param params the search request parameters
+     * @param userBean the optional user bean for access control
+     * @return the fused documents, or null when the search engine cannot answer this search
+     */
+    protected List<Map<String, Object>> searchWithEngineFusion(final RankFusionSearcher[] searchers, final String query,
+            final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
+        final int paginationDepth = ComponentUtil.getFessConfig().getRankFusionPaginationDepthAsInteger().intValue();
+        // The branches are sized to the depth the engine ranks to, not to the requested page, so
+        // that a branch asks the shards for as many candidates as the fusion can actually use.
+        final SearchRequestParams subQueryParams = new SearchRequestParamsWrapper(params, 0, paginationDepth);
+        final List<QueryBuilder> subQueries = new ArrayList<>(searchers.length - 1);
+        for (int i = 1; i < searchers.length; i++) {
+            final RankFusionSearcher searcher = searchers[i];
+            try {
+                searcher.buildSubQuery(query, subQueryParams, userBean)
+                        // The name comes back on each hit in matched_queries, which is how the
+                        // fused response still says which branch found a document.
+                        .map(subQuery -> subQuery.queryName(searcher.getName()))
+                        .ifPresent(subQueries::add);
+            } catch (final Exception e) {
+                logger.warn("{} could not contribute to a fused search; it is left out of this search. query={}", searcher.getName(), query,
+                        e);
+            }
+        }
+        if (subQueries.isEmpty()) {
+            // Every branch declined. Running them as separate searches would only produce the
+            // empty results they just declined to produce, so answer with the main searcher.
+            return searchWithMainSearcher(searchers[0], query, params, userBean);
+        }
+        final Optional<SearchResult> fused;
+        try {
+            fused = searchers[0].searchWithSubQueries(query, params, userBean, subQueries);
+        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("A fused search failed; falling back to rank fusion in Fess. query={}", query, e);
+            return null;
+        }
+        if (fused.isEmpty()) {
+            if (engineFusionUnsupportedWarned.compareAndSet(false, true)) {
+                logger.warn(
+                        "{} cannot fuse other searchers into one request, so rank fusion is performed by Fess even though " + "{} is true.",
+                        searchers[0].getName(), FessConfig.RANK_FUSION_ENGINE_ENABLED);
+            }
+            return null;
+        }
+        final SearchResult searchResult = fused.get();
+        return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
+                searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
+                searchResult.getFacetResponse(), params.getStartPosition(), params.getPageSize(), 0);
     }
 
     /**

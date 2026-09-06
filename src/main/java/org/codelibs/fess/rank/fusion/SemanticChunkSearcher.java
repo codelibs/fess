@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -128,6 +129,9 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
     /** One-time warn latch for the exact (full-scan) mode, reset when the ann mode becomes available. */
     private final AtomicBoolean exactModeWarned = new AtomicBoolean(false);
 
+    /** One-time notice latch for opting out of engine-side fusion because a min_score cutoff is set. */
+    private final AtomicBoolean minScoreOptOutNoticed = new AtomicBoolean(false);
+
     /** Timestamp of the last {@link #isKnnIndexReady()} probe. */
     private volatile long knnReadyCheckedAt;
 
@@ -182,6 +186,27 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
                     context.isAnnMode() ? "ann" : "exact", query, e);
             return emptyResult();
         }
+    }
+
+    @Override
+    protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean) {
+        if (getMinScore().isPresent()) {
+            // The cutoff is a request-level min_score today, and a fused request has a single
+            // min_score that the engine applies after it has combined the branches - there it
+            // cannot mean "this branch's own cosine floor". Rather than drop the cutoff without
+            // saying so, stay out of the fused request while it is configured.
+            if (minScoreOptOutNoticed.compareAndSet(false, true)) {
+                logger.info("{} is set, so semantic chunk search does not take part in rank fusion performed by the search engine: "
+                        + "a fused request has one min_score for the whole result, not one per branch.", SEARCH_MIN_SCORE_PROPERTY);
+            }
+            return Optional.empty();
+        }
+        final OptionalThing<SemanticQueryContext> contextOpt = prepare(query, params);
+        if (!contextOpt.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(buildSemanticQuery(contextOpt.get(), params));
     }
 
     /**

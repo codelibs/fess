@@ -315,14 +315,37 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
             docMap.put(fessConfig.getIndexFieldId(), searchHit.getId());
         }
 
-        final String[] searchers = DocumentUtil.getValue(docMap, Constants.SEARCHER, String[].class);
-        if (searchers != null) {
-            docMap.put(Constants.SEARCHER, ArrayUtil.add(searchers, getName()));
-        } else {
-            docMap.put(Constants.SEARCHER, new String[] { getName() });
+        String[] searchers = DocumentUtil.getValue(docMap, Constants.SEARCHER, String[].class);
+        if (searchers == null) {
+            searchers = new String[0];
         }
+        for (final String searcherName : resolveSearcherNames(searchHit)) {
+            if (!ArrayUtil.contains(searchers, searcherName)) {
+                searchers = ArrayUtil.add(searchers, searcherName);
+            }
+        }
+        docMap.put(Constants.SEARCHER, searchers);
 
         return docMap;
+    }
+
+    /**
+     * Returns which searchers found this hit.
+     *
+     * <p>In a request that fuses several searchers there is only one response, so the hit itself
+     * has to say which branches matched it. Each branch is sent as a named query, and the engine
+     * reports the names that matched in {@code matched_queries}; without them - an ordinary
+     * single-searcher response - the answer is simply this searcher.</p>
+     *
+     * @param searchHit the search hit
+     * @return the searcher names that matched this hit
+     */
+    protected String[] resolveSearcherNames(final SearchHit searchHit) {
+        final String[] matchedQueries = searchHit.getMatchedQueries();
+        if (matchedQueries != null && matchedQueries.length > 0) {
+            return matchedQueries;
+        }
+        return new String[] { getName() };
     }
 
 }
