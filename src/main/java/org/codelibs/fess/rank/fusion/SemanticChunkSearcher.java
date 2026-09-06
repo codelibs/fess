@@ -129,9 +129,6 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
     /** One-time warn latch for the exact (full-scan) mode, reset when the ann mode becomes available. */
     private final AtomicBoolean exactModeWarned = new AtomicBoolean(false);
 
-    /** One-time notice latch for opting out of engine-side fusion because a min_score cutoff is set. */
-    private final AtomicBoolean minScoreOptOutNoticed = new AtomicBoolean(false);
-
     /** Timestamp of the last {@link #isKnnIndexReady()} probe. */
     private volatile long knnReadyCheckedAt;
 
@@ -191,17 +188,6 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
     @Override
     protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
-        if (getMinScore().isPresent()) {
-            // The cutoff is a request-level min_score today, and a fused request has a single
-            // min_score that the engine applies after it has combined the branches - there it
-            // cannot mean "this branch's own cosine floor". Rather than drop the cutoff without
-            // saying so, stay out of the fused request while it is configured.
-            if (minScoreOptOutNoticed.compareAndSet(false, true)) {
-                logger.info("{} is set, so semantic chunk search does not take part in rank fusion performed by the search engine: "
-                        + "a fused request has one min_score for the whole result, not one per branch.", SEARCH_MIN_SCORE_PROPERTY);
-            }
-            return Optional.empty();
-        }
         final OptionalThing<SemanticQueryContext> contextOpt = prepare(query, params);
         if (!contextOpt.isPresent()) {
             return Optional.empty();
@@ -276,8 +262,6 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
                     .setFrom(params.getStartPosition())
                     .setSize(params.getPageSize())
                     .setFetchSource(params.getResponseFields(), null);
-            getMinScore().ifPresent(
-                    minScore -> resolveEngineMinScore(minScore, context.isAnnMode()).ifPresent(searchRequestBuilder::setMinScore));
             if (logger.isDebugEnabled()) {
                 logger.debug("Semantic chunk search mode: {}", context.isAnnMode() ? "ann" : "exact");
             }
@@ -307,7 +291,40 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         final QueryBuilder chunkQuery =
                 context.isAnnMode() ? buildKnnChunkQuery(queryVector, params, hasPermissionQuery ? permissionQuery : null)
                         : buildExactChunkQuery(queryVector);
-        return boolQuery.must(chunkQuery);
+        return boolQuery.must(applyMinScore(chunkQuery, context.isAnnMode()));
+    }
+
+    /**
+     * Applies the configured similarity cutoff to the chunk query.
+     *
+     * <p>The cutoff is expressed inside the query rather than as the request's {@code min_score}
+     * so that it means the same thing however the request is run. A request that fuses several
+     * searchers has one {@code min_score} for the combined result, applied after the engine has
+     * normalized the branches, so there it could not mean "this branch's own similarity floor" -
+     * the cutoff has to travel with the branch it belongs to.</p>
+     *
+     * <p>Wrapping keeps retrieval bounded: the chunk query still returns its {@code k} nearest
+     * neighbors and the cutoff then discards the ones that are not close enough, which is what
+     * this cutoff has always meant. Asking the engine for every chunk above a threshold instead
+     * ({@code knn} radial search) would drop {@code k} entirely, because the two cannot both be
+     * set.</p>
+     *
+     * @param chunkQuery the chunk query to bound
+     * @param annMode whether the ann (knn query) mode is active
+     * @return the chunk query, wrapped when a usable cutoff is configured
+     */
+    protected QueryBuilder applyMinScore(final QueryBuilder chunkQuery, final boolean annMode) {
+        final OptionalThing<Float> minScore = getMinScore();
+        if (!minScore.isPresent()) {
+            return chunkQuery;
+        }
+        final OptionalThing<Float> engineMinScore = resolveEngineMinScore(minScore.get().floatValue(), annMode);
+        if (!engineMinScore.isPresent()) {
+            return chunkQuery;
+        }
+        // function_score with no functions leaves the score alone and only applies the cutoff,
+        // so this needs no script.
+        return QueryBuilders.functionScoreQuery(chunkQuery).setMinScore(engineMinScore.get().floatValue());
     }
 
     /**
