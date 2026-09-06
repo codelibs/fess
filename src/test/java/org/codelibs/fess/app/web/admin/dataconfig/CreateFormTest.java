@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.admin.dataconfig;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -44,6 +45,20 @@ public class CreateFormTest extends UnitFessTestCase {
         form.initialize();
         assertNotNull(form.configParameter);
         assertTrue(form.configParameter.contains("config.script.type=" + Constants.DEFAULT_SCRIPT));
+    }
+
+    @Test
+    public void test_initialize_afterTheLoginManagerHasBeenResolved() {
+        // The suite shares one container across test classes in a fork, so whether the login
+        // manager has already been resolved when this form initializes depends on scheduling.
+        // Resolve it first here to pin the order that used to fail: the container could
+        // register the login manager and not build it, and initialize() asks it who is
+        // creating the entry.
+        assertNotNull(ComponentUtil.getComponent(FessLoginAssist.class));
+
+        final CreateForm form = new CreateForm();
+        form.initialize();
+        assertEquals(Constants.GUEST_USER, form.createdBy);
     }
 
     @Test

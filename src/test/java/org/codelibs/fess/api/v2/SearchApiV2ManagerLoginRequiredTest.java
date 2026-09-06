@@ -77,7 +77,7 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(anonymous, "fessLoginAssist");
-        ComponentUtil.register(anonymous, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(anonymous);
     }
 
     @Override

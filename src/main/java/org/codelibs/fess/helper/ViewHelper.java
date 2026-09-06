@@ -1038,7 +1038,7 @@ public class ViewHelper {
      * @throws FessSystemException if facet data cannot be loaded
      */
     public FacetResponse getCachedFacetResponse(final String query) {
-        final OptionalThing<FessUserBean> userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+        final OptionalThing<FessUserBean> userBean = ComponentUtil.getFessLoginAssist().getSavedUserBean();
         final String permissionKey = userBean.map(user -> StreamUtil.stream(user.getPermissions())
                 .get(stream -> stream.sorted().distinct().collect(Collectors.joining("\n")))).orElse(StringUtil.EMPTY);
 

@@ -74,7 +74,7 @@ public class LogoutHandler {
             return;
         }
         try {
-            final FessLoginAssist assist = ComponentUtil.getComponent(FessLoginAssist.class);
+            final FessLoginAssist assist = ComponentUtil.getFessLoginAssist();
             // Mirror LogoutAction.index(): the LOGOUT record must be written BEFORE logout()
             // drops the user bean, otherwise the audit line degrades to "user:-".
             recordLogoutActivity(assist);

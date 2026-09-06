@@ -166,7 +166,7 @@ public class FavoritePostHandler {
         // their session expired when DI is broken.
         final FessLoginAssist assist;
         try {
-            assist = ComponentUtil.getComponent(FessLoginAssist.class);
+            assist = ComponentUtil.getFessLoginAssist();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: could not acquire FessLoginAssist", docId, e);
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");

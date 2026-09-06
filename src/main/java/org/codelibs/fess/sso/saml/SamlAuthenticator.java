@@ -1520,7 +1520,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * @return The user bean of the session, empty when nobody is logged in.
      */
     protected OptionalThing<FessUserBean> getSavedUserBean() {
-        return ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+        return ComponentUtil.getFessLoginAssist().getSavedUserBean();
     }
 
     /**

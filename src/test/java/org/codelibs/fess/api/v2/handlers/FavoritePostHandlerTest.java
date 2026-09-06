@@ -96,7 +96,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(anon, "fessLoginAssist");
-        ComponentUtil.register(anon, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(anon);
     }
 
     @Test
@@ -216,7 +216,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(loginStub, "fessLoginAssist");
-        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(loginStub);
 
         final FessConfig cfgStub = new FavoriteEnabledFessConfig();
         // Use setFessConfig so ComponentUtil.getFessConfig() returns this stub —
@@ -305,7 +305,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             assertTrue(second.body().contains("\"count\":"), "duplicate POST must carry count: " + second.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -326,7 +326,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(loginStub, "fessLoginAssist");
-        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(loginStub);
 
         final FessConfig cfgStub = new FavoriteEnabledFessConfig();
         // Use setFessConfig so ComponentUtil.getFessConfig() returns this stub —
@@ -394,7 +394,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             org.junit.jupiter.api.Assertions.assertEquals(500, res.status, res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -415,7 +415,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(loginStub, "fessLoginAssist");
-        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(loginStub);
 
         final FessConfig cfgStub = new FavoriteEnabledFessConfig();
         ComponentUtil.setFessConfig(cfgStub);
@@ -491,7 +491,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             assertFalse(res.body().contains("\"already_existed\""), "fresh add must NOT carry already_existed: " + res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
             ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
         }
@@ -511,7 +511,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(throwing, "fessLoginAssist");
-        ComponentUtil.register(throwing, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(throwing);
         try {
             final CapturingResponse res = new CapturingResponse();
             new FavoritePostHandler().handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"q\"}"),
@@ -522,7 +522,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
                     "lookup exception must not be misreported as auth_required: " + res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -554,7 +554,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(loginStub, "fessLoginAssist");
-        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(loginStub);
         final FessConfig cfgStub = new FavoriteEnabledFessConfig();
         ComponentUtil.setFessConfig(cfgStub);
         ComponentUtil.register(cfgStub, "fessConfig");
@@ -575,7 +575,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
             ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
         }
@@ -596,7 +596,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(loginStub, "fessLoginAssist");
-        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(loginStub);
         final FessConfig cfgStub = new FavoriteEnabledFessConfig();
         ComponentUtil.setFessConfig(cfgStub);
         ComponentUtil.register(cfgStub, "fessConfig");
@@ -622,7 +622,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
             ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
         }
@@ -649,7 +649,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(loginStub, "fessLoginAssist");
-        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(loginStub);
 
         final FessConfig cfgStub = new FavoriteEnabledFessConfig();
         ComponentUtil.setFessConfig(cfgStub);
@@ -725,7 +725,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
             assertTrue(Character.isDigit(nextChar), "count value must be a JSON number (got '" + nextChar + "') in: " + body);
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
             ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
         }

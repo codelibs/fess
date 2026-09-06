@@ -106,7 +106,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         // FessLoginAssist.logout() drops the user bean — otherwise it would degrade to "user:-".
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("carol"), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("carol"));
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
         assertEquals(200, res.status, res.body());
@@ -121,7 +121,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         // A logout that ended no session is not an event.
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist(null), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist(null));
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
         assertEquals(200, res.status, res.body());
@@ -140,7 +140,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
             }
         }, "activityHelper");
         final StubLoginAssist assist = new StubLoginAssist("carol");
-        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(assist);
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
         assertEquals(200, res.status, res.body());
@@ -168,7 +168,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
             }
         }, "ssoManager");
         final StubLoginAssist assist = new StubLoginAssist("carol");
-        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(assist);
 
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
@@ -192,7 +192,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
             }
         }, "ssoManager");
         final StubLoginAssist assist = new StubLoginAssist("carol");
-        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(assist);
 
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
@@ -216,7 +216,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         final StubLoginAssist assist = new StubLoginAssist("carol");
         assist.logout();
         assist.logoutCount = 0;
-        ComponentUtil.register(assist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(assist);
 
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
