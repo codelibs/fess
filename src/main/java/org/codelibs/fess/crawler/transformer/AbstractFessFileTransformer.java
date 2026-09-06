@@ -345,6 +345,18 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         // lang
         if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentFileDefaultLang())) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), fessConfig.getCrawlerDocumentFileDefaultLang());
+        } else {
+            // The extractor metadata is appended to the body above, and language detection reads
+            // only the first indexer.language.detect.length characters of the field it ends up
+            // in. A short document is then classified from its producer metadata rather than
+            // from its own text -- a Japanese .docx written by an English tool is reported as
+            // English, and its body lands in content_en. Detecting from the extracted text alone
+            // settles the language before anything else is mixed into it; LanguageHelper keeps a
+            // value that is already on the document.
+            final String detectedLang = ComponentUtil.getLanguageHelper().detectLanguage(content);
+            if (detectedLang != null) {
+                putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), detectedLang);
+            }
         }
         // id
         putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));

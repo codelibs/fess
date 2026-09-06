@@ -293,11 +293,26 @@ public class LanguageHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_getSupportedLanguage_caseInsensitive() {
-        // Test that method is case sensitive (as per implementation)
-        assertNull(languageHelper.getSupportedLanguage("JA"));
-        assertNull(languageHelper.getSupportedLanguage("EN"));
+        // The same tag arrives written several ways -- the detector reports zh-CN, a document may
+        // carry zh_CN of its own -- so the match ignores case, and the configured spelling is
+        // what comes back.
+        assertEquals("ja", languageHelper.getSupportedLanguage("JA"));
+        assertEquals("en", languageHelper.getSupportedLanguage("EN"));
         assertEquals("ja", languageHelper.getSupportedLanguage("ja"));
         assertEquals("en", languageHelper.getSupportedLanguage("en"));
+    }
+
+    @Test
+    public void test_getSupportedLanguage_regionTagSeparator() {
+        // The detector reports zh-CN and pt-BR; supported.languages is written zh_CN because it
+        // also names the languages the user interface offers. Both resolve, and what comes back
+        // is the suffix the index declares its content_<lang> fields with.
+        languageHelper.supportedLanguages = new String[] { "ja", "en", "zh_CN", "zh_TW", "pt_BR" };
+        assertEquals("zh-cn", languageHelper.getSupportedLanguage("zh-CN"));
+        assertEquals("zh-cn", languageHelper.getSupportedLanguage("zh_CN"));
+        assertEquals("zh-tw", languageHelper.getSupportedLanguage("zh-TW"));
+        assertEquals("pt-br", languageHelper.getSupportedLanguage("pt-BR"));
+        assertNull(languageHelper.getSupportedLanguage("ckb-iq"));
     }
 
     @Test

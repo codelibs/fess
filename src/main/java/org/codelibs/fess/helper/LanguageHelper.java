@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -113,7 +114,7 @@ public class LanguageHelper {
      * @param text The text to detect the language from.
      * @return The detected language.
      */
-    protected String detectLanguage(final String text) {
+    public String detectLanguage(final String text) {
         if (StringUtil.isBlank(text)) {
             return null;
         }
@@ -143,6 +144,17 @@ public class LanguageHelper {
 
     /**
      * Returns the supported language for a given language.
+     * <p>
+     * The same language reaches this method written more than one way: the detector reports
+     * zh-CN, a document may carry zh_CN of its own, and supported.languages is written in the
+     * java locale form because it also names the languages the user interface offers. So the tag
+     * is matched without regard to case or to the separator before the region.
+     * </p>
+     * <p>
+     * What comes back is the normalized tag, not the configured spelling: the index declares
+     * content_zh-cn, and query.language.mapping resolves a request locale to the same value.
+     * Copying the content into content_zh_CN would put it in a field nothing searches.
+     * </p>
      *
      * @param lang The language to check.
      * @return The supported language, or null if not supported.
@@ -151,12 +163,24 @@ public class LanguageHelper {
         if (StringUtil.isBlank(lang)) {
             return null;
         }
+        final String normalized = normalizeLanguageTag(lang);
         for (final String l : supportedLanguages) {
-            if (l.equals(lang)) {
-                return l;
+            if (normalizeLanguageTag(l).equals(normalized)) {
+                return normalizeLanguageTag(l);
             }
         }
         return null;
+    }
+
+    /**
+     * Reduces a language tag to the form the comparison is made on: lower case, and hyphen as the
+     * separator before the region.
+     *
+     * @param lang The language tag.
+     * @return The normalized tag.
+     */
+    protected String normalizeLanguageTag(final String lang) {
+        return lang.toLowerCase(Locale.ROOT).replace('_', '-');
     }
 
     /**
