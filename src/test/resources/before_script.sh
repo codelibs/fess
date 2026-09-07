@@ -5,6 +5,8 @@ temp_log_file=/tmp/fess-build.$$
 unzip target/releases/fess-*.zip > ${temp_log_file} 2>&1
 tail ${temp_log_file}
 
+# bin/fess.in.sh points at http://localhost:9200 by default, which is the service container.
+export FESS_DICTIONARY_PATH="${FESS_DICTIONARY_PATH:-/usr/share/opensearch/config/dictionary}"
 ./fess-*/bin/fess > ${temp_log_file} 2>&1 &
 
 temp_json_file=/tmp/fess-log.$$
@@ -34,6 +36,6 @@ cd ..
 popd >/dev/null
 
 cat ${temp_log_file} ./fess-*/logs/*.log
-curl -s "http://localhost:9201/_cat/indices?v"
+curl -s "http://localhost:9200/_cat/indices?v"
 curl -s "http://localhost:8080/"
 

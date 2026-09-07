@@ -16,7 +16,30 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       PARENT_BRANCH: main
-    timeout-minutes: 15
+      # Must match configsync.config_path inside the service container, because Fess embeds this
+      # path in the analyzers' *_path settings and configsync writes the dictionaries there.
+      FESS_DICTIONARY_PATH: /usr/share/opensearch/config/dictionary
+    timeout-minutes: 20
+    # Fess no longer bundles a search engine, so the workflow starts one. This image is the
+    # official OpenSearch distribution plus the four CodeLibs plugins, built by docker-fess.
+    services:
+      opensearch:
+        image: ghcr.io/codelibs/fess-opensearch:3.8.0
+        env:
+          discovery.type: single-node
+          cluster.name: fess-search
+          DISABLE_INSTALL_DEMO_CONFIG: "true"
+          DISABLE_SECURITY_PLUGIN: "true"
+          FESS_DICTIONARY_PATH: /usr/share/opensearch/config/dictionary
+          OPENSEARCH_JAVA_OPTS: -Xms1g -Xmx1g
+        ports:
+        - 9200:9200
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 20
+          --health-start-period 60s
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
