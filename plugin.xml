@@ -56,6 +56,18 @@
 			<param name="plugin.version" value="3.8.0.0" />
 			<param name="plugin.zip.version" value="3.8.0.0" />
 		</antcall>
+		<!-- neural-search: provides the hybrid query and the search-phase processors that
+		     normalize and combine its subquery scores. It declares opensearch-knn (installed
+		     above) and transport-grpc (installed by module.xml) as extended plugins, and is
+		     published without the opensearch- prefix the other plugins carry. -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="plugin.groupId" value="org/opensearch/plugin" />
+			<param name="plugin.name.prefix" value="" />
+			<param name="plugin.name" value="neural-search" />
+			<param name="plugin.version" value="3.8.0.0" />
+			<param name="plugin.zip.version" value="3.8.0.0" />
+		</antcall>
 
 		<antcall target="remove.jars" />
 	</target>
@@ -90,6 +102,14 @@
 				<include name="knn/httpclient5-*" />
 				<include name="knn/httpcore5-*" />
 				<include name="knn/slf4j-api-*" />
+				<include name="neural-search/commons-collections4-*" />
+				<include name="neural-search/commons-math3-*" />
+				<include name="neural-search/commons-text-*" />
+				<include name="neural-search/gson-*" />
+				<include name="neural-search/jackson-annotations-*" />
+				<include name="neural-search/jackson-databind-*" />
+				<include name="neural-search/javassist-*" />
+				<include name="neural-search/json-smart-*" />
 				<include name="minhash/guava-*" />
 				<include name="minhash/failureaccess-*" />
 				<include name="minhash/jspecify-*" />
