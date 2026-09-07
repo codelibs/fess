@@ -307,6 +307,31 @@ public class SearchEngineClient implements Client {
     }
 
     /**
+     * Normalises {@code fess.dictionary.path} and appends the configured dictionary prefix.
+     *
+     * <p>The index settings concatenate this value with a relative file name -- {@code fess.json}
+     * carries {@code "keywords_path": "${fess.dictionary.path}ar/protwords.txt"} -- so a value
+     * without a trailing separator produces {@code .../dictionaryar/protwords.txt} and index
+     * creation fails with {@code IOException while reading keywords_path: file not readable}.
+     * The value reaches Fess from {@code FESS_DICTIONARY_PATH} or {@code -Dfess.dictionary.path},
+     * neither of which is required to end in a separator, so it is normalised here. The trailing
+     * separator used to be added only when a dictionary prefix was configured, which is not the
+     * default; the embedded search engine hid the gap by leaving the property unset entirely.</p>
+     *
+     * @param fessConfig the configuration supplying the dictionary prefix
+     */
+    protected void resolveDictionaryPath(final FessConfig fessConfig) {
+        String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+        if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
+            dictionaryPath = dictionaryPath + "/";
+            System.setProperty("fess.dictionary.path", dictionaryPath);
+        }
+        if (StringUtil.isNotBlank(fessConfig.getIndexDictionaryPrefix())) {
+            System.setProperty("fess.dictionary.path", dictionaryPath + fessConfig.getIndexDictionaryPrefix() + "/");
+        }
+    }
+
+    /**
      * Initializes the search engine client and configures indices.
      * Called automatically after dependency injection is complete.
      */
@@ -317,17 +342,7 @@ public class SearchEngineClient implements Client {
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        if (StringUtil.isNotBlank(fessConfig.getIndexDictionaryPrefix())) {
-            String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
-            if (StringUtil.isBlank(dictionaryPath)) {
-                System.setProperty("fess.dictionary.path", fessConfig.getIndexDictionaryPrefix() + "/");
-            } else {
-                if (!dictionaryPath.endsWith("/")) {
-                    dictionaryPath = dictionaryPath + "/";
-                }
-                System.setProperty("fess.dictionary.path", dictionaryPath + fessConfig.getIndexDictionaryPrefix() + "/");
-            }
-        }
+        resolveDictionaryPath(fessConfig);
 
         String httpAddress = SystemUtil.getSearchEngineHttpAddress();
         if (StringUtil.isBlank(httpAddress)) {

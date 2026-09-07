@@ -455,4 +455,57 @@ public class SearchEngineClientTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * fess.json concatenates this value with a relative file name, so a missing trailing
+     * separator turns .../dictionary into .../dictionaryar/protwords.txt and index creation
+     * fails with "file not readable".
+     */
+    @Test
+    public void test_resolveDictionaryPath_addsTrailingSeparator() {
+        final String original = System.getProperty("fess.dictionary.path");
+        try {
+            System.setProperty("fess.dictionary.path", "/usr/share/opensearch/config/dictionary");
+            new SearchEngineClient().resolveDictionaryPath(org.codelibs.fess.util.ComponentUtil.getFessConfig());
+            assertEquals("/usr/share/opensearch/config/dictionary/", System.getProperty("fess.dictionary.path"));
+        } finally {
+            if (original == null) {
+                System.clearProperty("fess.dictionary.path");
+            } else {
+                System.setProperty("fess.dictionary.path", original);
+            }
+        }
+    }
+
+    @Test
+    public void test_resolveDictionaryPath_keepsExistingSeparator() {
+        final String original = System.getProperty("fess.dictionary.path");
+        try {
+            System.setProperty("fess.dictionary.path", "/var/lib/opensearch/config/");
+            new SearchEngineClient().resolveDictionaryPath(org.codelibs.fess.util.ComponentUtil.getFessConfig());
+            assertEquals("/var/lib/opensearch/config/", System.getProperty("fess.dictionary.path"));
+        } finally {
+            if (original == null) {
+                System.clearProperty("fess.dictionary.path");
+            } else {
+                System.setProperty("fess.dictionary.path", original);
+            }
+        }
+    }
+
+    @Test
+    public void test_resolveDictionaryPath_leavesUnsetValueAlone() {
+        final String original = System.getProperty("fess.dictionary.path");
+        try {
+            System.clearProperty("fess.dictionary.path");
+            new SearchEngineClient().resolveDictionaryPath(org.codelibs.fess.util.ComponentUtil.getFessConfig());
+            assertNull(System.getProperty("fess.dictionary.path"));
+        } finally {
+            if (original == null) {
+                System.clearProperty("fess.dictionary.path");
+            } else {
+                System.setProperty("fess.dictionary.path", original);
+            }
+        }
+    }
+
 }
