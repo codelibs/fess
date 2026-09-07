@@ -48,14 +48,6 @@
 				<include>generate-thumbnail</include>
 			</includes>
 		</fileSet>
-		<fileSet>
-			<filtered>false</filtered>
-			<outputDirectory>fess-${project.version}/bin</outputDirectory>
-			<includes>
-				<include>module.xml</include>
-				<include>plugin.xml</include>
-			</includes>
-		</fileSet>
 
 		<!-- lib -->
 		<fileSet>
@@ -91,25 +83,6 @@
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
 			<outputDirectory>fess-${project.version}/temp</outputDirectory>
-			<excludes>
-				<exclude>*</exclude>
-			</excludes>
-			<filtered>false</filtered>
-		</fileSet>
-		<!-- es/modules -->
-		<fileSet>
-			<directory>${project.basedir}/modules</directory>
-			<outputDirectory>fess-${project.version}/es/modules</outputDirectory>
-		</fileSet>
-		<!-- es/plugins -->
-		<fileSet>
-			<directory>${project.basedir}/plugins</directory>
-			<outputDirectory>fess-${project.version}/es/plugins</outputDirectory>
-		</fileSet>
-		<!-- es/data -->
-		<fileSet>
-			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>fess-${project.version}/es/data</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>

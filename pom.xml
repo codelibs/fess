@@ -298,13 +298,6 @@
 				<configuration>
 					<target>
 						<ant antfile="${basedir}/dbflute.xml" target="download.dbflute" />
-						<ant antfile="${basedir}/module.xml" target="install.modules">
-							<property name="with.fess" value="true" />
-							<property name="opensearch.version" value="${opensearch.version}" />
-						</ant>
-						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
-							<property name="with.fess" value="true" />
-						</ant>
 						<ant antfile="deps.xml" target="install.jars" />
 						<echo message="fess.version=${project.version}" file="${basedir}/src/main/webapp/WEB-INF/project.properties" />
 					</target>
@@ -385,7 +378,6 @@
 										<include>bin/fess</include>
 										<include>bin/fess.in.sh</include>
 										<include>bin/generate-thumbnail</include>
-										<include>bin/plugin.xml</include>
 									</includes>
 								</resource>
 							</resources>
@@ -431,7 +423,6 @@
 										<include>bin/fess</include>
 										<include>bin/fess.in.sh</include>
 										<include>bin/generate-thumbnail</include>
-										<include>bin/plugin.xml</include>
 									</includes>
 								</resource>
 							</resources>
@@ -586,7 +577,6 @@
 								<path>${project.basedir}/src/main/assemblies/files/fess</path>
 								<path>${project.basedir}/src/main/assemblies/files/fess.in.sh</path>
 								<path>${project.basedir}/src/main/assemblies/files/generate-thumbnail</path>
-								<path>${project.basedir}/plugin.xml</path>
 							</paths>
 							<dst>${packaging.fess.bin.dir}</dst>
 							<mapper>
@@ -619,28 +609,6 @@
 								<type>perm</type>
 								<user>opensearch</user>
 								<group>opensearch</group>
-							</mapper>
-						</data>
-						<!-- Add elasicsearch modules directory -->
-						<data>
-							<type>directory</type>
-							<src>${project.basedir}/modules</src>
-							<mapper>
-								<type>perm</type>
-								<prefix>${packaging.fess.home.dir}/es/modules</prefix>
-								<user>${packaging.fess.user}</user>
-								<group>${packaging.fess.group}</group>
-							</mapper>
-						</data>
-						<!-- Add elasicsearch plugins directory -->
-						<data>
-							<type>directory</type>
-							<src>${project.basedir}/plugins</src>
-							<mapper>
-								<type>perm</type>
-								<prefix>${packaging.fess.home.dir}/es/plugins</prefix>
-								<user>${packaging.fess.user}</user>
-								<group>${packaging.fess.group}</group>
 							</mapper>
 						</data>
 						<!-- Add environment vars file -->
@@ -849,18 +817,6 @@
 								</source>
 							</sources>
 						</mapping>
-						<mapping>
-							<directory>${packaging.fess.bin.dir}</directory>
-							<filemode>644</filemode>
-							<sources>
-								<source>
-									<location>${project.basedir}</location>
-									<includes>
-										<include>plugin.xml</include>
-									</includes>
-								</source>
-							</sources>
-						</mapping>
 						<!-- logs (empty) -->
 						<mapping>
 							<directory>${packaging.fess.log.dir}</directory>
@@ -875,24 +831,6 @@
 							<filemode>755</filemode>
 							<username>opensearch</username>
 							<groupname>opensearch</groupname>
-						</mapping>
-						<!-- es/modules -->
-						<mapping>
-							<directory>${packaging.fess.home.dir}/es/modules</directory>
-							<sources>
-								<source>
-									<location>${project.basedir}/modules</location>
-								</source>
-							</sources>
-						</mapping>
-						<!-- es/plugins -->
-						<mapping>
-							<directory>${packaging.fess.home.dir}/es/plugins</directory>
-							<sources>
-								<source>
-									<location>${project.basedir}/plugins</location>
-								</source>
-							</sources>
 						</mapping>
 						<!-- Add environment vars file -->
 						<mapping>
