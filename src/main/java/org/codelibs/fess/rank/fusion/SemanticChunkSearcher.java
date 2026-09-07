@@ -40,6 +40,8 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.opensearch.query.KnnQueryBuilder;
+import org.codelibs.fess.query.StructuredQuerySplitter;
+import org.codelibs.fess.query.StructuredQuerySplitter.Split;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
@@ -108,9 +110,12 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
     public static final String SEARCH_MIN_SCORE_PROPERTY = "content_chunker.search.min_score";
 
     /**
-     * Matches queries that use Fess/Lucene query syntax; such queries skip the
-     * semantic branch because the whole query string is embedded as one text.
+     * Matches queries that use Fess/Lucene query syntax.
+     *
+     * @deprecated {@link StructuredQuerySplitter} decides this now, by separating the words to
+     *             embed from the conditions to filter on instead of refusing the whole query.
      */
+    @Deprecated
     protected static final Pattern QUERY_SYNTAX_PATTERN =
             Pattern.compile("[\"():\\[\\]{}^~*?\\\\]|&&|\\|\\||(?:^|\\s)[+\\-]\\S|\\b(?:AND|OR|NOT|TO)\\b");
 
@@ -134,6 +139,9 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
 
     /** Cached result of the last {@link #isKnnIndexReady()} probe. */
     private volatile boolean knnReady;
+
+    /** Separates the words to embed from the conditions to filter on. */
+    private final StructuredQuerySplitter querySplitter = new StructuredQuerySplitter();
 
     /**
      * Default constructor.
@@ -209,7 +217,14 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
      * @return the context, or empty when the semantic branch does not apply
      */
     protected OptionalThing<SemanticQueryContext> prepare(final String query, final SearchRequestParams params) {
-        if (!isSearchEnabled() || StringUtil.isBlank(query) || !isPlainQuery(query)) {
+        if (!isSearchEnabled() || StringUtil.isBlank(query)) {
+            return OptionalThing.empty();
+        }
+        // The assembled query is not the user's words: QueryStringBuilder has appended whatever
+        // the user narrowed by, so a search stops being embeddable the moment a facet is
+        // clicked. Split it instead of refusing it - embed the words, filter on the rest.
+        final Split split = getQuerySplitter().split(query);
+        if (split == null) {
             return OptionalThing.empty();
         }
         // Geo and similar-document constraints are hard filters on the default path; the
@@ -231,7 +246,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         embeddingUnavailableWarned.set(false);
         final float[] queryVector;
         try {
-            queryVector = embeddingClientManager.embedQuery(query);
+            queryVector = embeddingClientManager.embedQuery(split.text);
         } catch (final Exception e) {
             logger.warn("Failed to embed query for semantic chunk search; falling back to keyword-only results. query={}", query, e);
             return OptionalThing.empty();
@@ -241,7 +256,17 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         }
         final boolean annMode = isKnnIndexReady();
         warnExactModeOnce(annMode);
-        return OptionalThing.of(new SemanticQueryContext(queryVector, annMode));
+        return OptionalThing.of(new SemanticQueryContext(queryVector, annMode, split.conditionFilter));
+    }
+
+    /**
+     * Returns the splitter that separates the words to embed from the conditions to filter on.
+     * Overridable so a test can supply one that does not need a container.
+     *
+     * @return the splitter
+     */
+    protected StructuredQuerySplitter getQuerySplitter() {
+        return querySplitter;
     }
 
     /**
@@ -282,16 +307,42 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
      */
     protected QueryBuilder buildSemanticQuery(final SemanticQueryContext context, final SearchRequestParams params) {
         final BoolQueryBuilder permissionQuery = buildPermissionQuery(params);
-        final boolean hasPermissionQuery = permissionQuery.hasClauses();
+        final QueryBuilder conditionFilter = context.getConditionFilter();
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        if (hasPermissionQuery) {
+        if (permissionQuery.hasClauses()) {
             boolQuery.filter(permissionQuery);
+        }
+        if (conditionFilter != null) {
+            boolQuery.filter(conditionFilter);
         }
         final float[] queryVector = context.getQueryVector();
         final QueryBuilder chunkQuery =
-                context.isAnnMode() ? buildKnnChunkQuery(queryVector, params, hasPermissionQuery ? permissionQuery : null)
+                context.isAnnMode() ? buildKnnChunkQuery(queryVector, params, mergeKnnFilter(permissionQuery, conditionFilter))
                         : buildExactChunkQuery(queryVector);
         return boolQuery.must(applyMinScore(chunkQuery, context.isAnnMode()));
+    }
+
+    /**
+     * Combines the constraints handed to the knn query itself.
+     *
+     * <p>The clauses on the surrounding bool are what enforce them; this copy is a recall aid, so
+     * the approximate search does not spend its {@code k} on documents that are about to be
+     * discarded. Both constraints belong in it for the same reason: a user narrowing by label
+     * would otherwise get whichever of the nearest {@code k} chunks happened to carry that label,
+     * which is usually none of them.</p>
+     *
+     * @param permissionQuery the role and virtual-host constraint, possibly with no clauses
+     * @param conditionFilter the conditions recovered from the query, or null
+     * @return the combined filter, or null when there is nothing to constrain by
+     */
+    protected QueryBuilder mergeKnnFilter(final BoolQueryBuilder permissionQuery, final QueryBuilder conditionFilter) {
+        if (!permissionQuery.hasClauses()) {
+            return conditionFilter;
+        }
+        if (conditionFilter == null) {
+            return permissionQuery;
+        }
+        return QueryBuilders.boolQuery().filter(permissionQuery).filter(conditionFilter);
     }
 
     /**
@@ -339,15 +390,39 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         /** Whether the live index can serve approximate kNN. */
         private final boolean annMode;
 
+        /** The conditions the query carried, as a filter clause, or null when it carried none. */
+        private final QueryBuilder conditionFilter;
+
         /**
-         * Creates a new context.
+         * Creates a new context for a query that carried no conditions.
          *
          * @param queryVector the query embedding
          * @param annMode whether the ann (knn query) mode is active
          */
         public SemanticQueryContext(final float[] queryVector, final boolean annMode) {
+            this(queryVector, annMode, null);
+        }
+
+        /**
+         * Creates a new context.
+         *
+         * @param queryVector the query embedding
+         * @param annMode whether the ann (knn query) mode is active
+         * @param conditionFilter the conditions to filter on, or null
+         */
+        public SemanticQueryContext(final float[] queryVector, final boolean annMode, final QueryBuilder conditionFilter) {
             this.queryVector = queryVector;
             this.annMode = annMode;
+            this.conditionFilter = conditionFilter;
+        }
+
+        /**
+         * Returns the conditions the query carried.
+         *
+         * @return the filter clause, or null when the query carried none
+         */
+        public QueryBuilder getConditionFilter() {
+            return conditionFilter;
         }
 
         /**
@@ -607,7 +682,11 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
      *
      * @param query the assembled query string
      * @return true if the query is plain text
+     * @deprecated {@link StructuredQuerySplitter} decides this now: it separates the words to
+     *             embed from the conditions to filter on, instead of refusing a query for
+     *             carrying conditions at all. Retained because it is an override point.
      */
+    @Deprecated
     protected boolean isPlainQuery(final String query) {
         return !QUERY_SYNTAX_PATTERN.matcher(query).find();
     }
