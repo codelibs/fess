@@ -16,6 +16,7 @@
 package org.codelibs.fess.rank.fusion;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +42,8 @@ import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.opensearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.opensearch.action.search.SearchAction;
 import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.action.search.SearchResponse;
 import org.opensearch.cluster.metadata.MappingMetadata;
 import org.opensearch.common.settings.Settings;
@@ -280,6 +283,60 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
                 "track_total_hits must not be requested: " + builder.request().source());
         assertFalse(builder.request().source().toString().replaceAll("\\s", "").contains("track_total_hits"),
                 builder.request().source().toString());
+    }
+
+    // -------------------------------------------------------------------------------------
+    //                                                                               min_score
+    //                                                                               ---------
+
+    @Test
+    public void test_applyMinScore_leavesTheQueryAloneWhenUnset() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final QueryBuilder chunkQuery = QueryBuilders.matchAllQuery();
+        assertSame(chunkQuery, searcher.applyMinScore(chunkQuery, false));
+    }
+
+    @Test
+    public void test_applyMinScore_boundsTheQueryRatherThanTheRequest() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.minScore = Float.valueOf(0.4f);
+        // The cutoff has to travel with the branch it belongs to: a request that fuses several
+        // searchers has one min_score for the combined result, applied after normalization.
+        final String json = searcher.applyMinScore(QueryBuilders.matchAllQuery(), false).toString().replaceAll("\\s", "");
+        assertTrue(json.contains("\"function_score\""), json);
+        // exact mode scores cosine + 1
+        assertTrue(json.contains("\"min_score\":1.4"), json);
+    }
+
+    @Test
+    public void test_applyMinScore_usesTheEngineScale() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.minScore = Float.valueOf(0.4f);
+        // ann mode on lucene/cosinesimil scores (1 + cos) / 2
+        final String json = searcher.applyMinScore(QueryBuilders.matchAllQuery(), true).toString().replaceAll("\\s", "");
+        assertTrue(json.contains("\"min_score\":0.7"), json);
+    }
+
+    @Test
+    public void test_createSemanticSearchCondition_carriesTheCutoffInTheQuery() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.minScore = Float.valueOf(0.4f);
+        final SearchRequestBuilder builder = buildRequest(searcher, false, new StubSearchRequestParams(0, 10));
+        assertNull(builder.request().source().minScore(), "the cutoff no longer rides on the request");
+        assertTrue(builder.request().source().query().toString().replaceAll("\\s", "").contains("\"min_score\":1.4"),
+                builder.request().source().query().toString());
+    }
+
+    @Test
+    public void test_buildSubQuery_takesPartEvenWithACutoffConfigured() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.minScore = Float.valueOf(0.4f);
+        final Optional<QueryBuilder> subQuery =
+                searcher.buildSubQuery("plain query", new StubSearchRequestParams(0, 10), OptionalThing.empty());
+        assertTrue(subQuery.isPresent(), "a configured cutoff must not keep the branch out of a fused request");
+        assertTrue(subQuery.get().toString().replaceAll("\\s", "").contains("\"min_score\":1.4"), subQuery.get().toString());
     }
 
     // -------------------------------------------------------------------------------------
@@ -554,10 +611,16 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         boolean enabled = true;
         boolean available = true;
         boolean managerTouched = false;
+        Float minScore = null;
 
         @Override
         protected boolean isSearchEnabled() {
             return enabled;
+        }
+
+        @Override
+        protected OptionalThing<Float> getMinScore() {
+            return minScore == null ? OptionalThing.empty() : OptionalThing.of(minScore);
         }
 
         @Override
