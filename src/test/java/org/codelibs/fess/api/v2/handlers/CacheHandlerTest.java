@@ -132,7 +132,7 @@ public class CacheHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(throwing, "fessLoginAssist");
-        ComponentUtil.register(throwing, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(throwing);
         try {
             final CapturingResponse res = new CapturingResponse();
             new CacheHandler().handle(new StubRequest("GET", "/api/v2/cache/abc"), res, "abc");
@@ -142,7 +142,7 @@ public class CacheHandlerTest extends UnitFessTestCase {
                     "lookup exception must not be misreported as auth_required: " + res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 

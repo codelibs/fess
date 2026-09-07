@@ -105,7 +105,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(anon, "fessLoginAssist");
-        ComponentUtil.register(anon, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(anon);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     private static StubFessLoginAssist registerStubLoginAssist(final String userId, final String expectedCurrentPw) {
         final StubFessLoginAssist stub = new StubFessLoginAssist(userId, expectedCurrentPw);
         ComponentUtil.register(stub, "fessLoginAssist");
-        ComponentUtil.register(stub, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(stub);
         return stub;
     }
 
@@ -173,7 +173,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("current_password"), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -190,7 +190,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -230,7 +230,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(session.invalidateCalled, "session.invalidate() must be called after a successful password change (M-3)");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -264,7 +264,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "response must NOT contain csrf_token after session invalidation (M-3): " + res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -286,7 +286,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertFalse(session.invalidateCalled, "session.invalidate() must NOT be called when password change fails (M-3)");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -319,7 +319,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "response must contain re_login_required:true (MJ-7): " + res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -339,7 +339,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("do not match"), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -375,7 +375,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(changedCalled[0], "expected UserService.changePassword to be invoked");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -411,7 +411,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertFalse(changedCalled[0], "changePassword must NOT be invoked for a weak password");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -442,7 +442,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "bucket must be exhausted after one wrong-pw call consumed the 5th slot");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -472,7 +472,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertNotNull(res.getHeader("Retry-After"), "Retry-After header must be set on 429");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -519,7 +519,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(after.body().contains("\"code\":\"auth_required\""), after.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -556,7 +556,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "the three retries inside the lockout must be logged at DEBUG: " + formatEvents(events));
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -617,7 +617,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "the escalation must arm a lockout that outlives the sliding window");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -647,7 +647,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "the already-locked case must be visible at DEBUG: " + formatEvents(events));
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -729,7 +729,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "alice", 5, 60), "bucket must now be exhausted on the 6th");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -749,7 +749,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("current_password"), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -767,7 +767,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             }
         };
         ComponentUtil.register(throwing, "fessLoginAssist");
-        ComponentUtil.register(throwing, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(throwing);
         try {
             final CapturingResponse res = new CapturingResponse();
             new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password")
@@ -778,7 +778,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "lookup exception must not be misreported as auth_required: " + res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -803,7 +803,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         // are recorded — matching the LogoutHandler contract.
         final TrackingStubLoginAssist trackingAssist = new TrackingStubLoginAssist("alice", "secret-current");
         ComponentUtil.register(trackingAssist, "fessLoginAssist");
-        ComponentUtil.register(trackingAssist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(trackingAssist);
         final boolean[] changedCalled = { false };
         final StubUserService stubSvc = new StubUserService(changedCalled);
         ComponentUtil.register(stubSvc, "userService");
@@ -830,7 +830,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(session.invalidateCalled, "session.invalidate() must still be called after assist.logout()");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -840,7 +840,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         // the response must still be the normal 200 ok — logout failure must be swallowed.
         final ThrowingLogoutStubLoginAssist throwingAssist = new ThrowingLogoutStubLoginAssist("alice", "secret-current");
         ComponentUtil.register(throwingAssist, "fessLoginAssist");
-        ComponentUtil.register(throwingAssist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(throwingAssist);
         final boolean[] changedCalled = { false };
         final StubUserService stubSvc = new StubUserService(changedCalled);
         ComponentUtil.register(stubSvc, "userService");
@@ -868,7 +868,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(session.invalidateCalled, "session.invalidate() must be called even when assist.logout() throws (MINOR-4)");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -879,7 +879,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         // session.invalidate() should be called.
         final TrackingStubLoginAssist trackingAssist = new TrackingStubLoginAssist("alice", "secret-current");
         ComponentUtil.register(trackingAssist, "fessLoginAssist");
-        ComponentUtil.register(trackingAssist, FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(trackingAssist);
         try {
             final TrackingStubSession session = new TrackingStubSession();
             final CapturingResponse res = new CapturingResponse();
@@ -892,7 +892,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertFalse(session.invalidateCalled, "session.invalidate() must NOT be called on the wrong-password path");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -911,7 +911,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -934,7 +934,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -973,7 +973,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 
@@ -991,7 +991,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
-            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
         }
     }
 

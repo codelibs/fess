@@ -34,6 +34,7 @@ import org.codelibs.fess.api.v2.handlers.DocIdValidator;
 import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.api.v2.handlers.UserPayloads;
 import org.codelibs.fess.api.v2.handlers.V2JsonBody;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatContentFetcher;
@@ -294,6 +295,9 @@ public final class ComponentUtil {
     private static SystemHelper systemHelper;
 
     private static FessConfig fessConfig;
+
+    /** Login assist supplied by a test, taking precedence over the container. */
+    private static FessLoginAssist fessLoginAssist;
 
     /** List of initialization processes to run after container initialization. */
     private static List<Runnable> initProcesses = new ArrayList<>();
@@ -608,6 +612,23 @@ public final class ComponentUtil {
         }
         fessConfig = getComponent(FessConfig.class);
         return fessConfig;
+    }
+
+    /**
+     * Gets the login assist component.
+     *
+     * <p>This is the single channel for the login assist, so a test can stand in for it with
+     * {@link #setFessLoginAssist(FessLoginAssist)}. {@link #register(Object, String)} cannot:
+     * it only answers for a component the container fails to provide, and the container
+     * provides this one.</p>
+     *
+     * @return The login assist.
+     */
+    public static FessLoginAssist getFessLoginAssist() {
+        if (fessLoginAssist != null) {
+            return fessLoginAssist;
+        }
+        return getComponent(FessLoginAssist.class);
     }
 
     /**
@@ -1186,9 +1207,19 @@ public final class ComponentUtil {
         ComponentUtil.fessConfig = fessConfig;
         if (fessConfig == null) {
             systemHelper = null;
+            fessLoginAssist = null;
             FessProp.propMap.clear();
             componentMap.clear();
         }
+    }
+
+    /**
+     * For test purpose only.
+     *
+     * @param fessLoginAssist fessLoginAssist instance, or null to fall back to the container
+     */
+    public static void setFessLoginAssist(final FessLoginAssist fessLoginAssist) {
+        ComponentUtil.fessLoginAssist = fessLoginAssist;
     }
 
     /**

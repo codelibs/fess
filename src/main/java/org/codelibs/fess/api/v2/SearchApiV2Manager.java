@@ -374,7 +374,7 @@ public class SearchApiV2Manager extends BaseApiManager {
         }
         final OptionalThing<FessUserBean> userBean;
         try {
-            userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+            userBean = ComponentUtil.getFessLoginAssist().getSavedUserBean();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2{}: could not resolve the current user", sub, e);
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2" + sub);

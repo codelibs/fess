@@ -668,7 +668,7 @@ public class FessFunctions {
         } else {
             roles = new String[] { role };
         }
-        final FessLoginAssist loginAssist = ComponentUtil.getComponent(FessLoginAssist.class);
+        final FessLoginAssist loginAssist = ComponentUtil.getFessLoginAssist();
         return loginAssist.getSavedUserBean()
                 .map(user -> user.hasRoles(roles) || user.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray()))
                 .orElse(false);

@@ -48,7 +48,7 @@ import org.lastaflute.web.login.TypicalLoginAssist;
  */
 public class FessLoginAssistTest extends UnitFessTestCase {
 
-    private FessLoginAssist loginAssist;
+    private StubUserBhvLoginAssist loginAssist;
 
     private PasswordHashHelper passwordHashHelper;
 
@@ -68,7 +68,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         ComponentUtil.register(countingPm, "passwordHashHelper");
         ComponentUtil.register(new RecordingUserService(), UserService.class.getCanonicalName());
 
-        loginAssist = new FessLoginAssist();
+        loginAssist = new StubUserBhvLoginAssist();
     }
 
     @Override
@@ -477,6 +477,28 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     }
 
     // ---------------------------------------------------------------------
+    // Container
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_container_canBuildTheLoginManager() {
+        // This component is what LastaFlute hands back for "who is the current user", a
+        // question asked far from any user-index lookup - every admin form that records its
+        // creator asks it. It therefore has to be buildable in a container that has not wired
+        // the search engine client, which the user behavior transitively needs.
+        //
+        // Binding the behavior as a resource broke that: the container could register the
+        // component and never build it, and once anything had asked for it the failure was
+        // latched in for the rest of the JVM. LastaFlute only answers "nobody is logged in"
+        // for a login manager it cannot *find*; one it finds and cannot build raised the
+        // binding failure at whatever asked, which is why an admin form initializer failed
+        // depending on what had run before it.
+        final FessLoginAssist assist = ComponentUtil.getComponent(FessLoginAssist.class);
+        assertNotNull(assist);
+        assertEquals(FessUserBean.class, assist.getSaveKeyUserBeanType());
+    }
+
+    // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
 
@@ -533,9 +555,9 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         installCountingUserBhv(loginAssist, stored);
     }
 
-    private CountingUserBhv installCountingUserBhv(final FessLoginAssist target, final User stored) {
+    private CountingUserBhv installCountingUserBhv(final StubUserBhvLoginAssist target, final User stored) {
         final CountingUserBhv bhv = new CountingUserBhv(stored);
-        setField(FessLoginAssist.class, target, "userBhv", bhv);
+        target.userBhv = bhv;
         return bhv;
     }
 
@@ -589,7 +611,20 @@ public class FessLoginAssistTest extends UnitFessTestCase {
      * Exposes the protected sync-check entry point of {@code TypicalLoginAssist} and replaces
      * {@code logout()} with a counter, so the whole flow can run without a servlet session.
      */
-    private static class ExposedLoginAssist extends FessLoginAssist {
+    /**
+     * A login assist whose user behavior the test supplies, standing in for the component the
+     * container resolves in production.
+     */
+    private static class StubUserBhvLoginAssist extends FessLoginAssist {
+        UserBhv userBhv;
+
+        @Override
+        protected UserBhv getUserBhv() {
+            return userBhv;
+        }
+    }
+
+    private static class ExposedLoginAssist extends StubUserBhvLoginAssist {
         final AtomicInteger logoutCalls = new AtomicInteger(0);
 
         @Override

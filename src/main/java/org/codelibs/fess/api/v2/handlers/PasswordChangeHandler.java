@@ -155,7 +155,7 @@ public class PasswordChangeHandler {
         // "please log in again" when the real issue is server-side.
         final FessLoginAssist assist;
         try {
-            assist = ComponentUtil.getComponent(FessLoginAssist.class);
+            assist = ComponentUtil.getFessLoginAssist();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/auth/password: could not acquire FessLoginAssist", e);
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");

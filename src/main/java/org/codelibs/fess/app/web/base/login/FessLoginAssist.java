@@ -86,9 +86,23 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     @Resource
     private FessConfig fessConfig;
 
-    /** The user behavior for database operations on user entities. */
-    @Resource
-    private UserBhv userBhv;
+    /**
+     * Returns the behavior for user entities.
+     *
+     * <p>Resolved on demand rather than bound at construction. This component is the login
+     * manager LastaFlute looks up whenever something asks who the current user is, and
+     * answering that question reads the session, not the user index. Binding {@link UserBhv}
+     * as a resource made the whole component unbuildable in any container that has not wired
+     * the search engine client, because the behavior in turn requires that client. LastaFlute
+     * answers "nobody is logged in" when it cannot look the login manager up, but only for a
+     * manager it cannot find - one it finds and cannot build raised the binding failure at the
+     * caller instead.</p>
+     *
+     * @return the behavior for user entities
+     */
+    protected UserBhv getUserBhv() {
+        return ComponentUtil.getComponent(UserBhv.class);
+    }
 
     // ===================================================================================
     //                                                                           Find User
@@ -126,7 +140,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      */
     @Override
     protected OptionalEntity<FessUser> doFindLoginUser(final String username) {
-        return userBhv.selectEntity(cb -> {
+        return getUserBhv().selectEntity(cb -> {
             cb.query().setName_Equal(username);
         }).map(user -> (FessUser) user);
     }

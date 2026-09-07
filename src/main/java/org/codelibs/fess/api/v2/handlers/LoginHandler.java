@@ -219,7 +219,7 @@ public class LoginHandler {
         // consumed for DI breakage.
         final FessLoginAssist assist;
         try {
-            assist = ComponentUtil.getComponent(FessLoginAssist.class);
+            assist = ComponentUtil.getFessLoginAssist();
         } catch (final RuntimeException e) {
             logger.warn("login failed unexpectedly: could not acquire FessLoginAssist", e);
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");

@@ -110,6 +110,6 @@ public class MeHandler {
      * @return the saved user bean, or empty when no user is logged in
      */
     protected OptionalThing<FessUserBean> getSavedUserBean() {
-        return ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
+        return ComponentUtil.getFessLoginAssist().getSavedUserBean();
     }
 }

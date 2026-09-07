@@ -288,7 +288,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
      */
     private static void registerSuccessfulLoginComponents(final String username, final List<String> audit) {
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist(username, false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist(username, false));
         ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
     }
 
@@ -316,7 +316,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // the gates write no activity record, only the credential check does.
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("u", true), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("u", true));
         // Saturate the IP bucket so the very next request trips the IP gate.
         for (int i = 0; i < ipLimit; i++) {
             assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
@@ -367,7 +367,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // LOGIN_FAILURE — which is what turns the closing assertion into positive proof.
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("erin", true), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("erin", true));
         // Saturate the (clientIp, username) composite bucket the handler computes.
         final String userKey = handler.userScopeKey(ip, "erin");
         for (int i = 0; i < userLimit; i++) {
@@ -887,14 +887,14 @@ public class LoginHandlerTest extends UnitFessTestCase {
      */
     private static void registerConcurrentlyDrainingAssist(final LoginRateLimiter rl, final String userKey, final int userLimit,
             final int lockoutSec, final boolean armLockout) {
-        ComponentUtil.register(new StubLoginAssist("frank", true).withConcurrentRequestDuringLogin(() -> {
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("frank", true).withConcurrentRequestDuringLogin(() -> {
             for (int i = 0; i < userLimit; i++) {
                 rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60);
             }
             if (armLockout) {
                 rl.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec);
             }
-        }), FessLoginAssist.class.getCanonicalName());
+        }));
     }
 
     @Test
@@ -1007,7 +1007,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // record is byte-identical to the classic one.
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("alice", false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("alice", false));
         ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
         final CapturingResponse res = new CapturingResponse();
         new LoginHandler(new LoginRateLimiter()).handle(
@@ -1026,7 +1026,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // against the SPA login endpoint are invisible to audit.log.
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("bob", true), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("bob", true));
         final CapturingResponse res = new CapturingResponse();
         new LoginHandler(new LoginRateLimiter())
                 .handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"wrong\"}"), res);
@@ -1046,7 +1046,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
                 throw new IllegalStateException("audit sink is down");
             }
         }, "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("alice", false), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("alice", false));
         ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
         final CapturingResponse res = new CapturingResponse();
         new LoginHandler(new LoginRateLimiter()).handle(
@@ -1069,7 +1069,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
                 throw new IllegalStateException("audit sink is down");
             }
         }, "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("bob", true), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("bob", true));
         final CapturingResponse res = new CapturingResponse();
         new LoginHandler(new LoginRateLimiter())
                 .handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"wrong\"}"), res);
@@ -1087,7 +1087,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         // that leaked a request through into verification would show up as a record here.
         final List<String> audit = new ArrayList<>();
         ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
-        ComponentUtil.register(new StubLoginAssist("gwen", true), FessLoginAssist.class.getCanonicalName());
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("gwen", true));
         final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
         final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
         final LoginRateLimiter rl = new LoginRateLimiter();

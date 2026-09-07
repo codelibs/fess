@@ -112,7 +112,7 @@ public class CacheHandler {
         // is DI breakage.
         final FessLoginAssist assist;
         try {
-            assist = ComponentUtil.getComponent(FessLoginAssist.class);
+            assist = ComponentUtil.getFessLoginAssist();
         } catch (final RuntimeException e) {
             logger.warn("/api/v2/cache/{}: could not acquire FessLoginAssist", docId, e);
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
