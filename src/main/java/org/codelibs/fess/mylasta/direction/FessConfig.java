@@ -2228,7 +2228,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g. http://localhost:9201 <br>
      * comment: <br>
      * The URL of the search engine HTTP endpoint.<br>
-     * For IPv6 environments, use brackets around the IPv6 address (e.g., http://[::1]:9201)
+     * For IPv6 environments, use brackets around the IPv6 address (e.g., http://[::1]:9200)
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineHttpUrl();
