@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Installs the artifacts Fess needs but does not bundle -- OpenSearch and its Fess plugins.
+# Run it once before starting Fess for the first time:
+#
+#     bin/fess-setup install opensearch
+#
+# See bin/fess-setup for the other commands, or run it with no arguments.
+
+SCRIPT="$0"
+
+# SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
+while [ -h "$SCRIPT" ] ; do
+    ls=`ls -ld "$SCRIPT"`
+    # Drop everything prior to ->
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        SCRIPT="$link"
+    else
+        SCRIPT=`dirname "$SCRIPT"`/"$link"
+    fi
+done
+
+# determine fess home
+FESS_HOME=`dirname "$SCRIPT"`/..
+
+# make FESS_HOME absolute
+FESS_HOME=`cd "$FESS_HOME"; pwd`
+
+if [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    JAVA=`which java`
+fi
+
+if [ ! -x "$JAVA" ]; then
+    echo "Could not find any executable java binary. Please install java in your PATH or set JAVA_HOME"
+    exit 1
+fi
+
+exec "$JAVA" -jar "$FESS_HOME/bin/fess-setup.jar" "$@"

@@ -18,6 +18,7 @@
 			<includes>
 				<include>fess.in.bat</include>
 				<include>fess.bat</include>
+				<include>fess-setup.bat</include>
 				<include>service.bat</include>
 			</includes>
 		</fileSet>
@@ -43,6 +44,7 @@
 			<includes>
 				<include>fess.in.sh</include>
 				<include>fess</include>
+				<include>fess-setup</include>
 				<include>generate-thumbnail</include>
 			</includes>
 		</fileSet>
@@ -121,6 +123,13 @@
 		</fileSet>
 	</fileSets>
 	<files>
+		<file>
+			<!-- Built by the fess-setup-jar execution of maven-jar-plugin, which is declared
+			     before maven-assembly-plugin so it runs first within the package phase. -->
+			<source>${project.build.directory}/${project.build.finalName}-setup.jar</source>
+			<destName>fess-setup.jar</destName>
+			<outputDirectory>fess-${project.version}/bin</outputDirectory>
+		</file>
 		<file>
 			<source>README.md</source>
 			<outputDirectory>fess-${project.version}</outputDirectory>

@@ -119,7 +119,9 @@
 							<directory>${project.build.directory}/${project.build.finalName}-compress</directory>
 						</resource>
 					</webResources>
-					<packagingExcludes>**/*.min.map,**/*.min.css.map,**/*.min.js.map</packagingExcludes>
+					<!-- org.codelibs.fess.setup ships as bin/fess-setup.jar and never runs inside the
+				     webapp, so it is left out of the war rather than carried twice. -->
+				<packagingExcludes>**/*.min.map,**/*.min.css.map,**/*.min.js.map,WEB-INF/classes/org/codelibs/fess/setup/**,WEB-INF/classes/fess-setup.properties</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -310,6 +312,35 @@
 				<goals>
 					<goal>run</goal>
 				</goals>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- fess-setup runs from bin/fess-setup before Fess itself starts, with only java
+						     on the path. It is packaged on its own so that `java -jar` needs no classpath
+						     assembly: bin/fess sets FESS_CLASSPATH to lib/classes, which does not hold the
+						     webapp's jars. SetupPackageDependencyTest keeps the package free of anything
+						     but the JDK, so this jar needs no Class-Path entries either. -->
+						<id>fess-setup-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>setup</classifier>
+							<includes>
+								<include>org/codelibs/fess/setup/**</include>
+								<include>fess-setup.properties</include>
+							</includes>
+							<archive>
+								<manifest>
+									<mainClass>org.codelibs.fess.setup.FessSetup</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
