@@ -16,6 +16,8 @@
 package org.codelibs.fess.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -95,4 +97,83 @@ public class FessSetupTest {
         assertEquals("3.8.0", defs.get("opensearch").get("version"));
         assertEquals(4, defs.get("opensearch").list("plugin.artifacts").size());
     }
+
+    @Test
+    public void test_loadDefinitions_opensearchPlatforms() throws Exception {
+        final ComponentDefinition opensearch = FessSetup.loadDefinitions().get("opensearch");
+        assertEquals("linux", opensearch.osToken(Platform.Os.LINUX));
+        assertEquals("windows", opensearch.osToken(Platform.Os.WINDOWS));
+        assertNull(opensearch.osToken(Platform.Os.MACOS), "OpenSearch publishes no macOS build");
+        assertNotNull(opensearch.get("hint.unavailable"), "macOS users need a way forward");
+        assertTrue(opensearch.get("hint.unavailable").contains("brew"), opensearch.get("hint.unavailable"));
+    }
+
+    @Test
+    public void test_loadDefinitions_nodejsForPlaywright() throws Exception {
+        final Map<String, ComponentDefinition> defs = FessSetup.loadDefinitions();
+        assertTrue(defs.containsKey("nodejs"), defs.keySet().toString());
+        final ComponentDefinition nodejs = defs.get("nodejs");
+        assertEquals("linux", nodejs.osToken(Platform.Os.LINUX));
+        assertEquals("darwin", nodejs.osToken(Platform.Os.MACOS));
+        assertEquals("win", nodejs.osToken(Platform.Os.WINDOWS));
+        assertEquals("bin/node", nodejs.executable(Platform.Os.LINUX));
+        assertEquals("node.exe", nodejs.executable(Platform.Os.WINDOWS));
+        assertEquals("PLAYWRIGHT_NODEJS_PATH", nodejs.get("env"));
+    }
+
+    @Test
+    public void test_loadDefinitions_nodejsUrlResolves() throws Exception {
+        final ComponentDefinition nodejs = FessSetup.loadDefinitions().get("nodejs");
+        final String url =
+                nodejs.resolve("url", Map.of("os", "darwin", "arch", "arm64", "archive.ext", "tar.gz", "version", nodejs.get("version")));
+        assertTrue(url.startsWith("https://nodejs.org/dist/v"), url);
+        assertTrue(url.endsWith("-darwin-arm64.tar.gz"), url);
+    }
+
+    @Test
+    public void test_list_showsBothComponents() {
+        assertEquals(0, run("list"));
+        assertTrue(out().contains("opensearch"), out());
+        assertTrue(out().contains("nodejs"), out());
+    }
+
+    @Test
+    public void test_fessHome_comesFromTheLauncher() {
+        final String original = System.getProperty("fess.home");
+        try {
+            System.setProperty("fess.home", "/opt/fess");
+            assertEquals("/opt/fess", FessSetup.fessHome());
+        } finally {
+            if (original == null) {
+                System.clearProperty("fess.home");
+            } else {
+                System.setProperty("fess.home", original);
+            }
+        }
+    }
+
+    @Test
+    public void test_fessHome_fallsBackToTheWorkingDirectory() {
+        final String original = System.getProperty("fess.home");
+        try {
+            System.clearProperty("fess.home");
+            final String home = FessSetup.fessHome();
+            assertNotNull(home);
+            assertTrue(java.nio.file.Path.of(home).isAbsolute(), home);
+        } finally {
+            if (original != null) {
+                System.setProperty("fess.home", original);
+            }
+        }
+    }
+
+    @Test
+    public void test_destinationsAreRelativeToFessHome() throws Exception {
+        final Map<String, ComponentDefinition> defs = FessSetup.loadDefinitions();
+        for (final String name : new String[] { "opensearch", "nodejs" }) {
+            final String dest = defs.get(name).resolve("dest", Map.of("fess.home", "/opt/fess"));
+            assertTrue(dest.startsWith("/opt/fess/"), name + " -> " + dest);
+        }
+    }
+
 }

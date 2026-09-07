@@ -85,6 +85,33 @@ public record ComponentDefinition(String name, Map<String, String> attrs) {
     }
 
     /**
+     * Returns the token this component's publisher uses for an operating system in its artifact
+     * names. Projects disagree: OpenSearch says {@code windows} where Node.js says {@code win},
+     * and Node.js publishes {@code darwin} builds where OpenSearch publishes none at all, so the
+     * mapping belongs to the definition rather than to this tool.
+     *
+     * @param os the operating system
+     * @return the token, or {@code null} when the component publishes no build for it
+     */
+    public String osToken(final Platform.Os os) {
+        return attrs.get("os." + os.name().toLowerCase(java.util.Locale.ROOT));
+    }
+
+    /**
+     * Returns the path of this component's executable relative to its extracted directory.
+     * An {@code executable.<os>} attribute overrides the plain {@code executable} -- Node.js puts
+     * {@code node} under {@code bin/} everywhere except Windows, where {@code node.exe} sits at
+     * the root of the archive.
+     *
+     * @param os the operating system
+     * @return the relative path, or {@code null} when the component declares no executable
+     */
+    public String executable(final Platform.Os os) {
+        final String specific = attrs.get("executable." + os.name().toLowerCase(java.util.Locale.ROOT));
+        return specific != null ? specific : attrs.get("executable");
+    }
+
+    /**
      * Returns a comma-separated attribute as a list, trimming each element and dropping empties.
      *
      * @param key the attribute key

@@ -22,7 +22,7 @@ ECHO JAVA_HOME is set to %JAVA_HOME% but %JAVA_EXE% does not exist 1>&2
 EXIT /B 1
 
 :run
-"%JAVA_EXE%" -jar "%FESS_HOME%\bin\fess-setup.jar" %*
+"%JAVA_EXE%" -Dfess.home="%FESS_HOME%" -jar "%FESS_HOME%\bin\fess-setup.jar" %*
 SET EXIT_CODE=%ERRORLEVEL%
 
 ENDLOCAL & EXIT /B %EXIT_CODE%

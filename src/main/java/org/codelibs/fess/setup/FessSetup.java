@@ -36,6 +36,9 @@ public final class FessSetup {
 
     private static final String DEFINITION_RESOURCE = "/fess-setup.properties";
 
+    /** Post-install hook that installs the Fess plugins and writes configsync.config_path. */
+    private static final String POST_OPENSEARCH = "opensearch";
+
     private static final int EXIT_OK = 0;
 
     private static final int EXIT_FAILED = 1;
@@ -172,16 +175,13 @@ public final class FessSetup {
     private static int installComponent(final ComponentDefinition definition, final Map<String, String> options, final PrintStream out,
             final PrintStream err) throws SetupException {
         final Platform.Os os = Platform.current();
-        final String osToken = Platform.token(os);
+        final String osToken = definition.osToken(os);
         if (osToken == null) {
-            err.println("""
-                    error: OpenSearch publishes no official build for this platform.
-                           Install it another way, then point fess-setup at it:
-
-                             macOS:  brew install opensearch
-                                     bin/fess-setup install plugins --opensearch-home $(brew --prefix opensearch)
-
-                             Docker: use the compose files instead of a local install.""");
+            err.println("error: " + definition.name() + " publishes no official build for this platform.");
+            final String hint = definition.get("hint.unavailable");
+            if (hint != null) {
+                hint.lines().forEach(err::println);
+            }
             return EXIT_FAILED;
         }
         final String arch = Platform.archFrom(System.getProperty("os.arch"));
@@ -195,6 +195,7 @@ public final class FessSetup {
         vars.put("arch", arch);
         vars.put("archive.ext", Platform.archiveExt(os));
         vars.put("version", version);
+        vars.put("fess.home", fessHome());
 
         final String url = definition.resolve("url", vars);
         final Path dest = Path.of(options.getOrDefault("dest", definition.resolve("dest", vars)));
@@ -205,19 +206,56 @@ public final class FessSetup {
         } else {
             final Path archive = dest.resolve(url.substring(url.lastIndexOf('/') + 1));
             out.println("Downloading " + url);
-            Downloader.download(URI.create(url), archive, (bytes, total) -> reportProgress(out, bytes, total));
+            final int[] lastPercent = { -1 };
+            Downloader.download(URI.create(url), archive, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
             out.println();
             out.println("Extracting " + archive.getFileName());
             Archiver.extract(archive, dest);
         }
-        installPlugins(definition, home, options, out);
-        out.println("Configuring " + home);
-        OpenSearchConfigurer.configure(home);
+
+        if (POST_OPENSEARCH.equals(definition.get("post"))) {
+            installPlugins(definition, home, options, out);
+            out.println("Configuring " + home);
+            OpenSearchConfigurer.configure(home);
+            out.println();
+            out.println("Done. Start OpenSearch, then tell Fess where it is:");
+            out.println("  SEARCH_ENGINE_HTTP_URL=http://localhost:9200");
+            out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.dictionaryPath(home));
+            return EXIT_OK;
+        }
+
         out.println();
-        out.println("Done. Start OpenSearch, then tell Fess where it is:");
-        out.println("  SEARCH_ENGINE_HTTP_URL=http://localhost:9200");
-        out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.dictionaryPath(home));
+        out.println("Done. Installed to " + home);
+        reportExecutable(definition, home, os, out);
         return EXIT_OK;
+    }
+
+    /**
+     * Prints how to point Fess at a component's executable, when the definition names one.
+     *
+     * @param definition the component
+     * @param home the extracted directory
+     * @param os the operating system
+     * @param out the stream for normal output
+     */
+    private static void reportExecutable(final ComponentDefinition definition, final Path home, final Platform.Os os,
+            final PrintStream out) {
+        final String executable = definition.executable(os);
+        final String envName = definition.get("env");
+        if (executable == null || envName == null) {
+            return;
+        }
+        final Path path = home.resolve(executable).toAbsolutePath().normalize();
+        final Path fessHomePath = Path.of(fessHome()).toAbsolutePath().normalize();
+        out.println();
+        if (path.startsWith(fessHomePath)) {
+            out.println("bin/fess.in.sh finds this on its own, so there is nothing else to do.");
+            out.println("  " + envName + "=" + path);
+        } else {
+            out.println("It is outside the Fess directory, so bin/fess.in.sh will not find it. Add this");
+            out.println("to bin/fess.in.sh (bin\\fess.in.bat on Windows) so Fess and its crawler processes can:");
+            out.println("  export " + envName + "=" + path);
+        }
     }
 
     private static void installPlugins(final ComponentDefinition definition, final Path home, final Map<String, String> options,
@@ -232,11 +270,47 @@ public final class FessSetup {
         }
     }
 
-    private static void reportProgress(final PrintStream out, final long bytes, final long total) {
+    /**
+     * Returns the Fess installation directory, which the launcher passes in.
+     *
+     * <p>Falls back to the working directory so the jar stays usable when invoked directly with
+     * {@code java -jar}, but the launcher always sets it: the default destinations are written
+     * relative to it, and bin/fess.in.sh looks for an installed Node.js under it.</p>
+     *
+     * @return the Fess home directory
+     */
+    static String fessHome() {
+        final String home = System.getProperty("fess.home");
+        return home == null || home.isBlank() ? Path.of("").toAbsolutePath().toString() : home;
+    }
+
+    /**
+     * Reports download progress, one line rewrite per completed percent.
+     *
+     * <p>The carriage return keeps a terminal on one line. Redrawing on every buffer instead
+     * would emit tens of thousands of updates for a gigabyte, which is invisible on a terminal
+     * but fills a log file when the output is redirected.</p>
+     *
+     * @param out the stream for normal output
+     * @param bytes bytes written so far
+     * @param total the total size, or -1 when unknown
+     * @param lastPercent single-element holder of the last percentage reported
+     */
+    private static void reportProgress(final PrintStream out, final long bytes, final long total, final int[] lastPercent) {
         if (total > 0) {
-            out.printf("\r  %d%% (%d/%d MiB)", bytes * 100 / total, bytes >> 20, total >> 20);
+            final int percent = (int) (bytes * 100 / total);
+            if (percent == lastPercent[0]) {
+                return;
+            }
+            lastPercent[0] = percent;
+            out.printf("\r  %d%% (%d/%d MiB)", percent, bytes >> 20, total >> 20);
         } else {
-            out.printf("\r  %d MiB", bytes >> 20);
+            final int megabytes = (int) (bytes >> 20);
+            if (megabytes == lastPercent[0]) {
+                return;
+            }
+            lastPercent[0] = megabytes;
+            out.printf("\r  %d MiB", megabytes);
         }
     }
 }
