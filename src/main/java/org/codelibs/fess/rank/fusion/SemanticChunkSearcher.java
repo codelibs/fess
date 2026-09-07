@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -36,7 +36,6 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.ChunkVectorHelper;
-import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
@@ -83,7 +82,7 @@ import jakarta.annotation.PostConstruct;
  * query syntax (field filters, boolean operators, wildcards) — only plain keyword
  * or natural-language queries take the semantic branch.</p>
  */
-public class SemanticChunkSearcher extends DefaultSearcher {
+public class SemanticChunkSearcher extends AbstractDocumentSearcher {
 
     private static final Logger logger = LogManager.getLogger(SemanticChunkSearcher.class);
 
@@ -130,11 +129,8 @@ public class SemanticChunkSearcher extends DefaultSearcher {
     /** One-time warn latch for the exact (full-scan) mode, reset when the ann mode becomes available. */
     private final AtomicBoolean exactModeWarned = new AtomicBoolean(false);
 
-    /** Holds the query vector between {@link #search} and {@link #createSearchCondition}. */
-    protected final ThreadLocal<float[]> queryVectorHolder = new ThreadLocal<>();
-
-    /** Holds the resolved query mode (ann vs exact) between {@link #search} and {@link #createSearchCondition}. */
-    protected final ThreadLocal<Boolean> annModeHolder = new ThreadLocal<>();
+    /** One-time notice latch for opting out of engine-side fusion because a min_score cutoff is set. */
+    private final AtomicBoolean minScoreOptOutNoticed = new AtomicBoolean(false);
 
     /** Timestamp of the last {@link #isKnnIndexReady()} probe. */
     private volatile long knnReadyCheckedAt;
@@ -169,14 +165,72 @@ public class SemanticChunkSearcher extends DefaultSearcher {
 
     @Override
     protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
-        if (!isSearchEnabled() || StringUtil.isBlank(query) || !isPlainQuery(query)) {
+        final OptionalThing<SemanticQueryContext> contextOpt = prepare(query, params);
+        if (!contextOpt.isPresent()) {
             return emptyResult();
+        }
+        final SemanticQueryContext context = contextOpt.get();
+        final SearchRequestParams semanticParams = new SemanticSearchRequestParams(params);
+        try {
+            return execute(semanticParams, createSemanticSearchCondition(context, query, semanticParams, userBean));
+        } catch (final Exception e) {
+            // This searcher is auxiliary: never let its failure (e.g. a knn query hitting an
+            // index that was reindexed without index.knn while the readiness cache was still
+            // warm) escape as a search error -- RankFusionProcessor rethrows InvalidQueryException
+            // and the escape-retry cannot change a plain query. Degrade to keyword-only results
+            // and re-probe the index on the next request.
+            if (context.isAnnMode()) {
+                knnReadyCheckedAt = 0;
+            }
+            logger.warn("Semantic chunk search failed (mode={}); falling back to keyword-only results. query={}",
+                    context.isAnnMode() ? "ann" : "exact", query, e);
+            return emptyResult();
+        }
+    }
+
+    @Override
+    protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean) {
+        if (getMinScore().isPresent()) {
+            // The cutoff is a request-level min_score today, and a fused request has a single
+            // min_score that the engine applies after it has combined the branches - there it
+            // cannot mean "this branch's own cosine floor". Rather than drop the cutoff without
+            // saying so, stay out of the fused request while it is configured.
+            if (minScoreOptOutNoticed.compareAndSet(false, true)) {
+                logger.info("{} is set, so semantic chunk search does not take part in rank fusion performed by the search engine: "
+                        + "a fused request has one min_score for the whole result, not one per branch.", SEARCH_MIN_SCORE_PROPERTY);
+            }
+            return Optional.empty();
+        }
+        final OptionalThing<SemanticQueryContext> contextOpt = prepare(query, params);
+        if (!contextOpt.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(buildSemanticQuery(contextOpt.get(), params));
+    }
+
+    /**
+     * Resolves everything a semantic request needs before its query can be built: whether the
+     * branch applies to this request at all, the query embedding, and the vector mode the live
+     * index can serve.
+     *
+     * <p>The result is returned rather than stashed somewhere for a later callback to pick up, so
+     * that a caller which only wants the query - and never issues a request of its own - can
+     * reuse the same gates.</p>
+     *
+     * @param query the assembled query string
+     * @param params the search request parameters
+     * @return the context, or empty when the semantic branch does not apply
+     */
+    protected OptionalThing<SemanticQueryContext> prepare(final String query, final SearchRequestParams params) {
+        if (!isSearchEnabled() || StringUtil.isBlank(query) || !isPlainQuery(query)) {
+            return OptionalThing.empty();
         }
         // Geo and similar-document constraints are hard filters on the default path; the
         // semantic branch does not apply them, so skip it rather than fuse unfiltered hits.
         if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null
                 || StringUtil.isNotBlank(params.getSimilarDocHash())) {
-            return emptyResult();
+            return OptionalThing.empty();
         }
         final EmbeddingClientManager embeddingClientManager = getEmbeddingClientManager();
         if (!embeddingClientManager.available()) {
@@ -186,7 +240,7 @@ public class SemanticChunkSearcher extends DefaultSearcher {
             } else if (logger.isDebugEnabled()) {
                 logger.debug("Embedding provider still unavailable; skipping semantic chunk search.");
             }
-            return emptyResult();
+            return OptionalThing.empty();
         }
         embeddingUnavailableWarned.set(false);
         final float[] queryVector;
@@ -194,77 +248,108 @@ public class SemanticChunkSearcher extends DefaultSearcher {
             queryVector = embeddingClientManager.embedQuery(query);
         } catch (final Exception e) {
             logger.warn("Failed to embed query for semantic chunk search; falling back to keyword-only results. query={}", query, e);
-            return emptyResult();
+            return OptionalThing.empty();
         }
         if (queryVector == null || queryVector.length == 0) {
-            return emptyResult();
+            return OptionalThing.empty();
         }
         final boolean annMode = isKnnIndexReady();
         warnExactModeOnce(annMode);
-        queryVectorHolder.set(queryVector);
-        annModeHolder.set(annMode);
-        try {
-            return super.search(query, new SemanticSearchRequestParams(params), userBean);
-        } catch (final Exception e) {
-            // This searcher is auxiliary: never let its failure (e.g. a knn query hitting an
-            // index that was reindexed without index.knn while the readiness cache was still
-            // warm) escape as a search error -- RankFusionProcessor rethrows InvalidQueryException
-            // and the escape-retry cannot change a plain query. Degrade to keyword-only results
-            // and re-probe the index on the next request.
-            if (annMode) {
-                knnReadyCheckedAt = 0;
-            }
-            logger.warn("Semantic chunk search failed (mode={}); falling back to keyword-only results. query={}", annMode ? "ann" : "exact",
-                    query, e);
-            return emptyResult();
-        } finally {
-            queryVectorHolder.remove();
-            annModeHolder.remove();
-        }
+        return OptionalThing.of(new SemanticQueryContext(queryVector, annMode));
     }
 
-    @Override
-    protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
-            final OptionalThing<FessUserBean> userBean) {
-        final float[] queryVector = queryVectorHolder.get();
-        if (queryVector == null) {
-            return super.createSearchCondition(query, params, userBean);
-        }
+    /**
+     * Builds the condition for a semantic-only request: the semantic query, sized and sourced
+     * from the request params.
+     *
+     * @param context the resolved query embedding and vector mode
+     * @param query the assembled query string, used only to pick the search preference
+     * @param params the search request parameters
+     * @param userBean the optional user bean for access control
+     * @return the search condition
+     */
+    protected SearchCondition<SearchRequestBuilder> createSemanticSearchCondition(final SemanticQueryContext context, final String query,
+            final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         return searchRequestBuilder -> {
-            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-            queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
-            final BoolQueryBuilder permissionQuery = QueryBuilders.boolQuery();
-            if (params.getType() != SearchRequestType.ADMIN_SEARCH) {
-                final Set<String> roleSet = ComponentUtil.getRoleQueryHelper().build(params.getType());
-                if (!roleSet.isEmpty()) {
-                    queryHelper.buildRoleQuery(roleSet, permissionQuery);
-                }
-                final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
-                if (StringUtil.isNotBlank(virtualHostKey)) {
-                    permissionQuery
-                            .filter(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), virtualHostKey));
-                }
-            }
-            final boolean hasPermissionQuery = permissionQuery.hasClauses();
-            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            if (hasPermissionQuery) {
-                // The outer clause is what actually enforces the constraint; the copy handed to
-                // the knn query below is a recall aid, not the security boundary.
-                boolQuery.filter(permissionQuery);
-            }
-            final boolean annMode = Boolean.TRUE.equals(annModeHolder.get());
-            final QueryBuilder chunkQuery = annMode ? buildKnnChunkQuery(queryVector, params, hasPermissionQuery ? permissionQuery : null)
-                    : buildExactChunkQuery(queryVector);
-            searchRequestBuilder.setQuery(boolQuery.must(chunkQuery))
+            ComponentUtil.getQueryHelper().processSearchPreference(searchRequestBuilder, userBean, query);
+            searchRequestBuilder.setQuery(buildSemanticQuery(context, params))
                     .setFrom(params.getStartPosition())
                     .setSize(params.getPageSize())
                     .setFetchSource(params.getResponseFields(), null);
-            getMinScore().ifPresent(minScore -> resolveEngineMinScore(minScore, annMode).ifPresent(searchRequestBuilder::setMinScore));
+            getMinScore().ifPresent(
+                    minScore -> resolveEngineMinScore(minScore, context.isAnnMode()).ifPresent(searchRequestBuilder::setMinScore));
             if (logger.isDebugEnabled()) {
-                logger.debug("Semantic chunk search mode: {}", annMode ? "ann" : "exact");
+                logger.debug("Semantic chunk search mode: {}", context.isAnnMode() ? "ann" : "exact");
             }
             return true;
         };
+    }
+
+    /**
+     * Builds the semantic query: the chunk query constrained by the caller's permissions.
+     *
+     * <p>The permission clause is applied twice on purpose. The outer {@code bool} filter is what
+     * enforces it; the copy handed to the knn query is a recall aid, so the ANN search does not
+     * spend its {@code k} on documents that are about to be discarded.</p>
+     *
+     * @param context the resolved query embedding and vector mode
+     * @param params the search request parameters
+     * @return the semantic query
+     */
+    protected QueryBuilder buildSemanticQuery(final SemanticQueryContext context, final SearchRequestParams params) {
+        final BoolQueryBuilder permissionQuery = buildPermissionQuery(params);
+        final boolean hasPermissionQuery = permissionQuery.hasClauses();
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        if (hasPermissionQuery) {
+            boolQuery.filter(permissionQuery);
+        }
+        final float[] queryVector = context.getQueryVector();
+        final QueryBuilder chunkQuery =
+                context.isAnnMode() ? buildKnnChunkQuery(queryVector, params, hasPermissionQuery ? permissionQuery : null)
+                        : buildExactChunkQuery(queryVector);
+        return boolQuery.must(chunkQuery);
+    }
+
+    /**
+     * What a semantic request needs, resolved once by {@link #prepare} and passed explicitly to
+     * whatever builds the query.
+     */
+    public static class SemanticQueryContext {
+
+        /** The query embedding. */
+        private final float[] queryVector;
+
+        /** Whether the live index can serve approximate kNN. */
+        private final boolean annMode;
+
+        /**
+         * Creates a new context.
+         *
+         * @param queryVector the query embedding
+         * @param annMode whether the ann (knn query) mode is active
+         */
+        public SemanticQueryContext(final float[] queryVector, final boolean annMode) {
+            this.queryVector = queryVector;
+            this.annMode = annMode;
+        }
+
+        /**
+         * Returns the query embedding.
+         *
+         * @return the query embedding
+         */
+        public float[] getQueryVector() {
+            return queryVector;
+        }
+
+        /**
+         * Returns whether the ann (knn query) mode is active.
+         *
+         * @return true when the ann mode is active
+         */
+        public boolean isAnnMode() {
+            return annMode;
+        }
     }
 
     /**

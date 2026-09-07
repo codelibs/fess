@@ -15,257 +15,325 @@
  */
 package org.codelibs.fess.rank.fusion;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.collection.ArrayUtil;
-import org.codelibs.core.stream.StreamUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
-import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
-import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBuilder;
-import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
+import org.codelibs.fess.opensearch.query.HybridQueryBuilder;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.fess.util.FacetResponse;
-import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.action.search.SearchResponse;
-import org.opensearch.common.document.DocumentField;
-import org.opensearch.search.SearchHit;
-import org.opensearch.search.SearchHits;
-import org.opensearch.search.aggregations.Aggregations;
-import org.opensearch.search.fetch.subphase.highlight.HighlightField;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.search.builder.SearchSourceBuilder;
 
 /**
- * Default implementation of RankFusionSearcher that performs standard OpenSearch queries.
- * This searcher handles query execution, response processing, and document highlighting.
+ * The searcher Fess uses by default for document searches.
+ *
+ * <p>On its own it is the keyword searcher it inherits from {@link AbstractDocumentSearcher}. It
+ * additionally knows how to fold other searchers' queries into a single request, so that the
+ * search engine ranks the combined result set instead of Fess merging separate result lists.
+ * That is what makes facets, total hits, sorting and highlighting describe the whole result
+ * rather than the keyword branch of it.</p>
+ *
+ * <p>The fused request is a {@code hybrid} query carrying every branch as a subquery, plus an
+ * inline search pipeline that normalizes and combines the per-branch scores. Both are written in
+ * {@link #fuse}, together, because a hybrid query sent without its pipeline does not fail - it
+ * returns duplicated hits and sentinel scores.</p>
  */
-public class DefaultSearcher extends RankFusionSearcher {
+public class DefaultSearcher extends AbstractDocumentSearcher {
 
-    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(DefaultSearcher.class);
 
+    /** Combination technique that selects the score-ranker (reciprocal rank fusion) processor. */
+    protected static final String TECHNIQUE_RRF = "rrf";
+
+    /** Lowest rank constant the score-ranker processor accepts. */
+    protected static final int MIN_RANK_CONSTANT = 1;
+
+    /** Highest rank constant the score-ranker processor accepts. */
+    protected static final int MAX_RANK_CONSTANT = 10000;
+
+    /** How far a weight sum may drift from 1.0 before it is rejected. */
+    protected static final float WEIGHT_SUM_TOLERANCE = 0.001f;
+
+    /** Set once the search engine has refused a fused request, so it is not attempted again. */
+    protected final AtomicBoolean engineFusionDisabled = new AtomicBoolean(false);
+
+    /** One-time notice latch for a request that cannot be fused because it pages too deep. */
+    protected final AtomicBoolean paginationDepthNoticed = new AtomicBoolean(false);
+
+    /** One-time error latch for a fused result the search engine never normalized. */
+    protected final AtomicBoolean notNormalizedWarned = new AtomicBoolean(false);
+
     /**
-     * Creates a new instance of DefaultSearcher.
-     * This constructor initializes the default rank fusion searcher for performing
-     * standard OpenSearch queries with response processing and document highlighting.
+     * Creates a new instance.
      */
     public DefaultSearcher() {
     }
 
-    /**
-     * Performs a search operation using the specified query and parameters.
-     *
-     * @param query the search query string
-     * @param params the search request parameters
-     * @param userBean the optional user bean for access control
-     * @return the search result containing documents and metadata
-     */
     @Override
-    protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
-        final int pageSize = params.getPageSize();
-        LaRequestUtil.getOptionalRequest().ifPresent(request -> {
-            request.setAttribute(Constants.REQUEST_PAGE_SIZE, pageSize);
-        });
-        final OptionalEntity<SearchResponse> searchResponseOpt = sendRequest(query, params, userBean);
-        return processResponse(searchResponseOpt);
+    protected Optional<SearchResult> searchWithSubQueries(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean, final List<QueryBuilder> subQueries) {
+        if (!isEngineFusionApplicable(params, subQueries)) {
+            return Optional.empty();
+        }
+        final List<String> names = new ArrayList<>(subQueries.size() + 1);
+        names.add(getName());
+        subQueries.forEach(subQuery -> names.add(subQuery.queryName()));
+        final Map<String, Object> pipeline = buildPipelineSource(names);
+        if (pipeline == null) {
+            return Optional.empty();
+        }
+        try {
+            final SearchResult searchResult = execute(params, fuse(createSearchCondition(query, params, userBean), subQueries, pipeline));
+            warnIfNotNormalized(searchResult);
+            return Optional.of(searchResult);
+        } catch (final Exception e) {
+            // The likeliest cause is a cluster without the Neural Search plugin, where every
+            // fused request fails the same way. Retrying one per search would double the load
+            // for no benefit, so stop trying until the next restart and say why once.
+            if (engineFusionDisabled.compareAndSet(false, true)) {
+                logger.error("The search engine refused a fused request, so rank fusion falls back to Fess for the rest of this run. "
+                        + "Check that the cluster has the Neural Search plugin installed and that hybrid queries are not disabled "
+                        + "(plugins.neural_search.hybrid_search_disabled). query={}", query, e);
+            }
+            return Optional.empty();
+        }
     }
 
     /**
-     * Processes the OpenSearch response and converts it to a SearchResult.
+     * Reports a fused result that the search engine never normalized.
      *
-     * @param searchResponseOpt the optional search response from OpenSearch
-     * @return the processed search result
+     * <p>A hybrid query whose pipeline did not run comes back with duplicated hits and large
+     * negative sentinel scores rather than an error, so the only way to notice is to look at what
+     * came back. The scores of a normalized result are never negative.</p>
+     *
+     * @param searchResult the fused result
      */
-    protected SearchResult processResponse(final OptionalEntity<SearchResponse> searchResponseOpt) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchResultBuilder builder = SearchResult.create();
-        searchResponseOpt.ifPresent(searchResponse -> {
-            final SearchHits searchHits = searchResponse.getHits();
-            builder.allRecordCount(searchHits.getTotalHits().value());
-            builder.allRecordCountRelation(searchHits.getTotalHits().relation().toString());
-            builder.queryTime(searchResponse.getTook().millis());
-
-            if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
-                builder.partialResults(true);
-            }
-
-            // build highlighting fields
-            final String hlPrefix = ComponentUtil.getQueryHelper().getHighlightPrefix();
-            for (final SearchHit searchHit : searchHits.getHits()) {
-                final Map<String, Object> docMap = parseSearchHit(fessConfig, hlPrefix, searchHit);
-
-                if (fessConfig.isResultCollapsed()) {
-                    final Map<String, SearchHits> innerHits = searchHit.getInnerHits();
-                    if (innerHits != null) {
-                        final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
-                        if (innerSearchHits != null) {
-                            final long totalHits = innerSearchHits.getTotalHits().value();
-                            if (totalHits > 1) {
-                                docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
-                                final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());
-                                if (bitsField != null && !bitsField.getValues().isEmpty()) {
-                                    docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
-                                }
-                                docMap.put(fessConfig.getQueryCollapseInnerHitsName(), StreamUtil.stream(innerSearchHits.getHits())
-                                        .get(stream -> stream.map(hit -> parseSearchHit(fessConfig, hlPrefix, hit)).toArray(Map[]::new)));
-                            }
-                        }
-                    }
+    protected void warnIfNotNormalized(final SearchResult searchResult) {
+        for (final Map<String, Object> doc : searchResult.getDocumentList()) {
+            if (doc.get(Constants.SCORE) instanceof final Number score && score.floatValue() < 0.0f) {
+                if (notNormalizedWarned.compareAndSet(false, true)) {
+                    logger.error("A fused search came back with negative scores, which is what the search engine returns when a "
+                            + "hybrid query runs without the pipeline that normalizes it. These results are unranked and may repeat "
+                            + "documents. Check that the cluster accepts an inline search_pipeline carrying phase_results_processors.");
                 }
-
-                builder.addDocument(docMap);
+                return;
             }
-
-            // facet
-            final Aggregations aggregations = searchResponse.getAggregations();
-            if (aggregations != null) {
-                builder.facetResponse(new FacetResponse(aggregations));
-            }
-
-        });
-        return builder.build();
+        }
     }
 
     /**
-     * Sends a search request to OpenSearch with the specified parameters.
+     * Wraps the keyword condition so that the request carries every branch and the pipeline that
+     * combines them.
      *
-     * @param query the search query string
-     * @param params the search request parameters
-     * @param userBean the optional user bean for access control
-     * @return the optional search response from OpenSearch
-     */
-    protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
-            final OptionalThing<FessUserBean> userBean) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getSearchEngineClient()
-                .search(fessConfig.getIndexDocumentSearchIndex(), createSearchCondition(query, params, userBean),
-                        (searchRequestBuilder, execTime, searchResponse) -> {
-                            searchResponse.ifPresent(r -> {
-                                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
-                                    // partial results
-                                    final StringBuilder buf = new StringBuilder(1000);
-                                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":")
-                                            .append(execTime)//
-                                            .append(",\"request\":")
-                                            .append(searchRequestBuilder.toString())//
-                                            .append(",\"response\":")
-                                            .append(r.toString())
-                                            .append('}');
-                                    logger.warn(buf.toString());
-                                }
-                            });
-                            return searchResponse;
-                        });
-    }
-
-    /**
-     * Creates a search condition for the OpenSearch request.
+     * <p>The keyword query is read back out of the request the base condition just built, rather
+     * than rebuilt here, so that everything else that condition set up - facets, highlighting,
+     * sorting, collapsing, the offset guard - stays exactly as it was.</p>
      *
-     * @param query the search query string
-     * @param params the search request parameters
-     * @param userBean the optional user bean for access control
-     * @return the search condition for the request
+     * @param base the keyword search condition
+     * @param subQueries the other searchers' queries
+     * @param pipeline the inline search pipeline that normalizes and combines the branches
+     * @return the fused search condition
      */
-    protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
-            final OptionalThing<FessUserBean> userBean) {
+    protected SearchCondition<SearchRequestBuilder> fuse(final SearchCondition<SearchRequestBuilder> base,
+            final List<QueryBuilder> subQueries, final Map<String, Object> pipeline) {
         return searchRequestBuilder -> {
-            ComponentUtil.getQueryHelper().processSearchPreference(searchRequestBuilder, userBean, query);
-            return SearchConditionBuilder.builder(searchRequestBuilder)
-                    .query(query)
-                    .offset(params.getStartPosition())
-                    .size(params.getPageSize())
-                    .facetInfo(params.getFacetInfo())
-                    .geoInfo(params.getGeoInfo())
-                    .highlightInfo(params.getHighlightInfo())
-                    .similarDocHash(params.getSimilarDocHash())
-                    .responseFields(params.getResponseFields())
-                    .searchRequestType(params.getType())
-                    .trackTotalHits(params.getTrackTotalHits())
-                    .minScore(params.getMinScore())
-                    .build();
+            if (!base.build(searchRequestBuilder)) {
+                return false;
+            }
+            final SearchSourceBuilder source = searchRequestBuilder.request().source();
+            if (source == null || source.query() == null) {
+                // Fusing means wrapping the keyword query, so there has to be one. Failing here
+                // sends the search back to Fess-side fusion instead of quietly issuing a request
+                // that has lost every other branch.
+                throw new IllegalStateException("The keyword condition did not produce a query to fuse.");
+            }
+            final HybridQueryBuilder hybridQuery = new HybridQueryBuilder().add(source.query().queryName(getName()));
+            subQueries.forEach(hybridQuery::add);
+            source.query(hybridQuery.paginationDepth(getPaginationDepth()));
+            // Written here rather than by the caller: a hybrid query without this pipeline comes
+            // back with duplicated hits and sentinel scores instead of an error.
+            source.searchPipelineSource(pipeline);
+            return true;
         };
     }
 
     /**
-     * Parses a search hit from OpenSearch and converts it to a document map.
+     * Decides whether this request can be fused in the search engine.
      *
-     * @param fessConfig the Fess configuration
-     * @param hlPrefix the highlight prefix for field names
-     * @param searchHit the search hit to parse
-     * @return the parsed document as a map
+     * @param params the search request parameters
+     * @param subQueries the other searchers' queries
+     * @return true when the request can be fused
      */
-    protected Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
-        final Map<String, Object> docMap = new HashMap<>(32);
-        if (searchHit.getSourceAsMap() == null) {
-            searchHit.getFields().forEach((key, value) -> {
-                docMap.put(key, value.getValue());
-            });
-        } else {
-            docMap.putAll(searchHit.getSourceAsMap());
+    protected boolean isEngineFusionApplicable(final SearchRequestParams params, final List<QueryBuilder> subQueries) {
+        if (engineFusionDisabled.get() || !ComponentUtil.getFessConfig().isRankFusionEngineEnabled()) {
+            return false;
         }
-
-        final ViewHelper viewHelper = ComponentUtil.getViewHelper();
-
-        final Map<String, HighlightField> highlightFields = searchHit.getHighlightFields();
-        try {
-            if (highlightFields != null) {
-                highlightFields.values().stream().forEach(highlightField -> {
-                    final String text = viewHelper.createHighlightText(highlightField);
-                    if (text != null) {
-                        docMap.put(hlPrefix + highlightField.getName(), text);
-                    }
-                });
-                if (Constants.TEXT_FRAGMENT_TYPE_HIGHLIGHT.equals(fessConfig.getQueryHighlightTextFragmentType())) {
-                    docMap.put(Constants.TEXT_FRAGMENTS,
-                            viewHelper.createTextFragmentsByHighlight(highlightFields.values().toArray(HighlightField[]::new)));
-                }
+        if (subQueries.isEmpty() || subQueries.size() + 1 > HybridQueryBuilder.MAX_SUB_QUERIES) {
+            return false;
+        }
+        // Sorting by anything but the score makes the engine report null scores for every hit,
+        // which leaves nothing for the fusion to have decided. Advanced search assembles clauses
+        // the vector branches cannot mirror.
+        if (StringUtil.isNotBlank(params.getSort()) || params.hasConditionQuery()) {
+            return false;
+        }
+        if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null
+                || StringUtil.isNotBlank(params.getSimilarDocHash())) {
+            return false;
+        }
+        final int depth = getPaginationDepth();
+        if (params.getStartPosition() + params.getPageSize() > depth) {
+            // Beyond the depth the engine ranks to, a fused page would silently be built from a
+            // truncated set. Fall back rather than return a page nobody can explain.
+            if (paginationDepthNoticed.compareAndSet(false, true)) {
+                logger.info("A search reached past rank.fusion.pagination_depth ({}), so it was answered without fusing in the "
+                        + "search engine. Raise the property to page deeper into fused results.", depth);
             }
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Could not create a highlighting value: {}", docMap, e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Builds the inline search pipeline that normalizes and combines the branch scores.
+     *
+     * @param names the branch names, in the order the branches appear in the request
+     * @return the pipeline source, or null when the configuration is unusable
+     */
+    protected Map<String, Object> buildPipelineSource(final List<String> names) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String technique = fessConfig.getRankFusionCombinationTechnique();
+        final Map<String, Object> combination = new LinkedHashMap<>();
+        combination.put("technique", technique);
+        if (TECHNIQUE_RRF.equalsIgnoreCase(technique)) {
+            combination.put("rank_constant", Integer.valueOf(getEngineRankConstant()));
+        }
+        final List<Float> weights = resolveWeights(names);
+        if (weights == null) {
+            return null;
+        }
+        if (!weights.isEmpty()) {
+            combination.put("parameters", Map.of("weights", weights));
+        }
+        final Map<String, Object> processorBody = new LinkedHashMap<>();
+        if (!TECHNIQUE_RRF.equalsIgnoreCase(technique)) {
+            processorBody.put("normalization", Map.of("technique", fessConfig.getRankFusionNormalizationTechnique()));
+        }
+        processorBody.put("combination", combination);
+        final String processorName = TECHNIQUE_RRF.equalsIgnoreCase(technique) ? "score-ranker-processor" : "normalization-processor";
+        return Map.of("phase_results_processors", List.of(Map.of(processorName, processorBody)));
+    }
+
+    /**
+     * Resolves the configured weights into the order the branches appear in the request.
+     *
+     * <p>The property names each branch rather than relying on its position, because the set of
+     * searchers taking part depends on which plugins are installed and on
+     * {@code rank.fusion.searchers}. A positional list would silently start weighting the wrong
+     * branch, or be rejected outright by the engine, as soon as that set changed.</p>
+     *
+     * @param names the branch names, in request order
+     * @return the weights in request order, an empty list when none are configured, or null when
+     *         the configuration does not match the branches taking part
+     */
+    protected List<Float> resolveWeights(final List<String> names) {
+        final String configured = ComponentUtil.getFessConfig().getRankFusionCombinationWeights();
+        if (StringUtil.isBlank(configured)) {
+            return List.of();
+        }
+        final Map<String, Float> byName = new LinkedHashMap<>();
+        for (final String entry : configured.split(",")) {
+            final String pair = entry.trim();
+            if (pair.isEmpty()) {
+                continue;
             }
-        }
-
-        if (Constants.TEXT_FRAGMENT_TYPE_QUERY.equals(fessConfig.getQueryHighlightTextFragmentType())) {
-            docMap.put(Constants.TEXT_FRAGMENTS, viewHelper.createTextFragmentsByQuery());
-        }
-
-        // ContentTitle
-        if (viewHelper != null) {
-            docMap.put(fessConfig.getResponseFieldContentTitle(), viewHelper.getContentTitle(docMap));
-            docMap.put(fessConfig.getResponseFieldContentDescription(), viewHelper.getContentDescription(docMap));
-            docMap.put(fessConfig.getResponseFieldUrlLink(), viewHelper.getUrlLink(docMap));
-            docMap.put(fessConfig.getResponseFieldSitePath(), viewHelper.getSitePath(docMap));
-        }
-
-        if (!docMap.containsKey(Constants.SCORE)) {
-            final float score = searchHit.getScore();
-            if (Float.isFinite(score)) {
-                docMap.put(Constants.SCORE, score);
+            final int index = pair.lastIndexOf(':');
+            if (index <= 0 || index == pair.length() - 1) {
+                return rejectWeights(configured, "expected name:weight pairs");
             }
+            final Float weight;
+            try {
+                weight = Float.valueOf(pair.substring(index + 1).trim());
+            } catch (final NumberFormatException e) {
+                return rejectWeights(configured, "the weight of '" + pair.substring(0, index).trim() + "' is not a number");
+            }
+            if (weight.floatValue() < 0.0f || weight.floatValue() > 1.0f) {
+                return rejectWeights(configured, "weights must be between 0.0 and 1.0");
+            }
+            byName.put(pair.substring(0, index).trim(), weight);
         }
-
-        if (!docMap.containsKey(fessConfig.getIndexFieldId())) {
-            docMap.put(fessConfig.getIndexFieldId(), searchHit.getId());
+        if (byName.size() != names.size() || !byName.keySet().containsAll(names)) {
+            return rejectWeights(configured, "it must name exactly the searchers taking part: " + names);
         }
-
-        final String[] searchers = DocumentUtil.getValue(docMap, Constants.SEARCHER, String[].class);
-        if (searchers != null) {
-            docMap.put(Constants.SEARCHER, ArrayUtil.add(searchers, getName()));
-        } else {
-            docMap.put(Constants.SEARCHER, new String[] { getName() });
+        float sum = 0.0f;
+        final List<Float> weights = new ArrayList<>(names.size());
+        for (final String name : names) {
+            final Float weight = byName.get(name);
+            weights.add(weight);
+            sum += weight.floatValue();
         }
+        if (Math.abs(sum - 1.0f) > WEIGHT_SUM_TOLERANCE) {
+            return rejectWeights(configured, "the weights must sum to 1.0 but sum to " + sum);
+        }
+        return weights;
+    }
 
-        return docMap;
+    /**
+     * Reports an unusable weight configuration and refuses to fuse.
+     *
+     * <p>The engine fails the whole request when the weights do not match the branches, so this
+     * is caught here to name the property and the reason instead of surfacing a phase failure.</p>
+     *
+     * @param configured the configured value
+     * @param reason why it cannot be used
+     * @return null, meaning the request must not be fused
+     */
+    protected List<Float> rejectWeights(final String configured, final String reason) {
+        logger.error("{}='{}' cannot be used: {}. Rank fusion falls back to Fess for this search.",
+                FessConfig.RANK_FUSION_COMBINATION_WEIGHTS, configured, reason);
+        return null;
+    }
+
+    /**
+     * Converts the configured rank constant to the one the search engine needs.
+     *
+     * <p>Fess ranks from zero and scores a document {@code 1 / (K + rank)}; the engine ranks from
+     * one and scores it {@code 1 / (k + rank)}. Passing {@code K - 1} makes the two formulas
+     * identical, so turning engine-side fusion on does not change what the constant means.</p>
+     *
+     * @return the rank constant to send
+     */
+    protected int getEngineRankConstant() {
+        final int configured = ComponentUtil.getFessConfig().getRankFusionRankConstantAsInteger().intValue() - 1;
+        if (configured < MIN_RANK_CONSTANT) {
+            return MIN_RANK_CONSTANT;
+        }
+        if (configured > MAX_RANK_CONSTANT) {
+            return MAX_RANK_CONSTANT;
+        }
+        return configured;
+    }
+
+    /**
+     * Returns how many results each branch contributes per shard.
+     *
+     * @return the pagination depth
+     */
+    protected int getPaginationDepth() {
+        return ComponentUtil.getFessConfig().getRankFusionPaginationDepthAsInteger().intValue();
     }
 
 }

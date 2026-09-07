@@ -1276,6 +1276,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. rf_score */
     String RANK_FUSION_score_field = "rank.fusion.score_field";
 
+    /** The key of the configuration. e.g. false */
+    String RANK_FUSION_ENGINE_ENABLED = "rank.fusion.engine.enabled";
+
+    /** The key of the configuration. e.g. rrf */
+    String RANK_FUSION_COMBINATION_TECHNIQUE = "rank.fusion.combination.technique";
+
+    /** The key of the configuration. e.g. min_max */
+    String RANK_FUSION_NORMALIZATION_TECHNIQUE = "rank.fusion.normalization.technique";
+
+    /** The key of the configuration. e.g.  */
+    String RANK_FUSION_COMBINATION_WEIGHTS = "rank.fusion.combination.weights";
+
+    /** The key of the configuration. e.g. 200 */
+    String RANK_FUSION_pagination_depth = "rank.fusion.pagination_depth";
+
     /** The key of the configuration. e.g. true */
     String SMB_ROLE_FROM_FILE = "smb.role.from.file";
 
@@ -6673,6 +6688,55 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRankFusionScoreField();
+
+    /**
+     * Get the value for the key 'rank.fusion.engine.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether the search engine performs rank fusion.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isRankFusionEngineEnabled();
+
+    /**
+     * Get the value for the key 'rank.fusion.combination.technique'. <br>
+     * The value is, e.g. rrf <br>
+     * comment: How the search engine combines the fused scores.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRankFusionCombinationTechnique();
+
+    /**
+     * Get the value for the key 'rank.fusion.normalization.technique'. <br>
+     * The value is, e.g. min_max <br>
+     * comment: How scores are normalized before they are combined.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRankFusionNormalizationTechnique();
+
+    /**
+     * Get the value for the key 'rank.fusion.combination.weights'. <br>
+     * The value is, e.g.  <br>
+     * comment: Weight per searcher for engine-side fusion.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRankFusionCombinationWeights();
+
+    /**
+     * Get the value for the key 'rank.fusion.pagination_depth'. <br>
+     * The value is, e.g. 200 <br>
+     * comment: How many results each searcher contributes per shard to engine-side fusion.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRankFusionPaginationDepth();
+
+    /**
+     * Get the value for the key 'rank.fusion.pagination_depth' as {@link Integer}. <br>
+     * The value is, e.g. 200 <br>
+     * comment: How many results each searcher contributes per shard to engine-side fusion.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRankFusionPaginationDepthAsInteger();
 
     /**
      * Get the value for the key 'smb.role.from.file'. <br>
@@ -12530,6 +12594,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getRankFusionScoreField() {
             return get(FessConfig.RANK_FUSION_score_field);
+        }
+
+        public boolean isRankFusionEngineEnabled() {
+            return is(FessConfig.RANK_FUSION_ENGINE_ENABLED);
+        }
+
+        public String getRankFusionCombinationTechnique() {
+            return get(FessConfig.RANK_FUSION_COMBINATION_TECHNIQUE);
+        }
+
+        public String getRankFusionNormalizationTechnique() {
+            return get(FessConfig.RANK_FUSION_NORMALIZATION_TECHNIQUE);
+        }
+
+        public String getRankFusionCombinationWeights() {
+            return get(FessConfig.RANK_FUSION_COMBINATION_WEIGHTS);
+        }
+
+        public String getRankFusionPaginationDepth() {
+            return get(FessConfig.RANK_FUSION_pagination_depth);
+        }
+
+        public Integer getRankFusionPaginationDepthAsInteger() {
+            return getAsInteger(FessConfig.RANK_FUSION_pagination_depth);
         }
 
         public String getSmbRoleFromFile() {
