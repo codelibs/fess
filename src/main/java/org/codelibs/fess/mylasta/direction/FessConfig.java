@@ -28,7 +28,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. default */
     String search_engine_TYPE = "search_engine.type";
 
-    /** The key of the configuration. e.g. http://localhost:9201 */
+    /** The key of the configuration. e.g. http://localhost:9200 */
     String search_engine_HTTP_URL = "search_engine.http.url";
 
     /** The key of the configuration. e.g.  */
@@ -2225,7 +2225,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'search_engine.http.url'. <br>
-     * The value is, e.g. http://localhost:9201 <br>
+     * The value is, e.g. http://localhost:9200 <br>
      * comment: <br>
      * The URL of the search engine HTTP endpoint.<br>
      * For IPv6 environments, use brackets around the IPv6 address (e.g., http://[::1]:9200)
@@ -14457,7 +14457,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
             defaultMap.put(FessConfig.DOMAIN_TITLE, "Fess");
             defaultMap.put(FessConfig.search_engine_TYPE, "default");
-            defaultMap.put(FessConfig.search_engine_HTTP_URL, "http://localhost:9201");
+            defaultMap.put(FessConfig.search_engine_HTTP_URL, "http://localhost:9200");
             defaultMap.put(FessConfig.search_engine_HTTP_SSL_certificate_authorities, "");
             defaultMap.put(FessConfig.search_engine_USERNAME, "");
             defaultMap.put(FessConfig.search_engine_PASSWORD, "");

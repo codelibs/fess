@@ -348,7 +348,7 @@ public class SearchEngineClient implements Client {
 
         waitForYellowStatus(fessConfig);
 
-        warnUnlessOpenSearch3();
+        verifyEngineVersion();
 
         indexConfigList.forEach(configName -> {
             final String[] values = configName.split("/");
@@ -2723,7 +2723,7 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Logs an error unless the backend is OpenSearch 3.x or later.
+     * Aborts startup unless the backend is OpenSearch 3.x or later.
      *
      * <p>Fess walks whole result sets -- document export, purge, label updates, backup, the
      * scroll search API, suggest dictionary builds -- over a point in time ordered by a
@@ -2733,10 +2733,17 @@ public class SearchEngineClient implements Client {
      * hangs, because the client's socket timeout is disabled by default, so those jobs would
      * stall rather than fail visibly.</p>
      *
-     * <p>Startup is not aborted: search itself still works, and an operator may be mid-upgrade.
-     * The error is logged so the mismatch is noticed before a scheduled job hangs.</p>
+     * <p>This used to log an error and carry on, on the grounds that search still worked and an
+     * operator might be mid-upgrade. That reasoning came from a time when the alternative was a
+     * bundled engine nobody chose; now that the search engine is always a server the operator
+     * installed and pointed Fess at, a version mismatch is a misconfiguration to fix before
+     * anything runs -- and failing at startup is far cheaper to diagnose than a scheduled job
+     * that hangs days later.</p>
+     *
+     * <p>A backend that cannot be reached at all is not treated as a mismatch: the type check is
+     * skipped and the connection failure surfaces on its own.</p>
      */
-    protected void warnUnlessOpenSearch3() {
+    protected void verifyEngineVersion() {
         final EngineType engineType;
         try {
             engineType = getEngineInfo().getType();
@@ -2751,15 +2758,17 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Reports a backend Fess cannot walk result sets on.
+     * Rejects a backend Fess cannot walk result sets on.
      *
      * @param engineType the engine the backend reported
+     * @throws FessSystemException always
      */
     protected void reportUnsupportedEngine(final EngineType engineType) {
-        logger.error("The search engine reports {}, but Fess requires OpenSearch 3.x or later. Operations that walk every "
-                + "matching document (document export, purge, label update, backup, the scroll search API and "
-                + "suggest dictionary builds) sort by _shard_doc, which earlier engines do not implement; over "
-                + "HTTP they will hang rather than report an error.", engineType);
+        throw new FessSystemException("The search engine reports " + engineType
+                + ", but Fess requires OpenSearch 3.x or later. Operations that walk every matching document "
+                + "(document export, purge, label update, backup, the scroll search API and suggest dictionary "
+                + "builds) sort by _shard_doc, which earlier engines do not implement; over HTTP they hang "
+                + "rather than report an error. Upgrade the search engine, or run bin/fess-setup install opensearch.");
     }
 
     /**

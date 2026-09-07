@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fesen.client.EngineInfo;
+import org.codelibs.fesen.client.EngineInfo.EngineType;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.junit.jupiter.api.Test;
@@ -99,37 +101,38 @@ public class SearchEngineClientTest extends UnitFessTestCase {
      * OpenSearch 3.x is what Fess needs, so startup must stay quiet.
      */
     @Test
-    public void test_warnUnlessOpenSearch3_quietOnOpenSearch3() {
+    public void test_verifyEngineVersion_quietOnOpenSearch3() {
         final AtomicInteger reports = new AtomicInteger(0);
-        clientReporting("opensearch", "3.8.0", reports).warnUnlessOpenSearch3();
+        clientReporting("opensearch", "3.8.0", reports).verifyEngineVersion();
         assertEquals(0, reports.get());
     }
 
     /**
-     * OpenSearch 2.x cannot sort by _shard_doc, so the mismatch must be reported.
+     * OpenSearch 2.x cannot sort by _shard_doc, so startup must be refused.
      */
     @Test
-    public void test_warnUnlessOpenSearch3_reportsOpenSearch2() {
+    public void test_verifyEngineVersion_reportsOpenSearch2() {
         final AtomicInteger reports = new AtomicInteger(0);
-        clientReporting("opensearch", "2.19.4", reports).warnUnlessOpenSearch3();
+        clientReporting("opensearch", "2.19.4", reports).verifyEngineVersion();
         assertEquals(1, reports.get());
     }
 
     /**
-     * Elasticsearch has no _shard_doc sort either, so it is reported the same way.
+     * Elasticsearch has no _shard_doc sort either, so it is refused the same way.
      */
     @Test
-    public void test_warnUnlessOpenSearch3_reportsElasticsearch() {
+    public void test_verifyEngineVersion_reportsElasticsearch() {
         final AtomicInteger reports = new AtomicInteger(0);
-        clientReporting("elasticsearch", "8.11.0", reports).warnUnlessOpenSearch3();
+        clientReporting("elasticsearch", "8.11.0", reports).verifyEngineVersion();
         assertEquals(1, reports.get());
     }
 
     /**
-     * A client that cannot report its engine must not break startup.
+     * An engine that cannot be identified is not a mismatch: the connection failure surfaces
+     * on its own, so this check must stay out of the way.
      */
     @Test
-    public void test_warnUnlessOpenSearch3_survivesUndetectableEngine() {
+    public void test_verifyEngineVersion_survivesUndetectableEngine() {
         final AtomicInteger reports = new AtomicInteger(0);
         new SearchEngineClient() {
             @Override
@@ -141,7 +144,7 @@ public class SearchEngineClientTest extends UnitFessTestCase {
             protected void reportUnsupportedEngine(final EngineInfo.EngineType engineType) {
                 reports.incrementAndGet();
             }
-        }.warnUnlessOpenSearch3();
+        }.verifyEngineVersion();
         assertEquals(0, reports.get());
     }
 
@@ -438,4 +441,18 @@ public class SearchEngineClientTest extends UnitFessTestCase {
 
         assertFalse(client.isMissingKnnPluginError(new RuntimeException("connection refused")));
     }
+
+    @Test
+    public void test_reportUnsupportedEngine_abortsStartup() {
+        final SearchEngineClient client = new SearchEngineClient();
+
+        for (final EngineType engineType : new EngineType[] { EngineType.OPENSEARCH2, EngineType.OPENSEARCH1, EngineType.ELASTICSEARCH8,
+                EngineType.ELASTICSEARCH7, EngineType.UNKNOWN }) {
+            final FessSystemException e = org.junit.jupiter.api.Assertions.assertThrows(FessSystemException.class,
+                    () -> client.reportUnsupportedEngine(engineType));
+            assertTrue(e.getMessage().contains("OpenSearch 3"), e.getMessage());
+            assertTrue(e.getMessage().contains(engineType.toString()), e.getMessage());
+        }
+    }
+
 }
