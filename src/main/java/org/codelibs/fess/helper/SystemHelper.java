@@ -675,9 +675,7 @@ public class SystemHelper {
      * @param runtime The action runtime.
      */
     public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        runtime.registerData("developmentMode", ComponentUtil.getSearchEngineClient().isEmbedded());
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        runtime.registerData("installationLink", getInstallationLink());
         runtime.registerData("storageEnabled", isStorageEnabled(fessConfig));
         final boolean eoled = isEoled();
         runtime.registerData("eoled", eoled);
@@ -712,8 +710,6 @@ public class SystemHelper {
      * @param runtime The action runtime.
      */
     public void setupSearchHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        runtime.registerData("developmentMode", ComponentUtil.getSearchEngineClient().isEmbedded());
-        runtime.registerData("installationLink", getInstallationLink());
         final boolean eoled = isEoled();
         runtime.registerData("eoled", eoled);
         if (eoled) {

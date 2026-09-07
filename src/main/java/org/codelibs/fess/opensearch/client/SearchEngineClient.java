@@ -17,7 +17,6 @@ package org.codelibs.fess.opensearch.client;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
-import static org.codelibs.opensearch.runner.OpenSearchRunner.newConfigs;
 import static org.opensearch.core.action.ActionListener.wrap;
 
 import java.io.File;
@@ -73,11 +72,8 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
-import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
-import org.codelibs.opensearch.runner.OpenSearchRunner;
-import org.codelibs.opensearch.runner.OpenSearchRunner.Configs;
 import org.codelibs.fess.util.SearchEngineCurl;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
@@ -210,14 +206,8 @@ public class SearchEngineClient implements Client {
 
     private static final String CONFIG_INDEX_PREFIX = "fess_config";
 
-    /** OpenSearch runner for managing the embedded search engine */
-    protected OpenSearchRunner runner;
-
     /** OpenSearch client for executing operations */
     protected Client client;
-
-    /** Configuration settings for the search engine */
-    protected Map<String, String> settings;
 
     /** Path to index configuration resources */
     protected String indexConfigPath = "fess_indices";
@@ -248,9 +238,6 @@ public class SearchEngineClient implements Client {
 
     /** Maximum retry attempts for search engine status checks */
     protected int maxEsStatusRetry = 60;
-
-    /** Name of the search engine cluster */
-    protected String clusterName = "fesen";
 
     /** The config index whose bulk data is reloaded on startup so newly shipped jobs appear on upgraded installations. */
     protected static final String SCHEDULED_JOB_CONFIG_INDEX = "fess_config.scheduled_job";
@@ -284,15 +271,6 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Sets the configuration settings for the search engine.
-     *
-     * @param settings map of configuration key-value pairs
-     */
-    public void setSettings(final Map<String, String> settings) {
-        this.settings = settings;
-    }
-
-    /**
      * Gets the current cluster health status.
      *
      * @return the cluster health status name
@@ -304,24 +282,6 @@ public class SearchEngineClient implements Client {
                 .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout())
                 .getStatus()
                 .name();
-    }
-
-    /**
-     * Sets the OpenSearch runner for embedded mode.
-     *
-     * @param runner the OpenSearch runner instance
-     */
-    public void setRunner(final OpenSearchRunner runner) {
-        this.runner = runner;
-    }
-
-    /**
-     * Checks if the search engine is running in embedded mode.
-     *
-     * @return true if running in embedded mode, false otherwise
-     */
-    public boolean isEmbedded() {
-        return runner != null;
     }
 
     /**
@@ -370,71 +330,15 @@ public class SearchEngineClient implements Client {
         }
 
         String httpAddress = SystemUtil.getSearchEngineHttpAddress();
-        if (StringUtil.isBlank(httpAddress) && runner == null) {
-            switch (fessConfig.getFesenType()) {
-            case Constants.FESEN_TYPE_CLOUD:
-            case Constants.FESEN_TYPE_AWS:
-                httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
-                break;
-            default:
-                runner = new OpenSearchRunner();
-                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
-                final String esDir = System.getProperty("fess.es.dir");
-                if (esDir != null) {
-                    config.basePath(esDir);
-                }
-                config.disableESLogger();
-                runner.onBuild((number, settingsBuilder) -> {
-                    final File moduleDir = new File(esDir, "modules");
-                    if (moduleDir.isDirectory()) {
-                        settingsBuilder.put("path.modules", moduleDir.getAbsolutePath());
-                    } else {
-                        settingsBuilder.put("path.modules", new File(System.getProperty("user.dir"), "modules").getAbsolutePath());
-                    }
-                    final File pluginDir = new File(esDir, "plugins");
-                    if (pluginDir.isDirectory()) {
-                        settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
-                    } else {
-                        settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
-                    }
-                    if (settings != null) {
-                        settingsBuilder.putProperties(settings, s -> s);
-                    }
-                });
-                runner.build(config);
-
-                final int port = runner.node().settings().getAsInt("http.port", 9200);
-                try {
-                    final InetAddress localhost = InetAddress.getByName("localhost");
-                    httpAddress = IpAddressUtil.buildUrl("http", localhost, port, "");
-                } catch (final UnknownHostException e) {
-                    httpAddress = "http://localhost:" + port; // Fallback
-                }
-                logger.warn("Embedded OpenSearch is running. This configuration is not recommended for production use.");
-                // Reads the raw system property rather than ChunkVectorHelper#getKnnEngine(): this
-                // runs very early in open() (before the embedded node's HTTP client, waitForYellowStatus,
-                // or any index/mapping machinery), the same @PostConstruct phase whose ordering
-                // sensitivity is this whole branch's origin (Task 2 must bundle the k-NN plugin before
-                // Task 3's static mapping can rely on it). ComponentUtil.getFessConfig() a few lines up
-                // already proves a live component lookup succeeds this early, and ChunkVectorHelper has
-                // no eager dependency back on this class, so a live getKnnEngine() call would likely be
-                // safe too -- but this diagnostic fires before the search cluster exists, so a wrong
-                // guess here is expensive to be wrong about, and unlike the mapping-side substitution
-                // (fixed to require validation), an unvalidated engine value is merely informational
-                // here. Sharing ChunkVectorHelper's key/default constants gets the same "one source of
-                // truth, no silent desync" outcome as calling getKnnEngine() would, without adding a new
-                // component-container lookup at this specific point.
-                final String knnEngine =
-                        fessConfig.getSystemProperty(ChunkVectorHelper.KNN_ENGINE_PROPERTY, ChunkVectorHelper.DEFAULT_KNN_ENGINE);
-                if (isUnsupportedEmbeddedEngine(true, knnEngine)) {
-                    logger.warn("""
-                            content_chunker.search.knn.engine is set to '{}', but the embedded OpenSearch's bundled k-NN plugin \
-                            has no JNI native libraries for it: index creation will succeed, then every document write is \
-                            silently dropped by an uncaught error, and searches will return zero hits. Set \
-                            content_chunker.search.knn.engine=lucene, or use Docker or an external OpenSearch instead.""", knnEngine);
-                }
-                break;
-            }
+        if (StringUtil.isBlank(httpAddress)) {
+            httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
+        }
+        if (StringUtil.isBlank(httpAddress)) {
+            throw new FessSystemException("""
+                    No search engine address is configured, and Fess needs an OpenSearch server to run. \
+                    Set SEARCH_ENGINE_HTTP_URL in bin/fess.in.sh (bin\\fess.in.bat on Windows), or \
+                    search_engine.http.url in fess_config.properties. \
+                    Run bin/fess-setup install opensearch to set one up.""");
         }
         client = createHttpClient(fessConfig, httpAddress);
 
@@ -1270,25 +1174,6 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Determines whether the configured ANN engine cannot work on the embedded search engine.
-     *
-     * <p>The bundled k-NN plugin ships without its JNI libraries, so faiss and nmslib (raw input --
-     * this method runs on the unvalidated system property value, before {@link
-     * org.codelibs.fess.helper.ChunkVectorHelper#getKnnEngine() ChunkVectorHelper#getKnnEngine()}'s
-     * allow-set would separately reject nmslib outright) accept the index creation and then lose
-     * every document write in an uncaught thread. Only the pure-Java lucene engine works embedded;
-     * an external or containerized OpenSearch's JNI libraries make faiss usable too (nmslib is never
-     * a Fess-accepted engine value regardless of deployment, see {@code getKnnEngine()}).</p>
-     *
-     * @param embedded whether Fess is running the embedded search engine
-     * @param engine   the configured ANN engine
-     * @return {@code true} when the combination silently discards documents
-     */
-    protected boolean isUnsupportedEmbeddedEngine(final boolean embedded, final String engine) {
-        return embedded && !"lucene".equals(engine);
-    }
-
-    /**
      * Adds a rewrite rule for document mappings.
      *
      * @param rule the rewrite rule to apply to document mappings
@@ -1603,9 +1488,8 @@ public class SearchEngineClient implements Client {
             }
             ThreadUtil.sleep(1000L);
         }
-        final String message =
-                "Fesen (" + SystemUtil.getSearchEngineHttpAddress() + ") is not available. Check the state of your Fesen cluster ("
-                        + clusterName + ") in " + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms.";
+        final String message = "The search engine at " + SystemUtil.getSearchEngineHttpAddress() + " did not become available within "
+                + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms. Check that OpenSearch is running and reachable.";
         throw new ContainerInitFailureException(message, cause);
     }
 
@@ -1642,17 +1526,15 @@ public class SearchEngineClient implements Client {
     @Override
     @PreDestroy
     public void close() {
-        if (runner != null) {
-            try {
-                client.admin()
-                        .indices()
-                        .prepareFlush()
-                        .setForce(true)
-                        .execute()
-                        .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
-            } catch (final Exception e) {
-                logger.warn("Failed to flush indices.", e);
-            }
+        try {
+            client.admin()
+                    .indices()
+                    .prepareFlush()
+                    .setForce(true)
+                    .execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
+        } catch (final Exception e) {
+            logger.warn("Failed to flush indices.", e);
         }
         try {
             client.close();
@@ -2838,15 +2720,6 @@ public class SearchEngineClient implements Client {
          * @return the created entity
          */
         T build(R response, H hit);
-    }
-
-    /**
-     * Sets the name of the search engine cluster.
-     *
-     * @param clusterName the cluster name
-     */
-    public void setClusterName(final String clusterName) {
-        this.clusterName = clusterName;
     }
 
     /**

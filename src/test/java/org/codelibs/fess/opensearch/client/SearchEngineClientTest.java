@@ -371,17 +371,6 @@ public class SearchEngineClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_isUnsupportedEmbeddedEngine() {
-        final SearchEngineClient client = new SearchEngineClient();
-
-        assertTrue(client.isUnsupportedEmbeddedEngine(true, "faiss"));
-        assertTrue(client.isUnsupportedEmbeddedEngine(true, "nmslib"));
-        assertFalse(client.isUnsupportedEmbeddedEngine(true, "lucene"));
-        assertFalse(client.isUnsupportedEmbeddedEngine(false, "faiss"));
-        assertFalse(client.isUnsupportedEmbeddedEngine(false, "lucene"));
-    }
-
-    @Test
     public void test_isWebappProcess_trueWhenNoJobProcessMarkerIsSet() {
         final SearchEngineClient client = new SearchEngineClient();
 
