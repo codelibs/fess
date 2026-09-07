@@ -78,7 +78,7 @@ import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.opensearch.runner.OpenSearchRunner;
 import org.codelibs.opensearch.runner.OpenSearchRunner.Configs;
-import org.codelibs.opensearch.runner.net.OpenSearchCurl;
+import org.codelibs.fess.util.SearchEngineCurl;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.core.message.UserMessages;
@@ -565,7 +565,7 @@ public class SearchEngineClient implements Client {
             client.admin().indices().prepareRefresh(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
             try (CurlResponse response = ComponentUtil.getCurlHelper().get("/" + indexName + "/_count").execute()) {
                 if (response.getHttpStatusCode() == 200) {
-                    final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+                    final Map<String, Object> contentMap = response.getContent(SearchEngineCurl.jsonParser());
                     final Object count = contentMap.get("count");
                     if (count instanceof Number) {
                         return ((Number) count).longValue();
