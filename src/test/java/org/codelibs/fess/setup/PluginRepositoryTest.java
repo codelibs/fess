@@ -105,6 +105,12 @@ public class PluginRepositoryTest {
     }
 
     @Test
+    public void test_namesFromListing_includesLibraryPlugins() {
+        final String html = "<a href=\"fess-lib-gcs/\">x</a><a href=\"fess-lib-s3/\">x</a><a href=\"fess-parent/\">x</a>";
+        assertEquals(List.of("fess-lib-gcs", "fess-lib-s3"), PluginRepository.namesFromListing(html));
+    }
+
+    @Test
     public void test_namesFromListing_skipsNonPluginArtifacts() {
         final String html = "<a href=\"fess/\">fess/</a><a href=\"fess-parent/\">fess-parent/</a><a href=\"fess-ds-git/\">x</a>";
         final List<String> names = PluginRepository.namesFromListing(html);

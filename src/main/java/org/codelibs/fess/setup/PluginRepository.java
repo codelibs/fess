@@ -49,8 +49,8 @@ public final class PluginRepository {
      * The artifact name prefixes Fess treats as plugins. Anything else in the group directory
      * -- {@code fess} itself, {@code fess-parent} -- is not installable.
      */
-    private static final String[] PLUGIN_PREFIXES =
-            { "fess-ds", "fess-theme", "fess-ingest", "fess-script", "fess-webapp", "fess-thumbnail", "fess-crawler", "fess-llm" };
+    private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-theme", "fess-ingest", "fess-script", "fess-webapp",
+            "fess-thumbnail", "fess-crawler", "fess-llm", "fess-lib" };
 
     /**
      * Crawler artifacts that are libraries rather than plugins. PluginHelper hides these from

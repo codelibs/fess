@@ -602,6 +602,11 @@ public class PluginHelper {
         CRAWLER("fess-crawler"), //
         /** LLM plugins */
         LLM("fess-llm"), //
+        /**
+         * Library plugins: a third-party client and its dependencies, shipped so that the
+         * distribution does not have to carry them for every installation. fess-lib-gcs is one.
+         */
+        LIB("fess-lib"), //
         /** Unknown/generic JAR files */
         UNKNOWN("jar");
 
@@ -656,6 +661,9 @@ public class PluginHelper {
             }
             if (name.startsWith(LLM.getId())) {
                 return LLM;
+            }
+            if (name.startsWith(LIB.getId())) {
+                return LIB;
             }
             return UNKNOWN;
         }
