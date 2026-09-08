@@ -27,6 +27,17 @@ import java.util.Map;
 public interface StorageClient extends AutoCloseable {
 
     /**
+     * Configures this client and opens its connection.
+     *
+     * <p>An implementation is registered as a LastaDi prototype component and is therefore
+     * created through a no-argument constructor, so this is where it reads the {@code storage.*}
+     * configuration. {@link StorageClientFactory} calls it once per instance, before any other
+     * method. It is not a default method on purpose: a client that forgot to read its
+     * configuration would fail at the first request instead of failing to compile.</p>
+     */
+    void init();
+
+    /**
      * Uploads an object to storage.
      *
      * @param objectName the name/path for the object

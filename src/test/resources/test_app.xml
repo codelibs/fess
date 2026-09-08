@@ -5,6 +5,13 @@
 	<include path="convention.xml" />
 	<include path="lastaflute.xml" />
 
+	<!-- The storage clients, so that fess_storage.xml is parsed by the test container. Nothing
+	     else in the suite loads fess.xml, so without this the file is never verified: a typo in
+	     a class name or a missing component would only surface on the admin storage screen at
+	     runtime. The components are prototypes with no postConstruct, so including them costs
+	     nothing and needs no running engine. -->
+	<include path="fess_storage.xml" />
+
 	<!-- Register systemProperties for test environment -->
 	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
 

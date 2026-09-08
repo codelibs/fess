@@ -33,6 +33,8 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.StorageException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -55,8 +57,8 @@ public class GcsStorageClient implements StorageClient {
 
     private static final String DEFAULT_GCS_HOST = "storage.googleapis.com";
 
-    private final Storage storage;
-    private final String bucket;
+    private Storage storage;
+    private String bucket;
 
     /**
      * Constructor for subclasses that customize behavior without initializing the GCS client.
@@ -64,8 +66,7 @@ public class GcsStorageClient implements StorageClient {
      * {@code storage} or {@code bucket}.
      */
     protected GcsStorageClient() {
-        this.storage = null;
-        this.bucket = null;
+        // configured by init(), or by a subclass that overrides everything using storage
     }
 
     /**
@@ -77,6 +78,17 @@ public class GcsStorageClient implements StorageClient {
      * @param credentialsPath the path to the credentials JSON file (optional)
      */
     public GcsStorageClient(final String projectId, final String bucket, final String endpoint, final String credentialsPath) {
+        configure(projectId, bucket, endpoint, credentialsPath);
+    }
+
+    @Override
+    public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        configure(fessConfig.getStorageProjectId(), fessConfig.getStorageBucket(), fessConfig.getStorageEndpoint(),
+                fessConfig.getStorageCredentialsPath());
+    }
+
+    private void configure(final String projectId, final String bucket, final String endpoint, final String credentialsPath) {
         this.bucket = bucket;
 
         final StorageOptions.Builder builder = StorageOptions.newBuilder();

@@ -5,6 +5,7 @@
 	<include path="fess_config.xml"/>
 	<include path="fess_ds.xml"/>
 	<include path="fess_se.xml"/>
+	<include path="fess_storage.xml"/>
 	<include path="esflute_config.xml"/>
 	<include path="esflute_user.xml"/>
 	<include path="esflute_log.xml"/>
