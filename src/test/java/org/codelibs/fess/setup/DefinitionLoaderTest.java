@@ -16,6 +16,7 @@
 package org.codelibs.fess.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -87,4 +88,42 @@ public class DefinitionLoaderTest {
         final Map<String, ComponentDefinition> defs = load("component.p.version=1\n");
         assertTrue(defs.get("p").list("artifacts").isEmpty());
     }
+
+    @Test
+    public void test_osToken_comesFromTheDefinition() throws Exception {
+        final Map<String, ComponentDefinition> defs =
+                load("component.nodejs.os.linux=linux\ncomponent.nodejs.os.macos=darwin\ncomponent.nodejs.os.windows=win\n");
+        final ComponentDefinition nodejs = defs.get("nodejs");
+        assertEquals("linux", nodejs.osToken(Platform.Os.LINUX));
+        assertEquals("darwin", nodejs.osToken(Platform.Os.MACOS));
+        assertEquals("win", nodejs.osToken(Platform.Os.WINDOWS));
+    }
+
+    @Test
+    public void test_osToken_absentMeansNoBuildForThatPlatform() throws Exception {
+        final Map<String, ComponentDefinition> defs =
+                load("component.opensearch.os.linux=linux\ncomponent.opensearch.os.windows=windows\n");
+        final ComponentDefinition opensearch = defs.get("opensearch");
+        assertEquals("linux", opensearch.osToken(Platform.Os.LINUX));
+        assertEquals("windows", opensearch.osToken(Platform.Os.WINDOWS));
+        assertNull(opensearch.osToken(Platform.Os.MACOS), "OpenSearch publishes no macOS build");
+        assertNull(opensearch.osToken(Platform.Os.UNKNOWN));
+    }
+
+    @Test
+    public void test_executable_perOsOverride() throws Exception {
+        final Map<String, ComponentDefinition> defs =
+                load("component.nodejs.executable=bin/node\ncomponent.nodejs.executable.windows=node.exe\n");
+        final ComponentDefinition nodejs = defs.get("nodejs");
+        assertEquals("bin/node", nodejs.executable(Platform.Os.LINUX));
+        assertEquals("bin/node", nodejs.executable(Platform.Os.MACOS));
+        assertEquals("node.exe", nodejs.executable(Platform.Os.WINDOWS));
+    }
+
+    @Test
+    public void test_executable_absentIsNull() throws Exception {
+        final Map<String, ComponentDefinition> defs = load("component.opensearch.version=3.8.0\n");
+        assertNull(defs.get("opensearch").executable(Platform.Os.LINUX));
+    }
+
 }

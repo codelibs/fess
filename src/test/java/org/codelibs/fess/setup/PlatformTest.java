@@ -42,14 +42,6 @@ public class PlatformTest {
     }
 
     @Test
-    public void test_token_macosHasNoOfficialBuild() {
-        assertEquals("linux", Platform.token(Platform.Os.LINUX));
-        assertEquals("windows", Platform.token(Platform.Os.WINDOWS));
-        assertNull(Platform.token(Platform.Os.MACOS));
-        assertNull(Platform.token(Platform.Os.UNKNOWN));
-    }
-
-    @Test
     public void test_archiveExt() {
         assertEquals("tar.gz", Platform.archiveExt(Platform.Os.LINUX));
         assertEquals("zip", Platform.archiveExt(Platform.Os.WINDOWS));

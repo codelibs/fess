@@ -38,4 +38,4 @@ if [ ! -x "$JAVA" ]; then
     exit 1
 fi
 
-exec "$JAVA" -jar "$FESS_HOME/bin/fess-setup.jar" "$@"
+exec "$JAVA" -Dfess.home="$FESS_HOME" -jar "$FESS_HOME/bin/fess-setup.jar" "$@"

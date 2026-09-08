@@ -123,4 +123,13 @@ REM External opensearch cluster
 REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.search_engine.http_address=http://localhost:9200
 REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path=C:\opensearch\config\dictionary
 
+REM Node.js for the Playwright crawler, installed by: bin\fess-setup install nodejs
+REM An environment variable, not a -D option: the crawler runs in a child process that inherits
+REM the environment but not the parent's system properties.
+IF NOT DEFINED PLAYWRIGHT_NODEJS_PATH (
+  FOR /D %%D IN ("%FESS_HOME%\nodejs\*") DO (
+    IF EXIST "%%D\node.exe" SET PLAYWRIGHT_NODEJS_PATH=%%D\node.exe
+  )
+)
+
 set GROOVY_TURN_OFF_JAVA_WARNINGS=true

@@ -90,21 +90,8 @@ public final class Platform {
     }
 
     /**
-     * Returns the OS token used in OpenSearch artifact names.
-     *
-     * @param os the operating system
-     * @return {@code "linux"} or {@code "windows"}, or {@code null} when no official build exists
-     */
-    public static String token(final Os os) {
-        return switch (os) {
-        case LINUX -> "linux";
-        case WINDOWS -> "windows";
-        default -> null;
-        };
-    }
-
-    /**
-     * Returns the archive extension OpenSearch publishes for the given OS.
+     * Returns the archive extension publishers use for the given OS. Windows gets zip; everything
+     * else gets a gzipped tar. This holds for both OpenSearch and Node.js.
      *
      * @param os the operating system
      * @return {@code "zip"} on Windows, {@code "tar.gz"} otherwise
