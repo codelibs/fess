@@ -104,6 +104,29 @@ public final class FessPluginInstaller {
     }
 
     /**
+     * Returns the artifact name a plugin jar's file name carries.
+     *
+     * <p>The split is at the first hyphen followed by a digit, which is where a Maven file name
+     * turns from name into version. Doing it the other way round, by trying each known prefix,
+     * would cut {@code fess-webapp-mcp-client} down to {@code fess-webapp-mcp}.</p>
+     *
+     * @param fileName the file name
+     * @return the artifact name, or {@code null} when the name does not look like a plugin jar
+     */
+    public static String artifactIdOf(final String fileName) {
+        if (!fileName.endsWith(JAR)) {
+            return null;
+        }
+        final String stem = fileName.substring(0, fileName.length() - JAR.length());
+        for (int i = 1; i < stem.length() - 1; i++) {
+            if (stem.charAt(i) == '-' && Character.isDigit(stem.charAt(i + 1))) {
+                return stem.substring(0, i);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Lists the installed jars of one plugin, in file name order.
      *
      * <p>More than one is possible: nothing stops two versions of a plugin sitting side by side,
