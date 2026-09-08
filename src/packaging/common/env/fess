@@ -16,9 +16,6 @@ FESS_PORT=8080
 # Heap Memory
 FESS_HEAP_SIZE=512m
 
-# Elasticsearch Path
-SEARCH_ENGINE_HOME=/usr/share/opensearch/
-
-# Elasticsearch URL
+# The OpenSearch server Fess talks to
 SEARCH_ENGINE_HTTP_URL=http://localhost:9200
 

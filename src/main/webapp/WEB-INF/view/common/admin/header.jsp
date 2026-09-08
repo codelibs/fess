@@ -17,11 +17,6 @@
 			title="<la:message key="labels.eol_error" />">
 			<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle text-danger" aria-hidden="true"></i></a></li>
 		</c:if>
-		<c:if test="${developmentMode}">
-			<li class="nav-item" data-toggle="tooltip" data-placement="left"
-				title="<la:message key="labels.development_mode_warning" />">
-				<a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i></a></li>
-		</c:if>
 		<li class="nav-item" data-toggle="tooltip" data-placement="left"
 			title="<la:message key="labels.tooltip_search_view" />"><a class="nav-link" href="${contextPath}/" aria-label="<la:message key="labels.tooltip_search_view" />"><i class="fa fa-list-alt" aria-hidden="true"></i></a></li>
 		<c:if test="${fe:permission('admin-scheduler')}">

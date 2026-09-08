@@ -37,7 +37,7 @@ mvn jdeb:jdeb           # Build .deb package
 # Test
 mvn test                            # Unit tests (*Test.java)
 mvn test -Dtest=ClassName           # Single unit test
-mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
+mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9200"
 
 # Format (run before committing)
 mvn formatter:format

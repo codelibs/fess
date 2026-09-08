@@ -189,18 +189,20 @@ public class UiConfigHandler {
             final boolean userFavoriteEnabled = cfg.isUserFavorite();
             final boolean thumbnailEnabled = cfg.isThumbnailEnabled();
 
-            // eoled / development_mode come from SystemHelper (same source as the JSP runtime data).
+            // eoled comes from SystemHelper, the same source as the JSP runtime data.
             boolean eoled = false;
-            boolean developmentMode = false;
             try {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 if (systemHelper != null) {
                     eoled = systemHelper.isEoled();
-                    developmentMode = ComponentUtil.getSearchEngineClient().isEmbedded();
                 }
             } catch (final Exception ignored) {
-                // SystemHelper or SearchEngineClient not wired in unit harness — default to false.
+                // SystemHelper not wired in unit harness — default to false.
             }
+            // development_mode reported whether Fess was running the embedded search engine, which
+            // no longer exists: the search engine is always a separate server now. The field is
+            // required by openapi-user.yaml and read by the bundled theme, so it stays and is false.
+            final boolean developmentMode = false;
 
             // label_options: built from LabelTypeHelper; empty list when no labels configured.
             final List<Map<String, Object>> labelOptions = new ArrayList<>();

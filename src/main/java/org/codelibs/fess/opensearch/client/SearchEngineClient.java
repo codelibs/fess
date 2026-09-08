@@ -17,7 +17,6 @@ package org.codelibs.fess.opensearch.client;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
-import static org.codelibs.opensearch.runner.OpenSearchRunner.newConfigs;
 import static org.opensearch.core.action.ActionListener.wrap;
 
 import java.io.File;
@@ -73,12 +72,9 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
-import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
-import org.codelibs.opensearch.runner.OpenSearchRunner;
-import org.codelibs.opensearch.runner.OpenSearchRunner.Configs;
-import org.codelibs.opensearch.runner.net.OpenSearchCurl;
+import org.codelibs.fess.util.SearchEngineCurl;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.core.message.UserMessages;
@@ -210,14 +206,8 @@ public class SearchEngineClient implements Client {
 
     private static final String CONFIG_INDEX_PREFIX = "fess_config";
 
-    /** OpenSearch runner for managing the embedded search engine */
-    protected OpenSearchRunner runner;
-
     /** OpenSearch client for executing operations */
     protected Client client;
-
-    /** Configuration settings for the search engine */
-    protected Map<String, String> settings;
 
     /** Path to index configuration resources */
     protected String indexConfigPath = "fess_indices";
@@ -248,9 +238,6 @@ public class SearchEngineClient implements Client {
 
     /** Maximum retry attempts for search engine status checks */
     protected int maxEsStatusRetry = 60;
-
-    /** Name of the search engine cluster */
-    protected String clusterName = "fesen";
 
     /** The config index whose bulk data is reloaded on startup so newly shipped jobs appear on upgraded installations. */
     protected static final String SCHEDULED_JOB_CONFIG_INDEX = "fess_config.scheduled_job";
@@ -284,15 +271,6 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Sets the configuration settings for the search engine.
-     *
-     * @param settings map of configuration key-value pairs
-     */
-    public void setSettings(final Map<String, String> settings) {
-        this.settings = settings;
-    }
-
-    /**
      * Gets the current cluster health status.
      *
      * @return the cluster health status name
@@ -304,24 +282,6 @@ public class SearchEngineClient implements Client {
                 .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout())
                 .getStatus()
                 .name();
-    }
-
-    /**
-     * Sets the OpenSearch runner for embedded mode.
-     *
-     * @param runner the OpenSearch runner instance
-     */
-    public void setRunner(final OpenSearchRunner runner) {
-        this.runner = runner;
-    }
-
-    /**
-     * Checks if the search engine is running in embedded mode.
-     *
-     * @return true if running in embedded mode, false otherwise
-     */
-    public boolean isEmbedded() {
-        return runner != null;
     }
 
     /**
@@ -347,6 +307,31 @@ public class SearchEngineClient implements Client {
     }
 
     /**
+     * Normalises {@code fess.dictionary.path} and appends the configured dictionary prefix.
+     *
+     * <p>The index settings concatenate this value with a relative file name -- {@code fess.json}
+     * carries {@code "keywords_path": "${fess.dictionary.path}ar/protwords.txt"} -- so a value
+     * without a trailing separator produces {@code .../dictionaryar/protwords.txt} and index
+     * creation fails with {@code IOException while reading keywords_path: file not readable}.
+     * The value reaches Fess from {@code FESS_DICTIONARY_PATH} or {@code -Dfess.dictionary.path},
+     * neither of which is required to end in a separator, so it is normalised here. The trailing
+     * separator used to be added only when a dictionary prefix was configured, which is not the
+     * default; the embedded search engine hid the gap by leaving the property unset entirely.</p>
+     *
+     * @param fessConfig the configuration supplying the dictionary prefix
+     */
+    protected void resolveDictionaryPath(final FessConfig fessConfig) {
+        String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+        if (StringUtil.isNotBlank(dictionaryPath) && !dictionaryPath.endsWith("/")) {
+            dictionaryPath = dictionaryPath + "/";
+            System.setProperty("fess.dictionary.path", dictionaryPath);
+        }
+        if (StringUtil.isNotBlank(fessConfig.getIndexDictionaryPrefix())) {
+            System.setProperty("fess.dictionary.path", dictionaryPath + fessConfig.getIndexDictionaryPrefix() + "/");
+        }
+    }
+
+    /**
      * Initializes the search engine client and configures indices.
      * Called automatically after dependency injection is complete.
      */
@@ -357,84 +342,18 @@ public class SearchEngineClient implements Client {
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        if (StringUtil.isNotBlank(fessConfig.getIndexDictionaryPrefix())) {
-            String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
-            if (StringUtil.isBlank(dictionaryPath)) {
-                System.setProperty("fess.dictionary.path", fessConfig.getIndexDictionaryPrefix() + "/");
-            } else {
-                if (!dictionaryPath.endsWith("/")) {
-                    dictionaryPath = dictionaryPath + "/";
-                }
-                System.setProperty("fess.dictionary.path", dictionaryPath + fessConfig.getIndexDictionaryPrefix() + "/");
-            }
-        }
+        resolveDictionaryPath(fessConfig);
 
         String httpAddress = SystemUtil.getSearchEngineHttpAddress();
-        if (StringUtil.isBlank(httpAddress) && runner == null) {
-            switch (fessConfig.getFesenType()) {
-            case Constants.FESEN_TYPE_CLOUD:
-            case Constants.FESEN_TYPE_AWS:
-                httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
-                break;
-            default:
-                runner = new OpenSearchRunner();
-                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
-                final String esDir = System.getProperty("fess.es.dir");
-                if (esDir != null) {
-                    config.basePath(esDir);
-                }
-                config.disableESLogger();
-                runner.onBuild((number, settingsBuilder) -> {
-                    final File moduleDir = new File(esDir, "modules");
-                    if (moduleDir.isDirectory()) {
-                        settingsBuilder.put("path.modules", moduleDir.getAbsolutePath());
-                    } else {
-                        settingsBuilder.put("path.modules", new File(System.getProperty("user.dir"), "modules").getAbsolutePath());
-                    }
-                    final File pluginDir = new File(esDir, "plugins");
-                    if (pluginDir.isDirectory()) {
-                        settingsBuilder.put("path.plugins", pluginDir.getAbsolutePath());
-                    } else {
-                        settingsBuilder.put("path.plugins", new File(System.getProperty("user.dir"), "plugins").getAbsolutePath());
-                    }
-                    if (settings != null) {
-                        settingsBuilder.putProperties(settings, s -> s);
-                    }
-                });
-                runner.build(config);
-
-                final int port = runner.node().settings().getAsInt("http.port", 9200);
-                try {
-                    final InetAddress localhost = InetAddress.getByName("localhost");
-                    httpAddress = IpAddressUtil.buildUrl("http", localhost, port, "");
-                } catch (final UnknownHostException e) {
-                    httpAddress = "http://localhost:" + port; // Fallback
-                }
-                logger.warn("Embedded OpenSearch is running. This configuration is not recommended for production use.");
-                // Reads the raw system property rather than ChunkVectorHelper#getKnnEngine(): this
-                // runs very early in open() (before the embedded node's HTTP client, waitForYellowStatus,
-                // or any index/mapping machinery), the same @PostConstruct phase whose ordering
-                // sensitivity is this whole branch's origin (Task 2 must bundle the k-NN plugin before
-                // Task 3's static mapping can rely on it). ComponentUtil.getFessConfig() a few lines up
-                // already proves a live component lookup succeeds this early, and ChunkVectorHelper has
-                // no eager dependency back on this class, so a live getKnnEngine() call would likely be
-                // safe too -- but this diagnostic fires before the search cluster exists, so a wrong
-                // guess here is expensive to be wrong about, and unlike the mapping-side substitution
-                // (fixed to require validation), an unvalidated engine value is merely informational
-                // here. Sharing ChunkVectorHelper's key/default constants gets the same "one source of
-                // truth, no silent desync" outcome as calling getKnnEngine() would, without adding a new
-                // component-container lookup at this specific point.
-                final String knnEngine =
-                        fessConfig.getSystemProperty(ChunkVectorHelper.KNN_ENGINE_PROPERTY, ChunkVectorHelper.DEFAULT_KNN_ENGINE);
-                if (isUnsupportedEmbeddedEngine(true, knnEngine)) {
-                    logger.warn("""
-                            content_chunker.search.knn.engine is set to '{}', but the embedded OpenSearch's bundled k-NN plugin \
-                            has no JNI native libraries for it: index creation will succeed, then every document write is \
-                            silently dropped by an uncaught error, and searches will return zero hits. Set \
-                            content_chunker.search.knn.engine=lucene, or use Docker or an external OpenSearch instead.""", knnEngine);
-                }
-                break;
-            }
+        if (StringUtil.isBlank(httpAddress)) {
+            httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
+        }
+        if (StringUtil.isBlank(httpAddress)) {
+            throw new FessSystemException("""
+                    No search engine address is configured, and Fess needs an OpenSearch server to run. \
+                    Set SEARCH_ENGINE_HTTP_URL in bin/fess.in.sh (bin\\fess.in.bat on Windows), or \
+                    search_engine.http.url in fess_config.properties. \
+                    Run bin/fess-setup install opensearch to set one up.""");
         }
         client = createHttpClient(fessConfig, httpAddress);
 
@@ -444,7 +363,7 @@ public class SearchEngineClient implements Client {
 
         waitForYellowStatus(fessConfig);
 
-        warnUnlessOpenSearch3();
+        verifyEngineVersion();
 
         indexConfigList.forEach(configName -> {
             final String[] values = configName.split("/");
@@ -565,7 +484,7 @@ public class SearchEngineClient implements Client {
             client.admin().indices().prepareRefresh(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
             try (CurlResponse response = ComponentUtil.getCurlHelper().get("/" + indexName + "/_count").execute()) {
                 if (response.getHttpStatusCode() == 200) {
-                    final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+                    final Map<String, Object> contentMap = response.getContent(SearchEngineCurl.jsonParser());
                     final Object count = contentMap.get("count");
                     if (count instanceof Number) {
                         return ((Number) count).longValue();
@@ -1270,25 +1189,6 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Determines whether the configured ANN engine cannot work on the embedded search engine.
-     *
-     * <p>The bundled k-NN plugin ships without its JNI libraries, so faiss and nmslib (raw input --
-     * this method runs on the unvalidated system property value, before {@link
-     * org.codelibs.fess.helper.ChunkVectorHelper#getKnnEngine() ChunkVectorHelper#getKnnEngine()}'s
-     * allow-set would separately reject nmslib outright) accept the index creation and then lose
-     * every document write in an uncaught thread. Only the pure-Java lucene engine works embedded;
-     * an external or containerized OpenSearch's JNI libraries make faiss usable too (nmslib is never
-     * a Fess-accepted engine value regardless of deployment, see {@code getKnnEngine()}).</p>
-     *
-     * @param embedded whether Fess is running the embedded search engine
-     * @param engine   the configured ANN engine
-     * @return {@code true} when the combination silently discards documents
-     */
-    protected boolean isUnsupportedEmbeddedEngine(final boolean embedded, final String engine) {
-        return embedded && !"lucene".equals(engine);
-    }
-
-    /**
      * Adds a rewrite rule for document mappings.
      *
      * @param rule the rewrite rule to apply to document mappings
@@ -1603,9 +1503,8 @@ public class SearchEngineClient implements Client {
             }
             ThreadUtil.sleep(1000L);
         }
-        final String message =
-                "Fesen (" + SystemUtil.getSearchEngineHttpAddress() + ") is not available. Check the state of your Fesen cluster ("
-                        + clusterName + ") in " + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms.";
+        final String message = "The search engine at " + SystemUtil.getSearchEngineHttpAddress() + " did not become available within "
+                + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms. Check that OpenSearch is running and reachable.";
         throw new ContainerInitFailureException(message, cause);
     }
 
@@ -1642,17 +1541,15 @@ public class SearchEngineClient implements Client {
     @Override
     @PreDestroy
     public void close() {
-        if (runner != null) {
-            try {
-                client.admin()
-                        .indices()
-                        .prepareFlush()
-                        .setForce(true)
-                        .execute()
-                        .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
-            } catch (final Exception e) {
-                logger.warn("Failed to flush indices.", e);
-            }
+        try {
+            client.admin()
+                    .indices()
+                    .prepareFlush()
+                    .setForce(true)
+                    .execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
+        } catch (final Exception e) {
+            logger.warn("Failed to flush indices.", e);
         }
         try {
             client.close();
@@ -2841,16 +2738,7 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Sets the name of the search engine cluster.
-     *
-     * @param clusterName the cluster name
-     */
-    public void setClusterName(final String clusterName) {
-        this.clusterName = clusterName;
-    }
-
-    /**
-     * Logs an error unless the backend is OpenSearch 3.x or later.
+     * Aborts startup unless the backend is OpenSearch 3.x or later.
      *
      * <p>Fess walks whole result sets -- document export, purge, label updates, backup, the
      * scroll search API, suggest dictionary builds -- over a point in time ordered by a
@@ -2860,10 +2748,17 @@ public class SearchEngineClient implements Client {
      * hangs, because the client's socket timeout is disabled by default, so those jobs would
      * stall rather than fail visibly.</p>
      *
-     * <p>Startup is not aborted: search itself still works, and an operator may be mid-upgrade.
-     * The error is logged so the mismatch is noticed before a scheduled job hangs.</p>
+     * <p>This used to log an error and carry on, on the grounds that search still worked and an
+     * operator might be mid-upgrade. That reasoning came from a time when the alternative was a
+     * bundled engine nobody chose; now that the search engine is always a server the operator
+     * installed and pointed Fess at, a version mismatch is a misconfiguration to fix before
+     * anything runs -- and failing at startup is far cheaper to diagnose than a scheduled job
+     * that hangs days later.</p>
+     *
+     * <p>A backend that cannot be reached at all is not treated as a mismatch: the type check is
+     * skipped and the connection failure surfaces on its own.</p>
      */
-    protected void warnUnlessOpenSearch3() {
+    protected void verifyEngineVersion() {
         final EngineType engineType;
         try {
             engineType = getEngineInfo().getType();
@@ -2878,15 +2773,17 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Reports a backend Fess cannot walk result sets on.
+     * Rejects a backend Fess cannot walk result sets on.
      *
      * @param engineType the engine the backend reported
+     * @throws FessSystemException always
      */
     protected void reportUnsupportedEngine(final EngineType engineType) {
-        logger.error("The search engine reports {}, but Fess requires OpenSearch 3.x or later. Operations that walk every "
-                + "matching document (document export, purge, label update, backup, the scroll search API and "
-                + "suggest dictionary builds) sort by _shard_doc, which earlier engines do not implement; over "
-                + "HTTP they will hang rather than report an error.", engineType);
+        throw new FessSystemException("The search engine reports " + engineType
+                + ", but Fess requires OpenSearch 3.x or later. Operations that walk every matching document "
+                + "(document export, purge, label update, backup, the scroll search API and suggest dictionary "
+                + "builds) sort by _shard_doc, which earlier engines do not implement; over HTTP they hang "
+                + "rather than report an error. Upgrade the search engine, or run bin/fess-setup install opensearch.");
     }
 
     /**

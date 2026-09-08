@@ -38,12 +38,6 @@ ${fe:html(true)}
 									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle text-danger" aria-hidden="true"></i></a>
 								</li>
 							</c:if>
-							<c:if test="${developmentMode}">
-								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
-									title="<la:message key="labels.development_mode_warning" />"
-								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"
-									></i></a></li>
-							</c:if>
 							<c:choose>
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">

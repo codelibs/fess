@@ -20,8 +20,11 @@ if [ "x$FESS_HEAP_SIZE" != "x" ]; then
     FESS_MAX_MEM=$FESS_HEAP_SIZE
 fi
 
-# External opensearch cluster
-#SEARCH_ENGINE_HTTP_URL=http://localhost:9200
+# The OpenSearch server Fess talks to. Run bin/fess-setup install opensearch to set one up.
+# An exported SEARCH_ENGINE_HTTP_URL wins, so the init scripts and container images can point
+# Fess elsewhere without editing this file.
+SEARCH_ENGINE_HTTP_URL=${SEARCH_ENGINE_HTTP_URL:-http://localhost:9200}
+# The config directory of that server, where configsync keeps the dictionaries Fess pushes.
 #FESS_DICTIONARY_PATH=/var/lib/opensearch/config/
 
 # SSL truststore for certificate validation over https
@@ -97,9 +100,6 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfile.encoding=UTF-8"
 # Application Configuration
 if [ "x$APP_NAME" = "x" ]; then
   APP_NAME=fess
-fi
-if [ "x$SEARCH_ENGINE_HOME" = "x" ]; then
-  SEARCH_ENGINE_HOME=$FESS_HOME/es
 fi
 if [ "x$FESS_TEMP_PATH" = "x" ]; then
   FESS_TEMP_PATH=$FESS_HOME/temp

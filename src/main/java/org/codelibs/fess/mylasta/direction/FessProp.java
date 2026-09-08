@@ -2393,51 +2393,31 @@ public interface FessProp {
     String getSearchEngineType();
 
     default String getFesenType() {
-        final String value = getSearchEngineType();
-        if (value != null) {
-            return value;
-        }
-        return get("elasticsearch.type");
+        return getSearchEngineType();
     }
 
     String getSearchEngineHttpUrl();
 
     default String getFesenHttpUrl() {
-        final String value = getSearchEngineHttpUrl();
-        if (value != null) {
-            return value;
-        }
-        return get("elasticsearch.http.url");
+        return getSearchEngineHttpUrl();
     }
 
     String getSearchEngineHttpSslCertificateAuthorities();
 
     default String getFesenHttpSslCertificateAuthorities() {
-        final String value = getSearchEngineHttpSslCertificateAuthorities();
-        if (value != null) {
-            return value;
-        }
-        return get("elasticsearch.http.ssl.certificate_authorities");
+        return getSearchEngineHttpSslCertificateAuthorities();
     }
 
     String getSearchEngineUsername();
 
     default String getFesenUsername() {
-        final String value = getSearchEngineUsername();
-        if (value != null) {
-            return value;
-        }
-        return get("elasticsearch.username");
+        return getSearchEngineUsername();
     }
 
     String getSearchEnginePassword();
 
     default String getFesenPassword() {
-        final String value = getSearchEnginePassword();
-        if (value != null) {
-            return value;
-        }
-        return get("elasticsearch.password");
+        return getSearchEnginePassword();
     }
 
     Integer getAsInteger(String propertyKey);
@@ -2445,11 +2425,7 @@ public interface FessProp {
     Integer getSearchEngineHeartbeatIntervalAsInteger();
 
     default long getFesenHeartbeatInterval() {
-        Integer value = getSearchEngineHeartbeatIntervalAsInteger();
-        if (value != null) {
-            return value.longValue();
-        }
-        value = getAsInteger("elasticsearch.heartbeat_interval");
+        final Integer value = getSearchEngineHeartbeatIntervalAsInteger();
         if (value != null) {
             return value.longValue();
         }

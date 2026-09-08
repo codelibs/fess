@@ -59,7 +59,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.opensearch.runner.net.OpenSearchCurl;
+import org.codelibs.fess.util.SearchEngineCurl;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
@@ -1230,7 +1230,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             // recording the backoff here is what keeps the asynchronous parent group walk from
             // hammering a Graph that already asked us to wait.
             applyGraphThrottle(response);
-            final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+            final Map<String, Object> contentMap = response.getContent(SearchEngineCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response={}", contentMap);
             }
@@ -1658,7 +1658,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             // Before the body: a throttled reply is not required to be JSON, and the parser throws
             // CurlException when it is not.
             applyGraphThrottle(response);
-            final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+            final Map<String, Object> contentMap = response.getContent(SearchEngineCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("[getParentGroup] Response for id {}: {}", id, contentMap);
             }
@@ -1743,7 +1743,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
             // an answer -- groupList.add(id) below runs on every non-throwing path -- so nothing
             // else on that path ever reached Graph to notice the throttling.
             applyGraphThrottle(response);
-            final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+            final Map<String, Object> contentMap = response.getContent(SearchEngineCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("[processGroup] Response for id {}: {}", id, contentMap);
             }
