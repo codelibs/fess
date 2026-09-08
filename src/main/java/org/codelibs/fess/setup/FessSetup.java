@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,6 +40,9 @@ public final class FessSetup {
     /** Post-install hook that installs the Fess plugins and writes configsync.config_path. */
     private static final String POST_OPENSEARCH = "opensearch";
 
+    /** The definition holding where Fess plugins come from and go, rather than a download. */
+    private static final String PLUGIN_COMPONENT = "plugin";
+
     private static final int EXIT_OK = 0;
 
     private static final int EXIT_FAILED = 1;
@@ -53,11 +57,24 @@ public final class FessSetup {
                   Download OpenSearch, install the Fess plugins into it and configure it.
                   Official builds exist for Linux and Windows only.
 
-              install plugins --opensearch-home <dir> [--version <version>]
-                  Install the Fess plugins into an OpenSearch you already have.
+              install opensearch-plugins --opensearch-home <dir> [--version <version>]
+                  Install the Fess plugins into an OpenSearch you already have, in place of
+                  running its bin/opensearch-plugin four times by hand.
+
+              install nodejs [--dest <dir>] [--version <version>]
+                  Download Node.js, which the Playwright crawler needs.
+
+              install plugin <name>... [--version <version>] [--repository <url>]
+                  Install Fess plugins, for example fess-script-groovy or fess-ds-git.
+
+              remove plugin <name>...
+                  Delete installed Fess plugins.
 
               list
                   Show the components this build knows how to install.
+
+              list plugins [--repository <url>]
+                  Show the Fess plugins published for this version, and which are installed.
             """;
 
     private FessSetup() {
@@ -88,8 +105,9 @@ public final class FessSetup {
         try {
             final Map<String, ComponentDefinition> definitions = loadDefinitions();
             return switch (args[0]) {
-            case "list" -> list(definitions, out);
+            case "list" -> list(args, definitions, out, err);
             case "install" -> install(args, definitions, out, err);
+            case "remove" -> remove(args, definitions, out, err);
             default -> {
                 err.println(USAGE);
                 yield EXIT_USAGE;
@@ -119,12 +137,79 @@ public final class FessSetup {
         }
     }
 
-    private static int list(final Map<String, ComponentDefinition> definitions, final PrintStream out) {
+    private static int list(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
+            final PrintStream err) throws SetupException {
+        if (args.length > 1) {
+            if (!"plugins".equals(args[1])) {
+                err.println("error: unknown list target: " + args[1]);
+                err.println(USAGE);
+                return EXIT_USAGE;
+            }
+            return listPlugins(definitions, parseOptions(args, 2), out);
+        }
         definitions.forEach((name, definition) -> {
+            // A definition without a URL describes where something comes from rather than a
+            // download of its own: the plugin definition is one, and `install plugin` uses it.
+            if (definition.get("url") == null) {
+                return;
+            }
             final String version = definition.get("version");
             out.println(version == null ? name : name + "  " + version);
         });
         return EXIT_OK;
+    }
+
+    /**
+     * Prints the plugins the repository publishes for this Fess, marking the installed ones.
+     *
+     * @param definitions the setup definition
+     * @param options the command line options
+     * @param out the stream for normal output
+     * @return 0
+     * @throws SetupException if the repository or the plugin directory cannot be read
+     */
+    private static int listPlugins(final Map<String, ComponentDefinition> definitions, final Map<String, String> options,
+            final PrintStream out) throws SetupException {
+        final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
+        final String repository = options.getOrDefault("repository", definition.get("repository"));
+        final Path directory = pluginDirectory(definition, options);
+        final List<String> published = PluginRepository.namesFromListing(Downloader.readString(URI.create(repository)));
+        for (final String name : published) {
+            final String versions = installedVersions(directory, name);
+            out.println(versions == null ? "  " + name : "  " + name + "  (installed: " + versions + ")");
+        }
+
+        // A plugin built locally, or one published somewhere else, is installed but not listed
+        // above. Saying nothing about it would make `list plugins` look as though it had lost it.
+        final List<String> unlisted = new ArrayList<>();
+        for (final Path jar : FessPluginInstaller.installed(directory)) {
+            if (published.stream().noneMatch(name -> FessPluginInstaller.isJarOf(jar.getFileName().toString(), name))) {
+                unlisted.add(jar.getFileName().toString());
+            }
+        }
+        if (!unlisted.isEmpty()) {
+            out.println();
+            out.println("Installed but not published by " + repository + ":");
+            unlisted.forEach(name -> out.println("  " + name));
+        }
+        return EXIT_OK;
+    }
+
+    /**
+     * Returns the installed versions of a plugin as a comma-separated string.
+     *
+     * @param directory the plugin directory
+     * @param artifactId the plugin name
+     * @return the versions, or {@code null} when the plugin is not installed
+     * @throws SetupException if the plugin directory cannot be read
+     */
+    private static String installedVersions(final Path directory, final String artifactId) throws SetupException {
+        final List<Path> jars = FessPluginInstaller.installedJars(directory, artifactId);
+        if (jars.isEmpty()) {
+            return null;
+        }
+        return String.join(", ",
+                jars.stream().map(jar -> FessPluginInstaller.versionOf(jar.getFileName().toString(), artifactId)).toList());
     }
 
     private static int install(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
@@ -135,15 +220,18 @@ public final class FessSetup {
         }
         final String target = args[1];
         final Map<String, String> options = parseOptions(args, 2);
-        if ("plugins".equals(target)) {
+        if ("opensearch-plugins".equals(target)) {
             final String home = options.get("opensearch-home");
             if (home == null) {
-                err.println("error: install plugins requires --opensearch-home <dir>");
+                err.println("error: install opensearch-plugins requires --opensearch-home <dir>");
                 err.println(USAGE);
                 return EXIT_USAGE;
             }
             installPlugins(definitions.get("opensearch"), Path.of(home), options, out);
             return EXIT_OK;
+        }
+        if (PLUGIN_COMPONENT.equals(target)) {
+            return installFessPlugins(args, definitions, options, out, err);
         }
         final ComponentDefinition definition = definitions.get(target);
         if (definition == null) {
@@ -151,6 +239,155 @@ public final class FessSetup {
             return EXIT_FAILED;
         }
         return installComponent(definition, options, out, err);
+    }
+
+    /**
+     * Installs Fess plugins into the webapp's plugin directory.
+     *
+     * <p>The version is resolved from the repository unless the caller names one, so that
+     * {@code install plugin fess-ds-git} picks the latest release built for this Fess rather
+     * than whatever is newest.</p>
+     *
+     * @param args the command line
+     * @param definitions the setup definition
+     * @param options the parsed options
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 on success, 2 when no plugin was named
+     * @throws SetupException if a download or a file operation fails
+     */
+    private static int installFessPlugins(final String[] args, final Map<String, ComponentDefinition> definitions,
+            final Map<String, String> options, final PrintStream out, final PrintStream err) throws SetupException {
+        final List<String> artifactIds = positionals(args, 2);
+        if (artifactIds.isEmpty()) {
+            err.println("error: install plugin requires at least one plugin name, for example:");
+            err.println("  fess-setup install plugin fess-script-groovy");
+            err.println("Run `fess-setup list plugins` to see what is published.");
+            return EXIT_USAGE;
+        }
+        final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
+        final String repository = options.getOrDefault("repository", definition.get("repository"));
+        final Path directory = pluginDirectory(definition, options);
+        for (final String artifactId : artifactIds) {
+            final String version = options.containsKey("version") ? options.get("version") : resolveVersion(repository, artifactId);
+            final Path jar = directory.resolve(FessPluginInstaller.jarName(artifactId, version));
+            final String url = PluginRepository.jarUrl(repository, artifactId, version);
+            out.println("Downloading " + url);
+            final int[] lastPercent = { -1 };
+            Downloader.download(URI.create(url), jar, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
+            out.println();
+            for (final Path previous : FessPluginInstaller.removeOtherVersions(directory, artifactId, jar)) {
+                out.println("Removed the previous " + previous.getFileName());
+            }
+            out.println("Installed " + jar);
+        }
+        out.println();
+        out.println("Restart Fess to load " + (artifactIds.size() == 1 ? "it." : "them."));
+        return EXIT_OK;
+    }
+
+    /**
+     * Deletes installed Fess plugins.
+     *
+     * @param args the command line
+     * @param definitions the setup definition
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 on success, 2 on a usage error
+     * @throws SetupException if a jar cannot be deleted
+     */
+    private static int remove(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
+            final PrintStream err) throws SetupException {
+        if (args.length < 2 || !PLUGIN_COMPONENT.equals(args[1])) {
+            err.println(USAGE);
+            return EXIT_USAGE;
+        }
+        final List<String> artifactIds = positionals(args, 2);
+        if (artifactIds.isEmpty()) {
+            err.println("error: remove plugin requires at least one plugin name");
+            return EXIT_USAGE;
+        }
+        final Path directory = pluginDirectory(definitions.get(PLUGIN_COMPONENT), parseOptions(args, 2));
+        boolean removedAny = false;
+        for (final String artifactId : artifactIds) {
+            final List<Path> removed = FessPluginInstaller.remove(directory, artifactId);
+            if (removed.isEmpty()) {
+                out.println(artifactId + " is not installed.");
+            } else {
+                removed.forEach(jar -> out.println("Removed " + jar));
+                removedAny = true;
+            }
+        }
+        if (removedAny) {
+            out.println();
+            out.println("Restart Fess for the change to take effect.");
+        }
+        return EXIT_OK;
+    }
+
+    /**
+     * Picks the plugin version that fits this Fess, reading the artifact's Maven metadata.
+     *
+     * @param repository the plugin repository URL
+     * @param artifactId the plugin name
+     * @return the version to install
+     * @throws SetupException if the metadata cannot be read or holds no matching version
+     */
+    private static String resolveVersion(final String repository, final String artifactId) throws SetupException {
+        final String productVersion = FessPluginInstaller.productVersion(fessVersion());
+        final String metadata = Downloader.readString(URI.create(PluginRepository.metadataUrl(repository, artifactId)));
+        return PluginRepository.selectVersion(PluginRepository.versionsFromMetadata(metadata), productVersion);
+    }
+
+    /**
+     * Returns the directory Fess loads plugins from, which {@code --dest} overrides.
+     *
+     * @param definition the plugin definition
+     * @param options the command line options
+     * @return the plugin directory
+     */
+    private static Path pluginDirectory(final ComponentDefinition definition, final Map<String, String> options) {
+        final String dest = options.get("dest");
+        if (dest != null) {
+            return Path.of(dest);
+        }
+        final String configured = definition.resolve("dest", Map.of("fess.home", fessHome()));
+        return configured != null ? Path.of(configured) : FessPluginInstaller.directory(fessHome());
+    }
+
+    /**
+     * Returns this build's version, which the jar's manifest carries.
+     *
+     * <p>Empty when there is no manifest, which is how the class runs under test and from an
+     * IDE. {@link FessPluginInstaller#productVersion} then reports that {@code --version} is
+     * needed rather than guessing one.</p>
+     *
+     * @return the version, or an empty string
+     */
+    static String fessVersion() {
+        final String version = FessSetup.class.getPackage().getImplementationVersion();
+        return version == null ? "" : version;
+    }
+
+    /**
+     * Collects the arguments that are neither an option nor an option's value.
+     *
+     * @param args the command line
+     * @param from the index to start at
+     * @return the positional arguments, in order
+     */
+    static List<String> positionals(final String[] args, final int from) {
+        final List<String> values = new ArrayList<>();
+        for (int i = from; i < args.length; i++) {
+            if (args[i].startsWith("--")) {
+                if (i + 1 < args.length && !args[i + 1].startsWith("--")) {
+                    i++;
+                }
+                continue;
+            }
+            values.add(args[i]);
+        }
+        return values;
     }
 
     /**
@@ -264,9 +501,9 @@ public final class FessSetup {
         final String version = options.getOrDefault("version", definition.get("plugin.version"));
         final List<String> artifacts = definition.list("plugin.artifacts");
         for (final String coordinate : artifacts) {
-            final String url = PluginInstaller.zipUrl(repository, coordinate, version);
+            final String url = OpenSearchPluginInstaller.zipUrl(repository, coordinate, version);
             out.println("Installing " + coordinate + ":" + version);
-            PluginInstaller.install(home, url);
+            OpenSearchPluginInstaller.install(home, url);
         }
     }
 
@@ -303,14 +540,51 @@ public final class FessSetup {
                 return;
             }
             lastPercent[0] = percent;
-            out.printf("\r  %d%% (%d/%d MiB)", percent, bytes >> 20, total >> 20);
+            out.printf("\r  %d%% (%s)", percent, sizes(bytes, total));
         } else {
             final int megabytes = (int) (bytes >> 20);
             if (megabytes == lastPercent[0]) {
                 return;
             }
             lastPercent[0] = megabytes;
-            out.printf("\r  %d MiB", megabytes);
+            out.printf("\r  %s", size(bytes));
         }
+    }
+
+    /**
+     * Formats a byte count in the largest unit that does not round it to zero.
+     *
+     * @param bytes the count
+     * @return the formatted size
+     */
+    static String size(final long bytes) {
+        if (bytes >= 1L << 20) {
+            return (bytes >> 20) + " MiB";
+        }
+        if (bytes >= 1L << 10) {
+            return (bytes >> 10) + " KiB";
+        }
+        return bytes + " B";
+    }
+
+    /**
+     * Formats a progress pair, both figures in the unit that suits the total.
+     *
+     * <p>Choosing the unit per figure would print "0 B/9 KiB" at the start of a small download,
+     * and choosing MiB always -- which is what the OpenSearch bundle needs -- prints "0/0 MiB"
+     * for a plugin jar of a few kilobytes.</p>
+     *
+     * @param bytes bytes so far
+     * @param total the total size
+     * @return the formatted pair
+     */
+    static String sizes(final long bytes, final long total) {
+        if (total >= 1L << 20) {
+            return (bytes >> 20) + "/" + (total >> 20) + " MiB";
+        }
+        if (total >= 1L << 10) {
+            return (bytes >> 10) + "/" + (total >> 10) + " KiB";
+        }
+        return bytes + "/" + total + " B";
     }
 }

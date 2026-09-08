@@ -27,9 +27,9 @@ import java.nio.file.Path;
  * the CodeLibs plugins are not always published there -- 3.8.1 is absent from both Central and
  * maven.codelibs.org at the time of writing -- so the URL has to stay overridable.</p>
  */
-public final class PluginInstaller {
+public final class OpenSearchPluginInstaller {
 
-    private PluginInstaller() {
+    private OpenSearchPluginInstaller() {
     }
 
     /**

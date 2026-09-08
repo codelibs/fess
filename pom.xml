@@ -329,6 +329,10 @@
 							<archive>
 								<manifest>
 									<mainClass>org.codelibs.fess.setup.FessSetup</mainClass>
+									<!-- Implementation-Version is how `install plugin` learns which plugin
+									     release fits this build, so it does not have to be repeated in
+									     fess-setup.properties and kept in step by hand. -->
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 								</manifest>
 							</archive>
 						</configuration>

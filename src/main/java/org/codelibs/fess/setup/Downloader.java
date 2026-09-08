@@ -23,6 +23,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
@@ -53,6 +54,35 @@ public final class Downloader {
     }
 
     private Downloader() {
+    }
+
+    /**
+     * Reads {@code uri} into a string.
+     *
+     * <p>For the small documents that describe what to download -- a {@code maven-metadata.xml},
+     * a repository's directory index -- rather than the artifacts themselves.</p>
+     *
+     * @param uri the source
+     * @return the body, decoded as UTF-8
+     * @throws SetupException if the request fails or the server does not answer 200
+     */
+    public static String readString(final URI uri) throws SetupException {
+        try (HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT_SECONDS))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build()) {
+            final HttpRequest request = HttpRequest.newBuilder(uri).GET().build();
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() != 200) {
+                throw new SetupException("Failed to read " + uri + ": HTTP " + response.statusCode());
+            }
+            return response.body();
+        } catch (final IOException e) {
+            throw new SetupException("Failed to read " + uri, e);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SetupException("Interrupted while reading " + uri, e);
+        }
     }
 
     /**

@@ -1,11 +1,17 @@
 #!/bin/sh
 
-# Installs the artifacts Fess needs but does not bundle -- OpenSearch and its Fess plugins.
-# Run it once before starting Fess for the first time:
+# Installs the artifacts Fess needs but does not bundle. Run it once before starting Fess for
+# the first time:
 #
 #     bin/fess-setup install opensearch
 #
-# See bin/fess-setup for the other commands, or run it with no arguments.
+# It also installs Fess plugins and, for the Playwright crawler, Node.js:
+#
+#     bin/fess-setup list plugins
+#     bin/fess-setup install plugin fess-script-groovy
+#     bin/fess-setup install nodejs
+#
+# Run it with no arguments for the full list of commands.
 
 SCRIPT="$0"
 

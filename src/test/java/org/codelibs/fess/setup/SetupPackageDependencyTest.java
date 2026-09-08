@@ -36,6 +36,18 @@ import org.junit.jupiter.api.Test;
  */
 public class SetupPackageDependencyTest {
 
+    /**
+     * org.w3c.dom and org.xml.sax belong to the JDK's java.xml module despite not living under
+     * java.* or javax.*. test_allowedNonJavaxPackagesAreReallyJdkSupplied proves that.
+     *
+     * @param imported the imported type name
+     * @return whether the JDK supplies it
+     */
+    private static boolean isJdkPackage(final String imported) {
+        return imported.startsWith("java.") || imported.startsWith("javax.") || imported.startsWith("org.w3c.dom")
+                || imported.startsWith("org.xml.sax");
+    }
+
     @Test
     public void test_onlyJdkImports() throws IOException {
         final Path dir = Path.of("src/main/java/org/codelibs/fess/setup");
@@ -55,12 +67,25 @@ public class SetupPackageDependencyTest {
                     continue;
                 }
                 final String imported = trimmed.substring("import ".length()).replace("static ", "").replace(";", "").trim();
-                if (imported.startsWith("java.") || imported.startsWith("javax.") || imported.startsWith("org.codelibs.fess.setup.")) {
+                if (isJdkPackage(imported) || imported.startsWith("org.codelibs.fess.setup.")) {
                     continue;
                 }
                 violations.add(source.getFileName() + ": " + imported);
             }
         }
         assertTrue(violations.isEmpty(), "org.codelibs.fess.setup must depend on the JDK only, but found: " + violations);
+    }
+
+    /**
+     * Guards the allowance above: were any of these to stop being JDK-supplied, the setup jar
+     * would break at runtime while the import check still passed.
+     */
+    @Test
+    public void test_allowedNonJavaxPackagesAreReallyJdkSupplied() throws ClassNotFoundException {
+        for (final String name : new String[] { "org.w3c.dom.Document", "org.xml.sax.SAXException" }) {
+            final Class<?> type = Class.forName(name);
+            assertTrue(type.getClassLoader() == null, name + " is not loaded by the bootstrap loader");
+            assertTrue("java.xml".equals(type.getModule().getName()), name + " is not in java.xml");
+        }
     }
 }
