@@ -1186,6 +1186,16 @@
 			<artifactId>google-http-client-jackson2</artifactId>
 			<version>${google.http.client.version}</version>
 		</dependency>
+		<!-- OpenIdConnectAuthenticator uses GsonFactory from here, and this is the only one of the
+		     four google-http-client artifacts that was not declared. It arrived transitively from
+		     google-oauth-client instead, which asks for an older line than the core jar: two paths
+		     at the same depth, so declaration order decided it and the gson helper ran against a
+		     core jar of a different major version. Declaring it keeps all four on one version. -->
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-gson</artifactId>
+			<version>${google.http.client.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-xml</artifactId>
