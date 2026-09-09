@@ -75,6 +75,16 @@ public final class FessSetup {
 
               list plugins [--repository <url>]
                   Show the Fess plugins published for this version, and which are installed.
+
+              list installed
+                  Show the installed Fess plugins, without asking the repository.
+
+              upgrade plugins [--repository <url>]
+                  Re-install every installed Fess plugin at the version that fits this Fess.
+
+              check [--url <engine url>] [--playwright]
+                  Report on the installation: the engine, its plugins, and the installed
+                  plugins. Exit 0 when everything is in order, 1 when something is wrong.
             """;
 
     private FessSetup() {
@@ -108,6 +118,8 @@ public final class FessSetup {
             case "list" -> list(args, definitions, out, err);
             case "install" -> install(args, definitions, out, err);
             case "remove" -> remove(args, definitions, out, err);
+            case "upgrade" -> upgrade(args, definitions, out, err);
+            case "check" -> check(parseOptions(args, 1), definitions, out, err);
             default -> {
                 err.println(USAGE);
                 yield EXIT_USAGE;
@@ -140,6 +152,9 @@ public final class FessSetup {
     private static int list(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
             final PrintStream err) throws SetupException {
         if (args.length > 1) {
+            if ("installed".equals(args[1])) {
+                return listInstalled(definitions, parseOptions(args, 2), out);
+            }
             if (!"plugins".equals(args[1])) {
                 err.println("error: unknown list target: " + args[1]);
                 err.println(USAGE);
@@ -270,20 +285,38 @@ public final class FessSetup {
         final Path directory = pluginDirectory(definition, options);
         for (final String artifactId : artifactIds) {
             final String version = options.containsKey("version") ? options.get("version") : resolveVersion(repository, artifactId);
-            final Path jar = directory.resolve(FessPluginInstaller.jarName(artifactId, version));
-            final String url = PluginRepository.jarUrl(repository, artifactId, version);
-            out.println("Downloading " + url);
-            final int[] lastPercent = { -1 };
-            Downloader.download(URI.create(url), jar, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
-            out.println();
-            for (final Path previous : FessPluginInstaller.removeOtherVersions(directory, artifactId, jar)) {
-                out.println("Removed the previous " + previous.getFileName());
-            }
-            out.println("Installed " + jar);
+            installOne(repository, artifactId, version, directory, out);
         }
         out.println();
         out.println("Restart Fess to load " + (artifactIds.size() == 1 ? "it." : "them."));
         return EXIT_OK;
+    }
+
+    /**
+     * Downloads one plugin jar into the plugin directory and removes the other versions of it.
+     *
+     * <p>The removal happens after the download on purpose: doing it first would leave an
+     * installation with no plugin at all when the download then fails.</p>
+     *
+     * @param repository the plugin repository URL
+     * @param artifactId the plugin name
+     * @param version the version to install
+     * @param directory the plugin directory
+     * @param out the stream for normal output
+     * @throws SetupException if the download or a file operation fails
+     */
+    private static void installOne(final String repository, final String artifactId, final String version, final Path directory,
+            final PrintStream out) throws SetupException {
+        final Path jar = directory.resolve(FessPluginInstaller.jarName(artifactId, version));
+        final String url = PluginRepository.jarUrl(repository, artifactId, version);
+        out.println("Downloading " + url);
+        final int[] lastPercent = { -1 };
+        Downloader.download(URI.create(url), jar, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
+        out.println();
+        for (final Path previous : FessPluginInstaller.removeOtherVersions(directory, artifactId, jar)) {
+            out.println("Removed the previous " + previous.getFileName());
+        }
+        out.println("Installed " + jar);
     }
 
     /**
@@ -323,6 +356,201 @@ public final class FessSetup {
             out.println("Restart Fess for the change to take effect.");
         }
         return EXIT_OK;
+    }
+
+    /**
+     * Prints the installed plugins without asking the repository.
+     *
+     * <p>The first question about a broken installation is what is installed, and the answer
+     * must not depend on the machine having a route to the repository.</p>
+     *
+     * @param definitions the setup definition
+     * @param options the command line options
+     * @param out the stream for normal output
+     * @return 0
+     * @throws SetupException if the plugin directory cannot be read
+     */
+    private static int listInstalled(final Map<String, ComponentDefinition> definitions, final Map<String, String> options,
+            final PrintStream out) throws SetupException {
+        final Path directory = pluginDirectory(definitions.get(PLUGIN_COMPONENT), options);
+        final List<String> artifactIds = Diagnostics.installedArtifactIds(directory);
+        if (artifactIds.isEmpty()) {
+            out.println("No plugins are installed in " + directory);
+            return EXIT_OK;
+        }
+        for (final String artifactId : artifactIds) {
+            out.println("  " + artifactId + "  " + installedVersions(directory, artifactId));
+        }
+        return EXIT_OK;
+    }
+
+    /**
+     * Re-installs every installed plugin at the version that fits this Fess.
+     *
+     * <p>This is the chore a Fess upgrade creates: the plugins in WEB-INF/plugin were built
+     * against the previous release and stay behind until each is reinstalled by hand.</p>
+     *
+     * @param args the command line
+     * @param definitions the setup definition
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 on success, 2 on a usage error
+     * @throws SetupException if a download or a file operation fails
+     */
+    private static int upgrade(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
+            final PrintStream err) throws SetupException {
+        if (args.length < 2 || !"plugins".equals(args[1])) {
+            err.println(USAGE);
+            return EXIT_USAGE;
+        }
+        final Map<String, String> options = parseOptions(args, 2);
+        final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
+        final String repository = options.getOrDefault("repository", definition.get("repository"));
+        final Path directory = pluginDirectory(definition, options);
+        final List<String> artifactIds = Diagnostics.installedArtifactIds(directory);
+        if (artifactIds.isEmpty()) {
+            out.println("No plugins are installed in " + directory);
+            return EXIT_OK;
+        }
+        int upgraded = 0;
+        for (final String artifactId : artifactIds) {
+            final String current = installedVersions(directory, artifactId);
+            final String wanted = resolveVersion(repository, artifactId);
+            if (wanted.equals(current)) {
+                out.println(artifactId + " is already at " + current);
+                continue;
+            }
+            out.println(artifactId + " " + current + " -> " + wanted);
+            installOne(repository, artifactId, wanted, directory, out);
+            upgraded++;
+        }
+        out.println();
+        if (upgraded == 0) {
+            out.println("Nothing to do.");
+        } else {
+            out.println("Restart Fess to load the new versions.");
+        }
+        return EXIT_OK;
+    }
+
+    /**
+     * Reports on the installation: the engine, its plugins, and the installed Fess plugins.
+     *
+     * @param options the command line options
+     * @param definitions the setup definition
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 when nothing failed, 1 otherwise
+     * @throws SetupException if the plugin directory cannot be read
+     */
+    private static int check(final Map<String, String> options, final Map<String, ComponentDefinition> definitions, final PrintStream out,
+            final PrintStream err) throws SetupException {
+        final List<Diagnostics.Check> checks = new ArrayList<>();
+        final String url = engineUrl(options);
+
+        out.println("Engine  " + url);
+        try {
+            Downloader.readString(URI.create(url));
+            checks.add(new Diagnostics.Check(Diagnostics.Status.OK, "reachable", "yes"));
+            checks.add(
+                    Diagnostics.engineVersion(Diagnostics.distinctLines(Downloader.readString(URI.create(url + "/_cat/nodes?h=version")))));
+            final ComponentDefinition opensearch = definitions.get("opensearch");
+            final List<String> required = opensearch.list("plugin.artifacts").stream().map(FessSetup::artifactIdOf).toList();
+            checks.add(Diagnostics.enginePlugins(required,
+                    Diagnostics.distinctLines(Downloader.readString(URI.create(url + "/_cat/plugins?h=component")))));
+            checks.add(configsync(url));
+        } catch (final SetupException e) {
+            // Every later engine check would repeat this one failure, so stop after saying it.
+            checks.add(new Diagnostics.Check(Diagnostics.Status.FAIL, "reachable",
+                    e.getMessage() + " (set SEARCH_ENGINE_HTTP_URL, or start the engine)"));
+        }
+        checks.forEach(check -> print(out, check));
+
+        final Path directory = pluginDirectory(definitions.get(PLUGIN_COMPONENT), options);
+        out.println();
+        out.println("Fess    " + fessHome());
+        final List<Diagnostics.Check> local = new ArrayList<>();
+        local.add(pluginDirectoryCheck(directory));
+        local.addAll(Diagnostics.installedPlugins(directory, productVersionOrNull()));
+        local.add(Diagnostics.nodejs(Path.of(fessHome()), options.containsKey("playwright")));
+        local.forEach(check -> print(out, check));
+
+        checks.addAll(local);
+        final Diagnostics.Status worst = Diagnostics.worst(checks);
+        out.println();
+        if (worst == Diagnostics.Status.FAIL) {
+            err.println("Something is wrong. See the FAIL lines above.");
+            return EXIT_FAILED;
+        }
+        out.println(worst == Diagnostics.Status.WARN ? "Usable, with warnings." : "Everything checks out.");
+        return EXIT_OK;
+    }
+
+    private static Diagnostics.Check configsync(final String url) {
+        try {
+            Downloader.readString(URI.create(url + "/_configsync/file"));
+            return new Diagnostics.Check(Diagnostics.Status.OK, "configsync", "responding");
+        } catch (final SetupException e) {
+            return new Diagnostics.Check(Diagnostics.Status.FAIL, "configsync",
+                    "not responding; dictionaries will not reach the engine (" + e.getMessage() + ")");
+        }
+    }
+
+    private static Diagnostics.Check pluginDirectoryCheck(final Path directory) {
+        if (!Files.isDirectory(directory)) {
+            return new Diagnostics.Check(Diagnostics.Status.FAIL, "plugin directory", directory + " does not exist");
+        }
+        if (!Files.isWritable(directory)) {
+            return new Diagnostics.Check(Diagnostics.Status.FAIL, "plugin directory", directory + " is not writable");
+        }
+        return new Diagnostics.Check(Diagnostics.Status.OK, "plugin directory", directory.toString());
+    }
+
+    private static void print(final PrintStream out, final Diagnostics.Check check) {
+        out.printf("  %-4s  %-28s  %s%n", check.status(), check.name(), check.detail());
+    }
+
+    /**
+     * Returns the engine URL: {@code --url}, else the environment variable the launcher sets,
+     * else the default the shipped configuration uses.
+     *
+     * @param options the command line options
+     * @return the URL, without a trailing slash
+     */
+    static String engineUrl(final Map<String, String> options) {
+        String url = options.get("url");
+        if (url == null) {
+            url = System.getenv("SEARCH_ENGINE_HTTP_URL");
+        }
+        if (url == null || url.isBlank()) {
+            url = "http://localhost:9200";
+        }
+        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    }
+
+    /**
+     * Returns the artifact name of a {@code groupId:artifactId} coordinate.
+     *
+     * @param coordinate the coordinate
+     * @return the artifact name
+     */
+    static String artifactIdOf(final String coordinate) {
+        final int separator = coordinate.indexOf(':');
+        return separator < 0 ? coordinate : coordinate.substring(separator + 1);
+    }
+
+    /**
+     * Returns the plugin version this build accepts, or {@code null} when it cannot be told,
+     * which is the case when the jar has no manifest.
+     *
+     * @return the major.minor, or null
+     */
+    private static String productVersionOrNull() {
+        try {
+            return FessPluginInstaller.productVersion(fessVersion());
+        } catch (final SetupException e) {
+            return null;
+        }
     }
 
     /**

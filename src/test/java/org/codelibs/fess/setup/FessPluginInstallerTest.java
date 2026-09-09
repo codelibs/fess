@@ -131,6 +131,15 @@ public class FessPluginInstallerTest {
     }
 
     @Test
+    public void test_artifactIdOf() {
+        assertEquals("fess-ds-git", FessPluginInstaller.artifactIdOf("fess-ds-git-15.9.0.jar"));
+        assertEquals("fess-webapp-mcp-client", FessPluginInstaller.artifactIdOf("fess-webapp-mcp-client-1.0.jar"));
+        assertEquals("fess-ds-git", FessPluginInstaller.artifactIdOf("fess-ds-git-15.9.0-SNAPSHOT.jar"));
+        assertNull(FessPluginInstaller.artifactIdOf("README"));
+        assertNull(FessPluginInstaller.artifactIdOf("no-version-here.jar"));
+    }
+
+    @Test
     public void test_versionOf() {
         assertEquals("15.9.0", FessPluginInstaller.versionOf("fess-ds-git-15.9.0.jar", "fess-ds-git"));
         assertEquals("15.9.0-SNAPSHOT", FessPluginInstaller.versionOf("fess-ds-git-15.9.0-SNAPSHOT.jar", "fess-ds-git"));

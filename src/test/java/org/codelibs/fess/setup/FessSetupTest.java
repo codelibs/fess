@@ -209,6 +209,50 @@ public class FessSetupTest {
     }
 
     @Test
+    public void test_engineUrl_prefersTheOptionThenTheEnvironment() {
+        assertEquals("http://es:9200", FessSetup.engineUrl(Map.of("url", "http://es:9200")));
+        assertEquals("http://es:9200", FessSetup.engineUrl(Map.of("url", "http://es:9200/")), "a trailing slash would double up");
+        // With neither option nor environment variable, the default matches the shipped config.
+        if (System.getenv("SEARCH_ENGINE_HTTP_URL") == null) {
+            assertEquals("http://localhost:9200", FessSetup.engineUrl(Map.of()));
+        }
+    }
+
+    @Test
+    public void test_artifactIdOf_dropsTheGroup() {
+        assertEquals("opensearch-analysis-fess", FessSetup.artifactIdOf("org.codelibs.opensearch:opensearch-analysis-fess"));
+        assertEquals("already-bare", FessSetup.artifactIdOf("already-bare"));
+    }
+
+    @Test
+    public void test_listInstalled_onAnEmptyDirectory() {
+        assertEquals(0, run("list", "installed", "--dest", tempDir.toString()));
+        assertTrue(out().contains("No plugins are installed"), out());
+    }
+
+    @Test
+    public void test_listInstalled_namesEachPluginOnce() throws Exception {
+        java.nio.file.Files.writeString(tempDir.resolve("fess-ds-git-15.9.0.jar"), "x");
+        java.nio.file.Files.writeString(tempDir.resolve("fess-script-groovy-15.9.0.jar"), "x");
+
+        assertEquals(0, run("list", "installed", "--dest", tempDir.toString()));
+        assertTrue(out().contains("fess-ds-git  15.9.0"), out());
+        assertTrue(out().contains("fess-script-groovy  15.9.0"), out());
+    }
+
+    @Test
+    public void test_upgrade_withoutTarget_printsUsage() {
+        assertEquals(2, run("upgrade"));
+        assertTrue(err().contains("Usage:"), err());
+    }
+
+    @Test
+    public void test_upgrade_withNothingInstalled_saysSo() {
+        assertEquals(0, run("upgrade", "plugins", "--dest", tempDir.toString()));
+        assertTrue(out().contains("No plugins are installed"), out());
+    }
+
+    @Test
     public void test_sizes_useTheUnitThatSuitsTheTotal() {
         assertEquals("512/1024 MiB", FessSetup.sizes(512L << 20, 1024L << 20));
         assertEquals("4/9 KiB", FessSetup.sizes(4096L, 9728L));
