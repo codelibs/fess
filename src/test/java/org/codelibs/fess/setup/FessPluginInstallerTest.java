@@ -91,6 +91,15 @@ public class FessPluginInstallerTest {
     }
 
     @Test
+    public void test_installed_includesLibraryPlugins() throws Exception {
+        touch("fess-lib-gcs-15.9.0.jar");
+        touch("fess-ds-git-15.9.0.jar");
+
+        assertEquals(List.of("fess-ds-git-15.9.0.jar", "fess-lib-gcs-15.9.0.jar"),
+                FessPluginInstaller.installed(tempDir).stream().map(p -> p.getFileName().toString()).toList());
+    }
+
+    @Test
     public void test_remove() throws Exception {
         touch("fess-ds-git-15.9.0.jar");
         touch("fess-ds-slack-15.9.0.jar");
