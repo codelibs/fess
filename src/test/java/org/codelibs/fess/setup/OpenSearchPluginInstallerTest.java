@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class PluginInstallerTest {
+public class OpenSearchPluginInstallerTest {
 
     @TempDir
     Path tempDir;
@@ -33,37 +33,41 @@ public class PluginInstallerTest {
     public void test_zipUrl() throws Exception {
         assertEquals(
                 "https://repo1.maven.org/maven2/org/codelibs/opensearch/opensearch-analysis-fess/3.8.0/opensearch-analysis-fess-3.8.0.zip",
-                PluginInstaller.zipUrl("https://repo1.maven.org/maven2", "org.codelibs.opensearch:opensearch-analysis-fess", "3.8.0"));
+                OpenSearchPluginInstaller.zipUrl("https://repo1.maven.org/maven2", "org.codelibs.opensearch:opensearch-analysis-fess",
+                        "3.8.0"));
     }
 
     @Test
     public void test_zipUrl_trailingSlashOnRepository() throws Exception {
         assertEquals("https://example.org/m2/org/codelibs/opensearch/opensearch-minhash/3.8.0/opensearch-minhash-3.8.0.zip",
-                PluginInstaller.zipUrl("https://example.org/m2/", "org.codelibs.opensearch:opensearch-minhash", "3.8.0"));
+                OpenSearchPluginInstaller.zipUrl("https://example.org/m2/", "org.codelibs.opensearch:opensearch-minhash", "3.8.0"));
     }
 
     @Test
     public void test_zipUrl_rejectsMalformedCoordinate() {
-        final SetupException e =
-                assertThrows(SetupException.class, () -> PluginInstaller.zipUrl("https://example.org/m2", "no-colon-here", "3.8.0"));
+        final SetupException e = assertThrows(SetupException.class,
+                () -> OpenSearchPluginInstaller.zipUrl("https://example.org/m2", "no-colon-here", "3.8.0"));
         assertTrue(e.getMessage().contains("no-colon-here"), e.getMessage());
     }
 
     @Test
     public void test_zipUrl_rejectsEmptyArtifactId() {
-        assertThrows(SetupException.class, () -> PluginInstaller.zipUrl("https://example.org/m2", "org.codelibs.opensearch:", "3.8.0"));
+        assertThrows(SetupException.class,
+                () -> OpenSearchPluginInstaller.zipUrl("https://example.org/m2", "org.codelibs.opensearch:", "3.8.0"));
     }
 
     @Test
     public void test_pluginCommand_perOs() {
         final Path home = Path.of("/opt/opensearch");
-        assertEquals(home.resolve("bin").resolve("opensearch-plugin.bat"), PluginInstaller.pluginCommand(home, Platform.Os.WINDOWS));
-        assertEquals(home.resolve("bin").resolve("opensearch-plugin"), PluginInstaller.pluginCommand(home, Platform.Os.LINUX));
+        assertEquals(home.resolve("bin").resolve("opensearch-plugin.bat"),
+                OpenSearchPluginInstaller.pluginCommand(home, Platform.Os.WINDOWS));
+        assertEquals(home.resolve("bin").resolve("opensearch-plugin"), OpenSearchPluginInstaller.pluginCommand(home, Platform.Os.LINUX));
     }
 
     @Test
     public void test_install_reportsMissingPluginTool() {
-        final SetupException e = assertThrows(SetupException.class, () -> PluginInstaller.install(tempDir, "https://example.org/a.zip"));
+        final SetupException e =
+                assertThrows(SetupException.class, () -> OpenSearchPluginInstaller.install(tempDir, "https://example.org/a.zip"));
         assertTrue(e.getMessage().contains("opensearch-plugin"), e.getMessage());
         assertTrue(e.getMessage().contains("--opensearch-home"), e.getMessage());
     }

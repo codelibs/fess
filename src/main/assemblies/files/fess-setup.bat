@@ -1,9 +1,18 @@
 @echo off
 
-REM Installs the artifacts Fess needs but does not bundle -- OpenSearch and its Fess plugins.
-REM Run it once before starting Fess for the first time:
+REM Installs the artifacts Fess needs but does not bundle. Run it once before starting Fess for
+REM the first time:
 REM
 REM     bin\fess-setup install opensearch
+REM
+REM It also installs the Fess plugins into an OpenSearch you already have, Fess plugins, and
+REM Node.js for the Playwright crawler:
+REM
+REM     bin\fess-setup install opensearch-plugins --opensearch-home C:\opensearch-3.8.0
+REM     bin\fess-setup install plugin fess-script-groovy
+REM     bin\fess-setup install nodejs
+REM
+REM Run it with no arguments for the full list of commands.
 
 SETLOCAL
 
