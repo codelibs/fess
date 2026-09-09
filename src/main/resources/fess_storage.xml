@@ -6,7 +6,9 @@
 	     The mapping from a storage.type value to a class lives here rather than in Java so that
 	     the clients can ship as fess-lib-* plugins: a plugin contributes its component through
 	     fess_storage++.xml, which merges from every jar on the classpath, and setting
-	     storage.type to its name is enough to reach it.
+	     storage.type to its name is enough to reach it. fess-lib-gcs registers gcsStorageClient
+	     that way; storage.type=gcs without that plugin installed is a configuration error the
+	     factory reports rather than a missing class.
 
 	     They are prototypes, not singletons: every caller takes the client in a
 	     try-with-resources and closes it, which would shut down a shared instance. -->
@@ -16,7 +18,5 @@
 	     same client as s3. It is a separate component rather than a branch in Java because that
 	     keeps the type-to-class mapping in one place. -->
 	<component name="s3_compatStorageClient" class="org.codelibs.fess.storage.S3StorageClient" instance="prototype">
-	</component>
-	<component name="gcsStorageClient" class="org.codelibs.fess.storage.GcsStorageClient" instance="prototype">
 	</component>
 </components>
