@@ -16,6 +16,7 @@
 package org.codelibs.fess.indexer;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +24,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.exception.ScriptEngineException;
+import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -43,6 +45,9 @@ public class DocBoostMatcher {
 
     /** The script engine type used for expression evaluation */
     private final String scriptType;
+
+    /** Guards the missing-engine warning so a rule reports it once, not once per document. */
+    private final AtomicBoolean missingEngineReported = new AtomicBoolean();
 
     /**
      * Default constructor that creates a DocBoostMatcher with default script type.
@@ -102,14 +107,29 @@ public class DocBoostMatcher {
      * document from being indexed. This is the one caller for which that holds; everywhere else
      * a script that cannot be evaluated is reported.
      * </p>
+     * <p>
+     * A missing engine is the other thing entirely. The rule then matches nothing, ever, and no
+     * expression the administrator writes can change that -- a rule saved before 15.9 carries no
+     * script type and so runs on Groovy, which now ships as a plugin. Left at debug it looks
+     * exactly like a rule whose expressions never fit, so it is reported at warn instead, once
+     * per rule rather than once per crawled document.
+     * </p>
      *
      * @param expression the expression to evaluate
      * @param map the document data
      * @return the result, or null when the expression did not apply to this document
      */
     protected Object evaluate(final String expression, final Map<String, Object> map) {
+        final ScriptEngineFactory scriptEngineFactory = ComponentUtil.getScriptEngineFactory();
+        if (!scriptEngineFactory.hasScriptEngine(scriptType)) {
+            if (missingEngineReported.compareAndSet(false, true)) {
+                logger.warn("No script engine is registered for {}, so the document boost rule \"{}\" boosts nothing."
+                        + " Install the plugin providing it, such as fess-script-groovy for groovy.", scriptType, matchExpression);
+            }
+            return null;
+        }
         try {
-            return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(expression, map);
+            return scriptEngineFactory.getScriptEngine(scriptType).evaluate(expression, map);
         } catch (final ScriptEngineException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("The boost expression did not apply to the document: expression={}", expression, e);

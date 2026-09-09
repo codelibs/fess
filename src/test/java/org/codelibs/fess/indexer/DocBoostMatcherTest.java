@@ -16,12 +16,16 @@
 package org.codelibs.fess.indexer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.script.javascript.JavaScriptEngine;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -261,5 +265,70 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         legacy.setUrlExpr("url != null");
         legacy.setBoostExpr("1");
         assertEquals(Constants.LEGACY_SCRIPT, new DocBoostMatcher(legacy).getScriptType());
+    }
+
+    /**
+     * A rule saved before 15.9 carries no script type, so it runs on Groovy, and Groovy now
+     * ships as a plugin. With the plugin absent the rule can never match: that has to be said
+     * out loud, and said once rather than once per crawled document.
+     */
+    @Test
+    public void test_missingEngineIsReportedOncePerRule() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add(Constants.DEFAULT_SCRIPT, (template, paramMap) -> Boolean.TRUE);
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final BoostDocumentRule rule = new BoostDocumentRule();
+        rule.setUrlExpr("url != null");
+        rule.setBoostExpr("100");
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher(rule);
+        assertEquals(Constants.LEGACY_SCRIPT, docBoostMatcher.getScriptType());
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("url", "http://example.com/");
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DocBoostMatcher.class.getName(), Level.WARN);
+        try {
+            assertFalse(docBoostMatcher.match(map));
+            assertTrue(0.0f == docBoostMatcher.getValue(map));
+            assertFalse(docBoostMatcher.match(map));
+
+            final List<String> warnings = appender.warnings();
+            assertEquals(1, warnings.size());
+            assertTrue(warnings.get(0).contains(Constants.LEGACY_SCRIPT));
+            assertTrue(warnings.get(0).contains("fess-script-groovy"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    /**
+     * The engine is there and the expression simply does not fit this document. Every crawled
+     * document is offered to every rule, so that is the ordinary case and must stay quiet.
+     */
+    @Test
+    public void test_expressionThatDoesNotApplyIsNotReported() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add(Constants.LEGACY_SCRIPT, (template, paramMap) -> {
+            throw new ScriptEngineException("data1 is not defined");
+        });
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final BoostDocumentRule rule = new BoostDocumentRule();
+        rule.setUrlExpr("data1 > 10");
+        rule.setBoostExpr("100");
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher(rule);
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("url", "http://example.com/");
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DocBoostMatcher.class.getName(), Level.WARN);
+        try {
+            assertFalse(docBoostMatcher.match(map));
+            assertTrue(0.0f == docBoostMatcher.getValue(map));
+            assertTrue(appender.warnings().isEmpty());
+        } finally {
+            appender.detach();
+        }
     }
 }
