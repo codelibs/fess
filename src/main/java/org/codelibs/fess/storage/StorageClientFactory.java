@@ -20,6 +20,7 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.exception.StorageException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -69,28 +70,40 @@ public final class StorageClientFactory {
      * @return configured StorageClient
      */
     public static StorageClient createClient(final FessConfig fessConfig) {
-        final String endpoint = fessConfig.getStorageEndpoint();
-        final String accessKey = fessConfig.getStorageAccessKey();
-        final String secretKey = fessConfig.getStorageSecretKey();
-        final String bucket = fessConfig.getStorageBucket();
-
-        // Get explicit type or auto-detect
-        final String typeStr = fessConfig.getStorageType();
-        final StorageType type;
-        if (StringUtil.isBlank(typeStr) || "auto".equalsIgnoreCase(typeStr)) {
-            type = detectStorageType(endpoint);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Auto-detected storage type: {} for endpoint: {}", type, endpoint);
-            }
-        } else {
-            type = parseStorageType(typeStr);
+        final String componentName = componentName(fessConfig.getStorageType(), fessConfig.getStorageEndpoint());
+        if (!ComponentUtil.hasComponent(componentName)) {
+            throw new StorageException("No storage client is registered as " + componentName + " for storage.type="
+                    + fessConfig.getStorageType() + ". Install the plugin that provides it, such as fess-lib-gcs for gcs.");
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating {} for endpoint: {}", componentName, fessConfig.getStorageEndpoint());
+        }
+        final StorageClient client = ComponentUtil.getComponent(componentName);
+        client.init();
+        return client;
+    }
 
-        return switch (type) {
-        case GCS -> new GcsStorageClient(fessConfig.getStorageProjectId(), bucket, endpoint, fessConfig.getStorageCredentialsPath());
-        case S3, S3_COMPAT -> new S3StorageClient(endpoint, accessKey, secretKey, bucket, fessConfig.getStorageRegion());
-        default -> new S3StorageClient(endpoint, accessKey, secretKey, bucket, fessConfig.getStorageRegion());
-        };
+    /**
+     * Returns the name of the DI component that serves a storage type.
+     *
+     * <p>The mapping from a {@code storage.type} value to an implementation lives in the DI
+     * definition rather than here, which is what lets the clients ship as plugins: core no longer
+     * names GcsStorageClient or S3StorageClient, and a plugin registering
+     * {@code <type>StorageClient} is reachable by setting {@code storage.type=<type>}. The
+     * components are prototypes because every caller closes the client it was handed.</p>
+     *
+     * @param typeStr the configured type, blank or {@code auto} to detect from the endpoint
+     * @param endpoint the storage endpoint, used only when detecting
+     * @return the component name
+     */
+    static String componentName(final String typeStr, final String endpoint) {
+        final String type;
+        if (StringUtil.isBlank(typeStr) || "auto".equalsIgnoreCase(typeStr)) {
+            type = detectStorageType(endpoint).name().toLowerCase(Locale.ROOT);
+        } else {
+            type = typeStr.trim().toLowerCase(Locale.ROOT);
+        }
+        return type + "StorageClient";
     }
 
     /**
@@ -102,19 +115,4 @@ public final class StorageClientFactory {
         return createClient(ComponentUtil.getFessConfig());
     }
 
-    /**
-     * Parses a storage type string to StorageType enum.
-     *
-     * @param typeStr the type string (s3, gcs, s3_compat, auto)
-     * @return parsed StorageType
-     */
-    private static StorageType parseStorageType(final String typeStr) {
-        final String upper = typeStr.toUpperCase(Locale.ROOT);
-        try {
-            return StorageType.valueOf(upper);
-        } catch (final IllegalArgumentException e) {
-            logger.warn("Unknown storage type: {}, defaulting to S3_COMPAT", typeStr);
-            return StorageType.S3_COMPAT;
-        }
-    }
 }

@@ -30,6 +30,8 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.StorageException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -61,8 +63,16 @@ public class S3StorageClient implements StorageClient {
 
     private static final Logger logger = LogManager.getLogger(S3StorageClient.class);
 
-    private final S3Client s3Client;
-    private final String bucket;
+    private S3Client s3Client;
+    private String bucket;
+
+    /**
+     * Creates an unconfigured client, which is how LastaDi builds the prototype component.
+     * {@link #init()} reads the configuration and opens the connection.
+     */
+    public S3StorageClient() {
+        // configured by init()
+    }
 
     /**
      * Creates a new S3StorageClient instance.
@@ -74,6 +84,18 @@ public class S3StorageClient implements StorageClient {
      * @param region the AWS region
      */
     public S3StorageClient(final String endpoint, final String accessKey, final String secretKey, final String bucket,
+            final String region) {
+        configure(endpoint, accessKey, secretKey, bucket, region);
+    }
+
+    @Override
+    public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        configure(fessConfig.getStorageEndpoint(), fessConfig.getStorageAccessKey(), fessConfig.getStorageSecretKey(),
+                fessConfig.getStorageBucket(), fessConfig.getStorageRegion());
+    }
+
+    private void configure(final String endpoint, final String accessKey, final String secretKey, final String bucket,
             final String region) {
         this.bucket = bucket;
 
