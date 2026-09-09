@@ -341,7 +341,7 @@ public class FailureUrlTests extends CrawlTestBase {
         final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("name", NAME_PREFIX + "Scheduler");
         requestBody.put("target", "all");
-        requestBody.put("script_type", "groovy");
+        requestBody.put("script_type", "javascript");
         requestBody.put("sort_order", 0);
         requestBody.put("crawler", true);
         requestBody.put("job_logging", true);
