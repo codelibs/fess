@@ -241,6 +241,50 @@ public class JavaScriptEngineTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * A crawl job script narrows the crawl with {@code webConfigIds(String[])}, and in Groovy
+     * that was written {@code ["id"] as String[]}. There is no such cast in JavaScript, and the
+     * scripts the integration tests build rely on the engine converting a plain array literal
+     * instead. If that ever stops holding, those jobs fail at run time with no compile error, so
+     * it is pinned here rather than discovered in a crawl that never finishes.
+     */
+    @Test
+    public void test_arrayLiteralBecomesAJavaArray() {
+        final Map<String, Object> params = new HashMap<>();
+        final ArrayTarget target = new ArrayTarget();
+        params.put("t", target);
+
+        assertEquals("a,b", javaScriptEngine.evaluate("return t.take([\"a\",\"b\"]).joined();", params));
+        assertEquals("", javaScriptEngine.evaluate("return t.take([]).joined();", params));
+        // The explicit form works too, and is what to reach for when the target is ambiguous.
+        assertEquals("c", javaScriptEngine.evaluate("return t.take(Java.to([\"c\"], \"java.lang.String[]\")).joined();", params));
+    }
+
+    /** Stands in for CrawlJob, whose webConfigIds/fileConfigIds take a String array. */
+    public static class ArrayTarget {
+        private String[] values;
+
+        /**
+         * Records the array it was handed.
+         *
+         * @param values the array
+         * @return this
+         */
+        public ArrayTarget take(final String[] values) {
+            this.values = values;
+            return this;
+        }
+
+        /**
+         * Joins what was recorded, so a script can return a plain string.
+         *
+         * @return the joined values
+         */
+        public String joined() {
+            return values == null ? "null" : String.join(",", values);
+        }
+    }
+
     @Test
     public void test_getNameAndAliases() {
         assertEquals("javascript", javaScriptEngine.getName());

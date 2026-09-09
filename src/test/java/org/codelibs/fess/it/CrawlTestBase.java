@@ -146,14 +146,32 @@ public class CrawlTestBase extends ITBase {
         return response;
     }
 
+    /**
+     * Builds the job script for a web crawl of one config.
+     *
+     * <p>JavaScript, not Groovy: Groovy ships as a plugin from 15.9 and is not in the
+     * distribution. The array literal is passed straight to {@code webConfigIds(String[])} --
+     * the engine converts it, so Groovy's {@code as String[]} cast has no equivalent and needs
+     * none. {@code JavaScriptEngineTest#test_arrayLiteralBecomesAJavaArray} pins that.</p>
+     *
+     * @param webCofigId the web config to crawl
+     * @return the script
+     */
     protected static String buildWebConfigJobScript(final String webCofigId) {
         return String.format("return container.getComponent(\"crawlJob\")" + ".logLevel(\"info\")" + ".sessionId(\"%s\")"
-                + ".webConfigIds([\"%s\"] as String[])" + ".jobExecutor(executor).execute();", webCofigId, webCofigId);
+                + ".webConfigIds([\"%s\"])" + ".jobExecutor(executor).execute();", webCofigId, webCofigId);
     }
 
+    /**
+     * Builds the job script for a file crawl of one config. JavaScript, for the reason given on
+     * {@link #buildWebConfigJobScript}.
+     *
+     * @param fileConfigId the file config to crawl
+     * @return the script
+     */
     protected static String buildFileConfigJobScript(final String fileConfigId) {
         return String.format("return container.getComponent(\"crawlJob\")" + ".logLevel(\"info\")" + ".sessionId(\"%s\")"
-                + ".fileConfigIds([\"%s\"] as String[])" + ".jobExecutor(executor).execute();", fileConfigId, fileConfigId);
+                + ".fileConfigIds([\"%s\"])" + ".jobExecutor(executor).execute();", fileConfigId, fileConfigId);
     }
 
     protected static Map<String, Object> getSchedulerItem(final String namePrefix) {
