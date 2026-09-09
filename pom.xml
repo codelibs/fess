@@ -1649,6 +1649,18 @@
 			<groupId>com.github.jknack</groupId>
 			<artifactId>handlebars</artifactId>
 			<version>${handlebars.version}</version>
+			<!-- Handlebars pulls Nashorn (2.1 MiB) for one feature: Handlebars#precompileInline,
+			     which evaluates handlebars.js through javax.script to turn a template into
+			     JavaScript. ViewHelper only calls compile and apply, and no other class in the
+			     distribution or in a plugin names Nashorn, so nothing can reach it. Handlebars
+			     itself never names the engine either (it asks ScriptEngineManager), so this
+			     removes the jar without removing a code path. -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjdk.nashorn</groupId>
+					<artifactId>nashorn-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Tomcat -->
