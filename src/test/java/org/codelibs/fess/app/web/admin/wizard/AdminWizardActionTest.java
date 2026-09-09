@@ -42,7 +42,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,s3,gcs";
+                return "file,smb,smb1,ftp,s3";
             }
         });
         final ProtocolHelper protocolHelper = new ProtocolHelper();

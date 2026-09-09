@@ -1290,147 +1290,66 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>google-cloud-storage</artifactId>
-			<version>${google.cloud.storage.version}</version>
-			<!-- google-cloud-storage ships two transports and pulls the dependencies of both.
-			     GcsClient and the gcs: URL handler build their client with
-			     StorageOptions.newBuilder(), which is the JSON over HTTP transport; the gRPC one
-			     is only reachable through StorageOptions.grpc(), which nothing here calls. Its
-			     stack (gRPC itself, the generated gRPC storage client, the OpenTelemetry SDK, and
-			     google-cloud-monitoring, which is there for gRPC's client-side metrics) is
-			     therefore dead weight in every artifact that depends on this.
-			     The OpenTelemetry api/context/common jars stay: gax-httpjson uses them.
-			     io.grpc:grpc-api is NOT excluded and must not be: HttpStorageRpc#startSpan
-			     opens an OpenCensus span on every request, and OpenCensus carries its current
-			     span in io.grpc.Context, which has lived in grpc-api since gRPC 1.60 (the
-			     grpc-context artifact still exists but no longer holds the class). Excluding it
-			     leaves the JSON transport throwing NoClassDefFoundError on the first call.
-			     If a future release needs the gRPC transport, delete this block rather than
-			     adding artifacts back one at a time. -->
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>${httpclient5.version}</version>
+		</dependency>
+		<dependency>
+			<!-- HttpClient 4 has no caller here (the crawler uses httpclient5, and Hc4HttpClient
+			     lives in fess-crawler), but it has to be pinned rather than left to the resolver:
+			     fess-crawler asks for ${httpcomponents.version} at depth 3 while
+			     io.rest-assured:rest-assured, a test dependency, brings 4.5.13 at depth 2 and wins
+			     the nearest-wins tie. fess-ds-sharepoint compiles against ${httpcomponents.version}
+			     with scope provided and runs on whatever the war ships, so a test dependency must
+			     not be the one deciding that. -->
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${httpcomponents.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Not used by Fess itself: this and google-auth-library-oauth2-http below are here
+			     to supply fess-ds-gsuite, which declares both with scope provided and does not
+			     shade them. They arrived as transitive dependencies of google-cloud-storage until
+			     the GCS client moved to the fess-lib-gcs plugin, so they are declared here to keep
+			     that plugin working. The versions are the ones fess-ds-gsuite compiles against.
+			     Fess's own OpenID Connect code uses google-http-client and google-oauth-client
+			     (com.google.api.client.auth/http/json), which are declared separately. -->
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>2.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+			<version>1.50.0</version>
 			<exclusions>
 				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-inprocess</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-alts</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-auth</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-protobuf</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-protobuf-lite</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-opentelemetry</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-grpclb</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-netty-shaded</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-util</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-stub</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-googleapis</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-xds</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-services</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.grpc</groupId>
-					<artifactId>grpc-rls</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.api</groupId>
-					<artifactId>gax-grpc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.cloud</groupId>
-					<artifactId>google-cloud-core-grpc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.cloud</groupId>
-					<artifactId>google-cloud-monitoring</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.api.grpc</groupId>
-					<artifactId>proto-google-cloud-monitoring-v3</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.api.grpc</groupId>
-					<artifactId>grpc-google-cloud-storage-v2</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.api.grpc</groupId>
-					<artifactId>gapic-google-cloud-storage-v2</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.cloud.opentelemetry</groupId>
-					<artifactId>exporter-metrics</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry.contrib</groupId>
-					<artifactId>opentelemetry-gcp-resources</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry</groupId>
-					<artifactId>opentelemetry-sdk</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry</groupId>
-					<artifactId>opentelemetry-sdk-trace</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry</groupId>
-					<artifactId>opentelemetry-sdk-logs</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry</groupId>
-					<artifactId>opentelemetry-sdk-metrics</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry</groupId>
-					<artifactId>opentelemetry-sdk-common</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>io.opentelemetry</groupId>
-					<artifactId>opentelemetry-sdk-extension-autoconfigure-spi</artifactId>
+					<!-- api-common pulls the javax flavour of the annotation API. Fess runs on
+					     jakarta.annotation and excludes this artifact from fess-crawler-lasta for
+					     the same reason. -->
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents.client5</groupId>
-			<artifactId>httpclient5</artifactId>
-			<version>${httpclient5.version}</version>
+			<!-- google-api-client 2.7.2 asks for 1.30.0 and, being declared first, wins the
+			     nearest-wins tie against the 1.50.0 that google-auth-library-oauth2-http brings.
+			     A credentials jar 20 minor versions behind the library that loads it is the same
+			     split that left the GCS client calling a method its google-http-client did not
+			     have, so the version is stated here rather than left to declaration order. -->
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-credentials</artifactId>
+			<version>1.50.0</version>
+		</dependency>
+		<dependency>
+			<!-- The fifth member of the google-http-client family, and the only one that arrives
+			     through google-api-client (at 1.45.2). It has to move with the rest of the family:
+			     ApacheHttpTransport extends google-http-client's HttpTransport, so a major-version
+			     split between them fails at run time, not at compile time. -->
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-apache-v2</artifactId>
+			<version>${google.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
@@ -1546,6 +1465,18 @@
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+				<exclusion>
+					<!-- The Google Cloud Storage SDK is 18 MiB of the distribution for a protocol
+					     that most installations never crawl, and it moves faster than Fess does.
+					     It ships in the fess-lib-gcs plugin instead, which carries the SDK and
+					     registers GcsClient with crawlerClientCreator. fess-crawler still compiles
+					     GcsClient against the SDK, so this exclusion is what keeps the jars out of
+					     the war; the classes stay in fess-crawler.jar and cost a few tens of KiB.
+					     Do not relocate the SDK packages in that plugin: GcsClient lives outside
+					     its jar and resolves them by their original names. -->
+					<groupId>com.google.cloud</groupId>
+					<artifactId>google-cloud-storage</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
