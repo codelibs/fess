@@ -1304,6 +1304,139 @@
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-storage</artifactId>
 			<version>${google.cloud.storage.version}</version>
+			<!-- google-cloud-storage ships two transports and pulls the dependencies of both.
+			     GcsClient and the gcs: URL handler build their client with
+			     StorageOptions.newBuilder(), which is the JSON over HTTP transport; the gRPC one
+			     is only reachable through StorageOptions.grpc(), which nothing here calls. Its
+			     stack (gRPC itself, the generated gRPC storage client, the OpenTelemetry SDK, and
+			     google-cloud-monitoring, which is there for gRPC's client-side metrics) is
+			     therefore dead weight in every artifact that depends on this.
+			     The OpenTelemetry api/context/common jars stay: gax-httpjson uses them.
+			     io.grpc:grpc-api is NOT excluded and must not be: HttpStorageRpc#startSpan
+			     opens an OpenCensus span on every request, and OpenCensus carries its current
+			     span in io.grpc.Context, which has lived in grpc-api since gRPC 1.60 (the
+			     grpc-context artifact still exists but no longer holds the class). Excluding it
+			     leaves the JSON transport throwing NoClassDefFoundError on the first call.
+			     If a future release needs the gRPC transport, delete this block rather than
+			     adding artifacts back one at a time. -->
+			<exclusions>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-inprocess</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-alts</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-auth</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-protobuf</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-protobuf-lite</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-opentelemetry</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-grpclb</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-netty-shaded</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-util</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-stub</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-googleapis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-xds</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-services</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.grpc</groupId>
+					<artifactId>grpc-rls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.api</groupId>
+					<artifactId>gax-grpc</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.cloud</groupId>
+					<artifactId>google-cloud-core-grpc</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.cloud</groupId>
+					<artifactId>google-cloud-monitoring</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.api.grpc</groupId>
+					<artifactId>proto-google-cloud-monitoring-v3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.api.grpc</groupId>
+					<artifactId>grpc-google-cloud-storage-v2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.api.grpc</groupId>
+					<artifactId>gapic-google-cloud-storage-v2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.cloud.opentelemetry</groupId>
+					<artifactId>exporter-metrics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry.contrib</groupId>
+					<artifactId>opentelemetry-gcp-resources</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-sdk</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-sdk-trace</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-sdk-logs</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-sdk-metrics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-sdk-common</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.opentelemetry</groupId>
+					<artifactId>opentelemetry-sdk-extension-autoconfigure-spi</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
