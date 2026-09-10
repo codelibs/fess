@@ -37,7 +37,7 @@ Fess 15.8が利用可能で、[リリースページ](https://github.com/codelib
 
 ### Docker
 
-[ghcr.io](https://github.com/orgs/codelibs/packages)にDockerイメージを提供しています。また、このリポジトリにはDocker Compose（YAML）ファイルも用意されています。[こちらのリポジトリ](https://github.com/codelibs/docker-fess/tree/master/compose)で確認できます。
+[ghcr.io](https://github.com/orgs/codelibs/packages)にDockerイメージを提供しています。また、このリポジトリにはDocker Compose（YAML）ファイルも用意されています。[こちらのリポジトリ](https://github.com/codelibs/docker-fess/tree/main/compose)で確認できます。
 
 ### ブラウザUI
 
@@ -166,10 +166,10 @@ Fessは国際化対応ソフトウェアです。
 
 ラベルやメッセージをあなたの言語に追加したい場合、プロパティファイルを翻訳してから`fess\_\*\_[lang].properties`という名前に変更してください。
 
-* [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
-* [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
+* [fess_label_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_label_en.properties)
+* [fess_message_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_message_en.properties)
 
-検索/インデックスアナライザーの設定については、[doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json)に言語別の`lang\_[lang]`が含まれているか確認し、その言語に合わせてアナライザーを修正してください。アナライザーに関する詳細は、[OpenSearchのドキュメント](https://opensearch.org/docs/latest/analyzers/search-analyzers/)を参照してください。
+検索/インデックスアナライザーの設定については、[doc.json](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_indices/fess/doc.json)に言語別の`lang\_[lang]`が含まれているか確認し、その言語に合わせてアナライザーを修正してください。アナライザーに関する詳細は、[OpenSearchのドキュメント](https://opensearch.org/docs/latest/analyzers/search-analyzers/)を参照してください。
 
 私たちは、あなたの言語でのプルリクエストを歓迎します。
 

@@ -38,7 +38,7 @@ Pour plus de détails, consultez le [guide d'installation](https://fess.codelibs
 
 ### Docker
 
-Nous fournissons des images Docker sur [ghcr.io](https://github.com/orgs/codelibs/packages). Nous fournissons également un fichier Docker Compose (YAML) dans [ce dépôt](https://github.com/codelibs/docker-fess/tree/master/compose). 
+Nous fournissons des images Docker sur [ghcr.io](https://github.com/orgs/codelibs/packages). Nous fournissons également un fichier Docker Compose (YAML) dans [ce dépôt](https://github.com/codelibs/docker-fess/tree/main/compose). 
 
 ### Interface Web
 
@@ -167,10 +167,10 @@ Fess est un logiciel internationalisé.
 
 Si vous souhaitez ajouter des libellés/messages pour votre langue, veuillez traduire le fichier de propriétés et le renommer en fess\_\*\_[lang].properties.
 
-* [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
-* [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
+* [fess_label_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_label_en.properties)
+* [fess_message_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_message_en.properties)
 
-Pour l'analyseur de recherche/index, si [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) contient lang\_[lang] pour votre langue, veuillez modifier l'analyseur pour votre langue. Pour plus de détails sur les analyseurs, consultez la [documentation OpenSearch](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
+Pour l'analyseur de recherche/index, si [doc.json](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_indices/fess/doc.json) contient lang\_[lang] pour votre langue, veuillez modifier l'analyseur pour votre langue. Pour plus de détails sur les analyseurs, consultez la [documentation OpenSearch](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
 
 Nous accueillons les pull requests pour votre langue.
 

@@ -1,6 +1,6 @@
 # Fess: Enterprise Search Server
 [![Java CI with Maven](https://github.com/codelibs/fess/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/fess/actions/workflows/maven.yml)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/codelibs/fess/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/codelibs/fess/blob/main/LICENSE)
 ![GitHub Release](https://img.shields.io/github/v/release/codelibs/fess)
 
 ## Overview
@@ -47,7 +47,7 @@ For more details, see the [Installation Guide](https://fess.codelibs.org/stable/
 
 ### Docker
 
-Docker images are published on [ghcr.io](https://github.com/orgs/codelibs/packages). A Docker Compose file is available in the [docker-fess repository](https://github.com/codelibs/docker-fess/tree/master/compose).
+Docker images are published on [ghcr.io](https://github.com/orgs/codelibs/packages). A Docker Compose file is available in the [docker-fess repository](https://github.com/codelibs/docker-fess/tree/main/compose).
 
 ### Browser UI
 
@@ -183,10 +183,10 @@ Before committing, format the code and license headers:
 
 Fess is internationalized. To add labels and messages for a language, translate the property files below and rename them with your language code (`fess_*_[lang].properties`):
 
-- [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
-- [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
+- [fess_label_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_label_en.properties)
+- [fess_message_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_message_en.properties)
 
-For search and index analysis, if [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) contains `lang_[lang]` for your language, adjust the analyzer accordingly. See the [OpenSearch documentation](https://opensearch.org/docs/latest/analyzers/search-analyzers/) on analyzers for details. Pull requests for new languages are welcome.
+For search and index analysis, if [doc.json](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_indices/fess/doc.json) contains `lang_[lang]` for your language, adjust the analyzer accordingly. See the [OpenSearch documentation](https://opensearch.org/docs/latest/analyzers/search-analyzers/) on analyzers for details. Pull requests for new languages are welcome.
 
 ## Community and Support
 

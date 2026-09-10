@@ -38,7 +38,7 @@ Para mais detalhes, veja o [Guia de Instalação](https://fess.codelibs.org/15.8
 
 ### Docker
 
-Nós fornecemos imagens Docker em [ghcr.io](https://github.com/orgs/codelibs/packages). Também fornecemos um arquivo Docker Compose (YAML) neste [repositório](https://github.com/codelibs/docker-fess/tree/master/compose).
+Nós fornecemos imagens Docker em [ghcr.io](https://github.com/orgs/codelibs/packages). Também fornecemos um arquivo Docker Compose (YAML) neste [repositório](https://github.com/codelibs/docker-fess/tree/main/compose).
 
 ### Interface do Navegador
 
@@ -167,10 +167,10 @@ Fess é um software internacionalizado.
 
 Se você quiser adicionar rótulos/mensagens para o seu idioma, por favor, traduza o arquivo de propriedades e renomeie-o para fess\_\*\_[lang].properties.
 
-* [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
-* [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
+* [fess_label_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_label_en.properties)
+* [fess_message_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_message_en.properties)
 
-Para o analisador de busca/índice, se [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) contiver lang\_[lang] para o seu idioma, por favor, modifique o analisador para o seu idioma. Para mais detalhes sobre Analisadores, veja a [documentação do OpenSearch](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
+Para o analisador de busca/índice, se [doc.json](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_indices/fess/doc.json) contiver lang\_[lang] para o seu idioma, por favor, modifique o analisador para o seu idioma. Para mais detalhes sobre Analisadores, veja a [documentação do OpenSearch](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
 
 Aceitamos pull requests para o seu idioma.
 

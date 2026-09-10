@@ -37,7 +37,7 @@ Fess 15.8 现已发布，可在 [发布页面](https://github.com/codelibs/fess/
 
 ### Docker
 
-我们在 [ghcr.io](https://github.com/orgs/codelibs/packages) 上提供了 Docker 镜像。我们还在[此存储库](https://github.com/codelibs/docker-fess/tree/master/compose)中提供了 Docker Compose (YAML) 文件。
+我们在 [ghcr.io](https://github.com/orgs/codelibs/packages) 上提供了 Docker 镜像。我们还在[此存储库](https://github.com/codelibs/docker-fess/tree/main/compose)中提供了 Docker Compose (YAML) 文件。
 
 ### 浏览器 UI
 
@@ -166,10 +166,10 @@ Fess 是国际化软件。
 
 如果您想为您的语言添加标签/消息，请翻译属性文件，然后将其重命名为 fess\_\*\_[lang].properties。
 
-* [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
-* [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
+* [fess_label_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_label_en.properties)
+* [fess_message_en.properties](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_message_en.properties)
 
-对于搜索/索引分析器，如果 [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) 包含您语言的 lang\_[lang]，请为您的语言修改分析器。有关分析器的更多详细信息，请参阅 [OpenSearch 文档](https://opensearch.org/docs/latest/analyzers/search-analyzers/)。
+对于搜索/索引分析器，如果 [doc.json](https://github.com/codelibs/fess/blob/main/src/main/resources/fess_indices/fess/doc.json) 包含您语言的 lang\_[lang]，请为您的语言修改分析器。有关分析器的更多详细信息，请参阅 [OpenSearch 文档](https://opensearch.org/docs/latest/analyzers/search-analyzers/)。
 
 我们欢迎您的语言的 Pull Request。
 
