@@ -16,8 +16,11 @@
 package org.codelibs.fess.setup;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +47,96 @@ public final class FessPluginInstaller {
 
     private static final String JAR = ".jar";
 
+    /** Suffix of the file a download is written to until its checksum has been checked. */
+    private static final String DOWNLOAD = ".download";
+
     private FessPluginInstaller() {
+    }
+
+    /**
+     * Downloads a plugin jar and checks it against the checksum the repository publishes.
+     *
+     * <p>The URLs are tried in order and the first one that has the file wins, so that a release
+     * comes from its GitHub asset and falls back to the Maven repository. Only the last URL is
+     * allowed to fail the install: a source that answers "no such file" is skipped silently,
+     * because until every plugin publishes its jars on GitHub that is the normal case, and one
+     * that fails for any other reason is reported before the next is tried.</p>
+     *
+     * <p>The checksum is always the Maven repository's, GitHub publishing none. A jar that does
+     * not match it is deleted rather than installed; a checksum that cannot be read leaves the
+     * jar in place with a warning, because a repository that has stopped serving {@code .sha1}
+     * is not a reason to make {@code install plugin} unusable.</p>
+     *
+     * @param urls the candidate jar URLs, most preferred first
+     * @param checksumUrl the URL of the jar's {@code .sha1}
+     * @param jar the file to write
+     * @param out the stream for warnings
+     * @param progress receives download progress
+     * @return the URL the jar came from
+     * @throws SetupException if no source has the jar or the checksum does not match
+     */
+    public static String install(final List<String> urls, final String checksumUrl, final Path jar, final PrintStream out,
+            final Downloader.Progress progress) throws SetupException {
+        final Path download = jar.resolveSibling(jar.getFileName() + DOWNLOAD);
+        try {
+            final String used = fetch(urls, download, out, progress);
+            // The progress line is written with a carriage return and no newline, so anything
+            // printed from here on would land on top of it.
+            out.println();
+            verify(download, jar.getFileName().toString(), checksumUrl, out);
+            move(download, jar);
+            return used;
+        } finally {
+            discard(download);
+            discard(download.resolveSibling(download.getFileName() + ".part"));
+        }
+    }
+
+    private static void move(final Path download, final Path jar) throws SetupException {
+        try {
+            Files.move(download, jar, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            throw new SetupException("Failed to install " + jar, e);
+        }
+    }
+
+    private static void discard(final Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (final IOException e) {
+            // Nothing useful can be done about a leftover temporary file, and reporting it here
+            // would replace the failure that is actually worth reading.
+        }
+    }
+
+    private static String fetch(final List<String> urls, final Path jar, final PrintStream out, final Downloader.Progress progress)
+            throws SetupException {
+        if (urls.isEmpty()) {
+            throw new SetupException("No download source is configured for " + jar.getFileName());
+        }
+        for (int i = 0; i < urls.size() - 1; i++) {
+            final String url = urls.get(i);
+            try {
+                if (Downloader.downloadIfPresent(URI.create(url), jar, progress) != null) {
+                    return url;
+                }
+            } catch (final SetupException e) {
+                out.println("  warning: " + e.getMessage());
+            }
+        }
+        final String last = urls.get(urls.size() - 1);
+        Downloader.download(URI.create(last), jar, progress);
+        return last;
+    }
+
+    private static void verify(final Path download, final String name, final String checksumUrl, final PrintStream out)
+            throws SetupException {
+        final String published = Downloader.readStringIfPresent(URI.create(checksumUrl));
+        if (published == null) {
+            out.println("  warning: no checksum is published at " + checksumUrl + ", so " + name + " was not verified");
+            return;
+        }
+        Downloader.verifySha1(download, published);
     }
 
     /**

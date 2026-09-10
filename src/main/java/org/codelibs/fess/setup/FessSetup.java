@@ -66,6 +66,12 @@ public final class FessSetup {
 
               install plugin <name>... [--version <version>] [--repository <url>]
                   Install Fess plugins, for example fess-script-groovy or fess-ds-git.
+                  A release comes from the plugin's GitHub release, or from the Maven
+                  repository when GitHub has no such asset. A development build of Fess
+                  installs the snapshots of its own line as well, and prefers them.
+                  Every jar is checked against the SHA-1 the Maven repository publishes.
+                  --repository takes every version, jar and checksum from one repository,
+                  GitHub included.
 
               remove plugin <name>...
                   Delete installed Fess plugins.
@@ -75,6 +81,7 @@ public final class FessSetup {
 
               list plugins [--repository <url>]
                   Show the Fess plugins published for this version, and which are installed.
+                  A development build lists the snapshot repository too.
 
               list installed
                   Show the installed Fess plugins, without asking the repository.
@@ -186,9 +193,22 @@ public final class FessSetup {
     private static int listPlugins(final Map<String, ComponentDefinition> definitions, final Map<String, String> options,
             final PrintStream out) throws SetupException {
         final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
-        final String repository = options.getOrDefault("repository", definition.get("repository"));
+        final PluginSources sources = pluginSources(definition, options);
         final Path directory = pluginDirectory(definition, options);
-        final List<String> published = PluginRepository.namesFromListing(Downloader.readString(URI.create(repository)));
+        final String release = sources.releaseRepository();
+        List<String> published = PluginRepository.namesFromListing(Downloader.readString(URI.create(release)));
+        final StringBuilder consulted = new StringBuilder(release);
+        if (developmentBuild() && sources.hasSnapshot()) {
+            // A plugin whose line has no release yet is only in the snapshot repository, and
+            // leaving it out would hide exactly the plugins a development build can install.
+            try {
+                published = PluginRepository.mergeNames(published,
+                        PluginRepository.namesFromListing(Downloader.readString(URI.create(sources.snapshot()))));
+                consulted.append(" and ").append(sources.snapshot());
+            } catch (final SetupException e) {
+                out.println("warning: " + e.getMessage());
+            }
+        }
         for (final String name : published) {
             final String versions = installedVersions(directory, name);
             out.println(versions == null ? "  " + name : "  " + name + "  (installed: " + versions + ")");
@@ -204,7 +224,7 @@ public final class FessSetup {
         }
         if (!unlisted.isEmpty()) {
             out.println();
-            out.println("Installed but not published by " + repository + ":");
+            out.println("Installed but not published by " + consulted + ":");
             unlisted.forEach(name -> out.println("  " + name));
         }
         return EXIT_OK;
@@ -281,11 +301,10 @@ public final class FessSetup {
             return EXIT_USAGE;
         }
         final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
-        final String repository = options.getOrDefault("repository", definition.get("repository"));
+        final PluginSources sources = pluginSources(definition, options);
         final Path directory = pluginDirectory(definition, options);
         for (final String artifactId : artifactIds) {
-            final String version = options.containsKey("version") ? options.get("version") : resolveVersion(repository, artifactId);
-            installOne(repository, artifactId, version, directory, out);
+            installOne(sources, artifactId, resolve(sources, artifactId, options.get("version")), directory, out);
         }
         out.println();
         out.println("Restart Fess to load " + (artifactIds.size() == 1 ? "it." : "them."));
@@ -298,21 +317,24 @@ public final class FessSetup {
      * <p>The removal happens after the download on purpose: doing it first would leave an
      * installation with no plugin at all when the download then fails.</p>
      *
-     * @param repository the plugin repository URL
+     * @param sources where plugins are published
      * @param artifactId the plugin name
-     * @param version the version to install
+     * @param resolved the version to install
      * @param directory the plugin directory
      * @param out the stream for normal output
      * @throws SetupException if the download or a file operation fails
      */
-    private static void installOne(final String repository, final String artifactId, final String version, final Path directory,
+    private static void installOne(final PluginSources sources, final String artifactId, final Resolved resolved, final Path directory,
             final PrintStream out) throws SetupException {
-        final Path jar = directory.resolve(FessPluginInstaller.jarName(artifactId, version));
-        final String url = PluginRepository.jarUrl(repository, artifactId, version);
-        out.println("Downloading " + url);
+        final Path jar = directory.resolve(FessPluginInstaller.jarName(artifactId, resolved.fileVersion()));
+        out.println("Downloading " + artifactId + " " + resolved.version());
         final int[] lastPercent = { -1 };
-        Downloader.download(URI.create(url), jar, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
-        out.println();
+        final String used =
+                FessPluginInstaller.install(PluginRepository.jarUrls(sources, artifactId, resolved.version(), resolved.fileVersion()),
+                        PluginRepository.checksumUrl(
+                                PluginRepository.repositoryJarUrl(sources, artifactId, resolved.version(), resolved.fileVersion())),
+                        jar, out, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
+        out.println("  from " + used);
         for (final Path previous : FessPluginInstaller.removeOtherVersions(directory, artifactId, jar)) {
             out.println("Removed the previous " + previous.getFileName());
         }
@@ -405,7 +427,7 @@ public final class FessSetup {
         }
         final Map<String, String> options = parseOptions(args, 2);
         final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
-        final String repository = options.getOrDefault("repository", definition.get("repository"));
+        final PluginSources sources = pluginSources(definition, options);
         final Path directory = pluginDirectory(definition, options);
         final List<String> artifactIds = Diagnostics.installedArtifactIds(directory);
         if (artifactIds.isEmpty()) {
@@ -415,13 +437,16 @@ public final class FessSetup {
         int upgraded = 0;
         for (final String artifactId : artifactIds) {
             final String current = installedVersions(directory, artifactId);
-            final String wanted = resolveVersion(repository, artifactId);
-            if (wanted.equals(current)) {
+            final Resolved wanted = resolve(sources, artifactId, null);
+            // The file version, not the version, because a snapshot is on disk under the build
+            // it came from: comparing 15.9.0-SNAPSHOT with the installed timestamp would either
+            // re-download every time or never notice a newer build.
+            if (wanted.fileVersion().equals(current)) {
                 out.println(artifactId + " is already at " + current);
                 continue;
             }
-            out.println(artifactId + " " + current + " -> " + wanted);
-            installOne(repository, artifactId, wanted, directory, out);
+            out.println(artifactId + " " + current + " -> " + wanted.fileVersion());
+            installOne(sources, artifactId, wanted, directory, out);
             upgraded++;
         }
         out.println();
@@ -554,17 +579,134 @@ public final class FessSetup {
     }
 
     /**
+     * A plugin version, in the two forms a Maven repository gives it: the version itself, which
+     * names the directory, and the version the jar's file name carries. They differ for a
+     * snapshot, where {@code 15.9.0-SNAPSHOT} is published as {@code 15.9.0-20260903.015513-6}.
+     *
+     * @param version the version
+     * @param fileVersion the version the file name carries
+     */
+    private record Resolved(String version, String fileVersion) {
+    }
+
+    /**
+     * Reports whether this is a development build of Fess, which is what decides that the
+     * snapshot repository is read at all.
+     *
+     * @return true when this build's version is a snapshot
+     */
+    private static boolean developmentBuild() {
+        return PluginRepository.isSnapshot(fessVersion());
+    }
+
+    /**
+     * Works out which version of a plugin to install, and where its jar is published.
+     *
+     * @param sources where plugins are published
+     * @param artifactId the plugin name
+     * @param named the version the caller asked for, or null to pick one
+     * @return the resolved version
+     * @throws SetupException if the metadata cannot be read or holds no matching version
+     */
+    private static Resolved resolve(final PluginSources sources, final String artifactId, final String named) throws SetupException {
+        final String version = named != null ? named : resolveVersion(sources, artifactId);
+        if (!PluginRepository.isSnapshot(version)) {
+            return new Resolved(version, version);
+        }
+        final String metadata =
+                Downloader.readString(URI.create(PluginRepository.versionMetadataUrl(sources.repositoryOf(version), artifactId, version)));
+        return new Resolved(version, PluginRepository.snapshotFileVersion(metadata, version));
+    }
+
+    /**
      * Picks the plugin version that fits this Fess, reading the artifact's Maven metadata.
      *
-     * @param repository the plugin repository URL
+     * <p>A development build reads the snapshot repository as well as the release one and
+     * prefers a snapshot, so that plugins can be installed on a 15.9.0-SNAPSHOT Fess before the
+     * 15.9 line has released any. A released Fess never reads the snapshot repository, so a
+     * snapshot is neither listed nor installed there.</p>
+     *
+     * @param sources where plugins are published
      * @param artifactId the plugin name
      * @return the version to install
      * @throws SetupException if the metadata cannot be read or holds no matching version
      */
-    private static String resolveVersion(final String repository, final String artifactId) throws SetupException {
-        final String productVersion = FessPluginInstaller.productVersion(fessVersion());
-        final String metadata = Downloader.readString(URI.create(PluginRepository.metadataUrl(repository, artifactId)));
-        return PluginRepository.selectVersion(PluginRepository.versionsFromMetadata(metadata), productVersion);
+    private static String resolveVersion(final PluginSources sources, final String artifactId) throws SetupException {
+        return resolveVersion(sources, artifactId, FessPluginInstaller.productVersion(fessVersion()), developmentBuild());
+    }
+
+    /**
+     * Picks the plugin version that fits a given Fess.
+     *
+     * @param sources where plugins are published
+     * @param artifactId the plugin name
+     * @param productVersion the major.minor that Fess accepts, for example {@code 15.9}
+     * @param development whether this is a snapshot build of Fess
+     * @return the version to install
+     * @throws SetupException if no repository could be read or none holds a matching version
+     */
+    static String resolveVersion(final PluginSources sources, final String artifactId, final String productVersion,
+            final boolean development) throws SetupException {
+        final List<String> problems = new ArrayList<>();
+        final List<String> versions = new ArrayList<>();
+        if (sources.hasRelease()) {
+            versions.addAll(readVersions(sources.release(), artifactId, problems));
+        } else {
+            problems.add("no release repository is configured");
+        }
+        if (development) {
+            if (sources.hasSnapshot()) {
+                versions.addAll(readVersions(sources.snapshot(), artifactId, problems));
+            } else {
+                problems.add("no snapshot repository is configured");
+            }
+        }
+        if (versions.isEmpty()) {
+            throw new SetupException("Failed to read the published versions of " + artifactId + ": " + String.join("; ", problems));
+        }
+        return PluginRepository.selectVersion(versions, productVersion, development);
+    }
+
+    /**
+     * Reads the versions one repository publishes, keeping the reason when it has none.
+     *
+     * <p>A miss is not a failure while another repository is still to be read: a plugin is
+     * routinely absent from the release repository before its line ships, and absent from the
+     * snapshot repository once it stops being built there.</p>
+     *
+     * @param repository the repository URL
+     * @param artifactId the plugin name
+     * @param problems collects the reason a repository returned nothing
+     * @return the versions, empty when the metadata cannot be read
+     */
+    private static List<String> readVersions(final String repository, final String artifactId, final List<String> problems) {
+        try {
+            return PluginRepository
+                    .versionsFromMetadata(Downloader.readString(URI.create(PluginRepository.metadataUrl(repository, artifactId))));
+        } catch (final SetupException e) {
+            problems.add(e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Returns where plugins are published.
+     *
+     * <p>{@code --repository} replaces every source rather than only the release one: it names
+     * the repository the caller wants the plugins to come from -- a mirror, or a group
+     * repository that serves both trees -- and honouring it for the version list while still
+     * downloading the jar from github.com would defeat the point of naming it.</p>
+     *
+     * @param definition the plugin definition
+     * @param options the command line options
+     * @return the sources
+     */
+    static PluginSources pluginSources(final ComponentDefinition definition, final Map<String, String> options) {
+        final String named = options.get("repository");
+        if (named != null) {
+            return new PluginSources(named, named, "");
+        }
+        return new PluginSources(definition.get("repository"), definition.get("snapshot.repository"), definition.get("github"));
     }
 
     /**

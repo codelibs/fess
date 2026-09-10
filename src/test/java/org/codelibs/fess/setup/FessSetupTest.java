@@ -16,6 +16,7 @@
 package org.codelibs.fess.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -319,4 +320,38 @@ public class FessSetupTest {
         }
     }
 
+    @Test
+    public void test_loadDefinitions_pluginSnapshotRepository() throws Exception {
+        final ComponentDefinition plugin = FessSetup.loadDefinitions().get("plugin");
+        final String snapshot = plugin.get("snapshot.repository");
+        assertNotNull(snapshot, "a development build installs plugins from the snapshot repository");
+        assertTrue(snapshot.startsWith("https://"), snapshot);
+        assertTrue(snapshot.contains("snapshot"), snapshot);
+    }
+
+    @Test
+    public void test_loadDefinitions_pluginGithub() throws Exception {
+        final ComponentDefinition plugin = FessSetup.loadDefinitions().get("plugin");
+        final String github = plugin.get("github");
+        assertNotNull(github, "a release is downloaded from the plugin's GitHub release");
+        assertTrue(github.startsWith("https://github.com/"), github);
+    }
+
+    @Test
+    public void test_pluginSources_comeFromTheDefinition() throws Exception {
+        final ComponentDefinition plugin = FessSetup.loadDefinitions().get("plugin");
+        final PluginSources sources = FessSetup.pluginSources(plugin, Map.<String, String> of());
+        assertEquals(plugin.get("repository"), sources.release());
+        assertEquals(plugin.get("snapshot.repository"), sources.snapshot());
+        assertEquals(plugin.get("github"), sources.github());
+    }
+
+    @Test
+    public void test_pluginSources_repositoryOptionReplacesEverySource() throws Exception {
+        final ComponentDefinition plugin = FessSetup.loadDefinitions().get("plugin");
+        final PluginSources sources = FessSetup.pluginSources(plugin, Map.of("repository", "https://example.org/m2"));
+        assertEquals("https://example.org/m2", sources.release());
+        assertEquals("https://example.org/m2", sources.snapshot(), "--repository names where every jar comes from");
+        assertFalse(sources.hasGithub(), "--repository must not be quietly ignored in favour of github.com");
+    }
 }

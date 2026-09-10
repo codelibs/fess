@@ -16,6 +16,7 @@
 package org.codelibs.fess.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +44,27 @@ public class PluginRepositoryTest {
             </metadata>
             """;
 
+    private static final String SNAPSHOT_METADATA = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <metadata modelVersion="1.1.0">
+              <groupId>org.codelibs.fess</groupId>
+              <artifactId>fess-ds-git</artifactId>
+              <versioning>
+                <lastUpdated>20260903015513</lastUpdated>
+                <snapshot>
+                  <timestamp>20260903.015513</timestamp>
+                  <buildNumber>6</buildNumber>
+                </snapshot>
+                <snapshotVersions>
+                  <snapshotVersion>
+                    <extension>jar</extension>
+                    <value>15.9.0-20260903.015513-6</value>
+                  </snapshotVersion>
+                </snapshotVersions>
+              </versioning>
+            </metadata>
+            """;
+
     @Test
     public void test_versionsFromMetadata() throws Exception {
         final List<String> versions = PluginRepository.versionsFromMetadata(METADATA);
@@ -51,32 +73,32 @@ public class PluginRepositoryTest {
 
     @Test
     public void test_selectVersion_picksTheHighestMatchingTheProductVersion() throws Exception {
-        assertEquals("15.9.1", PluginRepository.selectVersion(PluginRepository.versionsFromMetadata(METADATA), "15.9"));
+        assertEquals("15.9.1", PluginRepository.selectVersion(PluginRepository.versionsFromMetadata(METADATA), "15.9", false));
     }
 
     @Test
     public void test_selectVersion_reportsWhenNothingMatches() {
         final SetupException e =
-                assertThrows(SetupException.class, () -> PluginRepository.selectVersion(List.of("14.19.0", "15.7.0"), "15.9"));
+                assertThrows(SetupException.class, () -> PluginRepository.selectVersion(List.of("14.19.0", "15.7.0"), "15.9", false));
         assertTrue(e.getMessage().contains("15.9"), e.getMessage());
         assertTrue(e.getMessage().contains("14.19.0"), e.getMessage());
     }
 
     @Test
     public void test_selectVersion_ordersNumerically() throws Exception {
-        assertEquals("15.9.10", PluginRepository.selectVersion(List.of("15.9.9", "15.9.10", "15.9.2"), "15.9"));
+        assertEquals("15.9.10", PluginRepository.selectVersion(List.of("15.9.9", "15.9.10", "15.9.2"), "15.9", false));
     }
 
     @Test
     public void test_jarUrl() {
         assertEquals("https://maven.codelibs.org/release/org/codelibs/fess/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar",
-                PluginRepository.jarUrl("https://maven.codelibs.org/release/org/codelibs/fess/", "fess-ds-git", "15.9.0"));
+                PluginRepository.jarUrl("https://maven.codelibs.org/release/org/codelibs/fess/", "fess-ds-git", "15.9.0", "15.9.0"));
     }
 
     @Test
     public void test_jarUrl_addsTheMissingSlash() {
         assertEquals("https://example.org/m2/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar",
-                PluginRepository.jarUrl("https://example.org/m2", "fess-ds-git", "15.9.0"));
+                PluginRepository.jarUrl("https://example.org/m2", "fess-ds-git", "15.9.0", "15.9.0"));
     }
 
     @Test
@@ -123,5 +145,146 @@ public class PluginRepositoryTest {
         final String html =
                 "<a href=\"fess-crawler-playwright/\">x</a><a href=\"fess-crawler-lasta/\">x</a>" + "<a href=\"fess-ds-git/\">x</a>";
         assertEquals(List.of("fess-ds-git"), PluginRepository.namesFromListing(html));
+    }
+
+    @Test
+    public void test_isSnapshot() throws Exception {
+        assertTrue(PluginRepository.isSnapshot("15.9.0-SNAPSHOT"));
+        assertFalse(PluginRepository.isSnapshot("15.9.0"));
+        assertFalse(PluginRepository.isSnapshot(""));
+    }
+
+    @Test
+    public void test_selectVersion_prefersASnapshotOnASnapshotBuild() throws Exception {
+        final List<String> versions = List.of("15.9.0-SNAPSHOT", "15.9.0", "15.8.0");
+        assertEquals("15.9.0-SNAPSHOT", PluginRepository.selectVersion(versions, "15.9", true));
+    }
+
+    @Test
+    public void test_selectVersion_takesTheHighestSnapshotOnASnapshotBuild() throws Exception {
+        final List<String> versions = List.of("15.9.0-SNAPSHOT", "15.9.2-SNAPSHOT", "15.9.10-SNAPSHOT");
+        assertEquals("15.9.10-SNAPSHOT", PluginRepository.selectVersion(versions, "15.9", true));
+    }
+
+    @Test
+    public void test_selectVersion_fallsBackToAReleaseWhenNoSnapshotIsPublished() throws Exception {
+        final List<String> versions = List.of("15.9.0", "15.9.1");
+        assertEquals("15.9.1", PluginRepository.selectVersion(versions, "15.9", true));
+    }
+
+    @Test
+    public void test_selectVersion_ignoresSnapshotsOnAReleaseBuild() throws Exception {
+        final List<String> versions = List.of("15.9.0", "15.9.1-SNAPSHOT");
+        assertEquals("15.9.0", PluginRepository.selectVersion(versions, "15.9", false));
+    }
+
+    @Test
+    public void test_selectVersion_refusesASnapshotOnAReleaseBuild() throws Exception {
+        final List<String> versions = List.of("15.9.1-SNAPSHOT");
+        final SetupException e = assertThrows(SetupException.class, () -> PluginRepository.selectVersion(versions, "15.9", false));
+        assertTrue(e.getMessage().contains("15.9.1-SNAPSHOT"), e.getMessage());
+    }
+
+    @Test
+    public void test_snapshotFileVersion() throws Exception {
+        assertEquals("15.9.0-20260903.015513-6", PluginRepository.snapshotFileVersion(SNAPSHOT_METADATA, "15.9.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void test_snapshotFileVersion_reportsMetadataWithoutASnapshotBuild() throws Exception {
+        final SetupException e =
+                assertThrows(SetupException.class, () -> PluginRepository.snapshotFileVersion(METADATA, "15.9.0-SNAPSHOT"));
+        assertTrue(e.getMessage().contains("15.9.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void test_versionMetadataUrl() throws Exception {
+        assertEquals("https://example.org/m2/fess-ds-git/15.9.0-SNAPSHOT/maven-metadata.xml",
+                PluginRepository.versionMetadataUrl("https://example.org/m2", "fess-ds-git", "15.9.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void test_jarUrl_namesTheTimestampedFileInsideTheSnapshotDirectory() throws Exception {
+        assertEquals(
+                "https://maven.codelibs.org/snapshot/org/codelibs/fess/fess-ds-git/15.9.0-SNAPSHOT/"
+                        + "fess-ds-git-15.9.0-20260903.015513-6.jar",
+                PluginRepository.jarUrl("https://maven.codelibs.org/snapshot/org/codelibs/fess/", "fess-ds-git", "15.9.0-SNAPSHOT",
+                        "15.9.0-20260903.015513-6"));
+    }
+
+    @Test
+    public void test_githubJarUrl() throws Exception {
+        assertEquals("https://github.com/codelibs/fess-ds-git/releases/download/fess-ds-git-15.9.0/fess-ds-git-15.9.0.jar",
+                PluginRepository.githubJarUrl("https://github.com/codelibs", "fess-ds-git", "15.9.0"));
+    }
+
+    @Test
+    public void test_githubJarUrl_addsTheMissingSlash() throws Exception {
+        assertEquals("https://github.com/codelibs/fess-ds-git/releases/download/fess-ds-git-15.9.0/fess-ds-git-15.9.0.jar",
+                PluginRepository.githubJarUrl("https://github.com/codelibs/", "fess-ds-git", "15.9.0"));
+    }
+
+    @Test
+    public void test_checksumUrl() throws Exception {
+        assertEquals("https://example.org/m2/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar.sha1",
+                PluginRepository.checksumUrl("https://example.org/m2/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar"));
+    }
+
+    @Test
+    public void test_mergeNames_sortsAndDropsDuplicates() throws Exception {
+        assertEquals(List.of("fess-ds-git", "fess-ds-slack", "fess-script-groovy"),
+                PluginRepository.mergeNames(List.of("fess-ds-slack", "fess-ds-git"), List.of("fess-ds-git", "fess-script-groovy")));
+    }
+
+    private static final PluginSources SOURCES = new PluginSources("https://maven.codelibs.org/release/org/codelibs/fess/",
+            "https://maven.codelibs.org/snapshot/org/codelibs/fess/", "https://github.com/codelibs");
+
+    @Test
+    public void test_jarUrls_triesGithubBeforeTheRepositoryForARelease() throws Exception {
+        assertEquals(
+                List.of("https://github.com/codelibs/fess-ds-git/releases/download/fess-ds-git-15.9.0/fess-ds-git-15.9.0.jar",
+                        "https://maven.codelibs.org/release/org/codelibs/fess/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar"),
+                PluginRepository.jarUrls(SOURCES, "fess-ds-git", "15.9.0", "15.9.0"));
+    }
+
+    @Test
+    public void test_jarUrls_usesOnlyTheSnapshotRepositoryForASnapshot() throws Exception {
+        assertEquals(
+                List.of("https://maven.codelibs.org/snapshot/org/codelibs/fess/fess-ds-git/15.9.0-SNAPSHOT/"
+                        + "fess-ds-git-15.9.0-20260903.015513-6.jar"),
+                PluginRepository.jarUrls(SOURCES, "fess-ds-git", "15.9.0-SNAPSHOT", "15.9.0-20260903.015513-6"));
+    }
+
+    @Test
+    public void test_jarUrls_skipsGithubWhenTheDefinitionNamesNone() throws Exception {
+        final PluginSources sources = new PluginSources("https://example.org/m2", "https://example.org/snapshot", "  ");
+        assertEquals(List.of("https://example.org/m2/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar"),
+                PluginRepository.jarUrls(sources, "fess-ds-git", "15.9.0", "15.9.0"));
+    }
+
+    @Test
+    public void test_repositoryJarUrl_choosesTheRepositoryThatMatchesTheVersion() throws Exception {
+        assertEquals("https://maven.codelibs.org/release/org/codelibs/fess/fess-ds-git/15.9.0/fess-ds-git-15.9.0.jar",
+                PluginRepository.repositoryJarUrl(SOURCES, "fess-ds-git", "15.9.0", "15.9.0"));
+        assertEquals(
+                "https://maven.codelibs.org/snapshot/org/codelibs/fess/fess-ds-git/15.9.0-SNAPSHOT/"
+                        + "fess-ds-git-15.9.0-20260903.015513-6.jar",
+                PluginRepository.repositoryJarUrl(SOURCES, "fess-ds-git", "15.9.0-SNAPSHOT", "15.9.0-20260903.015513-6"));
+    }
+
+    @Test
+    public void test_repositoryJarUrl_reportsASnapshotRepositoryTheDefinitionLeftEmpty() throws Exception {
+        final PluginSources sources = new PluginSources("https://example.org/m2", "", "https://github.com/codelibs");
+        final SetupException e = assertThrows(SetupException.class,
+                () -> PluginRepository.repositoryJarUrl(sources, "fess-ds-git", "15.9.0-SNAPSHOT", "15.9.0-20260903.015513-6"));
+        assertTrue(e.getMessage().contains("snapshot.repository"), e.getMessage());
+    }
+
+    @Test
+    public void test_repositoryJarUrl_reportsAReleaseRepositoryTheDefinitionLeftEmpty() throws Exception {
+        final PluginSources sources = new PluginSources(null, "https://example.org/snapshot", "https://github.com/codelibs");
+        final SetupException e =
+                assertThrows(SetupException.class, () -> PluginRepository.repositoryJarUrl(sources, "fess-ds-git", "15.9.0", "15.9.0"));
+        assertTrue(e.getMessage().contains("plugin.repository"), e.getMessage());
     }
 }
