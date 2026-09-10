@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -323,12 +324,27 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     /**
-     * Retrieves a list of files and directories from the storage system.
+     * Retrieves a list of files and directories from the storage system, discarding a failure.
      *
      * @param prefix the path prefix to list objects under
-     * @return list of file and directory information maps
+     * @return list of file and directory information maps, empty if the listing failed
      */
     public static List<Map<String, Object>> getFileItems(final String prefix) {
+        return getFileItems(prefix, e -> {});
+    }
+
+    /**
+     * Retrieves a list of files and directories from the storage system, handing a failure to the
+     * given handler. A failure returns an empty list instead of propagating, so the handler is the
+     * only way for a caller to tell an empty bucket from a storage it cannot reach at all: the
+     * message of the exception {@link StorageClientFactory} throws when no client is registered for
+     * the configured storage type names the plugin that provides one.
+     *
+     * @param prefix the path prefix to list objects under
+     * @param failureHandler receives the exception when the listing fails
+     * @return list of file and directory information maps, empty if the listing failed
+     */
+    public static List<Map<String, Object>> getFileItems(final String prefix, final Consumer<Exception> failureHandler) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<Map<String, Object>> list = new ArrayList<>();
         final List<Map<String, Object>> fileList = new ArrayList<>();
@@ -355,9 +371,8 @@ public class AdminStorageAction extends FessAdminAction {
                 }
             }
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access storage endpoint: {}", fessConfig.getStorageEndpoint(), e);
-            }
+            logger.warn("Failed to access storage endpoint: {}", fessConfig.getStorageEndpoint(), e);
+            failureHandler.accept(e);
         }
 
         list.addAll(fileList);
@@ -507,7 +522,10 @@ public class AdminStorageAction extends FessAdminAction {
             RenderDataUtil.register(data, "path", path);
             RenderDataUtil.register(data, "pathItems", createPathItems(path));
             RenderDataUtil.register(data, "parentId", createParentId(path));
-            RenderDataUtil.register(data, "fileItems", getFileItems(path));
+            // an unreachable storage otherwise renders as an empty list, so the reason is put on
+            // the screen too; for a missing plugin the message names the plugin to install
+            RenderDataUtil.register(data, "fileItems", getFileItems(path, e -> saveError(messages -> messages
+                    .addErrorsStorageAccessError(GLOBAL, e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()))));
         });
     }
 

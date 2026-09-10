@@ -468,4 +468,41 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
             assertTrue(true);
         }
     }
+
+    /**
+     * The file protocols of an installation whose s3 protocol comes from a plugin that is not
+     * installed: crawler.file.protocols minus s3, in the form ProtocolHelper hands out.
+     */
+    private static final String[] FILE_PROTOCOLS_WITHOUT_S3 = { "file:", "smb:", "smb1:", "ftp:" };
+
+    @Test
+    public void test_isUnsupportedProtocol_reportsAProtocolNobodyServes() {
+        // the path is rewritten to file:/s3://bucket/x and crawls nothing, so it has to be reported
+        assertTrue(WebFsIndexHelper.isUnsupportedProtocol("s3://bucket/x", FILE_PROTOCOLS_WITHOUT_S3));
+        assertTrue(WebFsIndexHelper.isUnsupportedProtocol("gcs://bucket/x", FILE_PROTOCOLS_WITHOUT_S3));
+    }
+
+    @Test
+    public void test_isUnsupportedProtocol_keepsQuietForAProtocolInUse() {
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("file:/foo", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("smb://host/share", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("smb1://host/share", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("ftp://host/dir", FILE_PROTOCOLS_WITHOUT_S3));
+        // and the same s3 path once the protocol is configured
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("s3://bucket/x", new String[] { "file:", "s3:" }));
+    }
+
+    @Test
+    public void test_isUnsupportedProtocol_keepsQuietForAPathWithoutAProtocol() {
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("/foo/bar", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("foo/bar", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("\\\\host\\share", FILE_PROTOCOLS_WITHOUT_S3));
+    }
+
+    @Test
+    public void test_isUnsupportedProtocol_doesNotMistakeAWindowsDriveLetterForAProtocol() {
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("C:\\path", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("C:/path", FILE_PROTOCOLS_WITHOUT_S3));
+        assertFalse(WebFsIndexHelper.isUnsupportedProtocol("c:\\Users\\foo\\docs", FILE_PROTOCOLS_WITHOUT_S3));
+    }
 }
