@@ -2077,9 +2077,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. title,url,content,doc_id,content_title,content_description */
     String RAG_CHAT_CONTENT_FIELDS = "rag.chat.content.fields";
 
-    /** The key of the configuration. e.g. 4000 */
-    String RAG_CHAT_MESSAGE_MAX_LENGTH = "rag.chat.message.max.length";
-
     /** The key of the configuration. e.g. 500 */
     String RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE = "rag.chat.highlight.fragment.size";
 
@@ -2157,15 +2154,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 7 */
     String THEME_UPLOAD_ATTIC_RETENTION_DAYS = "theme.upload.attic.retention.days";
-
-    /** The key of the configuration. e.g. zip */
-    String THEME_ALLOWED_ARCHIVE_EXTENSIONS = "theme.allowed.archive.extensions";
-
-    /** The key of the configuration. e.g. 86400 */
-    String THEME_ASSETS_CACHE_MAX_AGE = "theme.assets.cache.max.age";
-
-    /** The key of the configuration. e.g. true */
-    String THEME_ASSETS_PRECOMPRESSED = "theme.assets.precompressed";
 
     /** The key of the configuration. e.g.  */
     String THEME_API_CSRF_SERVER_ORIGINS = "theme.api.csrf.server.origins";
@@ -9979,21 +9967,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getRagChatContentFields();
 
     /**
-     * Get the value for the key 'rag.chat.message.max.length'. <br>
-     * The value is, e.g. 4000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatMessageMaxLength();
-
-    /**
-     * Get the value for the key 'rag.chat.message.max.length' as {@link Integer}. <br>
-     * The value is, e.g. 4000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagChatMessageMaxLengthAsInteger();
-
-    /**
      * Get the value for the key 'rag.chat.highlight.fragment.size'. <br>
      * The value is, e.g. 500 <br>
      * comment: Highlight settings for RAG search.
@@ -10384,42 +10357,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getThemeUploadAtticRetentionDaysAsInteger();
-
-    /**
-     * Get the value for the key 'theme.allowed.archive.extensions'. <br>
-     * The value is, e.g. zip <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThemeAllowedArchiveExtensions();
-
-    /**
-     * Get the value for the key 'theme.assets.cache.max.age'. <br>
-     * The value is, e.g. 86400 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThemeAssetsCacheMaxAge();
-
-    /**
-     * Get the value for the key 'theme.assets.cache.max.age' as {@link Integer}. <br>
-     * The value is, e.g. 86400 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getThemeAssetsCacheMaxAgeAsInteger();
-
-    /**
-     * Get the value for the key 'theme.assets.precompressed'. <br>
-     * The value is, e.g. true <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getThemeAssetsPrecompressed();
-
-    /**
-     * Is the property for the key 'theme.assets.precompressed' true? <br>
-     * The value is, e.g. true <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isThemeAssetsPrecompressed();
 
     /**
      * Get the value for the key 'theme.api.csrf.server.origins'. <br>
@@ -14176,14 +14113,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.RAG_CHAT_CONTENT_FIELDS);
         }
 
-        public String getRagChatMessageMaxLength() {
-            return get(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH);
-        }
-
-        public Integer getRagChatMessageMaxLengthAsInteger() {
-            return getAsInteger(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH);
-        }
-
         public String getRagChatHighlightFragmentSize() {
             return get(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE);
         }
@@ -14370,26 +14299,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getThemeUploadAtticRetentionDaysAsInteger() {
             return getAsInteger(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS);
-        }
-
-        public String getThemeAllowedArchiveExtensions() {
-            return get(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS);
-        }
-
-        public String getThemeAssetsCacheMaxAge() {
-            return get(FessConfig.THEME_ASSETS_CACHE_MAX_AGE);
-        }
-
-        public Integer getThemeAssetsCacheMaxAgeAsInteger() {
-            return getAsInteger(FessConfig.THEME_ASSETS_CACHE_MAX_AGE);
-        }
-
-        public String getThemeAssetsPrecompressed() {
-            return get(FessConfig.THEME_ASSETS_PRECOMPRESSED);
-        }
-
-        public boolean isThemeAssetsPrecompressed() {
-            return is(FessConfig.THEME_ASSETS_PRECOMPRESSED);
         }
 
         public String getThemeApiCsrfServerOrigins() {
@@ -15060,7 +14969,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_MAX_SIZE, "10000");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES, "30");
             defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FIELDS, "title,url,content,doc_id,content_title,content_description");
-            defaultMap.put(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH, "4000");
             defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE, "500");
             defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "3");
             defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FULLTEXT_MAX_LENGTH, "3000");
@@ -15087,9 +14995,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX, "50");
             defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES, "65536");
             defaultMap.put(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS, "7");
-            defaultMap.put(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS, "zip");
-            defaultMap.put(FessConfig.THEME_ASSETS_CACHE_MAX_AGE, "86400");
-            defaultMap.put(FessConfig.THEME_ASSETS_PRECOMPRESSED, "true");
             defaultMap.put(FessConfig.THEME_API_CSRF_SERVER_ORIGINS, "");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
