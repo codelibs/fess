@@ -19,9 +19,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class StorageItemTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorAndGetters() {
         final String name = "test-file.txt";
         final String path = "/documents/";
@@ -40,6 +42,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals(encodedId, item.getEncodedId());
     }
 
+    @Test
     public void test_directoryItem() {
         final String name = "documents";
         final String path = "/";
@@ -57,6 +60,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals(encodedId, item.getEncodedId());
     }
 
+    @Test
     public void test_fileItem() {
         final ZonedDateTime now = ZonedDateTime.now();
         final StorageItem item = new StorageItem("report.pdf", "/reports/2025/", false, 2048576L, now, "cmVwb3J0LnBkZg==");
@@ -68,6 +72,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals(now, item.getLastModified());
     }
 
+    @Test
     public void test_nullValues() {
         final StorageItem item = new StorageItem(null, null, false, 0L, null, null);
 
@@ -79,6 +84,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertNull(item.getEncodedId());
     }
 
+    @Test
     public void test_emptyName() {
         final StorageItem item = new StorageItem("", "/path/", false, 100L, null, "");
 
@@ -87,6 +93,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals("", item.getEncodedId());
     }
 
+    @Test
     public void test_largeFileSize() {
         final long largeSize = 10737418240L; // 10 GB
         final StorageItem item = new StorageItem("large-file.zip", "/backups/", false, largeSize, null, "bGFyZ2UtZmlsZS56aXA=");
@@ -94,6 +101,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals(largeSize, item.getSize());
     }
 
+    @Test
     public void test_rootPath() {
         final StorageItem item = new StorageItem("root-file.txt", "", false, 512L, null, "cm9vdC1maWxlLnR4dA==");
 
@@ -101,6 +109,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals("", item.getPath());
     }
 
+    @Test
     public void test_deeplyNestedPath() {
         final String deepPath = "/level1/level2/level3/level4/level5/";
         final StorageItem item = new StorageItem("nested.txt", deepPath, false, 256L, null, "bmVzdGVkLnR4dA==");
@@ -108,6 +117,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals(deepPath, item.getPath());
     }
 
+    @Test
     public void test_specialCharactersInName() {
         final String specialName = "file with spaces & symbols!@#.txt";
         final StorageItem item = new StorageItem(specialName, "/special/", false, 100L, null, "c3BlY2lhbA==");
@@ -115,6 +125,7 @@ public class StorageItemTest extends UnitFessTestCase {
         assertEquals(specialName, item.getName());
     }
 
+    @Test
     public void test_unicodeInName() {
         final String unicodeName = "ファイル名.txt";
         final StorageItem item = new StorageItem(unicodeName, "/unicode/", false, 200L, null, "dW5pY29kZQ==");

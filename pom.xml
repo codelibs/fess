@@ -1279,17 +1279,6 @@
 			<version>${oauth2.oidc.sdk.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<version>${s3.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>software.amazon.awssdk</groupId>
-					<artifactId>netty-nio-client</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
 			<version>${httpclient5.version}</version>
@@ -1477,6 +1466,19 @@
 					     its jar and resolves them by their original names. -->
 					<groupId>com.google.cloud</groupId>
 					<artifactId>google-cloud-storage</artifactId>
+				</exclusion>
+				<exclusion>
+					<!-- The AWS SDK for S3 is 30 jars and 8.4 MiB of the distribution for a
+					     protocol that most installations never crawl, and it moves faster than
+					     Fess does. It ships in the fess-storage-s3 plugin instead, which carries
+					     the SDK and registers S3Client with crawlerClientCreator. fess-crawler
+					     still compiles S3Client against the SDK, so this exclusion is what keeps
+					     the jars out of the war; the classes stay in fess-crawler.jar and cost a
+					     few tens of KiB.
+					     Do not relocate the SDK packages in that plugin: S3Client lives outside
+					     its jar and resolves them by their original names. -->
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>s3</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

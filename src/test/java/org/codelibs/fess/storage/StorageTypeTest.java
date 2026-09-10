@@ -16,39 +16,47 @@
 package org.codelibs.fess.storage;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class StorageTypeTest extends UnitFessTestCase {
 
+    @Test
     public void test_enumValues() {
         final StorageType[] types = StorageType.values();
         assertNotNull(types);
         assertEquals(3, types.length);
     }
 
+    @Test
     public void test_s3Type() {
         assertEquals(StorageType.S3, StorageType.valueOf("S3"));
     }
 
+    @Test
     public void test_gcsType() {
         assertEquals(StorageType.GCS, StorageType.valueOf("GCS"));
     }
 
+    @Test
     public void test_s3CompatType() {
         assertEquals(StorageType.S3_COMPAT, StorageType.valueOf("S3_COMPAT"));
     }
 
+    @Test
     public void test_valueOf() {
         for (final StorageType type : StorageType.values()) {
             assertEquals(type, StorageType.valueOf(type.name()));
         }
     }
 
+    @Test
     public void test_ordinal() {
         assertEquals(0, StorageType.S3.ordinal());
         assertEquals(1, StorageType.GCS.ordinal());
         assertEquals(2, StorageType.S3_COMPAT.ordinal());
     }
 
+    @Test
     public void test_name() {
         assertEquals("S3", StorageType.S3.name());
         assertEquals("GCS", StorageType.GCS.name());

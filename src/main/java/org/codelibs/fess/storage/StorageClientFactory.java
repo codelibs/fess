@@ -72,8 +72,10 @@ public final class StorageClientFactory {
     public static StorageClient createClient(final FessConfig fessConfig) {
         final String componentName = componentName(fessConfig.getStorageType(), fessConfig.getStorageEndpoint());
         if (!ComponentUtil.hasComponent(componentName)) {
-            throw new StorageException("No storage client is registered as " + componentName + " for storage.type="
-                    + fessConfig.getStorageType() + ". Install the plugin that provides it, such as fess-storage-gcs for gcs.");
+            throw new StorageException(
+                    "No storage client is registered as " + componentName + " for storage.type=" + fessConfig.getStorageType()
+                            + ". Every backend ships as a fess-storage-* plugin: install fess-storage-s3 for s3 and s3_compat, "
+                            + "or fess-storage-gcs for gcs.");
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Creating {} for endpoint: {}", componentName, fessConfig.getStorageEndpoint());
@@ -87,10 +89,10 @@ public final class StorageClientFactory {
      * Returns the name of the DI component that serves a storage type.
      *
      * <p>The mapping from a {@code storage.type} value to an implementation lives in the DI
-     * definition rather than here, which is what lets the clients ship as plugins: core no longer
-     * names GcsStorageClient or S3StorageClient, and a plugin registering
-     * {@code <type>StorageClient} is reachable by setting {@code storage.type=<type>}. The
-     * components are prototypes because every caller closes the client it was handed.</p>
+     * definition rather than here, which is what lets the clients ship as plugins: core names no
+     * implementation at all, and a plugin registering {@code <type>StorageClient} is reachable by
+     * setting {@code storage.type=<type>}. The components are prototypes because every caller
+     * closes the client it was handed.</p>
      *
      * @param typeStr the configured type, blank or {@code auto} to detect from the endpoint
      * @param endpoint the storage endpoint, used only when detecting

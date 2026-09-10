@@ -2,21 +2,18 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
-	<!-- Storage clients, resolved by StorageClientFactory as "<storage.type>StorageClient".
-	     The mapping from a storage.type value to a class lives here rather than in Java so that
-	     the clients can ship as fess-storage-* plugins: a plugin contributes its component through
-	     fess_storage++.xml, which merges from every jar on the classpath, and setting
-	     storage.type to its name is enough to reach it. fess-storage-gcs registers gcsStorageClient
-	     that way; storage.type=gcs without that plugin installed is a configuration error the
-	     factory reports rather than a missing class.
+	<!-- Storage client components are provided by fess-storage-* plugins via fess_storage++.xml.
+	     StorageClientFactory resolves them as "<storage.type>StorageClient", and the ++ suffix
+	     merges into this file, so it stays even though core registers nothing of its own: without
+	     a base file the plugins have nowhere to contribute to.
 
-	     They are prototypes, not singletons: every caller takes the client in a
+	     Keeping the storage.type-to-class mapping in the DI definition rather than in Java is what
+	     makes that work. Setting storage.type to a component's name is enough to reach it, so a
+	     plugin needs no change here to be reachable, and one plugin can register several names for
+	     the same class: fess-storage-s3 serves both s3 and s3_compat, the auto-detection result for
+	     MinIO and the like, that way. A storage.type whose plugin is not installed is a
+	     configuration error the factory reports rather than a missing class.
+
+	     The components are prototypes, not singletons: every caller takes the client in a
 	     try-with-resources and closes it, which would shut down a shared instance. -->
-	<component name="s3StorageClient" class="org.codelibs.fess.storage.S3StorageClient" instance="prototype">
-	</component>
-	<!-- S3_COMPAT is the auto-detection result for MinIO and the like, and it is served by the
-	     same client as s3. It is a separate component rather than a branch in Java because that
-	     keeps the type-to-class mapping in one place. -->
-	<component name="s3_compatStorageClient" class="org.codelibs.fess.storage.S3StorageClient" instance="prototype">
-	</component>
 </components>

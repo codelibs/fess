@@ -48,7 +48,7 @@ public class GoActionTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,s3";
+                return "file,smb,smb1,ftp";
             }
         });
         final ProtocolHelper protocolHelper = new ProtocolHelper();

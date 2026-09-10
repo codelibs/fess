@@ -46,7 +46,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,s3";
+                return "file,smb,smb1,ftp";
             }
 
             @Override
