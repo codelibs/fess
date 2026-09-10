@@ -15,10 +15,12 @@
  */
 package org.codelibs.fess.sso;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -464,6 +466,133 @@ public class SsoManagerTest extends UnitFessTestCase {
         LoginCredential credential = ssoManager.getLoginCredential();
         assertNotNull(credential);
         assertEquals("entraiduser", ((TestLoginCredential) credential).username);
+    }
+
+    // Test the report for an sso.type no installed plugin serves
+    /**
+     * The failure this reports used to be silent: a configured sso.type whose authenticator is not
+     * registered made every caller answer null, SsoAction turned that into errors.sso_login_error
+     * and a redirect, and nothing was logged above debug. The whole symptom was a GET /sso/ that
+     * answered 302 to /login/, which no amount of reading the configuration explains -- the
+     * configuration is right and a plugin is missing. Splitting the authenticators out of core made
+     * that the ordinary state of an upgraded installation.
+     */
+    @Test
+    public void test_getAuthenticator_unservedType_warnsNamingTheComponentAndThePlugin() {
+        currentSsoType = "saml";
+        ssoManager = newManager();
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SsoManager.class);
+        try {
+            assertNull(ssoManager.getAuthenticator(), "no samlAuthenticator is registered here");
+            assertEquals(1, capture.warnings().size());
+            final String warning = capture.warnings().get(0);
+            assertTrue(warning.contains("samlAuthenticator"), warning);
+            assertTrue(warning.contains("sso.type=saml"), warning);
+            assertTrue(warning.contains("fess-sso-saml"), warning);
+            // ERROR is a notification trigger in Fess, and an unfinished installation is not a fault.
+            assertTrue(capture.errors().isEmpty(), "must not be reported at ERROR: " + capture.errors());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    /**
+     * /sso/ is anonymous and the miss is hit on every visit, so a warning per attempt is a log an
+     * unauthenticated client can fill.
+     */
+    @Test
+    public void test_getAuthenticator_unservedType_warnsOnlyOncePerType() {
+        currentSsoType = "saml";
+        ssoManager = newManager();
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SsoManager.class);
+        try {
+            for (int i = 0; i < 5; i++) {
+                assertNull(ssoManager.getAuthenticator(), "attempt " + i);
+            }
+            assertEquals(1, capture.warnings().size());
+
+            // A different type is a different miss and is worth its own line.
+            currentSsoType = "spnego";
+            assertNull(ssoManager.getAuthenticator(), "no spnegoAuthenticator is registered here");
+            assertEquals(2, capture.warnings().size());
+            assertTrue(capture.warnings().get(1).contains("sso.type=spnego"), capture.warnings().get(1));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    /**
+     * The legacy type maps to entraid before the component name is built, so the plugin the warning
+     * names is the one that actually serves it.
+     */
+    @Test
+    public void test_getAuthenticator_unservedAadType_namesTheEntraidPlugin() {
+        currentSsoType = "aad";
+        ssoManager = newManager();
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SsoManager.class);
+        try {
+            assertNull(ssoManager.getAuthenticator(), "no entraidAuthenticator is registered here");
+            assertEquals(1, capture.warnings().size());
+            final String warning = capture.warnings().get(0);
+            assertTrue(warning.contains("entraidAuthenticator"), warning);
+            assertTrue(warning.contains("fess-sso-entraid"), warning);
+        } finally {
+            capture.detach();
+        }
+    }
+
+    /**
+     * An installation that does not use SSO must stay quiet: /sso/ is reachable whether or not it
+     * is configured, so a warning here would be a line per anonymous request on a deployment that
+     * has nothing wrong with it.
+     */
+    @Test
+    public void test_getAuthenticator_ssoNotConfigured_saysNothing() {
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SsoManager.class.getName(), Level.WARN);
+        try {
+            for (final String type : new String[] { Constants.NONE, "", "   ", null }) {
+                currentSsoType = type;
+                ssoManager = newManager();
+                assertNull(ssoManager.getAuthenticator(), "type=" + type);
+            }
+            assertTrue(capture.events().isEmpty(), "nothing to report for an unconfigured sso.type: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    /**
+     * Core must not ship a fess_sso++.xml. The plugins contribute their authenticators through a
+     * file of that name, and the ++ suffix merges every copy on the classpath: one in the war and
+     * one in a plugin jar define the same component twice, which makes getComponent throw
+     * TooManyRegistrationComponentException and runs the @PostConstruct that calls
+     * {@link SsoManager#register} twice. Overriding one from the other is not available either --
+     * a redefinition file is named fess_sso+&lt;component&gt;.xml, and a base path containing "+"
+     * is what RedefinableComponentTagHandler.redefine() refuses -- so the only workable division is
+     * for core to ship none. fess_sso.xml itself has to stay: it is what the plugins merge into.
+     */
+    @Test
+    public void test_coreShipsTheBaseFileAndNoPlusPlusFile() {
+        final ClassLoader loader = getClass().getClassLoader();
+        assertNotNull(loader.getResource("fess_sso.xml"), "fess_sso.xml is the file the plugins merge into");
+        assertNull(loader.getResource("fess_sso++.xml"),
+                "fess_sso++.xml belongs to the fess-sso-* plugins; a copy in core collides with theirs. "
+                        + "On an incremental build this also fails on a stale target/classes copy left by a build "
+                        + "from before the file was deleted -- which a war built from that directory really would ship. "
+                        + "mvn clean test settles which one it is.");
+    }
+
+    /** An SsoManager whose sso.type is the field the tests set. */
+    private SsoManager newManager() {
+        return new SsoManager() {
+            @Override
+            protected String getSsoType() {
+                return currentSsoType;
+            }
+        };
     }
 
     // Helper classes for testing

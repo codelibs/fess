@@ -1140,6 +1140,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- Nothing in core calls this any more: the OpenID Connect authenticator that used
+		     com.google.api.client.auth.oauth2 moved to the fess-sso-oidc plugin. The declaration
+		     stays because dropping it does not remove the jar, only the say over its version.
+		     google-api-client 2.7.2, kept below for fess-ds-gsuite, asks for 1.36.0 and would win
+		     by default, so the version the plugin runs against would be decided by a transitive
+		     request instead of here. google-oauth-client's types extend google-http-client's,
+		     declared at ${google.http.client.version} right below, which is the split the
+		     google-http-client-gson comment describes. -->
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client</artifactId>
@@ -1165,11 +1173,13 @@
 			<artifactId>google-http-client-jackson2</artifactId>
 			<version>${google.http.client.version}</version>
 		</dependency>
-		<!-- OpenIdConnectAuthenticator uses GsonFactory from here, and this is the only one of the
-		     four google-http-client artifacts that was not declared. It arrived transitively from
-		     google-oauth-client instead, which asks for an older line than the core jar: two paths
-		     at the same depth, so declaration order decided it and the gson helper ran against a
-		     core jar of a different major version. Declaring it keeps all four on one version. -->
+		<!-- The OpenID Connect authenticator uses GsonFactory from here, and this is the only one
+		     of the four google-http-client artifacts that was not declared. It arrived transitively
+		     from google-oauth-client instead, which asks for an older line than the core jar: two
+		     paths at the same depth, so declaration order decided it and the gson helper ran
+		     against a core jar of a different major version. Declaring it keeps all four on one
+		     version. The caller now lives in fess-sso-oidc, which changes nothing here: it runs on
+		     the jars the war ships. -->
 		<dependency>
 			<groupId>com.google.http-client</groupId>
 			<artifactId>google-http-client-gson</artifactId>
@@ -1205,11 +1215,6 @@
 			<groupId>org.codelibs</groupId>
 			<artifactId>curl4j</artifactId>
 			<version>${curl4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>spnego</artifactId>
-			<version>${spnego.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -1259,26 +1264,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>msal4j</artifactId>
-			<version>${msal4j.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.stephenc.jcip</groupId>
-					<artifactId>jcip-annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.mail</groupId>
-					<artifactId>javax.mail</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.nimbusds</groupId>
-			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>${oauth2.oidc.sdk.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
 			<version>${httpclient5.version}</version>
@@ -1301,8 +1286,8 @@
 			     shade them. They arrived as transitive dependencies of google-cloud-storage until
 			     the GCS client moved to the fess-storage-gcs plugin, so they are declared here to keep
 			     that plugin working. The versions are the ones fess-ds-gsuite compiles against.
-			     Fess's own OpenID Connect code uses google-http-client and google-oauth-client
-			     (com.google.api.client.auth/http/json), which are declared separately. -->
+			     google-http-client and google-oauth-client (com.google.api.client.auth/http/json)
+			     are declared separately, for fess-sso-oidc and for this one's own use. -->
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
 			<version>2.7.2</version>
@@ -1345,17 +1330,6 @@
 			<artifactId>mockwebserver</artifactId>
 			<version>${okhttp.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>java-saml</artifactId>
-			<version>${java.saml.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.xml.bind</groupId>
-					<artifactId>jakarta.xml.bind-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>

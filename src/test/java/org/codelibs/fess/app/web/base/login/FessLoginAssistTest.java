@@ -352,27 +352,21 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     // ---------------------------------------------------------------------
 
     @Test
-    public void test_needsSyncCheck_samlUser_staleCheckTime_skipsCheck() {
-        final FessUserBean bean = new FessUserBean(newSamlUser("saml-admin"));
-        assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
-    }
-
-    @Test
     public void test_needsSyncCheck_ldapUser_staleCheckTime_skipsCheck() {
         final FessUserBean bean = new FessUserBean(new LdapUser(new Hashtable<>(), "ldap-admin"));
         assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
     }
 
     @Test
-    public void test_needsSyncCheck_openIdUser_staleCheckTime_skipsCheck() {
-        final FessUserBean bean = new FessUserBean(newOpenIdUser("oidc-admin"));
+    public void test_needsSyncCheck_ssoUser_staleCheckTime_skipsCheck() {
+        final FessUserBean bean = new FessUserBean(newSsoUser("sso-admin"));
         assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.of(STALE_CHECK_DT), NOW));
     }
 
     @Test
     public void test_needsSyncCheck_externalUser_neverCheckedYet_skipsCheck() {
         // super returns true for "no check yet"; the external-user guard must run first.
-        final FessUserBean bean = new FessUserBean(newSamlUser("saml-admin"));
+        final FessUserBean bean = new FessUserBean(newSsoUser("sso-admin"));
         assertFalse(loginAssist.needsLoginSessionSyncCheck(bean, OptionalThing.empty(), NOW));
     }
 
@@ -415,7 +409,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     public void test_syncCheckLoginSession_externalUser_keepsSessionWithoutQuery() {
         final ExposedLoginAssist assist = newExposedAssist();
         final CountingUserBhv bhv = installCountingUserBhv(assist, null);
-        final FessUserBean bean = new FessUserBean(newSamlUser("saml-admin"));
+        final FessUserBean bean = new FessUserBean(newSsoUser("sso-admin"));
         bean.manageLastestSyncCheckTime(STALE_CHECK_DT);
 
         assertTrue(assist.callSyncCheckLoginSession(bean));
@@ -511,12 +505,37 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     /** Well within the 300-second default sync-check interval. */
     private static final LocalDateTime FRESH_CHECK_DT = NOW.minusSeconds(10);
 
-    private static SamlCredential.SamlUser newSamlUser(final String nameId) {
-        return new SamlCredential.SamlUser(nameId, "session-index", null, null, null, new String[0], new String[] { "admin" });
-    }
+    /**
+     * A user an SSO authenticator hands out. The guard under test asks only whether the bean holds
+     * the local {@link User} document, so what stands in for SamlUser and OpenIdUser -- which moved
+     * to the fess-sso-saml and fess-sso-oidc plugins with their authenticators -- is any other
+     * FessUser. This one is declared here rather than borrowed from another package so that the
+     * test keeps asserting the guard and not a plugin's class hierarchy.
+     */
+    private static FessUser newSsoUser(final String name) {
+        return new FessUser() {
+            private static final long serialVersionUID = 1L;
 
-    private static OpenIdConnectCredential.OpenIdUser newOpenIdUser(final String name) {
-        return new OpenIdConnectCredential.OpenIdUser(name, new String[0], new String[] { "admin" });
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String[] getRoleNames() {
+                return new String[] { "admin" };
+            }
+
+            @Override
+            public String[] getGroupNames() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getPermissions() {
+                return new String[] { "Radmin" };
+            }
+        };
     }
 
     private static User newLocalUser(final String name) {

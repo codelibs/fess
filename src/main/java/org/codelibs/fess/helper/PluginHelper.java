@@ -610,9 +610,11 @@ public class PluginHelper {
          */
         STORAGE("fess-storage"), //
         /**
-         * Single sign-on plugins, contributing the {@code SsoAuthenticator} that {@code sso.type}
-         * selects. No such plugin exists as of 15.9 - the authenticators still ship in core - so
-         * this reserves the prefix for when they are split out.
+         * Single sign-on plugins, each contributing the {@code <sso.type>Authenticator} that
+         * {@code sso.type} selects, plus the identity library it needs, so the distribution does
+         * not carry one for every installation. There are four: fess-sso-saml, fess-sso-spnego,
+         * fess-sso-entraid and fess-sso-oidc. Core keeps SsoManager and the /sso/ endpoints, and
+         * serves no type on its own.
          */
         SSO("fess-sso"), //
         /** Unknown/generic JAR files */
