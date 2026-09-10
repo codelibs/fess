@@ -50,7 +50,7 @@ public final class PluginRepository {
      * -- {@code fess} itself, {@code fess-parent} -- is not installable.
      */
     private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-theme", "fess-ingest", "fess-script", "fess-webapp",
-            "fess-thumbnail", "fess-crawler", "fess-llm", "fess-lib" };
+            "fess-thumbnail", "fess-crawler", "fess-llm", "fess-storage", "fess-sso" };
 
     /**
      * Crawler artifacts that are libraries rather than plugins. PluginHelper hides these from

@@ -91,11 +91,11 @@ public class FessPluginInstallerTest {
     }
 
     @Test
-    public void test_installed_includesLibraryPlugins() throws Exception {
-        touch("fess-lib-gcs-15.9.0.jar");
+    public void test_installed_includesStoragePlugins() throws Exception {
+        touch("fess-storage-gcs-15.9.0.jar");
         touch("fess-ds-git-15.9.0.jar");
 
-        assertEquals(List.of("fess-ds-git-15.9.0.jar", "fess-lib-gcs-15.9.0.jar"),
+        assertEquals(List.of("fess-ds-git-15.9.0.jar", "fess-storage-gcs-15.9.0.jar"),
                 FessPluginInstaller.installed(tempDir).stream().map(p -> p.getFileName().toString()).toList());
     }
 

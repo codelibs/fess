@@ -534,6 +534,9 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals(ArtifactType.WEBAPP, ArtifactType.getType("fess-webapp-test"));
         assertEquals(ArtifactType.THUMBNAIL, ArtifactType.getType("fess-thumbnail-test"));
         assertEquals(ArtifactType.CRAWLER, ArtifactType.getType("fess-crawler-test"));
+        assertEquals(ArtifactType.LLM, ArtifactType.getType("fess-llm-test"));
+        assertEquals(ArtifactType.STORAGE, ArtifactType.getType("fess-storage-gcs"));
+        assertEquals(ArtifactType.SSO, ArtifactType.getType("fess-sso-saml"));
         assertEquals(ArtifactType.UNKNOWN, ArtifactType.getType("unknown-test"));
     }
 

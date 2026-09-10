@@ -754,7 +754,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("ftp://ftp.example.com/file"));
         assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/key"));
 
-        // gcs is not in the shipped default: fess-lib-gcs adds it with addFileProtocol when the
+        // gcs is not in the shipped default: fess-storage-gcs adds it with addFileProtocol when the
         // plugin is installed, which test_s3_gcs_protocols_add_dynamically covers.
         assertFalse(protocolHelper.isValidFileProtocol("gcs://bucket/object"));
 

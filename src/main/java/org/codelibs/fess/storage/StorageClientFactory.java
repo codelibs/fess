@@ -73,7 +73,7 @@ public final class StorageClientFactory {
         final String componentName = componentName(fessConfig.getStorageType(), fessConfig.getStorageEndpoint());
         if (!ComponentUtil.hasComponent(componentName)) {
             throw new StorageException("No storage client is registered as " + componentName + " for storage.type="
-                    + fessConfig.getStorageType() + ". Install the plugin that provides it, such as fess-lib-gcs for gcs.");
+                    + fessConfig.getStorageType() + ". Install the plugin that provides it, such as fess-storage-gcs for gcs.");
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Creating {} for endpoint: {}", componentName, fessConfig.getStorageEndpoint());

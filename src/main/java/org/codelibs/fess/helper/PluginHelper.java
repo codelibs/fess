@@ -603,10 +603,18 @@ public class PluginHelper {
         /** LLM plugins */
         LLM("fess-llm"), //
         /**
-         * Library plugins: a third-party client and its dependencies, shipped so that the
-         * distribution does not have to carry them for every installation. fess-lib-gcs is one.
+         * Object storage backend plugins. Each one bundles the {@code <type>StorageClient} that
+         * {@code storage.type} selects and the crawler client that reads the same backend, plus
+         * the third-party SDK they need, so the distribution does not carry it for every
+         * installation. fess-storage-gcs is one.
          */
-        LIB("fess-lib"), //
+        STORAGE("fess-storage"), //
+        /**
+         * Single sign-on plugins, contributing the {@code SsoAuthenticator} that {@code sso.type}
+         * selects. No such plugin exists as of 15.9 - the authenticators still ship in core - so
+         * this reserves the prefix for when they are split out.
+         */
+        SSO("fess-sso"), //
         /** Unknown/generic JAR files */
         UNKNOWN("jar");
 
@@ -662,8 +670,11 @@ public class PluginHelper {
             if (name.startsWith(LLM.getId())) {
                 return LLM;
             }
-            if (name.startsWith(LIB.getId())) {
-                return LIB;
+            if (name.startsWith(STORAGE.getId())) {
+                return STORAGE;
+            }
+            if (name.startsWith(SSO.getId())) {
+                return SSO;
             }
             return UNKNOWN;
         }

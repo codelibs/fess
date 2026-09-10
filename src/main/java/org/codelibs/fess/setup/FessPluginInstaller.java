@@ -40,7 +40,7 @@ public final class FessPluginInstaller {
 
     /** The prefixes {@code PluginHelper.ArtifactType} recognises, which is what Fess can load. */
     private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-theme", "fess-ingest", "fess-script", "fess-webapp",
-            "fess-thumbnail", "fess-crawler", "fess-llm", "fess-lib" };
+            "fess-thumbnail", "fess-crawler", "fess-llm", "fess-storage", "fess-sso" };
 
     private static final String JAR = ".jar";
 
