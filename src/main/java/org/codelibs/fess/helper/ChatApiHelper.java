@@ -371,8 +371,12 @@ public class ChatApiHelper {
     }
 
     /**
-     * Resolves {@code rag.chat.message.max.length} from fess_config system properties,
-     * defaulting to {@code 4000} on parse failure.
+     * Resolves {@code rag.chat.message.max.length}, defaulting to {@code 4000} when it is
+     * unset or unparseable.
+     *
+     * <p>This is a system property: it is read from {@code conf/system.properties}, then
+     * {@code -Dfess.system.rag.chat.message.max.length}. It is deliberately not declared in
+     * {@code fess_config.properties}, which this channel never consults.
      *
      * @param fessConfig active Fess config
      * @return max chat message length in characters
