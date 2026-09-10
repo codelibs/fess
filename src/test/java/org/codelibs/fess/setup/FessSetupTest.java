@@ -274,6 +274,58 @@ public class FessSetupTest {
     }
 
     @Test
+    public void test_parsePluginSpec_takesTheVersionAfterTheColon() throws Exception {
+        final FessSetup.PluginSpec spec = FessSetup.parsePluginSpec("fess-ds-git:15.9.0", null);
+        assertEquals("fess-ds-git", spec.artifactId());
+        assertEquals("15.9.0", spec.version());
+    }
+
+    @Test
+    public void test_parsePluginSpec_fallsBackToTheOptionVersion() throws Exception {
+        final FessSetup.PluginSpec spec = FessSetup.parsePluginSpec("fess-ds-git", "15.9.0");
+        assertEquals("fess-ds-git", spec.artifactId());
+        assertEquals("15.9.0", spec.version());
+    }
+
+    @Test
+    public void test_parsePluginSpec_leavesTheVersionUnresolvedWhenNoneIsGiven() throws Exception {
+        final FessSetup.PluginSpec spec = FessSetup.parsePluginSpec("fess-ds-git", null);
+        assertEquals("fess-ds-git", spec.artifactId());
+        assertNull(spec.version());
+    }
+
+    @Test
+    public void test_parsePluginSpec_prefersTheColonOverTheOption() throws Exception {
+        assertEquals("15.9.1", FessSetup.parsePluginSpec("fess-ds-git:15.9.1", "15.9.0").version());
+    }
+
+    @Test
+    public void test_parsePluginSpec_rejectsAnEmptyName() {
+        final SetupException e = assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec(":15.9.0", null));
+        assertTrue(e.getMessage().contains(":15.9.0"), e.getMessage());
+    }
+
+    @Test
+    public void test_parsePluginSpec_rejectsAnEmptyVersion() {
+        final SetupException e = assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec("fess-ds-git:", null));
+        assertTrue(e.getMessage().contains("fess-ds-git:"), e.getMessage());
+    }
+
+    @Test
+    public void test_parsePluginSpec_rejectsAVersionThatCouldEscapeThePluginDirectory() {
+        // The version becomes the jar's file name, which is resolved against the plugin
+        // directory, so a separator in it would write outside that directory.
+        assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec("fess-ds-git:../../evil", null));
+        assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec("fess-ds-git", "../../evil"));
+    }
+
+    @Test
+    public void test_installPlugin_reportsAMalformedSpecAsAUsageError() {
+        assertEquals(2, run("install", "plugin", "fess-ds-git:"));
+        assertTrue(err().contains("fess-ds-git:"), err());
+    }
+
+    @Test
     public void test_fessVersion_isEmptyWithoutAManifest() {
         // Under test the class comes from target/classes, which has no manifest. The install
         // path then reports that --version is needed rather than guessing a plugin version.
