@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Installs the artifacts Fess needs but does not bundle.
@@ -42,6 +43,9 @@ public final class FessSetup {
 
     /** The definition holding where Fess plugins come from and go, rather than a download. */
     private static final String PLUGIN_COMPONENT = "plugin";
+
+    /** What a plugin name and a plugin version may be made of, which is a Maven coordinate. */
+    private static final Pattern COORDINATE = Pattern.compile("[A-Za-z0-9._-]+");
 
     private static final int EXIT_OK = 0;
 
@@ -64,8 +68,12 @@ public final class FessSetup {
               install nodejs [--dest <dir>] [--version <version>]
                   Download Node.js, which the Playwright crawler needs.
 
-              install plugin <name>... [--version <version>] [--repository <url>]
+              install plugin <name>[:<version>]... [--version <version>] [--repository <url>]
                   Install Fess plugins, for example fess-script-groovy or fess-ds-git.
+                  A name with no version is resolved against the repository, which picks
+                  the newest one built for this Fess. Name one instead to pin it, either
+                  per plugin as fess-script-groovy:15.9.0 or, for every plugin that has
+                  no version of its own, with --version.
                   A release comes from the plugin's GitHub release, or from the Maven
                   repository when GitHub has no such asset. A development build of Fess
                   installs the snapshots of its own line as well, and prefers them.
@@ -281,34 +289,94 @@ public final class FessSetup {
      *
      * <p>The version is resolved from the repository unless the caller names one, so that
      * {@code install plugin fess-ds-git} picks the latest release built for this Fess rather
-     * than whatever is newest.</p>
+     * than whatever is newest. A caller that needs a reproducible install -- a Dockerfile,
+     * say -- names the version instead, per plugin, because the plugins of one Fess line are
+     * released separately and need not all be at the same one.</p>
+     *
+     * <p>Every argument is parsed before the first download starts: a typo in the last of
+     * seven plugin names should not leave six of them installed.</p>
      *
      * @param args the command line
      * @param definitions the setup definition
      * @param options the parsed options
      * @param out the stream for normal output
      * @param err the stream for errors
-     * @return 0 on success, 2 when no plugin was named
+     * @return 0 on success, 2 when no plugin was named or one was named badly
      * @throws SetupException if a download or a file operation fails
      */
     private static int installFessPlugins(final String[] args, final Map<String, ComponentDefinition> definitions,
             final Map<String, String> options, final PrintStream out, final PrintStream err) throws SetupException {
-        final List<String> artifactIds = positionals(args, 2);
-        if (artifactIds.isEmpty()) {
+        final List<String> arguments = positionals(args, 2);
+        if (arguments.isEmpty()) {
             err.println("error: install plugin requires at least one plugin name, for example:");
             err.println("  fess-setup install plugin fess-script-groovy");
             err.println("Run `fess-setup list plugins` to see what is published.");
             return EXIT_USAGE;
         }
+        final List<PluginSpec> specs = new ArrayList<>();
+        for (final String argument : arguments) {
+            try {
+                specs.add(parsePluginSpec(argument, options.get("version")));
+            } catch (final SetupException e) {
+                err.println("error: " + e.getMessage());
+                return EXIT_USAGE;
+            }
+        }
         final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
         final PluginSources sources = pluginSources(definition, options);
         final Path directory = pluginDirectory(definition, options);
-        for (final String artifactId : artifactIds) {
-            installOne(sources, artifactId, resolve(sources, artifactId, options.get("version")), directory, out);
+        for (final PluginSpec spec : specs) {
+            installOne(sources, spec.artifactId(), resolve(sources, spec.artifactId(), spec.version()), directory, out);
         }
         out.println();
-        out.println("Restart Fess to load " + (artifactIds.size() == 1 ? "it." : "them."));
+        out.println("Restart Fess to load " + (specs.size() == 1 ? "it." : "them."));
         return EXIT_OK;
+    }
+
+    /**
+     * A plugin named on the command line: which plugin, and which version of it to install.
+     *
+     * @param artifactId the plugin name
+     * @param version the version to install, or {@code null} to let the repository decide
+     */
+    record PluginSpec(String artifactId, String version) {
+    }
+
+    /**
+     * Parses one {@code install plugin} argument, which is a plugin name and may carry a
+     * version after a colon.
+     *
+     * <p>The colon wins over {@code --version}, which is the default for the arguments that
+     * do not carry one, so that a mostly uniform set of plugins can name the odd one out.</p>
+     *
+     * <p>Both parts are checked against the characters a Maven coordinate is made of. This is
+     * not pedantry about version syntax: the name and the version become the jar's file name,
+     * which is resolved against the plugin directory, so a separator in either would write the
+     * jar somewhere else entirely.</p>
+     *
+     * @param argument the argument, either {@code <name>} or {@code <name>:<version>}
+     * @param defaultVersion the version {@code --version} named, or null
+     * @return the plugin and its version
+     * @throws SetupException if the argument or the default version is not in that shape
+     */
+    static PluginSpec parsePluginSpec(final String argument, final String defaultVersion) throws SetupException {
+        final int colon = argument.indexOf(':');
+        if (colon < 0) {
+            if (defaultVersion != null && !COORDINATE.matcher(defaultVersion).matches()) {
+                throw new SetupException("--version " + defaultVersion + " is not a version.");
+            }
+            if (!COORDINATE.matcher(argument).matches()) {
+                throw new SetupException("'" + argument + "' is not a plugin name.");
+            }
+            return new PluginSpec(argument, defaultVersion);
+        }
+        final String artifactId = argument.substring(0, colon);
+        final String version = argument.substring(colon + 1);
+        if (!COORDINATE.matcher(artifactId).matches() || !COORDINATE.matcher(version).matches()) {
+            throw new SetupException("'" + argument + "' is not a plugin, which is written as <name> or <name>:<version>, "
+                    + "for example fess-script-groovy or fess-script-groovy:15.9.0.");
+        }
+        return new PluginSpec(artifactId, version);
     }
 
     /**
