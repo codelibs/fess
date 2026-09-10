@@ -558,6 +558,7 @@
 							<type>files</type>
 							<paths>
 								<path>${project.basedir}/src/main/assemblies/files/fess</path>
+								<path>${project.basedir}/src/main/assemblies/files/fess-setup</path>
 								<path>${project.basedir}/src/main/assemblies/files/fess.in.sh</path>
 								<path>${project.basedir}/src/main/assemblies/files/generate-thumbnail</path>
 							</paths>
@@ -565,6 +566,20 @@
 							<mapper>
 								<type>perm</type>
 								<filemode>755</filemode>
+								<user>${packaging.fess.user}</user>
+								<group>${packaging.fess.group}</group>
+							</mapper>
+						</data>
+						<!-- Unlike the rest of bin this is not a source file: the fess-setup-jar execution
+						     of maven-jar-plugin builds it into target under the build final name. dst
+						     pins the installed name, which bin/fess-setup hardcodes. -->
+						<data>
+							<type>file</type>
+							<src>${project.build.directory}/${project.build.finalName}-setup.jar</src>
+							<dst>${packaging.fess.bin.dir}/fess-setup.jar</dst>
+							<mapper>
+								<type>perm</type>
+								<filemode>644</filemode>
 								<user>${packaging.fess.user}</user>
 								<group>${packaging.fess.group}</group>
 							</mapper>
@@ -789,14 +804,33 @@
 						<mapping>
 							<directory>${packaging.fess.bin.dir}</directory>
 							<filemode>755</filemode>
+							<!-- Once the jar mapping below adds a file this mapping does not own, the plugin
+							     lists bin file by file instead of as one directory entry, and the directory
+							     itself drops out of the package; recurseDirectories keeps it listed. -->
+							<recurseDirectories>true</recurseDirectories>
 							<sources>
 								<source>
 									<location>${project.basedir}/src/main/assemblies/files</location>
 									<includes>
 										<include>fess</include>
+										<include>fess-setup</include>
 										<include>fess.in.sh</include>
 										<include>generate-thumbnail</include>
 									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Same jar as in the deb bin section: build output rather than a source file,
+						     with destination pinning the installed name that bin/fess-setup hardcodes.
+						     It gets a mapping of its own because filemode is per mapping and only the
+						     launchers have to be executable. -->
+						<mapping>
+							<directory>${packaging.fess.bin.dir}</directory>
+							<directoryIncluded>false</directoryIncluded>
+							<sources>
+								<source>
+									<location>${project.build.directory}/${project.build.finalName}-setup.jar</location>
+									<destination>fess-setup.jar</destination>
 								</source>
 							</sources>
 						</mapping>
