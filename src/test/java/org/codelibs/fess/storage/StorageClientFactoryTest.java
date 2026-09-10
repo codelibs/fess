@@ -18,6 +18,12 @@ package org.codelibs.fess.storage;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
+/**
+ * What core still owns is the type-to-name mapping: {@link StorageClientFactory#componentName}
+ * and the endpoint detection behind it. The implementations moved to fess-storage-s3 and
+ * fess-storage-gcs together with their SDKs, so the component definitions and the prototype
+ * contract are verified in those plugins, not here.
+ */
 public class StorageClientFactoryTest extends UnitFessTestCase {
 
     @Test
@@ -49,42 +55,49 @@ public class StorageClientFactoryTest extends UnitFessTestCase {
     }
 
     /**
-     * Every name {@link #test_componentName_detectsFromTheEndpoint} and the storage.type values
-     * the distribution serves can produce has to exist in fess_storage.xml, or the admin storage
-     * screen fails at runtime for a configuration the UI offers.
+     * The distribution on its own serves no storage type: every backend ships as a
+     * fess-storage-* plugin that contributes its component through fess_storage++.xml, so
+     * fess_storage.xml declares nothing and storage.type is a configuration error until the
+     * matching plugin is installed. This asserts the absence, because registering any of these
+     * names in core again would pull an SDK back into the war - the AWS one for s3 and s3_compat,
+     * the Google Cloud Storage one for gcs.
+     *
+     * <p>test_app.xml includes fess_storage.xml, so this runs against the file the distribution
+     * ships rather than against an empty container.</p>
      */
     @Test
-    public void test_everyTypeTheDistributionServesHasAComponent() {
-        for (final StorageType type : new StorageType[] { StorageType.S3, StorageType.S3_COMPAT }) {
+    public void test_noTypeIsServedByCore() {
+        for (final StorageType type : StorageType.values()) {
             final String name = StorageClientFactory.componentName(type.name(), null);
-            assertTrue(org.codelibs.fess.util.ComponentUtil.hasComponent(name), name + " is not registered in fess_storage.xml");
+            assertFalse(org.codelibs.fess.util.ComponentUtil.hasComponent(name),
+                    name + " belongs to a fess-storage-* plugin and must not be declared in fess_storage.xml");
         }
-        assertTrue(org.codelibs.fess.util.ComponentUtil.hasComponent(StorageClientFactory.componentName("auto", null)));
+        // auto with no endpoint resolves to s3, which is a plugin as well.
+        assertFalse(org.codelibs.fess.util.ComponentUtil.hasComponent(StorageClientFactory.componentName("auto", null)));
     }
 
     /**
-     * GCS is deliberately not in that list. Its client ships in fess-storage-gcs, together with the
-     * Google Cloud Storage SDK the distribution no longer carries, so what core keeps is the name
-     * the plugin registers under and the endpoint detection that produces it. Registering a
-     * component here again would pull the SDK back into the war.
+     * With the clients gone, the mapping from an endpoint to a type name is what core contributes
+     * to reaching them, so it is fixed here as well as through {@link #componentName} above: a
+     * type that came out wrong would resolve a component name no installed plugin registers.
      */
     @Test
-    public void test_gcsIsServedByAPluginRatherThanCore() {
-        assertEquals("gcsStorageClient", StorageClientFactory.componentName(StorageType.GCS.name(), null));
-        assertFalse(org.codelibs.fess.util.ComponentUtil.hasComponent("gcsStorageClient"),
-                "gcsStorageClient belongs to fess-storage-gcs, which contributes it through fess_storage++.xml");
-    }
+    public void test_detectStorageType_mapsEndpointsToTypes() {
+        // No endpoint at all means AWS, which supplies its own.
+        assertEquals(StorageType.S3, StorageClientFactory.detectStorageType(null));
+        assertEquals(StorageType.S3, StorageClientFactory.detectStorageType(""));
+        assertEquals(StorageType.S3, StorageClientFactory.detectStorageType("   "));
 
-    /**
-     * A prototype, not a singleton: every caller closes the client it was handed, so a shared
-     * instance would be shut down for everybody by the first caller to finish.
-     */
-    @Test
-    public void test_theComponentsArePrototypes() {
-        final Object first = org.codelibs.fess.util.ComponentUtil.getComponent("s3StorageClient");
-        final Object second = org.codelibs.fess.util.ComponentUtil.getComponent("s3StorageClient");
-        assertNotNull(first);
-        assertNotNull(second);
-        assertFalse(first == second, "s3StorageClient must be instance=\"prototype\"");
+        assertEquals(StorageType.GCS, StorageClientFactory.detectStorageType("https://storage.googleapis.com"));
+        assertEquals(StorageType.GCS, StorageClientFactory.detectStorageType("https://STORAGE.GOOGLEAPIS.COM"));
+        assertEquals(StorageType.GCS, StorageClientFactory.detectStorageType("https://bucket.storage.cloud.google.com"));
+
+        assertEquals(StorageType.S3, StorageClientFactory.detectStorageType("https://s3.us-east-1.amazonaws.com"));
+        assertEquals(StorageType.S3, StorageClientFactory.detectStorageType("https://bucket.s3.amazonaws.com"));
+        assertEquals(StorageType.S3, StorageClientFactory.detectStorageType("https://s3-accelerate.amazonaws.com"));
+
+        // No vendor host: MinIO and the like, served by the same client as s3 under another name.
+        assertEquals(StorageType.S3_COMPAT, StorageClientFactory.detectStorageType("http://minio.internal:9000"));
+        assertEquals(StorageType.S3_COMPAT, StorageClientFactory.detectStorageType("https://objects.example.com"));
     }
 }

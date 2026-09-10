@@ -738,24 +738,25 @@ public class ProtocolHelperTest extends UnitFessTestCase {
 
             @Override
             public String getCrawlerFileProtocols() {
-                return "file,smb,smb1,ftp,s3";
+                return "file,smb,smb1,ftp";
             }
         });
 
         final ProtocolHelper protocolHelper = new ProtocolHelper();
         protocolHelper.init();
 
-        assertEquals(5, protocolHelper.getFileProtocols().length);
+        assertEquals(4, protocolHelper.getFileProtocols().length);
 
         // All file protocols should be valid
         assertTrue(protocolHelper.isValidFileProtocol("file:///path/to/file"));
         assertTrue(protocolHelper.isValidFileProtocol("smb://server/share"));
         assertTrue(protocolHelper.isValidFileProtocol("smb1://server/share"));
         assertTrue(protocolHelper.isValidFileProtocol("ftp://ftp.example.com/file"));
-        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/key"));
 
-        // gcs is not in the shipped default: fess-storage-gcs adds it with addFileProtocol when the
-        // plugin is installed, which test_s3_gcs_protocols_add_dynamically covers.
+        // Neither object-storage protocol is in the shipped default: fess-storage-s3 and
+        // fess-storage-gcs add theirs with addFileProtocol when the plugin is installed, which
+        // test_s3_gcs_protocols_add_dynamically covers.
+        assertFalse(protocolHelper.isValidFileProtocol("s3://bucket/key"));
         assertFalse(protocolHelper.isValidFileProtocol("gcs://bucket/object"));
 
         // Web protocols should NOT be valid as file protocols
