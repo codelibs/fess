@@ -18,6 +18,7 @@ package org.codelibs.fess.setup;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +44,10 @@ public class DownloaderTest {
 
     private HttpServer server;
 
+    private static final Downloader.Progress NO_PROGRESS = (bytes, total) -> {
+        // progress is not reported
+    };
+
     private static final byte[] BODY = "opensearch-payload".getBytes(StandardCharsets.UTF_8);
 
     @BeforeEach
@@ -53,6 +58,10 @@ public class DownloaderTest {
             try (OutputStream out = exchange.getResponseBody()) {
                 out.write(BODY);
             }
+        });
+        server.createContext("/broken", exchange -> {
+            exchange.sendResponseHeaders(500, -1);
+            exchange.close();
         });
         server.createContext("/missing", exchange -> {
             exchange.sendResponseHeaders(404, -1);
@@ -125,5 +134,80 @@ public class DownloaderTest {
         final Path dest = tempDir.resolve("payload.bin");
         Downloader.download(uri("/ok"), dest);
         assertFalse(Files.exists(tempDir.resolve("payload.bin.part")), "the .part file must be renamed away");
+    }
+
+    @Test
+    public void test_sha1_hashesTheFileContent() throws Exception {
+        final Path file = tempDir.resolve("payload.bin");
+        Files.writeString(file, "abc");
+        assertEquals("a9993e364706816aba3e25717850c26c9cd0d89d", Downloader.sha1(file));
+    }
+
+    @Test
+    public void test_verifySha1_acceptsTheDigestAsPublished() throws Exception {
+        final Path file = tempDir.resolve("payload.bin");
+        Files.writeString(file, "abc");
+        Downloader.verifySha1(file, "a9993e364706816aba3e25717850c26c9cd0d89d");
+    }
+
+    @Test
+    public void test_verifySha1_acceptsADigestFollowedByAFileName() throws Exception {
+        final Path file = tempDir.resolve("payload.bin");
+        Files.writeString(file, "abc");
+        Downloader.verifySha1(file, "A9993E364706816ABA3E25717850C26C9CD0D89D  payload.bin\n");
+    }
+
+    @Test
+    public void test_verifySha1_rejectsAMismatch() throws Exception {
+        final Path file = tempDir.resolve("payload.bin");
+        Files.writeString(file, "abc");
+        final SetupException e =
+                assertThrows(SetupException.class, () -> Downloader.verifySha1(file, "0000000000000000000000000000000000000000"));
+        assertTrue(e.getMessage().contains("a9993e364706816aba3e25717850c26c9cd0d89d"));
+        assertTrue(e.getMessage().contains("0000000000000000000000000000000000000000"));
+    }
+
+    @Test
+    public void test_verifySha1_rejectsAChecksumThatIsNotADigest() throws Exception {
+        final Path file = tempDir.resolve("payload.bin");
+        Files.writeString(file, "abc");
+        assertThrows(SetupException.class, () -> Downloader.verifySha1(file, "  "));
+    }
+
+    @Test
+    public void test_downloadIfPresent_writesTheBody() throws Exception {
+        final Path dest = tempDir.resolve("payload.bin");
+        assertEquals(dest, Downloader.downloadIfPresent(uri("/ok"), dest, NO_PROGRESS));
+        assertArrayEquals(BODY, Files.readAllBytes(dest));
+    }
+
+    @Test
+    public void test_downloadIfPresent_returnsNullWhenTheServerHasNoSuchFile() throws Exception {
+        final Path dest = tempDir.resolve("payload.bin");
+        assertNull(Downloader.downloadIfPresent(uri("/missing"), dest, NO_PROGRESS));
+        assertFalse(Files.exists(dest));
+    }
+
+    @Test
+    public void test_downloadIfPresent_stillFailsOnAnErrorThatIsNotAMissingFile() throws Exception {
+        final Path dest = tempDir.resolve("payload.bin");
+        final SetupException e = assertThrows(SetupException.class, () -> Downloader.downloadIfPresent(uri("/broken"), dest, NO_PROGRESS));
+        assertTrue(e.getMessage().contains("500"), e.getMessage());
+    }
+
+    @Test
+    public void test_readStringIfPresent_readsTheBody() throws Exception {
+        assertEquals("opensearch-payload", Downloader.readStringIfPresent(uri("/ok")));
+    }
+
+    @Test
+    public void test_readStringIfPresent_returnsNullWhenThereIsNoSuchFile() throws Exception {
+        assertNull(Downloader.readStringIfPresent(uri("/missing")));
+    }
+
+    @Test
+    public void test_readStringIfPresent_stillFailsOnAnErrorThatIsNotAMissingFile() throws Exception {
+        final SetupException e = assertThrows(SetupException.class, () -> Downloader.readStringIfPresent(uri("/broken")));
+        assertTrue(e.getMessage().contains("500"), e.getMessage());
     }
 }
