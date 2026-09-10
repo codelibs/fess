@@ -146,7 +146,8 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
      * silently, because the shadowed call neither fails nor logs. Registering {@code systemHelper}
      * that way left {@code SamlAuthenticatorTest} holding the real clock instead of the fake one it
      * installs, so its two tests that move the clock failed whenever this class happened to run
-     * before them in the same surefire fork. What {@code ComponentUtil} holds is cleared by
+     * before them in the same surefire fork. That test has since moved to the fess-sso-saml plugin,
+     * which changes nothing about the trap: it is a property of the shared container. What {@code ComponentUtil} holds is cleared by
      * {@code UnitFessTestCase#tearDown}, so nothing outlives a test method and the registration is
      * simply repeated per method.</p>
      *

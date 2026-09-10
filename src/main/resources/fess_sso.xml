@@ -2,6 +2,22 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
+	<!-- SsoAuthenticator components are provided by fess-sso-* plugins via fess_sso++.xml.
+	     SsoManager resolves them as "<sso.type>Authenticator", and the ++ suffix merges into this
+	     file, so it stays even though core registers nothing but the manager: without a base file
+	     the plugins have nowhere to contribute to.
+
+	     Keeping the sso.type-to-class mapping in the DI definition rather than in Java is what
+	     makes that work. Setting sso.type to a component's name is enough to reach it, so a plugin
+	     needs no change here to be reachable. An sso.type whose plugin is not installed is a
+	     configuration error SsoManager reports rather than a missing class.
+
+	     Do not add a fess_sso++.xml here for a component a plugin also registers: two definitions
+	     of one name make getComponent throw TooManyRegistrationComponentException, and the
+	     postConstruct that registers the authenticator with this manager runs twice. There is no
+	     way to override one from the other either, because a redefinition file has to be named
+	     fess_sso+&lt;component&gt;.xml and a base path containing a plus sign is exactly what
+	     RedefinableComponentTagHandler.redefine() refuses. -->
 	<component name="ssoManager" class="org.codelibs.fess.sso.SsoManager">
 	</component>
 </components>

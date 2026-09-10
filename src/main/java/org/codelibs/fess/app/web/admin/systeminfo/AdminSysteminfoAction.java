@@ -241,8 +241,8 @@ public class AdminSysteminfoAction extends FessAdminAction {
      * <p>Only OpenID Connect was listed by name before, so the Entra ID client secret was rendered
      * in cleartext under System Info &gt; Config Info, and was also copied verbatim into the bug
      * report that users paste into public issues. The legacy {@code aad.*} keys are covered by the
-     * same shape because {@link org.codelibs.fess.sso.entraid.EntraIdAuthenticator} still reads
-     * them as a fallback.
+     * same shape because {@code EntraIdAuthenticator}, now in the fess-sso-entraid plugin,
+     * still reads them as a fallback.
      *
      * @param key the property key to check
      * @return true if the key matches the SSO client credential shape
