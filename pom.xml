@@ -1310,7 +1310,7 @@
 			<!-- Not used by Fess itself: this and google-auth-library-oauth2-http below are here
 			     to supply fess-ds-gsuite, which declares both with scope provided and does not
 			     shade them. They arrived as transitive dependencies of google-cloud-storage until
-			     the GCS client moved to the fess-lib-gcs plugin, so they are declared here to keep
+			     the GCS client moved to the fess-storage-gcs plugin, so they are declared here to keep
 			     that plugin working. The versions are the ones fess-ds-gsuite compiles against.
 			     Fess's own OpenID Connect code uses google-http-client and google-oauth-client
 			     (com.google.api.client.auth/http/json), which are declared separately. -->
@@ -1469,7 +1469,7 @@
 				<exclusion>
 					<!-- The Google Cloud Storage SDK is 18 MiB of the distribution for a protocol
 					     that most installations never crawl, and it moves faster than Fess does.
-					     It ships in the fess-lib-gcs plugin instead, which carries the SDK and
+					     It ships in the fess-storage-gcs plugin instead, which carries the SDK and
 					     registers GcsClient with crawlerClientCreator. fess-crawler still compiles
 					     GcsClient against the SDK, so this exclusion is what keeps the jars out of
 					     the war; the classes stay in fess-crawler.jar and cost a few tens of KiB.

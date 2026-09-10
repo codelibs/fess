@@ -4,9 +4,9 @@
 <components>
 	<!-- Storage clients, resolved by StorageClientFactory as "<storage.type>StorageClient".
 	     The mapping from a storage.type value to a class lives here rather than in Java so that
-	     the clients can ship as fess-lib-* plugins: a plugin contributes its component through
+	     the clients can ship as fess-storage-* plugins: a plugin contributes its component through
 	     fess_storage++.xml, which merges from every jar on the classpath, and setting
-	     storage.type to its name is enough to reach it. fess-lib-gcs registers gcsStorageClient
+	     storage.type to its name is enough to reach it. fess-storage-gcs registers gcsStorageClient
 	     that way; storage.type=gcs without that plugin installed is a configuration error the
 	     factory reports rather than a missing class.
 

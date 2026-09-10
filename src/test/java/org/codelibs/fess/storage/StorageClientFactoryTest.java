@@ -63,7 +63,7 @@ public class StorageClientFactoryTest extends UnitFessTestCase {
     }
 
     /**
-     * GCS is deliberately not in that list. Its client ships in fess-lib-gcs, together with the
+     * GCS is deliberately not in that list. Its client ships in fess-storage-gcs, together with the
      * Google Cloud Storage SDK the distribution no longer carries, so what core keeps is the name
      * the plugin registers under and the endpoint detection that produces it. Registering a
      * component here again would pull the SDK back into the war.
@@ -72,7 +72,7 @@ public class StorageClientFactoryTest extends UnitFessTestCase {
     public void test_gcsIsServedByAPluginRatherThanCore() {
         assertEquals("gcsStorageClient", StorageClientFactory.componentName(StorageType.GCS.name(), null));
         assertFalse(org.codelibs.fess.util.ComponentUtil.hasComponent("gcsStorageClient"),
-                "gcsStorageClient belongs to fess-lib-gcs, which contributes it through fess_storage++.xml");
+                "gcsStorageClient belongs to fess-storage-gcs, which contributes it through fess_storage++.xml");
     }
 
     /**
