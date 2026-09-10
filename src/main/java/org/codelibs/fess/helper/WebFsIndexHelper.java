@@ -37,6 +37,7 @@ import org.codelibs.fess.crawler.service.impl.OpenSearchDataService;
 import org.codelibs.fess.crawler.service.impl.OpenSearchUrlFilterService;
 import org.codelibs.fess.crawler.service.impl.OpenSearchUrlQueueService;
 import org.codelibs.fess.indexer.IndexUpdater;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
@@ -62,6 +63,13 @@ public class WebFsIndexHelper {
     private static final Logger logger = LogManager.getLogger(WebFsIndexHelper.class);
 
     private static final String DISABLE_URL_ENCODE = "#DISABLE_URL_ENCODE";
+
+    /**
+     * Pattern of a URL scheme of two or more characters, such as {@code s3:} or {@code gcs:}.
+     * A single-character scheme is out so that a Windows drive letter, as in {@code C:\path},
+     * is not read as a protocol.
+     */
+    private static final Pattern SCHEME_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.\\-]+:");
 
     /**
      * Maximum number of URLs to access during crawling.
@@ -195,11 +203,19 @@ public class WebFsIndexHelper {
 
             // set urls
             split(urlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
-                if (!urlValue.startsWith("#") && protocolHelper.isValidWebProtocol(urlValue)) {
-                    final String u = duplicateHostHelper.convert(urlValue);
-                    crawler.addUrl(u);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Target URL: {}", u);
+                if (!urlValue.startsWith("#")) {
+                    if (protocolHelper.isValidWebProtocol(urlValue)) {
+                        final String u = duplicateHostHelper.convert(urlValue);
+                        crawler.addUrl(u);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Target URL: {}", u);
+                        }
+                    } else {
+                        // Unlike a file crawling path, which falls back to file:, a web URL with an
+                        // unusable protocol is dropped, and used to be dropped without a trace: the
+                        // job then succeeded having crawled nothing.
+                        logger.warn("Unsupported protocol in a crawling URL: {}. It is skipped. Available web protocols are {} ({}).",
+                                urlValue, ComponentUtil.getFessConfig().getCrawlerWebProtocols(), FessConfig.CRAWLER_WEB_PROTOCOLS);
                     }
                 }
             }));
@@ -322,6 +338,11 @@ public class WebFsIndexHelper {
                 if (!urlValue.startsWith("#")) {
                     final String u;
                     if (!protocolHelper.isValidFileProtocol(urlValue)) {
+                        if (isUnsupportedProtocol(urlValue, protocolHelper.getFileProtocols())) {
+                            logger.warn(
+                                    "Unsupported protocol in a crawling path: {}. It is crawled as a local file path. Available file protocols are {} ({}). The plugin that provides this protocol may not be installed.",
+                                    urlValue, ComponentUtil.getFessConfig().getCrawlerFileProtocols(), FessConfig.CRAWLER_FILE_PROTOCOLS);
+                        }
                         if (urlValue.startsWith("/")) {
                             u = "file:" + urlValue;
                         } else {
@@ -329,6 +350,16 @@ public class WebFsIndexHelper {
                         }
                     } else {
                         u = urlValue;
+                    }
+                    if (crawler.getClientFactory().getClient(u) == null) {
+                        // The other half of the report above: there, the protocol is not configured
+                        // at all; here it is, but nothing is registered to fetch it. An installation
+                        // that upgrades keeps its own crawler.file.protocols, so this is the shape a
+                        // missing protocol plugin takes for it. fess-crawler only logs the skip at
+                        // info level, per URL, once the crawl is under way.
+                        logger.warn(
+                                "No crawler client is registered for a crawling path: {}. It is not crawled. The plugin that provides this protocol may not be installed.",
+                                u);
                     }
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
@@ -509,6 +540,26 @@ public class WebFsIndexHelper {
             ComponentUtil.getCrawlingConfigHelper().remove(sid);
             deleteCrawlData(sid);
         }
+    }
+
+    /**
+     * Determines whether the given crawling path carries a protocol that file crawling cannot
+     * handle. It is true only when the path starts with a scheme of two or more characters that
+     * none of the given file protocols covers, which keeps a local path such as {@code /var/data},
+     * a relative path, and a Windows drive letter such as {@code C:\path} out of the report.
+     *
+     * @param path a path from a file crawling configuration
+     * @param fileProtocols the file protocols in use, each ending with a colon, as
+     *            {@link ProtocolHelper#getFileProtocols()} returns them
+     * @return true if the path carries a protocol that is not in use for file crawling
+     */
+    static boolean isUnsupportedProtocol(final String path, final String[] fileProtocols) {
+        for (final String fileProtocol : fileProtocols) {
+            if (path.startsWith(fileProtocol)) {
+                return false;
+            }
+        }
+        return SCHEME_PATTERN.matcher(path).find();
     }
 
     /**
