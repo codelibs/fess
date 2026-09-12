@@ -1055,17 +1055,6 @@
 			<artifactId>jakarta.transaction-api</artifactId>
 			<version>${jakarta.transaction.api.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-common</artifactId>
-			<version>${jersey.common.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.annotation</groupId>
-					<artifactId>jakarta.annotation-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- logging -->
 		<dependency>
@@ -1114,10 +1103,80 @@
 			<groupId>org.opensearch</groupId>
 			<artifactId>opensearch</artifactId>
 			<version>${opensearch.version}</version>
+			<!-- Fess is a client of a separate OpenSearch process. It uses this jar for the
+			     request and response types and the query builders, never to run a node: the
+			     embedded runner went away in 15.9. The exclusions below are the parts of the
+			     server that only a node needs, 7.9 MiB of the distribution.
+
+			     Each one was checked the same way: find every class of the server jar that
+			     names it, then check whether any of those is a class Fess, fesen-httpclient,
+			     fess-suggest or fess-crawler-opensearch names. For all of these the answer is
+			     none, so nothing we call can reach them. Two Lucene modules failed that test
+			     and are deliberately absent from this list - lucene-highlighter, which
+			     HighlightBuilder needs, and lucene-queries, which SpanTermQueryBuilder needs.
+
+			     Static reachability alone does not settle it, because the server jar's class
+			     graph is dense enough that a transitive walk from our entry points touches
+			     96.5% of it. What settles it is that these are node paths - bootstrap, the
+			     REST layer, the extensions protocol, index storage - and a client never runs
+			     them. Verified on a running instance before merging; see the pull request. -->
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.annotation</groupId>
 					<artifactId>jakarta.annotation-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<!-- org.opensearch.bootstrap.JNACLibrary / JNAKernel32Library: mlockall and
+					     the Windows console, for a node this JVM never starts. -->
+					<groupId>net.java.dev.jna</groupId>
+					<artifactId>jna</artifactId>
+				</exclusion>
+				<exclusion>
+					<!-- RestController$StreamHandlingHttpChannel and RestBulkStreamingAction:
+					     the server's own REST layer. -->
+					<groupId>io.projectreactor</groupId>
+					<artifactId>reactor-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<!-- org.opensearch.extensions.*: the node-to-extension transport protocol. -->
+					<groupId>com.google.protobuf</groupId>
+					<artifactId>protobuf-java</artifactId>
+				</exclusion>
+				<!-- Lucene runs inside the OpenSearch process, not here. What Fess itself needs
+				     from Lucene is the query parser it builds its own search syntax on, plus the
+				     analysis and join classes; those come from lucene-core, lucene-analysis-common,
+				     lucene-queryparser and lucene-join, which stay. -->
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-backward-codecs</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-grouping</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-memory</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-misc</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-sandbox</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-spatial-extras</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-spatial3d</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-suggest</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
