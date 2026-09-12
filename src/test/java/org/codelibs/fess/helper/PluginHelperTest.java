@@ -105,13 +105,21 @@ public class PluginHelperTest extends UnitFessTestCase {
     @Test
     public void test_processRepository3() {
         List<Artifact> list = pluginHelper.processRepository(ArtifactType.CRAWLER, "plugin/repo3/");
-        assertEquals(2, list.size());
-        assertEquals("fess-crawler-smbj", list.get(0).getName());
-        assertEquals("14.14.0", list.get(0).getVersion());
-        assertEquals("plugin/repo3/fess-crawler-smbj/14.14.0/fess-crawler-smbj-14.14.0.jar", list.get(0).getUrl());
-        assertEquals("fess-crawler-smbj", list.get(1).getName());
-        assertEquals("14.15.0", list.get(1).getVersion());
-        assertEquals("plugin/repo3/fess-crawler-smbj/14.15.0/fess-crawler-smbj-14.15.0.jar", list.get(1).getUrl());
+        // The listing names nine fess-crawler-* artifacts. Seven are the crawler libraries, which
+        // isExcludedName hides; what is left is the 14 versions of the Playwright crawler, which is
+        // a plugin, and the two of fess-crawler-smbj.
+        assertEquals(16, list.size());
+        assertEquals("fess-crawler-playwright", list.get(0).getName());
+        assertEquals("14.5.0", list.get(0).getVersion());
+        assertEquals("plugin/repo3/fess-crawler-playwright/14.5.0/fess-crawler-playwright-14.5.0.jar", list.get(0).getUrl());
+        assertEquals("fess-crawler-playwright", list.get(13).getName());
+        assertEquals("14.14.0", list.get(13).getVersion());
+        assertEquals("fess-crawler-smbj", list.get(14).getName());
+        assertEquals("14.14.0", list.get(14).getVersion());
+        assertEquals("plugin/repo3/fess-crawler-smbj/14.14.0/fess-crawler-smbj-14.14.0.jar", list.get(14).getUrl());
+        assertEquals("fess-crawler-smbj", list.get(15).getName());
+        assertEquals("14.15.0", list.get(15).getVersion());
+        assertEquals("plugin/repo3/fess-crawler-smbj/14.15.0/fess-crawler-smbj-14.15.0.jar", list.get(15).getUrl());
     }
 
     @Test
@@ -214,9 +222,10 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-opensearch"));
         assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-lasta"));
         assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-parent"));
-        assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-playwright"));
         assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-webdriver"));
 
+        // The Playwright crawler ships as a plugin, so it has to stay offerable.
+        assertFalse(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-playwright"));
         assertFalse(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-smbj"));
         assertFalse(pluginHelper.isExcludedName(ArtifactType.DATA_STORE, "fess-crawler"));
     }

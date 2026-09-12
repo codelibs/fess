@@ -230,7 +230,6 @@ public class PluginHelper {
                 || "fess-crawler-opensearch".equals(name)//
                 || "fess-crawler-lasta".equals(name)//
                 || "fess-crawler-parent".equals(name)//
-                || "fess-crawler-playwright".equals(name)//
                 || "fess-crawler-webdriver".equals(name)) {
             return true;
         }
