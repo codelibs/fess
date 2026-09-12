@@ -1496,25 +1496,6 @@
 			<version>${crawler.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codelibs.fess</groupId>
-			<artifactId>fess-crawler-playwright</artifactId>
-			<version>${crawler.playwright.version}</version>
-			<exclusions>
-				<exclusion>
-					<!-- driver-bundle is five Node.js binaries, one per platform, and nothing else:
-					     191 MiB of a 410 MiB distribution, for a crawler that is off by default. The
-					     JS driver itself lives in com.microsoft.playwright:driver, which stays.
-					     Playwright finds Node.js through PLAYWRIGHT_NODEJS_PATH instead, which
-					     bin/fess.in.sh sets from bin/fess-setup install nodejs.
-					     NOTE: this split only exists from Playwright 1.62.0. In 1.60 and earlier
-					     DriverJar itself lived in driver-bundle, so excluding it there would take
-					     the driver away with it. -->
-					<groupId>com.microsoft.playwright</groupId>
-					<artifactId>driver-bundle</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>args4j</groupId>
 			<artifactId>args4j</artifactId>
 			<version>2.33</version>

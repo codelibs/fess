@@ -59,8 +59,7 @@ public final class PluginRepository {
      * the admin list, and offering them here would let someone install a jar that cannot work.
      */
     private static final Set<String> EXCLUDED = Set.of("fess-crawler", "fess-crawler-db", "fess-crawler-db-h2", "fess-crawler-db-mysql",
-            "fess-crawler-es", "fess-crawler-opensearch", "fess-crawler-lasta", "fess-crawler-parent", "fess-crawler-playwright",
-            "fess-crawler-webdriver");
+            "fess-crawler-es", "fess-crawler-opensearch", "fess-crawler-lasta", "fess-crawler-parent", "fess-crawler-webdriver");
 
     private static final Pattern HREF = Pattern.compile("href=\"[^\"]*?([a-zA-Z0-9\\-]+)/?\"");
 

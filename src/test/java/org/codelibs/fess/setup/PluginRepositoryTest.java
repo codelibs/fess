@@ -124,6 +124,7 @@ public class PluginRepositoryTest {
         assertTrue(names.contains("fess-ds-git"), names.toString());
         assertTrue(names.contains("fess-script-groovy"), names.toString());
         assertTrue(names.contains("fess-theme-classic"), names.toString());
+        assertTrue(names.contains("fess-crawler-playwright"), names.toString());
     }
 
     @Test
@@ -142,9 +143,10 @@ public class PluginRepositoryTest {
     @Test
     public void test_namesFromListing_excludesCrawlerInternals() {
         // PluginHelper hides these from the admin list; fess-setup must not offer them either.
-        final String html =
-                "<a href=\"fess-crawler-playwright/\">x</a><a href=\"fess-crawler-lasta/\">x</a>" + "<a href=\"fess-ds-git/\">x</a>";
-        assertEquals(List.of("fess-ds-git"), PluginRepository.namesFromListing(html));
+        // fess-crawler-playwright is not one of them: it is a plugin, and has to stay offerable.
+        final String html = "<a href=\"fess-crawler-opensearch/\">x</a><a href=\"fess-crawler-lasta/\">x</a>"
+                + "<a href=\"fess-crawler-playwright/\">x</a>" + "<a href=\"fess-ds-git/\">x</a>";
+        assertEquals(List.of("fess-crawler-playwright", "fess-ds-git"), PluginRepository.namesFromListing(html));
     }
 
     @Test
