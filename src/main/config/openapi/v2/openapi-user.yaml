@@ -54,7 +54,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 15.8.0
+  version: 15.9.0
 externalDocs:
   description: API Documentation
   url: https://fess.codelibs.org/15.8/api/
@@ -1169,6 +1169,8 @@ components:
                   type: array
                   items: { type: string }
                 partial: { type: boolean }
+                timed_out: { type: boolean }
+                shard_failed: { type: boolean }
                 search_query: { type: string }
                 requested_time: { type: integer, format: int64 }
                 related_query:
