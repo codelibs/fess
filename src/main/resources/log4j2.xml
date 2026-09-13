@@ -99,9 +99,6 @@
 			<AppenderRef ref="AppFile" />
 			<AppenderRef ref="LogNotification" />
 		</Logger>
-		<Logger name="org.codelibs.fesen.opensearch.bootstrap" additivity="false" level="error">
-			<AppenderRef ref="AppFile" />
-		</Logger>
 		<!-- The SAML library resolves to the org.codelibs logger above, which follows
 		     ${log.level}. At debug it prints the decoded assertion, i.e. the NameID and
 		     every attribute, so switching Admin > General > Log Level to DEBUG would dump
