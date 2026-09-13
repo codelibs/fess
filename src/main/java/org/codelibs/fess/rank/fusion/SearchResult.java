@@ -46,6 +46,12 @@ public class SearchResult {
     /** Flag indicating whether the search results are partial due to timeout or other constraints. */
     protected final boolean partialResults;
 
+    /** Flag indicating whether the search engine stopped collecting because the query timeout elapsed. */
+    protected final boolean timedOut;
+
+    /** Flag indicating whether one or more shards failed to answer the search. */
+    protected final boolean shardFailed;
+
     /** The facet response containing aggregated facet information for the search results. */
     protected final FacetResponse facetResponse;
 
@@ -56,16 +62,21 @@ public class SearchResult {
      * @param allRecordCount The total number of matching records
      * @param allRecordCountRelation The relation type for the record count
      * @param queryTime The time taken to execute the query in milliseconds
-     * @param partialResults Whether the results are partial
+     * @param partialResults Whether the results are partial; a timed-out or shard-failed result is partial regardless
+     * @param timedOut Whether the query timeout elapsed
+     * @param shardFailed Whether a shard failed
      * @param facetResponse The facet response containing aggregated data
      */
     SearchResult(final List<Map<String, Object>> documentList, final long allRecordCount, final String allRecordCountRelation,
-            final long queryTime, final boolean partialResults, final FacetResponse facetResponse) {
+            final long queryTime, final boolean partialResults, final boolean timedOut, final boolean shardFailed,
+            final FacetResponse facetResponse) {
         this.documentList = documentList;
         this.allRecordCount = allRecordCount;
         this.allRecordCountRelation = allRecordCountRelation;
         this.queryTime = queryTime;
-        this.partialResults = partialResults;
+        this.partialResults = partialResults || timedOut || shardFailed;
+        this.timedOut = timedOut;
+        this.shardFailed = shardFailed;
         this.facetResponse = facetResponse;
     }
 
@@ -115,6 +126,24 @@ public class SearchResult {
     }
 
     /**
+     * Checks whether the search engine stopped collecting because the query timeout elapsed.
+     *
+     * @return true if the query timed out
+     */
+    public boolean isTimedOut() {
+        return timedOut;
+    }
+
+    /**
+     * Checks whether one or more shards failed to answer the search.
+     *
+     * @return true if a shard failed
+     */
+    public boolean isShardFailed() {
+        return shardFailed;
+    }
+
+    /**
      * Gets the facet response containing aggregated facet information.
      *
      * @return The facet response, or null if no facets were requested
@@ -135,8 +164,8 @@ public class SearchResult {
     @Override
     public String toString() {
         return "SearchResult [documentList=" + documentList + ", allRecordCount=" + allRecordCount + ", allRecordCountRelation="
-                + allRecordCountRelation + ", queryTime=" + queryTime + ", partialResults=" + partialResults + ", facetResponse="
-                + facetResponse + "]";
+                + allRecordCountRelation + ", queryTime=" + queryTime + ", partialResults=" + partialResults + ", timedOut=" + timedOut
+                + ", shardFailed=" + shardFailed + ", facetResponse=" + facetResponse + "]";
     }
 
     /**
@@ -158,6 +187,12 @@ public class SearchResult {
 
         /** Flag indicating whether the search results are partial. */
         private boolean partialResults;
+
+        /** Flag indicating whether the query timeout elapsed. */
+        private boolean timedOut;
+
+        /** Flag indicating whether a shard failed. */
+        private boolean shardFailed;
 
         /** The facet response containing aggregated facet information. */
         private FacetResponse facetResponse;
@@ -210,6 +245,30 @@ public class SearchResult {
         }
 
         /**
+         * Sets whether the search engine stopped collecting because the query timeout elapsed.
+         * A timed-out result is partial.
+         *
+         * @param timedOut true if the query timed out
+         * @return This builder instance for method chaining
+         */
+        public SearchResultBuilder timedOut(final boolean timedOut) {
+            this.timedOut = timedOut;
+            return this;
+        }
+
+        /**
+         * Sets whether one or more shards failed to answer the search. A result that lost a shard
+         * is partial.
+         *
+         * @param shardFailed true if a shard failed
+         * @return This builder instance for method chaining
+         */
+        public SearchResultBuilder shardFailed(final boolean shardFailed) {
+            this.shardFailed = shardFailed;
+            return this;
+        }
+
+        /**
          * Adds a document to the search result.
          *
          * @param doc The document to add to the result list
@@ -242,6 +301,8 @@ public class SearchResult {
                     allRecordCountRelation, //
                     queryTime, //
                     partialResults, //
+                    timedOut, //
+                    shardFailed, //
                     facetResponse);
         }
     }

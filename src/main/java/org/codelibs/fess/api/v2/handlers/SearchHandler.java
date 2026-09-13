@@ -160,6 +160,8 @@ public class SearchHandler {
         payload.put("end_record_number", data.getCurrentEndRecordNumber());
         payload.put("page_numbers", data.getPageNumberList());
         payload.put("partial", data.isPartialResults());
+        payload.put("timed_out", data.isTimedOut());
+        payload.put("shard_failed", data.isShardFailed());
         payload.put("search_query", data.getSearchQuery());
         payload.put("requested_time", data.getRequestedTime());
         payload.put("related_query", relatedQueryHelper.getRelatedQueries(query));

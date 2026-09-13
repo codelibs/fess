@@ -700,11 +700,15 @@ async function runSearch() {
     if (env.requested_time) state.requestedTime = env.requested_time;
     // A.5: store server-supplied highlight params for cache link construction.
     state.highlightParams = (typeof env.highlight_params === "string" && env.highlight_params) ? env.highlight_params : "";
-    // A.6: show/hide the partial-results warning banner.
+    // A.6: show/hide the partial-results warning banner. A timeout and a failed shard are
+    // different causes; a partial result that names neither is not called a timeout.
     const warningEl = document.getElementById("results-warning");
     if (warningEl) {
       if (env.partial) {
-        warningEl.textContent = t("labels.process_time_is_exceeded");
+        const warnings = [];
+        if (env.timed_out) warnings.push(t("labels.process_time_is_exceeded"));
+        if (env.shard_failed || !env.timed_out) warnings.push(t("labels.search_partially_failed"));
+        warningEl.textContent = warnings.join(" ");
         warningEl.classList.remove("d-none");
       } else {
         warningEl.classList.add("d-none");

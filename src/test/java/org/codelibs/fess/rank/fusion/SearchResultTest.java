@@ -79,6 +79,32 @@ public class SearchResultTest extends UnitFessTestCase {
         final SearchResult result = SearchResult.create().allRecordCount(1000).partialResults(true).build();
 
         assertTrue(result.isPartialResults());
+        assertFalse("a partial result does not say why unless it is told", result.isTimedOut());
+        assertFalse(result.isShardFailed());
+    }
+
+    /**
+     * Test that a timed-out result is partial even when that flag was not set.
+     */
+    @Test
+    public void test_searchResultWithTimedOut() {
+        final SearchResult result = SearchResult.create().allRecordCount(1000).timedOut(true).build();
+
+        assertTrue(result.isTimedOut());
+        assertFalse(result.isShardFailed());
+        assertTrue("a timed-out result cannot be complete", result.isPartialResults());
+    }
+
+    /**
+     * Test that a result that lost a shard is partial even when that flag was not set.
+     */
+    @Test
+    public void test_searchResultWithShardFailed() {
+        final SearchResult result = SearchResult.create().allRecordCount(1000).shardFailed(true).build();
+
+        assertTrue(result.isShardFailed());
+        assertFalse(result.isTimedOut());
+        assertTrue("a result that lost a shard cannot be complete", result.isPartialResults());
     }
 
     /**

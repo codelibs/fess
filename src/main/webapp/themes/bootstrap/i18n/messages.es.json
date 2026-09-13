@@ -177,6 +177,7 @@
   "result.copy_url": "Copiar URL",
   "result.copied": "Copiado",
   "labels.process_time_is_exceeded": "Se ha superado el tiempo de espera de la búsqueda. Los resultados mostrados pueden ser parciales.",
+  "labels.search_partially_failed": "No se pudo completar parte de la búsqueda. Los resultados mostrados pueden ser parciales.",
   "error.title_429": "Servicio temporalmente no disponible",
   "error.body_429": "El servidor está experimentando una carga alta. Por favor, inténtelo de nuevo más tarde.",
   "help.toc_title": "Contenido",

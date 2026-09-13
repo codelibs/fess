@@ -225,6 +225,59 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     }
 
     /**
+     * Test that the main searcher's reason for an incomplete result reaches the caller.
+     */
+    @Test
+    public void test_incompleteResult_keepsItsCause() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new IncompleteResultSearcher());
+            processor.init();
+
+            final QueryResponseList results =
+                    (QueryResponseList) processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            assertTrue("a timeout must reach the caller as a timeout", results.isTimedOut());
+            assertTrue("a shard failure must reach the caller as a shard failure", results.isShardFailed());
+            assertTrue(results.isPartialResults());
+        }
+    }
+
+    /**
+     * Test that fusing other searchers into the main one keeps the main searcher's reason.
+     */
+    @Test
+    public void test_fusedIncompleteResult_keepsItsCause() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new IncompleteResultSearcher());
+            processor.register(new TestSearcher(100));
+            processor.init();
+
+            final QueryResponseList results =
+                    (QueryResponseList) processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            assertTrue("a timeout must reach the caller as a timeout", results.isTimedOut());
+            assertTrue("a shard failure must reach the caller as a shard failure", results.isShardFailed());
+            assertTrue(results.isPartialResults());
+        }
+    }
+
+    /**
+     * Searcher whose result is incomplete both because it timed out and because a shard failed.
+     */
+    static class IncompleteResultSearcher extends TestSearcher {
+        IncompleteResultSearcher() {
+            super(100);
+        }
+
+        @Override
+        protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
+            final SearchResult result = super.search(query, params, userBean);
+            final SearchResultBuilder builder =
+                    SearchResult.create().allRecordCount(result.getAllRecordCount()).timedOut(true).shardFailed(true);
+            result.getDocumentList().forEach(builder::addDocument);
+            return builder.build();
+        }
+    }
+
+    /**
      * Test handling of very slow searcher (simulates timeout scenario).
      */
     @Test

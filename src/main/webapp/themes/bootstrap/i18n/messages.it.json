@@ -177,6 +177,7 @@
   "result.copy_url": "Copia URL",
   "result.copied": "Copiato",
   "labels.process_time_is_exceeded": "Il tempo di elaborazione della ricerca è scaduto. I risultati mostrati potrebbero essere parziali.",
+  "labels.search_partially_failed": "Non è stato possibile completare parte della ricerca. I risultati mostrati potrebbero essere parziali.",
   "error.title_429": "Servizio temporaneamente non disponibile",
   "error.body_429": "Il server sta attualmente riscontrando un carico elevato. Riprova più tardi.",
   "help.toc_title": "Indice",

@@ -177,6 +177,7 @@
   "result.copy_url": "URL kopiëren",
   "result.copied": "Gekopieerd",
   "labels.process_time_is_exceeded": "De zoekwachttijd is overschreden. De weergegeven resultaten zijn mogelijk onvolledig.",
+  "labels.search_partially_failed": "Een deel van de zoekopdracht kon niet worden voltooid. De weergegeven resultaten zijn mogelijk onvolledig.",
   "error.title_429": "Service tijdelijk niet beschikbaar",
   "error.body_429": "De server is momenteel zwaar belast. Probeer het later opnieuw.",
   "help.toc_title": "Inhoud",

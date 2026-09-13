@@ -27,9 +27,16 @@
 </div>
 <c:if test="${partialResults}">
 	<div class="alert alert-warning">
+		<c:if test="${timedOut}">
 		<p>
 			<la:message key="labels.process_time_is_exceeded" />
 		</p>
+		</c:if>
+		<c:if test="${shardFailed || !timedOut}">
+		<p>
+			<la:message key="labels.search_partially_failed" />
+		</p>
+		</c:if>
 	</div>
 </c:if>
 <c:if test="${facetResponse != null}">

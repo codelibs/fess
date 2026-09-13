@@ -724,6 +724,8 @@ public class AdminSearchlistAction extends FessAdminAction {
             RenderDataUtil.register(data, "currentEndRecordNumber", currentEndRecordNumber);
             RenderDataUtil.register(data, "pageNumberList", pageNumberList);
             RenderDataUtil.register(data, "partialResults", partialResults);
+            RenderDataUtil.register(data, "timedOut", timedOut);
+            RenderDataUtil.register(data, "shardFailed", shardFailed);
             RenderDataUtil.register(data, "queryTime", queryTime);
             RenderDataUtil.register(data, "searchQuery", searchQuery);
             RenderDataUtil.register(data, "requestedTime", requestedTime);

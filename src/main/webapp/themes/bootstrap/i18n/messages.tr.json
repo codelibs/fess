@@ -177,6 +177,7 @@
   "result.copy_url": "URL'yi kopyala",
   "result.copied": "Kopyalandı",
   "labels.process_time_is_exceeded": "Arama işlem süresi aşıldı. Gösterilen sonuçlar eksik olabilir.",
+  "labels.search_partially_failed": "Aramanın bir kısmı tamamlanamadı. Gösterilen sonuçlar eksik olabilir.",
   "error.title_429": "Hizmet Geçici Olarak Kullanılamıyor",
   "error.body_429": "Sunucu şu anda yoğun yük altında. Lütfen daha sonra tekrar deneyin.",
   "help.toc_title": "İçindekiler",

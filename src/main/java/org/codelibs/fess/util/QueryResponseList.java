@@ -81,6 +81,12 @@ public class QueryResponseList implements List<Map<String, Object>> {
     /** Flag indicating whether the search results are partial (not complete). */
     protected boolean partialResults = false;
 
+    /** Flag indicating whether the search engine stopped collecting because the query timeout elapsed. */
+    protected boolean timedOut = false;
+
+    /** Flag indicating whether one or more shards failed to answer the search. */
+    protected boolean shardFailed = false;
+
     /** The time taken to execute the search query in milliseconds. */
     protected long queryTime;
 
@@ -116,11 +122,35 @@ public class QueryResponseList implements List<Map<String, Object>> {
     public QueryResponseList(final List<Map<String, Object>> documentList, final long allRecordCount, final String allRecordCountRelation,
             final long queryTime, final boolean partialResults, final FacetResponse facetResponse, final int start, final int pageSize,
             final int offset) {
+        this(documentList, allRecordCount, allRecordCountRelation, queryTime, partialResults, false, false, facetResponse, start, pageSize,
+                offset);
+    }
+
+    /**
+     * Creates a QueryResponseList with complete search metadata, including why the results are partial.
+     *
+     * @param documentList the list of documents returned by the search
+     * @param allRecordCount the total number of records in the search result set
+     * @param allRecordCountRelation the relation type for the total record count
+     * @param queryTime the time taken to execute the search query in milliseconds
+     * @param partialResults flag indicating whether the results are partial; a timed-out or shard-failed result is partial regardless
+     * @param timedOut flag indicating whether the query timeout elapsed
+     * @param shardFailed flag indicating whether a shard failed
+     * @param facetResponse the facet response containing aggregated search facets
+     * @param start the starting position of the current page
+     * @param pageSize the number of records per page
+     * @param offset the offset value for pagination
+     */
+    public QueryResponseList(final List<Map<String, Object>> documentList, final long allRecordCount, final String allRecordCountRelation,
+            final long queryTime, final boolean partialResults, final boolean timedOut, final boolean shardFailed,
+            final FacetResponse facetResponse, final int start, final int pageSize, final int offset) {
         this(documentList, start, pageSize, offset);
         this.allRecordCount = allRecordCount;
         this.allRecordCountRelation = allRecordCountRelation;
         this.queryTime = queryTime;
-        this.partialResults = partialResults;
+        this.partialResults = partialResults || timedOut || shardFailed;
+        this.timedOut = timedOut;
+        this.shardFailed = shardFailed;
         this.facetResponse = facetResponse;
         if (pageSize > 0) {
             calculatePageInfo();
@@ -461,6 +491,24 @@ public class QueryResponseList implements List<Map<String, Object>> {
     }
 
     /**
+     * Checks whether the search engine stopped collecting because the query timeout elapsed.
+     *
+     * @return true if the query timed out
+     */
+    public boolean isTimedOut() {
+        return timedOut;
+    }
+
+    /**
+     * Checks whether one or more shards failed to answer the search.
+     *
+     * @return true if a shard failed
+     */
+    public boolean isShardFailed() {
+        return shardFailed;
+    }
+
+    /**
      * Gets the time taken to execute the search query in milliseconds.
      *
      * @return the query execution time in milliseconds
@@ -476,7 +524,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
                 + allRecordCountRelation + ", allPageCount=" + allPageCount + ", existNextPage=" + existNextPage + ", existPrevPage="
                 + existPrevPage + ", currentStartRecordNumber=" + currentStartRecordNumber + ", currentEndRecordNumber="
                 + currentEndRecordNumber + ", pageNumberList=" + pageNumberList + ", searchQuery=" + searchQuery + ", execTime=" + execTime
-                + ", facetResponse=" + facetResponse + ", partialResults=" + partialResults + ", queryTime=" + queryTime + "]";
+                + ", facetResponse=" + facetResponse + ", partialResults=" + partialResults + ", timedOut=" + timedOut + ", shardFailed="
+                + shardFailed + ", queryTime=" + queryTime + "]";
     }
 
 }

@@ -177,6 +177,7 @@
   "result.copy_url": "复制 URL",
   "result.copied": "已复制",
   "labels.process_time_is_exceeded": "搜索等待时间已超出。显示的结果可能不完整。",
+  "labels.search_partially_failed": "部分搜索未能完成。显示的结果可能不完整。",
   "error.title_429": "服务暂时不可用",
   "error.body_429": "服务器当前负载较高，请稍后重试。",
   "help.toc_title": "目录",

@@ -203,6 +203,8 @@ public class SearchHelper {
         data.setCurrentEndRecordNumber(queryResponseList.getCurrentEndRecordNumber());
         data.setPageNumberList(queryResponseList.getPageNumberList());
         data.setPartialResults(queryResponseList.isPartialResults());
+        data.setTimedOut(queryResponseList.isTimedOut());
+        data.setShardFailed(queryResponseList.isShardFailed());
         data.setQueryTime(queryResponseList.getQueryTime());
         data.setSearchQuery(query);
         data.setRequestedTime(requestedTime);
