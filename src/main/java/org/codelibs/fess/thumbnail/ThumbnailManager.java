@@ -49,7 +49,7 @@ import org.codelibs.fess.opensearch.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 import com.google.common.collect.Lists;
 

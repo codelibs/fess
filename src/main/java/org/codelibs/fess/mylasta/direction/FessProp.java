@@ -67,9 +67,9 @@ import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
 import org.lastaflute.web.validation.theme.typed.FloatTypeValidator;
 import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
 import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
-import org.opensearch.search.sort.SortBuilder;
-import org.opensearch.search.sort.SortBuilders;
-import org.opensearch.search.sort.SortOrder;
+import org.codelibs.fesen.opensearch.search.sort.SortBuilder;
+import org.codelibs.fesen.opensearch.search.sort.SortBuilders;
+import org.codelibs.fesen.opensearch.search.sort.SortOrder;
 
 public interface FessProp {
 

@@ -40,15 +40,15 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.opensearch.action.admin.indices.settings.get.GetSettingsResponse;
-import org.opensearch.action.search.SearchAction;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.action.search.SearchResponse;
-import org.opensearch.cluster.metadata.MappingMetadata;
-import org.opensearch.common.settings.Settings;
+import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.codelibs.fesen.opensearch.action.admin.indices.settings.get.GetSettingsResponse;
+import org.codelibs.fesen.opensearch.action.search.SearchAction;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.action.search.SearchResponse;
+import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
+import org.codelibs.fesen.opensearch.common.settings.Settings;
 
 public class SemanticChunkSearcherTest extends UnitFessTestCase {
 

@@ -27,8 +27,8 @@ import org.codelibs.fess.opensearch.user.cbean.ca.bs.BsUserCA;
 import org.codelibs.fess.opensearch.user.cbean.cq.UserCQ;
 import org.codelibs.fess.opensearch.user.cbean.cq.bs.BsUserCQ;
 import org.dbflute.cbean.ConditionQuery;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

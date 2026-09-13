@@ -35,16 +35,16 @@ import org.codelibs.fess.util.DocList;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.action.bulk.BulkItemResponse;
-import org.opensearch.action.bulk.BulkResponse;
-import org.opensearch.action.index.IndexAction;
-import org.opensearch.action.index.IndexRequestBuilder;
-import org.opensearch.action.search.SearchAction;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.index.query.TermQueryBuilder;
-import org.opensearch.index.query.TermsQueryBuilder;
+import org.codelibs.fesen.opensearch.action.bulk.BulkItemResponse;
+import org.codelibs.fesen.opensearch.action.bulk.BulkResponse;
+import org.codelibs.fesen.opensearch.action.index.IndexAction;
+import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchAction;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.TermQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder;
 
 public class IndexingHelperTest extends UnitFessTestCase {
     private IndexingHelper indexingHelper;

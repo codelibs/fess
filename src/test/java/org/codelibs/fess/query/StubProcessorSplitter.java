@@ -21,8 +21,8 @@ import java.util.List;
 import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.query.parser.QueryParser;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 /**
  * A {@link StructuredQuerySplitter} wired to the <em>real</em> {@link QueryParser} and a

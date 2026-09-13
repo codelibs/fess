@@ -99,7 +99,7 @@
 			<AppenderRef ref="AppFile" />
 			<AppenderRef ref="LogNotification" />
 		</Logger>
-		<Logger name="org.opensearch.bootstrap" additivity="false" level="error">
+		<Logger name="org.codelibs.fesen.opensearch.bootstrap" additivity="false" level="error">
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<!-- The SAML library resolves to the org.codelibs logger above, which follows

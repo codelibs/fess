@@ -37,8 +37,8 @@ import org.dbflute.dbmeta.accessory.DerivedTypeHandler;
 import org.dbflute.jdbc.StatementConfig;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.twowaysql.style.BoundDateDisplayStyle;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.common.unit.TimeValue;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.common.unit.TimeValue;
 
 /**
  * @author ESFlute (using FreeGen)

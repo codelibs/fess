@@ -24,8 +24,8 @@ import org.dbflute.FunCustodial;
 import org.dbflute.dbmeta.accessory.EntityModifiedProperties;
 import org.dbflute.dbmeta.accessory.EntityUniqueDrivenProperties;
 import org.dbflute.util.DfCollectionUtil;
-import org.opensearch.action.delete.DeleteRequestBuilder;
-import org.opensearch.action.index.IndexRequestBuilder;
+import org.codelibs.fesen.opensearch.action.delete.DeleteRequestBuilder;
+import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

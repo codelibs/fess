@@ -28,10 +28,10 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.script.Script;
-import org.opensearch.script.ScriptType;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.script.Script;
+import org.codelibs.fesen.opensearch.script.ScriptType;
 
 public class UpdateLabelJobTest extends UnitFessTestCase {
 
@@ -51,8 +51,8 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         SearchEngineClient mockSearchEngineClient = new SearchEngineClient() {
             @Override
             public long updateByQuery(String index,
-                    java.util.function.Function<org.opensearch.action.search.SearchRequestBuilder, org.opensearch.action.search.SearchRequestBuilder> builder,
-                    java.util.function.BiFunction<org.opensearch.action.update.UpdateRequestBuilder, org.opensearch.search.SearchHit, org.opensearch.action.update.UpdateRequestBuilder> processor) {
+                    java.util.function.Function<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder, org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> builder,
+                    java.util.function.BiFunction<org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder, org.codelibs.fesen.opensearch.search.SearchHit, org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder> processor) {
                 // Return a fixed count for testing
                 return 3L;
             }
@@ -137,8 +137,8 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         SearchEngineClient exceptionClient = new SearchEngineClient() {
             @Override
             public long updateByQuery(String index,
-                    java.util.function.Function<org.opensearch.action.search.SearchRequestBuilder, org.opensearch.action.search.SearchRequestBuilder> builder,
-                    java.util.function.BiFunction<org.opensearch.action.update.UpdateRequestBuilder, org.opensearch.search.SearchHit, org.opensearch.action.update.UpdateRequestBuilder> processor) {
+                    java.util.function.Function<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder, org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> builder,
+                    java.util.function.BiFunction<org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder, org.codelibs.fesen.opensearch.search.SearchHit, org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder> processor) {
                 throw new RuntimeException("Test exception");
             }
         };
@@ -205,8 +205,8 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         SearchEngineClient zeroClient = new SearchEngineClient() {
             @Override
             public long updateByQuery(String index,
-                    java.util.function.Function<org.opensearch.action.search.SearchRequestBuilder, org.opensearch.action.search.SearchRequestBuilder> builder,
-                    java.util.function.BiFunction<org.opensearch.action.update.UpdateRequestBuilder, org.opensearch.search.SearchHit, org.opensearch.action.update.UpdateRequestBuilder> processor) {
+                    java.util.function.Function<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder, org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> builder,
+                    java.util.function.BiFunction<org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder, org.codelibs.fesen.opensearch.search.SearchHit, org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder> processor) {
                 return 0L;
             }
         };
@@ -235,8 +235,8 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         SearchEngineClient errorClient = new SearchEngineClient() {
             @Override
             public long updateByQuery(String index,
-                    java.util.function.Function<org.opensearch.action.search.SearchRequestBuilder, org.opensearch.action.search.SearchRequestBuilder> builder,
-                    java.util.function.BiFunction<org.opensearch.action.update.UpdateRequestBuilder, org.opensearch.search.SearchHit, org.opensearch.action.update.UpdateRequestBuilder> processor) {
+                    java.util.function.Function<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder, org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> builder,
+                    java.util.function.BiFunction<org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder, org.codelibs.fesen.opensearch.search.SearchHit, org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder> processor) {
                 // Return 0 to simulate no documents processed due to error
                 return 0L;
             }

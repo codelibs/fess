@@ -35,12 +35,12 @@ import org.codelibs.fess.opensearch.config.exbhv.KeyMatchBhv;
 import org.codelibs.fess.opensearch.config.exentity.KeyMatch;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
-import org.opensearch.index.query.functionscore.ScoreFunctionBuilder;
-import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
+import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilder;
+import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 
 import jakarta.annotation.PostConstruct;
 

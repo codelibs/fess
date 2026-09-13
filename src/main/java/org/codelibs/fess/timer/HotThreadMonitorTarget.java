@@ -24,8 +24,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.action.admin.cluster.node.hotthreads.NodesHotThreadsResponse;
-import org.opensearch.common.unit.TimeValue;
+import org.codelibs.fesen.opensearch.action.admin.cluster.node.hotthreads.NodesHotThreadsResponse;
+import org.codelibs.fesen.opensearch.common.unit.TimeValue;
 
 /**
  * Monitor target for tracking hot threads in the OpenSearch cluster.

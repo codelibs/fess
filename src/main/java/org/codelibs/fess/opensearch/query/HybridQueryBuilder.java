@@ -20,22 +20,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.lucene.search.Query;
-import org.opensearch.core.common.io.stream.StreamInput;
-import org.opensearch.core.common.io.stream.StreamOutput;
-import org.opensearch.core.xcontent.XContentBuilder;
-import org.opensearch.index.query.AbstractQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryShardContext;
+import org.codelibs.fesen.opensearch.core.common.io.stream.StreamInput;
+import org.codelibs.fesen.opensearch.core.common.io.stream.StreamOutput;
+import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
+import org.codelibs.fesen.opensearch.index.query.AbstractQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 /**
  * Client-side {@link QueryBuilder} for the OpenSearch Neural Search plugin's {@code hybrid}
  * query, which runs several subqueries and hands their per-shard results to a search pipeline
  * that normalizes and combines them. The transport client has no builder for plugin-provided
  * queries, so this class only serializes the query body - following the same
- * serialization-only pattern as {@link KnnQueryBuilder} and {@link StoredLtrQueryBuilder};
- * {@link #doToQuery(QueryShardContext)} is unsupported because the query is evaluated
- * server-side.
+ * serialization-only pattern as {@link KnnQueryBuilder} and {@link StoredLtrQueryBuilder}.
+ * The query is evaluated server-side, so there is nothing to translate into a Lucene
+ * query here.
  *
  * <p>Two things about this query are easy to get wrong and fail silently:</p>
  *
@@ -167,11 +165,6 @@ public class HybridQueryBuilder extends AbstractQueryBuilder<HybridQueryBuilder>
         builder.endArray();
         printBoostAndQueryName(builder);
         builder.endObject();
-    }
-
-    @Override
-    protected Query doToQuery(final QueryShardContext context) throws IOException {
-        throw new UnsupportedOperationException("doToQuery is not supported.");
     }
 
     @Override

@@ -34,8 +34,8 @@ import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 public class IndexExportJobTest extends UnitFessTestCase {
 
@@ -71,7 +71,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     private void setupMockComponents(final List<Map<String, Object>> documents) {
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 long count = 0;
                 for (final Map<String, Object> doc : documents) {
@@ -154,7 +155,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
         final List<QueryBuilder> capturedQueries = new ArrayList<>();
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 return 0;
             }
@@ -183,7 +185,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
     public void test_execute_withException() {
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 throw new RuntimeException("Search engine error");
             }
@@ -224,7 +227,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
         final FessConfig fessConfig = new TestFessConfig(tempDir.toString(), "cache,internal_field", "100");
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 cursor.apply(doc);
                 return 1;
@@ -251,7 +255,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
         final List<String> capturedIndices = new ArrayList<>();
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 capturedIndices.add(index);
                 return 0;
@@ -813,7 +818,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
 
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 cursor.apply(doc);
                 return 1;
@@ -1360,7 +1366,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
 
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 cursor.apply(doc);
                 return 1;
@@ -1393,7 +1400,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
 
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
-            public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+            public long scrollSearch(final String index,
+                    final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                     final BooleanFunction<Map<String, Object>> cursor) {
                 cursor.apply(doc);
                 return 1;

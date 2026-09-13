@@ -22,22 +22,22 @@ import java.util.Collection;
 import org.codelibs.fess.opensearch.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.opensearch.config.cbean.cq.FileConfigCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.CommonTermsQueryBuilder;
-import org.opensearch.index.query.ExistsQueryBuilder;
-import org.opensearch.index.query.IdsQueryBuilder;
-import org.opensearch.index.query.MatchPhrasePrefixQueryBuilder;
-import org.opensearch.index.query.MatchPhraseQueryBuilder;
-import org.opensearch.index.query.MatchQueryBuilder;
-import org.opensearch.index.query.PrefixQueryBuilder;
-import org.opensearch.index.query.RangeQueryBuilder;
-import org.opensearch.index.query.RegexpQueryBuilder;
-import org.opensearch.index.query.SpanTermQueryBuilder;
-import org.opensearch.index.query.TermQueryBuilder;
-import org.opensearch.index.query.TermsQueryBuilder;
-import org.opensearch.index.query.WildcardQueryBuilder;
-import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.CommonTermsQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.ExistsQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.IdsQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchPhraseQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.RangeQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.RegexpQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.SpanTermQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.TermQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.WildcardQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

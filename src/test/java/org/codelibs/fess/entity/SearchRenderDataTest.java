@@ -25,8 +25,8 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.FacetResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.search.aggregations.Aggregation;
-import org.opensearch.search.aggregations.Aggregations;
+import org.codelibs.fesen.opensearch.search.aggregations.Aggregation;
+import org.codelibs.fesen.opensearch.search.aggregations.Aggregations;
 
 public class SearchRenderDataTest extends UnitFessTestCase {
 

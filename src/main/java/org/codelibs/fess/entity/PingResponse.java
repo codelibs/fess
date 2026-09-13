@@ -26,9 +26,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
 import org.lastaflute.di.exception.IORuntimeException;
-import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.opensearch.cluster.health.ClusterHealthStatus;
-import org.opensearch.common.xcontent.XContentType;
+import org.codelibs.fesen.opensearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.codelibs.fesen.opensearch.cluster.health.ClusterHealthStatus;
+import org.codelibs.fesen.opensearch.common.xcontent.XContentType;
 
 /**
  * Response entity for ping operations.

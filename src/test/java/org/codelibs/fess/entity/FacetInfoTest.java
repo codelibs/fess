@@ -20,7 +20,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.search.aggregations.BucketOrder;
+import org.codelibs.fesen.opensearch.search.aggregations.BucketOrder;
 
 public class FacetInfoTest extends UnitFessTestCase {
 

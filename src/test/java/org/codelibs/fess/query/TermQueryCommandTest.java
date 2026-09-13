@@ -27,12 +27,12 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
-import org.opensearch.index.query.MatchPhraseQueryBuilder;
-import org.opensearch.index.query.PrefixQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.TermQueryBuilder;
-import org.opensearch.index.query.WildcardQueryBuilder;
-import org.opensearch.search.sort.SortBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchPhraseQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.TermQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.WildcardQueryBuilder;
+import org.codelibs.fesen.opensearch.search.sort.SortBuilder;
 
 public class TermQueryCommandTest extends QueryTestBase {
     private static final Logger logger = LogManager.getLogger(TermQueryCommandTest.class);

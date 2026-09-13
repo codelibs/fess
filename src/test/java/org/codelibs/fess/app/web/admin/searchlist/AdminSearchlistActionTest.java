@@ -1394,7 +1394,7 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
 
         @Override
         public OptionalEntity<Map<String, Object>> getDocument(final String index,
-                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition) {
+                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition) {
             return documentToReturn == null ? OptionalEntity.empty() : OptionalEntity.of(new HashMap<>(documentToReturn));
         }
 

@@ -38,13 +38,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.action.search.SearchResponse;
-import org.opensearch.core.common.bytes.BytesArray;
-import org.opensearch.core.index.Index;
-import org.opensearch.core.index.shard.ShardId;
-import org.opensearch.search.SearchHit;
-import org.opensearch.search.SearchShardTarget;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchResponse;
+import org.codelibs.fesen.opensearch.core.common.bytes.BytesArray;
+import org.codelibs.fesen.opensearch.core.index.Index;
+import org.codelibs.fesen.opensearch.core.index.shard.ShardId;
+import org.codelibs.fesen.opensearch.search.SearchHit;
+import org.codelibs.fesen.opensearch.search.SearchShardTarget;
 
 public class ApiAdminBackupActionTest extends UnitFessTestCase {
 

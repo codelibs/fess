@@ -27,7 +27,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.optional.OptionalEntity;
 import org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity.RequestOptionCall;
-import org.opensearch.action.index.IndexRequestBuilder;
+import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -914,7 +914,7 @@ public class UserServiceTest extends UnitFessTestCase {
 
     /**
      * Stand-in for
-     * {@code org.opensearch.index.engine.VersionConflictEngineException}
+     * {@code org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException}
      * whose class name alone (via {@code endsWith}) identifies the error for
      * the classifier inside {@link UserService#isVersionConflict(Throwable)}.
      * We avoid importing the real type so this unit test does not pull in the

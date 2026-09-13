@@ -28,7 +28,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.opensearch.script.Script;
+import org.codelibs.fesen.opensearch.script.Script;
 
 import jakarta.annotation.PostConstruct;
 

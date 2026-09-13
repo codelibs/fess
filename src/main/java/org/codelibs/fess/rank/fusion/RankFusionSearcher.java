@@ -23,7 +23,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.dbflute.optional.OptionalThing;
-import org.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 /**
  * Abstract base class for rank fusion searchers in the Fess search system.

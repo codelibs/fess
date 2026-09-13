@@ -46,8 +46,8 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.search.sort.FieldSortBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.search.sort.FieldSortBuilder;
 
 public class CrawlingConfigHelperTest extends UnitFessTestCase {
     private CrawlingConfigHelper crawlingConfigHelper;

@@ -86,7 +86,7 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.ActionValidator;
-import org.opensearch.monitor.os.OsProbe;
+import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
