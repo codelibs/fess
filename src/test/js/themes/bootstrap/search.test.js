@@ -690,13 +690,36 @@ describe("runSearch — successful render", () => {
     expect(document.getElementById("options-bar").textContent).toContain("search.menu_labels");
   });
 
-  it("shows the partial-results warning when env.partial is set", async () => {
-    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { partial: true }) });
+  it("shows the timeout warning when the search timed out", async () => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { partial: true, timed_out: true }) });
     await runSearch();
     await settle();
     const warn = document.getElementById("results-warning");
     expect(warn.classList.contains("d-none")).toBe(false);
     expect(warn.textContent).toBe("labels.process_time_is_exceeded");
+  });
+
+  it("does not call a shard failure a timeout", async () => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { partial: true, shard_failed: true }) });
+    await runSearch();
+    await settle();
+    const warn = document.getElementById("results-warning");
+    expect(warn.classList.contains("d-none")).toBe(false);
+    expect(warn.textContent).toBe("labels.search_partially_failed");
+  });
+
+  it("shows both warnings when a timeout and a shard failure coincide", async () => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { partial: true, timed_out: true, shard_failed: true }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-warning").textContent).toBe("labels.process_time_is_exceeded labels.search_partially_failed");
+  });
+
+  it("does not call a partial result a timeout when no cause is given", async () => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { partial: true }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-warning").textContent).toBe("labels.search_partially_failed");
   });
 
   it("uses the _over status key when record_count_relation is not EQUAL_TO", async () => {

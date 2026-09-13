@@ -30,6 +30,8 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.RelatedContentHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -369,6 +371,45 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         assertEquals(body, 400, res.status);
         assertTrue(body.contains(ComponentUtil.getMessageManager().getMessage(Locale.ROOT, "errors.result_size_exceeded")), body);
+    }
+
+    /**
+     * A partial result says why it is partial, so a client does not report a failed shard as a timeout.
+     */
+    @Test
+    public void test_search_reportsWhyAResultIsPartial() throws Exception {
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                data.setDocumentItems(List.of());
+                data.setPartialResults(true);
+                data.setShardFailed(true);
+            }
+        }, "searchHelper");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return new String[0];
+            }
+        }, "relatedQueryHelper");
+        ComponentUtil.register(new RelatedContentHelper() {
+            @Override
+            public String[] getRelatedContents(final String query) {
+                return new String[0];
+            }
+        }, "relatedContentHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(body.contains("\"partial\":true"), body);
+        assertTrue(body.contains("\"timed_out\":false"), body);
+        assertTrue(body.contains("\"shard_failed\":true"), body);
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */

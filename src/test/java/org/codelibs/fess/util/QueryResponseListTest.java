@@ -444,6 +444,27 @@ public class QueryResponseListTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_constructor_withIncompleteResultCauses() {
+        QueryResponseList timedOut = new QueryResponseList(new ArrayList<>(), 100L, "gte", 500L, false, true, false, null, 0, 10, 0);
+        assertTrue(timedOut.isTimedOut());
+        assertFalse(timedOut.isShardFailed());
+        assertTrue("a timed-out result cannot be complete", timedOut.isPartialResults());
+
+        QueryResponseList shardFailed = new QueryResponseList(new ArrayList<>(), 100L, "gte", 500L, false, false, true, null, 0, 10, 0);
+        assertFalse(shardFailed.isTimedOut());
+        assertTrue(shardFailed.isShardFailed());
+        assertTrue("a result that lost a shard cannot be complete", shardFailed.isPartialResults());
+    }
+
+    @Test
+    public void test_constructor_withoutCauses_isNeitherTimedOutNorShardFailed() {
+        QueryResponseList qrList = new QueryResponseList(new ArrayList<>(), 100L, "gte", 500L, true, null, 0, 10, 0);
+        assertTrue(qrList.isPartialResults());
+        assertFalse(qrList.isTimedOut());
+        assertFalse(qrList.isShardFailed());
+    }
+
+    @Test
     public void test_listOperations_add() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);

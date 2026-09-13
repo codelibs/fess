@@ -124,9 +124,10 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
             builder.allRecordCountRelation(searchHits.getTotalHits().relation().toString());
             builder.queryTime(searchResponse.getTook().millis());
 
-            if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
-                builder.partialResults(true);
-            }
+            // The engine stops collecting when the query timeout elapses but still counts every
+            // shard as successful, so a timeout is visible only in timed_out.
+            builder.timedOut(searchResponse.isTimedOut());
+            builder.shardFailed(searchResponse.getTotalShards() != searchResponse.getSuccessfulShards());
 
             // build highlighting fields
             final String hlPrefix = ComponentUtil.getQueryHelper().getHighlightPrefix();
@@ -178,21 +179,42 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
         return ComponentUtil.getSearchEngineClient()
                 .search(fessConfig.getIndexDocumentSearchIndex(), condition, (searchRequestBuilder, execTime, searchResponse) -> {
                     searchResponse.ifPresent(r -> {
-                        if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
-                            // partial results
-                            final StringBuilder buf = new StringBuilder(1000);
-                            buf.append("[SEARCH TIMEOUT] {\"exec_time\":")
-                                    .append(execTime)//
-                                    .append(",\"request\":")
-                                    .append(searchRequestBuilder.toString())//
-                                    .append(",\"response\":")
-                                    .append(r.toString())
-                                    .append('}');
-                            logger.warn(buf.toString());
+                        if (!fessConfig.isQueryTimeoutLogging()) {
+                            return;
+                        }
+                        if (r.isTimedOut()) {
+                            logIncompleteResponse("SEARCH TIMEOUT", execTime, searchRequestBuilder, r);
+                        }
+                        if (r.getTotalShards() != r.getSuccessfulShards()) {
+                            // the reason is in _shards.failures of the response; the engine logs it at DEBUG only
+                            logIncompleteResponse("SEARCH SHARD FAILURE", execTime, searchRequestBuilder, r);
                         }
                     });
                     return searchResponse;
                 });
+    }
+
+    /**
+     * Logs a response that does not hold the complete result, with the request that produced it.
+     *
+     * @param label the cause, written in brackets at the start of the line
+     * @param execTime the time the request took in milliseconds
+     * @param searchRequestBuilder the request that was sent
+     * @param response the response that came back
+     */
+    protected void logIncompleteResponse(final String label, final long execTime, final SearchRequestBuilder searchRequestBuilder,
+            final SearchResponse response) {
+        final StringBuilder buf = new StringBuilder(1000);
+        buf.append('[')
+                .append(label)
+                .append("] {\"exec_time\":")
+                .append(execTime)//
+                .append(",\"request\":")
+                .append(searchRequestBuilder.toString())//
+                .append(",\"response\":")
+                .append(response.toString())
+                .append('}');
+        logger.warn(buf.toString());
     }
 
     /**

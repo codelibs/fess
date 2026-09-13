@@ -177,6 +177,7 @@
   "result.copy_url": "複製 URL",
   "result.copied": "已複製",
   "labels.process_time_is_exceeded": "搜尋等待時間已超出。顯示的結果可能不完整。",
+  "labels.search_partially_failed": "部分搜尋未能完成。顯示的結果可能不完整。",
   "error.title_429": "服務暫時無法使用",
   "error.body_429": "伺服器目前負載較高，請稍後再試。",
   "help.toc_title": "目錄",

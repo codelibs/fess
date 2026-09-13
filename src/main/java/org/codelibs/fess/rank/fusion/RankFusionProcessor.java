@@ -289,7 +289,8 @@ public class RankFusionProcessor implements AutoCloseable {
         final SearchResult searchResult = fused.get();
         return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
                 searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
-                searchResult.getFacetResponse(), params.getStartPosition(), params.getPageSize(), 0);
+                searchResult.isTimedOut(), searchResult.isShardFailed(), searchResult.getFacetResponse(), params.getStartPosition(),
+                params.getPageSize(), 0);
     }
 
     /**
@@ -362,8 +363,8 @@ public class RankFusionProcessor implements AutoCloseable {
                 allRecordCount += offset;
             }
             return createResponseList(searchResult.getDocumentList(), allRecordCount, searchResult.getAllRecordCountRelation(),
-                    searchResult.getQueryTime(), searchResult.isPartialResults(), searchResult.getFacetResponse(),
-                    params.getStartPosition(), pageSize, offset);
+                    searchResult.getQueryTime(), searchResult.isPartialResults(), searchResult.isTimedOut(), searchResult.isShardFailed(),
+                    searchResult.getFacetResponse(), params.getStartPosition(), pageSize, offset);
         }
 
         final ExternalContext externalContext = SingletonLaContainerFactory.getExternalContext();
@@ -488,7 +489,8 @@ public class RankFusionProcessor implements AutoCloseable {
             allRecordCount += offset;
         }
         return createResponseList(extractList(fusedDocs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
-                mainResult.getQueryTime(), mainResult.isPartialResults(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
+                mainResult.getQueryTime(), mainResult.isPartialResults(), mainResult.isTimedOut(), mainResult.isShardFailed(),
+                mainResult.getFacetResponse(), startPosition, pageSize, offset);
     }
 
     /**
@@ -533,7 +535,8 @@ public class RankFusionProcessor implements AutoCloseable {
             final SearchResult searchResult = searcher.search(query, params, userBean);
             return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
                     searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
-                    searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
+                    searchResult.isTimedOut(), searchResult.isShardFailed(), searchResult.getFacetResponse(), params.getStartPosition(),
+                    pageSize, 0);
         } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
             // These say the request was refused, not that the searcher broke. Swallowing one and
             // returning an empty list would report a refusal as a successful search of nothing,
@@ -569,7 +572,7 @@ public class RankFusionProcessor implements AutoCloseable {
      * @return an empty response list flagged as partial
      */
     protected QueryResponseList createDegradedResponseList(final SearchRequestParams params, final int pageSize) {
-        return createResponseList(Collections.emptyList(), 0, Relation.GREATER_THAN_OR_EQUAL_TO.toString(), 0, true, null,
+        return createResponseList(Collections.emptyList(), 0, Relation.GREATER_THAN_OR_EQUAL_TO.toString(), 0, true, false, false, null,
                 params.getStartPosition(), pageSize, 0);
     }
 
@@ -583,6 +586,8 @@ public class RankFusionProcessor implements AutoCloseable {
      * @param allRecordCountRelation the relationship of the record count (exact, approximate, etc.)
      * @param queryTime the time taken to execute the search query
      * @param partialResults whether the results are partial due to timeout or other constraints
+     * @param timedOut whether the query timeout elapsed
+     * @param shardFailed whether a shard failed
      * @param facetResponse the facet information for the search results
      * @param start the starting position for pagination
      * @param pageSize the size of the current page
@@ -590,10 +595,10 @@ public class RankFusionProcessor implements AutoCloseable {
      * @return QueryResponseList containing the search results and metadata
      */
     protected QueryResponseList createResponseList(final List<Map<String, Object>> documentList, final long allRecordCount,
-            final String allRecordCountRelation, final long queryTime, final boolean partialResults, final FacetResponse facetResponse,
-            final int start, final int pageSize, final int offset) {
-        return new QueryResponseList(documentList, allRecordCount, allRecordCountRelation, queryTime, partialResults, facetResponse, start,
-                pageSize, offset);
+            final String allRecordCountRelation, final long queryTime, final boolean partialResults, final boolean timedOut,
+            final boolean shardFailed, final FacetResponse facetResponse, final int start, final int pageSize, final int offset) {
+        return new QueryResponseList(documentList, allRecordCount, allRecordCountRelation, queryTime, partialResults, timedOut, shardFailed,
+                facetResponse, start, pageSize, offset);
     }
 
     /**

@@ -74,6 +74,12 @@ public class SearchRenderData {
     /** Flag indicating whether the results are partial due to timeout or other issues. */
     protected boolean partialResults;
 
+    /** Flag indicating whether the search engine stopped collecting because the query timeout elapsed. */
+    protected boolean timedOut;
+
+    /** Flag indicating whether one or more shards failed to answer the search. */
+    protected boolean shardFailed;
+
     /** The actual search query executed against the search engine. */
     protected String searchQuery;
 
@@ -226,6 +232,24 @@ public class SearchRenderData {
      */
     public void setPartialResults(final boolean partialResults) {
         this.partialResults = partialResults;
+    }
+
+    /**
+     * Sets whether the search engine stopped collecting because the query timeout elapsed.
+     *
+     * @param timedOut true if the query timed out
+     */
+    public void setTimedOut(final boolean timedOut) {
+        this.timedOut = timedOut;
+    }
+
+    /**
+     * Sets whether one or more shards failed to answer the search.
+     *
+     * @param shardFailed true if a shard failed
+     */
+    public void setShardFailed(final boolean shardFailed) {
+        this.shardFailed = shardFailed;
     }
 
     /**
@@ -400,6 +424,24 @@ public class SearchRenderData {
     }
 
     /**
+     * Checks whether the search engine stopped collecting because the query timeout elapsed.
+     *
+     * @return true if the query timed out
+     */
+    public boolean isTimedOut() {
+        return timedOut;
+    }
+
+    /**
+     * Checks whether one or more shards failed to answer the search.
+     *
+     * @return true if a shard failed
+     */
+    public boolean isShardFailed() {
+        return shardFailed;
+    }
+
+    /**
      * Gets the actual search query executed against the search engine.
      *
      * @return The search query string
@@ -442,8 +484,8 @@ public class SearchRenderData {
                 + ", allRecordCount=" + allRecordCount + ", allRecordCountRelation=" + allRecordCountRelation + ", allPageCount="
                 + allPageCount + ", existNextPage=" + existNextPage + ", existPrevPage=" + existPrevPage + ", currentStartRecordNumber="
                 + currentStartRecordNumber + ", currentEndRecordNumber=" + currentEndRecordNumber + ", pageNumberList=" + pageNumberList
-                + ", partialResults=" + partialResults + ", searchQuery=" + searchQuery + ", queryTime=" + queryTime + ", requestedTime="
-                + requestedTime + ", queryId=" + queryId + "]";
+                + ", partialResults=" + partialResults + ", timedOut=" + timedOut + ", shardFailed=" + shardFailed + ", searchQuery="
+                + searchQuery + ", queryTime=" + queryTime + ", requestedTime=" + requestedTime + ", queryId=" + queryId + "]";
     }
 
 }

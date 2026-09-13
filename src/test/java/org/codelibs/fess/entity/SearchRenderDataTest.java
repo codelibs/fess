@@ -336,6 +336,22 @@ public class SearchRenderDataTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_setAndIsTimedOut() {
+        assertFalse(searchRenderData.isTimedOut());
+        searchRenderData.setTimedOut(true);
+        assertTrue(searchRenderData.isTimedOut());
+        assertFalse(searchRenderData.isShardFailed());
+    }
+
+    @Test
+    public void test_setAndIsShardFailed() {
+        assertFalse(searchRenderData.isShardFailed());
+        searchRenderData.setShardFailed(true);
+        assertTrue(searchRenderData.isShardFailed());
+        assertFalse(searchRenderData.isTimedOut());
+    }
+
+    @Test
     public void test_setAndGetQueryTime() {
         // Test with zero
         searchRenderData.setQueryTime(0L);

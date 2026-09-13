@@ -177,6 +177,7 @@
   "result.copy_url": "URL 복사",
   "result.copied": "복사됨",
   "labels.process_time_is_exceeded": "검색 대기 시간 상한을 초과했습니다. 표시된 결과는 검색 결과의 일부일 수 있습니다.",
+  "labels.search_partially_failed": "검색의 일부를 완료할 수 없었습니다. 표시된 결과는 검색 결과의 일부일 수 있습니다.",
   "error.title_429": "일시적으로 서비스를 사용할 수 없습니다",
   "error.body_429": "서버에 현재 높은 부하가 발생하고 있습니다. 나중에 다시 시도해 주세요.",
   "help.toc_title": "목차",

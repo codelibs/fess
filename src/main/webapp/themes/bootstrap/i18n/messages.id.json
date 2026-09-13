@@ -177,6 +177,7 @@
   "result.copy_url": "Salin URL",
   "result.copied": "Disalin",
   "labels.process_time_is_exceeded": "Waktu pemrosesan pencarian telah terlampaui. Hasil yang ditampilkan mungkin tidak lengkap.",
+  "labels.search_partially_failed": "Sebagian pencarian tidak dapat diselesaikan. Hasil yang ditampilkan mungkin tidak lengkap.",
   "error.title_429": "Layanan Tidak Tersedia Sementara",
   "error.body_429": "Server sedang mengalami beban tinggi. Silakan coba lagi nanti.",
   "help.toc_title": "Daftar isi",

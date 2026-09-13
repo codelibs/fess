@@ -177,6 +177,7 @@
   "result.copy_url": "Kopiuj URL",
   "result.copied": "Skopiowano",
   "labels.process_time_is_exceeded": "Czas przetwarzania wyszukiwania został przekroczony. Wyświetlone wyniki mogą być niekompletne.",
+  "labels.search_partially_failed": "Nie udało się ukończyć części wyszukiwania. Wyświetlone wyniki mogą być niekompletne.",
   "error.title_429": "Usługa tymczasowo niedostępna",
   "error.body_429": "Serwer jest obecnie mocno obciążony. Spróbuj ponownie później.",
   "help.toc_title": "Spis treści",

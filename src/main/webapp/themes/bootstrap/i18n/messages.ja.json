@@ -177,6 +177,7 @@
   "result.copy_url": "URL をコピー",
   "result.copied": "コピーしました",
   "labels.process_time_is_exceeded": "処理時間を超過しました。結果が不完全な場合があります。",
+  "labels.search_partially_failed": "検索処理の一部を完了できませんでした。結果が不完全な場合があります。",
   "error.title_429": "一時的に利用できません",
   "error.body_429": "サーバーが混雑しています。しばらくしてから再度お試しください。",
   "help.toc_title": "目次",

@@ -5319,7 +5319,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.timeout.logging'. <br>
      * The value is, e.g. true <br>
-     * comment: Whether to enable logging for query timeouts.
+     * comment: Whether to log searches whose results are incomplete because the query timed out or a shard failed.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryTimeoutLogging();
@@ -5327,7 +5327,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.timeout.logging' true? <br>
      * The value is, e.g. true <br>
-     * comment: Whether to enable logging for query timeouts.
+     * comment: Whether to log searches whose results are incomplete because the query timed out or a shard failed.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryTimeoutLogging();
