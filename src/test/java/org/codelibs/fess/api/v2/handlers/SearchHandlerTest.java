@@ -258,19 +258,19 @@ public class SearchHandlerTest extends UnitFessTestCase {
             // Feed a stub Terms whose getName() returns "field:" + base64(label) so the
             // parent constructor decodes it without error; getBuckets() returns empty so
             // valueCountMap starts empty. Tests set overrideValueCountMap afterward.
-            super(new org.opensearch.search.aggregations.bucket.terms.Terms() {
+            super(new org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms() {
                 @Override
                 public String getName() {
                     return "field:" + java.util.Base64.getEncoder().encodeToString(label.getBytes(java.nio.charset.StandardCharsets.UTF_8));
                 }
 
                 @Override
-                public java.util.List<? extends org.opensearch.search.aggregations.bucket.terms.Terms.Bucket> getBuckets() {
+                public java.util.List<? extends org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms.Bucket> getBuckets() {
                     return java.util.Collections.emptyList();
                 }
 
                 @Override
-                public org.opensearch.search.aggregations.bucket.terms.Terms.Bucket getBucketByKey(final String term) {
+                public org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms.Bucket getBucketByKey(final String term) {
                     return null;
                 }
 
@@ -285,8 +285,9 @@ public class SearchHandlerTest extends UnitFessTestCase {
                 }
 
                 @Override
-                public org.opensearch.core.xcontent.XContentBuilder toXContent(final org.opensearch.core.xcontent.XContentBuilder builder,
-                        final org.opensearch.core.xcontent.ToXContent.Params params) throws java.io.IOException {
+                public org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder toXContent(
+                        final org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder builder,
+                        final org.codelibs.fesen.opensearch.core.xcontent.ToXContent.Params params) throws java.io.IOException {
                     return builder;
                 }
 

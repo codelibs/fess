@@ -673,8 +673,8 @@ public class ViewHelperTest extends UnitFessTestCase {
         viewHelper.init();
 
         try {
-            ViewHelper.TextFragment[] result =
-                    viewHelper.createTextFragmentsByHighlight(new org.opensearch.search.fetch.subphase.highlight.HighlightField[0]);
+            ViewHelper.TextFragment[] result = viewHelper
+                    .createTextFragmentsByHighlight(new org.codelibs.fesen.opensearch.search.fetch.subphase.highlight.HighlightField[0]);
             assertNotNull(result);
             assertEquals(0, result.length);
         } catch (Exception e) {

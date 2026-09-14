@@ -21,8 +21,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.query.StoredLtrQueryBuilder;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.search.rescore.QueryRescorerBuilder;
-import org.opensearch.search.rescore.RescorerBuilder;
+import org.codelibs.fesen.opensearch.search.rescore.QueryRescorerBuilder;
+import org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder;
 
 /**
  * Learning to Rank query rescorer implementation.

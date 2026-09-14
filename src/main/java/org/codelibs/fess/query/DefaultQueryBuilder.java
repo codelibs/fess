@@ -18,15 +18,13 @@ package org.codelibs.fess.query;
 import java.io.IOException;
 import java.util.Objects;
 
-import org.apache.lucene.search.Query;
-import org.opensearch.core.common.io.stream.StreamOutput;
-import org.opensearch.core.xcontent.XContentBuilder;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.DisMaxQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilderVisitor;
-import org.opensearch.index.query.QueryRewriteContext;
-import org.opensearch.index.query.QueryShardContext;
+import org.codelibs.fesen.opensearch.core.common.io.stream.StreamOutput;
+import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.DisMaxQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilderVisitor;
+import org.codelibs.fesen.opensearch.index.query.QueryRewriteContext;
 
 /**
  * Default implementation of QueryBuilder that wraps other QueryBuilder instances
@@ -98,18 +96,6 @@ public class DefaultQueryBuilder implements QueryBuilder {
     @Override
     public String getWriteableName() {
         return queryBuilder.getWriteableName();
-    }
-
-    /**
-     * Creates a Lucene Query from this query builder.
-     *
-     * @param context the query shard context
-     * @return the Lucene Query
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    public Query toQuery(final QueryShardContext context) throws IOException {
-        return queryBuilder.toQuery(context);
     }
 
     /**

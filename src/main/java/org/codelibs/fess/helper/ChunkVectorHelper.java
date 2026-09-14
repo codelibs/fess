@@ -41,11 +41,11 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.opensearch.cluster.metadata.MappingMetadata;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 import jakarta.annotation.PostConstruct;
 
@@ -1790,7 +1790,7 @@ public class ChunkVectorHelper {
      *
      * <p>The message check is load-bearing, not merely a belt-and-braces backup: over the HTTP
      * client (fesen-httpclient, Fess's production transport), a version conflict is NOT reconstructed
-     * as a real {@code org.opensearch.index.engine.VersionConflictEngineException}. The client parses
+     * as a real {@code org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException}. The client parses
      * the server's error body into a generic {@code OpenSearchStatusException} whose class name does
      * not end with {@code VersionConflictEngineException} but whose message is
      * {@code "OpenSearch exception [type=version_conflict_engine_exception, reason=...]"}. The

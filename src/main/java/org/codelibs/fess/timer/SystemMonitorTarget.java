@@ -27,19 +27,19 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.action.admin.cluster.node.stats.NodesStatsResponse;
-import org.opensearch.common.xcontent.XContentFactory;
-import org.opensearch.core.xcontent.ToXContent;
-import org.opensearch.core.xcontent.XContentBuilder;
-import org.opensearch.monitor.jvm.JvmStats;
-import org.opensearch.monitor.jvm.JvmStats.BufferPool;
-import org.opensearch.monitor.jvm.JvmStats.Classes;
-import org.opensearch.monitor.jvm.JvmStats.GarbageCollectors;
-import org.opensearch.monitor.jvm.JvmStats.Mem;
-import org.opensearch.monitor.jvm.JvmStats.Threads;
-import org.opensearch.monitor.os.OsProbe;
-import org.opensearch.monitor.os.OsStats;
-import org.opensearch.monitor.process.ProcessProbe;
+import org.codelibs.fesen.opensearch.action.admin.cluster.node.stats.NodesStatsResponse;
+import org.codelibs.fesen.opensearch.common.xcontent.XContentFactory;
+import org.codelibs.fesen.opensearch.core.xcontent.ToXContent;
+import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.BufferPool;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.Classes;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.GarbageCollectors;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.Mem;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.Threads;
+import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
+import org.codelibs.fesen.opensearch.monitor.os.OsStats;
+import org.codelibs.fesen.opensearch.monitor.process.ProcessProbe;
 
 /**
  * This class is a timer target for monitoring system-level statistics.

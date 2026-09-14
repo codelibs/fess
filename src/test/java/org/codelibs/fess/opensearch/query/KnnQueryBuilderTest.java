@@ -19,13 +19,13 @@ import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
-import org.opensearch.common.io.stream.BytesStreamOutput;
-import org.opensearch.core.common.io.stream.NamedWriteableAwareStreamInput;
-import org.opensearch.core.common.io.stream.NamedWriteableRegistry;
-import org.opensearch.core.common.io.stream.StreamInput;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.index.query.TermQueryBuilder;
+import org.codelibs.fesen.opensearch.common.io.stream.BytesStreamOutput;
+import org.codelibs.fesen.opensearch.core.common.io.stream.NamedWriteableAwareStreamInput;
+import org.codelibs.fesen.opensearch.core.common.io.stream.NamedWriteableRegistry;
+import org.codelibs.fesen.opensearch.core.common.io.stream.StreamInput;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.TermQueryBuilder;
 
 public class KnnQueryBuilderTest extends UnitFessTestCase {
 
@@ -142,17 +142,6 @@ public class KnnQueryBuilderTest extends UnitFessTestCase {
         final KnnQueryBuilder filtered = new KnnQueryBuilder("v", new float[] { 0.1f }, 5).filter(QueryBuilders.termQuery("role", "a"));
         assertFalse(filtered.equals(new KnnQueryBuilder("v", new float[] { 0.1f }, 5).filter(QueryBuilders.termQuery("role", "b"))));
         assertEquals(filtered, new KnnQueryBuilder("v", new float[] { 0.1f }, 5).filter(QueryBuilders.termQuery("role", "a")));
-    }
-
-    @Test
-    public void test_doToQuery_isUnsupported() throws Exception {
-        // the knn query is a plugin query evaluated server-side; this builder only serializes it
-        try {
-            new KnnQueryBuilder("v", new float[] { 0.1f }, 1).doToQuery(null);
-            fail("doToQuery must not be supported");
-        } catch (final UnsupportedOperationException e) {
-            assertTrue(e.getMessage().contains("doToQuery"), e.getMessage());
-        }
     }
 
     private KnnQueryBuilder roundTrip(final KnnQueryBuilder original) throws Exception {

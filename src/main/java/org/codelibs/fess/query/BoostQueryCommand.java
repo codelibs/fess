@@ -22,7 +22,7 @@ import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.lastaflute.core.message.UserMessages;
-import org.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 /**
  * Query command implementation for handling Boost queries.

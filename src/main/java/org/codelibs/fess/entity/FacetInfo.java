@@ -23,7 +23,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.search.aggregations.BucketOrder;
+import org.codelibs.fesen.opensearch.search.aggregations.BucketOrder;
 
 import jakarta.annotation.PostConstruct;
 

@@ -21,9 +21,9 @@ import org.codelibs.core.timer.TimeoutTarget;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.action.admin.cluster.node.stats.NodeStats;
-import org.opensearch.action.admin.cluster.node.stats.NodesStatsResponse;
-import org.opensearch.monitor.os.OsStats;
+import org.codelibs.fesen.opensearch.action.admin.cluster.node.stats.NodeStats;
+import org.codelibs.fesen.opensearch.action.admin.cluster.node.stats.NodesStatsResponse;
+import org.codelibs.fesen.opensearch.monitor.os.OsStats;
 
 /**
  * Timeout target that periodically monitors search engine CPU usage.

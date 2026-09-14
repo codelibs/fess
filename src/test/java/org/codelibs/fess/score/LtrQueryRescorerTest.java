@@ -24,8 +24,8 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.search.rescore.QueryRescorerBuilder;
-import org.opensearch.search.rescore.RescorerBuilder;
+import org.codelibs.fesen.opensearch.search.rescore.QueryRescorerBuilder;
+import org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder;
 
 public class LtrQueryRescorerTest extends UnitFessTestCase {
 

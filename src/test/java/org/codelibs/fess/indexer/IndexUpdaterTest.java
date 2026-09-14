@@ -56,7 +56,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 
 public class IndexUpdaterTest extends UnitFessTestCase {
 

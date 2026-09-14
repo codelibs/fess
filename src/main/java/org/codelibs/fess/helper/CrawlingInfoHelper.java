@@ -40,12 +40,12 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfo;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.search.aggregations.AggregationBuilders;
-import org.opensearch.search.aggregations.BucketOrder;
-import org.opensearch.search.aggregations.bucket.terms.Terms;
-import org.opensearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
+import org.codelibs.fesen.opensearch.search.aggregations.BucketOrder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
 /**
  * Helper class for managing crawling information and statistics.

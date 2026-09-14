@@ -20,19 +20,19 @@ import org.codelibs.fess.opensearch.log.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.opensearch.log.cbean.ca.FavoriteLogCA;
 import org.codelibs.fess.opensearch.log.cbean.cq.FavoriteLogCQ;
 import org.codelibs.fess.opensearch.log.cbean.cq.bs.BsFavoriteLogCQ;
-import org.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
-import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.opensearch.search.aggregations.metrics.CardinalityAggregationBuilder;
-import org.opensearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
-import org.opensearch.search.aggregations.metrics.TopHitsAggregationBuilder;
-import org.opensearch.search.aggregations.metrics.ValueCountAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.IpRangeAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.SignificantTermsAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.ScriptedMetricAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.TopHitsAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

@@ -17,7 +17,7 @@ package org.codelibs.fess.opensearch.query;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
-import org.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 public class HybridQueryBuilderTest extends UnitFessTestCase {
 

@@ -78,8 +78,8 @@ import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
-import org.opensearch.core.common.text.Text;
-import org.opensearch.search.fetch.subphase.highlight.HighlightField;
+import org.codelibs.fesen.opensearch.core.common.text.Text;
+import org.codelibs.fesen.opensearch.search.fetch.subphase.highlight.HighlightField;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;

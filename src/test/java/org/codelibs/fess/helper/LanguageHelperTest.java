@@ -23,7 +23,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.script.Script;
+import org.codelibs.fesen.opensearch.script.Script;
 
 public class LanguageHelperTest extends UnitFessTestCase {
 

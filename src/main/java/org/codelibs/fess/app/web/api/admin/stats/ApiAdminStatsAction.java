@@ -28,16 +28,16 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
-import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.opensearch.monitor.jvm.JvmStats;
-import org.opensearch.monitor.jvm.JvmStats.BufferPool;
-import org.opensearch.monitor.jvm.JvmStats.Classes;
-import org.opensearch.monitor.jvm.JvmStats.GarbageCollectors;
-import org.opensearch.monitor.jvm.JvmStats.Mem;
-import org.opensearch.monitor.jvm.JvmStats.Threads;
-import org.opensearch.monitor.os.OsProbe;
-import org.opensearch.monitor.os.OsStats;
-import org.opensearch.monitor.process.ProcessProbe;
+import org.codelibs.fesen.opensearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.BufferPool;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.Classes;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.GarbageCollectors;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.Mem;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmStats.Threads;
+import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
+import org.codelibs.fesen.opensearch.monitor.os.OsStats;
+import org.codelibs.fesen.opensearch.monitor.process.ProcessProbe;
 
 /**
  * API action for admin statistics management.

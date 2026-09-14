@@ -27,11 +27,11 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.SearchEngineUtil.XContentBuilderCallback;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.di.exception.IORuntimeException;
-import org.opensearch.common.xcontent.XContentType;
-import org.opensearch.core.xcontent.MediaType;
-import org.opensearch.core.xcontent.ToXContent;
-import org.opensearch.core.xcontent.XContentBuilder;
-import org.opensearch.search.SearchHit;
+import org.codelibs.fesen.opensearch.common.xcontent.XContentType;
+import org.codelibs.fesen.opensearch.core.xcontent.MediaType;
+import org.codelibs.fesen.opensearch.core.xcontent.ToXContent;
+import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
+import org.codelibs.fesen.opensearch.search.SearchHit;
 
 public class SearchEngineUtilTest extends UnitFessTestCase {
 
@@ -279,8 +279,8 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         ComponentUtil.register(new SearchEngineClient() {
             @Override
             public <T> long scrollSearch(final String index,
-                    final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
-                    final org.codelibs.fess.opensearch.client.SearchEngineClient.EntityCreator<T, org.opensearch.action.search.SearchResponse, SearchHit> creator,
+                    final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
+                    final org.codelibs.fess.opensearch.client.SearchEngineClient.EntityCreator<T, org.codelibs.fesen.opensearch.action.search.SearchResponse, SearchHit> creator,
                     final org.codelibs.fess.util.BooleanFunction<T> cursor) {
                 capturedIndex[0] = index;
                 long count = 0;

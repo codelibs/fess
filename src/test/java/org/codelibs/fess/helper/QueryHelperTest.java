@@ -48,10 +48,10 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 
 public class QueryHelperTest extends UnitFessTestCase {
 
@@ -810,12 +810,13 @@ public class QueryHelperTest extends UnitFessTestCase {
     public void test_createFieldSortBuilder_normalField() {
         // Using reflection to test protected method
         try {
-            java.lang.reflect.Method method =
-                    QueryHelper.class.getDeclaredMethod("createFieldSortBuilder", String.class, org.opensearch.search.sort.SortOrder.class);
+            java.lang.reflect.Method method = QueryHelper.class.getDeclaredMethod("createFieldSortBuilder", String.class,
+                    org.codelibs.fesen.opensearch.search.sort.SortOrder.class);
             method.setAccessible(true);
 
-            org.opensearch.search.sort.SortBuilder<?> result = (org.opensearch.search.sort.SortBuilder<?>) method.invoke(queryHelper,
-                    "timestamp", org.opensearch.search.sort.SortOrder.DESC);
+            org.codelibs.fesen.opensearch.search.sort.SortBuilder<?> result =
+                    (org.codelibs.fesen.opensearch.search.sort.SortBuilder<?>) method.invoke(queryHelper, "timestamp",
+                            org.codelibs.fesen.opensearch.search.sort.SortOrder.DESC);
 
             assertNotNull(result);
             assertTrue(result.toString().contains("timestamp"));
@@ -827,12 +828,13 @@ public class QueryHelperTest extends UnitFessTestCase {
     @Test
     public void test_createFieldSortBuilder_scoreField() {
         try {
-            java.lang.reflect.Method method =
-                    QueryHelper.class.getDeclaredMethod("createFieldSortBuilder", String.class, org.opensearch.search.sort.SortOrder.class);
+            java.lang.reflect.Method method = QueryHelper.class.getDeclaredMethod("createFieldSortBuilder", String.class,
+                    org.codelibs.fesen.opensearch.search.sort.SortOrder.class);
             method.setAccessible(true);
 
-            org.opensearch.search.sort.SortBuilder<?> result = (org.opensearch.search.sort.SortBuilder<?>) method.invoke(queryHelper,
-                    "_score", org.opensearch.search.sort.SortOrder.DESC);
+            org.codelibs.fesen.opensearch.search.sort.SortBuilder<?> result =
+                    (org.codelibs.fesen.opensearch.search.sort.SortBuilder<?>) method.invoke(queryHelper, "_score",
+                            org.codelibs.fesen.opensearch.search.sort.SortOrder.DESC);
 
             assertNotNull(result);
             assertTrue(result.toString().contains("_score"));
@@ -844,7 +846,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     @Test
     public void test_getRescorers_emptyList() {
         java.util.Map<String, Object> params = new java.util.HashMap<>();
-        org.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
+        org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
 
         assertNotNull(rescorers);
         assertEquals(0, rescorers.length);
@@ -854,7 +856,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     public void test_addQueryRescorer() {
         org.codelibs.fess.score.QueryRescorer mockRescorer = new org.codelibs.fess.score.QueryRescorer() {
             @Override
-            public org.opensearch.search.rescore.RescorerBuilder<?> evaluate(java.util.Map<String, Object> params) {
+            public org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder<?> evaluate(java.util.Map<String, Object> params) {
                 return null; // Return null for this test
             }
         };
@@ -862,7 +864,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         queryHelper.addQueryRescorer(mockRescorer);
 
         java.util.Map<String, Object> params = new java.util.HashMap<>();
-        org.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
+        org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
 
         assertNotNull(rescorers);
         assertEquals(0, rescorers.length); // Should be 0 because rescorer returns null

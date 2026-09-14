@@ -21,8 +21,8 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBui
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
-import org.opensearch.action.search.SearchAction;
-import org.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchAction;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 
 /**
  * Verifies that a search is never sent with the total turned off.

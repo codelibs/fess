@@ -29,9 +29,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
 import org.junit.jupiter.api.Test;
-import org.opensearch.index.query.MatchPhrasePrefixQueryBuilder;
-import org.opensearch.index.query.PrefixQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 public class PrefixQueryCommandTest extends QueryTestBase {
     private PrefixQueryCommand queryCommand;

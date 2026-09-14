@@ -37,7 +37,7 @@ import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
-import org.opensearch.action.bulk.BulkResponse;
+import org.codelibs.fesen.opensearch.action.bulk.BulkResponse;
 
 import jakarta.annotation.Resource;
 

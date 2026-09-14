@@ -51,13 +51,13 @@ import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.dbflute.optional.OptionalEntity;
-import org.opensearch.search.aggregations.AggregationBuilders;
-import org.opensearch.search.aggregations.BucketOrder;
-import org.opensearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.opensearch.search.aggregations.bucket.histogram.Histogram;
-import org.opensearch.search.aggregations.bucket.terms.Terms;
-import org.opensearch.search.aggregations.metrics.Avg;
-import org.opensearch.search.aggregations.metrics.Cardinality;
+import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
+import org.codelibs.fesen.opensearch.search.aggregations.BucketOrder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.Histogram;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.Avg;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.Cardinality;
 
 import jakarta.annotation.Resource;
 

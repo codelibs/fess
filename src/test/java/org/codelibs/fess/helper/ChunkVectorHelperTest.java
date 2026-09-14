@@ -35,11 +35,11 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.opensearch.action.search.SearchAction;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.cluster.metadata.MappingMetadata;
-import org.opensearch.index.seqno.SequenceNumbers;
-import org.opensearch.search.builder.SearchSourceBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchAction;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
+import org.codelibs.fesen.opensearch.index.seqno.SequenceNumbers;
+import org.codelibs.fesen.opensearch.search.builder.SearchSourceBuilder;
 
 public class ChunkVectorHelperTest extends UnitFessTestCase {
 
@@ -460,7 +460,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         // Cause class name genuinely ends with "VersionConflictEngineException" -- the same
         // shape SearchEngineClient#store() produces for a real optimistic-concurrency
         // conflict (it wraps the thrown OpenSearchException, e.g. the real
-        // org.opensearch.index.engine.VersionConflictEngineException, as the cause).
+        // org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException, as the cause).
         searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
                 new VersionConflictEngineException("[content_ids]: version conflict, required seqNo [5], primary term [1], current [7]"));
 
@@ -1989,7 +1989,8 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         int cursorAppliedCount = 0;
 
         @Override
-        public long scrollSearch(final String index, final SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition,
+        public long scrollSearch(final String index,
+                final SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition,
                 final org.codelibs.fess.util.BooleanFunction<Map<String, Object>> cursor) {
             capturedScrollIndex = index;
             for (final Map<String, Object> source : scrollSourcesToReturn) {
@@ -2003,7 +2004,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
         @Override
         public OptionalEntity<Map<String, Object>> getDocument(final String index,
-                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition) {
+                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition) {
             if (throwOnGetDocument != null) {
                 throw throwOnGetDocument;
             }
@@ -2107,7 +2108,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
      * Test double whose simple (and thus fully-qualified) class name ends with
      * {@code "VersionConflictEngineException"}, matching the class-name-suffix branch of
      * {@link ChunkVectorHelper#isVersionConflict(Throwable)} without depending on the real
-     * {@code org.opensearch.index.engine.VersionConflictEngineException}, which is
+     * {@code org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException}, which is
      * inconvenient to construct directly in a unit test.
      */
     private static final class VersionConflictEngineException extends RuntimeException {

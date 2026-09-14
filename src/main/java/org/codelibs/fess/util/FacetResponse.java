@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.opensearch.search.aggregations.Aggregations;
-import org.opensearch.search.aggregations.bucket.filter.Filter;
-import org.opensearch.search.aggregations.bucket.terms.Terms;
+import org.codelibs.fesen.opensearch.search.aggregations.Aggregations;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.filter.Filter;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
 
 import com.google.common.io.BaseEncoding;
 

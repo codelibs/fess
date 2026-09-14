@@ -41,9 +41,9 @@ import org.kohsuke.args4j.Option;
 import org.lastaflute.di.core.external.GenericExternalContext;
 import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-import org.opensearch.monitor.jvm.JvmInfo;
-import org.opensearch.monitor.os.OsProbe;
-import org.opensearch.monitor.process.ProcessProbe;
+import org.codelibs.fesen.opensearch.monitor.jvm.JvmInfo;
+import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
+import org.codelibs.fesen.opensearch.monitor.process.ProcessProbe;
 
 import jakarta.annotation.Resource;
 

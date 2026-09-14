@@ -32,9 +32,9 @@ import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
-import org.opensearch.action.bulk.BulkRequestBuilder;
-import org.opensearch.action.delete.DeleteRequestBuilder;
-import org.opensearch.action.index.IndexRequestBuilder;
+import org.codelibs.fesen.opensearch.action.bulk.BulkRequestBuilder;
+import org.codelibs.fesen.opensearch.action.delete.DeleteRequestBuilder;
+import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
 
 /**
  * @author ESFlute (using FreeGen)

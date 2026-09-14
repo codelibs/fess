@@ -55,8 +55,8 @@ import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.opensearch.action.update.UpdateRequest;
-import org.opensearch.script.Script;
+import org.codelibs.fesen.opensearch.action.update.UpdateRequest;
+import org.codelibs.fesen.opensearch.script.Script;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;

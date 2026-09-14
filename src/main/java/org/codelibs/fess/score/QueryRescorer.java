@@ -17,7 +17,7 @@ package org.codelibs.fess.score;
 
 import java.util.Map;
 
-import org.opensearch.search.rescore.RescorerBuilder;
+import org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder;
 
 /**
  * Interface for query rescoring implementations.

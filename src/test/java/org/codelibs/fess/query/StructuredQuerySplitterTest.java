@@ -22,8 +22,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.query.StructuredQuerySplitter.Split;
 import org.junit.jupiter.api.Test;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 public class StructuredQuerySplitterTest extends UnitFessTestCase {
 

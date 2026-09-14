@@ -450,7 +450,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
 
             @Override
             public boolean update(final String id,
-                    final java.util.function.Consumer<org.opensearch.action.update.UpdateRequestBuilder> builderConsumer) {
+                    final java.util.function.Consumer<org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder> builderConsumer) {
                 // no-op: skip real OpenSearch update in unit test
                 return true;
             }
@@ -683,7 +683,7 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
 
             @Override
             public boolean update(final String id,
-                    final java.util.function.Consumer<org.opensearch.action.update.UpdateRequestBuilder> builderConsumer) {
+                    final java.util.function.Consumer<org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder> builderConsumer) {
                 return true;
             }
         };

@@ -19,22 +19,20 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.apache.lucene.search.Query;
-import org.opensearch.core.common.io.stream.StreamInput;
-import org.opensearch.core.common.io.stream.StreamOutput;
-import org.opensearch.core.xcontent.XContentBuilder;
-import org.opensearch.index.query.AbstractQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.QueryShardContext;
+import org.codelibs.fesen.opensearch.core.common.io.stream.StreamInput;
+import org.codelibs.fesen.opensearch.core.common.io.stream.StreamOutput;
+import org.codelibs.fesen.opensearch.core.xcontent.XContentBuilder;
+import org.codelibs.fesen.opensearch.index.query.AbstractQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 /**
  * Client-side {@link QueryBuilder} for the OpenSearch k-NN plugin's {@code knn}
  * query (approximate nearest-neighbor search over a {@code knn_vector} field
  * indexed with an ANN method such as HNSW). The transport client has no builder
  * for plugin-provided queries, so this class only serializes the query body —
- * following the same serialization-only pattern as {@code StoredLtrQueryBuilder};
- * {@link #doToQuery(QueryShardContext)} is unsupported because the query is
- * evaluated server-side.
+ * following the same serialization-only pattern as {@code StoredLtrQueryBuilder}.
+ * The query is evaluated server-side, so there is nothing to translate into a
+ * Lucene query here.
  */
 public class KnnQueryBuilder extends AbstractQueryBuilder<KnnQueryBuilder> {
 
@@ -140,11 +138,6 @@ public class KnnQueryBuilder extends AbstractQueryBuilder<KnnQueryBuilder> {
         printBoostAndQueryName(builder);
         builder.endObject();
         builder.endObject();
-    }
-
-    @Override
-    protected Query doToQuery(final QueryShardContext context) throws IOException {
-        throw new UnsupportedOperationException("doToQuery is not supported.");
     }
 
     @Override

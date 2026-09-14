@@ -23,8 +23,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.junit.jupiter.api.Test;
-import org.opensearch.index.query.FuzzyQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.FuzzyQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 public class FuzzyQueryCommandTest extends QueryTestBase {
 

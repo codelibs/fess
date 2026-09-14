@@ -348,7 +348,7 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
 
         @Override
         public OptionalEntity<Map<String, Object>> getDocument(final String index,
-                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.opensearch.action.search.SearchRequestBuilder> condition) {
+                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder> condition) {
             return documentToReturn == null ? OptionalEntity.empty() : OptionalEntity.of(new HashMap<>(documentToReturn));
         }
 
@@ -366,7 +366,7 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
         }
 
         @Override
-        public long deleteByQuery(final String index, final org.opensearch.index.query.QueryBuilder queryBuilder) {
+        public long deleteByQuery(final String index, final org.codelibs.fesen.opensearch.index.query.QueryBuilder queryBuilder) {
             return deletedCount;
         }
     }

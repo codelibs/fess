@@ -23,8 +23,8 @@ import org.apache.lucene.util.BytesRef;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.junit.jupiter.api.Test;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.index.query.RangeQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.RangeQueryBuilder;
 
 public class TermRangeQueryCommandTest extends QueryTestBase {
     private TermRangeQueryCommand queryCommand;
