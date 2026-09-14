@@ -93,8 +93,6 @@ import org.codelibs.fesen.opensearch.action.admin.indices.flush.FlushResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.get.GetIndexResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.refresh.RefreshResponse;
-import org.codelibs.fesen.opensearch.action.admin.indices.segments.IndicesSegmentResponse;
-import org.codelibs.fesen.opensearch.action.admin.indices.segments.PitSegmentsRequest;
 import org.codelibs.fesen.opensearch.action.bulk.BulkRequest;
 import org.codelibs.fesen.opensearch.action.bulk.BulkRequestBuilder;
 import org.codelibs.fesen.opensearch.action.bulk.BulkResponse;
@@ -3502,17 +3500,6 @@ public class SearchEngineClient implements Client {
     @Override
     public void getAllPits(final GetAllPitNodesRequest getAllPitNodesRequest, final ActionListener<GetAllPitNodesResponse> listener) {
         client.getAllPits(getAllPitNodesRequest, listener);
-    }
-
-    /**
-     * Gets point-in-time segments information asynchronously.
-     *
-     * @param pitSegmentsRequest the PIT segments request
-     * @param listener           the response listener
-     */
-    @Override
-    public void pitSegments(final PitSegmentsRequest pitSegmentsRequest, final ActionListener<IndicesSegmentResponse> listener) {
-        client.pitSegments(pitSegmentsRequest, listener);
     }
 
     /**
