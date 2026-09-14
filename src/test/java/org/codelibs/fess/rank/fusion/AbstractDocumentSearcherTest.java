@@ -25,12 +25,12 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
-import org.opensearch.action.search.SearchAction;
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.action.search.SearchResponse;
-import org.opensearch.action.search.ShardSearchFailure;
-import org.opensearch.search.SearchHits;
-import org.opensearch.search.internal.InternalSearchResponse;
+import org.codelibs.fesen.opensearch.action.search.SearchAction;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchResponse;
+import org.codelibs.fesen.opensearch.action.search.ShardSearchFailure;
+import org.codelibs.fesen.opensearch.search.SearchHits;
+import org.codelibs.fesen.opensearch.search.internal.InternalSearchResponse;
 
 /**
  * Tests how a response that is not complete - because the query timeout elapsed, or because a
