@@ -264,9 +264,16 @@ public class PathMappingHelper extends AbstractConfigHelper {
      *
      * <p>A replacement containing a colon is far more often an ordinary path mapping such as
      * <code>file:</code> than a script, so every way of failing to reach an engine has to end in
-     * the plain replacement. Throwing here would leave {@code PathMapping#process} logging a
-     * warning and returning the raw URL, which indexes the wrong URL for a mapping that never
-     * wanted an engine in the first place.</p>
+     * the plain replacement, with <code>$1</code> group references as before. Throwing here would
+     * leave {@code PathMapping#process} logging a warning and returning the raw URL, which indexes
+     * the wrong URL for a mapping that never wanted an engine in the first place.</p>
+     *
+     * <p>A prefix in {@link #SCRIPT_ENGINE_NAMES} is the exception: that replacement is a script,
+     * typically a Groovy one saved before its engine became a plugin. Read as a regular-expression
+     * replacement, its <code>${...}</code> is a group reference that does not exist and every URL
+     * throws; read literally, every matching URL becomes the script text, which a crawl-time
+     * mapping would index. Neither is a mapping anyone wrote, so the URL is left unchanged and the
+     * missing engine is reported once, when the mapping is first used.</p>
      *
      * @param engineName the prefix before the first colon
      * @param template the script text after the first colon
@@ -288,8 +295,9 @@ public class PathMappingHelper extends AbstractConfigHelper {
         }
         if (scriptEngine == null) {
             if (SCRIPT_ENGINE_NAMES.contains(engineName.toLowerCase(Locale.ROOT))) {
-                logger.warn("No script engine is registered for {}, so \"{}\" is used as a plain replacement."
+                logger.warn("No script engine is registered for {}, so the path mapping \"{}\" is not applied and URLs are left unchanged."
                         + " Install the plugin providing it, such as fess-script-groovy for groovy.", engineName, replacement);
+                return (u, m) -> u;
             }
             return (u, m) -> m.replaceAll(replacement);
         }
