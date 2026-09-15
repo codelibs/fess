@@ -712,6 +712,14 @@
 					<defineStatements>
 						<defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
 						<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
+						<!-- rpmbuild 4.19 and later turns every non-root owner in the file list into a
+						     Requires(pre,postun) on user(fess), group(fess), user(opensearch) and
+						     group(opensearch). Only a package that ships a sysusers.d file provides those,
+						     and this one creates its user in the %pre scriptlet instead, so nothing does:
+						     dnf and rpm refuse to install the package unless dependencies are ignored.
+						     Weak dependencies keep the information without blocking the install; older
+						     rpmbuild versions do not generate these dependencies and ignore the macro. -->
+						<defineStatement>_use_weak_usergroup_deps 1</defineStatement>
 					</defineStatements>
 					<defaultFilemode>644</defaultFilemode>
 					<defaultDirmode>755</defaultDirmode>
