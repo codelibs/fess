@@ -22,10 +22,12 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.script.ScriptEngine;
 import org.codelibs.fess.script.ScriptEngineFactory;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -456,7 +458,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_replaceUrl_missingGroovyEngineIsPlainReplacement() {
+    public void test_replaceUrl_missingGroovyEngineLeavesUrlUnchanged() {
         ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
 
         final PathMappingHelper helper = new PathMappingHelper();
@@ -466,7 +468,61 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         final List<PathMapping> list = new ArrayList<>();
         list.add(pathMapping);
 
-        assertEquals("groovy:urla.html", helper.replaceUrl(list, "http://example.com/a.html"));
+        assertEquals("http://example.com/a.html", helper.replaceUrl(list, "http://example.com/a.html"));
+    }
+
+    @Test
+    public void test_createPathMatcher_missingGroovyEngineDoesNotThrowOnScript() {
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final String url = "http://localhost/docs/en/intro.html";
+        final Matcher matcher = Pattern.compile("http://localhost/docs/en/(.*)").matcher(url);
+        assertTrue(matcher.find());
+        final BiFunction<String, Matcher, String> pathMatcher =
+                helper.createPathMatcher(matcher, "groovy:\"http://mapped.invalid/en-${matcher.group(1)}\"");
+
+        assertEquals(url, pathMatcher.apply(url, matcher));
+    }
+
+    @Test
+    public void test_replaceUrl_missingGroovyEngineScriptLeavesUrlAndLogsNoFailure() {
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("http://localhost/docs/en/(.*)");
+        pathMapping.setReplacement("groovy:\"http://mapped.invalid/en-${matcher.group(1)}\"");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        final LogCapturingAppender pathMappingLog = LogCapturingAppender.attach(PathMapping.class);
+        final LogCapturingAppender helperLog = LogCapturingAppender.attach(PathMappingHelper.class);
+        try {
+            assertEquals("http://localhost/docs/en/intro.html", helper.replaceUrl(list, "http://localhost/docs/en/intro.html"));
+            assertEquals("http://localhost/docs/en/guide.html", helper.replaceUrl(list, "http://localhost/docs/en/guide.html"));
+
+            assertTrue(pathMappingLog.eventsAt(Level.WARN).isEmpty(), "unexpected warnings: " + pathMappingLog.renderedEvents());
+            assertEquals(1, helperLog.warnings().size());
+            assertTrue(helperLog.warnings().get(0).contains("fess-script-groovy"), helperLog.warnings().toString());
+        } finally {
+            pathMappingLog.detach();
+            helperLog.detach();
+        }
+    }
+
+    @Test
+    public void test_replaceUrl_unregisteredPrefixKeepsGroupReferences() {
+        ComponentUtil.register(new ScriptEngineFactory(), "scriptEngineFactory");
+
+        final PathMappingHelper helper = new PathMappingHelper();
+        final PathMapping pathMapping = new PathMapping();
+        pathMapping.setRegex("^file:/share/(.*)");
+        pathMapping.setReplacement("https://files.example.com/$1");
+        final List<PathMapping> list = new ArrayList<>();
+        list.add(pathMapping);
+
+        assertEquals("https://files.example.com/a/b.txt", helper.replaceUrl(list, "file:/share/a/b.txt"));
     }
 
     @Test
