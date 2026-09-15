@@ -891,11 +891,21 @@ public final class FessSetup {
         if (POST_OPENSEARCH.equals(definition.get("post"))) {
             installPlugins(definition, home, options, out);
             out.println("Configuring " + home);
-            OpenSearchConfigurer.configure(home);
+            final List<String> added = OpenSearchConfigurer.configure(home);
+            if (added.isEmpty()) {
+                out.println("  opensearch.yml already has the settings Fess needs; left unchanged.");
+            }
+            added.forEach(setting -> out.println("  added to opensearch.yml: " + setting));
             out.println();
-            out.println("Done. Start OpenSearch, then tell Fess where it is:");
+            out.println("Done. Start OpenSearch, then Fess.");
+            if (OpenSearchConfigurer.isFoundByLauncher(Path.of(fessHome()), home)) {
+                out.println("bin/fess.in.sh finds this OpenSearch on its own, so there is nothing else to set:");
+            } else {
+                out.println("bin/fess.in.sh will not find this OpenSearch on its own. Set these in bin/fess.in.sh");
+                out.println("(bin\\fess.in.bat on Windows) or in the environment Fess starts with:");
+            }
             out.println("  SEARCH_ENGINE_HTTP_URL=http://localhost:9200");
-            out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.dictionaryPath(home));
+            out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.dictionaryPathValue(home));
             return EXIT_OK;
         }
 

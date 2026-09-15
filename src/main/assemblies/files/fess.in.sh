@@ -24,8 +24,23 @@ fi
 # An exported SEARCH_ENGINE_HTTP_URL wins, so the init scripts and container images can point
 # Fess elsewhere without editing this file.
 SEARCH_ENGINE_HTTP_URL=${SEARCH_ENGINE_HTTP_URL:-http://localhost:9200}
-# The config directory of that server, where configsync keeps the dictionaries Fess pushes.
+# The config directory of that server, where configsync keeps the dictionaries Fess pushes. It has
+# to match configsync.config_path in that server's opensearch.yml. Left unset here and in the
+# environment, it is taken from the OpenSearch bin/fess-setup install opensearch put under
+# $FESS_HOME/opensearch, provided there is only one.
 #FESS_DICTIONARY_PATH=/var/lib/opensearch/config/
+if [ "x$FESS_DICTIONARY_PATH" = "x" ]; then
+  for fess_dictionary_candidate in "$FESS_HOME"/opensearch/*/config/dictionary ; do
+    if [ -d "$fess_dictionary_candidate" ]; then
+      if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
+        echo "warning: more than one OpenSearch under $FESS_HOME/opensearch; set FESS_DICTIONARY_PATH to the config/dictionary directory of the one Fess uses" >&2
+        FESS_DICTIONARY_PATH=
+        break
+      fi
+      FESS_DICTIONARY_PATH="$fess_dictionary_candidate"
+    fi
+  done
+fi
 
 # SSL truststore for certificate validation over https
 #FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djavax.net.ssl.trustStore=/tech/elastic/config/truststore.jks"
