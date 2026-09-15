@@ -17,12 +17,21 @@ package org.codelibs.fess.crawler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.misc.Pair;
+import org.codelibs.fess.crawler.client.CrawlerClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.RequestData;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.helper.CrawlingConfigHelper;
+import org.codelibs.fess.opensearch.config.exentity.WebConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -55,6 +64,111 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         assertEquals("http://.*", list.get(0).getSecond().pattern());
         assertEquals("playwright", list.get(1).getFirst());
         assertEquals("https://.*", list.get(1).getSecond().pattern());
+    }
+
+    @Test
+    public void test_getClient_warnsOncePerConfigAndClientNameWhenTheNamedClientIsMissing() {
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        final CrawlerClient httpClient = new StubCrawlerClient();
+        final CrawlerClientFactory clientFactory = new CrawlerClientFactory();
+        clientFactory.addClient(List.of("http:.*", "https:.*"), httpClient);
+
+        // fess-crawler-playwright is not installed, and chromium was never a client name
+        final String jsSite = storeWebConfig("1", "JS site",
+                "client.crawlerClients=playwright:https://js.example.com/.*,chromium:https://spa.example.com/.*");
+        final String otherSite = storeWebConfig("2", "Other site", "client.crawlerClients=playwright:https://.*");
+
+        // a crawl runs one FessCrawlerThread instance per thread, all sharing the crawler context
+        final FessCrawlerThread jsThread1 = createCrawlerThread(jsSite, clientFactory);
+        final FessCrawlerThread jsThread2 = createCrawlerThread(jsSite, clientFactory);
+        final FessCrawlerThread otherThread = createCrawlerThread(otherSite, clientFactory);
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessCrawlerThread.class);
+        try {
+            // what gets crawled does not change: every URL still falls back to the protocol's client
+            assertSame(httpClient, jsThread1.getClient("https://js.example.com/a"));
+            assertSame(httpClient, jsThread1.getClient("https://js.example.com/b"));
+            assertSame(httpClient, jsThread2.getClient("https://js.example.com/c"));
+            assertSame(httpClient, jsThread2.getClient("https://spa.example.com/"));
+            assertSame(httpClient, jsThread1.getClient("https://spa.example.com/next"));
+            assertSame(httpClient, otherThread.getClient("https://example.org/"));
+            assertSame(httpClient, otherThread.getClient("https://example.org/next"));
+            // no rule matches, so no client name was asked for
+            assertSame(httpClient, jsThread1.getClient("https://plain.example.com/"));
+
+            final List<String> warnings = appender.warnings();
+            assertEquals(3, warnings.size(), String.valueOf(warnings));
+
+            final List<String> jsPlaywright =
+                    warnings.stream().filter(m -> m.startsWith("[JS site]") && m.contains(" playwright ")).toList();
+            assertEquals(1, jsPlaywright.size(), String.valueOf(warnings));
+            assertTrue(jsPlaywright.get(0).contains("https://js.example.com/a"), jsPlaywright.get(0));
+            assertTrue(jsPlaywright.get(0).contains("fess-crawler-playwright"), jsPlaywright.get(0));
+            assertTrue(jsPlaywright.get(0).contains("bin/fess-setup install nodejs"), jsPlaywright.get(0));
+
+            final List<String> jsChromium = warnings.stream().filter(m -> m.startsWith("[JS site]") && m.contains(" chromium ")).toList();
+            assertEquals(1, jsChromium.size(), String.valueOf(warnings));
+            assertFalse(jsChromium.get(0).contains("fess-crawler-playwright"), jsChromium.get(0));
+
+            final List<String> otherPlaywright =
+                    warnings.stream().filter(m -> m.startsWith("[Other site]") && m.contains(" playwright ")).toList();
+            assertEquals(1, otherPlaywright.size(), String.valueOf(warnings));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_getClient_usesARegisteredNamedClientWithoutWarning() {
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        final CrawlerClient httpClient = new StubCrawlerClient();
+        final CrawlerClient playwrightClient = new StubCrawlerClient();
+        final CrawlerClientFactory clientFactory = new CrawlerClientFactory();
+        // the patterns fess-crawler-playwright registers, ahead of the protocol clients
+        clientFactory.addClient(List.of("playwright:http:.*", "playwright:https:.*"), playwrightClient);
+        clientFactory.addClient(List.of("http:.*", "https:.*"), httpClient);
+
+        final String jsSite = storeWebConfig("1", "JS site", "client.crawlerClients=playwright:https://js.example.com/.*");
+        final FessCrawlerThread crawlerThread = createCrawlerThread(jsSite, clientFactory);
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessCrawlerThread.class);
+        try {
+            assertSame(playwrightClient, crawlerThread.getClient("https://js.example.com/a"));
+            assertSame(httpClient, crawlerThread.getClient("https://plain.example.com/"));
+            assertEquals(0, appender.warnings().size(), String.valueOf(appender.warnings()));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    private static String storeWebConfig(final String id, final String name, final String configParameter) {
+        final WebConfig webConfig = new WebConfig();
+        webConfig.setId(id);
+        webConfig.setName(name);
+        webConfig.setConfigParameter(configParameter);
+        // a session id no earlier run in this JVM has used, as each crawl's is
+        return ComponentUtil.getCrawlingConfigHelper().store(UUID.randomUUID().toString(), webConfig);
+    }
+
+    private static FessCrawlerThread createCrawlerThread(final String sessionId, final CrawlerClientFactory clientFactory) {
+        final CrawlerContext crawlerContext = new CrawlerContext();
+        crawlerContext.setSessionId(sessionId);
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        crawlerThread.setCrawlerContext(crawlerContext);
+        crawlerThread.setClientFactory(clientFactory);
+        return crawlerThread;
+    }
+
+    private static class StubCrawlerClient implements CrawlerClient {
+        @Override
+        public void setInitParameterMap(final Map<String, Object> params) {
+            // nothing
+        }
+
+        @Override
+        public ResponseData execute(final RequestData data) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
