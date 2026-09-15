@@ -119,9 +119,28 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.level=warn
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlasta.env=web
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dtomcat.config.path=tomcat_config.properties
 
+REM The config directory of the OpenSearch server Fess talks to, where configsync keeps the
+REM dictionaries Fess pushes. It has to match configsync.config_path in that server's opensearch.yml.
+REM Left unset, it is taken from the OpenSearch bin\fess-setup install opensearch put under
+REM %FESS_HOME%\opensearch, provided there is only one. A -Dfess.dictionary.path line below wins.
+SET FESS_DICTIONARY_AMBIGUOUS=
+IF NOT DEFINED FESS_DICTIONARY_PATH (
+  FOR /D %%D IN ("%FESS_HOME%\opensearch\*") DO (
+    IF EXIST "%%D\config\dictionary\" (
+      IF DEFINED FESS_DICTIONARY_PATH SET FESS_DICTIONARY_AMBIGUOUS=true
+      SET FESS_DICTIONARY_PATH=%%D\config\dictionary
+    )
+  )
+)
+IF DEFINED FESS_DICTIONARY_AMBIGUOUS ECHO warning: more than one OpenSearch under %FESS_HOME%\opensearch; set FESS_DICTIONARY_PATH to the config\dictionary directory of the one Fess uses 1>&2
+IF DEFINED FESS_DICTIONARY_AMBIGUOUS SET FESS_DICTIONARY_PATH=
+SET FESS_DICTIONARY_AMBIGUOUS=
+REM Forward slashes: Fess substitutes the value into the index settings, where a backslash is lost.
+IF DEFINED FESS_DICTIONARY_PATH set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path="%FESS_DICTIONARY_PATH:\=/%"
+
 REM External opensearch cluster
 REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.search_engine.http_address=http://localhost:9200
-REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path=C:\opensearch\config\dictionary
+REM set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path=C:/opensearch/config/dictionary
 
 REM Node.js for the Playwright crawler, installed by: bin\fess-setup install nodejs
 REM An environment variable, not a -D option: the crawler runs in a child process that inherits
