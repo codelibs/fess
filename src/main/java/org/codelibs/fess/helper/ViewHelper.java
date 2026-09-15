@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -87,7 +88,6 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.ibm.icu.text.SimpleDateFormat;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;

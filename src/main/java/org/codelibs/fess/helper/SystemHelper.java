@@ -91,7 +91,6 @@ import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.ibm.icu.util.ULocale;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -190,8 +189,7 @@ public class SystemHelper {
                 .build(new CacheLoader<String, List<Map<String, String>>>() {
                     @Override
                     public List<Map<String, String>> load(final String key) throws Exception {
-                        final ULocale uLocale = new ULocale(key);
-                        final Locale displayLocale = uLocale.toLocale();
+                        final Locale displayLocale = Locale.forLanguageTag(key);
                         final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
                         final String msg = ComponentUtil.getMessageManager().getMessage(displayLocale, "labels.allLanguages");
                         final Map<String, String> defaultMap = new HashMap<>(2);
@@ -608,8 +606,8 @@ public class SystemHelper {
      */
     public List<Map<String, String>> getLanguageItems(final Locale locale) {
         try {
-            final String localeStr = locale.toString();
-            return langItemsCache.get(localeStr);
+            // A language tag, unlike Locale#toString, carries the script and extensions through the cache key.
+            return langItemsCache.get(locale.toLanguageTag());
         } catch (final ExecutionException e) {
             final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
             final String msg = ComponentUtil.getMessageManager().getMessage(locale, "labels.allLanguages");

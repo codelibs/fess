@@ -1240,11 +1240,6 @@
 			<version>${commons.lang3.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>${icu4j.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-langdetect-optimaize</artifactId>
 			<version>${tika.version}</version>
