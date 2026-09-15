@@ -98,6 +98,12 @@ public class LanguageHelper {
             if (language == null) {
                 return;
             }
+        } else if (doc.get(fessConfig.getIndexFieldLang()) instanceof String) {
+            // A language the document brings with it -- <html lang="zh-CN">, a configured default lang --
+            // is written the way supported.languages writes it, zh_CN. The text is copied below to the field
+            // of the normalized tag, content_zh-cn, so lang carries that tag too, as it does for a detected
+            // language; otherwise lang:zh-cn does not find the document.
+            doc.put(fessConfig.getIndexFieldLang(), language);
         }
 
         for (final String f : langFields) {
