@@ -311,6 +311,25 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getLanguageItems_keepsScriptOfRequestLocale() {
+        // The script of the request locale decides the script of the language names: Traditional Chinese for
+        // zh-Hant and Latin for sr-Latn, not the names of the language without its script.
+        final Locale zhHant = Locale.forLanguageTag("zh-Hant");
+        assertEquals(Locale.JAPANESE.getDisplayName(zhHant), getLanguageLabel(zhHant, "ja"));
+        final Locale srLatn = Locale.forLanguageTag("sr-Latn-RS");
+        assertEquals(Locale.JAPANESE.getDisplayName(srLatn), getLanguageLabel(srLatn, "ja"));
+    }
+
+    private String getLanguageLabel(final Locale locale, final String lang) {
+        return systemHelper.getLanguageItems(locale)
+                .stream()
+                .filter(item -> lang.equals(item.get(Constants.ITEM_VALUE)))
+                .map(item -> item.get(Constants.ITEM_LABEL))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Test
     public void test_getHostnamet() {
         assertNotNull(systemHelper.getHostname());
         try {
