@@ -358,10 +358,18 @@ public class FessCrawlerThread extends CrawlerThread {
     }
 
     /**
+     * The crawling sessions and client names already reported by {@link #getNamedClient}, as
+     * {@code sessionId:clientName}. Static because a crawl runs one FessCrawlerThread instance per
+     * thread, and the report is meant once per crawling configuration: the session id is the one
+     * {@link CrawlingConfigHelper#store} gives each configuration of a crawl.
+     */
+    protected static final Set<String> missingClientReports = ConcurrentHashMap.newKeySet();
+
+    /**
      * Retrieves the appropriate crawler client for the given URL based on configured rules.
      * This method uses client rules to determine which specific client implementation
      * should be used for crawling the URL, falling back to the default client if no
-     * specific rule matches.
+     * specific rule matches, or if the client a rule names is not registered.
      *
      * @param url the URL to get a client for
      * @return the crawler client instance to use for the URL
@@ -380,10 +388,39 @@ public class FessCrawlerThread extends CrawlerThread {
         })
                 .filter(StringUtil::isNotBlank)
                 .findFirst()//
-                .map(s -> clientFactory.getClient(s + ":" + url))//
+                .map(s -> getNamedClient(crawlingConfig, s, url))//
                 .orElseGet(() -> clientFactory.getClient(url));
         if (logger.isDebugEnabled()) {
             logger.debug("CrawlerClient: class={}", client.getClass().getCanonicalName());
+        }
+        return client;
+    }
+
+    /**
+     * Returns the client registered under {@code clientName} for the URL, or null, in which case
+     * {@link #getClient} falls back to the client for the URL's protocol.
+     *
+     * <p>That fallback leaves no trace in the crawl: the page is fetched and indexed, just not by the
+     * client the configuration named. With playwright that means no JavaScript is run, so text only
+     * a script produces is missing from the index while the job succeeds. Up to 15.8 the playwright
+     * client was bundled and always found; from 15.9 it comes from the fess-crawler-playwright plugin,
+     * and an installation without it lands here. The warning is logged once per crawling
+     * configuration and client name, not per URL.</p>
+     *
+     * @param crawlingConfig the crawling configuration whose rule named the client
+     * @param clientName the client name from {@code client.crawlerClients}
+     * @param url the URL to get a client for
+     * @return the named client, or null if none is registered for the URL
+     */
+    protected CrawlerClient getNamedClient(final CrawlingConfig crawlingConfig, final String clientName, final String url) {
+        final CrawlerClient client = clientFactory.getClient(clientName + ":" + url);
+        if (client == null && missingClientReports.add(crawlerContext.getSessionId() + ":" + clientName)) {
+            final String hint = "playwright".equals(clientName)
+                    ? " If the fess-crawler-playwright plugin is not installed, install it and Node.js with bin/fess-setup install plugin fess-crawler-playwright and bin/fess-setup install nodejs, then restart Fess."
+                    : " The plugin that provides this client may not be installed.";
+            logger.warn(
+                    "[{}] No crawler client {} is registered for {}, which client.crawlerClients assigns to it. It is crawled with the client for its protocol instead.{} Other URLs of this crawling configuration for {} are not reported.",
+                    crawlingConfig.getName(), clientName, url, hint, clientName);
         }
         return client;
     }
