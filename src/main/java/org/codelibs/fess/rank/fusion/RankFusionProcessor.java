@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -325,6 +326,12 @@ public class RankFusionProcessor implements AutoCloseable {
      * Executes searches in parallel across all provided searchers, then combines the results
      * using rank fusion algorithms to produce a unified result set.
      *
+     * <p>The main searcher runs on the calling thread and is always waited for. The other searchers
+     * run on the executor and are waited for up to {@code rank.fusion.timeout} milliseconds, counted
+     * from their submission. One that has not answered by then - an embedding provider that accepted
+     * the query and never replied, for instance - is left out of this search, and the response is
+     * flagged as partial and timed out.</p>
+     *
      * @param searchers array of searchers to use for concurrent searching
      * @param query the search query string
      * @param params search request parameters including pagination and filters
@@ -380,9 +387,12 @@ public class RankFusionProcessor implements AutoCloseable {
         if (logger.isDebugEnabled()) {
             logger.debug("Search parameters: windowSize={}, sizePerSearcher={}, rankConstant={}", windowSize, size, rankConstant);
         }
+        final Integer timeout = fessConfig.getRankFusionTimeoutAsInteger();
+        final long timeoutNanos = timeout != null && timeout > 0 ? TimeUnit.MILLISECONDS.toNanos(timeout) : 0L;
+        final long startTime = System.nanoTime();
         final List<Future<SearchResult>> resultList = new ArrayList<>();
-        for (int i = 0; i < searchers.length; i++) {
-            final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, 0, i == 0 ? windowSize : size);
+        for (int i = 1; i < searchers.length; i++) {
+            final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, 0, size);
             final RankFusionSearcher searcher = searchers[i];
             resultList.add(executorService.submit(() -> {
                 try {
@@ -399,13 +409,37 @@ public class RankFusionProcessor implements AutoCloseable {
                 }
             }));
         }
-        final SearchResult[] results = resultList.stream().map(future -> {
+        final SearchResult[] results = new SearchResult[searchers.length];
+        // The main searcher runs on the calling thread. rank.fusion.timeout does not apply to it -
+        // the search engine's own timeouts do - and it never queues for a pool thread behind
+        // searchers that are still waiting on an unresponsive provider.
+        try {
+            results[0] = searchers[0].search(query, new SearchRequestParamsWrapper(params, 0, windowSize), userBean);
+        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("Search operation failed with exception", e);
+            results[0] = SearchResult.create().build();
+        }
+        boolean searcherTimedOut = false;
+        for (int i = 1; i < searchers.length; i++) {
+            final Future<SearchResult> future = resultList.get(i - 1);
             try {
-                return future.get();
+                if (timeoutNanos > 0L) {
+                    results[i] = future.get(Math.max(0L, timeoutNanos - (System.nanoTime() - startTime)), TimeUnit.NANOSECONDS);
+                } else {
+                    results[i] = future.get();
+                }
+            } catch (final TimeoutException e) {
+                future.cancel(true);
+                logger.warn("{} did not return results within {}ms ({}); it is left out of this search. query={}", searchers[i].getName(),
+                        timeout, FessConfig.RANK_FUSION_TIMEOUT, query);
+                searcherTimedOut = true;
+                results[i] = SearchResult.create().build();
             } catch (final InterruptedException e) {
                 logger.warn("Search operation was interrupted", e);
                 Thread.currentThread().interrupt(); // Restore interrupt status
-                return SearchResult.create().build();
+                results[i] = SearchResult.create().build();
             } catch (final ExecutionException e) {
                 if (e.getCause() instanceof final InvalidQueryException iqe) {
                     throw iqe;
@@ -417,9 +451,9 @@ public class RankFusionProcessor implements AutoCloseable {
                     throw iate;
                 }
                 logger.warn("Search operation failed with exception", e.getCause());
-                return SearchResult.create().build();
+                results[i] = SearchResult.create().build();
             }
-        }).toArray(SearchResult[]::new);
+        }
 
         final String scoreField = fessConfig.getRankFusionScoreField();
         final Map<String, Map<String, Object>> documentsByIdMap = new HashMap<>();
@@ -489,8 +523,8 @@ public class RankFusionProcessor implements AutoCloseable {
             allRecordCount += offset;
         }
         return createResponseList(extractList(fusedDocs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
-                mainResult.getQueryTime(), mainResult.isPartialResults(), mainResult.isTimedOut(), mainResult.isShardFailed(),
-                mainResult.getFacetResponse(), startPosition, pageSize, offset);
+                mainResult.getQueryTime(), mainResult.isPartialResults() || searcherTimedOut, mainResult.isTimedOut() || searcherTimedOut,
+                mainResult.isShardFailed(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
     }
 
     /**

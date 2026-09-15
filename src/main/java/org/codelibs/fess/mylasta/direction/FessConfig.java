@@ -1267,6 +1267,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. -1 */
     String RANK_FUSION_THREADS = "rank.fusion.threads";
 
+    /** The key of the configuration. e.g. 10000 */
+    String RANK_FUSION_TIMEOUT = "rank.fusion.timeout";
+
     /** The key of the configuration. e.g. rf_score */
     String RANK_FUSION_score_field = "rank.fusion.score_field";
 
@@ -6656,6 +6659,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getRankFusionThreadsAsInteger();
+
+    /**
+     * Get the value for the key 'rank.fusion.timeout'. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum time (milliseconds) to wait for the searchers other than the main one when Fess fuses their results itself.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRankFusionTimeout();
+
+    /**
+     * Get the value for the key 'rank.fusion.timeout' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum time (milliseconds) to wait for the searchers other than the main one when Fess fuses their results itself.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRankFusionTimeoutAsInteger();
 
     /**
      * Get the value for the key 'rank.fusion.score_field'. <br>
@@ -12517,6 +12537,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RANK_FUSION_THREADS);
         }
 
+        public String getRankFusionTimeout() {
+            return get(FessConfig.RANK_FUSION_TIMEOUT);
+        }
+
+        public Integer getRankFusionTimeoutAsInteger() {
+            return getAsInteger(FessConfig.RANK_FUSION_TIMEOUT);
+        }
+
         public String getRankFusionScoreField() {
             return get(FessConfig.RANK_FUSION_score_field);
         }
@@ -14702,6 +14730,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RANK_FUSION_window_size, "200");
             defaultMap.put(FessConfig.RANK_FUSION_rank_constant, "20");
             defaultMap.put(FessConfig.RANK_FUSION_THREADS, "-1");
+            defaultMap.put(FessConfig.RANK_FUSION_TIMEOUT, "10000");
             defaultMap.put(FessConfig.RANK_FUSION_score_field, "rf_score");
             defaultMap.put(FessConfig.SMB_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.SMB_AVAILABLE_SID_TYPES, "1,2,4:2,5:1");
