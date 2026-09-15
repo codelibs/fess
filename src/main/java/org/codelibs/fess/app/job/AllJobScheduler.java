@@ -23,6 +23,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.logic.AccessContextLogic;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.MissingScriptEngineReporter;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.JobLogBhv;
@@ -82,6 +83,8 @@ public class AllJobScheduler implements LaJobScheduler {
     public void schedule(final LaCron cron) {
         schedulerTime = systemHelper.getCurrentTimeAsLong();
         scheduledJobService.start(cron);
+        // Every script engine plugin has registered by now, and nothing has run yet.
+        new MissingScriptEngineReporter().report();
 
         final String myName = fessConfig.getSchedulerTargetName();
         if (StringUtil.isNotBlank(myName)) {
