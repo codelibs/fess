@@ -23,10 +23,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fesen.client.EngineInfo.EngineType;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.di.exception.ContainerInitFailureException;
+import org.codelibs.fesen.opensearch.transport.client.AdminClient;
 import org.codelibs.fesen.opensearch.action.ActionRequest;
 import org.codelibs.fesen.opensearch.action.ActionType;
 import org.codelibs.fesen.opensearch.action.search.CreatePitAction;
@@ -69,6 +74,36 @@ public class SearchEngineClientTest extends UnitFessTestCase {
         assertFalse(false);
         assertNotNull("test");
         assertEquals(1, 1);
+    }
+
+    /**
+     * bin/fess.in.sh always sets SEARCH_ENGINE_HTTP_URL, so a new installation with no engine at
+     * all never sees the "no search engine address is configured" message and its fess-setup hint.
+     * What it does see is this one, and it has to name the command that installs an engine too.
+     */
+    @Test
+    public void test_waitForYellowStatus_unavailableEngineNamesFessSetup() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final SearchEngineClient client = new SearchEngineClient() {
+            {
+                this.client = this;
+            }
+
+            @Override
+            public AdminClient admin() {
+                throw new IllegalStateException("Connection refused");
+            }
+        };
+        client.setMaxEsStatusRetry(1);
+        try {
+            client.waitForYellowStatus(new FessConfig.SimpleImpl());
+            fail("an engine that never answers has to fail the startup");
+        } catch (final ContainerInitFailureException e) {
+            final String message = e.getMessage();
+            assertTrue(message, message.contains("did not become available"));
+            assertTrue(message, message.contains("Check that OpenSearch is running and reachable."));
+            assertTrue(message, message.contains("bin/fess-setup install opensearch"));
+        }
     }
 
     // Test placeholder for future implementation

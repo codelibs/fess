@@ -1502,7 +1502,8 @@ public class SearchEngineClient implements Client {
             ThreadUtil.sleep(1000L);
         }
         final String message = "The search engine at " + SystemUtil.getSearchEngineHttpAddress() + " did not become available within "
-                + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms. Check that OpenSearch is running and reachable.";
+                + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms. Check that OpenSearch is running and reachable."
+                + " If there is none yet, run bin/fess-setup install opensearch to set one up.";
         throw new ContainerInitFailureException(message, cause);
     }
 
