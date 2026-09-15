@@ -18,6 +18,7 @@ package org.codelibs.fess.helper;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -139,6 +140,59 @@ public class LanguageHelperTest extends UnitFessTestCase {
         } catch (NullPointerException e) {
             // Expected
         }
+    }
+
+    @Test
+    public void test_detectLanguage_japanese() {
+        // The profiles of the bundled detector were built from text with every hiragana written as
+        // U+3042 and every katakana as U+30A2. Unfolded kana match no profile, so a Japanese text was
+        // judged by its kanji alone, which the Chinese profiles cover better, or by its Latin words.
+        useBundledDetector();
+        assertEquals("ja", languageHelper.detectLanguage("社内の文書管理規程について説明します。作成した文書は定められた期間保管してください。"));
+        assertEquals("ja", languageHelper.detectLanguage("日本語の設計文書\nこれは日本語だけで書かれた文書です。\n本文には英語の単語はひとつも含まれていません。\n"));
+        assertEquals("ja", languageHelper.detectLanguage("第一条 この法律は、個人情報の適正な取扱いに関し、基本理念及び政府による基本方針の作成その他の個人情報の保護に関する施策の基本となる事項を定める。"));
+        assertEquals("ja", languageHelper.detectLanguage("PDF 抽出テスト文書\nPDF 抽出器のための本文です。\n"));
+        assertEquals("ja", languageHelper.detectLanguage("ダッシュボードでは、Fess がアクセスしている OpenSearch のクラスターとインデックスを管理するウェブ管理ツールを提供します。"));
+    }
+
+    @Test
+    public void test_detectLanguage_chinese() {
+        useBundledDetector();
+        assertEquals("zh-cn", languageHelper.detectLanguage("全文检索服务器可以帮助企业快速查找内部文档。系统会定期抓取共享目录中的文件并建立索引，方便员工按照关键词搜索需要的资料。"));
+        assertEquals("zh-tw", languageHelper.detectLanguage("全文檢索伺服器可以協助企業快速查詢內部文件。系統會定期擷取共用目錄中的檔案並建立索引，方便員工依照關鍵字搜尋需要的資料。"));
+        // Chinese that quotes a Japanese title or brand name keeps its language: the few kana stay
+        // below the share at which they are folded.
+        assertEquals("zh-tw", languageHelper.detectLanguage("動畫電影《鬼滅の刃》在台灣上映後票房屢創新高，許多觀眾表示劇情感人，畫面也非常精緻。"));
+        assertEquals("zh-cn", languageHelper.detectLanguage("优衣库（ユニクロ）宣布将在上海开设全球最大旗舰店，预计明年春季正式营业。"));
+        assertEquals("zh-tw", languageHelper.detectLanguage("作家村上春樹的小說《ノルウェイの森》中文譯名為《挪威的森林》，是他最具代表性的作品之一。"));
+        assertEquals("zh-tw", languageHelper.detectLanguage("美國前總統喬・拜登今天在白宮接見來訪的外國代表團，雙方就經濟合作與區域安全交換意見。"));
+    }
+
+    @Test
+    public void test_detectLanguage_english() {
+        useBundledDetector();
+        assertEquals("en",
+                languageHelper.detectLanguage("This document describes the deployment procedure for the internal search service."));
+        assertEquals("en", languageHelper.detectLanguage(
+                "The Japanese word ありがとう means thank you, and it is one of the first expressions visitors to Tokyo learn."));
+    }
+
+    @Test
+    public void test_getDetectText_kanaFolding() {
+        // kana are 7 of the 10 kana and kanji: folded
+        assertEquals("日本語あアアアアああ", languageHelper.getDetectText("日本語のテキストです"));
+        // the prolonged sound mark is in the katakana block, as it was when the profiles were built
+        assertEquals("アアアア", languageHelper.getDetectText("ラーメン"));
+        // kana are 4 of the 32 kana and kanji: left as they are
+        final String chinese = "优衣库（ユニクロ）宣布将在上海开设全球最大旗舰店，预计明年春季正式营业。";
+        assertEquals(chinese, languageHelper.getDetectText(chinese));
+        // no kana at all: the middle dot is not folded either
+        assertEquals("喬・拜登", languageHelper.getDetectText("喬・拜登"));
+    }
+
+    private void useBundledDetector() {
+        languageHelper.setDetector(new OptimaizeLangDetector().loadModels());
+        languageHelper.supportedLanguages = new String[] { "ja", "en", "zh_CN", "zh_TW" };
     }
 
     @Test
