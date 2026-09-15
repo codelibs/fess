@@ -50,6 +50,9 @@ public class LanguageHelper {
     /** The maximum text length for language detection. */
     protected int maxTextLength;
 
+    /** The share of kana among the kana and kanji of a text from which its kana are folded before detection. */
+    protected double kanaFoldingRatio = 0.2d;
+
     /**
      * Default constructor.
      */
@@ -139,7 +142,53 @@ public class LanguageHelper {
         } else {
             result = text.substring(0, maxTextLength);
         }
-        return result.replaceAll("\\s+", " ");
+        return foldKana(result.replaceAll("\\s+", " "));
+    }
+
+    /**
+     * Folds the kana of a Japanese text the way the language profiles of the bundled detector were built.
+     * <p>
+     * The Optimaize profiles were generated from text in which every character of the hiragana block was
+     * written as U+3042 and every character of the katakana block as U+30A2, but the detector takes its
+     * n-grams from the text as it is given. Unfolded kana match no profile, so a Japanese text was
+     * classified by its kanji alone, which the zh-CN and zh-TW profiles cover better, or by the Latin
+     * words in it.
+     * </p>
+     * <p>
+     * A text is folded only when kana make up at least {@code kanaFoldingRatio} of its kana and kanji,
+     * so that Chinese quoting a Japanese title or brand name is detected as it was.
+     * </p>
+     *
+     * @param text The text for language detection.
+     * @return The text with its kana folded, or the text itself.
+     */
+    protected String foldKana(final String text) {
+        int kana = 0;
+        int han = 0;
+        for (int i = 0; i < text.length(); i++) {
+            final Character.UnicodeScript script = Character.UnicodeScript.of(text.charAt(i));
+            if (script == Character.UnicodeScript.HIRAGANA || script == Character.UnicodeScript.KATAKANA) {
+                kana++;
+            } else if (script == Character.UnicodeScript.HAN) {
+                han++;
+            }
+        }
+        if (kana == 0 || kana < (kana + han) * kanaFoldingRatio) {
+            return text;
+        }
+        final StringBuilder buf = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            final char c = text.charAt(i);
+            final Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
+            if (block == Character.UnicodeBlock.HIRAGANA) {
+                buf.append('あ');
+            } else if (block == Character.UnicodeBlock.KATAKANA) {
+                buf.append('ア');
+            } else {
+                buf.append(c);
+            }
+        }
+        return buf.toString();
     }
 
     /**
