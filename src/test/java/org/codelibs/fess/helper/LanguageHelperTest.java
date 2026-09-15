@@ -124,6 +124,25 @@ public class LanguageHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_updateDocument_normalizesExistingLang() {
+        // <html lang="zh-CN"> reaches the document as zh_CN, the spelling supported.languages uses. The
+        // text is copied to content_zh-cn, so lang has to carry the same tag a detected document gets,
+        // or lang:zh-cn does not find the page.
+        languageHelper.supportedLanguages = new String[] { "ja", "en", "zh_CN", "zh_TW" };
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("lang", "zh_CN");
+        doc.put("title", "标题");
+        doc.put("content", "内容");
+
+        languageHelper.updateDocument(doc);
+
+        assertEquals("zh-cn", doc.get("lang"));
+        assertEquals("标题", doc.get("title_zh-cn"));
+        assertEquals("内容", doc.get("content_zh-cn"));
+        assertNull(doc.get("content_zh_CN"));
+    }
+
+    @Test
     public void test_detectLanguage_blank() {
         assertNull(languageHelper.detectLanguage(null));
         assertNull(languageHelper.detectLanguage(""));
