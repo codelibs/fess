@@ -128,7 +128,9 @@ public class ScriptExecutorJob implements LaJob {
             }
             jobLog.setJobStatus(Constants.OK);
         } catch (final Throwable t) {
-            logger.warn("Failed to execute job: id={}, script={}", id, script, t);
+            // ERROR, not WARN: a failed job is what log notification is for, and its default
+            // level (fess.log.notification.level) is ERROR, so a WARN here is never notified.
+            logger.error("Failed to execute job: id={}, script={}", id, script, t);
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {
