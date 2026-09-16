@@ -24,6 +24,8 @@ import org.dbflute.mail.send.SMailPostalMotorbike;
 import org.dbflute.mail.send.SMailPostalParkingLot;
 import org.dbflute.mail.send.SMailPostalPersonnel;
 import org.dbflute.mail.send.embedded.personnel.SMailDogmaticPostalPersonnel;
+import org.dbflute.mail.send.embedded.postie.SMailHonestPostie;
+import org.dbflute.mail.send.embedded.postie.SMailPostingMessage;
 import org.dbflute.mail.send.embedded.receptionist.SMailConventionReceptionist;
 import org.dbflute.mail.send.supplement.async.SMailAsyncStrategy;
 import org.dbflute.mail.send.supplement.filter.SMailSubjectFilter;
@@ -34,6 +36,10 @@ import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.core.magic.async.ConcurrentAsyncCall;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.util.ContainerUtil;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.MimeMessage;
 
 /**
  * The creator of mail delivery department.
@@ -108,6 +114,30 @@ public class FessMailDeliveryDepartmentCreator {
             @Override
             protected OptionalThing<SMailLabelStrategy> createLabelStrategy() {
                 return OptionalThing.of((view, locale, label) -> resolveLabelIfNeeds(messageManager, locale, label));
+            }
+
+            // MailFlute reads the SMTP reply after a send through com.sun.mail.smtp.SMTPTransport,
+            // and the instanceof it uses there resolves that class whatever the transport is.
+            // Jakarta Mail 2.1 ships the Angus implementation, which has no com.sun.mail package,
+            // so the step ended in NoClassDefFoundError once the mail had already gone out: the
+            // test mail screen answered with a system error, and a crawl with a notification
+            // target logged "Crawler terminated unexpectedly" and exited 1. The reply code and the
+            // last server response it collects are only used for logging, so send without them.
+            @Override
+            protected SMailHonestPostie newMailHonestPostie(final SMailPostalMotorbike motorbike) {
+                return new SMailHonestPostie(motorbike) {
+                    @Override
+                    protected void actuallySend(final SMailPostingMessage message) throws MessagingException {
+                        final Transport transport = prepareTransport();
+                        try {
+                            final MimeMessage mimeMessage = message.getMimeMessage();
+                            transport.connect();
+                            transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+                        } finally {
+                            closeTransport(transport);
+                        }
+                    }
+                };
             }
         };
     }
