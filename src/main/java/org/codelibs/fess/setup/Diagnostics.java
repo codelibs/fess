@@ -160,8 +160,14 @@ public final class Diagnostics {
             }
             final String version = versions.get(0);
             if (productVersion != null && !version.equals(productVersion) && !version.startsWith(productVersion + ".")) {
-                checks.add(new Check(Status.WARN, "plugin " + artifactId,
-                        version + " was built for another release (this Fess is " + productVersion + ")"));
+                // A failure, not a warning. A plugin is compiled against one Fess release, and the war
+                // it runs in changes under it between releases: 15.9 moved the OpenSearch classes into
+                // another package and stopped shipping libraries that 15.8 plugins took from it. A
+                // plugin jar left over from the previous release can then stop Fess from starting at
+                // all -- fess-webapp-mcp 15.8.0 in a 15.9 war fails the DI container and every page
+                // answers 404 -- while this check said "Usable, with warnings" and exited 0.
+                checks.add(new Check(Status.FAIL, "plugin " + artifactId, version + " was built for another release (this Fess is "
+                        + productVersion + "; replace it with: fess-setup upgrade plugins)"));
                 continue;
             }
             checks.add(new Check(Status.OK, "plugin " + artifactId, version));

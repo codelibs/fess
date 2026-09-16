@@ -117,18 +117,32 @@ public class DiagnosticsTest {
         assertTrue(checks.get(0).detail().contains("15.9.1"), checks.get(0).detail());
     }
 
+    /**
+     * A plugin jar left over from another release is a failure: the war changes under a plugin
+     * between releases, and such a jar can stop Fess from starting at all.
+     */
     @Test
-    public void test_installedPlugins_warnsWhenAPluginIsForAnotherRelease() throws Exception {
+    public void test_installedPlugins_failsWhenAPluginIsForAnotherRelease() throws Exception {
         Files.writeString(tempDir.resolve("fess-ds-git-15.8.0.jar"), "x");
         Files.writeString(tempDir.resolve("fess-ds-slack-15.9.0.jar"), "x");
 
         final List<Check> checks = Diagnostics.installedPlugins(tempDir, "15.9");
         assertEquals(2, checks.size());
         final Check git = checks.stream().filter(c -> c.name().contains("fess-ds-git")).findFirst().orElseThrow();
-        assertEquals(Status.WARN, git.status());
+        assertEquals(Status.FAIL, git.status());
         assertTrue(git.detail().contains("15.8.0"), git.detail());
+        assertTrue(git.detail().contains("fess-setup upgrade plugins"), "the remedy is named: " + git.detail());
         final Check slack = checks.stream().filter(c -> c.name().contains("fess-ds-slack")).findFirst().orElseThrow();
         assertEquals(Status.OK, slack.status());
+    }
+
+    @Test
+    public void test_installedPlugins_acceptsASnapshotOfThisRelease() throws Exception {
+        Files.writeString(tempDir.resolve("fess-webapp-mcp-15.9.0-20260914.212412-2.jar"), "x");
+
+        final List<Check> checks = Diagnostics.installedPlugins(tempDir, "15.9");
+        assertEquals(1, checks.size());
+        assertEquals(Status.OK, checks.get(0).status(), checks.get(0).detail());
     }
 
     @Test
