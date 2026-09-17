@@ -194,32 +194,8 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to start a crawl process. */
     public static final String ERRORS_failed_to_start_crawl_process = "{errors.failed_to_start_crawl_process}";
 
-    /** The key of the message: Invalid JSP file. */
-    public static final String ERRORS_invalid_design_jsp_file_name = "{errors.invalid_design_jsp_file_name}";
-
-    /** The key of the message: The JSP file does not exist. */
-    public static final String ERRORS_design_jsp_file_does_not_exist = "{errors.design_jsp_file_does_not_exist}";
-
-    /** The key of the message: The file name is not specified. */
-    public static final String ERRORS_design_file_name_is_not_found = "{errors.design_file_name_is_not_found}";
-
-    /** The key of the message: Failed to upload an image file. */
-    public static final String ERRORS_failed_to_write_design_image_file = "{errors.failed_to_write_design_image_file}";
-
-    /** The key of the message: Failed to update the JSP file. */
-    public static final String ERRORS_failed_to_update_jsp_file = "{errors.failed_to_update_jsp_file}";
-
-    /** The key of the message: The file name is invalid. */
-    public static final String ERRORS_design_file_name_is_invalid = "{errors.design_file_name_is_invalid}";
-
-    /** The key of the message: This file type is unsupported. */
-    public static final String ERRORS_design_file_is_unsupported_type = "{errors.design_file_is_unsupported_type}";
-
     /** The key of the message: Failed to create a crawling config at a wizard. */
     public static final String ERRORS_failed_to_create_crawling_config_at_wizard = "{errors.failed_to_create_crawling_config_at_wizard}";
-
-    /** The key of the message: This feature is disabled. */
-    public static final String ERRORS_design_editor_disabled = "{errors.design_editor_disabled}";
 
     /** The key of the message: Not found. Cause: {0} */
     public static final String ERRORS_not_found_on_file_system = "{errors.not_found_on_file_system}";
@@ -229,9 +205,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: No more results can be displayed. */
     public static final String ERRORS_result_size_exceeded = "{errors.result_size_exceeded}";
-
-    /** The key of the message: The file {0} does not exist. */
-    public static final String ERRORS_target_file_does_not_exist = "{errors.target_file_does_not_exist}";
 
     /** The key of the message: Failed to delete the file {0}. */
     public static final String ERRORS_failed_to_delete_file = "{errors.failed_to_delete_file}";
@@ -571,12 +544,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Started a crawl process. */
     public static final String SUCCESS_start_crawl_process = "{success.start_crawl_process}";
-
-    /** The key of the message: Updated {0}. */
-    public static final String SUCCESS_upload_design_file = "{success.upload_design_file}";
-
-    /** The key of the message: Updated {0}. */
-    public static final String SUCCESS_update_design_jsp_file = "{success.update_design_jsp_file}";
 
     /** The key of the message: Created a crawling config {0}. */
     public static final String SUCCESS_create_crawling_config_at_wizard = "{success.create_crawling_config_at_wizard}";
@@ -1487,104 +1454,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.invalid_design_jsp_file_name' with parameters.
-     * <pre>
-     * message: Invalid JSP file.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidDesignJspFileName(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_invalid_design_jsp_file_name));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.design_jsp_file_does_not_exist' with parameters.
-     * <pre>
-     * message: The JSP file does not exist.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDesignJspFileDoesNotExist(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_design_jsp_file_does_not_exist));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.design_file_name_is_not_found' with parameters.
-     * <pre>
-     * message: The file name is not specified.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDesignFileNameIsNotFound(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_design_file_name_is_not_found));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_write_design_image_file' with parameters.
-     * <pre>
-     * message: Failed to upload an image file.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToWriteDesignImageFile(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_failed_to_write_design_image_file));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_update_jsp_file' with parameters.
-     * <pre>
-     * message: Failed to update the JSP file.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToUpdateJspFile(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_failed_to_update_jsp_file));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.design_file_name_is_invalid' with parameters.
-     * <pre>
-     * message: The file name is invalid.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDesignFileNameIsInvalid(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_design_file_name_is_invalid));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.design_file_is_unsupported_type' with parameters.
-     * <pre>
-     * message: This file type is unsupported.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDesignFileIsUnsupportedType(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_design_file_is_unsupported_type));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.failed_to_create_crawling_config_at_wizard' with parameters.
      * <pre>
      * message: Failed to create a crawling config at a wizard.
@@ -1595,20 +1464,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToCreateCrawlingConfigAtWizard(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_create_crawling_config_at_wizard));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.design_editor_disabled' with parameters.
-     * <pre>
-     * message: This feature is disabled.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDesignEditorDisabled(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_design_editor_disabled));
         return this;
     }
 
@@ -1653,21 +1508,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsResultSizeExceeded(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_result_size_exceeded));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.target_file_does_not_exist' with parameters.
-     * <pre>
-     * message: The file {0} does not exist.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsTargetFileDoesNotExist(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_target_file_does_not_exist, arg0));
         return this;
     }
 
@@ -3304,36 +3144,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessStartCrawlProcess(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_start_crawl_process));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.upload_design_file' with parameters.
-     * <pre>
-     * message: Updated {0}.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessUploadDesignFile(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(SUCCESS_upload_design_file, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.update_design_jsp_file' with parameters.
-     * <pre>
-     * message: Updated {0}.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessUpdateDesignJspFile(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(SUCCESS_update_design_jsp_file, arg0));
         return this;
     }
 

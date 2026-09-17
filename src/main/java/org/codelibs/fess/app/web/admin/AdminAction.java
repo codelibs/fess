@@ -23,7 +23,6 @@ import org.codelibs.fess.app.web.admin.boostdoc.AdminBoostdocAction;
 import org.codelibs.fess.app.web.admin.crawlinginfo.AdminCrawlinginfoAction;
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.admin.dataconfig.AdminDataconfigAction;
-import org.codelibs.fess.app.web.admin.design.AdminDesignAction;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.admin.duplicatehost.AdminDuplicatehostAction;
 import org.codelibs.fess.app.web.admin.elevateword.AdminElevatewordAction;
@@ -91,8 +90,6 @@ public class AdminAction extends FessAdminAction {
             AdminGeneralAction.ROLE + VIEW, //
             AdminSchedulerAction.ROLE, //
             AdminSchedulerAction.ROLE + VIEW, //
-            AdminDesignAction.ROLE, //
-            AdminDesignAction.ROLE + VIEW, //
             AdminDictAction.ROLE, //
             AdminDictAction.ROLE + VIEW, //
             AdminAccesstokenAction.ROLE, //
@@ -165,8 +162,6 @@ public class AdminAction extends FessAdminAction {
             AdminGeneralAction.ROLE + VIEW, //
             AdminSchedulerAction.ROLE, //
             AdminSchedulerAction.ROLE + VIEW, //
-            AdminDesignAction.ROLE, //
-            AdminDesignAction.ROLE + VIEW, //
             AdminDictAction.ROLE, //
             AdminDictAction.ROLE + VIEW, //
             AdminAccesstokenAction.ROLE, //
@@ -239,8 +234,6 @@ public class AdminAction extends FessAdminAction {
             AdminGeneralAction.ROLE + VIEW, //
             AdminSchedulerAction.ROLE, //
             AdminSchedulerAction.ROLE + VIEW, //
-            AdminDesignAction.ROLE, //
-            AdminDesignAction.ROLE + VIEW, //
             AdminDictAction.ROLE, //
             AdminDictAction.ROLE + VIEW, //
             AdminAccesstokenAction.ROLE, //
@@ -334,9 +327,6 @@ public class AdminAction extends FessAdminAction {
         }
         if (user.hasRoles(getActionRoles(AdminSchedulerAction.ROLE))) {
             return AdminSchedulerAction.class;
-        }
-        if (user.hasRoles(getActionRoles(AdminDesignAction.ROLE))) {
-            return AdminDesignAction.class;
         }
         if (user.hasRoles(getActionRoles(AdminDictAction.ROLE))) {
             return AdminDictAction.class;

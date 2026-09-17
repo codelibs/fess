@@ -1022,27 +1022,6 @@ public interface FessProp {
         return split(getForumSupportedLangs(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).anyMatch(s -> s.equals(lang)));
     }
 
-    String getSupportedUploadedJsExtentions();
-
-    default String[] getSupportedUploadedJsExtentionsAsArray() {
-        return split(getSupportedUploadedJsExtentions(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
-    }
-
-    String getSupportedUploadedCssExtentions();
-
-    default String[] getSupportedUploadedCssExtentionsAsArray() {
-        return split(getSupportedUploadedCssExtentions(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
-    }
-
-    String getSupportedUploadedMediaExtentions();
-
-    default String[] getSupportedUploadedMediaExtentionsAsArray() {
-        return split(getSupportedUploadedMediaExtentions(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
-    }
-
     String getJobTemplateTitleWeb();
 
     String getJobTemplateTitleFile();
@@ -1244,13 +1223,6 @@ public interface FessProp {
             }
         }
         return Locale.ROOT;
-    }
-
-    String getSupportedUploadedFiles();
-
-    default boolean isSupportedUploadedFile(final String name) {
-        return split(getSuggestPopularWordExcludes(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).anyMatch(s -> s.equals(name)));
     }
 
     String getLdapAdminUserObjectClasses();
