@@ -272,18 +272,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1 */
     String LOAD_CONTROL_MONITOR_INTERVAL = "load.control.monitor.interval";
 
-    /** The key of the configuration. e.g. js */
-    String SUPPORTED_UPLOADED_JS_EXTENTIONS = "supported.uploaded.js.extentions";
-
-    /** The key of the configuration. e.g. css */
-    String SUPPORTED_UPLOADED_CSS_EXTENTIONS = "supported.uploaded.css.extentions";
-
-    /** The key of the configuration. e.g. jpg,jpeg,gif,png,swf */
-    String SUPPORTED_UPLOADED_MEDIA_EXTENTIONS = "supported.uploaded.media.extentions";
-
-    /** The key of the configuration. e.g. license.properties */
-    String SUPPORTED_UPLOADED_FILES = "supported.uploaded.files";
-
     /** The key of the configuration. e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh */
     String SUPPORTED_LANGUAGES = "supported.languages";
 
@@ -1723,9 +1711,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. group */
     String ONLINE_HELP_NAME_GROUP = "online.help.name.group";
 
-    /** The key of the configuration. e.g. design */
-    String ONLINE_HELP_NAME_DESIGN = "online.help.name.design";
-
     /** The key of the configuration. e.g. dashboard */
     String ONLINE_HELP_NAME_DASHBOARD = "online.help.name.dashboard";
 
@@ -2821,38 +2806,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getLoadControlMonitorIntervalAsInteger();
-
-    /**
-     * Get the value for the key 'supported.uploaded.js.extentions'. <br>
-     * The value is, e.g. js <br>
-     * comment: Supported JavaScript file extensions for upload.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getSupportedUploadedJsExtentions();
-
-    /**
-     * Get the value for the key 'supported.uploaded.css.extentions'. <br>
-     * The value is, e.g. css <br>
-     * comment: Supported CSS file extensions for upload.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getSupportedUploadedCssExtentions();
-
-    /**
-     * Get the value for the key 'supported.uploaded.media.extentions'. <br>
-     * The value is, e.g. jpg,jpeg,gif,png,swf <br>
-     * comment: Supported media file extensions for upload.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getSupportedUploadedMediaExtentions();
-
-    /**
-     * Get the value for the key 'supported.uploaded.files'. <br>
-     * The value is, e.g. license.properties <br>
-     * comment: Supported files for upload.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getSupportedUploadedFiles();
 
     /**
      * Get the value for the key 'supported.languages'. <br>
@@ -8657,14 +8610,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameGroup();
 
     /**
-     * Get the value for the key 'online.help.name.design'. <br>
-     * The value is, e.g. design <br>
-     * comment: Online help key for design.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getOnlineHelpNameDesign();
-
-    /**
      * Get the value for the key 'online.help.name.dashboard'. <br>
      * The value is, e.g. dashboard <br>
      * comment: Online help key for dashboard.
@@ -10743,22 +10688,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getLoadControlMonitorIntervalAsInteger() {
             return getAsInteger(FessConfig.LOAD_CONTROL_MONITOR_INTERVAL);
-        }
-
-        public String getSupportedUploadedJsExtentions() {
-            return get(FessConfig.SUPPORTED_UPLOADED_JS_EXTENTIONS);
-        }
-
-        public String getSupportedUploadedCssExtentions() {
-            return get(FessConfig.SUPPORTED_UPLOADED_CSS_EXTENTIONS);
-        }
-
-        public String getSupportedUploadedMediaExtentions() {
-            return get(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS);
-        }
-
-        public String getSupportedUploadedFiles() {
-            return get(FessConfig.SUPPORTED_UPLOADED_FILES);
         }
 
         public String getSupportedLanguages() {
@@ -13489,10 +13418,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_GROUP);
         }
 
-        public String getOnlineHelpNameDesign() {
-            return get(FessConfig.ONLINE_HELP_NAME_DESIGN);
-        }
-
         public String getOnlineHelpNameDashboard() {
             return get(FessConfig.ONLINE_HELP_NAME_DASHBOARD);
         }
@@ -14427,10 +14352,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.WEB_LOAD_CONTROL, "100");
             defaultMap.put(FessConfig.API_LOAD_CONTROL, "100");
             defaultMap.put(FessConfig.LOAD_CONTROL_MONITOR_INTERVAL, "1");
-            defaultMap.put(FessConfig.SUPPORTED_UPLOADED_JS_EXTENTIONS, "js");
-            defaultMap.put(FessConfig.SUPPORTED_UPLOADED_CSS_EXTENTIONS, "css");
-            defaultMap.put(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS, "jpg,jpeg,gif,png,swf");
-            defaultMap.put(FessConfig.SUPPORTED_UPLOADED_FILES, "license.properties");
             defaultMap.put(FessConfig.SUPPORTED_LANGUAGES,
                     "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_LENGTH, "60");
@@ -14878,7 +14799,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SYSTEMINFO, "systeminfo");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_USER, "user");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_GROUP, "group");
-            defaultMap.put(FessConfig.ONLINE_HELP_NAME_DESIGN, "design");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DASHBOARD, "dashboard");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_WEBAUTH, "webauth");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_FILECONFIG, "fileconfig");

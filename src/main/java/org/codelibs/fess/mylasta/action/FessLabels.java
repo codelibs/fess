@@ -155,9 +155,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Parameters */
     public static final String LABELS_PARAMETERS = "{labels.parameters}";
 
-    /** The key of the message: File to Upload */
-    public static final String LABELS_DESIGN_FILE = "{labels.designFile}";
-
     /** The key of the message: Bulk File */
     public static final String LABELS_BULK_FILE = "{labels.bulkFile}";
 
@@ -178,9 +175,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Default Label */
     public static final String LABELS_DEFAULT_LABEL_VALUE = "{labels.defaultLabelValue}";
-
-    /** The key of the message: File Name */
-    public static final String LABELS_DESIGN_FILE_NAME = "{labels.designFileName}";
 
     /** The key of the message: Check Last Modified */
     public static final String LABELS_INCREMENTAL_CRAWLING = "{labels.incrementalCrawling}";
@@ -475,9 +469,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Dashboard */
     public static final String LABELS_menu_dashboard_config = "{labels.menu_dashboard_config}";
-
-    /** The key of the message: Page Design */
-    public static final String LABELS_menu_design = "{labels.menu_design}";
 
     /** The key of the message: Dictionary */
     public static final String LABELS_menu_dict = "{labels.menu_dict}";
@@ -1814,47 +1805,8 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Key Match */
     public static final String LABELS_key_match_title_details = "{labels.key_match_title_details}";
 
-    /** The key of the message: Page Design */
-    public static final String LABELS_design_configuration = "{labels.design_configuration}";
-
-    /** The key of the message: File to Upload */
-    public static final String LABELS_design_title_file_upload = "{labels.design_title_file_upload}";
-
-    /** The key of the message: File Manager */
-    public static final String LABELS_design_title_file = "{labels.design_title_file}";
-
-    /** The key of the message: Upload File */
-    public static final String LABELS_design_file = "{labels.design_file}";
-
-    /** The key of the message: File Name (optional) */
-    public static final String LABELS_design_file_name = "{labels.design_file_name}";
-
-    /** The key of the message: Upload */
-    public static final String LABELS_design_button_upload = "{labels.design_button_upload}";
-
-    /** The key of the message: View Page File */
-    public static final String LABELS_design_file_title_edit = "{labels.design_file_title_edit}";
-
-    /** The key of the message: Edit */
-    public static final String LABELS_design_edit_button = "{labels.design_edit_button}";
-
-    /** The key of the message: Download */
-    public static final String LABELS_design_download_button = "{labels.design_download_button}";
-
     /** The key of the message: Delete */
     public static final String LABELS_design_delete_button = "{labels.design_delete_button}";
-
-    /** The key of the message: Use Default */
-    public static final String LABELS_design_use_default_button = "{labels.design_use_default_button}";
-
-    /** The key of the message: View Edit Page File */
-    public static final String LABELS_design_title_edit_content = "{labels.design_title_edit_content}";
-
-    /** The key of the message: Update */
-    public static final String LABELS_design_button_update = "{labels.design_button_update}";
-
-    /** The key of the message: Back */
-    public static final String LABELS_design_button_back = "{labels.design_button_back}";
 
     /** The key of the message: Data Store Crawling */
     public static final String LABELS_data_crawling_configuration = "{labels.data_crawling_configuration}";

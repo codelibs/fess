@@ -96,7 +96,6 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertEquals("{success.delete_doc_from_index}", FessMessages.SUCCESS_delete_doc_from_index);
         assertEquals("{success.crawling_info_delete_all}", FessMessages.SUCCESS_crawling_info_delete_all);
         assertEquals("{success.start_crawl_process}", FessMessages.SUCCESS_start_crawl_process);
-        assertEquals("{success.upload_design_file}", FessMessages.SUCCESS_upload_design_file);
         assertEquals("{success.crud_create_crud_table}", FessMessages.SUCCESS_crud_create_crud_table);
         assertEquals("{success.crud_update_crud_table}", FessMessages.SUCCESS_crud_update_crud_table);
         assertEquals("{success.crud_delete_crud_table}", FessMessages.SUCCESS_crud_delete_crud_table);
@@ -439,16 +438,6 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_addErrorsTargetFileDoesNotExist() {
-        String property = "testProperty";
-        String arg0 = "target.txt";
-        FessMessages result = messages.addErrorsTargetFileDoesNotExist(property, arg0);
-        assertNotNull(result);
-        assertSame(messages, result);
-        assertTrue(messages.hasMessageOf(property));
-    }
-
-    @Test
     public void test_addErrorsFailedToDeleteFile() {
         String property = "testProperty";
         String arg0 = "delete.txt";
@@ -518,26 +507,6 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test success message methods with parameters
-    @Test
-    public void test_addSuccessUploadDesignFile() {
-        String property = "testProperty";
-        String arg0 = "design.css";
-        FessMessages result = messages.addSuccessUploadDesignFile(property, arg0);
-        assertNotNull(result);
-        assertSame(messages, result);
-        assertTrue(messages.hasMessageOf(property));
-    }
-
-    @Test
-    public void test_addSuccessUpdateDesignJspFile() {
-        String property = "testProperty";
-        String arg0 = "index.jsp";
-        FessMessages result = messages.addSuccessUpdateDesignJspFile(property, arg0);
-        assertNotNull(result);
-        assertSame(messages, result);
-        assertTrue(messages.hasMessageOf(property));
-    }
-
     @Test
     public void test_addSuccessJobStarted() {
         String property = "testProperty";
