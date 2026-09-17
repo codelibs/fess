@@ -1,14 +1,16 @@
-// Bootstrap theme i18n loader. Resolves the runtime locale once at boot
-// using navigator.language with primary-subtag and English fallbacks per spec §4.6.
+// Bootstrap theme i18n loader. Resolves the runtime locale once at boot: the server's
+// ui_locale (?browser_lang=, session, Accept-Language — as on the JSP pages), then
+// navigator.language, each by exact or primary-subtag match, then English (spec §4.6).
 
 const SUPPORTED = ["de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW"];
 let messages = {};
 let locale = "en";
 
-export function pickLocale() {
-  const raw = (navigator.language || "en");
+/** The supported locale matching `tag` exactly or by its primary subtag, or null. */
+function matchLocale(tag) {
+  if (!tag) return null;
   // Case-insensitive exact match first (e.g. "pt-BR", "zh-CN").
-  const lower = raw.toLowerCase();
+  const lower = String(tag).toLowerCase();
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === lower) return s;
   }
@@ -17,11 +19,21 @@ export function pickLocale() {
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === primary) return s;
   }
-  return "en";
+  return null;
 }
 
-export async function init() {
-  locale = pickLocale();
+/**
+ * Pick the UI locale: `preferred` (ui_locale from /api/v2/ui/config) when it names a
+ * supported locale, otherwise navigator.language, otherwise English.
+ *
+ * @param {string} [preferred]
+ */
+export function pickLocale(preferred) {
+  return matchLocale(preferred) || matchLocale(navigator.language) || "en";
+}
+
+export async function init(preferred) {
+  locale = pickLocale(preferred);
   // Bundles load relative to this module, so they are found under any context path.
   try {
     const r = await fetch(new URL(`../i18n/messages.${locale}.json`, import.meta.url).href, { credentials: "same-origin" });

@@ -110,6 +110,23 @@ describe("init + state accessors", () => {
     expect(api.getCsrfToken()).toBe("abc");
   });
 
+  it("forwards ?browser_lang= from the page URL to /ui/config", async () => {
+    const fetchMock = installFetch(async () => envelope({ status: 0, csrf_token: "t" }));
+    window.history.pushState({}, "", "/?browser_lang=ja");
+    try {
+      await api.init();
+    } finally {
+      window.history.pushState({}, "", "/");
+    }
+    expect(fetchMock.mock.calls[0][0]).toBe("api/v2/ui/config?browser_lang=ja");
+  });
+
+  it("requests /ui/config without parameters when the page URL has no browser_lang", async () => {
+    const fetchMock = installFetch(async () => envelope({ status: 0, csrf_token: "t" }));
+    await api.init();
+    expect(fetchMock.mock.calls[0][0]).toBe("api/v2/ui/config");
+  });
+
   it("has null config and empty csrf before init", () => {
     expect(api.getConfig()).toBeNull();
     expect(api.getCsrfToken()).toBe("");

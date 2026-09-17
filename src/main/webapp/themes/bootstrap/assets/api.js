@@ -251,7 +251,10 @@ function dispatchFrame(frame, onEvent) {
 }
 
 export async function init() {
-  const env = await get("/ui/config");
+  // JSP parity: ?browser_lang= on the page picks the UI language. The server resolves it
+  // into ui_locale and remembers it in the session.
+  const browserLang = new URLSearchParams(location.search).get("browser_lang");
+  const env = await get("/ui/config", browserLang ? { browser_lang: browserLang } : undefined);
   config = env;            // entire envelope, callers read fields directly
   csrfToken = env.csrf_token || "";
 }

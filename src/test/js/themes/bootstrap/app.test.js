@@ -428,6 +428,13 @@ describe("main", () => {
     expect(router.dispatch).toHaveBeenCalledTimes(1);
   });
 
+  it("passes the server's ui_locale to i18n", async () => {
+    mountFullDom();
+    api.getConfig.mockReturnValue({ features: {}, ui_locale: "ja" });
+    await main();
+    expect(i18n.init).toHaveBeenCalledWith("ja");
+  });
+
   it("renders EOL + dev-mode warnings and reveals the chat nav item from config", async () => {
     mountFullDom();
     api.getConfig.mockReturnValue({
