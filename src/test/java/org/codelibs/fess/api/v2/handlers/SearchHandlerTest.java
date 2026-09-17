@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
@@ -411,6 +412,100 @@ public class SearchHandlerTest extends UnitFessTestCase {
         assertTrue(body.contains("\"partial\":true"), body);
         assertTrue(body.contains("\"timed_out\":false"), body);
         assertTrue(body.contains("\"shard_failed\":true"), body);
+    }
+
+    @Test
+    public void test_search_reportsThePermissionState() throws Exception {
+        registerSearchStubs();
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(FessUser.PermissionState.PENDING)));
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(body.contains("\"permission_state\":\"PENDING\""), body);
+    }
+
+    @Test
+    public void test_search_guestIsResolved() throws Exception {
+        registerSearchStubs();
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.empty();
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(body.contains("\"permission_state\":\"RESOLVED\""), body);
+    }
+
+    private static void registerSearchStubs() {
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                data.setDocumentItems(List.of());
+            }
+        }, "searchHelper");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return new String[0];
+            }
+        }, "relatedQueryHelper");
+        ComponentUtil.register(new RelatedContentHelper() {
+            @Override
+            public String[] getRelatedContents(final String query) {
+                return new String[0];
+            }
+        }, "relatedContentHelper");
+    }
+
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+        private final PermissionState state;
+
+        StubFessUser(final PermissionState state) {
+            this.state = state;
+        }
+
+        @Override
+        public String getName() {
+            return "frank";
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
+
+        @Override
+        public PermissionState getPermissionState() {
+            return state;
+        }
     }
 
     /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */

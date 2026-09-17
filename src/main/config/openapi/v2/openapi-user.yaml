@@ -1179,6 +1179,13 @@ components:
                 partial: { type: boolean }
                 timed_out: { type: boolean }
                 shard_failed: { type: boolean }
+                permission_state:
+                  type: string
+                  enum: [RESOLVED, PENDING, FAILED]
+                  description: |-
+                    How far the caller's group and role permissions have got.
+                    `PENDING` or `FAILED` means the results may miss documents
+                    the user should see. `RESOLVED` for guests.
                 search_query: { type: string }
                 requested_time: { type: integer, format: int64 }
                 related_query:

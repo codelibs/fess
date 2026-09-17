@@ -33,6 +33,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -104,7 +105,13 @@ public class SearchHandler {
             final SearchRenderData data = new SearchRenderData();
             final V2JsonRequestParams params = new V2JsonRequestParams(request, fessConfig);
             searchHelper.search(params, data, OptionalThing.empty());
-            ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, buildPayload(params.getQuery(), data));
+            final Map<String, Object> payload = buildPayload(params.getQuery(), data);
+            // Evaluated per search, like the JSP page's warning (FessSearchAction.hookBefore): a user
+            // whose group and role permissions are still loading or failed sees fewer results.
+            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
+            payload.put("permission_state",
+                    ComponentUtil.getV2UserPayloads().permissionState(userBean.isPresent() ? userBean.get() : null));
+            ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
         } catch (final InvalidRequestParameterException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final InvalidQueryException e) {
@@ -122,6 +129,21 @@ public class SearchHandler {
                             messages -> messages.addErrorsResultSizeExceeded(UserMessages.GLOBAL_PROPERTY_KEY));
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/search");
+        }
+    }
+
+    /**
+     * Resolves the logged-in user. A seam so tests supply a user without the login subsystem;
+     * a failed lookup counts as a guest.
+     *
+     * @return the saved user bean, or empty for a guest
+     */
+    protected OptionalThing<FessUserBean> getSavedUserBean() {
+        try {
+            return ComponentUtil.getFessLoginAssist().getSavedUserBean();
+        } catch (final Exception e) {
+            logger.debug("login subsystem lookup failed; treating the caller as a guest", e);
+            return OptionalThing.empty();
         }
     }
 
