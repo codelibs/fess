@@ -21,7 +21,12 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
   NetworkError: class extends Error {},
 }));
 
+vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
+  redirect: vi.fn(),
+}));
+
 import * as api from "../../../../main/webapp/themes/bootstrap/assets/api.js";
+import * as router from "../../../../main/webapp/themes/bootstrap/assets/router.js";
 import {
   isLoginLinkEnabled,
   buildUserDropdown,
@@ -29,6 +34,11 @@ import {
   rotateCsrf,
   probeMe,
   attach,
+  getCurrentUser,
+  isLoginRequired,
+  isLoginGateClosed,
+  promptLogin,
+  endSession,
 } from "../../../../main/webapp/themes/bootstrap/assets/auth.js";
 import { resetDom } from "../../helpers/dom.js";
 
@@ -302,5 +312,207 @@ describe("attach — login form submit", () => {
     const err = document.getElementById("login-error");
     expect(err.textContent).toBe("auth.error_invalid_credentials");
     expect(err.classList.contains("d-none")).toBe(false);
+  });
+});
+
+describe("login gate", () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<ul id="auth-controls"></ul>';
+  });
+
+  it("reads login_required from the config", () => {
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    expect(isLoginRequired()).toBe(true);
+    api.getConfig.mockReturnValue({ features: { login_required: true } });
+    expect(isLoginRequired()).toBe(false);
+    api.getConfig.mockReturnValue(null);
+    expect(isLoginRequired()).toBe(false);
+  });
+
+  it("closes only when login is required and the probe found a guest", async () => {
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    api.get.mockRejectedValue({ code: "auth_required" });
+    await probeMe();
+    expect(isLoginGateClosed()).toBe(true);
+    expect(getCurrentUser()).toBeNull();
+    api.getConfig.mockReturnValue({ login_required: false, features: {} });
+    expect(isLoginGateClosed()).toBe(false);
+  });
+
+  it("stays open for a logged-in user, whose user object is kept", async () => {
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    api.get.mockResolvedValue({ authenticated: true, user: { name: "Al", editable: true } });
+    await probeMe();
+    expect(isLoginGateClosed()).toBe(false);
+    expect(getCurrentUser()).toEqual({ name: "Al", editable: true });
+  });
+
+  it("stays open when the probe failed on the network, so a broken server cannot loop through login", async () => {
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    api.get.mockRejectedValue({ code: "auth_required" });
+    await probeMe(); // a confirmed guest first
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    api.get.mockRejectedValue({ httpStatus: 503 });
+    await probeMe();
+    warn.mockRestore();
+    expect(isLoginGateClosed()).toBe(false);
+  });
+});
+
+describe("promptLogin", () => {
+  const MODAL = `
+    <div id="login-modal">
+      <button type="button" id="login-close" data-bs-dismiss="modal"></button>
+      <button type="button" id="login-cancel" data-bs-dismiss="modal"></button>
+    </div>`;
+  let show;
+  beforeEach(() => {
+    show = vi.fn();
+    vi.stubGlobal("bootstrap", { Modal: { getOrCreateInstance: vi.fn(() => ({ show, hide: vi.fn() })) } });
+  });
+
+  it("sends the user to the SSO login when SSO is served", () => {
+    document.body.innerHTML = MODAL;
+    api.getConfig.mockReturnValue({ login_required: true, features: { sso_enabled: true, login_link: false } });
+    promptLogin();
+    expect(router.redirect).toHaveBeenCalledWith("sso/");
+    expect(show).not.toHaveBeenCalled();
+  });
+
+  it("opens a modal without close controls while login is required", () => {
+    document.body.innerHTML = MODAL;
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    promptLogin();
+    expect(show).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("login-close").classList.contains("d-none")).toBe(true);
+    expect(document.getElementById("login-cancel").classList.contains("d-none")).toBe(true);
+  });
+
+  it("opens a modal that can be closed when login is optional", () => {
+    document.body.innerHTML = MODAL;
+    api.getConfig.mockReturnValue({ features: {} });
+    promptLogin();
+    expect(show).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("login-cancel").classList.contains("d-none")).toBe(false);
+    expect(router.redirect).not.toHaveBeenCalled();
+  });
+});
+
+describe("attach — locked login modal", () => {
+  const FIXTURE = `
+    <ul id="auth-controls"></ul>
+    <div id="login-modal">
+      <form id="login-form">
+        <button type="button" id="login-cancel" data-bs-dismiss="modal"></button>
+        <input id="login-username" value="bob">
+        <input id="login-password" value="pw">
+        <div id="login-error" class="d-none"></div>
+      </form>
+    </div>`;
+  let hide;
+  const hideEvent = () => {
+    const ev = new Event("hide.bs.modal", { cancelable: true });
+    document.getElementById("login-modal").dispatchEvent(ev);
+    return ev;
+  };
+
+  beforeEach(() => {
+    hide = vi.fn();
+    vi.stubGlobal("bootstrap", { Modal: { getOrCreateInstance: vi.fn(() => ({ show: vi.fn(), hide })) } });
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    api.get.mockRejectedValue({ code: "auth_required" });
+  });
+
+  it("refuses to close while login is required, and closes after a login", async () => {
+    document.body.innerHTML = FIXTURE;
+    await attach();
+    promptLogin();
+    expect(hideEvent().defaultPrevented).toBe(true);
+
+    api.post.mockResolvedValue({ user: { name: "Bob" }, csrf_token: "Z" });
+    document.getElementById("login-form").dispatchEvent(new Event("submit"));
+    await flush();
+
+    expect(hide).toHaveBeenCalled();
+    expect(document.getElementById("login-cancel").classList.contains("d-none")).toBe(false);
+    expect(hideEvent().defaultPrevented).toBe(false);
+  });
+});
+
+describe("endSession", () => {
+  it("shows the guest login link and takes a CSRF token for the new session", async () => {
+    document.body.innerHTML = '<ul id="auth-controls"></ul>';
+    api.getConfig.mockReturnValue({ login_required: true, features: {} });
+    api.get.mockResolvedValueOnce({ authenticated: true, user: { name: "Al" } });
+    await probeMe();
+    api.get.mockResolvedValueOnce({ csrf_token: "fresh" });
+
+    await endSession();
+
+    expect(api.setAuthenticated).toHaveBeenLastCalledWith(false);
+    expect(document.getElementById("login-btn")).not.toBeNull();
+    expect(api.setCsrfToken).toHaveBeenCalledWith("fresh");
+    expect(getCurrentUser()).toBeNull();
+    expect(isLoginGateClosed()).toBe(true);
+  });
+});
+
+describe("logout", () => {
+  /**
+   * Log in, click logout, and return the fess:auth:logout event (null when none was sent)
+   * and the order in which the event and router.redirect happened.
+   */
+  async function logInThenLogOut(logoutEnv) {
+    document.body.innerHTML = '<ul id="auth-controls"></ul>';
+    api.getConfig.mockReturnValue({ features: {} });
+    api.get.mockResolvedValueOnce({ authenticated: true, user: { name: "Al" } });
+    await probeMe();
+    api.post.mockResolvedValue(logoutEnv);
+    const order = [];
+    let event = null;
+    const onLogout = (ev) => { event = ev; order.push("logout"); };
+    router.redirect.mockImplementation(() => { order.push("redirect"); });
+    document.addEventListener("fess:auth:logout", onLogout);
+    try {
+      document.getElementById("logout-btn").click();
+      await flush();
+    } finally {
+      document.removeEventListener("fess:auth:logout", onLogout);
+    }
+    return { event, order };
+  }
+
+  it("continues to the identity provider's logout URL after announcing a logout that redirects", async () => {
+    const { event, order } = await logInThenLogOut({ ok: true, csrf_token: "t", redirect_url: "https://idp.example.com/logout?id=1" });
+    expect(event).not.toBeNull();
+    expect(event.detail.redirecting).toBe(true);
+    expect(router.redirect).toHaveBeenCalledTimes(1);
+    expect(router.redirect).toHaveBeenCalledWith("https://idp.example.com/logout?id=1");
+    expect(order).toEqual(["logout", "redirect"]);
+  });
+
+  it("does not follow a redirect_url that is not http(s)", async () => {
+    const { event, order } = await logInThenLogOut({ ok: true, csrf_token: "t", redirect_url: "javascript:alert(1)" });
+    expect(event).not.toBeNull();
+    expect(event.detail.redirecting).toBe(false);
+    expect(router.redirect).not.toHaveBeenCalled();
+    expect(order).toEqual(["logout"]);
+  });
+
+  it("does not follow an http(s) redirect_url that is not a valid URL", async () => {
+    const { event, order } = await logInThenLogOut({ ok: true, csrf_token: "t", redirect_url: "https://" });
+    expect(event).not.toBeNull();
+    expect(event.detail.redirecting).toBe(false);
+    expect(router.redirect).not.toHaveBeenCalled();
+    expect(order).toEqual(["logout"]);
+  });
+
+  it("stays on the page without a redirect_url", async () => {
+    const { event, order } = await logInThenLogOut({ ok: true, csrf_token: "t" });
+    expect(event).not.toBeNull();
+    expect(event.detail.redirecting).toBe(false);
+    expect(router.redirect).not.toHaveBeenCalled();
+    expect(order).toEqual(["logout"]);
+    expect(document.getElementById("login-btn")).not.toBeNull();
   });
 });

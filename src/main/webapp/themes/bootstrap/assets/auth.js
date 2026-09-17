@@ -1,6 +1,15 @@
 import * as api from "./api.js";
 import { sanitizeHtml } from "./format.js";
 import { t } from "./i18n.js";
+import * as router from "./router.js";
+
+// What the last /auth/me probe, login or logout established: "in", "out", or "unknown"
+// (before the probe, or when the probe failed on the network or the server).
+let authState = "unknown";
+// The logged-in user from /auth/me or /auth/login; null for a guest or an unknown state.
+let currentUser = null;
+// True while the login modal must stay open: login is required and nobody is logged in.
+let loginLocked = false;
 
 /**
  * Returns true when the login link should be shown.
@@ -10,6 +19,25 @@ import { t } from "./i18n.js";
 export function isLoginLinkEnabled() {
   const features = api.getConfig()?.features || {};
   return features.login_link !== false;
+}
+
+/** The logged-in user, or null for a guest or while the login state is unknown. */
+export function getCurrentUser() {
+  return currentUser;
+}
+
+/** True when Fess requires login for the search pages (login.required). */
+export function isLoginRequired() {
+  return api.getConfig()?.login_required === true;
+}
+
+/**
+ * True when the search pages must wait for a login: login is required and the auth probe
+ * confirmed a guest. An unknown state (the probe failed on the network or the server)
+ * keeps the gate open, so a broken server cannot bounce the user through login in a loop.
+ */
+export function isLoginGateClosed() {
+  return isLoginRequired() && authState === "out";
 }
 
 export async function probeMe() {
@@ -43,6 +71,7 @@ export async function probeMe() {
       const meta = document.getElementById("results-meta");
       if (meta) meta.textContent = t("error.network");
       // Do not call setLoggedOut() — auth state is unknown, not confirmed gone.
+      authState = "unknown";
       return null;
     }
     // All other errors: log and treat as logged out (preserve safety net).
@@ -168,6 +197,8 @@ export function buildLoginLink() {
 
 function setLoggedIn(user) {
   api.setAuthenticated(true);
+  authState = "in";
+  currentUser = user;
   const controls = document.getElementById("auth-controls");
   if (!controls) return;
 
@@ -191,13 +222,19 @@ function setLoggedIn(user) {
       try { logoutEnv = await api.post("/auth/logout", {}); } catch { /* server may have already invalidated */ }
       await rotateCsrf(logoutEnv);
       setLoggedOut();
-      document.dispatchEvent(new CustomEvent("fess:auth:logout"));
+      // JSP parity (LogoutAction): with SSO single logout, continue to the identity
+      // provider's logout URL. Only http(s) URLs are followed.
+      const redirectUrl = ssoLogoutUrl(logoutEnv);
+      document.dispatchEvent(new CustomEvent("fess:auth:logout", { detail: { redirecting: redirectUrl !== null } }));
+      if (redirectUrl) router.redirect(redirectUrl);
     });
   }
 }
 
 function setLoggedOut() {
   api.setAuthenticated(false);
+  authState = "out";
+  currentUser = null;
   const controls = document.getElementById("auth-controls");
   const existingDropdown = document.getElementById("user-dropdown");
   if (existingDropdown) existingDropdown.remove();
@@ -207,6 +244,64 @@ function setLoggedOut() {
   // Only show the login link when the login_link feature is enabled (D.3).
   if (isLoginLinkEnabled()) {
     controls.appendChild(buildLoginLink());
+  }
+}
+
+/**
+ * End the client side of a session the server already ended (a password change, an
+ * expired session): show the guest header and take a CSRF token for the new session.
+ */
+export async function endSession() {
+  setLoggedOut();
+  await rotateCsrf();
+}
+
+/**
+ * Ask the user to log in. When SSO is served, go to the SSO login (JSP parity:
+ * FessSearchAction.redirectToLogin sends the user to /sso/). Otherwise open the login
+ * modal; while login is required it cannot be closed.
+ */
+export function promptLogin() {
+  if (api.getConfig()?.features?.sso_enabled) {
+    router.redirect("sso/");
+    return;
+  }
+  const modal = document.getElementById("login-modal");
+  if (!modal) return;
+  setLoginLocked(isLoginRequired());
+  if (!window.bootstrap || !bootstrap.Modal) {
+    console.warn("[fess] bootstrap not loaded; skipping modal show");
+    return;
+  }
+  bootstrap.Modal.getOrCreateInstance(modal).show();
+}
+
+/** The identity provider's logout URL to follow after logout, or null unless it is an absolute http(s) URL. */
+function ssoLogoutUrl(logoutEnv) {
+  const value = logoutEnv && logoutEnv.redirect_url;
+  if (typeof value !== "string") return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Lock the login modal (its close controls are hidden and attach() refuses hide.bs.modal)
+ * or unlock it.
+ */
+function setLoginLocked(locked) {
+  loginLocked = locked;
+  document.querySelectorAll('#login-modal [data-bs-dismiss="modal"]').forEach(el => el.classList.toggle("d-none", locked));
+}
+
+function hideLoginModal() {
+  if (!window.bootstrap || !bootstrap.Modal) {
+    console.warn("[fess] bootstrap not loaded; skipping modal hide");
+  } else {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).hide();
   }
 }
 
@@ -261,6 +356,13 @@ export function attach() {
   const modal = document.getElementById("login-modal");
   const form = document.getElementById("login-form");
   const err = document.getElementById("login-error");
+  if (modal) {
+    // A locked modal stays open. Bootstrap's hide() gives up when hide.bs.modal is
+    // prevented, which covers the backdrop, Escape and the close controls.
+    modal.addEventListener("hide.bs.modal", ev => {
+      if (loginLocked) ev.preventDefault();
+    });
+  }
   if (modal && form) {
     modal.addEventListener("hidden.bs.modal", () => {
       form.reset();
@@ -283,11 +385,8 @@ export function attach() {
         if (env.csrf_token) api.setCsrfToken(env.csrf_token);
         else await rotateCsrf();
         setLoggedIn(env.user || { username });
-        if (!window.bootstrap || !bootstrap.Modal) {
-          console.warn("[fess] bootstrap not loaded; skipping modal hide");
-        } else {
-          bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).hide();
-        }
+        setLoginLocked(false);
+        hideLoginModal();
         document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: env.user }));
       } catch (e) {
         // V2ErrorCode emits lowercase snake_case wire codes ("rate_limited").
