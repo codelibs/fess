@@ -37,11 +37,14 @@ import {
   refresh,
   attach,
   _state,
+  initialNum,
+  forgetNum,
 } from "../../../../main/webapp/themes/bootstrap/assets/search.js";
 
 beforeEach(() => {
   resetDom();
   vi.clearAllMocks();
+  sessionStorage.clear();
   api.getConfig.mockReturnValue(null);
   clearSearchState();
 });
@@ -1437,5 +1440,159 @@ describe("attach — wiring", () => {
 
   it("is idempotent — a second attach() call is a quiet no-op", () => {
     expect(() => attach()).not.toThrow();
+  });
+});
+
+describe("runFromUrl — default labels, sort and page size", () => {
+  const DEFAULTS_CFG = {
+    ...FULL_CFG,
+    default_label_values: ["lblA"],
+    default_sort: "last_modified.desc",
+    page_size_default: 20,
+    page_size_max: 100,
+    num_options: [10, 20, 50],
+  };
+  const searchParams = () => api.get.mock.calls.find((c) => c[0] === "/search")[1];
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue(DEFAULTS_CFG);
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+  });
+
+  it("applies the default labels and sort when the URL names none, and shows them in the drawer", async () => {
+    setLocation("/search?q=foo");
+    runFromUrl();
+    await settle();
+    expect(searchParams()["fields.label"]).toEqual(["lblA"]);
+    expect(searchParams().sort).toBe("last_modified.desc");
+    expect(document.getElementById("labelSearchOption").value).toBe("lblA");
+    expect(document.getElementById("sortSearchOption").value).toBe("last_modified.desc");
+  });
+
+  it("keeps the labels and sort the URL names", async () => {
+    setLocation("/search?q=foo&fields.label=lblB&sort=score.desc");
+    runFromUrl();
+    await settle();
+    expect(searchParams()["fields.label"]).toEqual(["lblB"]);
+    expect(searchParams().sort).toBe("score.desc");
+  });
+
+  it("adds no default label when the URL has an empty fields.label", async () => {
+    setLocation("/search?q=foo&fields.label=");
+    runFromUrl();
+    await settle();
+    expect(searchParams()).not.toHaveProperty(["fields.label"]);
+  });
+
+  it("narrows the search with a label facet click instead of adding the label to the defaults", async () => {
+    setLocation("/search?q=foo");
+    runFromUrl();
+    await settle();
+    api.get.mockClear();
+    const facetLink = [...document.querySelectorAll("#facet-body li.list-group-item a")]
+      .find((a) => a.textContent.startsWith("Label B"));
+    facetLink.click();
+    await settle();
+    // JSP parity (searchResults.jsp): a facet link adds ex_q=label:<value>, which ANDs.
+    expect(searchParams()["fields.label"]).toEqual(["lblA"]);
+    expect(searchParams()["ex_q"]).toContain("label:lblB");
+  });
+
+  it("does not turn an empty search into a search by applying defaults", () => {
+    setLocation("/search?sort=");
+    runFromUrl();
+    expect(navigate).toHaveBeenCalledWith("./", { replace: true });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it("remembers an explicit num for the tab and uses it when the URL has none", async () => {
+    setLocation("/search?q=a&num=50");
+    runFromUrl();
+    await settle();
+    expect(sessionStorage.getItem("fess.search.num")).toBe("50");
+    api.get.mockClear();
+    setLocation("/search?q=b");
+    runFromUrl();
+    await settle();
+    expect(searchParams().num).toBe(50);
+  });
+
+  it("starts from page_size_default when nothing is remembered", async () => {
+    setLocation("/search?q=a");
+    runFromUrl();
+    await settle();
+    expect(searchParams().num).toBe(20);
+  });
+});
+
+describe("initialNum / forgetNum", () => {
+  const CFG = { page_size_default: 20, page_size_max: 100, num_options: [10, 20, 50] };
+
+  it.each([
+    ["50", 50],   // an offered size
+    ["30", 20],   // rounded down to an offered size
+    ["500", 50],  // capped at page_size_max, then rounded down
+    ["5", 10],    // below every offered size → the smallest
+    ["abc", 20],  // unreadable → page_size_default
+    ["0", 20],    // not positive → page_size_default
+  ])("turns a remembered %s into %i", (stored, expected) => {
+    api.getConfig.mockReturnValue(CFG);
+    sessionStorage.setItem("fess.search.num", stored);
+    expect(initialNum()).toBe(expected);
+  });
+
+  it("caps a remembered size at page_size_max when no num options are offered", () => {
+    api.getConfig.mockReturnValue({ page_size_default: 20, page_size_max: 100 });
+    sessionStorage.setItem("fess.search.num", "300");
+    expect(initialNum()).toBe(100);
+  });
+
+  it("falls back to 10 without config", () => {
+    api.getConfig.mockReturnValue(null);
+    expect(initialNum()).toBe(10);
+  });
+
+  it("forgetNum() drops the remembered size", () => {
+    api.getConfig.mockReturnValue(CFG);
+    sessionStorage.setItem("fess.search.num", "50");
+    forgetNum();
+    expect(sessionStorage.getItem("fess.search.num")).toBeNull();
+    expect(initialNum()).toBe(20);
+  });
+});
+
+describe("clearSearchState — home defaults", () => {
+  it("pre-selects the default labels, sort and page size", () => {
+    api.getConfig.mockReturnValue({
+      ...FULL_CFG,
+      default_label_values: ["lblA"],
+      default_sort: "last_modified.desc",
+      page_size_default: 20,
+    });
+    mountBody(SEARCH_FIXTURE);
+    sessionStorage.setItem("fess.search.num", "50");
+
+    clearSearchState();
+
+    expect(_state.num).toBe(50);
+    expect(_state.sort).toBe("last_modified.desc");
+    expect(_state.fields).toEqual({ label: ["lblA"] });
+    expect(document.getElementById("numSearchOption").value).toBe("50");
+    expect(document.getElementById("sortSearchOption").value).toBe("last_modified.desc");
+    expect(document.getElementById("labelSearchOption").value).toBe("lblA");
+  });
+});
+
+describe("renderCurrentFilters — default page size", () => {
+  it("shows no page-size badge for page_size_default", async () => {
+    api.getConfig.mockReturnValue({ ...FULL_CFG, page_size_default: 20 });
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+    _state.q = "foo";
+    _state.num = 20;
+    await runSearch();
+    await settle();
+    expect(document.getElementById("current-filters").textContent).not.toContain("search.num_format");
   });
 });
