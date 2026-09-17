@@ -21,7 +21,11 @@ import org.lastaflute.web.response.ActionResponse;
 
 /**
  * OSDD (OpenSearch Description Document) action.
+ *
+ * @deprecated Kept for compatibility with existing clients and themes that link it; slated for
+ *             removal in a later release.
  */
+@Deprecated(since = "15.9")
 public class OsddAction extends FessSearchAction {
 
     /**
