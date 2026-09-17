@@ -9,15 +9,25 @@ import { resetDom } from "../../helpers/dom.js";
 // vi.mock is hoisted, so the paths must be string literals (not the consts below).
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({ post: vi.fn() }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({ navigate: vi.fn() }));
+vi.mock("../../../../main/webapp/themes/bootstrap/assets/auth.js", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getCurrentUser: vi.fn(),
+  promptLogin: vi.fn(),
+  endSession: vi.fn(),
+}));
 
 import * as api from "../../../../main/webapp/themes/bootstrap/assets/api.js";
 import * as router from "../../../../main/webapp/themes/bootstrap/assets/router.js";
+import * as auth from "../../../../main/webapp/themes/bootstrap/assets/auth.js";
 import { attach } from "../../../../main/webapp/themes/bootstrap/assets/profile.js";
 
 beforeEach(() => {
   resetDom();
   api.post.mockReset();
   router.navigate.mockReset();
+  auth.getCurrentUser.mockReset().mockReturnValue({ name: "Al", editable: true });
+  auth.promptLogin.mockReset();
+  auth.endSession.mockReset().mockResolvedValue(undefined);
 });
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -56,6 +66,24 @@ describe("attach (structure)", () => {
 
     expect(document.getElementById("profile-error").classList.contains("d-none")).toBe(true);
     expect(document.getElementById("profile-success").classList.contains("d-none")).toBe(true);
+  });
+});
+
+describe("attach (who may change a password)", () => {
+  it("asks a guest to log in instead of showing the form", () => {
+    auth.getCurrentUser.mockReturnValue(null);
+    mountProfile();
+    expect(document.getElementById("password-form")).toBeNull();
+    expect(document.querySelector("#profile-view .alert").textContent).toBe("flash.login_required");
+    expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends a user whose password is managed elsewhere back home", () => {
+    auth.getCurrentUser.mockReturnValue({ name: "ldap", editable: false });
+    mountProfile();
+    expect(document.getElementById("password-form")).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith("./", { replace: true });
+    expect(auth.promptLogin).not.toHaveBeenCalled();
   });
 });
 
@@ -100,17 +128,43 @@ describe("attach (submit)", () => {
     expect(document.getElementById("new-password").value).toBe(""); // form.reset()
   });
 
-  it("navigates home 2s after a re_login_required success", async () => {
-    vi.useFakeTimers();
+  it("after a re_login_required success ends the session and asks for a login, keeping the message", async () => {
     api.post.mockResolvedValue({ re_login_required: true });
     mountProfile();
     setPasswords("current", "newpass1", "newpass1");
 
     submitForm();
-    await vi.advanceTimersByTimeAsync(2000); // flush microtasks, then fire the 2s timer
 
-    expect(router.navigate).toHaveBeenCalledTimes(1);
-    expect(router.navigate).toHaveBeenCalledWith("./");
+    await vi.waitFor(() => expect(auth.promptLogin).toHaveBeenCalledTimes(1));
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("profile-success").textContent).toBe("profile.success");
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it("treats a 401 without a reason as an ended session", async () => {
+    api.post.mockRejectedValue({ code: "auth_required" });
+    mountProfile();
+    setPasswords("current", "newpass1", "newpass1");
+
+    submitForm();
+
+    await vi.waitFor(() => expect(auth.promptLogin).toHaveBeenCalledTimes(1));
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("profile-error").textContent).toBe("flash.login_required");
+  });
+
+  it("keeps the session when only the current password is wrong", async () => {
+    api.post.mockRejectedValue({ code: "auth_required", details: { reason: "invalid_current_password" } });
+    mountProfile();
+    setPasswords("wrong", "newpass1", "newpass1");
+
+    submitForm();
+
+    const err = document.getElementById("profile-error");
+    await vi.waitFor(() => expect(err.classList.contains("d-none")).toBe(false));
+    expect(err.textContent).toBe("profile.error_wrong_current");
+    expect(auth.endSession).not.toHaveBeenCalled();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
   });
 
   it("shows the localized API error when the request rejects", async () => {

@@ -389,9 +389,20 @@ export function localizePasswordError(err) {
     default:
       break;
   }
-  // Fallbacks by HTTP/code when no specific reason is present.
-  if (code === "auth_required" || code === "AUTH_REQUIRED" || httpStatus === 401) return t("profile.error_wrong_current");
+  // Fallbacks by HTTP/code when no specific reason is present. auth_required without a
+  // reason means the session is gone (a wrong current password carries a reason).
+  if (code === "auth_required" || code === "AUTH_REQUIRED" || httpStatus === 401) return t("flash.login_required");
   return t("error.server");
+}
+
+/**
+ * True when POST /auth/password failed because the session is gone: auth_required (401)
+ * without a reason. A wrong current password is auth_required too, but carries the reason
+ * invalid_current_password.
+ */
+export function isSessionGone(err) {
+  if (!err || (err.details && err.details.reason)) return false;
+  return err.code === "auth_required" || err.code === "AUTH_REQUIRED" || err.httpStatus === 401;
 }
 
 export function attach() {

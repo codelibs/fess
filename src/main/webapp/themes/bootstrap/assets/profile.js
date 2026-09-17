@@ -3,7 +3,7 @@
 // All DOM construction uses createElement/textContent/setAttribute — no innerHTML.
 
 import * as api from "./api.js";
-import { localizePasswordError } from "./auth.js";
+import { endSession, getCurrentUser, isSessionGone, localizePasswordError, promptLogin } from "./auth.js";
 import { t } from "./i18n.js";
 import * as router from "./router.js";
 
@@ -76,6 +76,23 @@ export function attach() {
 
   // Clear previous content without innerHTML assignment.
   while (container.firstChild) container.removeChild(container.firstChild);
+
+  // JSP parity (ProfileAction): the page is for logged-in users. Ask a guest to log in;
+  // app.js runs this route again after the login.
+  const user = getCurrentUser();
+  if (!user) {
+    const notice = el("div", { className: "alert alert-info mt-4", textContent: t("flash.login_required") });
+    notice.setAttribute("role", "status");
+    container.appendChild(notice);
+    promptLogin();
+    return;
+  }
+  // A password managed elsewhere (e.g. LDAP or SSO) cannot be changed here. The header
+  // hides the link for such users, so send a direct visit home.
+  if (user.editable === false) {
+    router.navigate("./", { replace: true });
+    return;
+  }
 
   // ── Centered column layout ────────────────────────────────────────────────
   // #profile-view already has class="container my-4"; add top margin so the card
@@ -185,22 +202,22 @@ export function attach() {
         confirm_password: confirmPw
       });
 
-      // M-3: session has been invalidated server-side. The SPA must re-authenticate
-      // to obtain a fresh session and CSRF token.
+      successDiv.textContent = t("profile.success");
+      successDiv.classList.remove("d-none");
+      form.reset();
+      // M-3: the server ended the session. Show the guest header, take a CSRF token for the
+      // new session and ask for a login with the new password; the success message stays.
       if (env.re_login_required) {
-        successDiv.textContent = t("profile.success");
-        successDiv.classList.remove("d-none");
-        form.reset();
-        // Redirect to login after a brief pause so the user sees the success message.
-        setTimeout(() => router.navigate("./"), 2000);
-      } else {
-        successDiv.textContent = t("profile.success");
-        successDiv.classList.remove("d-none");
-        form.reset();
+        await endSession();
+        promptLogin();
       }
     } catch (err) {
       errorDiv.textContent = localizePasswordError(err);
       errorDiv.classList.remove("d-none");
+      if (isSessionGone(err)) {
+        await endSession();
+        promptLogin();
+      }
     } finally {
       submitBtn.disabled = false;
     }

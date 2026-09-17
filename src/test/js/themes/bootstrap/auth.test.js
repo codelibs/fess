@@ -39,6 +39,7 @@ import {
   isLoginGateClosed,
   promptLogin,
   endSession,
+  isSessionGone,
   localizePasswordError,
 } from "../../../../main/webapp/themes/bootstrap/assets/auth.js";
 import { resetDom } from "../../helpers/dom.js";
@@ -542,14 +543,30 @@ describe("localizePasswordError", () => {
     [{ details: { reason: "new_password_required" } }, "profile.error_blank_password"],
     [{ details: { reason: "current_password_required" } }, "profile.error_blank_password"],
     [{ details: { reason: "password_mismatch" } }, "profile.error_mismatch"],
-    [{ code: "AUTH_REQUIRED" }, "profile.error_wrong_current"],
+    // Without a reason, auth_required means the session is gone: the user must log in again.
+    [{ code: "AUTH_REQUIRED" }, "flash.login_required"],
     // Same wire-code contract for V2ErrorCode.AUTH_REQUIRED → "auth_required".
-    [{ code: "auth_required" }, "profile.error_wrong_current"],
-    [{ httpStatus: 401 }, "profile.error_wrong_current"],
+    [{ code: "auth_required" }, "flash.login_required"],
+    [{ httpStatus: 401 }, "flash.login_required"],
+    [{ code: "auth_required", details: { reason: "invalid_current_password" } }, "profile.error_wrong_current"],
     [{ code: "SOMETHING_UNMAPPED" }, "error.server"],
     [null, "error.server"],
   ])("%o → %s", (err, key) => {
     expect(localizePasswordError(err)).toBe(key);
+  });
+});
+
+describe("isSessionGone", () => {
+  it.each([
+    [{ code: "auth_required" }, true],
+    [{ code: "AUTH_REQUIRED" }, true],
+    [{ httpStatus: 401 }, true],
+    [{ code: "auth_required", details: { reason: "invalid_current_password" } }, false],
+    [{ code: "rate_limited" }, false],
+    [{ name: "NetworkError" }, false],
+    [null, false],
+  ])("%o → %s", (err, expected) => {
+    expect(isSessionGone(err)).toBe(expected);
   });
 });
 
