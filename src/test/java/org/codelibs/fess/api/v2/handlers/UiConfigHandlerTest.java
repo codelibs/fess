@@ -35,6 +35,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.LastaWebKey;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -620,6 +621,76 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_uiLocale_browserLangWinsAndIsRemembered() throws Exception {
+        final StubSession session = new StubSession();
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session)
+                .withParameter("browser_lang", "zh_TW")
+                .withLocale(java.util.Locale.ENGLISH), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"zh-TW\""), res.body());
+        assertEquals(java.util.Locale.TAIWAN, session.getAttribute(LastaWebKey.USER_LOCALE_KEY));
+    }
+
+    @Test
+    public void test_uiLocale_sessionLocaleBeforeAcceptLanguage() throws Exception {
+        final StubSession session = new StubSession();
+        session.setAttribute(LastaWebKey.USER_LOCALE_KEY, java.util.Locale.JAPANESE);
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session).withLocale(java.util.Locale.ENGLISH),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"ja\""), res.body());
+    }
+
+    @Test
+    public void test_uiLocale_acceptLanguageWhenNothingElse() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(
+                new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()).withLocale(java.util.Locale.of("pt", "BR")),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"pt-BR\""), res.body());
+    }
+
+    @Test
+    public void test_uiLocale_unparsableBrowserLangIsIgnored() throws Exception {
+        final StubSession session = new StubSession();
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session)
+                .withParameter("browser_lang", "not a locale")
+                .withLocale(java.util.Locale.ENGLISH), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"en\""), res.body());
+        assertNull(session.getAttribute(LastaWebKey.USER_LOCALE_KEY));
+    }
+
+    @Test
+    public void test_toUiLocaleTag() {
+        assertEquals("", UiConfigHandler.toUiLocaleTag(null));
+        assertEquals("", UiConfigHandler.toUiLocaleTag(java.util.Locale.ROOT));
+        assertEquals("zh-CN", UiConfigHandler.toUiLocaleTag(java.util.Locale.SIMPLIFIED_CHINESE));
+    }
+
+    @Test
+    public void test_labelOptions_filteredByTheRequestLocale() throws Exception {
+        final java.util.List<java.util.Locale> requested = new java.util.ArrayList<>();
+        ComponentUtil.register(new LabelTypeHelper() {
+            @Override
+            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
+                    final java.util.Locale requestLocale) {
+                requested.add(requestLocale);
+                return java.util.List.of();
+            }
+        }, "labelTypeHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(
+                new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()).withLocale(java.util.Locale.JAPANESE), res);
+        assertEquals(200, res.status, res.body());
+        assertEquals(java.util.List.of(java.util.Locale.JAPANESE), requested);
+    }
+
     private static class StubFessUser implements FessUser {
         private static final long serialVersionUID = 1L;
         private final String name;
@@ -856,6 +927,8 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();
         private HttpSession session;
+        private final Map<String, String> params = new HashMap<>();
+        private java.util.Locale locale = java.util.Locale.ROOT;
 
         StubRequest(final String method, final String uri) {
             this.method = method;
@@ -864,6 +937,16 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         StubRequest withSession(final HttpSession s) {
             this.session = s;
+            return this;
+        }
+
+        StubRequest withParameter(final String name, final String value) {
+            params.put(name, value);
+            return this;
+        }
+
+        StubRequest withLocale(final java.util.Locale l) {
+            this.locale = l;
             return this;
         }
 
@@ -1080,7 +1163,7 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getParameter(final String name) {
-            return null;
+            return params.get(name);
         }
 
         @Override
@@ -1135,12 +1218,12 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         @Override
         public java.util.Locale getLocale() {
-            return java.util.Locale.ROOT;
+            return locale;
         }
 
         @Override
         public Enumeration<java.util.Locale> getLocales() {
-            return Collections.enumeration(java.util.Collections.singleton(java.util.Locale.ROOT));
+            return Collections.enumeration(java.util.Collections.singleton(locale));
         }
 
         @Override

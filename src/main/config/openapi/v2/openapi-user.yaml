@@ -1377,6 +1377,7 @@ components:
                 - site_name
                 - login_required
                 - locales
+                - ui_locale
                 - default_label_values
                 - default_sort
                 - theme
@@ -1398,6 +1399,15 @@ components:
                 locales:
                   type: array
                   items: { type: string }
+                ui_locale:
+                  type: string
+                  description: |-
+                    BCP 47 tag of the display language the JSP pages would use:
+                    `?browser_lang=` (then remembered in the session), the session,
+                    then Accept-Language. Empty only when no locale can be
+                    determined; without Accept-Language the servlet container
+                    reports its default locale. Unlike `locales`, which lists the
+                    search languages.
                 default_label_values:
                   type: array
                   items: { type: string }
@@ -1526,7 +1536,9 @@ components:
                       label_key: { type: string }
                 label_options:
                   type: array
-                  description: Configured labels; empty when none are defined.
+                  description: |-
+                    Labels offered to the caller, filtered by the request locale and
+                    the caller's roles; empty when none.
                   items:
                     type: object
                     required: [value, name]
