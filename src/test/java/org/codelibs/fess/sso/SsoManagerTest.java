@@ -267,6 +267,41 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(expectedLogoutUrl, logoutUrl);
     }
 
+    @Test
+    public void test_isServed_withRegisteredAuthenticator() {
+        currentSsoType = "test";
+        ssoManager = new SsoManager() {
+            @Override
+            protected String getSsoType() {
+                return currentSsoType;
+            }
+
+            @Override
+            protected SsoAuthenticator getAuthenticator() {
+                return testAuthenticator;
+            }
+        };
+        assertTrue(ssoManager.isServed());
+    }
+
+    @Test
+    public void test_isServed_whenTheTypeHasNoAuthenticator() {
+        // sso.type is set but its fess-sso-* plugin is not installed: available() still says true.
+        currentSsoType = "saml";
+        ssoManager = newManager();
+        assertTrue(ssoManager.available());
+        assertFalse(ssoManager.isServed(), "no samlAuthenticator is registered here");
+    }
+
+    @Test
+    public void test_isServed_whenSsoIsNotConfigured() {
+        for (final String type : new String[] { Constants.NONE, "", null }) {
+            currentSsoType = type;
+            ssoManager = newManager();
+            assertFalse(ssoManager.isServed(), "type=" + type);
+        }
+    }
+
     // Test getAuthenticator() method
     @Test
     public void test_getAuthenticator_whenComponentExists() {

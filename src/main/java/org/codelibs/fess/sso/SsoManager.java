@@ -81,6 +81,21 @@ public class SsoManager {
     }
 
     /**
+     * Checks whether SSO login can actually be served: {@code sso.type} is configured and a
+     * component for it is registered.
+     *
+     * <p>{@link #available()} looks only at {@code sso.type}, so it stays true when the fess-sso-*
+     * plugin for that type is not installed. A search page that offers an SSO login has to tell
+     * the two apart; otherwise its link leads to {@code /sso/}, which sends the user straight back
+     * to the login page.</p>
+     *
+     * @return true if SSO is configured and a registered authenticator serves it
+     */
+    public boolean isServed() {
+        return available() && getAuthenticator() != null;
+    }
+
+    /**
      * Attempts to obtain login credentials using the configured SSO authenticator.
      *
      * @return The login credential from SSO authentication, or null if SSO is not available

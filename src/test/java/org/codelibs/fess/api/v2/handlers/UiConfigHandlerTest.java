@@ -422,6 +422,44 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_resolveLoginLink() {
+        final UiConfigHandler handler = new UiConfigHandler();
+        assertEquals("sso/", handler.resolveLoginLink(true, true));
+        assertEquals(Boolean.TRUE, handler.resolveLoginLink(true, false));
+        assertEquals(Boolean.FALSE, handler.resolveLoginLink(false, true));
+        assertEquals(Boolean.FALSE, handler.resolveLoginLink(false, false));
+    }
+
+    @Test
+    public void test_features_ssoServed_loginLinkPointsToSso() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler() {
+            @Override
+            protected boolean isSsoServed() {
+                return true;
+            }
+        }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"sso_enabled\":true"), res.body());
+        // login.link.enabled defaults to true.
+        assertTrue(res.body().contains("\"login_link\":\"sso/\""), res.body());
+    }
+
+    @Test
+    public void test_features_ssoNotServed_loginLinkStaysBoolean() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler() {
+            @Override
+            protected boolean isSsoServed() {
+                return false;
+            }
+        }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"sso_enabled\":false"), res.body());
+        assertTrue(res.body().contains("\"login_link\":true"), res.body());
+    }
+
     /**
      * rag_chat_enabled must be present as a boolean in the features map.
      * Mirrors the gate used by FessSearchAction#setupHtmlData (chatClient.isAvailable()).

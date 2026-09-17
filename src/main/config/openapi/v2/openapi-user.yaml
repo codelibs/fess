@@ -1428,6 +1428,7 @@ components:
                     - eol_link
                     - installation_link
                     - login_link
+                    - sso_enabled
                     - rag_chat_enabled
                   properties:
                     user_favorite: { type: boolean }
@@ -1459,8 +1460,20 @@ components:
                         Resolved installation guide URL. Empty string when it
                         cannot be resolved.
                     login_link:
+                      oneOf:
+                        - type: boolean
+                        - type: string
+                          enum: ['sso/']
+                      description: |-
+                        `"sso/"` (relative to the page's base URL) when SSO login is
+                        served and the login link is enabled: the link signs the user
+                        in through the identity provider. Otherwise whether the local
+                        login link is shown.
+                    sso_enabled:
                       type: boolean
-                      description: Whether the login link should be shown.
+                      description: |-
+                        `true` when `sso.type` is configured and the fess-sso-*
+                        plugin serving it is installed.
                     rag_chat_enabled:
                       type: boolean
                       description: Whether the RAG chat feature is available.

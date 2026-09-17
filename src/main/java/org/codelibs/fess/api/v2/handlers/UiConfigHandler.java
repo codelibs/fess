@@ -37,6 +37,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
@@ -127,6 +128,41 @@ public class UiConfigHandler {
         entry.put("value", value);
         entry.put("label_key", labelKey);
         list.add(entry);
+    }
+
+    /**
+     * Resolves {@code features.login_link}. When SSO is served the link goes to {@code sso/},
+     * which signs the user in through the identity provider; otherwise it stays the plain flag
+     * saying whether the local login link is shown.
+     *
+     * <p>The link is relative so it resolves against the page's base URL, which the static theme
+     * gets from {@code <base href>}; it works under any context path.</p>
+     *
+     * @param loginLinkEnabled whether {@code login.link.enabled} is on
+     * @param ssoEnabled whether SSO login is served
+     * @return {@code "sso/"}, or the boolean flag
+     */
+    Object resolveLoginLink(final boolean loginLinkEnabled, final boolean ssoEnabled) {
+        if (loginLinkEnabled && ssoEnabled) {
+            return "sso/";
+        }
+        return loginLinkEnabled;
+    }
+
+    /**
+     * Tells whether SSO login is served. A seam so tests decide it without installing an
+     * authenticator plugin.
+     *
+     * @return true if {@link SsoManager#isServed()} says so
+     */
+    protected boolean isSsoServed() {
+        try {
+            final SsoManager ssoManager = ComponentUtil.getSsoManager();
+            return ssoManager != null && ssoManager.isServed();
+        } catch (final Exception e) {
+            logger.debug("SSO availability could not be resolved; reporting it as not served", e);
+            return false;
+        }
     }
 
     /**
@@ -258,6 +294,7 @@ public class UiConfigHandler {
             } catch (final Exception ignored) {
                 // FessProp system-property store not accessible — default to true.
             }
+            final boolean ssoEnabled = isSsoServed();
 
             final Map<String, Object> features = new LinkedHashMap<>();
             features.put("user_favorite", userFavoriteEnabled);
@@ -276,7 +313,8 @@ public class UiConfigHandler {
             features.put("eol_link", eolLink);
             features.put("installation_link", installationLink);
             // B.2: login link availability flag.
-            features.put("login_link", loginLinkEnabled);
+            features.put("login_link", resolveLoginLink(loginLinkEnabled, ssoEnabled));
+            features.put("sso_enabled", ssoEnabled);
             // rag_chat_enabled: mirrors FessSearchAction#setupHtmlData chatClient.isAvailable()
             // so the static-theme SPA sees the same availability gate as the legacy JSP path.
             boolean ragChatEnabled = false;
