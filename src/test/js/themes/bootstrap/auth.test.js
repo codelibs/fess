@@ -89,22 +89,22 @@ describe("buildUserDropdown", () => {
   });
 
   it("includes the profile item unless editable === false", () => {
-    expect(buildUserDropdown({ name: "Al" }).querySelector('a[href="/profile"]')).not.toBeNull();
-    expect(buildUserDropdown({ name: "Al", editable: true }).querySelector('a[href="/profile"]')).not.toBeNull();
-    expect(buildUserDropdown({ name: "Al", editable: false }).querySelector('a[href="/profile"]')).toBeNull();
+    expect(buildUserDropdown({ name: "Al" }).querySelector('a[href="profile"]')).not.toBeNull();
+    expect(buildUserDropdown({ name: "Al", editable: true }).querySelector('a[href="profile"]')).not.toBeNull();
+    expect(buildUserDropdown({ name: "Al", editable: false }).querySelector('a[href="profile"]')).toBeNull();
   });
 
   it("includes the admin item only when admin === true", () => {
-    expect(buildUserDropdown({ name: "Al", admin: true }).querySelector('a[href="/admin/"]')).not.toBeNull();
+    expect(buildUserDropdown({ name: "Al", admin: true }).querySelector('a[href="admin/"]')).not.toBeNull();
     // Truthy-but-not-true values do not qualify (strict ===).
-    expect(buildUserDropdown({ name: "Al", admin: 1 }).querySelector('a[href="/admin/"]')).toBeNull();
-    expect(buildUserDropdown({ name: "Al" }).querySelector('a[href="/admin/"]')).toBeNull();
+    expect(buildUserDropdown({ name: "Al", admin: 1 }).querySelector('a[href="admin/"]')).toBeNull();
+    expect(buildUserDropdown({ name: "Al" }).querySelector('a[href="admin/"]')).toBeNull();
   });
 
   it("labels items with the exact i18n keys", () => {
     const w = buildUserDropdown({ name: "Al", admin: true });
-    expect(w.querySelector('a[href="/profile"]').textContent).toBe("nav.profile");
-    expect(w.querySelector('a[href="/admin/"]').textContent).toBe("nav.administration");
+    expect(w.querySelector('a[href="profile"]').textContent).toBe("nav.profile");
+    expect(w.querySelector('a[href="admin/"]').textContent).toBe("nav.administration");
     expect(w.querySelector("#logout-btn").textContent).toBe("auth.logout");
   });
 });
@@ -123,7 +123,7 @@ describe("buildLoginLink", () => {
   it("opens the login modal when SSO is not fully configured", () => {
     api.getConfig.mockReturnValue({});
     const a = buildLoginLink();
-    expect(a.getAttribute("href")).toBe("/login");
+    expect(a.getAttribute("href")).toBe("login");
     expect(a.getAttribute("data-bs-toggle")).toBe("modal");
     expect(a.getAttribute("data-bs-target")).toBe("#login-modal");
     expect(a.querySelector("span").textContent).toBe("auth.login");
@@ -132,7 +132,7 @@ describe("buildLoginLink", () => {
   it("opens the modal when sso_enabled is set but login_link is missing", () => {
     api.getConfig.mockReturnValue({ features: { sso_enabled: true } });
     const a = buildLoginLink();
-    expect(a.getAttribute("href")).toBe("/login");
+    expect(a.getAttribute("href")).toBe("login");
     expect(a.getAttribute("data-bs-target")).toBe("#login-modal");
   });
 });
@@ -172,7 +172,7 @@ describe("probeMe", () => {
     expect(api.setAuthenticated).toHaveBeenCalledWith(true);
     expect(document.getElementById("user-dropdown")).not.toBeNull();
     expect(document.getElementById("userMenu")).not.toBeNull();
-    expect(document.querySelector('#user-dropdown a[href="/admin/"]')).not.toBeNull();
+    expect(document.querySelector('#user-dropdown a[href="admin/"]')).not.toBeNull();
   });
 
   it("treats AUTH_REQUIRED as logged out and shows the login link", async () => {

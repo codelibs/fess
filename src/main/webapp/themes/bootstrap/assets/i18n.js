@@ -22,15 +22,16 @@ export function pickLocale() {
 
 export async function init() {
   locale = pickLocale();
+  // Bundles load relative to this module, so they are found under any context path.
   try {
-    const r = await fetch(`/themes/bootstrap/i18n/messages.${locale}.json`, { credentials: "same-origin" });
+    const r = await fetch(new URL(`../i18n/messages.${locale}.json`, import.meta.url).href, { credentials: "same-origin" });
     if (!r.ok) throw new Error("i18n bundle " + locale + " HTTP " + r.status);
     messages = await r.json();
   } catch (e) {
     // Fall back to English on any failure (spec §4.6).
     if (locale !== "en") {
       try {
-        const r2 = await fetch("/themes/bootstrap/i18n/messages.en.json", { credentials: "same-origin" });
+        const r2 = await fetch(new URL("../i18n/messages.en.json", import.meta.url).href, { credentials: "same-origin" });
         messages = await r2.json();
         locale = "en";
       } catch { messages = {}; }

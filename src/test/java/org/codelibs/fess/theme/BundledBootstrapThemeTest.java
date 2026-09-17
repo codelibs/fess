@@ -164,9 +164,30 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_searchJs_thumbnailUsesThumbnailEndpoint() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("/thumbnail/?docId="));
+        assertTrue(js.contains("\"thumbnail/?docId=\""));
         assertTrue(js.contains("&queryId="));
         assertFalse(js.contains("safeHref(d.thumbnail)"));
+    }
+
+    /**
+     * Fess inserts {@code <base href="{context path}/">} into index.html. A root-absolute URL
+     * skips the context path, so the theme must use URLs relative to that base.
+     */
+    @Test
+    public void test_theme_usesUrlsRelativeToTheInjectedBase() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final java.util.regex.Matcher m = Pattern.compile("(?:href|src)=\"/[^\"]*\"").matcher(html);
+        final boolean found = m.find();
+        assertFalse(found, "index.html must use URLs relative to <base href>: " + (found ? m.group() : ""));
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("assets"))) {
+            for (final Path p : files.filter(f -> f.getFileName().toString().endsWith(".js")).toList()) {
+                final String js = Files.readString(p, StandardCharsets.UTF_8);
+                for (final String absolute : java.util.List.of("\"/api/v2", "\"/themes/", "`/themes/", "navigate(\"/", ".href = \"/",
+                        "\"/search?", "\"/search\";", "\"/go/", "\"/thumbnail/", "`/cache/", "\"/osdd\"")) {
+                    assertFalse(js.contains(absolute), p.getFileName() + " must not use the root-absolute URL " + absolute);
+                }
+            }
+        }
     }
 
     @Test

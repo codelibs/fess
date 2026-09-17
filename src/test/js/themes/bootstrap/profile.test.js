@@ -95,7 +95,7 @@ describe("attach (structure)", () => {
     expect(document.getElementById("confirm-password")).not.toBeNull();
 
     expect(document.querySelector('#password-form button[type="submit"]')).not.toBeNull();
-    expect(document.querySelector("#password-form a.btn-secondary").getAttribute("href")).toBe("/");
+    expect(document.querySelector("#password-form a.btn-secondary").getAttribute("href")).toBe("./");
 
     expect(document.getElementById("profile-error").classList.contains("d-none")).toBe(true);
     expect(document.getElementById("profile-success").classList.contains("d-none")).toBe(true);
@@ -153,7 +153,7 @@ describe("attach (submit)", () => {
     await vi.advanceTimersByTimeAsync(2000); // flush microtasks, then fire the 2s timer
 
     expect(router.navigate).toHaveBeenCalledTimes(1);
-    expect(router.navigate).toHaveBeenCalledWith("/");
+    expect(router.navigate).toHaveBeenCalledWith("./");
   });
 
   it("shows the localized API error when the request rejects", async () => {

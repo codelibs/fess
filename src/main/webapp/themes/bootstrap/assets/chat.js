@@ -1338,7 +1338,7 @@ export function attachStandalone() {
     // DELETE session
     if (sessionId) {
       try {
-        await fetch("/api/v2/chat/sessions/" + encodeURIComponent(sessionId), {
+        await fetch("api/v2/chat/sessions/" + encodeURIComponent(sessionId), {
           method: "DELETE",
           credentials: "same-origin",
           headers: { "X-Fess-CSRF-Token": api.getCsrfToken() || "" }

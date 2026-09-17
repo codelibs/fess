@@ -103,7 +103,7 @@ export function buildUserDropdown(user) {
   if (user.editable !== false) {
     const profileA = document.createElement("a");
     profileA.className = "dropdown-item";
-    profileA.href = "/profile";
+    profileA.href = "profile";
     profileA.setAttribute("data-spa", "");
     profileA.setAttribute("data-i18n", "nav.profile");
     profileA.textContent = t("nav.profile");
@@ -114,7 +114,7 @@ export function buildUserDropdown(user) {
   if (user.admin === true) {
     const adminA = document.createElement("a");
     adminA.className = "dropdown-item";
-    adminA.href = "/admin/";
+    adminA.href = "admin/";
     adminA.setAttribute("data-i18n", "nav.administration");
     adminA.textContent = t("nav.administration");
     menu.appendChild(adminA);
@@ -150,7 +150,7 @@ export function buildLoginLink() {
   if (features.sso_enabled && features.login_link) {
     a.href = features.login_link;
   } else {
-    a.href = "/login";
+    a.href = "login";
     a.setAttribute("data-bs-toggle", "modal");
     a.setAttribute("data-bs-target", "#login-modal");
   }

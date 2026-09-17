@@ -126,7 +126,7 @@ function mountFullDom() {
     <div id="chat-view" hidden></div>
     <div id="cache-view" hidden></div>
     <input id="query">
-    <a class="adv" href="/search/advance">Advanced</a>
+    <a class="adv" href="search/advance">Advanced</a>
     <div id="footer-copyright"></div>
     <div id="back-to-top"></div>
     <div id="searchOptions"></div>`;
@@ -237,11 +237,11 @@ describe("hasSearchQuery", () => {
 describe("updateAdvanceLinks", () => {
   it("forwards the header query and URL paging state onto the advance link", () => {
     document.body.innerHTML =
-      '<input id="query" value="hello"><a class="adv" href="/search/advance">A</a>';
+      '<input id="query" value="hello"><a class="adv" href="search/advance">A</a>';
     setLocation("/?num=20&sort=score&lang=en&fields.label=foo");
     updateAdvanceLinks();
     const href = document.querySelector("a.adv").getAttribute("href");
-    expect(href.startsWith("/search/advance?")).toBe(true);
+    expect(href.startsWith("search/advance?")).toBe(true);
     const qs = new URLSearchParams(href.split("?")[1]);
     expect(qs.get("q")).toBe("hello");
     expect(qs.get("num")).toBe("20");
@@ -251,16 +251,16 @@ describe("updateAdvanceLinks", () => {
   });
 
   it("falls back to the URL q= when no input is populated", () => {
-    document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
+    document.body.innerHTML = '<a class="adv" href="search/advance">A</a>';
     setLocation("/?q=urlq");
     updateAdvanceLinks();
-    expect(document.querySelector("a.adv").getAttribute("href")).toBe("/search/advance?q=urlq");
+    expect(document.querySelector("a.adv").getAttribute("href")).toBe("search/advance?q=urlq");
   });
 
   it("prefers the header #query value over the home #contentQuery value", () => {
     document.body.innerHTML =
       '<input id="query" value="fromHeader"><input id="contentQuery" value="fromHome">' +
-      '<a class="adv" href="/search/advance">A</a>';
+      '<a class="adv" href="search/advance">A</a>';
     setLocation("/");
     updateAdvanceLinks();
     const qs = new URLSearchParams(
@@ -269,15 +269,15 @@ describe("updateAdvanceLinks", () => {
     expect(qs.get("q")).toBe("fromHeader");
   });
 
-  it("emits a bare /search/advance href when there is no query at all", () => {
-    document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
+  it("emits a bare search/advance href when there is no query at all", () => {
+    document.body.innerHTML = '<a class="adv" href="search/advance">A</a>';
     setLocation("/");
     updateAdvanceLinks();
-    expect(document.querySelector("a.adv").getAttribute("href")).toBe("/search/advance");
+    expect(document.querySelector("a.adv").getAttribute("href")).toBe("search/advance");
   });
 
   it("forwards multiple lang and fields.label values", () => {
-    document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
+    document.body.innerHTML = '<a class="adv" href="search/advance">A</a>';
     setLocation("/?q=x&lang=en&lang=ja&fields.label=a&fields.label=b");
     updateAdvanceLinks();
     const qs = new URLSearchParams(
@@ -391,7 +391,7 @@ describe("registerRoutes", () => {
     calls[5][1]();
     expect(isHidden("chat-view")).toBe(false);
     expect(chat.attachStandalone).toHaveBeenCalled();
-    expect(document.getElementById("chat-nav-link").getAttribute("href")).toBe("/");
+    expect(document.getElementById("chat-nav-link").getAttribute("href")).toBe("./");
 
     // Cache handler.
     calls[6][1]();

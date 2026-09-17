@@ -97,7 +97,7 @@ export function attach() {
   // Use a simple fallback to /search if nothing is available.
   const backHref = document.referrer
     ? new URL(document.referrer).pathname + new URL(document.referrer).search
-    : "/search";
+    : "search";
 
   if (!docId) {
     renderError(host, t("labels.cache_not_found"), backHref);

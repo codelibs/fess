@@ -53,7 +53,7 @@ describe("get", () => {
     await api.get("/search", { q: "x", skip: null, label: ["a", "b"] });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toBe("/api/v2/search?q=x&label=a&label=b");
+    expect(url).toBe("api/v2/search?q=x&label=a&label=b");
     expect(opts.method).toBe("GET");
     expect(opts.headers.Accept).toBe("application/json");
   });
@@ -90,7 +90,7 @@ describe("post", () => {
     const fetchMock = installFetch(async () => envelope({ status: 0, ok: true }));
     await api.post("/favorites", { id: "d1" });
     const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toBe("/api/v2/favorites");
+    expect(url).toBe("api/v2/favorites");
     expect(opts.method).toBe("POST");
     expect(opts.headers["X-Fess-CSRF-Token"]).toBe("tok-123");
     expect(opts.body).toBe(JSON.stringify({ id: "d1" }));

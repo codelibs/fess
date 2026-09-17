@@ -141,7 +141,7 @@ describe("init", () => {
     expect(document.title).toBe("My Fess");
     expect(document.querySelector("[data-i18n]").textContent).toBe("Hello");
     expect(fetchMock).toHaveBeenCalledWith(
-      "/themes/bootstrap/i18n/messages.ja.json",
+      expect.stringMatching(/\/themes\/bootstrap\/i18n\/messages\.ja\.json$/),
       { credentials: "same-origin" }
     );
   });

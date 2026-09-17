@@ -2,7 +2,8 @@
 // (header name X-Fess-CSRF-Token; verified in SearchApiV2Manager.java:172),
 // envelope unwrapping ({ response: { status, ...} }), and locale propagation.
 
-const BASE = "/api/v2";
+// Relative to the <base href> Fess inserts, so requests reach /api/v2 under any context path.
+const BASE = "api/v2";
 let config = null;
 let csrfToken = "";
 

@@ -18,7 +18,8 @@ import { sanitizeHtml } from "./format.js";
  * @returns {Promise<{sections: Array<{id:string, title:string, html:string}>}>}
  */
 export async function fetchHelpContent(locale) {
-  const url = `/themes/bootstrap/help/${locale}.json`;
+  // Relative to this module, so the bundles load under any context path and theme name.
+  const url = new URL(`../help/${locale}.json`, import.meta.url).href;
   try {
     const r = await fetch(url, { credentials: "same-origin" });
     if (!r.ok) throw new Error(`help/${locale}.json HTTP ${r.status}`);
@@ -26,7 +27,7 @@ export async function fetchHelpContent(locale) {
   } catch (e) {
     if (locale !== "en") {
       // Fallback to English.
-      const r2 = await fetch("/themes/bootstrap/help/en.json", { credentials: "same-origin" });
+      const r2 = await fetch(new URL("../help/en.json", import.meta.url).href, { credentials: "same-origin" });
       if (!r2.ok) throw new Error(`help/en.json HTTP ${r2.status}`);
       return await r2.json();
     }

@@ -26,7 +26,7 @@ describe("fetchHelpContent", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toBe("/themes/bootstrap/help/en.json");
+    expect(url).toMatch(/\/themes\/bootstrap\/help\/en\.json$/);
     expect(opts).toEqual({ credentials: "same-origin" });
   });
 
@@ -41,8 +41,8 @@ describe("fetchHelpContent", () => {
     await expect(fetchHelpContent("ja")).resolves.toEqual(en);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[0][0]).toBe("/themes/bootstrap/help/ja.json");
-    expect(fetchMock.mock.calls[1][0]).toBe("/themes/bootstrap/help/en.json");
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/themes\/bootstrap\/help\/ja\.json$/);
+    expect(fetchMock.mock.calls[1][0]).toMatch(/\/themes\/bootstrap\/help\/en\.json$/);
   });
 
   it("rejects without any fallback when the en bundle itself is not ok", async () => {

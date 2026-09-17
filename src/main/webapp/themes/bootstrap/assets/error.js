@@ -150,7 +150,7 @@ function render(container, code, requestedUrl, errorDetailKey) {
   actions.className = "error-actions";
 
   const homeLink = document.createElement("a");
-  homeLink.href = "/";
+  homeLink.href = "./";
   homeLink.setAttribute("data-spa", "");
   homeLink.className = "btn btn-primary me-2";
   homeLink.textContent = t("error.go_home");

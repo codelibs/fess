@@ -211,7 +211,7 @@ describe("attach: submit builds the /search URL", () => {
 
     expect(navigate).toHaveBeenCalledTimes(1);
     const target = navigate.mock.calls[0][0];
-    expect(target.startsWith("/search?")).toBe(true);
+    expect(target.startsWith("search?")).toBe(true);
 
     const p = new URLSearchParams(target.slice(target.indexOf("?") + 1));
     // timestamp date-math appended to the composed q

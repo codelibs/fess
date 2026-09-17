@@ -49,12 +49,12 @@ afterEach(() => setLocation("/"));
 describe("buildGoUrl", () => {
   it("builds a /go/ URL with rt, docId, queryId and order", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", 3, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=3");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=3");
   });
 
   it("appends an encoded &hash= for a #fragment URL", () => {
     expect(buildGoUrl("https://ex.com/d#sec-2", "d1", "q1", 3, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=3&hash=%23sec-2");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=3&hash=%23sec-2");
   });
 
   it("returns # for javascript: and data: schemes", () => {
@@ -64,11 +64,11 @@ describe("buildGoUrl", () => {
 
   it("builds a /go/ URL for file:, smb: and s3: (file-system crawl results)", () => {
     expect(buildGoUrl("file:///data/report.pdf", "d1", "q1", 2, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=2");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=2");
     expect(buildGoUrl("smb://host/share/file.docx", "d2", "q2", 1, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d2&queryId=q2&order=1");
+      .toBe("go/?rt=1700000000000&docId=d2&queryId=q2&order=1");
     expect(buildGoUrl("s3://bucket/key.txt", "d3", "q3", 1, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d3&queryId=q3&order=1");
+      .toBe("go/?rt=1700000000000&docId=d3&queryId=q3&order=1");
   });
 
   it("returns # for empty, null and non-string originalUrl", () => {
@@ -79,12 +79,12 @@ describe("buildGoUrl", () => {
 
   it("percent-encodes docId and queryId with special characters", () => {
     expect(buildGoUrl("https://ex.com/d", "a b&c", "q 1", 3, 1))
-      .toBe("/go/?rt=1&docId=a%20b%26c&queryId=q%201&order=3");
+      .toBe("go/?rt=1&docId=a%20b%26c&queryId=q%201&order=3");
   });
 
   it("defaults order to 0 when omitted", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", undefined, 1))
-      .toBe("/go/?rt=1&docId=d1&queryId=q1&order=0");
+      .toBe("go/?rt=1&docId=d1&queryId=q1&order=0");
   });
 });
 
@@ -171,7 +171,7 @@ describe("buildResultCard", () => {
     const a = li.querySelector("h3 a");
     expect(a.textContent).toBe("Hello");
     expect(a.getAttribute("href"))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=1");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=1");
     expect(li.querySelector("cite").textContent).toBe("https://ex.com/p");
     // No thumbnail / cache / similar for a minimal doc.
     expect(li.querySelector("img.thumbnail")).toBeNull();
@@ -203,7 +203,7 @@ describe("buildResultCard", () => {
       { doc_id: "d2", title: "T", url: "https://e.com", thumbnail: "y" }, "q2", 2);
     const img = li.querySelector("img.thumbnail");
     expect(img).not.toBeNull();
-    expect(img.getAttribute("src")).toBe("/thumbnail/?docId=d2&queryId=q2");
+    expect(img.getAttribute("src")).toBe("thumbnail/?docId=d2&queryId=q2");
   });
 
   it("omits the thumbnail when the feature is off even if d.thumbnail is set", () => {
@@ -219,7 +219,7 @@ describe("buildResultCard", () => {
       { doc_id: "d3", title: "T", url: "https://e.com", has_cache: "true" }, "q", 1);
     const cache = li.querySelector("a.cache");
     expect(cache).not.toBeNull();
-    expect(cache.getAttribute("href")).toContain("/cache/?docId=d3");
+    expect(cache.getAttribute("href")).toMatch(/^cache\/\?docId=d3/);
   });
 
   it("renders a similar link only when similar_docs_count > 1", () => {
@@ -275,16 +275,16 @@ describe("renderPopularWords", () => {
     expect(spans[0].className).toBe("me-2");
     const anchors = target.querySelectorAll("a");
     expect(anchors.length).toBe(2);
-    expect(anchors[0].getAttribute("href")).toBe("/search?q=a");
+    expect(anchors[0].getAttribute("href")).toBe("search?q=a");
     expect(anchors[0].hasAttribute("data-spa")).toBe(true);
-    expect(anchors[1].getAttribute("href")).toBe("/search?q=b");
+    expect(anchors[1].getAttribute("href")).toBe("search?q=b");
   });
 
   it("percent-encodes a word containing a space", () => {
     mountBody('<div id="pw"></div>');
     const target = document.getElementById("pw");
     renderPopularWords(["c d"], target);
-    expect(target.querySelector("a").getAttribute("href")).toBe("/search?q=c%20d");
+    expect(target.querySelector("a").getAttribute("href")).toBe("search?q=c%20d");
   });
 
   it("clears children and adds d-none for an empty or null word list", () => {
@@ -378,7 +378,7 @@ describe("runFromUrl", () => {
     expect(_state.facetQueries).toEqual([]);
     expect(_state.sdh).toBe("");
     expect(_state.fields).toEqual({});
-    expect(navigate).toHaveBeenCalledWith("/", { replace: true });
+    expect(navigate).toHaveBeenCalledWith("./", { replace: true });
     expect(api.get).not.toHaveBeenCalled();
   });
 

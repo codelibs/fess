@@ -660,7 +660,7 @@ export function attach() {
     const sortVal = fSort.input.value;
     if (sortVal) params.set("sort", sortVal);
 
-    navigate("/search?" + params.toString());
+    navigate("search?" + params.toString());
     // JSP parity: disable the submit button for 3000ms after navigation has
     // been triggered, to prevent rapid double-submits. The shared helper
     // (search.js) re-enables it on the timer.

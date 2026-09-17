@@ -171,7 +171,7 @@ export function attach() {
 
   // Back link (btn-secondary)
   const backLink = el("a", { className: "btn btn-secondary me-2" });
-  backLink.href = "/";
+  backLink.href = "./";
   backLink.setAttribute("data-spa", "");
   const backIcon = el("i", { className: "fa fa-arrow-left" });
   backIcon.setAttribute("aria-hidden", "true");
@@ -237,7 +237,7 @@ export function attach() {
         successDiv.classList.remove("d-none");
         form.reset();
         // Redirect to login after a brief pause so the user sees the success message.
-        setTimeout(() => router.navigate("/"), 2000);
+        setTimeout(() => router.navigate("./"), 2000);
       } else {
         successDiv.textContent = t("profile.success");
         successDiv.classList.remove("d-none");
