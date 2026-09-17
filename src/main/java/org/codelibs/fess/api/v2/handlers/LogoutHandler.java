@@ -16,13 +16,17 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,7 +65,8 @@ public class LogoutHandler {
      * idempotent) and then invalidates the underlying {@link HttpSession} when
      * one exists. Rejects non-{@code POST} methods with
      * {@link V2ErrorCode#METHOD_NOT_ALLOWED}; otherwise always writes a success
-     * envelope of {@code {"ok": true}}.</p>
+     * envelope of {@code {"ok": true}}, plus {@code redirect_url} when the SSO provider names a
+     * single-logout URL.</p>
      *
      * @param req the incoming HTTP request
      * @param res the HTTP response to write to
@@ -73,12 +78,13 @@ public class LogoutHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
+        String redirectUrl = null;
         try {
             final FessLoginAssist assist = ComponentUtil.getFessLoginAssist();
             // Mirror LogoutAction.index(): the LOGOUT record must be written BEFORE logout()
             // drops the user bean, otherwise the audit line degrades to "user:-".
             recordLogoutActivity(assist);
-            runSsoLogout(assist);
+            redirectUrl = runSsoLogout(assist);
             assist.logout();
         } catch (final Exception e) {
             // logout is idempotent — no session or unavailable login subsystem; log WARN for
@@ -93,7 +99,12 @@ public class LogoutHandler {
                 // FessLoginAssist.logout() may have already invalidated the session.
             }
         }
-        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, Map.of("ok", true));
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("ok", true);
+        if (StringUtil.isNotBlank(redirectUrl)) {
+            payload.put("redirect_url", redirectUrl);
+        }
+        ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 
     /**
@@ -124,19 +135,22 @@ public class LogoutHandler {
      * {@code removeAccount}). That cache expires nothing by itself, so skipping this call leaves
      * the tokens of everyone who logs out through the v2 API resident for the life of the JVM.</p>
      *
-     * <p>{@code SsoManager.logout} answers with the provider's single-logout URL. The v2 API has
-     * no redirect semantics -- it always writes a JSON envelope -- so the URL is deliberately
-     * discarded; a client that wants a front-channel single logout has to navigate there itself.
-     * Like the audit write, failures are logged and swallowed: the local logout below must still
-     * happen and the endpoint must stay idempotent. An absent user bean is simply skipped.</p>
+     * <p>{@code SsoManager.logout} answers with the provider's single-logout URL, which
+     * {@code LogoutAction} redirects to. The v2 API writes a JSON envelope instead, so the URL is
+     * returned for the envelope and the client navigates there. Like the audit write, failures are
+     * logged and swallowed: the local logout must still happen and the endpoint must stay
+     * idempotent. An absent user bean is simply skipped.</p>
      *
      * @param assist the login assist still holding the user bean to be logged out
+     * @return the single-logout URL, or null when there is none
      */
-    private void runSsoLogout(final FessLoginAssist assist) {
+    private String runSsoLogout(final FessLoginAssist assist) {
         try {
-            assist.getSavedUserBean().ifPresent(user -> ComponentUtil.getSsoManager().logout(user));
+            final OptionalThing<FessUserBean> user = assist.getSavedUserBean();
+            return user.isPresent() ? ComponentUtil.getSsoManager().logout(user.get()) : null;
         } catch (final RuntimeException e) {
             logger.warn("[v2/logout] failed to run the SSO logout", e);
+            return null;
         }
     }
 }

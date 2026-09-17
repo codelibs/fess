@@ -602,7 +602,8 @@ paths:
       summary: Log out (idempotent)
       description: |-
         Always returns `ok: true` — invoking logout with no active session
-        is a no-op, not an error. Requires `X-Fess-CSRF-Token`.
+        is a no-op, not an error. Adds `redirect_url` when the SSO provider
+        names a single-logout URL. Requires `X-Fess-CSRF-Token`.
       operationId: authLogoutV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -612,7 +613,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OkResponse'
+                $ref: '#/components/schemas/LogoutResponse'
         '403': { $ref: '#/components/responses/Forbidden' }
         '405':
           description: |-
@@ -1655,6 +1656,23 @@ components:
                     Present when the password is listed in
                     `password.invalid.admin.passwords`. The user is signed in;
                     the client should ask for a new password.
+
+    LogoutResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [ok]
+              properties:
+                ok: { type: boolean, enum: [true] }
+                redirect_url:
+                  type: string
+                  description: |-
+                    The SSO provider's single-logout URL. Present only when the
+                    provider names one; the client navigates there.
 
     PasswordChangeRequest:
       type: object
