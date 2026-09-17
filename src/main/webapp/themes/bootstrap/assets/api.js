@@ -2,7 +2,8 @@
 // (header name X-Fess-CSRF-Token; verified in SearchApiV2Manager.java:172),
 // envelope unwrapping ({ response: { status, ...} }), and locale propagation.
 
-const BASE = "/api/v2";
+// Relative to the <base href> Fess inserts, so requests reach /api/v2 under any context path.
+const BASE = "api/v2";
 let config = null;
 let csrfToken = "";
 
@@ -250,7 +251,10 @@ function dispatchFrame(frame, onEvent) {
 }
 
 export async function init() {
-  const env = await get("/ui/config");
+  // JSP parity: ?browser_lang= on the page picks the UI language. The server resolves it
+  // into ui_locale and remembers it in the session.
+  const browserLang = new URLSearchParams(location.search).get("browser_lang");
+  const env = await get("/ui/config", browserLang ? { browser_lang: browserLang } : undefined);
   config = env;            // entire envelope, callers read fields directly
   csrfToken = env.csrf_token || "";
 }

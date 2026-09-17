@@ -41,7 +41,7 @@ describe("attach", () => {
     expect(view.querySelector(".error-title").textContent).toBe("error.title_404");
     expect(view.querySelector(".error-body").textContent).toBe("error.body_404");
     const home = view.querySelector(".error-actions a");
-    expect(home.getAttribute("href")).toBe("/");
+    expect(home.getAttribute("href")).toBe("./");
     expect(home.hasAttribute("data-spa")).toBe(true);
   });
 

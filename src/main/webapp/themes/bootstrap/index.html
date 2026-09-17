@@ -6,10 +6,12 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fess</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/font-awesome.min.css">
-  <link rel="stylesheet" href="/themes/bootstrap/assets/styles.css">
-  <link rel="icon" href="/favicon.ico">
+  <!-- Fess inserts <base href="{context path}/"> right after <head>. Every URL in this
+       theme is relative to it, so the theme works under any context path. -->
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="themes/bootstrap/assets/styles.css">
+  <link rel="icon" href="favicon.ico">
 
 </head>
 <body>
@@ -28,7 +30,7 @@
   <header>
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none" role="banner" data-bs-theme="dark">
       <div id="content" class="container">
-        <a class="navbar-brand d-inline-flex" href="/" id="brand-link" data-spa><img src="/themes/bootstrap/assets/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="align-items-center"></a>
+        <a class="navbar-brand d-inline-flex" href="./" id="brand-link" data-spa><img src="themes/bootstrap/assets/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="align-items-center"></a>
         <div class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0" role="search" id="search-form-wrap">
           <form class="input-group" id="search-form" role="search" aria-label="Site search">
             <input
@@ -56,8 +58,8 @@
           <!-- Auth entry (login nav-link OR user dropdown) rendered by auth.js -->
           <li class="nav-item" id="auth-controls" data-i18n-aria-label="aria.auth_controls"></li>
           <!-- Chat (AI mode) — shown by app.js when rag_chat_enabled -->
-          <li class="nav-item d-none" id="chat-nav-item"><a class="nav-link" href="/chat" id="chat-nav-link" data-spa role="button"><i class="fa fa-fw fa-robot" aria-hidden="true"></i> <span data-i18n="nav.chat_ai_mode">AI Search</span></a></li>
-          <li class="nav-item"><a class="nav-link help-link" href="/help" id="help-link" data-spa role="help"><i class="fa fa-fw fa-question-circle" aria-hidden="true"></i> <span data-i18n="nav.help">Help</span></a></li>
+          <li class="nav-item d-none" id="chat-nav-item"><a class="nav-link" href="chat" id="chat-nav-link" data-spa role="button"><i class="fa fa-fw fa-robot" aria-hidden="true"></i> <span data-i18n="nav.chat_ai_mode">AI Search</span></a></li>
+          <li class="nav-item"><a class="nav-link help-link" href="help" id="help-link" data-spa role="help"><i class="fa fa-fw fa-question-circle" aria-hidden="true"></i> <span data-i18n="nav.help">Help</span></a></li>
         </ul>
       </div>
     </nav>
@@ -112,7 +114,7 @@
         <button type="submit" class="btn btn-primary" form="search-form">
           <i class="fa fa-search" aria-hidden="true"></i> <span data-i18n="nav.search">Search</span>
         </button>
-        <a href="/search/advance" data-spa id="searchOptionsAdvanceLink" class="btn btn-secondary">
+        <a href="search/advance" data-spa id="searchOptionsAdvanceLink" class="btn btn-secondary">
           <i class="fa fa-cog" aria-hidden="true"></i> <span data-i18n="advance.link">Advanced Search</span>
         </a>
       </div>
@@ -131,7 +133,7 @@
         <div class="row">
           <div class="col text-center searchFormBox">
             <h1 class="mainLogo">
-              <img src="/themes/bootstrap/assets/logo.png" alt="" data-i18n-alt="page.heading" class="home-logo">
+              <img src="themes/bootstrap/assets/logo.png" alt="" data-i18n-alt="page.heading" class="home-logo">
             </h1>
             <!-- Notification banner (parity index.jsp .notification) — rendered by
                  app.js renderNotifications() from config.notifications.search_top. -->
@@ -309,19 +311,40 @@
           <button type="submit" class="btn btn-primary" data-i18n="auth.login">Login</button>
         </div>
       </form>
+      <!-- New-password form, shown instead of the login form when the password just used
+           must be changed (parity login/newpassword.jsp). auth.js switches between them. -->
+      <form class="modal-content d-none" id="password-change-form">
+        <div class="modal-header">
+          <h5 class="modal-title" data-i18n="profile.title">Change Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p data-i18n="auth.password_change_required">You need to update your password</p>
+          <div class="alert alert-danger d-none" id="password-change-error" role="alert"></div>
+          <div class="mb-3">
+            <label for="password-change-new" class="form-label" data-i18n="profile.new_password">New password</label>
+            <input class="form-control" id="password-change-new" name="new_password" type="password" autocomplete="new-password" required>
+          </div>
+          <div class="mb-3">
+            <label for="password-change-confirm" class="form-label" data-i18n="profile.confirm_password">Confirm new password</label>
+            <input class="form-control" id="password-change-confirm" name="confirm_password" type="password" autocomplete="new-password" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="auth.cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="profile.update">Update</button>
+        </div>
+      </form>
     </div>
   </div>
-
-  <!-- contextPath hidden field (parity index.jsp:176 / searchResults.jsp). -->
-  <input type="hidden" id="contextPath" value="">
 
   <!--
     Load order matters: popper.min.js MUST load before bootstrap.min.js (the
     non-bundle build needs Popper's createPopper for dropdowns/tooltips), and both
     classic defer scripts MUST appear before app.js (type="module") in document order.
   -->
-  <script src="/js/popper.min.js" defer></script>
-  <script src="/js/bootstrap.min.js" defer></script>
-  <script type="module" src="/themes/bootstrap/assets/app.js"></script>
+  <script src="js/popper.min.js" defer></script>
+  <script src="js/bootstrap.min.js" defer></script>
+  <script type="module" src="themes/bootstrap/assets/app.js"></script>
 </body>
 </html>

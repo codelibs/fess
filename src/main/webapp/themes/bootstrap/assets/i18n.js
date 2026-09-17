@@ -1,14 +1,16 @@
-// Bootstrap theme i18n loader. Resolves the runtime locale once at boot
-// using navigator.language with primary-subtag and English fallbacks per spec §4.6.
+// Bootstrap theme i18n loader. Resolves the runtime locale once at boot: the server's
+// ui_locale (?browser_lang=, session, Accept-Language — as on the JSP pages), then
+// navigator.language, each by exact or primary-subtag match, then English (spec §4.6).
 
 const SUPPORTED = ["de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW"];
 let messages = {};
 let locale = "en";
 
-export function pickLocale() {
-  const raw = (navigator.language || "en");
+/** The supported locale matching `tag` exactly or by its primary subtag, or null. */
+function matchLocale(tag) {
+  if (!tag) return null;
   // Case-insensitive exact match first (e.g. "pt-BR", "zh-CN").
-  const lower = raw.toLowerCase();
+  const lower = String(tag).toLowerCase();
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === lower) return s;
   }
@@ -17,20 +19,31 @@ export function pickLocale() {
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === primary) return s;
   }
-  return "en";
+  return null;
 }
 
-export async function init() {
-  locale = pickLocale();
+/**
+ * Pick the UI locale: `preferred` (ui_locale from /api/v2/ui/config) when it names a
+ * supported locale, otherwise navigator.language, otherwise English.
+ *
+ * @param {string} [preferred]
+ */
+export function pickLocale(preferred) {
+  return matchLocale(preferred) || matchLocale(navigator.language) || "en";
+}
+
+export async function init(preferred) {
+  locale = pickLocale(preferred);
+  // Bundles load relative to this module, so they are found under any context path.
   try {
-    const r = await fetch(`/themes/bootstrap/i18n/messages.${locale}.json`, { credentials: "same-origin" });
+    const r = await fetch(new URL(`../i18n/messages.${locale}.json`, import.meta.url).href, { credentials: "same-origin" });
     if (!r.ok) throw new Error("i18n bundle " + locale + " HTTP " + r.status);
     messages = await r.json();
   } catch (e) {
     // Fall back to English on any failure (spec §4.6).
     if (locale !== "en") {
       try {
-        const r2 = await fetch("/themes/bootstrap/i18n/messages.en.json", { credentials: "same-origin" });
+        const r2 = await fetch(new URL("../i18n/messages.en.json", import.meta.url).href, { credentials: "same-origin" });
         messages = await r2.json();
         locale = "en";
       } catch { messages = {}; }
@@ -48,7 +61,7 @@ export async function init() {
  *
  * Substitution supports two modes:
  *  - Named placeholders (Object): {name} is replaced by params.name.
- *    e.g. t("result.click_count", { n: 42 }) → "Clicks: 42"
+ *    e.g. t("result.click_count", { n: 42 }) → "42 views"
  *  - Positional placeholders (Array): {0}, {1}, … are replaced by params[0], params[1], …
  *    e.g. t("labels.search_result_status", [total, start, end, query])
  *    → "Results 1 - 10 of 100 for foo"

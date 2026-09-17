@@ -69,6 +69,16 @@ The function returns an `AbortController`. Call `.abort()` to cancel
 the fetch before the server sends a final `done` event (e.g. on user
 navigation or a new submission).
 
+## Context path
+
+Fess 15.9 and later insert `<base href="{context path}/">` right after `<head>` when they
+serve `index.html`. Every URL in this theme is relative to that base (`css/bootstrap.min.css`,
+`api/v2`, `search?q=…`, `./`), so the theme works when Fess runs under a context path such as
+`/fess`. `router.js` matches routes against the path below the base, and `i18n.js` and `help.js`
+load their JSON relative to the module URL. Keep new URLs relative: a root-absolute URL
+(`/search`) skips the context path. Fragment-only links (`#id`) would resolve against the base,
+so the router keeps them on the current page.
+
 ## CSRF
 
 All state-changing requests echo the token returned by `/ui/config` in

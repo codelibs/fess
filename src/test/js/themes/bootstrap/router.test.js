@@ -191,6 +191,32 @@ describe("attach", () => {
     expect(seen).toBe("/pop");
   });
 
+  it("moves focus to the target of a fragment-only link instead of following it", () => {
+    document.body.innerHTML = '<a id="skip" href="#main-x">skip</a><main id="main-x">content</main>';
+    const ev = clickEvent(document.getElementById("skip"));
+    expect(ev.defaultPrevented).toBe(true);
+    const target = document.getElementById("main-x");
+    expect(target.getAttribute("tabindex")).toBe("-1");
+    expect(document.activeElement).toBe(target);
+  });
+
+  it("keeps a bare # link, or a link to a missing target, on this page", () => {
+    document.body.innerHTML = '<a id="bare" href="#">a</a><a id="missing" href="#nope">b</a>';
+    expect(clickEvent(document.getElementById("bare")).defaultPrevented).toBe(true);
+    expect(clickEvent(document.getElementById("missing")).defaultPrevented).toBe(true);
+  });
+
+  it("leaves fragment links that handled the click, and Bootstrap toggles, alone", () => {
+    document.body.innerHTML =
+      '<a id="own" href="#own-target">a</a><div id="own-target"></div>' +
+      '<a id="toggle" href="#panel" data-bs-toggle="collapse">b</a><div id="panel"></div>';
+    document.getElementById("own").addEventListener("click", (e) => e.preventDefault());
+    clickEvent(document.getElementById("own"));
+    expect(document.getElementById("own-target").hasAttribute("tabindex")).toBe(false);
+    expect(clickEvent(document.getElementById("toggle")).defaultPrevented).toBe(false);
+    expect(document.getElementById("panel").hasAttribute("tabindex")).toBe(false);
+  });
+
   it("is idempotent: a second attach() adds no duplicate click listener", () => {
     r.attach(); // guarded no-op; must NOT add a second listener
     r.register((p) => p === "/idem", () => {});
@@ -206,5 +232,97 @@ describe("attach", () => {
     // A single click → exactly one navigate → one dispatch → one route:change.
     expect(changeCount).toBe(1);
     expect(location.pathname).toBe("/idem");
+  });
+});
+
+describe("context path", () => {
+  let r;
+  /** Add the <base href> Fess inserts into index.html. */
+  function setBase(href) {
+    const base = document.createElement("base");
+    base.setAttribute("href", href);
+    document.head.appendChild(base);
+  }
+  beforeEach(async () => {
+    vi.resetModules();
+    resetDom();
+    setLocation("/");
+    r = await import(ROUTER);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    resetDom(); // drops the <base>
+    setLocation("/");
+  });
+
+  it("uses the origin root when the page has no <base>", () => {
+    setLocation("/search");
+    expect(r.basePath()).toBe("/");
+    expect(r.currentPath()).toBe("/search");
+  });
+
+  it("matches routes below the <base> path", () => {
+    setBase("/fess/");
+    setLocation("/fess/search/");
+    let seen = null;
+    let eventPath = null;
+    const onChange = (e) => { eventPath = e.detail.path; };
+    document.addEventListener("fess:route:change", onChange);
+    r.register((p) => p === "/search", (p) => { seen = p; });
+    try {
+      r.dispatch();
+    } finally {
+      document.removeEventListener("fess:route:change", onChange);
+    }
+    expect(r.basePath()).toBe("/fess/");
+    expect(seen).toBe("/search");
+    expect(eventPath).toBe("/search");
+  });
+
+  it("maps the context root, with or without its trailing slash, to /", () => {
+    setBase("/fess/");
+    setLocation("/fess/");
+    expect(r.currentPath()).toBe("/");
+    setLocation("/fess");
+    expect(r.currentPath()).toBe("/");
+  });
+
+  it("resolves a relative navigate() target against the <base>", () => {
+    setBase("/fess/");
+    setLocation("/fess/help");
+    let seen = null;
+    r.register((p) => p === "/search", (p) => { seen = p; });
+    r.navigate("search?q=x");
+    expect(location.pathname).toBe("/fess/search");
+    expect(location.search).toBe("?q=x");
+    expect(seen).toBe("/search");
+  });
+
+  it("navigates to the context root for ./", () => {
+    setBase("/fess/");
+    setLocation("/fess/search?q=x");
+    const replace = vi.spyOn(history, "replaceState");
+    r.navigate("./", { replace: true });
+    expect(replace).toHaveBeenCalledWith(null, "", "/fess/");
+    expect(r.currentPath()).toBe("/");
+  });
+
+  it("resolves a relative navigate() target against the origin root without a <base>", () => {
+    setLocation("/cache/abc");
+    r.navigate("search?q=y");
+    expect(location.pathname).toBe("/search");
+  });
+});
+
+describe("redirect", () => {
+  it("loads a URL resolved against the application root", async () => {
+    vi.resetModules();
+    resetDom();
+    setLocation("/");
+    const r = await import(ROUTER);
+    // A same-document fragment is the one kind of navigation jsdom carries out.
+    r.redirect("#signin");
+    expect(location.hash).toBe("#signin");
+    setLocation("/");
   });
 });

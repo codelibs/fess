@@ -19,6 +19,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
 
 import * as api from "../../../../main/webapp/themes/bootstrap/assets/api.js";
 import { navigate } from "../../../../main/webapp/themes/bootstrap/assets/router.js";
+import { formatFileSize } from "../../../../main/webapp/themes/bootstrap/assets/format.js";
 import {
   safeHref,
   buildGoUrl,
@@ -36,11 +37,14 @@ import {
   refresh,
   attach,
   _state,
+  initialNum,
+  forgetNum,
 } from "../../../../main/webapp/themes/bootstrap/assets/search.js";
 
 beforeEach(() => {
   resetDom();
   vi.clearAllMocks();
+  sessionStorage.clear();
   api.getConfig.mockReturnValue(null);
   clearSearchState();
 });
@@ -49,12 +53,12 @@ afterEach(() => setLocation("/"));
 describe("buildGoUrl", () => {
   it("builds a /go/ URL with rt, docId, queryId and order", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", 3, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=3");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=3");
   });
 
   it("appends an encoded &hash= for a #fragment URL", () => {
     expect(buildGoUrl("https://ex.com/d#sec-2", "d1", "q1", 3, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=3&hash=%23sec-2");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=3&hash=%23sec-2");
   });
 
   it("returns # for javascript: and data: schemes", () => {
@@ -64,11 +68,11 @@ describe("buildGoUrl", () => {
 
   it("builds a /go/ URL for file:, smb: and s3: (file-system crawl results)", () => {
     expect(buildGoUrl("file:///data/report.pdf", "d1", "q1", 2, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=2");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=2");
     expect(buildGoUrl("smb://host/share/file.docx", "d2", "q2", 1, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d2&queryId=q2&order=1");
+      .toBe("go/?rt=1700000000000&docId=d2&queryId=q2&order=1");
     expect(buildGoUrl("s3://bucket/key.txt", "d3", "q3", 1, 1700000000000))
-      .toBe("/go/?rt=1700000000000&docId=d3&queryId=q3&order=1");
+      .toBe("go/?rt=1700000000000&docId=d3&queryId=q3&order=1");
   });
 
   it("returns # for empty, null and non-string originalUrl", () => {
@@ -79,12 +83,12 @@ describe("buildGoUrl", () => {
 
   it("percent-encodes docId and queryId with special characters", () => {
     expect(buildGoUrl("https://ex.com/d", "a b&c", "q 1", 3, 1))
-      .toBe("/go/?rt=1&docId=a%20b%26c&queryId=q%201&order=3");
+      .toBe("go/?rt=1&docId=a%20b%26c&queryId=q%201&order=3");
   });
 
   it("defaults order to 0 when omitted", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", undefined, 1))
-      .toBe("/go/?rt=1&docId=d1&queryId=q1&order=0");
+      .toBe("go/?rt=1&docId=d1&queryId=q1&order=0");
   });
 });
 
@@ -171,7 +175,7 @@ describe("buildResultCard", () => {
     const a = li.querySelector("h3 a");
     expect(a.textContent).toBe("Hello");
     expect(a.getAttribute("href"))
-      .toBe("/go/?rt=1700000000000&docId=d1&queryId=q1&order=1");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=1");
     expect(li.querySelector("cite").textContent).toBe("https://ex.com/p");
     // No thumbnail / cache / similar for a minimal doc.
     expect(li.querySelector("img.thumbnail")).toBeNull();
@@ -203,7 +207,7 @@ describe("buildResultCard", () => {
       { doc_id: "d2", title: "T", url: "https://e.com", thumbnail: "y" }, "q2", 2);
     const img = li.querySelector("img.thumbnail");
     expect(img).not.toBeNull();
-    expect(img.getAttribute("src")).toBe("/thumbnail/?docId=d2&queryId=q2");
+    expect(img.getAttribute("src")).toBe("thumbnail/?docId=d2&queryId=q2");
   });
 
   it("omits the thumbnail when the feature is off even if d.thumbnail is set", () => {
@@ -219,7 +223,30 @@ describe("buildResultCard", () => {
       { doc_id: "d3", title: "T", url: "https://e.com", has_cache: "true" }, "q", 1);
     const cache = li.querySelector("a.cache");
     expect(cache).not.toBeNull();
-    expect(cache.getAttribute("href")).toContain("/cache/?docId=d3");
+    expect(cache.getAttribute("href")).toMatch(/^cache\/\?docId=d3/);
+  });
+
+  it("shows the view count between the size and the cache link while search logging is on", () => {
+    api.getConfig.mockReturnValue({ features: { search_log_enabled: true } });
+    const li = buildResultCard(
+      { doc_id: "d5", title: "T", url: "https://e.com", content_length: 2048, click_count: 7, has_cache: "true" }, "q", 1);
+    const text = li.querySelector(".info").textContent;
+    const size = text.indexOf(formatFileSize(2048));
+    const count = text.indexOf("result.click_count");
+    const cache = text.indexOf("result.cache");
+    expect(size).toBeGreaterThanOrEqual(0);
+    expect(count).toBeGreaterThan(size);
+    expect(cache).toBeGreaterThan(count);
+  });
+
+  it("omits the view count when search logging is off or nothing was clicked", () => {
+    const infoText = (doc) => buildResultCard({ title: "T", url: "https://e.com", ...doc }, "q", 1)
+      .querySelector(".info").textContent;
+    api.getConfig.mockReturnValue({ features: { search_log_enabled: false } });
+    expect(infoText({ doc_id: "a", click_count: 7 })).not.toContain("result.click_count");
+    api.getConfig.mockReturnValue({ features: { search_log_enabled: true } });
+    expect(infoText({ doc_id: "b", click_count: 0 })).not.toContain("result.click_count");
+    expect(infoText({ doc_id: "c" })).not.toContain("result.click_count");
   });
 
   it("renders a similar link only when similar_docs_count > 1", () => {
@@ -275,16 +302,16 @@ describe("renderPopularWords", () => {
     expect(spans[0].className).toBe("me-2");
     const anchors = target.querySelectorAll("a");
     expect(anchors.length).toBe(2);
-    expect(anchors[0].getAttribute("href")).toBe("/search?q=a");
+    expect(anchors[0].getAttribute("href")).toBe("search?q=a");
     expect(anchors[0].hasAttribute("data-spa")).toBe(true);
-    expect(anchors[1].getAttribute("href")).toBe("/search?q=b");
+    expect(anchors[1].getAttribute("href")).toBe("search?q=b");
   });
 
   it("percent-encodes a word containing a space", () => {
     mountBody('<div id="pw"></div>');
     const target = document.getElementById("pw");
     renderPopularWords(["c d"], target);
-    expect(target.querySelector("a").getAttribute("href")).toBe("/search?q=c%20d");
+    expect(target.querySelector("a").getAttribute("href")).toBe("search?q=c%20d");
   });
 
   it("clears children and adds d-none for an empty or null word list", () => {
@@ -334,6 +361,7 @@ describe("clearSearchState / _state", () => {
     `);
     const s = _state;
     s.q = "x"; s.start = 5; s.num = 50; s.sort = "z"; s.lang = ["ja"]; s.sdh = "h";
+    s.as = { q: ["x"] };
     s.facets = { a: [1] }; s.fields = { label: ["x"] }; s.facetQueries = ["fq"]; s.exQ = ["e"];
     s.geo = { lat: "1", lon: "2", distance: "3" }; s.requestedTime = 99; s.highlightParams = "&hl";
 
@@ -345,6 +373,7 @@ describe("clearSearchState / _state", () => {
     expect(_state.sort).toBe("");
     expect(_state.lang).toEqual([]);
     expect(_state.sdh).toBe("");
+    expect(_state.as).toEqual({});
     expect(_state.facets).toEqual({});
     expect(_state.fields).toEqual({});
     expect(_state.facetQueries).toEqual([]);
@@ -378,7 +407,7 @@ describe("runFromUrl", () => {
     expect(_state.facetQueries).toEqual([]);
     expect(_state.sdh).toBe("");
     expect(_state.fields).toEqual({});
-    expect(navigate).toHaveBeenCalledWith("/", { replace: true });
+    expect(navigate).toHaveBeenCalledWith("./", { replace: true });
     expect(api.get).not.toHaveBeenCalled();
   });
 
@@ -722,6 +751,44 @@ describe("runSearch — successful render", () => {
     expect(document.getElementById("results-warning").textContent).toBe("labels.search_partially_failed");
   });
 
+  it.each([
+    ["PENDING", "errors.user_permissions_loading"],
+    ["FAILED", "errors.user_permissions_unavailable"],
+  ])("tells the user when permissions are %s", async (permissionState, key) => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { permission_state: permissionState }) });
+    await runSearch();
+    await settle();
+    const warn = document.getElementById("results-warning");
+    expect(warn.classList.contains("d-none")).toBe(false);
+    expect(warn.textContent).toBe(key);
+  });
+
+  it("shows the permission notice when nothing matched", async () => {
+    installApiDispatch({ search: makeSearchEnv([], { permission_state: "PENDING" }) });
+    await runSearch();
+    await settle();
+    const warn = document.getElementById("results-warning");
+    expect(warn.classList.contains("d-none")).toBe(false);
+    expect(warn.textContent).toBe("errors.user_permissions_loading");
+  });
+
+  it("puts the permission notice before a partial-result warning", async () => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { permission_state: "FAILED", partial: true, timed_out: true }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-warning").textContent)
+      .toBe("errors.user_permissions_unavailable labels.process_time_is_exceeded");
+  });
+
+  it("hides the banner for resolved permissions and a complete result", async () => {
+    const warn = document.getElementById("results-warning");
+    warn.classList.remove("d-none");
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { permission_state: "RESOLVED" }) });
+    await runSearch();
+    await settle();
+    expect(warn.classList.contains("d-none")).toBe(true);
+  });
+
   it("uses the _over status key when record_count_relation is not EQUAL_TO", async () => {
     installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { record_count_relation: "GREATER_THAN_OR_EQUAL_TO" }) });
     await runSearch();
@@ -820,6 +887,21 @@ describe("runSearch — error handling", () => {
     api.get.mockRejectedValueOnce(Object.assign(new Error("auth"), { code: "auth_required" }));
     await runSearch();
     expect(errBox().textContent).toBe("error.auth_required");
+  });
+
+  it("announces fess:auth:required for auth_required only", async () => {
+    let announced = 0;
+    const onRequired = () => { announced += 1; };
+    document.addEventListener("fess:auth:required", onRequired);
+    try {
+      api.get.mockRejectedValueOnce(Object.assign(new Error("auth"), { code: "auth_required" }));
+      await runSearch();
+      api.get.mockRejectedValueOnce(new Error("boom"));
+      await runSearch();
+    } finally {
+      document.removeEventListener("fess:auth:required", onRequired);
+    }
+    expect(announced).toBe(1);
   });
 
   it("shows error.server for a generic failure and clears the spinner", async () => {
@@ -1326,11 +1408,20 @@ describe("attach — wiring", () => {
     // and rendered popular words.
     expect(document.getElementById("popular-words").querySelectorAll("a[data-spa]").length).toBe(4);
 
-    // 1. Header form submit → navigate to /search?q=..., syncs inputs, disables the button.
+    // 1. Header form submit → navigate to search?q=..., syncs inputs, disables the button.
+    // The drawer's labels ride along; a legacy URL's sdh and as.* conditions do not.
+    setLocation("/search?q=old&sdh=h1&as.q=legacy&fields.label=lblB");
+    document.getElementById("labelSearchOption").value = "lblA";
     document.getElementById("query").value = "hello";
     document.getElementById("search-form").dispatchEvent(new Event("submit", { cancelable: true }));
     expect(navigate).toHaveBeenCalled();
-    expect(navigate.mock.calls.at(-1)[0]).toContain("q=hello");
+    const headerTarget = navigate.mock.calls.at(-1)[0];
+    expect(headerTarget).toContain("q=hello");
+    const headerParams = new URLSearchParams(headerTarget.slice(headerTarget.indexOf("?") + 1));
+    expect(headerParams.getAll("fields.label")).toEqual(["lblA"]);
+    expect(headerParams.has("sdh")).toBe(false);
+    expect(headerParams.has("as.q")).toBe(false);
+    setLocation("/");
     expect(document.getElementById("contentQuery").value).toBe("hello");
     expect(document.getElementById("searchButton").disabled).toBe(true);
 
@@ -1375,5 +1466,206 @@ describe("attach — wiring", () => {
 
   it("is idempotent — a second attach() call is a quiet no-op", () => {
     expect(() => attach()).not.toThrow();
+  });
+});
+
+describe("runFromUrl — default labels, sort and page size", () => {
+  const DEFAULTS_CFG = {
+    ...FULL_CFG,
+    default_label_values: ["lblA"],
+    default_sort: "last_modified.desc",
+    page_size_default: 20,
+    page_size_max: 100,
+    num_options: [10, 20, 50],
+  };
+  const searchParams = () => api.get.mock.calls.find((c) => c[0] === "/search")[1];
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue(DEFAULTS_CFG);
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+  });
+
+  it("applies the default labels and sort when the URL names none, and shows them in the drawer", async () => {
+    setLocation("/search?q=foo");
+    runFromUrl();
+    await settle();
+    expect(searchParams()["fields.label"]).toEqual(["lblA"]);
+    expect(searchParams().sort).toBe("last_modified.desc");
+    expect(document.getElementById("labelSearchOption").value).toBe("lblA");
+    expect(document.getElementById("sortSearchOption").value).toBe("last_modified.desc");
+  });
+
+  it("keeps the labels and sort the URL names", async () => {
+    setLocation("/search?q=foo&fields.label=lblB&sort=score.desc");
+    runFromUrl();
+    await settle();
+    expect(searchParams()["fields.label"]).toEqual(["lblB"]);
+    expect(searchParams().sort).toBe("score.desc");
+  });
+
+  it("adds no default label when the URL has an empty fields.label", async () => {
+    setLocation("/search?q=foo&fields.label=");
+    runFromUrl();
+    await settle();
+    expect(searchParams()).not.toHaveProperty(["fields.label"]);
+  });
+
+  it("narrows the search with a label facet click instead of adding the label to the defaults", async () => {
+    setLocation("/search?q=foo");
+    runFromUrl();
+    await settle();
+    api.get.mockClear();
+    const facetLink = [...document.querySelectorAll("#facet-body li.list-group-item a")]
+      .find((a) => a.textContent.startsWith("Label B"));
+    facetLink.click();
+    await settle();
+    // JSP parity (searchResults.jsp): a facet link adds ex_q=label:<value>, which ANDs.
+    expect(searchParams()["fields.label"]).toEqual(["lblA"]);
+    expect(searchParams()["ex_q"]).toContain("label:lblB");
+  });
+
+  it("does not turn an empty search into a search by applying defaults", () => {
+    setLocation("/search?sort=");
+    runFromUrl();
+    expect(navigate).toHaveBeenCalledWith("./", { replace: true });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it("remembers an explicit num for the tab and uses it when the URL has none", async () => {
+    setLocation("/search?q=a&num=50");
+    runFromUrl();
+    await settle();
+    expect(sessionStorage.getItem("fess.search.num")).toBe("50");
+    api.get.mockClear();
+    setLocation("/search?q=b");
+    runFromUrl();
+    await settle();
+    expect(searchParams().num).toBe(50);
+  });
+
+  it("starts from page_size_default when nothing is remembered", async () => {
+    setLocation("/search?q=a");
+    runFromUrl();
+    await settle();
+    expect(searchParams().num).toBe(20);
+  });
+});
+
+describe("initialNum / forgetNum", () => {
+  const CFG = { page_size_default: 20, page_size_max: 100, num_options: [10, 20, 50] };
+
+  it.each([
+    ["50", 50],   // an offered size
+    ["30", 20],   // rounded down to an offered size
+    ["500", 50],  // capped at page_size_max, then rounded down
+    ["5", 10],    // below every offered size → the smallest
+    ["abc", 20],  // unreadable → page_size_default
+    ["0", 20],    // not positive → page_size_default
+  ])("turns a remembered %s into %i", (stored, expected) => {
+    api.getConfig.mockReturnValue(CFG);
+    sessionStorage.setItem("fess.search.num", stored);
+    expect(initialNum()).toBe(expected);
+  });
+
+  it("caps a remembered size at page_size_max when no num options are offered", () => {
+    api.getConfig.mockReturnValue({ page_size_default: 20, page_size_max: 100 });
+    sessionStorage.setItem("fess.search.num", "300");
+    expect(initialNum()).toBe(100);
+  });
+
+  it("falls back to 10 without config", () => {
+    api.getConfig.mockReturnValue(null);
+    expect(initialNum()).toBe(10);
+  });
+
+  it("forgetNum() drops the remembered size", () => {
+    api.getConfig.mockReturnValue(CFG);
+    sessionStorage.setItem("fess.search.num", "50");
+    forgetNum();
+    expect(sessionStorage.getItem("fess.search.num")).toBeNull();
+    expect(initialNum()).toBe(20);
+  });
+});
+
+describe("clearSearchState — home defaults", () => {
+  it("pre-selects the default labels, sort and page size", () => {
+    api.getConfig.mockReturnValue({
+      ...FULL_CFG,
+      default_label_values: ["lblA"],
+      default_sort: "last_modified.desc",
+      page_size_default: 20,
+    });
+    mountBody(SEARCH_FIXTURE);
+    sessionStorage.setItem("fess.search.num", "50");
+
+    clearSearchState();
+
+    expect(_state.num).toBe(50);
+    expect(_state.sort).toBe("last_modified.desc");
+    expect(_state.fields).toEqual({ label: ["lblA"] });
+    expect(document.getElementById("numSearchOption").value).toBe("50");
+    expect(document.getElementById("sortSearchOption").value).toBe("last_modified.desc");
+    expect(document.getElementById("labelSearchOption").value).toBe("lblA");
+  });
+});
+
+describe("renderCurrentFilters — default page size", () => {
+  it("shows no page-size badge for page_size_default", async () => {
+    api.getConfig.mockReturnValue({ ...FULL_CFG, page_size_default: 20 });
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+    _state.q = "foo";
+    _state.num = 20;
+    await runSearch();
+    await settle();
+    expect(document.getElementById("current-filters").textContent).not.toContain("search.num_format");
+  });
+});
+
+describe("runFromUrl — legacy JSP parameters", () => {
+  const searchParams = () => api.get.mock.calls.find((c) => c[0] === "/search")[1];
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue(FULL_CFG);
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+  });
+
+  it("passes sdh and as.* from the URL to the search API", async () => {
+    setLocation("/search?q=foo&sdh=abc&as.q=bar&as.filetype=pdf&as.filetype=html&as.nq=");
+    runFromUrl();
+    await settle();
+    expect(searchParams().sdh).toBe("abc");
+    expect(searchParams()["as.q"]).toEqual(["bar"]);
+    expect(searchParams()["as.filetype"]).toEqual(["pdf", "html"]);
+    expect(Object.keys(searchParams())).not.toContain("as.nq");
+  });
+
+  it("runs a search for an advanced-search condition without a keyword", async () => {
+    setLocation("/search?as.epq=exact%20phrase");
+    runFromUrl();
+    await settle();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(searchParams()["as.epq"]).toEqual(["exact phrase"]);
+  });
+
+  it("goes home for as.occt alone, which only narrows a search", () => {
+    setLocation("/search?as.occt=title");
+    runFromUrl();
+    expect(navigate).toHaveBeenCalledWith("./", { replace: true });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it("drops sdh and as.* once the URL has none", async () => {
+    setLocation("/search?q=foo&sdh=abc&as.q=bar");
+    runFromUrl();
+    await settle();
+    api.get.mockClear();
+    setLocation("/search?q=next");
+    runFromUrl();
+    await settle();
+    expect(Object.keys(searchParams())).not.toContain("sdh");
+    expect(Object.keys(searchParams()).filter((k) => k.startsWith("as."))).toEqual([]);
   });
 });

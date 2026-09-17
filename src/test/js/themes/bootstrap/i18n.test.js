@@ -50,6 +50,19 @@ describe("pickLocale", () => {
     setLanguage("");
     expect(pickLocale()).toBe("en");
   });
+
+  it.each([
+    ["ja", "de-DE", "ja"],        // ui_locale wins over the browser language
+    ["pt-BR", "en-US", "pt-BR"],  // exact match
+    ["zh-TW", "en-US", "zh-TW"],  // exact match
+    ["fr-CA", "en-US", "fr"],     // primary-subtag match
+    ["", "de-DE", "de"],          // unknown on the server → browser language
+    [undefined, "de-DE", "de"],   // no preference → browser language
+    ["xx", "ko-KR", "ko"],        // unsupported preference → browser language
+  ])("preferred %s with navigator.language %s → %s", (preferred, lang, expected) => {
+    setLanguage(lang);
+    expect(pickLocale(preferred)).toBe(expected);
+  });
 });
 
 describe("t", () => {
@@ -141,9 +154,20 @@ describe("init", () => {
     expect(document.title).toBe("My Fess");
     expect(document.querySelector("[data-i18n]").textContent).toBe("Hello");
     expect(fetchMock).toHaveBeenCalledWith(
-      "/themes/bootstrap/i18n/messages.ja.json",
+      expect.stringMatching(/\/themes\/bootstrap\/i18n\/messages\.ja\.json$/),
       { credentials: "same-origin" }
     );
+  });
+
+  it("loads the bundle of the preferred locale passed by the app", async () => {
+    vi.resetModules();
+    const fetchMock = installFetch(async () => jsonResponse({ "page.title": "Fess KO" }));
+    setLanguage("ja-JP");
+    const m = await import(I18N);
+    await m.init("ko");
+    expect(m.getLocale()).toBe("ko");
+    expect(document.documentElement.lang).toBe("ko");
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/i18n\/messages\.ko\.json$/);
   });
 
   it("falls back to the English bundle when the primary locale bundle is not ok", async () => {

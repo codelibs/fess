@@ -43,6 +43,10 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/auth.js", () => ({
   buildUserDropdown: () => document.createElement("div"),
   buildLoginLink: () => document.createElement("a"),
   rotateCsrf: vi.fn(async () => {}),
+  isLoginGateClosed: vi.fn(() => false),
+  isLoginRequired: vi.fn(() => false),
+  promptLogin: vi.fn(),
+  endSession: vi.fn(async () => {}),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   attach: vi.fn(),
@@ -52,6 +56,8 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   attachSuggest: vi.fn(),
   disableSubmitBriefly: vi.fn(),
   renderPopularWords: vi.fn(),
+  initSearchOptions: vi.fn(),
+  forgetNum: vi.fn(),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/chat.js", () => ({
   attach: vi.fn(),
@@ -63,6 +69,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
   navigate: vi.fn(),
   attach: vi.fn(),
   dispatch: vi.fn(),
+  currentPath: vi.fn(() => "/"),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/error.js", () => ({ attach: vi.fn() }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/profile.js", () => ({ attach: vi.fn() }));
@@ -86,7 +93,7 @@ import * as cache from "../../../../main/webapp/themes/bootstrap/assets/cache.js
 // dynamic import, so app.js registers a DOMContentLoaded listener instead of
 // auto-running main() at import time.
 Object.defineProperty(document, "readyState", { configurable: true, get: () => "loading" });
-const { renderHomeFlash, hasSearchQuery, updateAdvanceLinks, registerRoutes, main } = await import(
+const { renderHomeFlash, hasSearchQuery, updateAdvanceLinks, registerRoutes, main, isLoginGatedPath } = await import(
   "../../../../main/webapp/themes/bootstrap/assets/app.js"
 );
 
@@ -126,7 +133,7 @@ function mountFullDom() {
     <div id="chat-view" hidden></div>
     <div id="cache-view" hidden></div>
     <input id="query">
-    <a class="adv" href="/search/advance">Advanced</a>
+    <a class="adv" href="search/advance">Advanced</a>
     <div id="footer-copyright"></div>
     <div id="back-to-top"></div>
     <div id="searchOptions"></div>`;
@@ -143,6 +150,10 @@ beforeEach(() => {
   i18n.init.mockResolvedValue(undefined);
   auth.attach.mockResolvedValue(null);
   help.attach.mockResolvedValue(undefined);
+  auth.isLoginGateClosed.mockReturnValue(false);
+  auth.isLoginRequired.mockReturnValue(false);
+  auth.endSession.mockResolvedValue(undefined);
+  router.currentPath.mockReturnValue("/");
   setLocation("/");
 });
 afterEach(resetDom);
@@ -237,11 +248,11 @@ describe("hasSearchQuery", () => {
 describe("updateAdvanceLinks", () => {
   it("forwards the header query and URL paging state onto the advance link", () => {
     document.body.innerHTML =
-      '<input id="query" value="hello"><a class="adv" href="/search/advance">A</a>';
+      '<input id="query" value="hello"><a class="adv" href="search/advance">A</a>';
     setLocation("/?num=20&sort=score&lang=en&fields.label=foo");
     updateAdvanceLinks();
     const href = document.querySelector("a.adv").getAttribute("href");
-    expect(href.startsWith("/search/advance?")).toBe(true);
+    expect(href.startsWith("search/advance?")).toBe(true);
     const qs = new URLSearchParams(href.split("?")[1]);
     expect(qs.get("q")).toBe("hello");
     expect(qs.get("num")).toBe("20");
@@ -251,16 +262,16 @@ describe("updateAdvanceLinks", () => {
   });
 
   it("falls back to the URL q= when no input is populated", () => {
-    document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
+    document.body.innerHTML = '<a class="adv" href="search/advance">A</a>';
     setLocation("/?q=urlq");
     updateAdvanceLinks();
-    expect(document.querySelector("a.adv").getAttribute("href")).toBe("/search/advance?q=urlq");
+    expect(document.querySelector("a.adv").getAttribute("href")).toBe("search/advance?q=urlq");
   });
 
   it("prefers the header #query value over the home #contentQuery value", () => {
     document.body.innerHTML =
       '<input id="query" value="fromHeader"><input id="contentQuery" value="fromHome">' +
-      '<a class="adv" href="/search/advance">A</a>';
+      '<a class="adv" href="search/advance">A</a>';
     setLocation("/");
     updateAdvanceLinks();
     const qs = new URLSearchParams(
@@ -269,15 +280,15 @@ describe("updateAdvanceLinks", () => {
     expect(qs.get("q")).toBe("fromHeader");
   });
 
-  it("emits a bare /search/advance href when there is no query at all", () => {
-    document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
+  it("emits a bare search/advance href when there is no query at all", () => {
+    document.body.innerHTML = '<a class="adv" href="search/advance">A</a>';
     setLocation("/");
     updateAdvanceLinks();
-    expect(document.querySelector("a.adv").getAttribute("href")).toBe("/search/advance");
+    expect(document.querySelector("a.adv").getAttribute("href")).toBe("search/advance");
   });
 
   it("forwards multiple lang and fields.label values", () => {
-    document.body.innerHTML = '<a class="adv" href="/search/advance">A</a>';
+    document.body.innerHTML = '<a class="adv" href="search/advance">A</a>';
     setLocation("/?q=x&lang=en&lang=ja&fields.label=a&fields.label=b");
     updateAdvanceLinks();
     const qs = new URLSearchParams(
@@ -391,7 +402,7 @@ describe("registerRoutes", () => {
     calls[5][1]();
     expect(isHidden("chat-view")).toBe(false);
     expect(chat.attachStandalone).toHaveBeenCalled();
-    expect(document.getElementById("chat-nav-link").getAttribute("href")).toBe("/");
+    expect(document.getElementById("chat-nav-link").getAttribute("href")).toBe("./");
 
     // Cache handler.
     calls[6][1]();
@@ -406,6 +417,30 @@ describe("registerRoutes", () => {
     // Fallback handler (index 8) also lands on the error view.
     calls[8][1]();
     expect(isHidden("error-view")).toBe(false);
+  });
+});
+
+describe("home search form", () => {
+  it("carries the drawer's sort, page size and labels into the search URL", () => {
+    mountFullDom();
+    document.getElementById("sortSearchOption").innerHTML = '<option value="last_modified.desc" selected>x</option>';
+    document.getElementById("numSearchOption").innerHTML = '<option value="20" selected>20</option>';
+    document.getElementById("home-view").insertAdjacentHTML("beforeend",
+      '<select id="labelSearchOption" multiple><option value="lblA" selected>A</option><option value="lblB">B</option></select>');
+    registerRoutes();
+    setLocation("/");
+    router.register.mock.calls[0][1](); // the home handler wires the form
+
+    document.getElementById("contentQuery").value = "hello";
+    document.getElementById("home-search-form").dispatchEvent(new Event("submit", { cancelable: true }));
+
+    const target = router.navigate.mock.calls.at(-1)[0];
+    expect(target.startsWith("search?")).toBe(true);
+    const qs = new URLSearchParams(target.slice("search?".length));
+    expect(qs.get("q")).toBe("hello");
+    expect(qs.get("sort")).toBe("last_modified.desc");
+    expect(qs.get("num")).toBe("20");
+    expect(qs.getAll("fields.label")).toEqual(["lblA"]);
   });
 });
 
@@ -426,6 +461,13 @@ describe("main", () => {
     expect(router.register).toHaveBeenCalledTimes(9);
     expect(router.attach).toHaveBeenCalledTimes(1);
     expect(router.dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the server's ui_locale to i18n", async () => {
+    mountFullDom();
+    api.getConfig.mockReturnValue({ features: {}, ui_locale: "ja" });
+    await main();
+    expect(i18n.init).toHaveBeenCalledWith("ja");
   });
 
   it("renders EOL + dev-mode warnings and reveals the chat nav item from config", async () => {
@@ -486,5 +528,89 @@ describe("main", () => {
     document.body.innerHTML = "";
     await expect(main()).resolves.toBeUndefined();
     expect(router.dispatch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("login gate", () => {
+  it.each(["/", "/index", "/index.html", "/search", "/chat", "/cache", "/cache/doc"])("gates %s", (path) => {
+    expect(isLoginGatedPath(path)).toBe(true);
+  });
+
+  it.each(["/help", "/advance", "/search/advance", "/profile", "/error/404", "/unknown"])("does not gate %s", (path) => {
+    expect(isLoginGatedPath(path)).toBe(false);
+  });
+
+  it("asks for login instead of running a gated route while the gate is closed", async () => {
+    mountFullDom();
+    auth.isLoginGateClosed.mockReturnValue(true);
+    router.currentPath.mockReturnValue("/search");
+    await main();
+    expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+    expect(router.dispatch).not.toHaveBeenCalled();
+  });
+
+  it("runs a route that is not gated even while the gate is closed", async () => {
+    mountFullDom();
+    auth.isLoginGateClosed.mockReturnValue(true);
+    router.currentPath.mockReturnValue("/help");
+    await main();
+    expect(router.dispatch).toHaveBeenCalledTimes(1);
+    expect(auth.promptLogin).not.toHaveBeenCalled();
+  });
+});
+
+describe("auth events", () => {
+  it("fetches the config again and re-runs the route after a login", async () => {
+    mountFullDom();
+    await main();
+    api.init.mockClear();
+    router.dispatch.mockClear();
+    document.dispatchEvent(new CustomEvent("fess:auth:login"));
+    await flush();
+    expect(api.init).toHaveBeenCalled();
+    expect(search.initSearchOptions).toHaveBeenCalled();
+    expect(router.dispatch).toHaveBeenCalled();
+    expect(search.refresh).not.toHaveBeenCalled();
+  });
+
+  it("forgets the page size and fetches the config again after a logout", async () => {
+    mountFullDom();
+    await main();
+    api.init.mockClear();
+    document.dispatchEvent(new CustomEvent("fess:auth:logout"));
+    await flush();
+    expect(search.forgetNum).toHaveBeenCalled();
+    expect(api.init).toHaveBeenCalled();
+  });
+
+  it("forgets the page size but does not reload the page for a logout that leaves for the identity provider", async () => {
+    mountFullDom();
+    await main();
+    api.init.mockClear();
+    router.dispatch.mockClear();
+    document.dispatchEvent(new CustomEvent("fess:auth:logout", { detail: { redirecting: true } }));
+    await flush();
+    expect(search.forgetNum).toHaveBeenCalled();
+    expect(api.init).not.toHaveBeenCalled();
+    expect(router.dispatch).not.toHaveBeenCalled();
+  });
+
+  it("asks for login again when a search reports auth_required and login is required", async () => {
+    mountFullDom();
+    await main();
+    auth.isLoginRequired.mockReturnValue(true);
+    document.dispatchEvent(new CustomEvent("fess:auth:required"));
+    await flush();
+    expect(auth.endSession).toHaveBeenCalled();
+    expect(auth.promptLogin).toHaveBeenCalled();
+  });
+
+  it("ignores auth_required when login is optional", async () => {
+    mountFullDom();
+    await main();
+    document.dispatchEvent(new CustomEvent("fess:auth:required"));
+    await flush();
+    expect(auth.endSession).not.toHaveBeenCalled();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
   });
 });

@@ -164,9 +164,45 @@ public class BundledBootstrapThemeTest {
     @Test
     public void test_searchJs_thumbnailUsesThumbnailEndpoint() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("/thumbnail/?docId="));
+        assertTrue(js.contains("\"thumbnail/?docId=\""));
         assertTrue(js.contains("&queryId="));
         assertFalse(js.contains("safeHref(d.thumbnail)"));
+    }
+
+    /**
+     * Fess inserts {@code <base href="{context path}/">} into index.html. A root-absolute URL
+     * skips the context path, so the theme must use URLs relative to that base.
+     */
+    @Test
+    public void test_theme_usesUrlsRelativeToTheInjectedBase() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final java.util.regex.Matcher m = Pattern.compile("(?:href|src)=\"/[^\"]*\"").matcher(html);
+        final boolean found = m.find();
+        assertFalse(found, "index.html must use URLs relative to <base href>: " + (found ? m.group() : ""));
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("assets"))) {
+            for (final Path p : files.filter(f -> f.getFileName().toString().endsWith(".js")).toList()) {
+                final String js = Files.readString(p, StandardCharsets.UTF_8);
+                for (final String absolute : java.util.List.of("\"/api/v2", "\"/themes/", "`/themes/", "navigate(\"/", ".href = \"/",
+                        "\"/search?", "\"/search\";", "\"/go/", "\"/thumbnail/", "`/cache/", "\"/osdd\"")) {
+                    assertFalse(js.contains(absolute), p.getFileName() + " must not use the root-absolute URL " + absolute);
+                }
+            }
+        }
+    }
+
+    /**
+     * The login modal holds the new-password form auth.js shows when the password just used
+     * must be changed (parity login/newpassword.jsp).
+     */
+    @Test
+    public void test_indexHtml_loginModalOffersPasswordChange() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        for (final String id : java.util.List.of("password-change-form", "password-change-error", "password-change-new",
+                "password-change-confirm")) {
+            assertTrue(html.contains("id=\"" + id + "\""), "index.html must contain #" + id);
+        }
+        assertTrue(html.contains("data-i18n=\"auth.password_change_required\""),
+                "the new-password form must explain why the password has to change");
     }
 
     @Test
@@ -949,6 +985,29 @@ public class BundledBootstrapThemeTest {
                         }
                     });
         }
+    }
+
+    /**
+     * The bundles carry the JSP wording for the view count, the permission notice and the forced
+     * password change, ported from fess_label / fess_message.
+     */
+    @Test
+    public void test_i18n_carriesJspWordingForSearchAndLogin() throws Exception {
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            for (final Path p : files.filter(f -> f.getFileName().toString().startsWith("messages.")).toList()) {
+                final String s = Files.readString(p, StandardCharsets.UTF_8);
+                for (final String key : java.util.List.of("\"auth.password_change_required\"", "\"errors.user_permissions_loading\"",
+                        "\"errors.user_permissions_unavailable\"")) {
+                    assertTrue(s.contains(key), p.getFileName() + " must contain " + key);
+                }
+                assertTrue(Pattern.compile("\"result\\.click_count\": \"[^\"]*\\{n\\}").matcher(s).find(),
+                        p.getFileName() + " must keep the {n} placeholder in result.click_count");
+            }
+        }
+        final String en = Files.readString(THEME_DIR.resolve("i18n/messages.en.json"), StandardCharsets.UTF_8);
+        assertTrue(en.contains("\"result.click_count\": \"{n} views\""), "result.click_count must follow labels.search_click_views");
+        assertTrue(en.contains("\"auth.password_change_required\": \"You need to update your password\""),
+                "auth.password_change_required must follow labels.login.newpassword");
     }
 
     @Test

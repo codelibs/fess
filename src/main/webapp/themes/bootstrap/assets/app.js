@@ -196,7 +196,7 @@ function attachHomeView() {
       if (q) {
         const params = new URLSearchParams();
         params.set("q", q);
-        // JSP parity: carry the shared drawer's sort / num / lang selections into
+        // JSP parity: carry the shared drawer's sort / num / lang / label selections into
         // the first search so options set on the home view before searching are applied
         // (these selects no longer auto-run a search on change).
         const sortSel = document.getElementById("sortSearchOption");
@@ -205,7 +205,9 @@ function attachHomeView() {
         if (numSel && numSel.value) params.set("num", numSel.value);
         const langSel = document.getElementById("langSearchOption");
         if (langSel) Array.from(langSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("lang", v));
-        router.navigate("/search?" + params.toString());
+        const labelSel = document.getElementById("labelSearchOption");
+        if (labelSel) Array.from(labelSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("fields.label", v));
+        router.navigate("search?" + params.toString());
         // JSP parity: disable the submit button for 3s after navigation has been
         // triggered, to prevent rapid double-submits.
         search.disableSubmitBriefly(document.querySelector("#home-search-form button[type=submit]"));
@@ -311,7 +313,7 @@ function renderChatNavLink() {
 
 /**
  * #F (parity header.jsp:83-89): on the chat route, turn the chat nav link into a
- * "Search" link (href "/", fa-search). On any other route restore the chat label.
+ * "Search" link (href "./", fa-search). On any other route restore the chat label.
  * header-search-link
  */
 function setChatNavSearchMode(onChat) {
@@ -326,12 +328,12 @@ function setChatNavSearchMode(onChat) {
   icon.setAttribute("aria-hidden", "true");
   const span = document.createElement("span");
   if (onChat) {
-    link.href = "/";
+    link.href = "./";
     icon.className = "fa fa-fw fa-search";
     span.setAttribute("data-i18n", "nav.search");
     span.textContent = t("nav.search");
   } else {
-    link.href = "/chat";
+    link.href = "chat";
     icon.className = "fa fa-fw fa-robot";
     span.setAttribute("data-i18n", "nav.chat_ai_mode");
     span.textContent = t("nav.chat_ai_mode");
@@ -397,8 +399,8 @@ export function updateAdvanceLinks() {
   urlParams.getAll("fields.label").filter(v => v !== "").forEach(v => advParams.append("fields.label", v));
 
   const qs = advParams.toString();
-  const href = "/search/advance" + (qs ? "?" + qs : "");
-  document.querySelectorAll('a[href^="/search/advance"]').forEach(a => {
+  const href = "search/advance" + (qs ? "?" + qs : "");
+  document.querySelectorAll('a[href^="search/advance"]').forEach(a => {
     a.setAttribute("href", href);
   });
 }
@@ -415,6 +417,36 @@ function attachAdvanceLinkSync() {
   // Refresh on every route change so a freshly shown view reflects the query.
   document.addEventListener("fess:route:change", updateAdvanceLinks);
   updateAdvanceLinks();
+}
+
+/**
+ * Paths whose JSP pages required login when login.required is on (RootAction,
+ * SearchAction, CacheAction, ChatAction). Help, advanced search and error pages stay
+ * open; the profile view asks for login itself.
+ */
+export function isLoginGatedPath(path) {
+  return path === "/" || path === "/index" || path === "/index.html" || path === "/search"
+    || path === "/chat" || path === "/cache" || path.startsWith("/cache/");
+}
+
+/** Run the route for the current URL, or ask for login first when that page needs it. */
+export function dispatchOrGate() {
+  if (auth.isLoginGateClosed() && isLoginGatedPath(router.currentPath())) {
+    auth.promptLogin();
+    return;
+  }
+  router.dispatch();
+}
+
+/** Fetch the config for the user who just logged in or out, then re-run the route. */
+async function refreshForUser() {
+  try {
+    await api.init();
+  } catch (e) {
+    console.error("Fess /ui/config failed:", e);
+  }
+  search.initSearchOptions();
+  dispatchOrGate();
 }
 
 export function registerRoutes() {
@@ -536,7 +568,8 @@ export async function main() {
   } catch (e) {
     console.error("Fess /ui/config failed:", e);
   }
-  await i18n.init();
+  // ui_locale honours ?browser_lang= and the session, as the JSP pages did.
+  await i18n.init(api.getConfig()?.ui_locale);
   // Render warning indicators after config is loaded.
   renderWarnings();
   // Render notification banners from config.notifications.
@@ -551,9 +584,23 @@ export async function main() {
   // standalone /chat page (chat.attachStandalone, wired in the /chat route). Mounting
   // the inline panel here wrongly showed a chat column on the results page, so it is
   // intentionally not called. (#chat-column stays d-none as defined in index.html.)
-  // After login, refresh results without re-attaching event listeners.
-  // search.attach() is idempotent but search.refresh() is semantically cleaner.
-  document.addEventListener("fess:auth:login", () => search.refresh());
+  // The config depends on the user (label options, default labels and sort), so fetch it
+  // again after a login or logout and run the current route for the new user.
+  document.addEventListener("fess:auth:login", () => refreshForUser());
+  document.addEventListener("fess:auth:logout", ev => {
+    // JSP parity: the page size was remembered in the session that just ended.
+    search.forgetNum();
+    // Leaving for the identity provider's logout: do not reload or re-gate this page, which
+    // would start a second navigation and cancel single logout.
+    if (ev.detail && ev.detail.redirecting) return;
+    refreshForUser();
+  });
+  // A search answered auth_required: the session ended while the site requires login.
+  document.addEventListener("fess:auth:required", async () => {
+    if (!auth.isLoginRequired()) return;
+    await auth.endSession();
+    auth.promptLogin();
+  });
 
   // Close the search-options drawer on client-side navigation. The JSP dismisses it
   // via a full page reload; in the SPA the Bootstrap collapse would otherwise stay
@@ -582,10 +629,11 @@ export async function main() {
   // Keep the "Advanced" links carrying the current query (JSP parity).
   attachAdvanceLinkSync();
 
-  // Client-side routing: register routes then attach listeners and dispatch.
+  // Client-side routing: register routes, attach listeners, then run the current route
+  // (or ask for login first when login.required gates it).
   registerRoutes();
   router.attach();
-  router.dispatch();
+  dispatchOrGate();
 }
 
 if (document.readyState === "loading") {

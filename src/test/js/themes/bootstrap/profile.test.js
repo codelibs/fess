@@ -1,70 +1,37 @@
 // SPDX-License-Identifier: Apache-2.0
 // Behavioural tests for the profile / password-change view. api.js and
 // router.js are mocked (router.js carries module state; api.post is driven per
-// test), while i18n.js stays real — its t() returns each key unchanged, so the
-// error-mapping table asserts exact i18n keys. One isolated test seeds a real
-// i18n bundle to prove positional {0} substitution of min_length.
+// test). localizePasswordError moved to auth.js; its tests live in auth.test.js.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { resetDom } from "../../helpers/dom.js";
-import { installFetch, jsonResponse } from "../../helpers/net.js";
 
 // vi.mock is hoisted, so the paths must be string literals (not the consts below).
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({ post: vi.fn() }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({ navigate: vi.fn() }));
+vi.mock("../../../../main/webapp/themes/bootstrap/assets/auth.js", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getCurrentUser: vi.fn(),
+  promptLogin: vi.fn(),
+  endSession: vi.fn(),
+}));
 
 import * as api from "../../../../main/webapp/themes/bootstrap/assets/api.js";
 import * as router from "../../../../main/webapp/themes/bootstrap/assets/router.js";
-import {
-  localizePasswordError,
-  attach,
-} from "../../../../main/webapp/themes/bootstrap/assets/profile.js";
-
-const I18N = "../../../../main/webapp/themes/bootstrap/assets/i18n.js";
-const PROFILE = "../../../../main/webapp/themes/bootstrap/assets/profile.js";
+import * as auth from "../../../../main/webapp/themes/bootstrap/assets/auth.js";
+import { attach } from "../../../../main/webapp/themes/bootstrap/assets/profile.js";
 
 beforeEach(() => {
   resetDom();
   api.post.mockReset();
   router.navigate.mockReset();
+  auth.getCurrentUser.mockReset().mockReturnValue({ name: "Al", editable: true });
+  auth.promptLogin.mockReset();
+  auth.endSession.mockReset().mockResolvedValue(undefined);
 });
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
-});
-
-// ---------------------------------------------------------------------------
-// localizePasswordError: error-code / reason → localized message key.
-// ---------------------------------------------------------------------------
-describe("localizePasswordError", () => {
-  it.each([
-    [{ name: "NetworkError" }, "error.network"],
-    [{ code: "RATE_LIMITED" }, "auth.error_rate_limited"],
-    // The server's actual wire code is lowercase snake_case (V2ErrorCode
-    // .RATE_LIMITED → "rate_limited"); api.js copies err.code through unchanged.
-    // No httpStatus here, so the 429 fallback cannot cover for the code arm.
-    [{ code: "rate_limited" }, "auth.error_rate_limited"],
-    [{ httpStatus: 429 }, "auth.error_rate_limited"],
-    [{ details: { reason: "invalid_current_password" } }, "profile.error_wrong_current"],
-    [{ details: { reason: "errors.password_length", min_length: 8 } }, "profile.error_password_length"],
-    [{ details: { reason: "errors.password_no_uppercase" } }, "profile.error_password_no_uppercase"],
-    [{ details: { reason: "errors.password_no_lowercase" } }, "profile.error_password_no_lowercase"],
-    [{ details: { reason: "errors.password_no_digit" } }, "profile.error_password_no_digit"],
-    [{ details: { reason: "errors.password_no_special_char" } }, "profile.error_password_no_special_char"],
-    [{ details: { reason: "errors.password_is_blacklisted" } }, "profile.error_password_blacklisted"],
-    [{ details: { reason: "errors.blank_password" } }, "profile.error_blank_password"],
-    [{ details: { reason: "new_password_required" } }, "profile.error_blank_password"],
-    [{ details: { reason: "current_password_required" } }, "profile.error_blank_password"],
-    [{ details: { reason: "password_mismatch" } }, "profile.error_mismatch"],
-    [{ code: "AUTH_REQUIRED" }, "profile.error_wrong_current"],
-    // Same wire-code contract for V2ErrorCode.AUTH_REQUIRED → "auth_required".
-    [{ code: "auth_required" }, "profile.error_wrong_current"],
-    [{ httpStatus: 401 }, "profile.error_wrong_current"],
-    [{ code: "SOMETHING_UNMAPPED" }, "error.server"],
-    [null, "error.server"],
-  ])("%o → %s", (err, key) => {
-    expect(localizePasswordError(err)).toBe(key);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -95,10 +62,28 @@ describe("attach (structure)", () => {
     expect(document.getElementById("confirm-password")).not.toBeNull();
 
     expect(document.querySelector('#password-form button[type="submit"]')).not.toBeNull();
-    expect(document.querySelector("#password-form a.btn-secondary").getAttribute("href")).toBe("/");
+    expect(document.querySelector("#password-form a.btn-secondary").getAttribute("href")).toBe("./");
 
     expect(document.getElementById("profile-error").classList.contains("d-none")).toBe(true);
     expect(document.getElementById("profile-success").classList.contains("d-none")).toBe(true);
+  });
+});
+
+describe("attach (who may change a password)", () => {
+  it("asks a guest to log in instead of showing the form", () => {
+    auth.getCurrentUser.mockReturnValue(null);
+    mountProfile();
+    expect(document.getElementById("password-form")).toBeNull();
+    expect(document.querySelector("#profile-view .alert").textContent).toBe("flash.login_required");
+    expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends a user whose password is managed elsewhere back home", () => {
+    auth.getCurrentUser.mockReturnValue({ name: "ldap", editable: false });
+    mountProfile();
+    expect(document.getElementById("password-form")).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith("./", { replace: true });
+    expect(auth.promptLogin).not.toHaveBeenCalled();
   });
 });
 
@@ -143,17 +128,43 @@ describe("attach (submit)", () => {
     expect(document.getElementById("new-password").value).toBe(""); // form.reset()
   });
 
-  it("navigates home 2s after a re_login_required success", async () => {
-    vi.useFakeTimers();
+  it("after a re_login_required success ends the session and asks for a login, keeping the message", async () => {
     api.post.mockResolvedValue({ re_login_required: true });
     mountProfile();
     setPasswords("current", "newpass1", "newpass1");
 
     submitForm();
-    await vi.advanceTimersByTimeAsync(2000); // flush microtasks, then fire the 2s timer
 
-    expect(router.navigate).toHaveBeenCalledTimes(1);
-    expect(router.navigate).toHaveBeenCalledWith("/");
+    await vi.waitFor(() => expect(auth.promptLogin).toHaveBeenCalledTimes(1));
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("profile-success").textContent).toBe("profile.success");
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it("treats a 401 without a reason as an ended session", async () => {
+    api.post.mockRejectedValue({ code: "auth_required" });
+    mountProfile();
+    setPasswords("current", "newpass1", "newpass1");
+
+    submitForm();
+
+    await vi.waitFor(() => expect(auth.promptLogin).toHaveBeenCalledTimes(1));
+    expect(auth.endSession).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("profile-error").textContent).toBe("flash.login_required");
+  });
+
+  it("keeps the session when only the current password is wrong", async () => {
+    api.post.mockRejectedValue({ code: "auth_required", details: { reason: "invalid_current_password" } });
+    mountProfile();
+    setPasswords("wrong", "newpass1", "newpass1");
+
+    submitForm();
+
+    const err = document.getElementById("profile-error");
+    await vi.waitFor(() => expect(err.classList.contains("d-none")).toBe(false));
+    expect(err.textContent).toBe("profile.error_wrong_current");
+    expect(auth.endSession).not.toHaveBeenCalled();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
   });
 
   it("shows the localized API error when the request rejects", async () => {
@@ -167,28 +178,5 @@ describe("attach (submit)", () => {
     await vi.waitFor(() => expect(err.classList.contains("d-none")).toBe(false));
     expect(err.textContent).toBe("auth.error_rate_limited");
     expect(router.navigate).not.toHaveBeenCalled();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Positional substitution: seed a real i18n bundle in an isolated module graph
-// so the {0} placeholder actually renders min_length. Kept last so its
-// resetModules never disturbs the statically-imported suites above.
-// ---------------------------------------------------------------------------
-describe("localizePasswordError (positional substitution)", () => {
-  it("substitutes min_length into the localized password-length message", async () => {
-    vi.resetModules(); // fresh, seedable i18n singleton (api/router stay mocked via vi.mock)
-    const i18n = await import(I18N);
-    installFetch(async () => jsonResponse({ "profile.error_password_length": "Minimum {0} characters" }));
-    Object.defineProperty(navigator, "language", { value: "en", configurable: true });
-    await i18n.init();
-    const freshProfile = await import(PROFILE);
-
-    const msg = freshProfile.localizePasswordError({
-      details: { reason: "errors.password_length", min_length: 8 },
-    });
-    expect(msg).toContain("8");
-
-    vi.unstubAllGlobals();
   });
 });
