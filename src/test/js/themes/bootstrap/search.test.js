@@ -19,6 +19,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
 
 import * as api from "../../../../main/webapp/themes/bootstrap/assets/api.js";
 import { navigate } from "../../../../main/webapp/themes/bootstrap/assets/router.js";
+import { formatFileSize } from "../../../../main/webapp/themes/bootstrap/assets/format.js";
 import {
   safeHref,
   buildGoUrl,
@@ -220,6 +221,29 @@ describe("buildResultCard", () => {
     const cache = li.querySelector("a.cache");
     expect(cache).not.toBeNull();
     expect(cache.getAttribute("href")).toMatch(/^cache\/\?docId=d3/);
+  });
+
+  it("shows the view count between the size and the cache link while search logging is on", () => {
+    api.getConfig.mockReturnValue({ features: { search_log_enabled: true } });
+    const li = buildResultCard(
+      { doc_id: "d5", title: "T", url: "https://e.com", content_length: 2048, click_count: 7, has_cache: "true" }, "q", 1);
+    const text = li.querySelector(".info").textContent;
+    const size = text.indexOf(formatFileSize(2048));
+    const count = text.indexOf("result.click_count");
+    const cache = text.indexOf("result.cache");
+    expect(size).toBeGreaterThanOrEqual(0);
+    expect(count).toBeGreaterThan(size);
+    expect(cache).toBeGreaterThan(count);
+  });
+
+  it("omits the view count when search logging is off or nothing was clicked", () => {
+    const infoText = (doc) => buildResultCard({ title: "T", url: "https://e.com", ...doc }, "q", 1)
+      .querySelector(".info").textContent;
+    api.getConfig.mockReturnValue({ features: { search_log_enabled: false } });
+    expect(infoText({ doc_id: "a", click_count: 7 })).not.toContain("result.click_count");
+    api.getConfig.mockReturnValue({ features: { search_log_enabled: true } });
+    expect(infoText({ doc_id: "b", click_count: 0 })).not.toContain("result.click_count");
+    expect(infoText({ doc_id: "c" })).not.toContain("result.click_count");
   });
 
   it("renders a similar link only when similar_docs_count > 1", () => {
@@ -720,6 +744,44 @@ describe("runSearch — successful render", () => {
     await runSearch();
     await settle();
     expect(document.getElementById("results-warning").textContent).toBe("labels.search_partially_failed");
+  });
+
+  it.each([
+    ["PENDING", "errors.user_permissions_loading"],
+    ["FAILED", "errors.user_permissions_unavailable"],
+  ])("tells the user when permissions are %s", async (permissionState, key) => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { permission_state: permissionState }) });
+    await runSearch();
+    await settle();
+    const warn = document.getElementById("results-warning");
+    expect(warn.classList.contains("d-none")).toBe(false);
+    expect(warn.textContent).toBe(key);
+  });
+
+  it("shows the permission notice when nothing matched", async () => {
+    installApiDispatch({ search: makeSearchEnv([], { permission_state: "PENDING" }) });
+    await runSearch();
+    await settle();
+    const warn = document.getElementById("results-warning");
+    expect(warn.classList.contains("d-none")).toBe(false);
+    expect(warn.textContent).toBe("errors.user_permissions_loading");
+  });
+
+  it("puts the permission notice before a partial-result warning", async () => {
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { permission_state: "FAILED", partial: true, timed_out: true }) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-warning").textContent)
+      .toBe("errors.user_permissions_unavailable labels.process_time_is_exceeded");
+  });
+
+  it("hides the banner for resolved permissions and a complete result", async () => {
+    const warn = document.getElementById("results-warning");
+    warn.classList.remove("d-none");
+    installApiDispatch({ search: makeSearchEnv(SAMPLE_DOCS, { permission_state: "RESOLVED" }) });
+    await runSearch();
+    await settle();
+    expect(warn.classList.contains("d-none")).toBe(true);
   });
 
   it("uses the _over status key when record_count_relation is not EQUAL_TO", async () => {
