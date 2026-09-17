@@ -361,6 +361,7 @@ describe("clearSearchState / _state", () => {
     `);
     const s = _state;
     s.q = "x"; s.start = 5; s.num = 50; s.sort = "z"; s.lang = ["ja"]; s.sdh = "h";
+    s.as = { q: ["x"] };
     s.facets = { a: [1] }; s.fields = { label: ["x"] }; s.facetQueries = ["fq"]; s.exQ = ["e"];
     s.geo = { lat: "1", lon: "2", distance: "3" }; s.requestedTime = 99; s.highlightParams = "&hl";
 
@@ -372,6 +373,7 @@ describe("clearSearchState / _state", () => {
     expect(_state.sort).toBe("");
     expect(_state.lang).toEqual([]);
     expect(_state.sdh).toBe("");
+    expect(_state.as).toEqual({});
     expect(_state.facets).toEqual({});
     expect(_state.fields).toEqual({});
     expect(_state.facetQueries).toEqual([]);
@@ -1391,11 +1393,20 @@ describe("attach — wiring", () => {
     // and rendered popular words.
     expect(document.getElementById("popular-words").querySelectorAll("a[data-spa]").length).toBe(4);
 
-    // 1. Header form submit → navigate to /search?q=..., syncs inputs, disables the button.
+    // 1. Header form submit → navigate to search?q=..., syncs inputs, disables the button.
+    // The drawer's labels ride along; a legacy URL's sdh and as.* conditions do not.
+    setLocation("/search?q=old&sdh=h1&as.q=legacy&fields.label=lblB");
+    document.getElementById("labelSearchOption").value = "lblA";
     document.getElementById("query").value = "hello";
     document.getElementById("search-form").dispatchEvent(new Event("submit", { cancelable: true }));
     expect(navigate).toHaveBeenCalled();
-    expect(navigate.mock.calls.at(-1)[0]).toContain("q=hello");
+    const headerTarget = navigate.mock.calls.at(-1)[0];
+    expect(headerTarget).toContain("q=hello");
+    const headerParams = new URLSearchParams(headerTarget.slice(headerTarget.indexOf("?") + 1));
+    expect(headerParams.getAll("fields.label")).toEqual(["lblA"]);
+    expect(headerParams.has("sdh")).toBe(false);
+    expect(headerParams.has("as.q")).toBe(false);
+    setLocation("/");
     expect(document.getElementById("contentQuery").value).toBe("hello");
     expect(document.getElementById("searchButton").disabled).toBe(true);
 
@@ -1594,5 +1605,52 @@ describe("renderCurrentFilters — default page size", () => {
     await runSearch();
     await settle();
     expect(document.getElementById("current-filters").textContent).not.toContain("search.num_format");
+  });
+});
+
+describe("runFromUrl — legacy JSP parameters", () => {
+  const searchParams = () => api.get.mock.calls.find((c) => c[0] === "/search")[1];
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue(FULL_CFG);
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+  });
+
+  it("passes sdh and as.* from the URL to the search API", async () => {
+    setLocation("/search?q=foo&sdh=abc&as.q=bar&as.filetype=pdf&as.filetype=html&as.nq=");
+    runFromUrl();
+    await settle();
+    expect(searchParams().sdh).toBe("abc");
+    expect(searchParams()["as.q"]).toEqual(["bar"]);
+    expect(searchParams()["as.filetype"]).toEqual(["pdf", "html"]);
+    expect(Object.keys(searchParams())).not.toContain("as.nq");
+  });
+
+  it("runs a search for an advanced-search condition without a keyword", async () => {
+    setLocation("/search?as.epq=exact%20phrase");
+    runFromUrl();
+    await settle();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(searchParams()["as.epq"]).toEqual(["exact phrase"]);
+  });
+
+  it("goes home for as.occt alone, which only narrows a search", () => {
+    setLocation("/search?as.occt=title");
+    runFromUrl();
+    expect(navigate).toHaveBeenCalledWith("./", { replace: true });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it("drops sdh and as.* once the URL has none", async () => {
+    setLocation("/search?q=foo&sdh=abc&as.q=bar");
+    runFromUrl();
+    await settle();
+    api.get.mockClear();
+    setLocation("/search?q=next");
+    runFromUrl();
+    await settle();
+    expect(Object.keys(searchParams())).not.toContain("sdh");
+    expect(Object.keys(searchParams()).filter((k) => k.startsWith("as."))).toEqual([]);
   });
 });

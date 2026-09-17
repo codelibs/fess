@@ -409,6 +409,30 @@ describe("registerRoutes", () => {
   });
 });
 
+describe("home search form", () => {
+  it("carries the drawer's sort, page size and labels into the search URL", () => {
+    mountFullDom();
+    document.getElementById("sortSearchOption").innerHTML = '<option value="last_modified.desc" selected>x</option>';
+    document.getElementById("numSearchOption").innerHTML = '<option value="20" selected>20</option>';
+    document.getElementById("home-view").insertAdjacentHTML("beforeend",
+      '<select id="labelSearchOption" multiple><option value="lblA" selected>A</option><option value="lblB">B</option></select>');
+    registerRoutes();
+    setLocation("/");
+    router.register.mock.calls[0][1](); // the home handler wires the form
+
+    document.getElementById("contentQuery").value = "hello";
+    document.getElementById("home-search-form").dispatchEvent(new Event("submit", { cancelable: true }));
+
+    const target = router.navigate.mock.calls.at(-1)[0];
+    expect(target.startsWith("search?")).toBe(true);
+    const qs = new URLSearchParams(target.slice("search?".length));
+    expect(qs.get("q")).toBe("hello");
+    expect(qs.get("sort")).toBe("last_modified.desc");
+    expect(qs.get("num")).toBe("20");
+    expect(qs.getAll("fields.label")).toEqual(["lblA"]);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // main — the SPA boot sequence
 // ---------------------------------------------------------------------------

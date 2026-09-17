@@ -196,7 +196,7 @@ function attachHomeView() {
       if (q) {
         const params = new URLSearchParams();
         params.set("q", q);
-        // JSP parity: carry the shared drawer's sort / num / lang selections into
+        // JSP parity: carry the shared drawer's sort / num / lang / label selections into
         // the first search so options set on the home view before searching are applied
         // (these selects no longer auto-run a search on change).
         const sortSel = document.getElementById("sortSearchOption");
@@ -205,6 +205,8 @@ function attachHomeView() {
         if (numSel && numSel.value) params.set("num", numSel.value);
         const langSel = document.getElementById("langSearchOption");
         if (langSel) Array.from(langSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("lang", v));
+        const labelSel = document.getElementById("labelSearchOption");
+        if (labelSel) Array.from(labelSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("fields.label", v));
         router.navigate("search?" + params.toString());
         // JSP parity: disable the submit button for 3s after navigation has been
         // triggered, to prevent rapid double-submits.
