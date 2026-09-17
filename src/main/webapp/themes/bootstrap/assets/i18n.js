@@ -61,7 +61,7 @@ export async function init(preferred) {
  *
  * Substitution supports two modes:
  *  - Named placeholders (Object): {name} is replaced by params.name.
- *    e.g. t("result.click_count", { n: 42 }) → "Clicks: 42"
+ *    e.g. t("result.click_count", { n: 42 }) → "42 views"
  *  - Positional placeholders (Array): {0}, {1}, … are replaced by params[0], params[1], …
  *    e.g. t("labels.search_result_status", [total, start, end, query])
  *    → "Results 1 - 10 of 100 for foo"

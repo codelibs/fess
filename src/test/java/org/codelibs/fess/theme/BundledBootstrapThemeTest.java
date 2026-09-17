@@ -972,6 +972,29 @@ public class BundledBootstrapThemeTest {
         }
     }
 
+    /**
+     * The bundles carry the JSP wording for the view count, the permission notice and the forced
+     * password change, ported from fess_label / fess_message.
+     */
+    @Test
+    public void test_i18n_carriesJspWordingForSearchAndLogin() throws Exception {
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            for (final Path p : files.filter(f -> f.getFileName().toString().startsWith("messages.")).toList()) {
+                final String s = Files.readString(p, StandardCharsets.UTF_8);
+                for (final String key : java.util.List.of("\"auth.password_change_required\"", "\"errors.user_permissions_loading\"",
+                        "\"errors.user_permissions_unavailable\"")) {
+                    assertTrue(s.contains(key), p.getFileName() + " must contain " + key);
+                }
+                assertTrue(Pattern.compile("\"result\\.click_count\": \"[^\"]*\\{n\\}").matcher(s).find(),
+                        p.getFileName() + " must keep the {n} placeholder in result.click_count");
+            }
+        }
+        final String en = Files.readString(THEME_DIR.resolve("i18n/messages.en.json"), StandardCharsets.UTF_8);
+        assertTrue(en.contains("\"result.click_count\": \"{n} views\""), "result.click_count must follow labels.search_click_views");
+        assertTrue(en.contains("\"auth.password_change_required\": \"You need to update your password\""),
+                "auth.password_change_required must follow labels.login.newpassword");
+    }
+
     @Test
     public void test_searchJs_favoritePostsQueryId() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
