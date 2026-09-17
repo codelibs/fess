@@ -77,7 +77,8 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
     public void test_serveIndex_normal() throws Exception {
         final Path tmp = Files.createTempDirectory("tv-index-");
         try {
-            final String content = "<html><body>hello</body></html>";
+            final String content = "<html><head><title>T</title></head><body>hello</body></html>";
+            final String expected = "<html><head><base href=\"/\"><title>T</title></head><body>hello</body></html>";
             Files.writeString(tmp.resolve("index.html"), content);
             final Theme theme = new Theme("t", tmp, manifest());
             final StubRequest req = new StubRequest();
@@ -91,9 +92,51 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertEquals(StaticThemeResponder.INDEX_CSP, res.headers.get("Content-Security-Policy"));
             assertEquals("same-origin", res.headers.get("Referrer-Policy"));
             assertEquals("inline; filename=\"index.html\"", res.headers.get("Content-Disposition"));
-            assertEquals(content, new String(res.body(), StandardCharsets.UTF_8));
-            // Content-Length should equal the file size (set via setContentLengthLong).
-            assertEquals(content.getBytes(StandardCharsets.UTF_8).length, (int) res.contentLength);
+            assertEquals(expected, new String(res.body(), StandardCharsets.UTF_8));
+            // Content-Length is the length of what is actually sent.
+            assertEquals(expected.getBytes(StandardCharsets.UTF_8).length, (int) res.contentLength);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveIndex_baseHrefCarriesTheContextPath() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-index-ctx-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>T</title></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final StubRequest req = new StubRequest();
+            req.contextPath = "/fess";
+            final CapturingResponse res = new CapturingResponse();
+
+            new StaticThemeResponder().serveIndex(req, res, theme, "/search");
+
+            final String body = new String(res.body(), StandardCharsets.UTF_8);
+            assertTrue(body.contains("<head><base href=\"/fess/\"><title>"), body);
+            assertEquals(res.body().length, (int) res.contentLength);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveIndex_errorRouteHasBaseHrefAndErrorMeta() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-index-error-base-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final StubRequest req = new StubRequest();
+            req.contextPath = "/fess";
+            final CapturingResponse res = new CapturingResponse();
+
+            new StaticThemeResponder().serveIndex(req, res, theme, "/error/notFound");
+
+            final String body = new String(res.body(), StandardCharsets.UTF_8);
+            assertEquals(404, res.status);
+            assertTrue(body.contains("<head><base href=\"/fess/\">"), body);
+            assertTrue(body.contains("<meta name=\"x-fess-error-code\" content=\"404\">"), body);
+            assertEquals(res.body().length, (int) res.contentLength);
         } finally {
             deleteTree(tmp);
         }
@@ -641,6 +684,35 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_injectBaseHref_insertsRightAfterTheHeadStartTag() {
+        final String out = new String(StaticThemeResponder.injectBaseHref(
+                "<html><head lang=\"en\"><title>T</title></head><body><header>h</header></body></html>".getBytes(StandardCharsets.UTF_8),
+                "/fess"), StandardCharsets.UTF_8);
+        assertEquals("<html><head lang=\"en\"><base href=\"/fess/\"><title>T</title></head><body><header>h</header></body></html>", out);
+    }
+
+    @Test
+    public void test_injectBaseHref_returnsOriginalWithoutAHeadTag() {
+        final String html = "<html><body><header>no head</header></body></html>";
+        assertEquals(html,
+                new String(StaticThemeResponder.injectBaseHref(html.getBytes(StandardCharsets.UTF_8), "/fess"), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void test_injectBaseHref_escapesTheContextPath() {
+        final String out = new String(StaticThemeResponder.injectBaseHref("<head></head>".getBytes(StandardCharsets.UTF_8), "/a\"b<c>&d"),
+                StandardCharsets.UTF_8);
+        assertEquals("<head><base href=\"/a&quot;b&lt;c&gt;&amp;d/\"></head>", out);
+    }
+
+    @Test
+    public void test_injectBaseHref_nullContextPathIsTheRoot() {
+        final String out = new String(StaticThemeResponder.injectBaseHref("<HEAD></HEAD>".getBytes(StandardCharsets.UTF_8), null),
+                StandardCharsets.UTF_8);
+        assertEquals("<HEAD><base href=\"/\"></HEAD>", out);
+    }
+
+    @Test
     public void test_resolveMessageKey_acceptsSafeAndRejectsUnsafe() {
         final StaticThemeResponder viewer = new StaticThemeResponder();
         final StubRequest safe = new StubRequest();
@@ -876,6 +948,7 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
     static class StubRequest implements HttpServletRequest {
         final Map<String, String> headers = new HashMap<>();
         String messageKey;
+        String contextPath = "";
 
         @Override
         public String getHeader(final String name) {
@@ -897,7 +970,7 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
 
         @Override
         public String getContextPath() {
-            return "";
+            return contextPath;
         }
 
         // --- remaining methods: unused ---
