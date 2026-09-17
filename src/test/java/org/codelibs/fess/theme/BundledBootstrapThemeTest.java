@@ -190,6 +190,21 @@ public class BundledBootstrapThemeTest {
         }
     }
 
+    /**
+     * The login modal holds the new-password form auth.js shows when the password just used
+     * must be changed (parity login/newpassword.jsp).
+     */
+    @Test
+    public void test_indexHtml_loginModalOffersPasswordChange() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        for (final String id : java.util.List.of("password-change-form", "password-change-error", "password-change-new",
+                "password-change-confirm")) {
+            assertTrue(html.contains("id=\"" + id + "\""), "index.html must contain #" + id);
+        }
+        assertTrue(html.contains("data-i18n=\"auth.password_change_required\""),
+                "the new-password form must explain why the password has to change");
+    }
+
     @Test
     public void test_searchJs_usesHighlightedContentTitle() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);

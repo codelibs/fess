@@ -3,6 +3,7 @@
 // All DOM construction uses createElement/textContent/setAttribute — no innerHTML.
 
 import * as api from "./api.js";
+import { localizePasswordError } from "./auth.js";
 import { t } from "./i18n.js";
 import * as router from "./router.js";
 
@@ -62,52 +63,6 @@ function makePasswordField(labelText, inputId, inputAttrs = {}) {
 
   wrapper.appendChild(group);
   return wrapper;
-}
-
-/**
- * Map a password-change error from POST /api/v2/auth/password to a localized,
- * user-facing message. Per the V2 i18n contract the server's `error.message` is
- * developer-facing English; the client localizes using the stable `error.code`
- * and the structured `error.details.reason` token (mirrors auth.js login errors).
- *
- * @param {object} err - ApiError (code/httpStatus/details) or NetworkError
- * @returns {string} a localized message safe to render via textContent
- */
-export function localizePasswordError(err) {
-  if (err && err.name === "NetworkError") return t("error.network");
-  const code = err && err.code;
-  const httpStatus = err && err.httpStatus;
-  // V2ErrorCode emits lowercase snake_case wire codes ("rate_limited"); the
-  // uppercase spelling is kept alongside it so the branch survives either form.
-  if (code === "rate_limited" || code === "RATE_LIMITED" || httpStatus === 429) return t("auth.error_rate_limited");
-  const details = (err && err.details) || {};
-  const reason = details.reason;
-  if (reason === "invalid_current_password") return t("profile.error_wrong_current");
-  switch (reason) {
-    case "errors.password_length":
-      return t("profile.error_password_length", [details.min_length]);
-    case "errors.password_no_uppercase":
-      return t("profile.error_password_no_uppercase");
-    case "errors.password_no_lowercase":
-      return t("profile.error_password_no_lowercase");
-    case "errors.password_no_digit":
-      return t("profile.error_password_no_digit");
-    case "errors.password_no_special_char":
-      return t("profile.error_password_no_special_char");
-    case "errors.password_is_blacklisted":
-      return t("profile.error_password_blacklisted");
-    case "errors.blank_password":
-    case "new_password_required":
-    case "current_password_required":
-      return t("profile.error_blank_password");
-    case "password_mismatch":
-      return t("profile.error_mismatch");
-    default:
-      break;
-  }
-  // Fallbacks by HTTP/code when no specific reason is present.
-  if (code === "auth_required" || code === "AUTH_REQUIRED" || httpStatus === 401) return t("profile.error_wrong_current");
-  return t("error.server");
 }
 
 /**

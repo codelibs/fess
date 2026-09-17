@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Behavioural tests for the profile / password-change view. api.js and
 // router.js are mocked (router.js carries module state; api.post is driven per
-// test), while i18n.js stays real — its t() returns each key unchanged, so the
-// error-mapping table asserts exact i18n keys. One isolated test seeds a real
-// i18n bundle to prove positional {0} substitution of min_length.
+// test). localizePasswordError moved to auth.js; its tests live in auth.test.js.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { resetDom } from "../../helpers/dom.js";
-import { installFetch, jsonResponse } from "../../helpers/net.js";
 
 // vi.mock is hoisted, so the paths must be string literals (not the consts below).
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({ post: vi.fn() }));
@@ -15,13 +12,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({ na
 
 import * as api from "../../../../main/webapp/themes/bootstrap/assets/api.js";
 import * as router from "../../../../main/webapp/themes/bootstrap/assets/router.js";
-import {
-  localizePasswordError,
-  attach,
-} from "../../../../main/webapp/themes/bootstrap/assets/profile.js";
-
-const I18N = "../../../../main/webapp/themes/bootstrap/assets/i18n.js";
-const PROFILE = "../../../../main/webapp/themes/bootstrap/assets/profile.js";
+import { attach } from "../../../../main/webapp/themes/bootstrap/assets/profile.js";
 
 beforeEach(() => {
   resetDom();
@@ -31,40 +22,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
-});
-
-// ---------------------------------------------------------------------------
-// localizePasswordError: error-code / reason → localized message key.
-// ---------------------------------------------------------------------------
-describe("localizePasswordError", () => {
-  it.each([
-    [{ name: "NetworkError" }, "error.network"],
-    [{ code: "RATE_LIMITED" }, "auth.error_rate_limited"],
-    // The server's actual wire code is lowercase snake_case (V2ErrorCode
-    // .RATE_LIMITED → "rate_limited"); api.js copies err.code through unchanged.
-    // No httpStatus here, so the 429 fallback cannot cover for the code arm.
-    [{ code: "rate_limited" }, "auth.error_rate_limited"],
-    [{ httpStatus: 429 }, "auth.error_rate_limited"],
-    [{ details: { reason: "invalid_current_password" } }, "profile.error_wrong_current"],
-    [{ details: { reason: "errors.password_length", min_length: 8 } }, "profile.error_password_length"],
-    [{ details: { reason: "errors.password_no_uppercase" } }, "profile.error_password_no_uppercase"],
-    [{ details: { reason: "errors.password_no_lowercase" } }, "profile.error_password_no_lowercase"],
-    [{ details: { reason: "errors.password_no_digit" } }, "profile.error_password_no_digit"],
-    [{ details: { reason: "errors.password_no_special_char" } }, "profile.error_password_no_special_char"],
-    [{ details: { reason: "errors.password_is_blacklisted" } }, "profile.error_password_blacklisted"],
-    [{ details: { reason: "errors.blank_password" } }, "profile.error_blank_password"],
-    [{ details: { reason: "new_password_required" } }, "profile.error_blank_password"],
-    [{ details: { reason: "current_password_required" } }, "profile.error_blank_password"],
-    [{ details: { reason: "password_mismatch" } }, "profile.error_mismatch"],
-    [{ code: "AUTH_REQUIRED" }, "profile.error_wrong_current"],
-    // Same wire-code contract for V2ErrorCode.AUTH_REQUIRED → "auth_required".
-    [{ code: "auth_required" }, "profile.error_wrong_current"],
-    [{ httpStatus: 401 }, "profile.error_wrong_current"],
-    [{ code: "SOMETHING_UNMAPPED" }, "error.server"],
-    [null, "error.server"],
-  ])("%o → %s", (err, key) => {
-    expect(localizePasswordError(err)).toBe(key);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -167,28 +124,5 @@ describe("attach (submit)", () => {
     await vi.waitFor(() => expect(err.classList.contains("d-none")).toBe(false));
     expect(err.textContent).toBe("auth.error_rate_limited");
     expect(router.navigate).not.toHaveBeenCalled();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Positional substitution: seed a real i18n bundle in an isolated module graph
-// so the {0} placeholder actually renders min_length. Kept last so its
-// resetModules never disturbs the statically-imported suites above.
-// ---------------------------------------------------------------------------
-describe("localizePasswordError (positional substitution)", () => {
-  it("substitutes min_length into the localized password-length message", async () => {
-    vi.resetModules(); // fresh, seedable i18n singleton (api/router stay mocked via vi.mock)
-    const i18n = await import(I18N);
-    installFetch(async () => jsonResponse({ "profile.error_password_length": "Minimum {0} characters" }));
-    Object.defineProperty(navigator, "language", { value: "en", configurable: true });
-    await i18n.init();
-    const freshProfile = await import(PROFILE);
-
-    const msg = freshProfile.localizePasswordError({
-      details: { reason: "errors.password_length", min_length: 8 },
-    });
-    expect(msg).toContain("8");
-
-    vi.unstubAllGlobals();
   });
 });
