@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
@@ -97,6 +98,27 @@ public class MeHandlerTest extends UnitFessTestCase {
         assertTrue("username must be present: " + res.body(), res.body().contains("\"username\":"));
         assertTrue("name must be present: " + res.body(), res.body().contains("\"name\":"));
         assertTrue("admin must be present: " + res.body(), res.body().contains("\"admin\":"));
+    }
+
+    @Test
+    public void test_authenticatedUser_reportsPermissionState() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        final MeHandler handler = new MeHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser("eve") {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public PermissionState getPermissionState() {
+                        return PermissionState.PENDING;
+                    }
+                }));
+            }
+        };
+        handler.handle(new StubRequest("GET", "/api/v2/auth/me"), res);
+        assertEquals(res.body(), 200, res.status);
+        assertTrue(res.body(), res.body().contains("\"permission_state\":\"PENDING\""));
     }
 
     /** Minimal FessUser with null role/group/permission arrays. */

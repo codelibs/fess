@@ -330,6 +330,12 @@ public class LoginHandler {
             payload.put("csrf_token", token);
             addReturnTo(payload, returnTo);
         }
+        if (!fessConfig.isValidAdminPassword(password)) {
+            // Mirrors LoginAction.login(): a password on password.invalid.admin.passwords signs the
+            // user in and asks for a new one. The session is already live, so this is a prompt for
+            // the client, not an enforcement.
+            payload.put("password_change_required", true);
+        }
         ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
     }
 

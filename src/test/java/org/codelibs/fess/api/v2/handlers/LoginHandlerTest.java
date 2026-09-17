@@ -1019,6 +1019,33 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void login_blacklistedPasswordAsksForAPasswordChange() throws Exception {
+        // Mirrors LoginAction.login(): a password listed in password.invalid.admin.passwords (default
+        // "admin") signs the user in and asks for a new password.
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("alice", false));
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"admin\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"password_change_required\":true"), res.body());
+        assertTrue(res.body().contains("\"permission_state\":\"RESOLVED\""), res.body());
+    }
+
+    @Test
+    public void login_acceptedPasswordDoesNotAskForAPasswordChange() throws Exception {
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("alice", false));
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new LoginHandler(new LoginRateLimiter()).handle(
+                new StubRequestWithSession("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"alice\",\"password\":\"secret\"}"),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertFalse(res.body().contains("password_change_required"), res.body());
+    }
+
+    @Test
     public void login_credentialFailureWritesLoginFailureRecordToAuditLog() throws Exception {
         // Companion regression for the failure path: LoginAction.login() calls
         // activityHelper.loginFailure(new LocalUserCredential(username, password)) when the

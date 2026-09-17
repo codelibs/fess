@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.entity.FessUser.PermissionState;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -78,10 +80,28 @@ public class UserPayloads {
         // customised per deployment). Ensures the SPA dropdown's "Administration"
         // visibility stays in lock-step with the actual authorization check.
         userMap.put("admin", u.hasRoles(ComponentUtil.getFessConfig().getAuthenticationAdminRolesAsArray()));
+        userMap.put("permission_state", permissionState(u));
         return userMap;
     }
 
     private List<String> arrayOrEmpty(final String[] arr) {
         return arr == null ? List.of() : List.of(arr);
+    }
+
+    /**
+     * Returns how far the user's group and role permissions have got, as sent on the wire:
+     * {@code RESOLVED}, {@code PENDING} or {@code FAILED}.
+     *
+     * <p>No user, {@code FessUserBean.empty()} (which wraps no user) and a null state -- a session
+     * deserialized from before the field existed -- all count as {@code RESOLVED}, as they do for
+     * the JSP pages ({@code FessSearchAction.getPermissionStateMessageKey}).</p>
+     *
+     * @param u the user bean, may be null
+     * @return the state name
+     */
+    public String permissionState(final FessUserBean u) {
+        final FessUser fessUser = u == null ? null : u.getFessUser();
+        final PermissionState state = fessUser == null ? null : fessUser.getPermissionState();
+        return (state == null ? PermissionState.RESOLVED : state).name();
     }
 }

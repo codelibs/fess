@@ -1079,7 +1079,7 @@ components:
     # --- Reusable user shape -----------------------------------------
     UserPayload:
       type: object
-      required: [user_id, username, name, roles, groups, permissions, editable, admin]
+      required: [user_id, username, name, roles, groups, permissions, editable, admin, permission_state]
       description: |-
         Authenticated-user descriptor used by `/auth/me` and `/auth/login`.
         All array fields are guaranteed non-null (empty arrays when no
@@ -1112,6 +1112,13 @@ components:
             `true` when the user holds one of the configured
             `authentication.admin.roles`. Drives the visibility of the
             SPA "Administration" entry.
+        permission_state:
+          type: string
+          enum: [RESOLVED, PENDING, FAILED]
+          description: |-
+            How far the user's group and role permissions have got. `PENDING`
+            and `FAILED` mean the user currently holds fewer than they should,
+            so searches may miss documents.
 
     # --- Health ------------------------------------------------------
     HealthResponse:
@@ -1641,6 +1648,13 @@ components:
                 return_to:
                   type: string
                   description: Echoed only when the request value passed the allowlist.
+                password_change_required:
+                  type: boolean
+                  enum: [true]
+                  description: |-
+                    Present when the password is listed in
+                    `password.invalid.admin.passwords`. The user is signed in;
+                    the client should ask for a new password.
 
     PasswordChangeRequest:
       type: object
