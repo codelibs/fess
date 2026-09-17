@@ -27,10 +27,12 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.codelibs.nekohtml.parsers.DOMParser;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Node;
@@ -1050,6 +1052,27 @@ public class FessPropTest extends UnitFessTestCase {
     @Test
     public void test_normalizeIpAddress_trimsSurroundingSpace() {
         assertEquals("127.0.0.1", FessProp.normalizeIpAddress("  127.0.0.1  "));
+    }
+
+    @Test
+    public void test_getDefaultSortForUser() {
+        assertEquals("", sortConfig().getDefaultSortForUser(OptionalThing.empty()));
+        assertEquals("last_modified.desc,score.desc",
+                sortConfig("last_modified.desc,score.desc").getDefaultSortForUser(OptionalThing.empty()));
+        // Two applicable values: the first one given for a field wins, as FessSearchAction did.
+        assertEquals("last_modified.desc,score.desc",
+                sortConfig("last_modified.desc", "last_modified.asc,score.desc").getDefaultSortForUser(OptionalThing.empty()));
+    }
+
+    private static FessConfig sortConfig(final String... values) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String[] getDefaultSortValues(final OptionalThing<FessUserBean> userBean) {
+                return values;
+            }
+        };
     }
 
 }

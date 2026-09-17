@@ -36,12 +36,14 @@ import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -162,6 +164,21 @@ public class UiConfigHandler {
         } catch (final Exception e) {
             logger.debug("SSO availability could not be resolved; reporting it as not served", e);
             return false;
+        }
+    }
+
+    /**
+     * Resolves the logged-in user. A seam so tests supply a user without the login subsystem;
+     * a failed lookup counts as a guest.
+     *
+     * @return the saved user bean, or empty for a guest
+     */
+    protected OptionalThing<FessUserBean> getSavedUserBean() {
+        try {
+            return ComponentUtil.getFessLoginAssist().getSavedUserBean();
+        } catch (final Exception e) {
+            logger.debug("login subsystem lookup failed; treating the caller as a guest", e);
+            return OptionalThing.empty();
         }
     }
 
@@ -408,6 +425,13 @@ public class UiConfigHandler {
             payload.put("site_name", siteName);
             payload.put("login_required", cfg.isLoginRequired());
             payload.put("locales", langs == null ? java.util.List.of() : Arrays.asList(langs));
+            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
+            // The label and sort the JSP search page pre-selects for this user (label.value /
+            // sort.value). /api/v2/search does not apply them, so API clients see no change.
+            // The JSP page applies label.value only when it offers labels (FessSearchAction.buildFormParams),
+            // so a default for a label the user cannot see is not sent either.
+            payload.put("default_label_values", labelOptions.isEmpty() ? List.of() : Arrays.asList(cfg.getDefaultLabelValues(userBean)));
+            payload.put("default_sort", cfg.getDefaultSortForUser(userBean));
             payload.put("theme", themePayload);
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());

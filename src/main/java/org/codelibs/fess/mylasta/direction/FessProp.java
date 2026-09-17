@@ -263,6 +263,34 @@ public interface FessProp {
         }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
+    /**
+     * Joins the default sort values that apply to the user into one sort parameter. When several
+     * apply, the first value given for each field wins.
+     *
+     * @param userBean the logged-in user, or empty for a guest
+     * @return the sort parameter, e.g. {@code last_modified.desc,score.desc}; empty when none applies
+     */
+    default String getDefaultSortForUser(final OptionalThing<FessUserBean> userBean) {
+        final String[] defaultSortValues = getDefaultSortValues(userBean);
+        if (defaultSortValues.length == 1) {
+            return defaultSortValues[0];
+        }
+        final StringBuilder sortValueSb = new StringBuilder();
+        final Set<String> sortFieldNames = new HashSet<>();
+        for (final String defaultSortValue : defaultSortValues) {
+            for (final String singleValue : defaultSortValue.split(",")) {
+                final String sortFieldName = singleValue.split("\\.")[0];
+                if (sortFieldNames.add(sortFieldName)) {
+                    if (sortValueSb.length() > 0) {
+                        sortValueSb.append(',');
+                    }
+                    sortValueSb.append(singleValue);
+                }
+            }
+        }
+        return sortValueSb.toString();
+    }
+
     default void setDefaultSortValue(final String value) {
         setSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, value);
         propMap.remove(DEFAULT_SORT_VALUES);

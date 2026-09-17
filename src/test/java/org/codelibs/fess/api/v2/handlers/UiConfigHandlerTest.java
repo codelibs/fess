@@ -23,9 +23,16 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -460,6 +467,66 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"login_link\":true"), res.body());
     }
 
+    @Test
+    public void test_defaultLabelAndSort_forTheLoggedInUser() throws Exception {
+        final String body = handleWithDefaults(OptionalThing.of(new FessUserBean(new StubFessUser("carol", "staff"))));
+        assertTrue(body.contains("\"default_label_values\":[\"intranet\",\"news\"]"), body);
+        assertTrue(body.contains("\"default_sort\":\"last_modified.desc\""), body);
+    }
+
+    @Test
+    public void test_defaultLabelAndSort_forAGuest() throws Exception {
+        final String body = handleWithDefaults(OptionalThing.empty());
+        assertTrue(body.contains("\"default_label_values\":[]"), body);
+        assertTrue(body.contains("\"default_sort\":\"\""), body);
+    }
+
+    @Test
+    public void test_defaultLabelValues_emptyWhenNoLabelIsOffered() throws Exception {
+        final String body = handleWithDefaults(OptionalThing.of(new FessUserBean(new StubFessUser("carol", "staff"))), java.util.List.of());
+        assertTrue(body.contains("\"default_label_values\":[]"), body);
+        assertTrue(body.contains("\"default_sort\":\"last_modified.desc\""), body);
+    }
+
+    /** Runs the handler with label.value and sort.value bound to the "staff" role and one visible label. */
+    private String handleWithDefaults(final OptionalThing<FessUserBean> user) throws Exception {
+        return handleWithDefaults(user, java.util.List.of(Map.of(Constants.ITEM_VALUE, "intranet", Constants.ITEM_LABEL, "Intranet")));
+    }
+
+    /**
+     * Runs the handler with label.value and sort.value bound to the "staff" role and the given labels offered,
+     * restoring both properties afterwards.
+     */
+    private String handleWithDefaults(final OptionalThing<FessUserBean> user, final java.util.List<Map<String, String>> labelItems)
+            throws Exception {
+        ComponentUtil.register(new LabelTypeHelper() {
+            @Override
+            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
+                    final java.util.Locale requestLocale) {
+                return labelItems;
+            }
+        }, "labelTypeHelper");
+        final org.codelibs.core.misc.DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        FessProp.propMap.clear();
+        systemProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, "role:staff=intranet,news");
+        systemProperties.setProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, "role:staff=last_modified.desc");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler() {
+                @Override
+                protected OptionalThing<FessUserBean> getSavedUserBean() {
+                    return user;
+                }
+            }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            return res.body();
+        } finally {
+            systemProperties.remove(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+            systemProperties.remove(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+            FessProp.propMap.clear();
+        }
+    }
+
     /**
      * rag_chat_enabled must be present as a boolean in the features map.
      * Mirrors the gate used by FessSearchAction#setupHtmlData (chatClient.isAvailable()).
@@ -550,6 +617,37 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             assertTrue(idx >= 0, "facet_views key missing");
             final String after = body.substring(idx + "\"facet_views\"".length()).stripLeading().replaceFirst("^:", "").stripLeading();
             assertTrue(after.startsWith("["), "facet_views must be a JSON array in: " + body);
+        }
+    }
+
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+        private final String name;
+        private final String[] roles;
+
+        StubFessUser(final String name, final String... roles) {
+            this.name = name;
+            this.roles = roles;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return roles;
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
         }
     }
 

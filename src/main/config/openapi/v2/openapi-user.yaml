@@ -1377,6 +1377,8 @@ components:
                 - site_name
                 - login_required
                 - locales
+                - default_label_values
+                - default_sort
                 - theme
                 - features
                 - page_size_default
@@ -1396,6 +1398,20 @@ components:
                 locales:
                   type: array
                   items: { type: string }
+                default_label_values:
+                  type: array
+                  items: { type: string }
+                  description: |-
+                    Label values the search page pre-selects for the current user
+                    (`label.value`, by role or group). `/search` does not apply them.
+                    Empty when `label_options` is empty, as the search page applies
+                    it only when it offers labels.
+                default_sort:
+                  type: string
+                  description: |-
+                    Sort parameter the search page pre-selects for the current user
+                    (`sort.value`, by role or group); empty when none applies.
+                    `/search` does not apply it.
                 theme:
                   type: object
                   description: |-
