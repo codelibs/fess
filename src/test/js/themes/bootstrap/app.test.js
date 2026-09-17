@@ -43,6 +43,10 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/auth.js", () => ({
   buildUserDropdown: () => document.createElement("div"),
   buildLoginLink: () => document.createElement("a"),
   rotateCsrf: vi.fn(async () => {}),
+  isLoginGateClosed: vi.fn(() => false),
+  isLoginRequired: vi.fn(() => false),
+  promptLogin: vi.fn(),
+  endSession: vi.fn(async () => {}),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   attach: vi.fn(),
@@ -52,6 +56,8 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   attachSuggest: vi.fn(),
   disableSubmitBriefly: vi.fn(),
   renderPopularWords: vi.fn(),
+  initSearchOptions: vi.fn(),
+  forgetNum: vi.fn(),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/chat.js", () => ({
   attach: vi.fn(),
@@ -63,6 +69,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
   navigate: vi.fn(),
   attach: vi.fn(),
   dispatch: vi.fn(),
+  currentPath: vi.fn(() => "/"),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/error.js", () => ({ attach: vi.fn() }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/profile.js", () => ({ attach: vi.fn() }));
@@ -86,7 +93,7 @@ import * as cache from "../../../../main/webapp/themes/bootstrap/assets/cache.js
 // dynamic import, so app.js registers a DOMContentLoaded listener instead of
 // auto-running main() at import time.
 Object.defineProperty(document, "readyState", { configurable: true, get: () => "loading" });
-const { renderHomeFlash, hasSearchQuery, updateAdvanceLinks, registerRoutes, main } = await import(
+const { renderHomeFlash, hasSearchQuery, updateAdvanceLinks, registerRoutes, main, isLoginGatedPath } = await import(
   "../../../../main/webapp/themes/bootstrap/assets/app.js"
 );
 
@@ -143,6 +150,10 @@ beforeEach(() => {
   i18n.init.mockResolvedValue(undefined);
   auth.attach.mockResolvedValue(null);
   help.attach.mockResolvedValue(undefined);
+  auth.isLoginGateClosed.mockReturnValue(false);
+  auth.isLoginRequired.mockReturnValue(false);
+  auth.endSession.mockResolvedValue(undefined);
+  router.currentPath.mockReturnValue("/");
   setLocation("/");
 });
 afterEach(resetDom);
@@ -517,5 +528,89 @@ describe("main", () => {
     document.body.innerHTML = "";
     await expect(main()).resolves.toBeUndefined();
     expect(router.dispatch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("login gate", () => {
+  it.each(["/", "/index", "/index.html", "/search", "/chat", "/cache", "/cache/doc"])("gates %s", (path) => {
+    expect(isLoginGatedPath(path)).toBe(true);
+  });
+
+  it.each(["/help", "/advance", "/search/advance", "/profile", "/error/404", "/unknown"])("does not gate %s", (path) => {
+    expect(isLoginGatedPath(path)).toBe(false);
+  });
+
+  it("asks for login instead of running a gated route while the gate is closed", async () => {
+    mountFullDom();
+    auth.isLoginGateClosed.mockReturnValue(true);
+    router.currentPath.mockReturnValue("/search");
+    await main();
+    expect(auth.promptLogin).toHaveBeenCalledTimes(1);
+    expect(router.dispatch).not.toHaveBeenCalled();
+  });
+
+  it("runs a route that is not gated even while the gate is closed", async () => {
+    mountFullDom();
+    auth.isLoginGateClosed.mockReturnValue(true);
+    router.currentPath.mockReturnValue("/help");
+    await main();
+    expect(router.dispatch).toHaveBeenCalledTimes(1);
+    expect(auth.promptLogin).not.toHaveBeenCalled();
+  });
+});
+
+describe("auth events", () => {
+  it("fetches the config again and re-runs the route after a login", async () => {
+    mountFullDom();
+    await main();
+    api.init.mockClear();
+    router.dispatch.mockClear();
+    document.dispatchEvent(new CustomEvent("fess:auth:login"));
+    await flush();
+    expect(api.init).toHaveBeenCalled();
+    expect(search.initSearchOptions).toHaveBeenCalled();
+    expect(router.dispatch).toHaveBeenCalled();
+    expect(search.refresh).not.toHaveBeenCalled();
+  });
+
+  it("forgets the page size and fetches the config again after a logout", async () => {
+    mountFullDom();
+    await main();
+    api.init.mockClear();
+    document.dispatchEvent(new CustomEvent("fess:auth:logout"));
+    await flush();
+    expect(search.forgetNum).toHaveBeenCalled();
+    expect(api.init).toHaveBeenCalled();
+  });
+
+  it("forgets the page size but does not reload the page for a logout that leaves for the identity provider", async () => {
+    mountFullDom();
+    await main();
+    api.init.mockClear();
+    router.dispatch.mockClear();
+    document.dispatchEvent(new CustomEvent("fess:auth:logout", { detail: { redirecting: true } }));
+    await flush();
+    expect(search.forgetNum).toHaveBeenCalled();
+    expect(api.init).not.toHaveBeenCalled();
+    expect(router.dispatch).not.toHaveBeenCalled();
+  });
+
+  it("asks for login again when a search reports auth_required and login is required", async () => {
+    mountFullDom();
+    await main();
+    auth.isLoginRequired.mockReturnValue(true);
+    document.dispatchEvent(new CustomEvent("fess:auth:required"));
+    await flush();
+    expect(auth.endSession).toHaveBeenCalled();
+    expect(auth.promptLogin).toHaveBeenCalled();
+  });
+
+  it("ignores auth_required when login is optional", async () => {
+    mountFullDom();
+    await main();
+    document.dispatchEvent(new CustomEvent("fess:auth:required"));
+    await flush();
+    expect(auth.endSession).not.toHaveBeenCalled();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
   });
 });

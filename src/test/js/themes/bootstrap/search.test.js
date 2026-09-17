@@ -889,6 +889,21 @@ describe("runSearch — error handling", () => {
     expect(errBox().textContent).toBe("error.auth_required");
   });
 
+  it("announces fess:auth:required for auth_required only", async () => {
+    let announced = 0;
+    const onRequired = () => { announced += 1; };
+    document.addEventListener("fess:auth:required", onRequired);
+    try {
+      api.get.mockRejectedValueOnce(Object.assign(new Error("auth"), { code: "auth_required" }));
+      await runSearch();
+      api.get.mockRejectedValueOnce(new Error("boom"));
+      await runSearch();
+    } finally {
+      document.removeEventListener("fess:auth:required", onRequired);
+    }
+    expect(announced).toBe(1);
+  });
+
   it("shows error.server for a generic failure and clears the spinner", async () => {
     api.get.mockRejectedValueOnce(new Error("boom"));
     await runSearch();

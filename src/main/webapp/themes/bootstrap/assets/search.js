@@ -763,6 +763,10 @@ async function runSearch() {
               : t("error.server");
     if (errBox) { errBox.textContent = msg; errBox.classList.remove("d-none"); }
     else { const meta = document.getElementById("results-meta"); if (meta) meta.textContent = msg; }
+    // The session is gone: app.js asks for login again when the site requires it.
+    if (e && (e.code === "auth_required" || e.code === "AUTH_REQUIRED")) {
+      document.dispatchEvent(new CustomEvent("fess:auth:required"));
+    }
   } finally {
     // Only the latest request clears the spinner. If this request was superseded,
     // currentSearchAbort already points at a newer controller, so leave it running.
