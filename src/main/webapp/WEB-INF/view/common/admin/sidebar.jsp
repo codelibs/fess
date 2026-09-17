@@ -35,7 +35,7 @@
 				</li>
 			</c:if>
 				
-            <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or fe:permission('admin-design-view') or fe:permission('admin-dict-view') or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view') or fe:permission('admin-theme-view')}">
+            <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or fe:permission('admin-dict-view') or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view') or fe:permission('admin-theme-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='system'}">menu-open</c:if>">
 				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='system'}">active</c:if>">
 					<i class='nav-icon fa fa-laptop' aria-hidden="true"></i>
@@ -66,13 +66,6 @@
 						<a href="${fe:url('/admin/scheduler/')}" class="nav-link <c:if test="${param.menuType=='scheduler'}">active</c:if>" <c:if test="${param.menuType=='scheduler'}">aria-current="page"</c:if>>
 							<i class='fa fa-clock nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_scheduler_config" /></p>
-						</a></li></c:if>
-						
-					<c:if test="${fe:permission('admin-design-view')}">
-					<li class="nav-item">
-						<a href="${fe:url('/admin/design/')}" class="nav-link <c:if test="${param.menuType=='design'}">active</c:if>" <c:if test="${param.menuType=='design'}">aria-current="page"</c:if>>
-							<i class='fa fa-palette nav-icon' aria-hidden="true"></i>
-							<p><la:message key="labels.menu_design" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-dict-view') and fesenType!='cloud' and fesenType!='aws'}">
