@@ -28,6 +28,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,6 +74,9 @@ public class StaticThemeResponder {
      * underscores and hyphens only. Compiled once rather than per request.
      */
     private static final Pattern MESSAGE_KEY_PATTERN = Pattern.compile("[A-Za-z0-9._\\-]+");
+
+    /** The start tag of {@code <head>}, with or without attributes; never {@code <header>}. */
+    private static final Pattern HEAD_START_TAG = Pattern.compile("<head(?:\\s[^>]*)?>", Pattern.CASE_INSENSITIVE);
 
     /**
      * Default constructor.
@@ -134,20 +138,22 @@ public class StaticThemeResponder {
         final boolean isErrorRoute = requestPath != null && ("/error".equals(requestPath) || requestPath.startsWith("/error/"));
         final String messageKey = resolveMessageKey(req);
 
+        // Read the file upfront so the base element (and, on error routes, the meta tags) can be
+        // injected and the final byte length is known before Content-Length is set.
+        final byte[] originalBytes;
+        try (InputStream in = Files.newInputStream(indexFile)) {
+            final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
+            in.transferTo(buf);
+            originalBytes = buf.toByteArray();
+        } catch (final IOException e) {
+            sendNotFound(res);
+            return;
+        }
+        final byte[] indexBytes = injectBaseHref(originalBytes, req.getContextPath());
+
         if (isErrorRoute) {
-            // Read the file upfront so we can inject meta tags and know the final byte length
-            // before setting Content-Length (which must be set once).
-            final byte[] originalBytes;
-            try (InputStream in = Files.newInputStream(indexFile)) {
-                final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
-                in.transferTo(buf);
-                originalBytes = buf.toByteArray();
-            } catch (final IOException e) {
-                sendNotFound(res);
-                return;
-            }
             final int status = computeErrorStatus(requestPath);
-            byte[] modifiedBytes = injectErrorCodeMeta(originalBytes, status);
+            byte[] modifiedBytes = injectErrorCodeMeta(indexBytes, status);
             if (messageKey != null && !messageKey.isEmpty()) {
                 modifiedBytes = injectErrorDetailMeta(modifiedBytes, messageKey);
             }
@@ -181,10 +187,8 @@ public class StaticThemeResponder {
         // INDEX_CSP; X-Frame-Options: DENY covers browsers that don't honor frame-ancestors.
         res.setHeader("X-Frame-Options", "DENY");
         res.setHeader("Referrer-Policy", "same-origin");
-        res.setContentLengthLong(fileSize);
-        try (InputStream in = Files.newInputStream(indexFile)) {
-            in.transferTo(res.getOutputStream());
-        }
+        res.setContentLength(indexBytes.length);
+        res.getOutputStream().write(indexBytes);
     }
 
     /**
@@ -265,6 +269,33 @@ public class StaticThemeResponder {
             return null;
         }
         return raw;
+    }
+
+    /**
+     * Inserts {@code <base href="{contextPath}/">} right after the {@code <head>} start tag, so a
+     * theme's relative URLs resolve against the web application root whatever context path Fess is
+     * deployed under. {@code INDEX_CSP}'s {@code base-uri 'self'} allows it: the href is always
+     * on this origin. The bytes are returned unchanged when there is no {@code <head>} tag.
+     *
+     * @param htmlBytes UTF-8 encoded HTML bytes
+     * @param contextPath the request's context path; null or empty for the root
+     * @return the HTML with the base element inserted
+     */
+    static byte[] injectBaseHref(final byte[] htmlBytes, final String contextPath) {
+        if (htmlBytes == null) {
+            return htmlBytes;
+        }
+        final String html = new String(htmlBytes, StandardCharsets.UTF_8);
+        final Matcher matcher = HEAD_START_TAG.matcher(html);
+        if (!matcher.find()) {
+            return htmlBytes;
+        }
+        final String href = ((contextPath == null ? "" : contextPath) + "/").replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+        final String modified = html.substring(0, matcher.end()) + "<base href=\"" + href + "\">" + html.substring(matcher.end());
+        return modified.getBytes(StandardCharsets.UTF_8);
     }
 
     /**

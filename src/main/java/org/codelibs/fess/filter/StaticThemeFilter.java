@@ -16,12 +16,19 @@
 package org.codelibs.fess.filter;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.VirtualHostHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
@@ -220,8 +227,121 @@ public class StaticThemeFilter implements Filter {
             return;
         }
 
+        // A JSP search URL the SPA does not route (paging, /search/search, /chat/clear) is sent to
+        // the SPA URL showing the same page. Only here, where the SPA would serve the path: in JSP
+        // mode the JSP actions still handle these URLs themselves.
+        final String legacyTarget = resolveLegacyRedirect(req, uri);
+        if (legacyTarget != null) {
+            res.sendRedirect((req.getContextPath() == null ? "" : req.getContextPath()) + legacyTarget);
+            return;
+        }
+
         // Allowlisted UI path -> serve index.html directly in place.
         responder.serveIndex(req, res, theme, uri);
+    }
+
+    /**
+     * Maps a JSP search URL the SPA does not route to the SPA URL showing the same page.
+     *
+     * <ul>
+     *   <li>{@code /search/prev}, {@code /search/next}, {@code /search/move}: {@code /search} with
+     *       {@code start} computed from {@code pn} and {@code num} as {@code SearchAction.doMove}
+     *       does. {@code pn} and any {@code start} are dropped; the other parameters are kept as
+     *       sent.</li>
+     *   <li>{@code /search/search}: {@code /search} with the query string as sent.</li>
+     *   <li>{@code /chat/clear}: {@code /chat}; the SPA keeps its own chat sessions.</li>
+     * </ul>
+     *
+     * @param req the request
+     * @param uri the request path without the context path
+     * @return the target path and query without the context path, or null when the path is not one of these
+     */
+    String resolveLegacyRedirect(final HttpServletRequest req, final String uri) {
+        final String path = uri.length() > 1 && uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
+        final int move;
+        switch (path) {
+        case "/search/search":
+            return StringUtil.isEmpty(req.getQueryString()) ? "/search" : "/search?" + req.getQueryString();
+        case "/chat/clear":
+            return "/chat";
+        case "/search/prev":
+            move = -1;
+            break;
+        case "/search/next":
+            move = 1;
+            break;
+        case "/search/move":
+            move = 0;
+            break;
+        default:
+            return null;
+        }
+        final int start = computeLegacyStart(req.getParameter("pn"), req.getParameter("num"), move);
+        final String kept = removeParameters(req.getQueryString(), "pn", "start");
+        return "/search?" + (kept.isEmpty() ? "" : kept + "&") + "start=" + start;
+    }
+
+    /**
+     * Computes the result offset of a JSP paging link as {@code SearchAction.doMove} does.
+     *
+     * @param pn the page number the link was rendered on; ignored unless a positive integer
+     * @param num the page size; absent or unparsable means {@code paging.search.page.size}, zero or
+     *        below or above {@code paging.search.page.max.size} means that maximum
+     * @param move -1 for the previous page, 1 for the next page, 0 for the page itself
+     * @return the offset
+     */
+    static int computeLegacyStart(final String pn, final String num, final int move) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Integer pageNumber = parseInteger(pn);
+        if (pageNumber == null || pageNumber <= 0) {
+            return fessConfig.getPagingSearchPageStartAsInteger();
+        }
+        final int maxSize = fessConfig.getPagingSearchPageMaxSizeAsInteger();
+        final Integer requestedSize = parseInteger(num);
+        final int pageSize;
+        if (requestedSize == null) {
+            pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
+        } else if (requestedSize <= 0 || requestedSize > maxSize) {
+            pageSize = maxSize;
+        } else {
+            pageSize = requestedSize;
+        }
+        return (Math.max(1, pageNumber + move) - 1) * pageSize;
+    }
+
+    /**
+     * Removes the named parameters from a raw query string, keeping every other pair, and its order
+     * and encoding, exactly as sent.
+     *
+     * @param queryString the raw query string, may be null
+     * @param names the parameter names to remove
+     * @return the remaining query string; empty when nothing remains
+     */
+    static String removeParameters(final String queryString, final String... names) {
+        if (StringUtil.isEmpty(queryString)) {
+            return "";
+        }
+        final Set<String> removed = Set.of(names);
+        return Arrays.stream(queryString.split("&")).filter(pair -> !pair.isEmpty()).filter(pair -> {
+            final int eq = pair.indexOf('=');
+            final String name = eq < 0 ? pair : pair.substring(0, eq);
+            try {
+                return !removed.contains(URLDecoder.decode(name, StandardCharsets.UTF_8));
+            } catch (final IllegalArgumentException e) {
+                return !removed.contains(name);
+            }
+        }).collect(Collectors.joining("&"));
+    }
+
+    private static Integer parseInteger(final String value) {
+        if (StringUtil.isBlank(value)) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(value.trim());
+        } catch (final NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String stripContextPath(final HttpServletRequest req) {

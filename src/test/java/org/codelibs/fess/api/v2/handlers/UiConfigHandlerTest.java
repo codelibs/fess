@@ -23,11 +23,19 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.LastaWebKey;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -422,6 +430,104 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_resolveLoginLink() {
+        final UiConfigHandler handler = new UiConfigHandler();
+        assertEquals("sso/", handler.resolveLoginLink(true, true));
+        assertEquals(Boolean.TRUE, handler.resolveLoginLink(true, false));
+        assertEquals(Boolean.FALSE, handler.resolveLoginLink(false, true));
+        assertEquals(Boolean.FALSE, handler.resolveLoginLink(false, false));
+    }
+
+    @Test
+    public void test_features_ssoServed_loginLinkPointsToSso() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler() {
+            @Override
+            protected boolean isSsoServed() {
+                return true;
+            }
+        }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"sso_enabled\":true"), res.body());
+        // login.link.enabled defaults to true.
+        assertTrue(res.body().contains("\"login_link\":\"sso/\""), res.body());
+    }
+
+    @Test
+    public void test_features_ssoNotServed_loginLinkStaysBoolean() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler() {
+            @Override
+            protected boolean isSsoServed() {
+                return false;
+            }
+        }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"sso_enabled\":false"), res.body());
+        assertTrue(res.body().contains("\"login_link\":true"), res.body());
+    }
+
+    @Test
+    public void test_defaultLabelAndSort_forTheLoggedInUser() throws Exception {
+        final String body = handleWithDefaults(OptionalThing.of(new FessUserBean(new StubFessUser("carol", "staff"))));
+        assertTrue(body.contains("\"default_label_values\":[\"intranet\",\"news\"]"), body);
+        assertTrue(body.contains("\"default_sort\":\"last_modified.desc\""), body);
+    }
+
+    @Test
+    public void test_defaultLabelAndSort_forAGuest() throws Exception {
+        final String body = handleWithDefaults(OptionalThing.empty());
+        assertTrue(body.contains("\"default_label_values\":[]"), body);
+        assertTrue(body.contains("\"default_sort\":\"\""), body);
+    }
+
+    @Test
+    public void test_defaultLabelValues_emptyWhenNoLabelIsOffered() throws Exception {
+        final String body = handleWithDefaults(OptionalThing.of(new FessUserBean(new StubFessUser("carol", "staff"))), java.util.List.of());
+        assertTrue(body.contains("\"default_label_values\":[]"), body);
+        assertTrue(body.contains("\"default_sort\":\"last_modified.desc\""), body);
+    }
+
+    /** Runs the handler with label.value and sort.value bound to the "staff" role and one visible label. */
+    private String handleWithDefaults(final OptionalThing<FessUserBean> user) throws Exception {
+        return handleWithDefaults(user, java.util.List.of(Map.of(Constants.ITEM_VALUE, "intranet", Constants.ITEM_LABEL, "Intranet")));
+    }
+
+    /**
+     * Runs the handler with label.value and sort.value bound to the "staff" role and the given labels offered,
+     * restoring both properties afterwards.
+     */
+    private String handleWithDefaults(final OptionalThing<FessUserBean> user, final java.util.List<Map<String, String>> labelItems)
+            throws Exception {
+        ComponentUtil.register(new LabelTypeHelper() {
+            @Override
+            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
+                    final java.util.Locale requestLocale) {
+                return labelItems;
+            }
+        }, "labelTypeHelper");
+        final org.codelibs.core.misc.DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        FessProp.propMap.clear();
+        systemProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, "role:staff=intranet,news");
+        systemProperties.setProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, "role:staff=last_modified.desc");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler() {
+                @Override
+                protected OptionalThing<FessUserBean> getSavedUserBean() {
+                    return user;
+                }
+            }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            return res.body();
+        } finally {
+            systemProperties.remove(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+            systemProperties.remove(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+            FessProp.propMap.clear();
+        }
+    }
+
     /**
      * rag_chat_enabled must be present as a boolean in the features map.
      * Mirrors the gate used by FessSearchAction#setupHtmlData (chatClient.isAvailable()).
@@ -512,6 +618,107 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
             assertTrue(idx >= 0, "facet_views key missing");
             final String after = body.substring(idx + "\"facet_views\"".length()).stripLeading().replaceFirst("^:", "").stripLeading();
             assertTrue(after.startsWith("["), "facet_views must be a JSON array in: " + body);
+        }
+    }
+
+    @Test
+    public void test_uiLocale_browserLangWinsAndIsRemembered() throws Exception {
+        final StubSession session = new StubSession();
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session)
+                .withParameter("browser_lang", "zh_TW")
+                .withLocale(java.util.Locale.ENGLISH), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"zh-TW\""), res.body());
+        assertEquals(java.util.Locale.TAIWAN, session.getAttribute(LastaWebKey.USER_LOCALE_KEY));
+    }
+
+    @Test
+    public void test_uiLocale_sessionLocaleBeforeAcceptLanguage() throws Exception {
+        final StubSession session = new StubSession();
+        session.setAttribute(LastaWebKey.USER_LOCALE_KEY, java.util.Locale.JAPANESE);
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session).withLocale(java.util.Locale.ENGLISH),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"ja\""), res.body());
+    }
+
+    @Test
+    public void test_uiLocale_acceptLanguageWhenNothingElse() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(
+                new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()).withLocale(java.util.Locale.of("pt", "BR")),
+                res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"pt-BR\""), res.body());
+    }
+
+    @Test
+    public void test_uiLocale_unparsableBrowserLangIsIgnored() throws Exception {
+        final StubSession session = new StubSession();
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session)
+                .withParameter("browser_lang", "not a locale")
+                .withLocale(java.util.Locale.ENGLISH), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ui_locale\":\"en\""), res.body());
+        assertNull(session.getAttribute(LastaWebKey.USER_LOCALE_KEY));
+    }
+
+    @Test
+    public void test_toUiLocaleTag() {
+        assertEquals("", UiConfigHandler.toUiLocaleTag(null));
+        assertEquals("", UiConfigHandler.toUiLocaleTag(java.util.Locale.ROOT));
+        assertEquals("zh-CN", UiConfigHandler.toUiLocaleTag(java.util.Locale.SIMPLIFIED_CHINESE));
+    }
+
+    @Test
+    public void test_labelOptions_filteredByTheRequestLocale() throws Exception {
+        final java.util.List<java.util.Locale> requested = new java.util.ArrayList<>();
+        ComponentUtil.register(new LabelTypeHelper() {
+            @Override
+            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
+                    final java.util.Locale requestLocale) {
+                requested.add(requestLocale);
+                return java.util.List.of();
+            }
+        }, "labelTypeHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(
+                new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()).withLocale(java.util.Locale.JAPANESE), res);
+        assertEquals(200, res.status, res.body());
+        assertEquals(java.util.List.of(java.util.Locale.JAPANESE), requested);
+    }
+
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+        private final String name;
+        private final String[] roles;
+
+        StubFessUser(final String name, final String... roles) {
+            this.name = name;
+            this.roles = roles;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return roles;
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
         }
     }
 
@@ -720,6 +927,8 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();
         private HttpSession session;
+        private final Map<String, String> params = new HashMap<>();
+        private java.util.Locale locale = java.util.Locale.ROOT;
 
         StubRequest(final String method, final String uri) {
             this.method = method;
@@ -728,6 +937,16 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         StubRequest withSession(final HttpSession s) {
             this.session = s;
+            return this;
+        }
+
+        StubRequest withParameter(final String name, final String value) {
+            params.put(name, value);
+            return this;
+        }
+
+        StubRequest withLocale(final java.util.Locale l) {
+            this.locale = l;
             return this;
         }
 
@@ -944,7 +1163,7 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getParameter(final String name) {
-            return null;
+            return params.get(name);
         }
 
         @Override
@@ -999,12 +1218,12 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         @Override
         public java.util.Locale getLocale() {
-            return java.util.Locale.ROOT;
+            return locale;
         }
 
         @Override
         public Enumeration<java.util.Locale> getLocales() {
-            return Collections.enumeration(java.util.Collections.singleton(java.util.Locale.ROOT));
+            return Collections.enumeration(java.util.Collections.singleton(locale));
         }
 
         @Override

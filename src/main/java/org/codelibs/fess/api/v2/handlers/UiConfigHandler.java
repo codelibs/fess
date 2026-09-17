@@ -24,8 +24,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.api.v2.V2ErrorCode;
@@ -36,11 +38,15 @@ import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.LastaWebKey;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -130,6 +136,105 @@ public class UiConfigHandler {
     }
 
     /**
+     * Resolves {@code features.login_link}. When SSO is served the link goes to {@code sso/},
+     * which signs the user in through the identity provider; otherwise it stays the plain flag
+     * saying whether the local login link is shown.
+     *
+     * <p>The link is relative so it resolves against the page's base URL, which the static theme
+     * gets from {@code <base href>}; it works under any context path.</p>
+     *
+     * @param loginLinkEnabled whether {@code login.link.enabled} is on
+     * @param ssoEnabled whether SSO login is served
+     * @return {@code "sso/"}, or the boolean flag
+     */
+    Object resolveLoginLink(final boolean loginLinkEnabled, final boolean ssoEnabled) {
+        if (loginLinkEnabled && ssoEnabled) {
+            return "sso/";
+        }
+        return loginLinkEnabled;
+    }
+
+    /**
+     * Tells whether SSO login is served. A seam so tests decide it without installing an
+     * authenticator plugin.
+     *
+     * @return true if {@link SsoManager#isServed()} says so
+     */
+    protected boolean isSsoServed() {
+        try {
+            final SsoManager ssoManager = ComponentUtil.getSsoManager();
+            return ssoManager != null && ssoManager.isServed();
+        } catch (final Exception e) {
+            logger.debug("SSO availability could not be resolved; reporting it as not served", e);
+            return false;
+        }
+    }
+
+    /**
+     * Resolves the logged-in user. A seam so tests supply a user without the login subsystem;
+     * a failed lookup counts as a guest.
+     *
+     * @return the saved user bean, or empty for a guest
+     */
+    protected OptionalThing<FessUserBean> getSavedUserBean() {
+        try {
+            return ComponentUtil.getFessLoginAssist().getSavedUserBean();
+        } catch (final Exception e) {
+            logger.debug("login subsystem lookup failed; treating the caller as a guest", e);
+            return OptionalThing.empty();
+        }
+    }
+
+    /**
+     * Resolves the display locale the JSP pages use for this request: {@code ?browser_lang=}, then
+     * the locale remembered in the session, then Accept-Language.
+     *
+     * <p>A valid {@code browser_lang} is remembered in the session under the key LastaFlute reads,
+     * so the JSP pages and this endpoint agree afterwards. This endpoint is not a LastaFlute
+     * action, so the framework's own resolution ({@code FessUserLocaleProcessProvider}) does not
+     * run for it.</p>
+     *
+     * @param req the request
+     * @param cfg the configuration naming the {@code browser_lang} parameter
+     * @return the locale; {@link Locale#ROOT} when nothing names one
+     */
+    Locale resolveUiLocale(final HttpServletRequest req, final FessConfig cfg) {
+        final HttpSession session = req.getSession(true);
+        final String paramName = cfg.getQueryBrowserLangParameterName();
+        if (StringUtil.isNotBlank(paramName)) {
+            final String value = req.getParameter(paramName);
+            if (StringUtil.isNotBlank(value)) {
+                try {
+                    final Locale locale = LocaleUtils.toLocale(value);
+                    if (session != null) {
+                        session.setAttribute(LastaWebKey.USER_LOCALE_KEY, locale);
+                    }
+                    return locale;
+                } catch (final IllegalArgumentException e) {
+                    logger.debug("Ignoring an unparsable {} value", paramName, e);
+                }
+            }
+        }
+        if (session != null && session.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof final Locale sessionLocale) {
+            return sessionLocale;
+        }
+        return req.getLocale() == null ? Locale.ROOT : req.getLocale();
+    }
+
+    /**
+     * Renders a locale as the BCP 47 tag the SPA reads, e.g. {@code pt-BR}.
+     *
+     * @param locale the locale, may be null
+     * @return the tag; empty for null or {@link Locale#ROOT}
+     */
+    static String toUiLocaleTag(final Locale locale) {
+        if (locale == null || StringUtil.isBlank(locale.getLanguage())) {
+            return "";
+        }
+        return locale.toLanguageTag();
+    }
+
+    /**
      * Processes one {@code /api/v2/ui/config} GET request.
      *
      * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#METHOD_NOT_ALLOWED}.
@@ -209,7 +314,10 @@ public class UiConfigHandler {
             try {
                 final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
                 if (labelTypeHelper != null) {
-                    final List<Map<String, String>> items = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON, Locale.ROOT);
+                    // Filtered by the request language like /api/v2/labels (LabelsHandler), so a
+                    // label bound to a locale is offered only to that locale.
+                    final Locale requestLocale = req.getLocale() == null ? Locale.ROOT : req.getLocale();
+                    final List<Map<String, String>> items = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON, requestLocale);
                     if (items != null) {
                         for (final Map<String, String> item : items) {
                             final Map<String, Object> entry = new LinkedHashMap<>();
@@ -258,6 +366,7 @@ public class UiConfigHandler {
             } catch (final Exception ignored) {
                 // FessProp system-property store not accessible — default to true.
             }
+            final boolean ssoEnabled = isSsoServed();
 
             final Map<String, Object> features = new LinkedHashMap<>();
             features.put("user_favorite", userFavoriteEnabled);
@@ -276,7 +385,8 @@ public class UiConfigHandler {
             features.put("eol_link", eolLink);
             features.put("installation_link", installationLink);
             // B.2: login link availability flag.
-            features.put("login_link", loginLinkEnabled);
+            features.put("login_link", resolveLoginLink(loginLinkEnabled, ssoEnabled));
+            features.put("sso_enabled", ssoEnabled);
             // rag_chat_enabled: mirrors FessSearchAction#setupHtmlData chatClient.isAvailable()
             // so the static-theme SPA sees the same availability gate as the legacy JSP path.
             boolean ragChatEnabled = false;
@@ -299,6 +409,7 @@ public class UiConfigHandler {
             // and a freshly-issued session-bound token is always returned. Using
             // getSession(true) ensures the session exists even on the very first request.
             final HttpSession session = req.getSession(true);
+            final String uiLocale = toUiLocaleTag(resolveUiLocale(req, cfg));
             final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
             final String csrfToken = csrf == null ? "" : csrf.issue(session);
 
@@ -370,6 +481,14 @@ public class UiConfigHandler {
             payload.put("site_name", siteName);
             payload.put("login_required", cfg.isLoginRequired());
             payload.put("locales", langs == null ? java.util.List.of() : Arrays.asList(langs));
+            payload.put("ui_locale", uiLocale);
+            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
+            // The label and sort the JSP search page pre-selects for this user (label.value /
+            // sort.value). /api/v2/search does not apply them, so API clients see no change.
+            // The JSP page applies label.value only when it offers labels (FessSearchAction.buildFormParams),
+            // so a default for a label the user cannot see is not sent either.
+            payload.put("default_label_values", labelOptions.isEmpty() ? List.of() : Arrays.asList(cfg.getDefaultLabelValues(userBean)));
+            payload.put("default_sort", cfg.getDefaultSortForUser(userBean));
             payload.put("theme", themePayload);
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());

@@ -163,7 +163,6 @@ public class LogoutHandlerTest extends UnitFessTestCase {
             @Override
             public String logout(final FessUserBean user) {
                 ssoLogouts.add(user.getUserId());
-                // A real SLO URL. The v2 API has no redirect semantics, so it must be ignored.
                 return "https://login.microsoftonline.com/common/oauth2/v2.0/logout";
             }
         }, "ssoManager");
@@ -177,8 +176,28 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         org.junit.jupiter.api.Assertions.assertEquals(List.of("carol"), ssoLogouts,
                 "the v2 logout must run the SSO logout for the user still bound to the session");
         assertEquals(1, assist.logoutCount, "the local logout must still run");
-        // The single-logout URL is discarded: the envelope stays the plain idempotent success.
         assertTrue(res.body().contains("\"ok\":true"), res.body());
+        // The provider's single-logout URL is handed to the client, which navigates there as
+        // LogoutAction's redirect does.
+        assertTrue(res.body().contains("\"redirect_url\":\"https://login.microsoftonline.com/common/oauth2/v2.0/logout\""), res.body());
+    }
+
+    @Test
+    public void logout_withoutASingleLogoutUrl_sendsNoRedirectUrl() throws Exception {
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public String logout(final FessUserBean user) {
+                return null;
+            }
+        }, "ssoManager");
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("carol"));
+
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequest("POST", "/api/v2/auth/logout"), res);
+
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"ok\":true"), res.body());
+        assertFalse(res.body().contains("redirect_url"), res.body());
     }
 
     @Test
@@ -200,6 +219,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         assertEquals(200, res.status, res.body());
         assertTrue(res.body().contains("\"ok\":true"), res.body());
         assertEquals(1, assist.logoutCount, "logout must still be performed when the SSO logout fails");
+        assertFalse(res.body().contains("redirect_url"), res.body());
     }
 
     @Test
@@ -223,6 +243,7 @@ public class LogoutHandlerTest extends UnitFessTestCase {
 
         assertEquals(200, res.status, res.body());
         assertTrue(ssoLogouts.isEmpty(), "an absent user bean must not reach SsoManager.logout: " + ssoLogouts);
+        assertFalse(res.body().contains("redirect_url"), res.body());
     }
 
     /**

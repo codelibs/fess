@@ -475,6 +475,91 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         assertFalse(chain.called);
     }
 
+    @Test
+    public void test_legacyNextPage_redirectsToSearchWithStart() throws Exception {
+        final StaticThemeFilter f = filterWithActiveTheme(null);
+        final StubResponse res = new StubResponse();
+        final StubChain chain = new StubChain();
+        f.doFilter(new StubRequest("GET", "/search/next").withQuery("q=fess&pn=2&num=20&sdh=abc"), res, chain);
+        assertEquals("/search?q=fess&num=20&sdh=abc&start=40", res.redirectLocation);
+        assertFalse(chain.called);
+    }
+
+    @Test
+    public void test_legacyPaging_followsSearchActionDoMove() {
+        final StaticThemeFilter f = new StaticThemeFilter();
+        assertEquals("/search?q=a&start=0",
+                f.resolveLegacyRedirect(new StubRequest("GET", "/search/prev").withQuery("q=a&pn=1"), "/search/prev"));
+        assertEquals("/search?q=a&num=20&start=20",
+                f.resolveLegacyRedirect(new StubRequest("GET", "/search/prev").withQuery("q=a&pn=3&num=20"), "/search/prev"));
+        assertEquals("/search?q=a&num=20&start=40",
+                f.resolveLegacyRedirect(new StubRequest("GET", "/search/move/").withQuery("q=a&pn=3&num=20"), "/search/move/"));
+        // No pn: paging.search.page.start, and a stale start is dropped.
+        assertEquals("/search?q=a&start=0",
+                f.resolveLegacyRedirect(new StubRequest("GET", "/search/next").withQuery("q=a&start=90"), "/search/next"));
+        // num 0 or above the max is the max (paging.search.page.max.size=100).
+        assertEquals("/search?q=a&num=0&start=100",
+                f.resolveLegacyRedirect(new StubRequest("GET", "/search/next").withQuery("q=a&pn=1&num=0"), "/search/next"));
+    }
+
+    @Test
+    public void test_legacyPaging_keepsOtherParametersAsSent() {
+        final StaticThemeFilter f = new StaticThemeFilter();
+        assertEquals("/search?q=%E6%A4%9C%E7%B4%A2&fields.label=a&fields.label=b&start=10",
+                f.resolveLegacyRedirect(
+                        new StubRequest("GET", "/search/next").withQuery("q=%E6%A4%9C%E7%B4%A2&pn=1&fields.label=a&fields.label=b"),
+                        "/search/next"));
+    }
+
+    @Test
+    public void test_legacySearchAndChatClear() {
+        final StaticThemeFilter f = new StaticThemeFilter();
+        assertEquals("/search?q=a&num=20",
+                f.resolveLegacyRedirect(new StubRequest("GET", "/search/search").withQuery("q=a&num=20"), "/search/search"));
+        assertEquals("/search", f.resolveLegacyRedirect(new StubRequest("GET", "/search/search/"), "/search/search/"));
+        assertEquals("/chat", f.resolveLegacyRedirect(new StubRequest("GET", "/chat/clear").withQuery("sessionId=x"), "/chat/clear"));
+        assertNull(f.resolveLegacyRedirect(new StubRequest("GET", "/search"), "/search"));
+        assertNull(f.resolveLegacyRedirect(new StubRequest("GET", "/search/index"), "/search/index"));
+    }
+
+    @Test
+    public void test_legacyRedirect_keepsTheContextPath() throws Exception {
+        final StaticThemeFilter f = filterWithActiveTheme(null);
+        final StubResponse res = new StubResponse();
+        f.doFilter(new StubRequest("GET", "/fess/search/move").withContextPath("/fess").withQuery("q=a&pn=2"), res, new StubChain());
+        assertEquals("/fess/search?q=a&start=10", res.redirectLocation);
+    }
+
+    @Test
+    public void test_legacyUrl_notRedirectedWithoutAnActiveTheme() throws Exception {
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(new StubRegistry(null));
+        f.setStaticThemeResponder(new StubResponder());
+        final StubResponse res = new StubResponse();
+        final StubChain chain = new StubChain();
+        f.doFilter(new StubRequest("GET", "/search/next").withQuery("q=a&pn=2"), res, chain);
+        assertNull(res.redirectLocation, "JSP mode keeps serving /search/next itself");
+        assertTrue(chain.called);
+    }
+
+    @Test
+    public void test_legacyUrl_notRedirectedWhenSpaFallbackIsOff() throws Exception {
+        // buildManifest(false) is the existing helper test_spaFallbackFalse_passesUiRequestThrough uses.
+        final StaticThemeFilter f = filterWithActiveTheme(buildManifest(false));
+        final StubResponse res = new StubResponse();
+        final StubChain chain = new StubChain();
+        f.doFilter(new StubRequest("GET", "/search/next").withQuery("q=a&pn=2"), res, chain);
+        assertNull(res.redirectLocation);
+        assertTrue(chain.called);
+    }
+
+    private static StaticThemeFilter filterWithActiveTheme(final ThemeManifest manifest) {
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(new StubRegistry(new Theme("t", Paths.get("/tmp/t"), manifest)));
+        f.setStaticThemeResponder(new StubResponder());
+        return f;
+    }
+
     // ===== Stubs =====
 
     /**
@@ -526,6 +611,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
     static class StubResponse implements HttpServletResponse {
         // Implement the bare minimum; methods we don't call throw UnsupportedOperationException.
+        String redirectLocation;
+
         @Override
         public String getCharacterEncoding() {
             throw new UnsupportedOperationException();
@@ -638,7 +725,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public void sendRedirect(final String location) {
-            throw new UnsupportedOperationException();
+            this.redirectLocation = location;
         }
 
         @Override
@@ -717,10 +804,35 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();
         String forwardedTo;
+        private String contextPath = "";
+        private String queryString;
+        private final Map<String, String[]> params = new HashMap<>();
 
         StubRequest(final String method, final String uri) {
             this.method = method;
             this.uri = uri;
+        }
+
+        StubRequest withContextPath(final String ctx) {
+            this.contextPath = ctx;
+            return this;
+        }
+
+        StubRequest withQuery(final String qs) {
+            this.queryString = qs;
+            for (final String pair : qs.split("&")) {
+                if (pair.isEmpty()) {
+                    continue;
+                }
+                final int eq = pair.indexOf('=');
+                final String name = java.net.URLDecoder.decode(eq < 0 ? pair : pair.substring(0, eq), StandardCharsets.UTF_8);
+                final String value = eq < 0 ? "" : java.net.URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8);
+                final String[] old = params.get(name);
+                final String[] values = old == null ? new String[1] : java.util.Arrays.copyOf(old, old.length + 1);
+                values[values.length - 1] = value;
+                params.put(name, values);
+            }
+            return this;
         }
 
         @Override
@@ -735,7 +847,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public String getContextPath() {
-            return "";
+            return contextPath;
         }
 
         @Override
@@ -827,7 +939,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public String getQueryString() {
-            return null;
+            return queryString;
         }
 
         @Override
@@ -949,7 +1061,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public String getParameter(final String name) {
-            return null;
+            final String[] values = params.get(name);
+            return values == null || values.length == 0 ? null : values[0];
         }
 
         @Override

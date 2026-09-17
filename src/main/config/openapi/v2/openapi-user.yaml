@@ -602,7 +602,8 @@ paths:
       summary: Log out (idempotent)
       description: |-
         Always returns `ok: true` — invoking logout with no active session
-        is a no-op, not an error. Requires `X-Fess-CSRF-Token`.
+        is a no-op, not an error. Adds `redirect_url` when the SSO provider
+        names a single-logout URL. Requires `X-Fess-CSRF-Token`.
       operationId: authLogoutV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -612,7 +613,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OkResponse'
+                $ref: '#/components/schemas/LogoutResponse'
         '403': { $ref: '#/components/responses/Forbidden' }
         '405':
           description: |-
@@ -1079,7 +1080,7 @@ components:
     # --- Reusable user shape -----------------------------------------
     UserPayload:
       type: object
-      required: [user_id, username, name, roles, groups, permissions, editable, admin]
+      required: [user_id, username, name, roles, groups, permissions, editable, admin, permission_state]
       description: |-
         Authenticated-user descriptor used by `/auth/me` and `/auth/login`.
         All array fields are guaranteed non-null (empty arrays when no
@@ -1112,6 +1113,13 @@ components:
             `true` when the user holds one of the configured
             `authentication.admin.roles`. Drives the visibility of the
             SPA "Administration" entry.
+        permission_state:
+          type: string
+          enum: [RESOLVED, PENDING, FAILED]
+          description: |-
+            How far the user's group and role permissions have got. `PENDING`
+            and `FAILED` mean the user currently holds fewer than they should,
+            so searches may miss documents.
 
     # --- Health ------------------------------------------------------
     HealthResponse:
@@ -1171,6 +1179,13 @@ components:
                 partial: { type: boolean }
                 timed_out: { type: boolean }
                 shard_failed: { type: boolean }
+                permission_state:
+                  type: string
+                  enum: [RESOLVED, PENDING, FAILED]
+                  description: |-
+                    How far the caller's group and role permissions have got.
+                    `PENDING` or `FAILED` means the results may miss documents
+                    the user should see. `RESOLVED` for guests.
                 search_query: { type: string }
                 requested_time: { type: integer, format: int64 }
                 related_query:
@@ -1377,6 +1392,9 @@ components:
                 - site_name
                 - login_required
                 - locales
+                - ui_locale
+                - default_label_values
+                - default_sort
                 - theme
                 - features
                 - page_size_default
@@ -1396,6 +1414,29 @@ components:
                 locales:
                   type: array
                   items: { type: string }
+                ui_locale:
+                  type: string
+                  description: |-
+                    BCP 47 tag of the display language the JSP pages would use:
+                    `?browser_lang=` (then remembered in the session), the session,
+                    then Accept-Language. Empty only when no locale can be
+                    determined; without Accept-Language the servlet container
+                    reports its default locale. Unlike `locales`, which lists the
+                    search languages.
+                default_label_values:
+                  type: array
+                  items: { type: string }
+                  description: |-
+                    Label values the search page pre-selects for the current user
+                    (`label.value`, by role or group). `/search` does not apply them.
+                    Empty when `label_options` is empty, as the search page applies
+                    it only when it offers labels.
+                default_sort:
+                  type: string
+                  description: |-
+                    Sort parameter the search page pre-selects for the current user
+                    (`sort.value`, by role or group); empty when none applies.
+                    `/search` does not apply it.
                 theme:
                   type: object
                   description: |-
@@ -1428,6 +1469,7 @@ components:
                     - eol_link
                     - installation_link
                     - login_link
+                    - sso_enabled
                     - rag_chat_enabled
                   properties:
                     user_favorite: { type: boolean }
@@ -1459,8 +1501,20 @@ components:
                         Resolved installation guide URL. Empty string when it
                         cannot be resolved.
                     login_link:
+                      oneOf:
+                        - type: boolean
+                        - type: string
+                          enum: ['sso/']
+                      description: |-
+                        `"sso/"` (relative to the page's base URL) when SSO login is
+                        served and the login link is enabled: the link signs the user
+                        in through the identity provider. Otherwise whether the local
+                        login link is shown.
+                    sso_enabled:
                       type: boolean
-                      description: Whether the login link should be shown.
+                      description: |-
+                        `true` when `sso.type` is configured and the fess-sso-*
+                        plugin serving it is installed.
                     rag_chat_enabled:
                       type: boolean
                       description: Whether the RAG chat feature is available.
@@ -1497,7 +1551,9 @@ components:
                       label_key: { type: string }
                 label_options:
                   type: array
-                  description: Configured labels; empty when none are defined.
+                  description: |-
+                    Labels offered to the caller, filtered by the request locale and
+                    the caller's roles; empty when none.
                   items:
                     type: object
                     required: [value, name]
@@ -1600,6 +1656,30 @@ components:
                 return_to:
                   type: string
                   description: Echoed only when the request value passed the allowlist.
+                password_change_required:
+                  type: boolean
+                  enum: [true]
+                  description: |-
+                    Present when the password is listed in
+                    `password.invalid.admin.passwords`. The user is signed in;
+                    the client should ask for a new password.
+
+    LogoutResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [ok]
+              properties:
+                ok: { type: boolean, enum: [true] }
+                redirect_url:
+                  type: string
+                  description: |-
+                    The SSO provider's single-logout URL. Present only when the
+                    provider names one; the client navigates there.
 
     PasswordChangeRequest:
       type: object

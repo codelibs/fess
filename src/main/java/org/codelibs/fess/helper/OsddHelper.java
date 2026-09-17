@@ -36,7 +36,11 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Helper class for Open Search Description Document.
+ *
+ * @deprecated Kept for compatibility with existing clients and themes that link it; slated for
+ *             removal in a later release.
  */
+@Deprecated(since = "15.9")
 public class OsddHelper {
 
     /**
