@@ -205,7 +205,7 @@ public final class PluginRepository {
         return new ArrayList<>(names);
     }
 
-    private static String base(final String repository) {
+    static String base(final String repository) {
         return repository.endsWith("/") ? repository : repository + "/";
     }
 

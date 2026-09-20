@@ -107,9 +107,9 @@ public final class FessSetup {
 
               list themes [--repository <url>]
                   Show the static themes published for this version, and which are installed.
-                  The list comes from the repository's directory index; when that cannot be
-                  read, the installed themes are still shown and a theme can be installed by
-                  naming it.
+                  The names come from theme-index.txt, which the deploy publishes beside the
+                  themes; when that cannot be read, the installed themes are still shown and a
+                  theme can be installed by naming it.
 
               list installed
                   Show the installed Fess plugins, without asking the repository.
@@ -564,21 +564,22 @@ public final class FessSetup {
     /**
      * Reads the theme names one repository lists, reporting rather than hiding a failure.
      *
-     * <p>The list comes from the repository's directory index, which is generated on a schedule
-     * and is absent for a tree nothing has been published to yet. Returning nothing and saying
-     * nothing would present that as "no themes exist", which is neither true nor actionable:
-     * a theme installs by name whether or not the index has caught up.</p>
+     * <p>The list comes from the index the deploy publishes beside the themes, which is absent
+     * for a tree nothing has been published to yet. Returning nothing and saying nothing would
+     * present that as "no themes exist", which is neither true nor actionable: a theme installs
+     * by name whether or not the index is there.</p>
      *
      * @param repository the group directory URL
      * @param out the stream for warnings
      * @return the theme names, empty when the listing cannot be read
      */
     private static List<String> readThemeNames(final String repository, final PrintStream out) {
+        final String url = ThemeInstaller.indexUrl(repository);
         try {
-            return ThemeInstaller.namesFromListing(Downloader.readString(URI.create(repository)));
+            return ThemeInstaller.namesFromIndex(Downloader.readString(URI.create(url)));
         } catch (final SetupException e) {
             out.println("warning: " + e.getMessage());
-            out.println("  That list is the repository's directory index, which is generated periodically.");
+            out.println("  " + url + " is the list of published themes, written by the deploy.");
             out.println("  A theme can still be installed by name: fess-setup install theme <name>");
             return List.of();
         }

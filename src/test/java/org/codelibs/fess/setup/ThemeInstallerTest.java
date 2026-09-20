@@ -294,20 +294,35 @@ public class ThemeInstallerTest {
     }
 
     @Test
-    public void test_namesFromListing_keepsDirectoriesAndDropsEverythingElse() {
-        final String html = """
-                <html><body>
-                <a href="..">..</a>
-                <a href="docuforge">docuforge</a>
-                <a href="voicebox/">voicebox</a>
-                <a href="voicebox/">voicebox</a>
-                <a href="maven-metadata.xml">maven-metadata.xml</a>
-                <a href="https://example.com/elsewhere">elsewhere</a>
-                <a href="?C=N;O=D">sort</a>
-                </body></html>
+    public void test_namesFromIndex_readsOneNamePerLine() throws Exception {
+        final String index = """
+                docuforge
+                voicebox
+
+                docuforge
                 """;
 
-        assertEquals(List.of("docuforge", "voicebox"), ThemeInstaller.namesFromListing(html));
+        assertEquals(List.of("docuforge", "voicebox"), ThemeInstaller.namesFromIndex(index));
+    }
+
+    @Test
+    public void test_namesFromIndex_keepsTheLastLineWithoutATrailingNewline() throws Exception {
+        assertEquals(List.of("docuforge", "voicebox"), ThemeInstaller.namesFromIndex("docuforge\nvoicebox"));
+    }
+
+    @Test
+    public void test_namesFromIndex_refusesAnythingThatIsNotAnIndex() {
+        // A proxy page or an error document answering 200 would otherwise be read as a
+        // catalogue of themes whose names are fragments of HTML.
+        assertThrows(SetupException.class, () -> ThemeInstaller.namesFromIndex("<html><body>nope</body></html>"));
+        assertThrows(SetupException.class, () -> ThemeInstaller.namesFromIndex("docuforge\n../escape"));
+        assertThrows(SetupException.class, () -> ThemeInstaller.namesFromIndex("DocuForge"));
+    }
+
+    @Test
+    public void test_indexUrl_sitsBesideTheThemes() {
+        assertEquals("https://example.com/themes/theme-index.txt", ThemeInstaller.indexUrl("https://example.com/themes/"));
+        assertEquals("https://example.com/themes/theme-index.txt", ThemeInstaller.indexUrl("https://example.com/themes"));
     }
 
     @Test

@@ -31,7 +31,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -58,12 +57,15 @@ public final class ThemeInstaller {
 
     private static final String ATTIC_PREFIX = ".attic-";
 
+    /** The file naming every published theme, one per line, beside the themes themselves. */
+    static final String INDEX_NAME = "theme-index.txt";
+
     /**
-     * Anything a directory listing links to. The names are filtered afterwards rather than in
-     * the pattern, because a theme name carries no prefix to recognise it by the way a plugin
-     * name does.
+     * What a theme name may be, from {@code ThemeManifest.NAME_PATTERN} in Fess. Every line of
+     * the index is checked against it, which is also what tells a real index from a proxy error
+     * page that happens to answer 200.
      */
-    private static final Pattern HREF = Pattern.compile("href=\"([^\"]+)\"");
+    private static final Pattern NAME = Pattern.compile("[a-z0-9][a-z0-9_-]{0,63}");
 
     private ThemeInstaller() {
     }
@@ -304,35 +306,42 @@ public final class ThemeInstaller {
     }
 
     /**
-     * Extracts theme names from a repository directory listing.
+     * Returns the URL of the file naming the published themes.
      *
-     * <p>Plugin names are recognised by their prefix; a theme name has none, so what is filtered
-     * out instead is everything that cannot be a theme directory: the parent link, anything with
-     * a path separator or a scheme, and anything with a dot, which is a file rather than a
-     * directory because a theme name cannot contain one.</p>
-     *
-     * @param html the directory index
-     * @return the theme names, in listing order, without duplicates
+     * @param repository the group directory URL themes are published under
+     * @return the index URL
      */
-    public static List<String> namesFromListing(final String html) {
+    public static String indexUrl(final String repository) {
+        return PluginRepository.base(repository) + INDEX_NAME;
+    }
+
+    /**
+     * Extracts the theme names from the published index.
+     *
+     * <p>Not from a directory listing: the server generates those on a schedule, so the themes
+     * tree answers 403 until it has, and the listing for the parent group is already behind. A
+     * catalogue built on it reports that no themes exist.</p>
+     *
+     * <p>Every line has to be a theme name. That is what tells an index from a proxy page or an
+     * error document that answers 200, which would otherwise be read as a list of themes.</p>
+     *
+     * @param text the index
+     * @return the theme names, in file order, without duplicates
+     * @throws SetupException if any line is not a theme name
+     */
+    public static List<String> namesFromIndex(final String text) throws SetupException {
         final Set<String> names = new LinkedHashSet<>();
-        final Matcher matcher = HREF.matcher(html);
-        while (matcher.find()) {
-            final String name = strip(matcher.group(1));
-            if (name.isEmpty() || ".".equals(name) || "..".equals(name)) {
+        for (final String raw : text.split("\n")) {
+            final String name = raw.strip();
+            if (name.isEmpty()) {
                 continue;
             }
-            if (name.indexOf('/') >= 0 || name.indexOf(':') >= 0 || name.indexOf('.') >= 0 || name.charAt(0) == '?'
-                    || name.charAt(0) == '#') {
-                continue;
+            if (!NAME.matcher(name).matches()) {
+                throw new SetupException("Not a theme index: it has a line that is not a theme name.");
             }
             names.add(name);
         }
         return new ArrayList<>(names);
-    }
-
-    private static String strip(final String href) {
-        return href.endsWith("/") ? href.substring(0, href.length() - 1) : href;
     }
 
     private static void createDirectory(final Path directory) throws SetupException {
