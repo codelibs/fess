@@ -310,13 +310,26 @@ describe("registerRoutes", () => {
     return router.register.mock.calls;
   }
 
-  it("registers nine routes as (predicate, handler) pairs", () => {
+  it("registers ten routes as (predicate, handler) pairs", () => {
     const calls = registered();
-    expect(calls.length).toBe(9);
+    expect(calls.length).toBe(10);
     for (const [predicate, handler] of calls) {
       expect(typeof predicate).toBe("function");
       expect(typeof handler).toBe("function");
     }
+  });
+
+  it("registers the error-meta route first, ahead of every path-based route", () => {
+    const calls = registered();
+    // No meta tag: the predicate is false regardless of path.
+    expect(calls[0][0]("/")).toBe(false);
+    expect(calls[0][0]("/search")).toBe(false);
+    // With the meta tag present, it matches any path — it must win over every route
+    // registered after it, which is only true if it is index 0.
+    document.head.insertAdjacentHTML("beforeend", '<meta name="x-fess-error-code" content="429">');
+    expect(calls[0][0]("/")).toBe(true);
+    expect(calls[0][0]("/search")).toBe(true);
+    expect(calls[0][0]("/totally-unknown")).toBe(true);
   });
 
   it("registers a home route matching '/' only when there is no q=", () => {
@@ -325,7 +338,7 @@ describe("registerRoutes", () => {
     const homeRoute = calls.find(([p]) => p("/") === true);
     expect(homeRoute).toBeTruthy();
     // The home predicate must reject '/' once a q= is present (results take over).
-    const homePredicate = calls[0][0];
+    const homePredicate = calls[1][0];
     setLocation("/");
     expect(homePredicate("/")).toBe(true);
     setLocation("/?q=x");
@@ -334,7 +347,7 @@ describe("registerRoutes", () => {
 
   it("registers a search/results route matching /search and /index paths", () => {
     const calls = registered();
-    const searchPredicate = calls[1][0];
+    const searchPredicate = calls[2][0];
     expect(searchPredicate("/search")).toBe(true);
     expect(searchPredicate("/")).toBe(true);
     expect(searchPredicate("/index")).toBe(true);
@@ -368,54 +381,55 @@ describe("registerRoutes", () => {
     const calls = registered();
     const isHidden = (id) => document.getElementById(id).hasAttribute("hidden");
 
-    // Home handler (index 0) reveals home-view and clears search state.
+    // Home handler (index 1 — index 0 is the error-meta route) reveals home-view and
+    // clears search state.
     setLocation("/");
-    expect(() => calls[0][1]()).not.toThrow();
+    expect(() => calls[1][1]()).not.toThrow();
     await flush();
     expect(isHidden("home-view")).toBe(false);
     expect(isHidden("results-view")).toBe(true);
     expect(search.clearSearchState).toHaveBeenCalled();
 
-    // Results handler (index 1) reveals results-view and runs the URL search.
-    calls[1][1]();
+    // Results handler reveals results-view and runs the URL search.
+    calls[2][1]();
     expect(isHidden("results-view")).toBe(false);
     expect(isHidden("home-view")).toBe(true);
     expect(search.attach).toHaveBeenCalled();
     expect(search.runFromUrl).toHaveBeenCalled();
 
     // Profile handler.
-    calls[2][1]();
+    calls[3][1]();
     expect(isHidden("profile-view")).toBe(false);
     expect(profile.attach).toHaveBeenCalled();
 
     // Advance handler.
-    calls[3][1]();
+    calls[4][1]();
     expect(isHidden("advance-view")).toBe(false);
     expect(advance.attach).toHaveBeenCalled();
 
     // Help handler.
-    calls[4][1]();
+    calls[5][1]();
     expect(isHidden("help-view")).toBe(false);
     expect(help.attach).toHaveBeenCalled();
 
     // Chat handler puts the nav link into "Search" mode and mounts standalone chat.
-    calls[5][1]();
+    calls[6][1]();
     expect(isHidden("chat-view")).toBe(false);
     expect(chat.attachStandalone).toHaveBeenCalled();
     expect(document.getElementById("chat-nav-link").getAttribute("href")).toBe("./");
 
     // Cache handler.
-    calls[6][1]();
+    calls[7][1]();
     expect(isHidden("cache-view")).toBe(false);
     expect(cache.attach).toHaveBeenCalled();
 
     // Error handler.
-    calls[7][1]();
+    calls[8][1]();
     expect(isHidden("error-view")).toBe(false);
     expect(errorView.attach).toHaveBeenCalled();
 
-    // Fallback handler (index 8) also lands on the error view.
-    calls[8][1]();
+    // Fallback handler (last) also lands on the error view.
+    calls[calls.length - 1][1]();
     expect(isHidden("error-view")).toBe(false);
   });
 });
@@ -429,7 +443,7 @@ describe("home search form", () => {
       '<select id="labelSearchOption" multiple><option value="lblA" selected>A</option><option value="lblB">B</option></select>');
     registerRoutes();
     setLocation("/");
-    router.register.mock.calls[0][1](); // the home handler wires the form
+    router.register.mock.calls[1][1](); // the home handler (index 1 — index 0 is the error-meta route) wires the form
 
     document.getElementById("contentQuery").value = "hello";
     document.getElementById("home-search-form").dispatchEvent(new Event("submit", { cancelable: true }));
@@ -457,8 +471,8 @@ describe("main", () => {
     expect(i18n.init).toHaveBeenCalledTimes(1);
     expect(auth.attach).toHaveBeenCalledTimes(1);
     expect(search.attach).toHaveBeenCalledTimes(1);
-    // registerRoutes -> nine router.register calls, then attach + dispatch.
-    expect(router.register).toHaveBeenCalledTimes(9);
+    // registerRoutes -> ten router.register calls, then attach + dispatch.
+    expect(router.register).toHaveBeenCalledTimes(10);
     expect(router.attach).toHaveBeenCalledTimes(1);
     expect(router.dispatch).toHaveBeenCalledTimes(1);
   });
@@ -557,6 +571,21 @@ describe("login gate", () => {
     expect(router.dispatch).toHaveBeenCalledTimes(1);
     expect(auth.promptLogin).not.toHaveBeenCalled();
   });
+
+  it("shows the error page instead of the login prompt when the server marked the response as an error, even on a gated path", async () => {
+    // Fix 1: a login-gated path (e.g. "/search") can carry an error response too (a 429 from
+    // LoadControlFilter served in place). The meta tag, not the path, must decide: an
+    // anonymous visitor must still see the error page, not a login prompt that can never be
+    // satisfied by the failing request.
+    mountFullDom();
+    document.head.insertAdjacentHTML("beforeend", '<meta name="x-fess-error-code" content="429">');
+    auth.isLoginGateClosed.mockReturnValue(true);
+    auth.isLoginRequired.mockReturnValue(true);
+    router.currentPath.mockReturnValue("/search");
+    await main();
+    expect(auth.promptLogin).not.toHaveBeenCalled();
+    expect(router.dispatch).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("auth events", () => {
@@ -612,5 +641,36 @@ describe("auth events", () => {
     await flush();
     expect(auth.endSession).not.toHaveBeenCalled();
     expect(auth.promptLogin).not.toHaveBeenCalled();
+  });
+});
+
+// Kept last in this file: the error-meta latch (module-level state in app.js, set the first
+// time the route below's handler runs) is never reset between tests, so any test that
+// consumes it would otherwise leak into every test that runs after it in this file.
+describe("error-meta route wins over a path-based route, then yields once shown (Fix 1)", () => {
+  it("renders the error view (not search) at a path the SPA routes, then routes normally on a later dispatch", () => {
+    mountFullDom();
+    document.head.insertAdjacentHTML("beforeend", '<meta name="x-fess-error-code" content="429">');
+    registerRoutes();
+    const calls = router.register.mock.calls;
+    setLocation("/search");
+    const isHidden = (id) => document.getElementById(id).hasAttribute("hidden");
+    // Mirrors router.dispatch(): run the first registered route whose predicate matches.
+    const dispatch = (path) => calls.find(([predicate]) => predicate(path))[1](path);
+
+    // The meta tag is present and unconsumed: the error-meta route (index 0) must win over
+    // the /search route registered after it.
+    dispatch("/search");
+    expect(isHidden("error-view")).toBe(false);
+    expect(isHidden("results-view")).toBe(true);
+    expect(errorView.attach).toHaveBeenCalled();
+    expect(search.runFromUrl).not.toHaveBeenCalled();
+
+    // The handler set the latch: a later client-side navigate() to the same URL must render
+    // the search view normally rather than showing the error view forever (the meta element
+    // itself is never removed from the DOM).
+    dispatch("/search");
+    expect(isHidden("results-view")).toBe(false);
+    expect(search.runFromUrl).toHaveBeenCalled();
   });
 });

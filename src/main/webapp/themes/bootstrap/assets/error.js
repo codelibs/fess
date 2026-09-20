@@ -20,13 +20,22 @@ const PATH_TO_CODE = {
   "internalservererror": "500",
   "system": "500",
   "error": "500",
-  // #8: 503 path segments are reserved — computeErrorStatus never emits 503
-  // (busy maps to 429), but a direct /error/503 URL still resolves to the
-  // localized 503 page (error.title_503 / error.body_503 are kept in all 16 bundles).
+  // #8: StaticThemeResponder.computeErrorStatus (Java) maps /error/503,
+  // /error/serviceUnavailable and /error/service_unavailable to 503 too (busy still maps
+  // to 429 separately), so a direct /error/503 URL resolves to the localized 503 page
+  // (error.title_503 / error.body_503 are kept in all 16 bundles) whether or not the
+  // server-injected meta tag is present.
   "503": "503",
   "service_unavailable": "503",
   "serviceunavailable": "503",
-  "busy": "429"
+  "busy": "429",
+  // #8.5: computeErrorStatus likewise maps /error/403 and /error/forbidden to 403, so a
+  // bookmarked /error/403 URL resolves to the localized 403 page (error.title_403 /
+  // error.body_403 are kept in all 16 bundles) the same way, whether or not the
+  // server-injected meta tag is present (401 is shown as 403; 403/408 no longer redirect
+  // to /login/).
+  "403": "403",
+  "forbidden": "403"
 };
 
 /**
@@ -186,6 +195,13 @@ export function attach() {
   try {
     requestedUrl = new URL(location.href).searchParams.get("url");
   } catch { /* ignore — URL constructor should never throw for location.href */ }
+
+  // The error page is now served in place: ErrorPageServlet answers the failing URL itself, so
+  // there is no ?url to carry the address. When the server marked this response as an error
+  // (the meta tag), the current path IS the URL the visitor asked for.
+  if (!requestedUrl && readErrorCodeMeta()) {
+    requestedUrl = location.pathname;
+  }
 
   // F.9: Read server-injected error detail key from <meta> tag in document head.
   const errorDetailKey = readErrorDetailKey();

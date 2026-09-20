@@ -429,8 +429,30 @@ export function isLoginGatedPath(path) {
     || path === "/chat" || path === "/cache" || path.startsWith("/cache/");
 }
 
+// Set once the error-meta route below has rendered the error view for this page load, so a
+// later client-side navigate() back to the same URL (the meta tag is never removed from the
+// DOM — error.js reads it) routes normally instead of showing the error view forever.
+let errorMetaConsumed = false;
+
+/**
+ * True when the server marked this response as an error (the x-fess-error-code meta tag
+ * StaticThemeResponder / ErrorPageServlet inject) and no route has rendered it yet this page
+ * load. The tag, not the path, is authoritative: the error page is now served in place at the
+ * URL that failed, so a path this SPA would otherwise route itself (e.g. "/" or "/search" on a
+ * 429 from LoadControlFilter) can carry an error response too.
+ */
+function hasUnconsumedErrorMeta() {
+  return !errorMetaConsumed && document.querySelector('meta[name="x-fess-error-code"]') !== null;
+}
+
 /** Run the route for the current URL, or ask for login first when that page needs it. */
 export function dispatchOrGate() {
+  // The server marked this response as an error: show it even on a login-gated path (an
+  // anonymous visitor must still see e.g. a 429 from LoadControlFilter, not a login prompt).
+  if (hasUnconsumedErrorMeta()) {
+    router.dispatch();
+    return;
+  }
   if (auth.isLoginGateClosed() && isLoginGatedPath(router.currentPath())) {
     auth.promptLogin();
     return;
@@ -450,6 +472,23 @@ async function refreshForUser() {
 }
 
 export function registerRoutes() {
+  // The server marks any response it could not otherwise satisfy with a x-fess-error-code
+  // meta tag and serves the error page in place, at the URL that failed — which can be a URL
+  // this SPA would otherwise route itself (e.g. "/" or "/search" on a 429 from
+  // LoadControlFilter). Registered before every other route so the meta tag, not the path,
+  // decides: while it is present and unconsumed, it wins over whichever route would otherwise
+  // have matched this path. The handler is intentionally identical to the /error route below.
+  router.register(
+    hasUnconsumedErrorMeta,
+    () => {
+      errorMetaConsumed = true;
+      setChatNavSearchMode(false);
+      setSearchFormVisible(true);
+      showView("error-view");
+      errorView.attach();
+    }
+  );
+
   // Home route — "/" with no q= parameter shows the centered home view.
   router.register(
     path => (path === "/" || path === "/index" || path === "/index.html") && !hasSearchQuery(),

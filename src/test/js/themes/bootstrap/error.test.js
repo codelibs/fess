@@ -20,6 +20,8 @@ describe("codeFromPath", () => {
     ["/error/busy", "429"], // busy → 429, never 503
     ["/error/503", "503"],
     ["/error/service_unavailable", "503"],
+    ["/error/403", "403"], // a bookmarked /error/403 still resolves, though the server never redirects here
+    ["/error/forbidden", "403"],
     ["/error/system", "500"],
     ["/error/unknown", "500"], // no match → default 500
     ["/", "500"],
@@ -64,5 +66,35 @@ describe("attach", () => {
 
   it("does nothing when #error-view is absent", () => {
     expect(() => attach()).not.toThrow();
+  });
+
+  it("shows the current path as the requested URL when the page is served in place", () => {
+    document.head.innerHTML = '<meta name="x-fess-error-code" content="404">';
+    document.body.innerHTML = '<div id="error-view"></div>';
+    setLocation("/missing/page");
+    attach();
+    expect(document.querySelector("#error-view .error-detail dd").textContent).toBe("/missing/page");
+  });
+
+  it("prefers an explicit ?url over the current path", () => {
+    document.head.innerHTML = '<meta name="x-fess-error-code" content="404">';
+    document.body.innerHTML = '<div id="error-view"></div>';
+    setLocation("/error/notfound/?url=%2Fwanted");
+    attach();
+    expect(document.querySelector("#error-view .error-detail dd").textContent).toBe("/wanted");
+  });
+
+  it("shows no requested URL when there is no meta tag and no ?url", () => {
+    document.body.innerHTML = '<div id="error-view"></div>';
+    setLocation("/error/notfound/");
+    attach();
+    expect(document.querySelector("#error-view .error-detail")).toBeNull();
+  });
+
+  it("renders the 403 title and body", () => {
+    document.head.innerHTML = '<meta name="x-fess-error-code" content="403">';
+    document.body.innerHTML = '<div id="error-view"></div>';
+    attach();
+    expect(document.querySelector("#error-view .error-title").textContent).toBe("error.title_403");
   });
 });
