@@ -301,6 +301,9 @@ public final class ThemeManifest {
     /**
      * Returns whether SPA-style fallback to the entry file is enabled.
      *
+     * @deprecated the value is still parsed and exposed for compatibility with existing
+     *             {@code theme.yml} files, but Fess 15.9 ignores it: {@link org.codelibs.fess.filter.StaticThemeFilter}
+     *             always serves its allowlisted UI paths as the SPA entry regardless of this flag.
      * @return {@code true} when SPA fallback is enabled
      */
     public boolean isSpaFallback() {

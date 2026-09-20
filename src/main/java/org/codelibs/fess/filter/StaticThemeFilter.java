@@ -31,7 +31,6 @@ import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
-import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -63,14 +62,14 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * <p>Behavior summary:
  * <ul>
- *   <li>Non-GET requests pass through unchanged.</li>
+ *   <li>Requests other than GET and HEAD pass through unchanged.</li>
  *   <li>Requests that are neither a {@code /themes/...} asset nor an allowlisted UI path
  *       pass through unchanged (without even resolving the active theme).</li>
  *   <li>If no active static theme is resolved, pass through.</li>
  *   <li>For {@code /themes/{name}/...} that matches the active static theme's name, the filter calls
  *       {@link StaticThemeResponder#serveAsset} with the path after {@code {name}/}.</li>
- *   <li>For an allowlisted UI path (when {@code spaFallback} is enabled), the filter calls
- *       {@link StaticThemeResponder#serveIndex} to serve the SPA entry HTML in place.</li>
+ *   <li>For an allowlisted UI path, the filter calls {@link StaticThemeResponder#serveIndex}
+ *       to serve the SPA entry HTML in place.</li>
  * </ul>
  */
 public class StaticThemeFilter implements Filter {
@@ -79,14 +78,18 @@ public class StaticThemeFilter implements Filter {
 
     /**
      * SPA-owned UI path prefixes served as the theme entry ({@code index.html}) when a static
-     * theme is active and {@code spaFallback} is enabled. The root path {@code "/"} is matched
-     * exactly (handled in {@link #isThemeUiPath(String)}); each prefix below matches the bare
-     * path and any sub-path (e.g. {@code /cache} and {@code /cache/}).
+     * theme is active. (The {@code theme.yml} {@code spaFallback} flag that used to gate this is
+     * deprecated and no longer consulted -- see the removed check this class used to make.) The
+     * root path {@code "/"} is matched exactly (handled in {@link #isThemeUiPath(String)}); each
+     * prefix below matches the bare path and any sub-path (e.g. {@code /cache} and {@code
+     * /cache/}).
      *
      * <p>This set mirrors the public search UI routes that the SPA replaces:
      * <ul>
      *   <li>{@code /} — search top (root).</li>
      *   <li>{@code /search} — search results.</li>
+     *   <li>{@code /advance} — the advanced search page; {@code /search/advance} is already
+     *       covered by the {@code /search} prefix.</li>
      *   <li>{@code /help} — the search help page.</li>
      *   <li>{@code /error} — error pages; {@link StaticThemeResponder} detects the
      *       {@code /error} prefix and sets the appropriate HTTP status and diagnostic
@@ -103,6 +106,7 @@ public class StaticThemeFilter implements Filter {
      */
     private static final List<String> THEME_UI_PREFIXES = List.of(//
             "/search", //
+            "/advance", //
             "/help", //
             "/error", //
             "/profile", //
@@ -165,8 +169,11 @@ public class StaticThemeFilter implements Filter {
         }
         final HttpServletResponse res = (HttpServletResponse) response;
 
-        // Only intercept GET requests
-        if (!"GET".equalsIgnoreCase(req.getMethod())) {
+        // GET and HEAD are the SPA's read paths. A HEAD response is built exactly like the GET
+        // one — the container drops the body and keeps the headers, which is what a HEAD client
+        // asks for. Everything else is a Fess route.
+        final String method = req.getMethod();
+        if (!"GET".equalsIgnoreCase(method) && !"HEAD".equalsIgnoreCase(method)) {
             chain.doFilter(request, response);
             return;
         }
@@ -219,13 +226,8 @@ public class StaticThemeFilter implements Filter {
             return;
         }
 
-        // If the theme manifest has spaFallback=false, do not serve the theme entry for
-        // UI requests — let the original Fess routes handle them.
-        final boolean spaFallback = theme.getManifest().map(ThemeManifest::isSpaFallback).orElse(true);
-        if (!spaFallback) {
-            chain.doFilter(request, response);
-            return;
-        }
+        // theme.yml's spaFallback flag is deprecated and no longer consulted: now that there is
+        // no JSP UI behind the allowlisted UI paths, a theme cannot opt out of serving them.
 
         // A JSP search URL the SPA does not route (paging, /search/search, /chat/clear) is sent to
         // the SPA URL showing the same page. Only here, where the SPA would serve the path: in JSP
