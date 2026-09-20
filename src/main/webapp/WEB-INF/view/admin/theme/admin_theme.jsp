@@ -186,6 +186,89 @@ ${fe:html(true)}
                             </div>
                         </div>
                     </div>
+
+                    <div class="card card-outline card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <la:message key="labels.theme_available_title"/>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <c:if test="${empty availableArtifacts}">
+                                <%-- Not labels.list_could_not_find_crud_table ("not found"):
+                                     an empty catalogue means the repository's index could
+                                     not be read, not that no themes are published, and the
+                                     operator can act on the difference. --%>
+                                <p><la:message key="labels.theme_available_empty"/></p>
+                            </c:if>
+                            <c:if test="${not empty availableArtifacts}">
+                                <table class="table table-bordered table-striped"
+                                       aria-label="<la:message key="labels.theme_available_title"/>">
+                                    <thead>
+                                    <tr>
+                                        <th><la:message key="labels.theme_name"/></th>
+                                        <th><la:message key="labels.theme_version"/></th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="a" items="${availableArtifacts}">
+                                        <tr>
+                                            <td>${f:h(a.name)}</td>
+                                            <td>${f:h(a.version)}</td>
+                                            <td>
+                                                <la:form action="/admin/theme/install">
+                                                    <input type="hidden" name="name" value="${f:h(a.name)}"/>
+                                                    <input type="hidden" name="version" value="${f:h(a.version)}"/>
+                                                    <button type="submit" class="btn btn-primary btn-xs ${f:h(editableClass)}">
+                                                        <i class="fa fa-download" aria-hidden="true"></i>
+                                                        <la:message key="labels.theme_install"/>
+                                                    </button>
+                                                </la:form>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    </tbody>
+                                </table>
+                            </c:if>
+                        </div>
+                    </div>
+
+                    <%-- The catalogue is discoverability, not the way in. A theme installs
+                         by name whether or not the repository listed it, so the operator
+                         always has a way to act -- including when the list above is
+                         empty, which is exactly when they need one. --%>
+                    <div class="card card-outline card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <la:message key="labels.theme_install_by_name_title"/>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <la:form action="/admin/theme/install">
+                                <div class="form-group row">
+                                    <label for="installName" class="col-sm-3 col-form-label">
+                                        <la:message key="labels.theme_name"/>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        <la:text styleId="installName" property="name" styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="installVersion" class="col-sm-3 col-form-label">
+                                        <la:message key="labels.theme_version"/>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        <la:text styleId="installVersion" property="version" styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary ${f:h(editableClass)}">
+                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                    <la:message key="labels.theme_install"/>
+                                </button>
+                            </la:form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

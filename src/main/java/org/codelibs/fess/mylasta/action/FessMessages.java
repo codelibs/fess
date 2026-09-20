@@ -431,6 +431,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to delete theme: {0} */
     public static final String ERRORS_failed_to_delete_theme = "{errors.failed_to_delete_theme}";
 
+    /** The key of the message: Failed to install theme: {0} */
+    public static final String ERRORS_failed_to_install_theme = "{errors.failed_to_install_theme}";
+
     /** The key of the message: {0} is the active default theme and cannot be deleted */
     public static final String ERRORS_theme_is_active = "{errors.theme_is_active}";
 
@@ -628,6 +631,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Theme uploaded: {0} */
     public static final String SUCCESS_upload_theme = "{success.upload_theme}";
+
+    /** The key of the message: Theme installed: {0} {1} */
+    public static final String SUCCESS_install_theme = "{success.install_theme}";
 
     /** The key of the message: Theme deleted: {0} */
     public static final String SUCCESS_delete_theme = "{success.delete_theme}";
@@ -2606,6 +2612,21 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_install_theme' with parameters.
+     * <pre>
+     * message: Failed to install theme: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToInstallTheme(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_install_theme, arg0));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.theme_is_active' with parameters.
      * <pre>
      * message: {0} is the active default theme and cannot be deleted
@@ -3552,6 +3573,22 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUploadTheme(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_upload_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.install_theme' with parameters.
+     * <pre>
+     * message: Theme installed: {0} {1}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessInstallTheme(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_install_theme, arg0, arg1));
         return this;
     }
 

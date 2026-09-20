@@ -31,6 +31,7 @@ import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.Theme;
+import org.codelibs.fess.theme.ThemeArtifactHelper;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeManifestException;
 import org.codelibs.fess.theme.ThemeRegistry;
@@ -75,6 +76,9 @@ public class AdminThemeAction extends FessAdminAction {
 
     @Resource
     private StaticThemeInstaller staticThemeInstaller;
+
+    @Resource
+    private ThemeArtifactHelper themeArtifactHelper;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -218,6 +222,35 @@ public class AdminThemeAction extends FessAdminAction {
     }
 
     /**
+     * Installs a published theme identified by name and version.
+     *
+     * @param form the install form
+     * @return redirect to the theme index
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse install(final ThemeInstallForm form) {
+        // Fallback renders point at asListHtml(...), not a bare asHtml(path_AdminTheme_AdminThemeJsp):
+        // this action's target page is the list page itself, and only asListHtml's renderWith
+        // populates themeItems/currentDefault/availableArtifacts (see delete/reload/setdefault below,
+        // which follow the same rule for the same reason).
+        validate(form, messages -> {}, () -> asListHtml(new ThemeListForm()));
+        verifyToken(() -> asListHtml(new ThemeListForm()));
+        try {
+            themeArtifactHelper.install(form.name, form.version);
+            saveInfo(m -> m.addSuccessInstallTheme(GLOBAL, form.name, form.version));
+        } catch (final StaticThemeInstaller.InstallException ex) {
+            logger.warn("Theme install rejected: name={}, version={}", form.name, form.version, ex);
+            throwValidationError(m -> mapInstallExceptionToMessage(m, ex), () -> asListHtml(new ThemeListForm()));
+        } catch (final ThemeArtifactHelper.ThemeArtifactException ex) {
+            logger.warn("Failed to install the theme: name={}, version={}", form.name, form.version, ex);
+            throwValidationError(m -> m.addErrorsFailedToInstallTheme(GLOBAL, String.valueOf(ex.getMessage())),
+                    () -> asListHtml(new ThemeListForm()));
+        }
+        return redirect(getClass());
+    }
+
+    /**
      * Routes an {@link StaticThemeInstaller.InstallException} to a localized
      * message (M-14). When the cause is a {@link ThemeManifestException},
      * the structured {@link ThemeManifestException.Code} determines the
@@ -349,6 +382,7 @@ public class AdminThemeAction extends FessAdminAction {
             themeRegistry.getAllThemes().forEach((name, t) -> rows.add(asThemeRow(t, def)));
             RenderDataUtil.register(data, "themeItems", rows);
             RenderDataUtil.register(data, "currentDefault", def);
+            RenderDataUtil.register(data, "availableArtifacts", themeArtifactHelper.getAvailableArtifacts());
         }).useForm(ThemeListForm.class, op -> op.setup(f -> f.defaultTheme = currentDefault()));
     }
 
