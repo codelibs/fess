@@ -237,6 +237,7 @@ public class AdminThemeAction extends FessAdminAction {
         case ENTRY_LIMIT -> messages.addErrorsThemeInstallEntryLimit(GLOBAL);
         case RATIO_LIMIT -> messages.addErrorsThemeInstallRatioLimit(GLOBAL);
         case ZIP_BOMB_RATIO -> messages.addErrorsThemeInstallZipBombRatio(GLOBAL);
+        case INCOMPATIBLE_FESS_VERSION -> messages.addErrorsThemeIncompatibleFessVersion(GLOBAL);
         // The manifest name equalled ThemeRegistry.BUILT_IN_THEME_NAME (installZip refuses to
         // overwrite the bundled theme); reuse the same key the delete-side BUILT_IN guard uses.
         case BUILT_IN -> messages.addErrorsThemeIsBuiltin(GLOBAL, ThemeRegistry.BUILT_IN_THEME_NAME);

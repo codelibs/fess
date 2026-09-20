@@ -494,6 +494,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The theme archive was rejected because its cumulative compression ratio indicates a zip bomb. */
     public static final String ERRORS_theme_install_zip_bomb_ratio = "{errors.theme_install_zip_bomb_ratio}";
 
+    /** The key of the message: This theme requires a newer version of Fess than this server. */
+    public static final String ERRORS_theme_incompatible_fess_version = "{errors.theme_incompatible_fess_version}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -2899,6 +2902,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsThemeInstallZipBombRatio(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_theme_install_zip_bomb_ratio));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_incompatible_fess_version' with parameters.
+     * <pre>
+     * message: This theme requires a newer version of Fess than this server.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeIncompatibleFessVersion(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_incompatible_fess_version));
         return this;
     }
 
