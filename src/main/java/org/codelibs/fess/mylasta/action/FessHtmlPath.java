@@ -421,9 +421,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /error/notFound.jsp */
     HtmlNext path_Error_NotFoundJsp = new HtmlNext("/error/notFound.jsp");
 
-    /** The path of the HTML: /error/redirect.jsp */
-    HtmlNext path_Error_RedirectJsp = new HtmlNext("/error/redirect.jsp");
-
     /** The path of the HTML: /error/system.jsp */
     HtmlNext path_Error_SystemJsp = new HtmlNext("/error/system.jsp");
 

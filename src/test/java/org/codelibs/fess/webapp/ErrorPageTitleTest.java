@@ -43,12 +43,17 @@ import org.junit.jupiter.api.Test;
  * mismatch is only visible in a browser.</p>
  *
  * <p>The check is the invariant those pages share -- the title key is the heading
- * key -- applied to every error screen in both the served tree and the design-editor
- * originals, so a new error page inherits it too.</p>
+ * key -- applied to every error screen in both the served tree and its {@code orig/view}
+ * copy, so a new error page inherits it too.</p>
  */
 public class ErrorPageTitleTest extends UnitFessTestCase {
 
-    /** The served copies and the design-editor "Use Default" copies, which must not drift apart. */
+    /**
+     * The served copies and their {@code orig/view} counterparts. The latter is not a
+     * design-editor "Use Default" source any more -- that editor was removed in fess#3457 -- it
+     * is simply a second copy of the same pages, kept until sub-project D deletes the tree, and
+     * the two must not drift apart from each other until then.
+     */
     private static final String[] ERROR_VIEW_DIRS = { "src/main/webapp/WEB-INF/view/error", "src/main/webapp/WEB-INF/orig/view/error" };
 
     /** Matches the message key of the document title. */
@@ -57,7 +62,13 @@ public class ErrorPageTitleTest extends UnitFessTestCase {
     /** Matches the message key of the page heading. */
     private static final Pattern HEADING_KEY_PATTERN = Pattern.compile("<h2>\\s*<la:message\\s+key=\"([^\"]+)\"");
 
-    /** Lower bound on the pages compared per tree, so a broken pattern cannot pass vacuously. */
+    /**
+     * Lower bound on the pages compared per tree, so a broken pattern cannot pass vacuously.
+     * Every JSP under {@link #ERROR_VIEW_DIRS} renders its own page now that the container's
+     * error-page forward target -- the one page that only forwarded instead of rendering, and so
+     * was skipped here -- has been removed; this equals the number of JSPs each directory holds,
+     * so the floor is exact rather than a loose lower bound.
+     */
     private static final int MINIMUM_EXPECTED_PAGES = 5;
 
     @Test
@@ -69,12 +80,12 @@ public class ErrorPageTitleTest extends UnitFessTestCase {
                 final String source = read(jsp);
                 final String titleKey = firstGroup(TITLE_KEY_PATTERN, source);
                 final String headingKey = firstGroup(HEADING_KEY_PATTERN, source);
-                if (titleKey == null && headingKey == null) {
-                    // redirect.jsp renders no page of its own; it only forwards.
-                    continue;
-                }
-                assertNotNull(titleKey, jsp + " has a heading but no title");
-                assertNotNull(headingKey, jsp + " has a title but no heading");
+                // Every remaining error JSP renders its own page (the one page that did not --
+                // and so was exempted here -- has been deleted), so each must carry both a
+                // <title> and an <h2> naming a message key; neither message assumes the other
+                // key is present, since both can be missing at once.
+                assertNotNull(titleKey, jsp + " must have a <title><la:message key=\"...\"/></title>");
+                assertNotNull(headingKey, jsp + " must have an <h2><la:message key=\"...\"/></h2>");
                 if (!headingKey.equals(titleKey)) {
                     mismatches.add(jsp + " titled " + titleKey + " but headed " + headingKey);
                 }

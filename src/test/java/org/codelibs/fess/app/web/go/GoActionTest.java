@@ -18,15 +18,32 @@ package org.codelibs.fess.app.web.go;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.helper.ViewHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.dbflute.system.DBFluteSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.servlet.filter.RequestLoggingFilter.RequestClientErrorException;
+import org.lastaflute.web.servlet.request.ResponseManager;
+import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.VaMore;
+import org.lastaflute.web.validation.ValidationSuccess;
 
 /**
  * Test class for GoAction.
@@ -36,11 +53,14 @@ public class GoActionTest extends UnitFessTestCase {
 
     private TestableGoAction goAction;
 
+    /** Shared by {@code ComponentUtil.setFessConfig} and the action's own {@code fessConfig} field. */
+    private FessConfig fessConfig;
+
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         // Setup protocolHelper with test configuration
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+        fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public String getCrawlerWebProtocols() {
                 return "http,https";
@@ -50,17 +70,49 @@ public class GoActionTest extends UnitFessTestCase {
             public String getCrawlerFileProtocols() {
                 return "file,smb,smb1,ftp";
             }
-        });
+
+            @Override
+            public String getIndexFieldUrl() {
+                return "url";
+            }
+
+            @Override
+            public String getIndexFieldConfigId() {
+                return "configId";
+            }
+
+            @Override
+            public boolean isSearchLog() {
+                // Keeps index() off the click-log path, which needs userInfoHelper/SearchLogHelper
+                // that these tests do not stub -- unrelated to the status/detail-key behavior
+                // under test.
+                return false;
+            }
+
+            @Override
+            public boolean isSearchFileProxyEnabled() {
+                return true;
+            }
+        };
+        ComponentUtil.setFessConfig(fessConfig);
         final ProtocolHelper protocolHelper = new ProtocolHelper();
         protocolHelper.init();
         ComponentUtil.register(protocolHelper, "protocolHelper");
 
         goAction = new TestableGoAction();
         goAction.setSystemHelper(new FixedSystemHelper());
+        goAction.setFessConfig(fessConfig);
+        goAction.setResponseManager(ComponentUtil.getComponent(ResponseManager.class));
     }
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
+        // Also unregisters everything ComponentUtil.register(...) added during this test
+        // (protocolHelper, and the notFoundOnFileSystem/loadFailure tests' stub viewHelper):
+        // ComponentUtil.setFessConfig(null) clears its whole componentMap as a side effect (see
+        // ComponentUtil#setFessConfig), so a stub registered by one test cannot leak into a
+        // later test in the same JVM. This is the same cleanup other Fess tests that call
+        // ComponentUtil.register(...) rely on (e.g. AdminWizardActionTest).
         ComponentUtil.setFessConfig(null);
         super.tearDown(testInfo);
     }
@@ -85,6 +137,66 @@ public class GoActionTest extends UnitFessTestCase {
         // systemHelper is injected via @Resource in production; set it directly for unit tests.
         void setSystemHelper(final SystemHelper systemHelper) {
             this.systemHelper = systemHelper;
+        }
+
+        // fessConfig, searchHelper, pathMappingHelper and responseManager are injected via
+        // @Resource in production; set them directly for unit tests that drive index().
+        void setFessConfig(final FessConfig fessConfig) {
+            this.fessConfig = fessConfig;
+        }
+
+        void setSearchHelper(final SearchHelper searchHelper) {
+            this.searchHelper = searchHelper;
+        }
+
+        void setResponseManager(final ResponseManager responseManager) {
+            this.responseManager = responseManager;
+        }
+
+        {
+            // A plain pass-through: index()'s own branching is what these tests exercise, not
+            // path-mapping rewriting, which would need a live PathMappingBhv/OpenSearch.
+            this.pathMappingHelper = new PathMappingHelper() {
+                @Override
+                public String replaceUrl(final String url) {
+                    return url;
+                }
+            };
+        }
+
+        // Login handling is orthogonal to the status/detail-key decisions under test here.
+        @Override
+        protected boolean isLoginRequired() {
+            return false;
+        }
+
+        // getUserBean() normally reads fessLoginAssist, unset here; index() passes its result
+        // straight through to searchHelper (ignored by the stub below), so an anonymous visitor
+        // is enough and avoids a NullPointerException that index()'s own try/catch would
+        // otherwise swallow as "doc not found", masking every branch below it.
+        @Override
+        protected OptionalThing<FessUserBean> getUserBean() {
+            return OptionalThing.empty();
+        }
+
+        /**
+         * When true, {@link #validate} invokes the production error hook instead of running real
+         * Bean Validation -- exercising exactly the {@code validate(form, messages -> {}, () -> {
+         * throw responseManager.new400(...); })} hook in {@link GoAction#index}, the same way
+         * {@code SearchActionTest} stubs {@code validate()} rather than driving Hibernate
+         * Validator, which real validation would need {@code requestManager} wired up to reach.
+         */
+        boolean failValidation;
+
+        @Override
+        public ValidationSuccess validate(final Object form, final VaMore<FessMessages> moreValidationLambda,
+                final VaErrorHook validationErrorLambda) {
+            if (failValidation) {
+                // The production hook's body always throws; it never returns a value.
+                validationErrorLambda.hook();
+                throw new IllegalStateException("validationErrorLambda should have thrown");
+            }
+            return new ValidationSuccess(new FessMessages());
         }
     }
 
@@ -331,5 +443,149 @@ public class GoActionTest extends UnitFessTestCase {
         assertTrue(goAction.isFileSystemPath("gcs://bucket/path/file%20with%20spaces.txt"));
         assertTrue(goAction.isFileSystemPath("gcs://bucket/path/ファイル.txt"));
         assertTrue(goAction.isFileSystemPath("gcs://bucket/path/file+name.txt"));
+    }
+
+    // ==================================================================================
+    //                                                                index() status Tests
+    //                                                                ====================
+    // Spec table (task 7): each branch reports the real status at the real URL instead of
+    // redirecting to ErrorAction, and records the detail key ErrorPageServlet reads off the
+    // request. validate()'s own error hook is exercised via TestableGoAction.failValidation
+    // rather than real Bean Validation, which would need requestManager wired up to reach --
+    // the same seam SearchActionTest uses. The 400/404 branches throw a
+    // RequestClientErrorException that never reaches the container's RequestLoggingFilter in
+    // this unit test, so only the exception's type and its getErrorStatus() (via
+    // assertClientError below) and the detail-key attribute are assertable here; the eventual
+    // sendError(<status>) conversion is that filter's job, not index()'s, and is out of reach of
+    // a plain action-method call. The 500 branch is different: index() itself calls sendError,
+    // so that status is asserted directly on the mock response.
+
+    private GoForm newGoForm() {
+        final GoForm form = new GoForm();
+        form.docId = "doc1";
+        form.queryId = "query1";
+        return form;
+    }
+
+    /**
+     * Asserts {@code e} is the framework's client-error exception carrying exactly
+     * {@code expectedStatus} -- not merely that its class name happens to contain the status
+     * digits, which an unrelated class could also satisfy.
+     */
+    private void assertClientError(final int expectedStatus, final Exception e) {
+        assertTrue(e instanceof RequestClientErrorException,
+                "expected a " + expectedStatus + " RequestClientErrorException, got " + e.getClass());
+        assertEquals(expectedStatus, ((RequestClientErrorException) e).getErrorStatus());
+    }
+
+    /** Stub returning a fixed document (or none) without touching the search engine. */
+    private static class StubSearchHelper extends SearchHelper {
+        private final Map<String, Object> doc;
+
+        StubSearchHelper(final Map<String, Object> doc) {
+            this.doc = doc;
+        }
+
+        @Override
+        public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                final OptionalThing<FessUserBean> userBean) {
+            // GoAction.index() only ever calls .orElse(null) on this, never .get(), so the
+            // not-found thrower below is never invoked.
+            return OptionalEntity.ofNullable(doc, () -> {});
+        }
+    }
+
+    @Test
+    public void test_go_validationFailure_is400() {
+        goAction.failValidation = true;
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 400");
+        } catch (final Exception e) {
+            assertClientError(400, e);
+        }
+    }
+
+    @Test
+    public void test_go_docIdNotFound_is404WithDetailKey() throws Exception {
+        goAction.setSearchHelper(new StubSearchHelper(null));
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 404");
+        } catch (final Exception e) {
+            assertClientError(404, e);
+        }
+        assertEquals("errors.docid_not_found", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
+    public void test_go_documentUrlMissing_is404WithDetailKey() throws Exception {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("id", "doc1");
+        goAction.setSearchHelper(new StubSearchHelper(doc));
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 404");
+        } catch (final Exception e) {
+            assertClientError(404, e);
+        }
+        assertEquals("errors.document_not_found", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
+    public void test_go_unsafeRedirectUrl_is404WithDetailKey() throws Exception {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "javascript:alert(1)");
+        goAction.setSearchHelper(new StubSearchHelper(doc));
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 404");
+        } catch (final Exception e) {
+            assertClientError(404, e);
+        }
+        assertEquals("errors.document_not_found", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
+    public void test_go_notFoundOnFileSystem_is404WithDetailKey() throws Exception {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "file:///tmp/does-not-exist.txt");
+        goAction.setSearchHelper(new StubSearchHelper(doc));
+        ComponentUtil.register(new ViewHelper() {
+            @Override
+            public StreamResponse asContentResponse(final Map<String, Object> requestedDoc) {
+                return new StreamResponse("does-not-exist.txt").httpStatus(404);
+            }
+        }, "viewHelper");
+        try {
+            goAction.index(newGoForm());
+            fail("expected a 404");
+        } catch (final Exception e) {
+            assertClientError(404, e);
+        }
+        assertEquals("errors.not_found_on_file_system", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+    }
+
+    @Test
+    public void test_go_loadFailure_is500WithDetailKey() throws Exception {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "file:///tmp/unreachable.txt");
+        goAction.setSearchHelper(new StubSearchHelper(doc));
+        ComponentUtil.register(new ViewHelper() {
+            @Override
+            public StreamResponse asContentResponse(final Map<String, Object> requestedDoc) {
+                throw new RuntimeException("simulated file server failure");
+            }
+        }, "viewHelper");
+
+        final ActionResponse response = goAction.index(newGoForm());
+
+        assertEquals(500, getMockResponse().getStatus());
+        assertEquals("errors.not_load_from_server", getMockRequest().getAttribute(Constants.ERROR_DETAIL_KEY));
+        assertTrue(response.isReturnAsEmptyBody(),
+                "must return asEmptyBody() -- undefined() is refused from an"
+                        + " @Execute method by RedCardableAssist#assertExecuteMethodResponseDefined, and asEmptyBody() is"
+                        + " what pins \"no body, no forward\": a plain HtmlResponse.fromRedirectPathAsIs(...) is also"
+                        + " !isUndefined() but is not an empty body");
     }
 }
