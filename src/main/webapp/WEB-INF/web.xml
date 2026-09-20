@@ -200,10 +200,18 @@
   <!-- ================================================================================= -->
   <!--                                                                           Servlet -->
   <!--                                                                           ======= -->
+  <servlet>
+    <servlet-name>errorPageServlet</servlet-name>
+    <servlet-class>org.codelibs.fess.servlet.ErrorPageServlet</servlet-class>
+  </servlet>
 
   <!-- ================================================================================= -->
   <!--                                                                   Servlet Mapping -->
   <!--                                                                   =============== -->
+  <servlet-mapping>
+    <servlet-name>errorPageServlet</servlet-name>
+    <url-pattern>/error-page</url-pattern>
+  </servlet-mapping>
 
   <!-- ================================================================================= -->
   <!--                                                                  Servlet Listener -->
@@ -264,32 +272,38 @@
   <!-- ================================================================================= -->
   <!--                                                                        Error Page -->
   <!--                                                                        ========== -->
+  <!--
+    Every status below is handled by org.codelibs.fess.servlet.ErrorPageServlet, mapped at
+    /error-page above. The servlet reads the real status from the container's
+    jakarta.servlet.error.status_code request attribute (set by the ERROR dispatch), not from
+    this list, so the <error-code> here only selects which statuses reach it.
+  -->
   <error-page>
     <error-code>400</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=badRequest</location>
+    <location>/error-page</location>
   </error-page>
   <error-page>
     <error-code>401</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=badAuth</location>
+    <location>/error-page</location>
   </error-page>
   <error-page>
     <error-code>403</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+    <location>/error-page</location>
   </error-page>
   <error-page>
     <error-code>404</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=notFound</location>
+    <location>/error-page</location>
   </error-page>
   <error-page>
     <error-code>408</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+    <location>/error-page</location>
   </error-page>
   <error-page>
     <error-code>429</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=busy</location>
+    <location>/error-page</location>
   </error-page>
   <error-page>
     <error-code>500</error-code>
-    <location>/WEB-INF/view/error/redirect.jsp?type=systemError</location>
+    <location>/error-page</location>
   </error-page>
 </web-app>
