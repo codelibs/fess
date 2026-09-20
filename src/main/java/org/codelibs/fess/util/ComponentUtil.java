@@ -106,6 +106,7 @@ import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.StaticThemeResponder;
+import org.codelibs.fess.theme.ThemeArtifactHelper;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
@@ -141,6 +142,8 @@ public final class ComponentUtil {
     private static final String SEARCH_HELPER = "searchHelper";
 
     private static final String THEME_HELPER = "themeHelper";
+
+    private static final String THEME_ARTIFACT_HELPER = "themeArtifactHelper";
 
     private static final String PLUGIN_HELPER = "pluginHelper";
 
@@ -949,6 +952,14 @@ public final class ComponentUtil {
      */
     public static ThemeHelper getThemeHelper() {
         return getComponent(THEME_HELPER);
+    }
+
+    /**
+     * Gets the theme artifact helper component.
+     * @return The theme artifact helper.
+     */
+    public static ThemeArtifactHelper getThemeArtifactHelper() {
+        return getComponent(THEME_ARTIFACT_HELPER);
     }
 
     /**
