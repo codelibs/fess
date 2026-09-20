@@ -16,8 +16,13 @@
 package org.codelibs.fess.theme;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +47,8 @@ import org.w3c.dom.NodeList;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+
+import jakarta.annotation.Resource;
 
 /**
  * Discovers static themes published in a Maven-style repository tree.
@@ -136,6 +143,38 @@ public class ThemeArtifactHelper {
      */
     public ThemeArtifactHelper() {
         // for DI
+    }
+
+    /**
+     * Installs the downloaded archive. Injected because this helper is itself a
+     * DI component and {@link StaticThemeInstaller} is registered alongside it
+     * in the same {@code app.xml}.
+     */
+    @Resource
+    protected StaticThemeInstaller staticThemeInstaller;
+
+    /** Raised when a theme artifact cannot be resolved, verified or installed. */
+    public static class ThemeArtifactException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Creates an exception.
+         *
+         * @param message diagnostic message
+         */
+        public ThemeArtifactException(final String message) {
+            super(message);
+        }
+
+        /**
+         * Creates an exception with a cause.
+         *
+         * @param message diagnostic message
+         * @param cause the underlying failure
+         */
+        public ThemeArtifactException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
     }
 
     /**
@@ -353,6 +392,176 @@ public class ThemeArtifactHelper {
      */
     protected String buildArtifactUrl(final String repositoryUrl, final String name, final String version) {
         return join(repositoryUrl, name) + "/" + version + "/" + name + "-" + version + ".zip";
+    }
+
+    /**
+     * Downloads a published theme, verifies its checksum and installs it.
+     *
+     * @param name the theme name
+     * @param version the theme version
+     * @throws ThemeArtifactException when the artifact is unknown, cannot be
+     *         downloaded, or fails checksum verification
+     */
+    public void install(final String name, final String version) {
+        // The artifact is built from the name and the version, not looked up in the
+        // catalogue. The catalogue answers what can be offered, not what may be
+        // installed: an operator naming a theme and a version that exist must not be
+        // blocked because the index was momentarily unreadable, and bin/fess-setup
+        // already works this way. The repository still decides -- a name or version that
+        // is not published 404s -- and installZip still rejects an incompatible theme.
+        //
+        // Both parts are checked against the patterns the manifest enforces before they
+        // reach a URL: they are pasted into one, and a separator in either would point
+        // the download somewhere else entirely.
+        if (!NAME_PATTERN.matcher(name).matches() || !VERSION_PATTERN.matcher(version).matches()) {
+            throw new ThemeArtifactException("Not a theme name and version: " + name + " " + version);
+        }
+        final String[] repositories = getRepositories();
+        if (repositories.length == 0) {
+            throw new ThemeArtifactException("No theme repository is configured.");
+        }
+
+        // Each configured repository is tried in order, so a theme published in the
+        // second one installs. Only the last failure is reported: the earlier ones are
+        // "this repository does not have it", which is the normal case.
+        ThemeArtifactException last = null;
+        for (final String repositoryUrl : repositories) {
+            final ThemeArtifact artifact = new ThemeArtifact(name, version, buildArtifactUrl(repositoryUrl, name, version));
+            Path temp = null;
+            try {
+                temp = Files.createTempFile("fess-theme-", ".zip");
+                download(artifact.getUrl(), temp);
+                verifyChecksum(artifact, temp);
+                try (InputStream in = Files.newInputStream(temp)) {
+                    staticThemeInstaller.installZip(in);
+                }
+                if (logger.isInfoEnabled()) {
+                    logger.info("Installed theme from repository: name={}, version={}, url={}", name, version, artifact.getUrl());
+                }
+                return;
+            } catch (final StaticThemeInstaller.InstallException e) {
+                // The archive was fetched and verified; Fess refused its content. Trying
+                // the next repository would install a theme the operator did not name, so
+                // this reaches the caller unchanged -- it carries the structured Code the
+                // admin screen and the API map to a message, INCOMPATIBLE_FESS_VERSION
+                // among them.
+                throw e;
+            } catch (final ThemeArtifactException e) {
+                last = e;
+            } catch (final Exception e) {
+                last = new ThemeArtifactException("Failed to install the theme " + name + " " + version, e);
+            } finally {
+                if (temp != null) {
+                    try {
+                        Files.deleteIfExists(temp);
+                    } catch (final IOException e) {
+                        logger.warn("Failed to delete the temporary file: {}", temp, e);
+                    }
+                }
+            }
+        }
+        throw last != null ? last : new ThemeArtifactException("Failed to install the theme " + name + " " + version);
+    }
+
+    /**
+     * Streams an artifact to a local file.
+     *
+     * @param url the artifact URL
+     * @param dest the destination file
+     */
+    protected void download(final String url, final Path dest) {
+        try (CurlResponse response = createCurlRequest(url).execute()) {
+            if (response.getHttpStatusCode() != 200) {
+                throw new ThemeArtifactException("HTTP " + response.getHttpStatusCode() + " for " + url);
+            }
+            try (InputStream in = response.getContentAsStream()) {
+                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (final ThemeArtifactException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new ThemeArtifactException("Failed to download " + url, e);
+        }
+    }
+
+    /**
+     * Verifies a downloaded artifact against its published {@code .sha1}.
+     *
+     * <p>A missing checksum (HTTP 404) is a warning: not every repository
+     * publishes one. Any other failure is fatal -- treating it as "skip" would
+     * let anyone who can break the checksum request disable verification.</p>
+     *
+     * @param artifact the artifact being installed
+     * @param file the downloaded file
+     */
+    protected void verifyChecksum(final ThemeArtifact artifact, final Path file) {
+        final String checksumUrl = artifact.getUrl() + ".sha1";
+        final String published;
+        try (CurlResponse response = createCurlRequest(checksumUrl).execute()) {
+            final int status = response.getHttpStatusCode();
+            if (status == 404) {
+                logger.warn("No checksum published for {}; installing without verification", artifact.getUrl());
+                return;
+            }
+            if (status != 200) {
+                throw new ThemeArtifactException("HTTP " + status + " while reading " + checksumUrl);
+            }
+            published = response.getContentAsString();
+        } catch (final ThemeArtifactException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new ThemeArtifactException("Failed to read " + checksumUrl, e);
+        }
+
+        final String actual = sha1Of(file);
+        if (!matchesChecksum(published, actual)) {
+            throw new ThemeArtifactException("Checksum mismatch for " + artifact.getUrl());
+        }
+    }
+
+    /**
+     * Compares a published checksum body with a computed digest. The body is
+     * normally bare 40-hex, but a {@code sha1sum}-style line is tolerated by
+     * reading only the first token.
+     *
+     * @param published the published checksum body, may be null
+     * @param actual the computed digest
+     * @return true when they match
+     */
+    static boolean matchesChecksum(final String published, final String actual) {
+        if (published == null) {
+            return false;
+        }
+        final String trimmed = published.trim();
+        if (trimmed.isEmpty()) {
+            return false;
+        }
+        final String token = trimmed.split("\\s+")[0];
+        return token.equalsIgnoreCase(actual);
+    }
+
+    /**
+     * Computes the SHA-1 digest of a file as lowercase hex.
+     *
+     * @param file the file to digest
+     * @return the digest
+     */
+    protected String sha1Of(final Path file) {
+        try (InputStream in = Files.newInputStream(file)) {
+            final MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            final byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                digest.update(buffer, 0, read);
+            }
+            final StringBuilder sb = new StringBuilder(40);
+            for (final byte b : digest.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (final Exception e) {
+            throw new ThemeArtifactException("Failed to digest " + file, e);
+        }
     }
 
     private static String join(final String base, final String segment) {
