@@ -335,6 +335,9 @@ public class Constants extends CoreLibConstants {
     /** Request attribute key for storing field logs. */
     public static final String FIELD_LOGS = "fess.FieldLogs";
 
+    /** Request attribute key for storing the error detail message key shown by the error page. */
+    public static final String ERROR_DETAIL_KEY = "fess.ErrorDetailKey";
+
     // ============================================================
     // Date/Time Format Constants
     // ============================================================
