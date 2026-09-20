@@ -50,6 +50,13 @@ import jakarta.servlet.http.HttpServletResponse;
  * denylist (see {@link #isBlockedFilename(String)}). The entry file is subjected to the same
  * filename denylist so a malicious manifest entry cannot serve internal files (e.g.
  * {@code theme.yml} or {@code .env}) as HTML.</p>
+ *
+ * <p>{@link #serveErrorPage} is the counterpart used outside that filter: the container's error
+ * dispatch (registered via {@code <error-page>}) invokes it for a request that already failed at
+ * an arbitrary URL, with a status the servlet — not this class — derives from the original
+ * request. It shares its entry-file validation and response-header logic with {@link #serveIndex}
+ * through {@link #readEntryBytes} and {@link #writeIndexBytes} so the two entry points cannot
+ * drift apart.</p>
  */
 public class StaticThemeResponder {
 
@@ -70,8 +77,10 @@ public class StaticThemeResponder {
     static final String SVG_CSP = "default-src 'none'; style-src 'unsafe-inline'";
 
     /**
-     * Allowlist for the {@code message_key} request parameter: letters, digits, dots,
-     * underscores and hyphens only. Compiled once rather than per request.
+     * Allowlist backing {@link #isSafeMessageKey}: letters, digits, dots, underscores and
+     * hyphens only. Applies both to the {@code message_key} request parameter read by
+     * {@link #resolveMessageKey} and to a {@code detailKey} passed directly to
+     * {@link #serveErrorPage}. Compiled once rather than per call.
      */
     private static final Pattern MESSAGE_KEY_PATTERN = Pattern.compile("[A-Za-z0-9._\\-]+");
 
@@ -108,28 +117,14 @@ public class StaticThemeResponder {
      */
     public void serveIndex(final HttpServletRequest req, final HttpServletResponse res, final Theme theme, final String requestPath)
             throws IOException {
-        final String entry = theme.getManifest().map(ThemeManifest::getEntry).orElse("index.html");
-        final Path indexFile = theme.getBasePath().resolve(entry).normalize();
-        // Apply the same filename denylist as resolveAsset: manifest validation rejects
-        // traversal but not dotfiles/theme.yml/etc., so a malicious manifest entry must
-        // not be able to serve internal files (e.g. entry: theme.yml or .env) as HTML.
-        if (!indexFile.startsWith(theme.getBasePath()) || isBlockedFilename(indexFile.getFileName().toString())
-                || !Files.isRegularFile(indexFile)) {
+        // Read the file upfront so the base element (and, on error routes, the meta tags) can be
+        // injected and the final byte length is known before Content-Length is set.
+        final byte[] originalBytes = readEntryBytes(theme);
+        if (originalBytes == null) {
             sendNotFound(res);
             return;
         }
-        // TOCTOU note: isRegularFile() and Files.size() are separate syscalls.
-        // A concurrent theme replacement (atomic move + REPLACE_EXISTING) between
-        // these calls is theoretically possible but extremely unlikely in practice.
-        // The worst outcome is a transient 404 or a Content-Length mismatch caught
-        // by the HTTP client; no correctness invariant is violated.
-        final long fileSize;
-        try {
-            fileSize = Files.size(indexFile);
-        } catch (final IOException e) {
-            sendNotFound(res);
-            return;
-        }
+        final byte[] indexBytes = injectBaseHref(originalBytes, req.getContextPath());
 
         // Attach error diagnostic headers when the request targets an /error route, and set the
         // HTTP status so proxies and CDNs see the correct status without parsing X-Fess-Error-Code.
@@ -138,57 +133,53 @@ public class StaticThemeResponder {
         final boolean isErrorRoute = requestPath != null && ("/error".equals(requestPath) || requestPath.startsWith("/error/"));
         final String messageKey = resolveMessageKey(req);
 
-        // Read the file upfront so the base element (and, on error routes, the meta tags) can be
-        // injected and the final byte length is known before Content-Length is set.
-        final byte[] originalBytes;
-        try (InputStream in = Files.newInputStream(indexFile)) {
-            final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
-            in.transferTo(buf);
-            originalBytes = buf.toByteArray();
-        } catch (final IOException e) {
-            sendNotFound(res);
-            return;
-        }
-        final byte[] indexBytes = injectBaseHref(originalBytes, req.getContextPath());
-
         if (isErrorRoute) {
             final int status = computeErrorStatus(requestPath);
             byte[] modifiedBytes = injectErrorCodeMeta(indexBytes, status);
             if (messageKey != null && !messageKey.isEmpty()) {
                 modifiedBytes = injectErrorDetailMeta(modifiedBytes, messageKey);
             }
-            // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
-            res.setStatus(status);
-            res.setContentType("text/html; charset=UTF-8");
-            res.setHeader("Content-Disposition", "inline; filename=\"index.html\"");
-            res.setHeader("Cache-Control", "no-store");
-            res.setHeader("Content-Security-Policy", INDEX_CSP);
-            // Clickjacking defense-in-depth: INDEX_CSP already sets frame-ancestors 'none'
-            // (enforced via this HTTP header, unlike a <meta> CSP); X-Frame-Options covers
-            // older browsers that don't honor frame-ancestors.
-            res.setHeader("X-Frame-Options", "DENY");
-            res.setHeader("Referrer-Policy", "same-origin");
-            res.setHeader("X-Fess-Route", "error");
-            res.setHeader("X-Fess-Error-Code", String.valueOf(status));
-            res.setContentLength(modifiedBytes.length);
-            res.getOutputStream().write(modifiedBytes);
+            writeIndexBytes(res, modifiedBytes, status, status);
             return;
         }
 
-        // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
-        // Content-Disposition must be inline; otherwise the browser would download index.html
-        // instead of rendering it.
-        res.setStatus(HttpServletResponse.SC_OK);
-        res.setContentType("text/html; charset=UTF-8");
-        res.setHeader("Content-Disposition", "inline; filename=\"index.html\"");
-        res.setHeader("Cache-Control", "no-store");
-        res.setHeader("Content-Security-Policy", INDEX_CSP);
-        // Clickjacking defense-in-depth (see error path above): frame-ancestors 'none' is in
-        // INDEX_CSP; X-Frame-Options: DENY covers browsers that don't honor frame-ancestors.
-        res.setHeader("X-Frame-Options", "DENY");
-        res.setHeader("Referrer-Policy", "same-origin");
-        res.setContentLength(indexBytes.length);
-        res.getOutputStream().write(indexBytes);
+        writeIndexBytes(res, indexBytes, HttpServletResponse.SC_OK, null);
+    }
+
+    /**
+     * Serves the theme's entry file as an error page: the given HTTP status, the SPA's error meta
+     * tags, and the same hardening headers as a normal index response.
+     *
+     * <p>Unlike {@link #serveIndex}, the status and the displayed error code are supplied by the
+     * caller: the container's error dispatch knows the real status, and the displayed code may
+     * differ from it (a 401 is shown as a 403, because the SPA has no 401 page and the browser
+     * already handled the challenge).</p>
+     *
+     * @param req the request being answered (used for the context path)
+     * @param res the response to write to
+     * @param theme the resolved theme
+     * @param httpStatus the HTTP status to send
+     * @param displayCode the error code the page shows (meta tag and {@code X-Fess-Error-Code})
+     * @param detailKey an i18n key for the detail line, or null; unsafe values are dropped
+     * @return true when the page was written; false when the theme could not supply its entry file
+     *         and nothing was written to the response
+     * @throws IOException if writing the response fails
+     */
+    public boolean serveErrorPage(final HttpServletRequest req, final HttpServletResponse res, final Theme theme, final int httpStatus,
+            final int displayCode, final String detailKey) throws IOException {
+        // Nothing must be written before this point: the caller (the error-page servlet) falls
+        // back to its own minimal HTML when the theme cannot answer, and that decision has to be
+        // made before any bytes reach the response.
+        final byte[] entryBytes = readEntryBytes(theme);
+        if (entryBytes == null) {
+            return false;
+        }
+        byte[] html = injectErrorCodeMeta(injectBaseHref(entryBytes, req == null ? null : req.getContextPath()), displayCode);
+        if (isSafeMessageKey(detailKey)) {
+            html = injectErrorDetailMeta(html, detailKey);
+        }
+        writeIndexBytes(res, html, httpStatus, displayCode);
+        return true;
     }
 
     /**
@@ -219,6 +210,9 @@ public class StaticThemeResponder {
      *   <li>{@code /error/badRequest} or {@code /error/badrequest} → 400</li>
      *   <li>{@code /error/notFound} or {@code /error/notfound} → 404</li>
      *   <li>{@code /error/busy} → 429</li>
+     *   <li>{@code /error/403} or {@code /error/forbidden} → 403</li>
+     *   <li>{@code /error/503}, {@code /error/serviceUnavailable} or
+     *       {@code /error/service_unavailable} → 503</li>
      *   <li>Any other {@code /error/*} path → 500</li>
      * </ul>
      *
@@ -245,6 +239,8 @@ public class StaticThemeResponder {
         case "badrequest" -> 400;
         case "notfound" -> 404;
         case "busy" -> 429;
+        case "403", "forbidden" -> 403;
+        case "503", "serviceunavailable", "service_unavailable" -> 503;
         default -> 500;
         };
     }
@@ -264,11 +260,24 @@ public class StaticThemeResponder {
             return null;
         }
         final String raw = req.getParameter("message_key");
-        // Allowlist: letters, digits, dots, underscores, hyphens only.
-        if (raw == null || raw.isEmpty() || !MESSAGE_KEY_PATTERN.matcher(raw).matches()) {
-            return null;
-        }
-        return raw;
+        return isSafeMessageKey(raw) ? raw : null;
+    }
+
+    /**
+     * Tests whether a candidate message key is safe to inject into HTML as a
+     * {@code x-fess-error-detail-key} meta tag value.
+     *
+     * <p>This is the {@code message_key} allowlist — letters, digits, dots, underscores and
+     * hyphens only, matching the conventional key naming scheme such as
+     * {@code errors.docid_not_found} — extracted so both {@link #resolveMessageKey} (a query
+     * parameter read from the request) and {@link #serveErrorPage} (a detail key supplied
+     * directly by the caller, e.g. the error-page servlet) apply the same rule.</p>
+     *
+     * @param key the candidate key; {@code null} or empty is never safe
+     * @return {@code true} when the key is non-empty and contains only allowlisted characters
+     */
+    public static boolean isSafeMessageKey(final String key) {
+        return key != null && MESSAGE_KEY_PATTERN.matcher(key).matches();
     }
 
     /**
@@ -537,6 +546,89 @@ public class StaticThemeResponder {
         try (InputStream in = Files.newInputStream(file)) {
             in.transferTo(res.getOutputStream());
         }
+    }
+
+    /**
+     * Reads the theme's entry file after the same validation {@link #serveIndex} applies.
+     *
+     * <p>Used by both {@link #serveIndex} and {@link #serveErrorPage} so the entry-file
+     * resolution and validation rules (denylist, containment check, regular-file check) exist in
+     * exactly one place.</p>
+     *
+     * @param theme the theme whose entry file is read
+     * @return the file's bytes, or null when the entry is missing, blocked or unreadable
+     */
+    private byte[] readEntryBytes(final Theme theme) {
+        final String entry = theme.getManifest().map(ThemeManifest::getEntry).orElse("index.html");
+        final Path indexFile = theme.getBasePath().resolve(entry).normalize();
+        // Apply the same filename denylist as resolveAsset: manifest validation rejects
+        // traversal but not dotfiles/theme.yml/etc., so a malicious manifest entry must
+        // not be able to serve internal files (e.g. entry: theme.yml or .env) as HTML.
+        if (!indexFile.startsWith(theme.getBasePath()) || isBlockedFilename(indexFile.getFileName().toString())
+                || !Files.isRegularFile(indexFile)) {
+            return null;
+        }
+        // TOCTOU note: isRegularFile() and Files.size() are separate syscalls.
+        // A concurrent theme replacement (atomic move + REPLACE_EXISTING) between
+        // these calls is theoretically possible but extremely unlikely in practice.
+        // The worst outcome is a transient 404 (serveIndex) or fallback HTML (serveErrorPage's
+        // caller) or a Content-Length mismatch caught by the HTTP client; no correctness
+        // invariant is violated.
+        final long fileSize;
+        try {
+            fileSize = Files.size(indexFile);
+        } catch (final IOException e) {
+            return null;
+        }
+        try (InputStream in = Files.newInputStream(indexFile)) {
+            final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
+            in.transferTo(buf);
+            return buf.toByteArray();
+        } catch (final IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Writes HTML bytes with the index response headers.
+     *
+     * <p>Used by both {@link #serveIndex} and {@link #serveErrorPage} so the header set for an
+     * index-style HTML response — content type, caching, hardening headers, and the optional
+     * error diagnostics — exists in exactly one place and cannot drift between the two entry
+     * points.</p>
+     *
+     * @param res the response to write to
+     * @param html the bytes to write
+     * @param status the HTTP status
+     * @param errorCode the error code for the diagnostic headers, or null for a normal page
+     * @throws IOException if writing fails
+     */
+    private void writeIndexBytes(final HttpServletResponse res, final byte[] html, final int status, final Integer errorCode)
+            throws IOException {
+        // X-Content-Type-Options: nosniff is not set here. For serveIndex()'s caller
+        // (StaticThemeFilter, a REQUEST dispatch) Tomcat's HttpHeaderSecurityFilter (web.xml)
+        // adds it. That filter is REQUEST-dispatch only, so it never runs for serveErrorPage()'s
+        // caller (the container's ERROR/FORWARD error dispatch); there, ErrorPageServlet sets the
+        // header itself before calling serveErrorPage() -- the right place, since this method is
+        // shared by both callers and cannot tell which dispatch type it is running under.
+        // Content-Disposition must be inline; otherwise the browser would download index.html
+        // instead of rendering it.
+        res.setStatus(status);
+        res.setContentType("text/html; charset=UTF-8");
+        res.setHeader("Content-Disposition", "inline; filename=\"index.html\"");
+        res.setHeader("Cache-Control", "no-store");
+        res.setHeader("Content-Security-Policy", INDEX_CSP);
+        // Clickjacking defense-in-depth: INDEX_CSP already sets frame-ancestors 'none'
+        // (enforced via this HTTP header, unlike a <meta> CSP); X-Frame-Options covers
+        // older browsers that don't honor frame-ancestors.
+        res.setHeader("X-Frame-Options", "DENY");
+        res.setHeader("Referrer-Policy", "same-origin");
+        if (errorCode != null) {
+            res.setHeader("X-Fess-Route", "error");
+            res.setHeader("X-Fess-Error-Code", String.valueOf(errorCode));
+        }
+        res.setContentLength(html.length);
+        res.getOutputStream().write(html);
     }
 
     /**
