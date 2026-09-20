@@ -92,7 +92,23 @@ public final class PluginRepository {
      * @return the jar URL
      */
     public static String jarUrl(final String repository, final String artifactId, final String version, final String fileVersion) {
-        return base(repository) + artifactId + "/" + version + "/" + artifactId + "-" + fileVersion + ".jar";
+        return artifactUrl(repository, artifactId, version, fileVersion, "jar");
+    }
+
+    /**
+     * Returns the URL of one artifact file, which is the jar for a plugin and the zip for a
+     * theme.
+     *
+     * @param repository the group directory URL
+     * @param artifactId the artifact name
+     * @param version the version, which names the directory
+     * @param fileVersion the version the file name carries
+     * @param extension the file extension, without the dot
+     * @return the artifact URL
+     */
+    public static String artifactUrl(final String repository, final String artifactId, final String version, final String fileVersion,
+            final String extension) {
+        return base(repository) + artifactId + "/" + version + "/" + artifactId + "-" + fileVersion + "." + extension;
     }
 
     /**

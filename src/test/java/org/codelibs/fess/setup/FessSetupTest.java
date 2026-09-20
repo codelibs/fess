@@ -157,6 +157,61 @@ public class FessSetupTest {
         }
     }
 
+    /**
+     * The theme definition holds a repository rather than a download of its own, for the same
+     * reason the plugin definition does.
+     */
+    @Test
+    public void test_list_omitsTheThemeDefinition() {
+        assertEquals(0, run("list"));
+        for (final String line : out().split("\n")) {
+            assertTrue(!"theme".equals(line.trim()), out());
+        }
+    }
+
+    @Test
+    public void test_loadDefinitions_themeRepository() throws Exception {
+        final ComponentDefinition theme = FessSetup.loadDefinitions().get("theme");
+        assertNotNull(theme, "install theme needs a repository to read");
+        assertTrue(theme.get("repository").endsWith("/org/codelibs/fess/themes/"), theme.get("repository"));
+        assertTrue(theme.get("snapshot.repository").endsWith("/org/codelibs/fess/themes/"), theme.get("snapshot.repository"));
+        assertNull(theme.get("url"), "a theme is named on the command line, not by the definition");
+        assertNull(theme.get("github"), "themes are published to the Maven repository only");
+        assertEquals("/opt/fess/app/themes", theme.resolve("dest", Map.of("fess.home", "/opt/fess")));
+    }
+
+    @Test
+    public void test_installTheme_withoutAName_saysSo() {
+        assertEquals(2, run("install", "theme"));
+        assertTrue(err().contains("list themes"), err());
+    }
+
+    @Test
+    public void test_installTheme_reportsAMalformedNameAsAUsageError() {
+        assertEquals(2, run("install", "theme", "../evil", "--dest", tempDir.toString()));
+        assertTrue(err().contains("is not a theme name"), err());
+    }
+
+    @Test
+    public void test_removeTheme_withoutAName_saysSo() {
+        assertEquals(2, run("remove", "theme"));
+        assertTrue(err().contains("theme name"), err());
+    }
+
+    @Test
+    public void test_removeTheme_reportsAThemeThatIsNotInstalled() {
+        assertEquals(0, run("remove", "theme", "docuforge", "--dest", tempDir.toString()));
+        assertTrue(out().contains("docuforge is not installed"), out());
+    }
+
+    @Test
+    public void test_usage_documentsTheThemeCommands() {
+        assertEquals(2, run());
+        assertTrue(err().contains("install theme"), err());
+        assertTrue(err().contains("remove theme"), err());
+        assertTrue(err().contains("list themes"), err());
+    }
+
     @Test
     public void test_loadDefinitions_pluginRepository() throws Exception {
         final ComponentDefinition plugin = FessSetup.loadDefinitions().get("plugin");

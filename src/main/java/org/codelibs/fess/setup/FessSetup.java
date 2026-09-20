@@ -44,7 +44,10 @@ public final class FessSetup {
     /** The definition holding where Fess plugins come from and go, rather than a download. */
     private static final String PLUGIN_COMPONENT = "plugin";
 
-    /** What a plugin name and a plugin version may be made of, which is a Maven coordinate. */
+    /** The definition holding where static themes come from and go, rather than a download. */
+    private static final String THEME_COMPONENT = "theme";
+
+    /** What an artifact name and version may be made of, which is a Maven coordinate. */
     private static final Pattern COORDINATE = Pattern.compile("[A-Za-z0-9._-]+");
 
     private static final int EXIT_OK = 0;
@@ -81,8 +84,19 @@ public final class FessSetup {
                   --repository takes every version, jar and checksum from one repository,
                   GitHub included.
 
+              install theme <name>[:<version>]... [--version <version>] [--repository <url>]
+                  Install static themes, for example docuforge or voicebox.
+                  A theme's version is the Fess line it targets, so a name with no version
+                  resolves to the theme built for this Fess. The archive is checked against
+                  the SHA-1 the Maven repository publishes and extracted into the themes
+                  directory; a theme already installed under that name is kept as a backup
+                  for the same period as one replaced from the admin screen.
+
               remove plugin <name>...
                   Delete installed Fess plugins.
+
+              remove theme <name>...
+                  Delete installed static themes, keeping each as a backup.
 
               list
                   Show the components this build knows how to install.
@@ -90,6 +104,12 @@ public final class FessSetup {
               list plugins [--repository <url>]
                   Show the Fess plugins published for this version, and which are installed.
                   A development build lists the snapshot repository too.
+
+              list themes [--repository <url>]
+                  Show the static themes published for this version, and which are installed.
+                  The list comes from the repository's directory index; when that cannot be
+                  read, the installed themes are still shown and a theme can be installed by
+                  naming it.
 
               list installed
                   Show the installed Fess plugins, without asking the repository.
@@ -169,6 +189,9 @@ public final class FessSetup {
         if (args.length > 1) {
             if ("installed".equals(args[1])) {
                 return listInstalled(definitions, parseOptions(args, 2), out);
+            }
+            if ("themes".equals(args[1])) {
+                return listThemes(definitions, parseOptions(args, 2), out);
             }
             if (!"plugins".equals(args[1])) {
                 err.println("error: unknown list target: " + args[1]);
@@ -276,6 +299,9 @@ public final class FessSetup {
         if (PLUGIN_COMPONENT.equals(target)) {
             return installFessPlugins(args, definitions, options, out, err);
         }
+        if (THEME_COMPONENT.equals(target)) {
+            return installThemes(args, definitions, options, out, err);
+        }
         final ComponentDefinition definition = definitions.get(target);
         if (definition == null) {
             err.println("error: unknown component: " + target);
@@ -334,9 +360,10 @@ public final class FessSetup {
     }
 
     /**
-     * A plugin named on the command line: which plugin, and which version of it to install.
+     * An artifact named on the command line -- a plugin or a theme: which one, and which version
+     * of it to install.
      *
-     * @param artifactId the plugin name
+     * @param artifactId the artifact name
      * @param version the version to install, or {@code null} to let the repository decide
      */
     record PluginSpec(String artifactId, String version) {
@@ -360,21 +387,36 @@ public final class FessSetup {
      * @throws SetupException if the argument or the default version is not in that shape
      */
     static PluginSpec parsePluginSpec(final String argument, final String defaultVersion) throws SetupException {
+        return parseSpec(argument, defaultVersion, "plugin", "fess-script-groovy");
+    }
+
+    /**
+     * Parses one {@code <name>} or {@code <name>:<version>} argument.
+     *
+     * @param argument the argument
+     * @param defaultVersion the version {@code --version} named, or null
+     * @param kind what is being named, for the error message
+     * @param example an example of a well-formed name, for the error message
+     * @return the artifact and its version
+     * @throws SetupException if the argument or the default version is not in that shape
+     */
+    static PluginSpec parseSpec(final String argument, final String defaultVersion, final String kind, final String example)
+            throws SetupException {
         final int colon = argument.indexOf(':');
         if (colon < 0) {
             if (defaultVersion != null && !COORDINATE.matcher(defaultVersion).matches()) {
                 throw new SetupException("--version " + defaultVersion + " is not a version.");
             }
             if (!COORDINATE.matcher(argument).matches()) {
-                throw new SetupException("'" + argument + "' is not a plugin name.");
+                throw new SetupException("'" + argument + "' is not a " + kind + " name.");
             }
             return new PluginSpec(argument, defaultVersion);
         }
         final String artifactId = argument.substring(0, colon);
         final String version = argument.substring(colon + 1);
         if (!COORDINATE.matcher(artifactId).matches() || !COORDINATE.matcher(version).matches()) {
-            throw new SetupException("'" + argument + "' is not a plugin, which is written as <name> or <name>:<version>, "
-                    + "for example fess-script-groovy or fess-script-groovy:15.9.0.");
+            throw new SetupException("'" + argument + "' is not a " + kind + ", which is written as <name> or <name>:<version>, "
+                    + "for example " + example + " or " + example + ":15.9.0.");
         }
         return new PluginSpec(artifactId, version);
     }
@@ -410,6 +452,174 @@ public final class FessSetup {
     }
 
     /**
+     * Installs static themes into the webapp's themes directory.
+     *
+     * <p>A theme's version is the Fess line it targets, so the same major.minor narrowing that
+     * picks a plugin picks the theme built for this Fess, and a name with no version needs no
+     * catalogue to be consulted. Every argument is parsed before the first download starts, for
+     * the reason it is for plugins.</p>
+     *
+     * @param args the command line
+     * @param definitions the setup definition
+     * @param options the parsed options
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 on success, 2 when no theme was named or one was named badly
+     * @throws SetupException if a download or a file operation fails
+     */
+    private static int installThemes(final String[] args, final Map<String, ComponentDefinition> definitions,
+            final Map<String, String> options, final PrintStream out, final PrintStream err) throws SetupException {
+        final List<String> arguments = positionals(args, 2);
+        if (arguments.isEmpty()) {
+            err.println("error: install theme requires at least one theme name, for example:");
+            err.println("  fess-setup install theme docuforge");
+            err.println("Run `fess-setup list themes` to see what is published.");
+            return EXIT_USAGE;
+        }
+        final List<PluginSpec> specs = new ArrayList<>();
+        for (final String argument : arguments) {
+            try {
+                specs.add(parseSpec(argument, options.get("version"), THEME_COMPONENT, "docuforge"));
+            } catch (final SetupException e) {
+                err.println("error: " + e.getMessage());
+                return EXIT_USAGE;
+            }
+        }
+        final ComponentDefinition definition = definitions.get(THEME_COMPONENT);
+        final PluginSources sources = pluginSources(definition, options);
+        final Path directory = themeDirectory(definition, options);
+        for (final PluginSpec spec : specs) {
+            installOneTheme(sources, spec.artifactId(), resolve(sources, spec.artifactId(), spec.version()), directory, out);
+        }
+        out.println();
+        out.println("Restart Fess, or reload the themes from the admin screen, to pick " + (specs.size() == 1 ? "it up." : "them up."));
+        return EXIT_OK;
+    }
+
+    /**
+     * Downloads one theme archive and extracts it into the themes directory.
+     *
+     * @param sources where themes are published
+     * @param name the theme name
+     * @param resolved the version to install
+     * @param directory the themes directory
+     * @param out the stream for normal output
+     * @throws SetupException if the download or a file operation fails
+     */
+    private static void installOneTheme(final PluginSources sources, final String name, final Resolved resolved, final Path directory,
+            final PrintStream out) throws SetupException {
+        out.println("Downloading " + name + " " + resolved.version());
+        final int[] lastPercent = { -1 };
+        final String used = ThemeInstaller.install(sources.repositoryOf(resolved.version()), name, resolved.version(),
+                resolved.fileVersion(), directory, out, (bytes, total) -> reportProgress(out, bytes, total, lastPercent));
+        out.println("  from " + used);
+        out.println("Installed " + directory.resolve(name));
+    }
+
+    /**
+     * Prints the themes the repository publishes for this Fess, marking the installed ones.
+     *
+     * @param definitions the setup definition
+     * @param options the command line options
+     * @param out the stream for normal output
+     * @return 0
+     * @throws SetupException if the themes directory cannot be read
+     */
+    private static int listThemes(final Map<String, ComponentDefinition> definitions, final Map<String, String> options,
+            final PrintStream out) throws SetupException {
+        final ComponentDefinition definition = definitions.get(THEME_COMPONENT);
+        final PluginSources sources = pluginSources(definition, options);
+        final Path directory = themeDirectory(definition, options);
+        final List<String> installed = ThemeInstaller.installed(directory);
+        List<String> names = readThemeNames(sources.releaseRepository(), out);
+        if (developmentBuild() && sources.hasSnapshot()) {
+            names = PluginRepository.mergeNames(names, readThemeNames(sources.snapshot(), out));
+        }
+        final List<String> published = names;
+        for (final String name : published) {
+            final String version = installed.contains(name) ? ThemeInstaller.installedVersion(directory, name) : null;
+            out.println(version == null ? "  " + name : "  " + name + "  (installed: " + version + ")");
+        }
+
+        // A theme installed from a zip by hand, or one whose name the listing could not be read
+        // for, is installed but absent above. Saying nothing would make this look as though it
+        // had lost it.
+        final List<String> unlisted = installed.stream().filter(name -> !published.contains(name)).toList();
+        if (!unlisted.isEmpty()) {
+            if (!published.isEmpty()) {
+                out.println();
+            }
+            out.println("Installed but not listed by the repository:");
+            for (final String name : unlisted) {
+                final String version = ThemeInstaller.installedVersion(directory, name);
+                out.println(version == null ? "  " + name : "  " + name + "  " + version);
+            }
+        }
+        if (published.isEmpty() && unlisted.isEmpty()) {
+            out.println("No themes are published there, and none are installed in " + directory);
+        }
+        return EXIT_OK;
+    }
+
+    /**
+     * Reads the theme names one repository lists, reporting rather than hiding a failure.
+     *
+     * <p>The list comes from the repository's directory index, which is generated on a schedule
+     * and is absent for a tree nothing has been published to yet. Returning nothing and saying
+     * nothing would present that as "no themes exist", which is neither true nor actionable:
+     * a theme installs by name whether or not the index has caught up.</p>
+     *
+     * @param repository the group directory URL
+     * @param out the stream for warnings
+     * @return the theme names, empty when the listing cannot be read
+     */
+    private static List<String> readThemeNames(final String repository, final PrintStream out) {
+        try {
+            return ThemeInstaller.namesFromListing(Downloader.readString(URI.create(repository)));
+        } catch (final SetupException e) {
+            out.println("warning: " + e.getMessage());
+            out.println("  That list is the repository's directory index, which is generated periodically.");
+            out.println("  A theme can still be installed by name: fess-setup install theme <name>");
+            return List.of();
+        }
+    }
+
+    /**
+     * Deletes installed static themes, keeping each as a backup.
+     *
+     * @param args the command line
+     * @param definitions the setup definition
+     * @param out the stream for normal output
+     * @param err the stream for errors
+     * @return 0 on success, 2 on a usage error
+     * @throws SetupException if a theme cannot be moved aside
+     */
+    private static int removeThemes(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
+            final PrintStream err) throws SetupException {
+        final List<String> names = positionals(args, 2);
+        if (names.isEmpty()) {
+            err.println("error: remove theme requires at least one theme name");
+            return EXIT_USAGE;
+        }
+        final Path directory = themeDirectory(definitions.get(THEME_COMPONENT), parseOptions(args, 2));
+        boolean removedAny = false;
+        for (final String name : names) {
+            if (ThemeInstaller.remove(directory, name) == null) {
+                out.println(name + " is not installed.");
+            } else {
+                out.println("Removed " + directory.resolve(name));
+                removedAny = true;
+            }
+        }
+        if (removedAny) {
+            out.println();
+            out.println("Restart Fess for the change to take effect. A theme still set as the default");
+            out.println("leaves Fess on the bundled one until another is chosen on the admin screen.");
+        }
+        return EXIT_OK;
+    }
+
+    /**
      * Deletes installed Fess plugins.
      *
      * @param args the command line
@@ -421,7 +631,14 @@ public final class FessSetup {
      */
     private static int remove(final String[] args, final Map<String, ComponentDefinition> definitions, final PrintStream out,
             final PrintStream err) throws SetupException {
-        if (args.length < 2 || !PLUGIN_COMPONENT.equals(args[1])) {
+        if (args.length < 2) {
+            err.println(USAGE);
+            return EXIT_USAGE;
+        }
+        if (THEME_COMPONENT.equals(args[1])) {
+            return removeThemes(args, definitions, out, err);
+        }
+        if (!PLUGIN_COMPONENT.equals(args[1])) {
             err.println(USAGE);
             return EXIT_USAGE;
         }
@@ -785,12 +1002,35 @@ public final class FessSetup {
      * @return the plugin directory
      */
     private static Path pluginDirectory(final ComponentDefinition definition, final Map<String, String> options) {
+        return componentDirectory(definition, options, FessPluginInstaller.directory(fessHome()));
+    }
+
+    /**
+     * Returns the directory Fess loads static themes from, which {@code --dest} overrides.
+     *
+     * @param definition the theme definition
+     * @param options the command line options
+     * @return the themes directory
+     */
+    private static Path themeDirectory(final ComponentDefinition definition, final Map<String, String> options) {
+        return componentDirectory(definition, options, ThemeInstaller.directory(fessHome()));
+    }
+
+    /**
+     * Returns where a component installs to: the option, else the definition, else the default.
+     *
+     * @param definition the component definition
+     * @param options the command line options
+     * @param fallback the directory to use when the definition names none
+     * @return the directory
+     */
+    private static Path componentDirectory(final ComponentDefinition definition, final Map<String, String> options, final Path fallback) {
         final String dest = options.get("dest");
         if (dest != null) {
             return Path.of(dest);
         }
         final String configured = definition.resolve("dest", Map.of("fess.home", fessHome()));
-        return configured != null ? Path.of(configured) : FessPluginInstaller.directory(fessHome());
+        return configured != null ? Path.of(configured) : fallback;
     }
 
     /**
