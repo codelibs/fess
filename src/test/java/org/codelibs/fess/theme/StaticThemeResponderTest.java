@@ -265,6 +265,10 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertErrorStatus(theme, "/error/busy", 429);
             assertErrorStatus(theme, "/error/system", 500);
             assertErrorStatus(theme, "/error/anything_else", 500);
+            assertErrorStatus(theme, "/error/403", 403);
+            assertErrorStatus(theme, "/error/forbidden", 403);
+            assertErrorStatus(theme, "/error/503", 503);
+            assertErrorStatus(theme, "/error/service_unavailable", 503);
         } finally {
             deleteTree(tmp);
         }
@@ -597,6 +601,16 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/anything_else"));
         assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/unknown"));
         assertEquals(500, StaticThemeResponder.computeErrorStatus(null));
+        // Final review Task 4: /error/403 and /error/503 (and their word forms) must resolve
+        // to those statuses -- previously every unknown segment fell to the 500 default, so a
+        // bookmarked /error/403 or /error/503 silently rendered as a 500 despite error.js's
+        // PATH_TO_CODE (and this method's own javadoc) claiming otherwise.
+        assertEquals(403, StaticThemeResponder.computeErrorStatus("/error/403"));
+        assertEquals(403, StaticThemeResponder.computeErrorStatus("/error/forbidden"));
+        assertEquals(403, StaticThemeResponder.computeErrorStatus("/error/Forbidden"));
+        assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/503"));
+        assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/serviceUnavailable"));
+        assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/service_unavailable"));
     }
 
     @Test
@@ -727,6 +741,129 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         assertNull(viewer.resolveMessageKey(absent));
 
         assertNull(viewer.resolveMessageKey(null));
+    }
+
+    // --- serveErrorPage -----------------------
+
+    @Test
+    public void test_serveErrorPage_writesIndexWithGivenStatusAndMeta() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-errpage-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final StubRequest req = new StubRequest();
+            final CapturingResponse res = new CapturingResponse();
+
+            final boolean written = new StaticThemeResponder().serveErrorPage(req, res, theme, 404, 404, null);
+
+            assertTrue(written);
+            assertEquals(404, res.status);
+            assertEquals("404", res.headers.get("X-Fess-Error-Code"));
+            assertEquals("error", res.headers.get("X-Fess-Route"));
+            assertEquals("no-store", res.headers.get("Cache-Control"));
+            assertEquals(StaticThemeResponder.INDEX_CSP, res.headers.get("Content-Security-Policy"));
+            assertEquals("DENY", res.headers.get("X-Frame-Options"));
+            assertEquals("same-origin", res.headers.get("Referrer-Policy"));
+            assertEquals("inline; filename=\"index.html\"", res.headers.get("Content-Disposition"));
+            final String html = new String(res.body(), StandardCharsets.UTF_8);
+            assertTrue(html.contains("<meta name=\"x-fess-error-code\" content=\"404\">"), html);
+            assertTrue(html.contains("<base href=\"/\">"), html);
+            assertEquals(res.body().length, (int) res.contentLength);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveErrorPage_displayCodeMayDifferFromHttpStatus() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-errpage-display-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final CapturingResponse res = new CapturingResponse();
+
+            final boolean written = new StaticThemeResponder().serveErrorPage(new StubRequest(), res, theme, 401, 403, null);
+
+            assertTrue(written);
+            // The status actually sent to the client is the real one (401): a proxy or the
+            // browser's own handling of the challenge must see the true status.
+            assertEquals(401, res.status);
+            // The displayed code (what the SPA shows) can differ: the theme has no dedicated
+            // 401 page, so the caller asks for the 403 "forbidden" page to be displayed instead.
+            assertTrue(new String(res.body(), StandardCharsets.UTF_8).contains("content=\"403\""));
+            assertEquals("403", res.headers.get("X-Fess-Error-Code"));
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveErrorPage_injectsDetailKey() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-errpage-detail-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final CapturingResponse res = new CapturingResponse();
+
+            final boolean written =
+                    new StaticThemeResponder().serveErrorPage(new StubRequest(), res, theme, 500, 500, "errors.not_load_from_server");
+
+            assertTrue(written);
+            final String html = new String(res.body(), StandardCharsets.UTF_8);
+            assertTrue(html.contains("x-fess-error-detail-key\" content=\"errors.not_load_from_server\""), html);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveErrorPage_rejectsUnsafeDetailKey() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-errpage-unsafekey-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head><title>Fess</title></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final CapturingResponse res = new CapturingResponse();
+
+            final boolean written =
+                    new StaticThemeResponder().serveErrorPage(new StubRequest(), res, theme, 500, 500, "errors.x\"><script>");
+
+            assertTrue(written);
+            assertFalse(new String(res.body(), StandardCharsets.UTF_8).contains("x-fess-error-detail-key"));
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveErrorPage_missingEntryReportsFailure() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-errpage-missing-");
+        try {
+            // No index.html created: the theme cannot supply its entry file.
+            final Theme brokenTheme = new Theme("t", tmp, manifest());
+            final CapturingResponse res = new CapturingResponse();
+
+            final boolean written = new StaticThemeResponder().serveErrorPage(new StubRequest(), res, brokenTheme, 500, 500, null);
+
+            assertFalse(written);
+            // Nothing must have reached the response: the caller (the error-page servlet) is the
+            // one that writes a fallback page in this case.
+            assertEquals(0, res.body().length);
+            assertEquals(200, res.status);
+            assertNull(res.contentType);
+            assertTrue(res.headers.isEmpty(), res.headers.toString());
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_isSafeMessageKey() {
+        assertTrue(StaticThemeResponder.isSafeMessageKey("errors.docid_not_found"));
+        assertTrue(StaticThemeResponder.isSafeMessageKey("errors.not_load_from_server"));
+        assertFalse(StaticThemeResponder.isSafeMessageKey("errors.x<script>"));
+        assertFalse(StaticThemeResponder.isSafeMessageKey("errors.x\"><script>"));
+        assertFalse(StaticThemeResponder.isSafeMessageKey(null));
+        assertFalse(StaticThemeResponder.isSafeMessageKey(""));
     }
 
     // ===== Stubs =====

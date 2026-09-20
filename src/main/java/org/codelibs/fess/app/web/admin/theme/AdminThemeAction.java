@@ -237,6 +237,9 @@ public class AdminThemeAction extends FessAdminAction {
         case ENTRY_LIMIT -> messages.addErrorsThemeInstallEntryLimit(GLOBAL);
         case RATIO_LIMIT -> messages.addErrorsThemeInstallRatioLimit(GLOBAL);
         case ZIP_BOMB_RATIO -> messages.addErrorsThemeInstallZipBombRatio(GLOBAL);
+        // The manifest name equalled ThemeRegistry.BUILT_IN_THEME_NAME (installZip refuses to
+        // overwrite the bundled theme); reuse the same key the delete-side BUILT_IN guard uses.
+        case BUILT_IN -> messages.addErrorsThemeIsBuiltin(GLOBAL, ThemeRegistry.BUILT_IN_THEME_NAME);
         default -> messages.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage()));
         }
     }
@@ -260,7 +263,7 @@ public class AdminThemeAction extends FessAdminAction {
 
     /**
      * Deletes a static theme via the installer. The installer enforces that
-     * the theme is not the active default.
+     * the theme is not the active default and not the bundled built-in theme.
      *
      * @param form the delete form containing the theme name
      * @return redirect to the theme index
@@ -294,6 +297,7 @@ public class AdminThemeAction extends FessAdminAction {
             final String themeName) {
         switch (ex.code()) {
         case ACTIVE_DEFAULT -> messages.addErrorsThemeIsActive(GLOBAL, themeName);
+        case BUILT_IN -> messages.addErrorsThemeIsBuiltin(GLOBAL, themeName);
         case NOT_FOUND -> messages.addErrorsThemeNotFound(GLOBAL, themeName);
         case INVALID_NAME -> messages.addErrorsThemeNameInvalid(GLOBAL, themeName);
         default -> messages.addErrorsFailedToDeleteTheme(GLOBAL, themeName);

@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.theme;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,6 +80,18 @@ public class StaticThemeInstallerDeleteTest {
         assertThrows(InstallException.class, () -> installer.delete(""));
         assertThrows(InstallException.class, () -> installer.delete(null));
         assertThrows(InstallException.class, () -> installer.delete(".staging-foo"));
+    }
+
+    @Test
+    public void test_deleteRefusesTheBuiltInTheme() throws Exception {
+        seedStaticTheme(ThemeRegistry.BUILT_IN_THEME_NAME);
+        registry.reload();
+        // Even when nothing else names it active, the bundled theme is the last-resort
+        // fallback ThemeRegistry falls back to, so it must never be deletable.
+        installer.setActiveDefaultProbe(() -> null);
+        final InstallException ex = assertThrows(InstallException.class, () -> installer.delete(ThemeRegistry.BUILT_IN_THEME_NAME));
+        assertEquals(InstallException.Code.BUILT_IN, ex.code());
+        assertTrue(Files.isDirectory(tempDir.resolve(ThemeRegistry.BUILT_IN_THEME_NAME)));
     }
 
     @Test

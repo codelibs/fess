@@ -907,8 +907,36 @@ public class BundledBootstrapThemeTest {
 
     @Test
     public void test_errorJs_503ReservedComment() throws Exception {
+        // Final review Task 4/6: StaticThemeResponder.computeErrorStatus now maps /error/503 (and
+        // its word forms) to 503 too, so the old "computeErrorStatus never emits 503" claim this
+        // comment made is no longer true. Pin the corrected comment instead of the stale one.
         final String js = Files.readString(THEME_DIR.resolve("assets/error.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("503 path segments are reserved"), "error.js must mark the 503 path mappings as reserved (#8)");
+        assertTrue(js.contains("StaticThemeResponder.computeErrorStatus (Java) maps /error/503"),
+                "error.js must document that computeErrorStatus also maps 503 path segments (#8)");
+    }
+
+    /**
+     * Task 8: the theme now receives statuses it never saw before (401 shown as 403), and is
+     * rendered in place at the URL that failed. All 16 i18n bundles must carry the 403 title/body
+     * pair and the not_load_from_server detail key that /go now stores.
+     */
+    @Test
+    public void test_i18n_hasError403AndNotLoadFromServerKeys() throws Exception {
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.filter(p -> p.getFileName().toString().startsWith("messages.") && p.getFileName().toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            final String json = Files.readString(p, StandardCharsets.UTF_8);
+                            for (final String key : new String[] { "error.title_403", "error.body_403",
+                                    "error.detail_not_load_from_server" }) {
+                                assertTrue(json.contains("\"" + key + "\""),
+                                        "i18n bundle " + p.getFileName() + " must contain " + key + " (task 8)");
+                            }
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
     }
 
     @Test

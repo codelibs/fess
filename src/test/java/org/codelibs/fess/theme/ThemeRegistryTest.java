@@ -61,7 +61,9 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_resolveActiveTheme_fallsBackToBuiltIn() throws Exception {
+    public void test_resolveActiveTheme_emptyWhenBuiltInIsMissing() throws Exception {
+        // No themes on disk at all, not even the bundled "bootstrap" theme: resolution has
+        // nothing left to fall back to and must return empty rather than throw or invent one.
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         try {
             final ThemeRegistry reg = new ThemeRegistry();
@@ -69,6 +71,26 @@ public class ThemeRegistryTest extends UnitFessTestCase {
             reg.reload();
             assertTrue(reg.resolveActiveTheme(null).isEmpty());
             assertTrue(reg.resolveActiveTheme("nonexistent").isEmpty());
+        } finally {
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
+    public void test_resolveActiveTheme_fallsBackToBuiltInWhenNoDefaultConfigured() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        try {
+            writeTheme(tempThemesDir, ThemeRegistry.BUILT_IN_THEME_NAME);
+            writeTheme(tempThemesDir, "docsearch");
+
+            final ThemeRegistry reg = new ThemeRegistry();
+            reg.setThemesDirOverride(tempThemesDir);
+            reg.reload();
+
+            // No virtual host key, no theme.default configured: the bundled theme wins.
+            final Optional<Theme> resolved = reg.resolveActiveTheme(null);
+            assertTrue(resolved.isPresent());
+            assertEquals(ThemeRegistry.BUILT_IN_THEME_NAME, resolved.get().getName());
         } finally {
             deleteRecursively(tempThemesDir);
         }
@@ -126,26 +148,56 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_resolveActiveTheme_unknownSystemPropertyFallsBackToBuiltin() throws Exception {
+    public void test_resolveActiveTheme_fallsBackToBuiltInWhenDefaultIsNotInstalled() throws Exception {
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         final FessConfig cfg = ComponentUtil.getFessConfig();
         final String before = cfg.getDefaultTheme();
         try {
+            writeTheme(tempThemesDir, ThemeRegistry.BUILT_IN_THEME_NAME);
+
+            // Point the system property at a theme nobody installed BEFORE reload — the
+            // registry caches the resolved default into its snapshot at reload time, so a
+            // property change after reload would not be observed.
+            cfg.setDefaultTheme("this-theme-does-not-exist");
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
             reg.reload();
-            // No themes on disk; resolving via an unknown system-property name must
-            // yield empty (the registry has nothing to fall back to in this isolated test).
-            cfg.setDefaultTheme("this-theme-does-not-exist");
+
             final Optional<Theme> resolved = reg.resolveActiveTheme(null);
-            // Either the resolver returns empty (no fixture, no built-in default reachable
-            // from a unit-test classpath) or, defensively, it returns a theme other than
-            // the missing one. Both are valid; the contract under test is "no NPE / no
-            // throw, no spurious match to the missing name".
-            if (resolved.isPresent()) {
-                assertEquals(false, "this-theme-does-not-exist".equals(resolved.get().getName()));
-            } else {
-                assertNull(reg.getTheme("this-theme-does-not-exist").orElse(null));
-            }
+            assertTrue(resolved.isPresent());
+            assertEquals(ThemeRegistry.BUILT_IN_THEME_NAME, resolved.get().getName());
+        } finally {
+            cfg.setDefaultTheme(before == null ? "" : before);
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
+    public void test_resolveActiveTheme_warnsOncePerUnknownDefault() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final FessConfig cfg = ComponentUtil.getFessConfig();
+        final String before = cfg.getDefaultTheme();
+        try {
+            writeTheme(tempThemesDir, ThemeRegistry.BUILT_IN_THEME_NAME);
+            cfg.setDefaultTheme("ghost");
+            final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
+            reg.reload();
+
+            reg.resolveActiveTheme(null);
+            reg.resolveActiveTheme(null);
+
+            assertEquals(1, reg.getUnknownDefaultWarnCountForTest());
+
+            // A second, DIFFERENT unknown default must warn again: this is what distinguishes
+            // "warn once per distinct value" from a naive "warn once ever" latch, which would
+            // still report 1 here. theme.default is cached into the snapshot at reload time
+            // (see test_resolveActiveTheme_fallsBackToBuiltInWhenDefaultIsNotInstalled), so the
+            // property must be changed BEFORE reload() for the new value to take effect.
+            cfg.setDefaultTheme("ghost2");
+            reg.reload();
+            reg.resolveActiveTheme(null);
+            reg.resolveActiveTheme(null);
+
+            assertEquals(2, reg.getUnknownDefaultWarnCountForTest());
         } finally {
             cfg.setDefaultTheme(before == null ? "" : before);
             deleteRecursively(tempThemesDir);
@@ -276,6 +328,20 @@ public class ThemeRegistryTest extends UnitFessTestCase {
         f.setAccessible(true);
         f.set(reg, cfg);
         return reg;
+    }
+
+    /**
+     * Materialises a minimal, valid theme fixture named {@code name} under {@code themesDir}.
+     */
+    private static void writeTheme(final Path themesDir, final String name) throws Exception {
+        final Path themeDir = themesDir.resolve(name);
+        Files.createDirectories(themeDir);
+        Files.writeString(themeDir.resolve("theme.yml"), String.join("\n", //
+                "apiVersion: fess.codelibs.org/v1", //
+                "kind: StaticTheme", //
+                "name: " + name, //
+                "displayName: " + name, //
+                "version: 1.0.0"));
     }
 
     private static void deleteRecursively(final Path p) throws Exception {

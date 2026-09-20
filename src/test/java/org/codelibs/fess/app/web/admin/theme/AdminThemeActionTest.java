@@ -340,11 +340,12 @@ public class AdminThemeActionTest extends UnitFessTestCase {
     public void test_delete_allInstallExceptionCodes_haveLocalizedKeyMapping() {
         // Pin the mapping table: every StaticThemeInstaller.InstallException.Code that
         // the delete() switch handles must produce a non-empty FessMessages entry with a
-        // localized key (not the raw exception message). The three named codes plus the
+        // localized key (not the raw exception message). The four named codes plus the
         // default fallback for all remaining codes are each tested.
         //
         // Expected key mapping (mirrors AdminThemeAction#mapDeleteExceptionToMessage):
         //   ACTIVE_DEFAULT → errors.theme_is_active
+        //   BUILT_IN       → errors.theme_is_builtin
         //   NOT_FOUND      → errors.theme_not_found
         //   INVALID_NAME   → errors.theme_name_invalid
         //   <all others>   → errors.failed_to_delete_theme (default)
@@ -355,6 +356,7 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // e.g. "errors.theme_is_active" not "{errors.theme_is_active}".
         final Object[][] namedCases = { //
                 { StaticThemeInstaller.InstallException.Code.ACTIVE_DEFAULT, "errors.theme_is_active" }, //
+                { StaticThemeInstaller.InstallException.Code.BUILT_IN, "errors.theme_is_builtin" }, //
                 { StaticThemeInstaller.InstallException.Code.NOT_FOUND, "errors.theme_not_found" }, //
                 { StaticThemeInstaller.InstallException.Code.INVALID_NAME, "errors.theme_name_invalid" }, //
         };
@@ -378,7 +380,8 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // All remaining codes must fall back to errors.failed_to_delete_theme.
         final java.util.Set<StaticThemeInstaller.InstallException.Code> namedCodes =
                 new java.util.HashSet<>(java.util.Arrays.asList(StaticThemeInstaller.InstallException.Code.ACTIVE_DEFAULT,
-                        StaticThemeInstaller.InstallException.Code.NOT_FOUND, StaticThemeInstaller.InstallException.Code.INVALID_NAME));
+                        StaticThemeInstaller.InstallException.Code.BUILT_IN, StaticThemeInstaller.InstallException.Code.NOT_FOUND,
+                        StaticThemeInstaller.InstallException.Code.INVALID_NAME));
 
         for (final StaticThemeInstaller.InstallException.Code code : StaticThemeInstaller.InstallException.Code.values()) {
             if (namedCodes.contains(code)) {
@@ -397,6 +400,23 @@ public class AdminThemeActionTest extends UnitFessTestCase {
             }).anyMatch(um -> "errors.failed_to_delete_theme".equals(um.getMessageKey()));
             assertTrue(hasFallbackKey, "code " + code + " must fall back to errors.failed_to_delete_theme but got: " + msgs);
         }
+    }
+
+    @Test
+    public void test_mapDeleteExceptionToMessage_builtIn() {
+        // The bundled theme is refused outright (Task 2): the delete switch must route
+        // Code.BUILT_IN to its own errors.theme_is_builtin key, not the ACTIVE_DEFAULT
+        // key or the generic fallback.
+        final FessMessages msgs = new FessMessages();
+        AdminThemeAction.mapDeleteExceptionToMessage(msgs,
+                new StaticThemeInstaller.InstallException(StaticThemeInstaller.InstallException.Code.BUILT_IN, "built-in"), "bootstrap");
+        final boolean hasExpectedKey = msgs.toPropertySet().stream().flatMap(p -> {
+            final java.util.Iterator<org.lastaflute.core.message.UserMessage> it = msgs.accessByIteratorOf(p);
+            final java.util.List<org.lastaflute.core.message.UserMessage> list = new java.util.ArrayList<>();
+            it.forEachRemaining(list::add);
+            return list.stream();
+        }).anyMatch(um -> "errors.theme_is_builtin".equals(um.getMessageKey()));
+        assertTrue(hasExpectedKey, "Code.BUILT_IN must map to errors.theme_is_builtin but got: " + msgs);
     }
 
     // ── C-2: null fileName normalization ─────────────────────────────────────────
@@ -604,6 +624,41 @@ public class AdminThemeActionTest extends UnitFessTestCase {
             data.requiredMessageOf("_global", "errors.theme_not_found");
         });
         assertTokenVerified();
+    }
+
+    // ── Final review Task 3: install refuses the built-in theme name ─────────────
+
+    @Test
+    public void test_upload_builtInThemeName_localizesToThemeIsBuiltin() {
+        // The installer refuses to let an upload overwrite the bundled theme (Code.BUILT_IN,
+        // symmetric with the existing delete-side guard); the upload mapper must route it to
+        // the same errors.theme_is_builtin key delete uses, not the generic
+        // errors.failed_to_upload_theme fallback.
+        final StaticThemeInstaller.InstallException ex = new StaticThemeInstaller.InstallException(
+                StaticThemeInstaller.InstallException.Code.BUILT_IN, "Cannot overwrite the built-in theme: bootstrap");
+        final FessMessages msgs = new FessMessages();
+        AdminThemeAction.mapInstallExceptionToMessage(msgs, ex);
+        final boolean hasExpectedKey = msgs.toPropertySet().stream().flatMap(p -> {
+            final java.util.Iterator<org.lastaflute.core.message.UserMessage> it = msgs.accessByIteratorOf(p);
+            final java.util.List<org.lastaflute.core.message.UserMessage> list = new java.util.ArrayList<>();
+            it.forEachRemaining(list::add);
+            return list.stream();
+        }).anyMatch(um -> "errors.theme_is_builtin".equals(um.getMessageKey()));
+        assertTrue(hasExpectedKey, "Code.BUILT_IN must map to errors.theme_is_builtin but got: " + msgs);
+    }
+
+    // ── Final review Task 7: the admin JSP's delete guard matches ThemeRegistry.BUILT_IN_THEME_NAME ──
+
+    @Test
+    public void test_adminThemeJsp_deleteGuardMatchesBuiltInThemeName() throws Exception {
+        // admin_theme.jsp hides the delete control with a literal 'bootstrap' string; pin that
+        // literal to ThemeRegistry.BUILT_IN_THEME_NAME so the two cannot silently drift apart
+        // (mirrors ErrorPageServletTest#test_webXmlPointsEveryErrorPageAtThisServlet).
+        final String jsp = java.nio.file.Files.readString(java.nio.file.Path.of("src/main/webapp/WEB-INF/view/admin/theme/admin_theme.jsp"),
+                java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(jsp.contains("t.name != '" + ThemeRegistry.BUILT_IN_THEME_NAME + "'"),
+                "admin_theme.jsp's delete-control guard must compare against ThemeRegistry.BUILT_IN_THEME_NAME ('"
+                        + ThemeRegistry.BUILT_IN_THEME_NAME + "'), not an unpinned literal");
     }
 
     /**

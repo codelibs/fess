@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -64,6 +66,10 @@ public class ThemeRegistry {
 
     private static final Logger logger = LogManager.getLogger(ThemeRegistry.class);
 
+    /** Name of the theme bundled with the WAR, used as the final fallback when neither the
+     *  virtual-host key nor {@code theme.default} resolves to an installed theme. */
+    public static final String BUILT_IN_THEME_NAME = "bootstrap";
+
     /** Injected Fess configuration used to resolve the themes directory and default theme. */
     @Resource
     protected FessConfig fessConfig;
@@ -98,6 +104,15 @@ public class ThemeRegistry {
      * degrade to DEBUG.
      */
     private final AtomicBoolean defaultThemeFirstFailure = new AtomicBoolean(false);
+
+    /**
+     * Remembers the unknown {@code theme.default} value already reported, so it is logged once
+     * per distinct value instead of once per request.
+     */
+    private final AtomicReference<String> warnedUnknownDefault = new AtomicReference<>();
+
+    /** Counts WARN emissions for an unknown default theme name. Test seam only. */
+    private final AtomicInteger unknownDefaultWarnCount = new AtomicInteger();
 
     /**
      * Initialises the registry by performing the first scan. Failures are
@@ -217,12 +232,17 @@ public class ThemeRegistry {
      *   <li>If {@code virtualHostKey} resolves to a known theme, use it.</li>
      *   <li>Otherwise fall back to the global default theme stored under the
      *       {@link Constants#DEFAULT_THEME_PROPERTY} system property.</li>
-     *   <li>Return empty when neither lookup succeeds.</li>
+     *   <li>Otherwise fall back to the bundled {@link #BUILT_IN_THEME_NAME} theme, which
+     *       ships inside the WAR and is refused by the delete path; this is what keeps a
+     *       Fess instance with no theme configuration at all on the static UI.</li>
      * </ol>
+     *
+     * <p>An unknown {@code theme.default} value is an operator mistake, not a per-request
+     * event, so it is logged once per distinct value rather than on every call.</p>
      *
      * @param virtualHostKey theme name derived from the request's virtual host
      *        (may be {@code null} or blank)
-     * @return the resolved theme, or empty if none configured
+     * @return the resolved theme, or empty if even the bundled theme is not installed
      */
     public Optional<Theme> resolveActiveTheme(final String virtualHostKey) {
         final Snapshot snap = snapshot;
@@ -241,9 +261,22 @@ public class ThemeRegistry {
         }
         final String def = snap.defaultThemeName;
         if (StringUtil.isNotBlank(def)) {
-            return Optional.ofNullable(snap.byName.get(def));
+            final Theme configured = snap.byName.get(def);
+            if (configured != null) {
+                return Optional.of(configured);
+            }
+            // A default that names a theme nobody installed is an operator mistake, not a
+            // per-request event: report it once per distinct value so the log stays readable
+            // while a fresh typo is still reported.
+            if (!def.equals(warnedUnknownDefault.getAndSet(def))) {
+                unknownDefaultWarnCount.incrementAndGet();
+                logger.warn("The default theme '{}' is not installed; falling back to '{}'.", def, BUILT_IN_THEME_NAME);
+            }
         }
-        return Optional.empty();
+        // The bundled theme ships inside the WAR and is refused by the delete path, so this is
+        // the last resort: without it there is no static UI and the request falls through to
+        // whatever Fess routes are left.
+        return Optional.ofNullable(snap.byName.get(BUILT_IN_THEME_NAME));
     }
 
     private String lookupDefaultThemeName() {
@@ -268,6 +301,16 @@ public class ThemeRegistry {
     // ---- Test seams ----
     void setThemesDirOverride(final Path p) {
         this.themesDirOverride = p;
+    }
+
+    /**
+     * Returns how many times an unknown {@code theme.default} value has triggered a WARN log.
+     * Test seam only.
+     *
+     * @return the number of distinct unknown default values warned about so far
+     */
+    int getUnknownDefaultWarnCountForTest() {
+        return unknownDefaultWarnCount.get();
     }
 
     /**

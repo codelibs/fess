@@ -27,7 +27,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
-import org.codelibs.fess.app.web.error.ErrorAction;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -40,8 +39,11 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Action class for handling document redirection requests.
@@ -88,7 +90,9 @@ public class GoAction extends FessSearchAction {
      */
     @Execute
     public ActionResponse index(final GoForm form) throws IOException {
-        validate(form, messages -> {}, () -> asHtml(virtualHost(path_Error_ErrorJsp)));
+        validate(form, messages -> {}, () -> {
+            throw responseManager.new400("Invalid parameters: docId=" + form.docId);
+        });
         if (isLoginRequired()) {
             return redirectToLogin();
         }
@@ -103,13 +107,13 @@ public class GoAction extends FessSearchAction {
             logger.warn("Failed to request: {}", form.docId, e);
         }
         if (doc == null) {
-            saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
-            return redirect(ErrorAction.class);
+            saveErrorDetailKey("errors.docid_not_found");
+            throw responseManager.new404("Doc ID is not found: " + form.docId);
         }
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (url == null) {
-            saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
-            return redirect(ErrorAction.class);
+            saveErrorDetailKey("errors.document_not_found");
+            throw responseManager.new404("The URL for the document ID is not found: " + form.docId);
         }
 
         if (fessConfig.isSearchLog()) {
@@ -158,26 +162,49 @@ public class GoAction extends FessSearchAction {
                 return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
             }
             logger.warn("Invalid redirect URL detected: {}", targetUrl);
-            saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
-            return redirect(ErrorAction.class);
+            saveErrorDetailKey("errors.document_not_found");
+            throw responseManager.new404("The URL for the document ID is not found: " + form.docId);
         }
         if (!fessConfig.isSearchFileProxyEnabled()) {
             return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
         }
         final ViewHelper viewHelper = ComponentUtil.getViewHelper();
+        final StreamResponse response;
         try {
-            final StreamResponse response = viewHelper.asContentResponse(doc);
-            if (response.getHttpStatus().orElse(200) == 404) {
-                logger.debug("Document not found: url={}", targetUrl);
-                saveError(messages -> messages.addErrorsNotFoundOnFileSystem(GLOBAL, targetUrl));
-                return redirect(ErrorAction.class);
-            }
-            return response;
+            // Only this call may fail with an I/O-flavored exception (an unreachable file
+            // server, say); the 404 check and its throw below must stay outside this try, or
+            // the catch below would swallow that throw as "failed to load" too.
+            response = viewHelper.asContentResponse(doc);
         } catch (final Exception e) {
             logger.warn("Failed to load: {}", doc, e);
-            saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
-            return redirect(ErrorAction.class);
+            saveErrorDetailKey("errors.not_load_from_server");
+            // sendError hands the response to the container's error page (ErrorPageServlet) while
+            // keeping this failure at WARN: throwing would have LastaFlute log it at ERROR, which
+            // Fess treats as an alert-worthy event. HtmlResponse.undefined() cannot be returned
+            // here -- LastaFlute's RedCardableAssist#assertExecuteMethodResponseDefined forbids an
+            // @Execute method from returning it (ExecuteMethodReturnUndefinedResponseException) --
+            // so asEmptyBody() is used instead: the response the same guard recommends, which
+            // likewise adds no body and leaves the sendError()-flagged response alone.
+            LaResponseUtil.getResponse().sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return HtmlResponse.asEmptyBody();
         }
+        if (response.getHttpStatus().orElse(200) == 404) {
+            logger.debug("Document not found: url={}", targetUrl);
+            saveErrorDetailKey("errors.not_found_on_file_system");
+            throw responseManager.new404("Not found: " + targetUrl);
+        }
+        return response;
+    }
+
+    /**
+     * Records the detail key the error page shows for this failure. {@code ErrorPageServlet} reads
+     * it from the request on the container's error dispatch and passes it to the theme as the
+     * {@code x-fess-error-detail-key} meta tag.
+     *
+     * @param messageKey a {@code fess_message} key, e.g. {@code errors.docid_not_found}
+     */
+    private void saveErrorDetailKey(final String messageKey) {
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> req.setAttribute(Constants.ERROR_DETAIL_KEY, messageKey));
     }
 
     /**

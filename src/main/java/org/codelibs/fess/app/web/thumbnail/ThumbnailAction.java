@@ -65,7 +65,9 @@ public class ThumbnailAction extends FessSearchAction {
      */
     @Execute
     public ActionResponse index(final ThumbnailForm form) {
-        validate(form, messages -> {}, () -> asHtml(virtualHost(path_Error_ErrorJsp)));
+        validate(form, messages -> {}, () -> {
+            throw responseManager.new400("Invalid parameters: docId=" + form.docId);
+        });
         if (isLoginRequired()) {
             return redirectToLogin();
         }

@@ -18,11 +18,17 @@ package org.codelibs.fess.mylasta.direction;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.codelibs.fess.servlet.ErrorPageServlet;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -63,6 +69,41 @@ public class FessFwAssistantDirectorTest extends UnitFessTestCase {
                         + " and must load in a child process, which has no servlet API on its classpath: " + e);
             }
         }
+    }
+
+    /**
+     * Pins the two show-errors forward paths {@code FessFwAssistantDirector} hands to
+     * {@code JspHtmlRenderingProvider}: the search side against the servlet that actually answers
+     * it -- both that the two constants agree, and that the path is actually wired into
+     * {@code web.xml} as a {@code <servlet-mapping>}, which is what makes the container route a
+     * forward to it -- and the admin side against a JSP that actually exists on disk.
+     *
+     * <p>The second assertion is a regression guard: the admin path used to read
+     * {@code /admin/error/error.jsp}, a file that has never existed -- only {@code admin_error.jsp}
+     * is there -- so a forward down that path fell through to the container's own default error
+     * page instead of Fess' admin error screen.</p>
+     */
+    @Test
+    public void test_showErrorsForwardPaths() throws Exception {
+        // ErrorPageServlet.SERVLET_PATH and FessFwAssistantDirector.SEARCH_ERROR_FORWARD_PATH
+        // are both `static final String` fields with constant initializers, so a plain
+        // `ErrorPageServlet.SERVLET_PATH` expression here would be inlined by javac into this
+        // class' own bytecode at compile time: a stale incremental build that recompiles this
+        // test without recompiling ErrorPageServlet would then compare two frozen literals
+        // instead of catching real drift between them. Reading it by reflection forces an
+        // actual runtime field read of the loaded class.
+        final String servletPath = (String) ErrorPageServlet.class.getField("SERVLET_PATH").get(null);
+        assertEquals(servletPath, FessFwAssistantDirector.SEARCH_ERROR_FORWARD_PATH);
+
+        final String webXml = Files.readString(Path.of("src/main/webapp/WEB-INF/web.xml"), StandardCharsets.UTF_8);
+        final Matcher mappingMatcher = Pattern
+                .compile("<servlet-mapping>\\s*<servlet-name>([^<]+)</servlet-name>\\s*<url-pattern>"
+                        + Pattern.quote(FessFwAssistantDirector.SEARCH_ERROR_FORWARD_PATH) + "</url-pattern>\\s*</servlet-mapping>")
+                .matcher(webXml);
+        assertTrue(mappingMatcher.find(), "the " + FessFwAssistantDirector.SEARCH_ERROR_FORWARD_PATH
+                + " url-pattern must be inside a <servlet-mapping> in web.xml, or a forward to it never reaches ErrorPageServlet");
+
+        assertTrue(Files.isRegularFile(Path.of("src/main/webapp/WEB-INF/view" + FessFwAssistantDirector.ADMIN_ERROR_FORWARD_PATH)));
     }
 
     /** Reads the {@code class} attribute of every {@code component} element in the director XML. */

@@ -54,6 +54,25 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_install_refusesBuiltInThemeName() throws Exception {
+        // Final review Task 3: symmetric with delete()'s existing BUILT_IN guard. Without this,
+        // an upload named "bootstrap" could overwrite the bundled last-resort theme and then
+        // never be removable again (delete() already refuses BUILT_IN).
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            final byte[] zip = buildValidZip(ThemeRegistry.BUILT_IN_THEME_NAME);
+            final StaticThemeInstaller.InstallException ex =
+                    assertThrows(StaticThemeInstaller.InstallException.class, () -> installer.installZip(new ByteArrayInputStream(zip)));
+            assertEquals(StaticThemeInstaller.InstallException.Code.BUILT_IN, ex.code());
+            assertFalse(Files.exists(themesDir.resolve(ThemeRegistry.BUILT_IN_THEME_NAME)),
+                    "the built-in theme directory must not be created/overwritten by a rejected install");
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
     public void test_install_rejectsZipSlip() throws Exception {
         final Path themesDir = Files.createTempDirectory("themes-installer-");
         try {

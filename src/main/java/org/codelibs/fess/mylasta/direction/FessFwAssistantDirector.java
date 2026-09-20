@@ -59,6 +59,17 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     //                                                                          ==========
     private static final Logger logger = LogManager.getLogger(FessFwAssistantDirector.class);
 
+    /**
+     * Forward path for the search-side show-errors rendering: the {@code ErrorPageServlet} mapping
+     * in {@code web.xml}. Spelled as a literal on purpose -- this class is loaded by the crawler,
+     * thumbnail, suggest and chunk child processes, whose classpath has no servlet API, so it must
+     * not reference a servlet class even to read a constant.
+     */
+    static final String SEARCH_ERROR_FORWARD_PATH = "/error-page";
+
+    /** Forward path for the admin-side show-errors rendering, relative to the JSP view root. */
+    static final String ADMIN_ERROR_FORWARD_PATH = "/admin/error/admin_error.jsp";
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -178,9 +189,9 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
             @Override
             protected String getShowErrorsForwardPath(final ActionRuntime runtime) {
                 if (FessAdminAction.class.isAssignableFrom(runtime.getActionType())) {
-                    return "/admin/error/error.jsp";
+                    return ADMIN_ERROR_FORWARD_PATH;
                 }
-                return "/error/system.jsp";
+                return SEARCH_ERROR_FORWARD_PATH;
             }
         });
     }

@@ -128,7 +128,6 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/error/badRequest.jsp", FessHtmlPath.path_Error_BadRequestJsp.getRoutingPath());
         assertEquals("/error/error.jsp", FessHtmlPath.path_Error_ErrorJsp.getRoutingPath());
         assertEquals("/error/notFound.jsp", FessHtmlPath.path_Error_NotFoundJsp.getRoutingPath());
-        assertEquals("/error/redirect.jsp", FessHtmlPath.path_Error_RedirectJsp.getRoutingPath());
         assertEquals("/error/system.jsp", FessHtmlPath.path_Error_SystemJsp.getRoutingPath());
     }
 

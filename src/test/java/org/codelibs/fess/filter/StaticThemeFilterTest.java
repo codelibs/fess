@@ -96,6 +96,67 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_doFilter_servesHeadLikeGet() throws Exception {
+        // HEAD must be served exactly like GET: same allowlist match, same serveIndex call.
+        // The container (Tomcat) is responsible for discarding the response body for HEAD --
+        // this unit test only proves the filter itself does not special-case HEAD as pass-through.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        final StubResponder stub = new StubResponder();
+        f.setStaticThemeResponder(stub);
+        final StubRequest req = new StubRequest("HEAD", "/search");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+        assertFalse(chain.called, "HEAD must be answered by the filter, not passed through");
+        assertTrue(stub.servedIndex);
+        assertEquals("/search", stub.lastRequestPath);
+        assertNull(req.forwardedTo);
+    }
+
+    @Test
+    public void test_doFilter_servesAdvancePath() throws Exception {
+        // /advance joins THEME_UI_PREFIXES: GET /advance is served by the theme (the SPA routes
+        // it); only /search/advance was previously allowlisted via the /search prefix.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        final StubResponder stub = new StubResponder();
+        f.setStaticThemeResponder(stub);
+        final StubRequest req = new StubRequest("GET", "/advance");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+        assertTrue(stub.servedIndex, "/advance must be served as the SPA index");
+        assertEquals("/advance", stub.lastRequestPath);
+        assertNull(req.forwardedTo);
+        assertFalse(chain.called);
+    }
+
+    @Test
+    public void test_doFilter_servesUiPathEvenWhenSpaFallbackIsFalse() throws Exception {
+        // The manifest flag is deprecated and ignored: even spaFallback=false must still serve
+        // the allowlisted UI paths as the SPA entry, since there is no JSP UI left behind them.
+        // Use /help (rather than /search, already covered by the renamed
+        // test_doFilter_ignoresSpaFallbackForUiPaths below) to broaden path coverage.
+        final ThemeManifest manifest = buildManifest(false);
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+        final StubResponder stub = new StubResponder();
+        f.setStaticThemeResponder(stub);
+        final StubRequest req = new StubRequest("GET", "/help");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+        assertTrue(stub.servedIndex, "spaFallback=false must not prevent serving the SPA index");
+        assertEquals("/help", stub.lastRequestPath);
+        assertNull(req.forwardedTo);
+        assertFalse(chain.called);
+    }
+
+    @Test
     public void test_passesThroughPostRequests() throws Exception {
         final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
         final StubRegistry reg = new StubRegistry(staticTheme);
@@ -332,12 +393,12 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_spaFallbackFalse_passesUiRequestThrough() throws Exception {
-        // When manifest.spaFallback=false, allowlisted UI requests must pass through
-        // to the original Fess routes rather than being served the SPA index.
-        // A regression here would silently break themes that opt out of SPA mode.
-        // Use an allowlisted UI path (/search) so the request actually reaches the
-        // spaFallback gate; an unlisted path would pass through before the gate.
+    public void test_doFilter_ignoresSpaFallbackForUiPaths() throws Exception {
+        // Pins the NEW contract: theme.yml's spaFallback flag is deprecated and no longer
+        // consulted by the filter, so a theme cannot opt out of serving the allowlisted UI
+        // paths -- there is no JSP UI left behind them to fall back to.
+        // (Previously, spaFallback=false made the filter pass allowlisted UI requests through
+        // to the original Fess routes; that behavior is gone.)
         final ThemeManifest manifest = buildManifest(false);
         final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), manifest);
         final StubRegistry reg = new StubRegistry(staticTheme);
@@ -346,14 +407,15 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubResponder stub = new StubResponder();
         f.setStaticThemeResponder(stub);
 
-        // Allowlisted UI request, gated off by spaFallback=false.
+        // Allowlisted UI request; spaFallback=false is ignored.
         final StubRequest req = new StubRequest("GET", "/search");
         final StubChain chain = new StubChain();
         f.doFilter(req, new StubResponse(), chain);
 
-        // Must pass through -- not served as the SPA index.
-        assertTrue(chain.called, "spaFallback=false must pass UI requests through to original routes");
-        assertFalse(stub.servedIndex, "spaFallback=false must not serve the SPA index for UI requests");
+        // Must be served as the SPA index, not passed through.
+        assertFalse(chain.called, "spaFallback=false must not stop the filter from serving UI paths");
+        assertTrue(stub.servedIndex, "spaFallback=false must still serve the SPA index for UI requests");
+        assertEquals("/search", stub.lastRequestPath);
         assertNull(req.forwardedTo);
     }
 
@@ -543,14 +605,19 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_legacyUrl_notRedirectedWhenSpaFallbackIsOff() throws Exception {
-        // buildManifest(false) is the existing helper test_spaFallbackFalse_passesUiRequestThrough uses.
+    public void test_legacyUrl_redirectsEvenWhenSpaFallbackIsOff() throws Exception {
+        // Pins the NEW contract: the legacy-URL redirect is no longer gated by
+        // manifest.spaFallback (that check was removed), so it fires the same way whether
+        // spaFallback is true or false. buildManifest(false) is the existing helper
+        // test_doFilter_ignoresSpaFallbackForUiPaths uses.
+        // (Previously, spaFallback=false made the filter pass /search/next through to the
+        // original Fess route instead of redirecting; that behavior is gone.)
         final StaticThemeFilter f = filterWithActiveTheme(buildManifest(false));
         final StubResponse res = new StubResponse();
         final StubChain chain = new StubChain();
         f.doFilter(new StubRequest("GET", "/search/next").withQuery("q=a&pn=2"), res, chain);
-        assertNull(res.redirectLocation);
-        assertTrue(chain.called);
+        assertEquals("/search?q=a&start=20", res.redirectLocation);
+        assertFalse(chain.called);
     }
 
     private static StaticThemeFilter filterWithActiveTheme(final ThemeManifest manifest) {
