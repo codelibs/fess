@@ -260,7 +260,7 @@ public class AdminThemeAction extends FessAdminAction {
      * @param messages the message accumulator
      * @param ex the install exception raised by the installer
      */
-    static void mapInstallExceptionToMessage(final FessMessages messages, final StaticThemeInstaller.InstallException ex) {
+    public static void mapInstallExceptionToMessage(final FessMessages messages, final StaticThemeInstaller.InstallException ex) {
         if (ex.getCause() instanceof final ThemeManifestException tme) {
             addErrorForManifestCode(messages, tme.code());
             return;
