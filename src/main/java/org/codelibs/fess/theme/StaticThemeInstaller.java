@@ -176,6 +176,8 @@ public class StaticThemeInstaller {
             INVALID_NAME,
             /** Refused because the theme is the currently active default. */
             ACTIVE_DEFAULT,
+            /** Refused because the theme is bundled with the WAR and is the last-resort fallback. */
+            BUILT_IN,
             /** Theme directory not found under the themes root. */
             NOT_FOUND,
             /** ZIP extraction failed (e.g. ZipSlip, denied segment). */
@@ -283,6 +285,13 @@ public class StaticThemeInstaller {
                     throw new InstallException(InstallException.Code.MANIFEST_INVALID, "Invalid theme.yml: " + tme.getMessage(), tme);
                 }
             }
+            if (ThemeRegistry.BUILT_IN_THEME_NAME.equals(m.getName())) {
+                // Symmetric with delete()'s guard: the bundled theme is the last-resort
+                // fallback ThemeRegistry.resolveActiveTheme(String) falls back to, and delete()
+                // already refuses to remove it. Without this guard an upload named "bootstrap"
+                // could overwrite it here and then never be removable via delete().
+                throw new InstallException(InstallException.Code.BUILT_IN, "Cannot overwrite the built-in theme: " + m.getName());
+            }
             final Path target = themesDir.resolve(m.getName());
             // A-3: reject symlinks at the target path — a symlink could redirect the
             // atomic rename onto a location outside the themes directory.
@@ -341,10 +350,12 @@ public class StaticThemeInstaller {
      * Removes the static-theme directory atomically.
      *
      * <p>Refuses when (a) the name fails the spec §4.2 regex
-     * ({@code ^[a-z0-9][a-z0-9_-]{0,63}$}), (b) the theme is the currently
-     * active default (per the configured probe or
-     * {@link ThemeRegistry#resolveActiveTheme(String)}), or (c) the directory
-     * does not exist under the themes root.</p>
+     * ({@code ^[a-z0-9][a-z0-9_-]{0,63}$}), (b) the theme is
+     * {@link ThemeRegistry#BUILT_IN_THEME_NAME}, i.e. the bundled theme that
+     * {@link ThemeRegistry#resolveActiveTheme(String)} falls back to when nothing else
+     * resolves, (c) the theme is the currently active default (per the configured probe or
+     * {@link ThemeRegistry#resolveActiveTheme(String)}), or (d) the directory does not exist
+     * under the themes root.</p>
      *
      * <p>Successful deletion atomically renames the directory to
      * {@code themes/.attic-<name>-<timestamp>/} — preserving the §4.4 7-day
@@ -357,6 +368,11 @@ public class StaticThemeInstaller {
     public void delete(final String name) {
         if (name == null || !NAME_RE.matcher(name).matches()) {
             throw new InstallException(InstallException.Code.INVALID_NAME, "Invalid theme name: " + name);
+        }
+        if (ThemeRegistry.BUILT_IN_THEME_NAME.equals(name)) {
+            // The bundled theme is what ThemeRegistry falls back to when no other theme
+            // resolves; deleting it would leave the instance with no static UI at all.
+            throw new InstallException(InstallException.Code.BUILT_IN, "Cannot delete the built-in theme: " + name);
         }
         final String active = activeDefaultProbe != null ? activeDefaultProbe.get()
                 : (themeRegistry == null ? null : themeRegistry.resolveActiveTheme(null).map(Theme::getName).orElse(null));

@@ -434,6 +434,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {0} is the active default theme and cannot be deleted */
     public static final String ERRORS_theme_is_active = "{errors.theme_is_active}";
 
+    /** The key of the message: {0} is the built-in theme and cannot be deleted */
+    public static final String ERRORS_theme_is_builtin = "{errors.theme_is_builtin}";
+
     /** The key of the message: Invalid theme name: {0} */
     public static final String ERRORS_theme_name_invalid = "{errors.theme_name_invalid}";
 
@@ -2611,6 +2614,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsThemeIsActive(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_theme_is_active, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_is_builtin' with parameters.
+     * <pre>
+     * message: {0} is the built-in theme and cannot be deleted
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeIsBuiltin(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_is_builtin, arg0));
         return this;
     }
 

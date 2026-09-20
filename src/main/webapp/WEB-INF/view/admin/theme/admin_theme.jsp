@@ -121,7 +121,10 @@ ${fe:html(true)}
                                                         </c:if>
                                                     </td>
                                                     <td>
-                                                        <c:if test="${editable && !t.isDefault}">
+                                                        <%-- The bundled theme (name "bootstrap") is the last-resort
+                                                             fallback ThemeRegistry falls back to; it stays listed
+                                                             but is never deletable. --%>
+                                                        <c:if test="${editable && !t.isDefault && t.name != 'bootstrap'}">
                                                             <div class="text-center">
                                                                 <button type="button" class="btn btn-danger btn-xs"
                                                                         name="delete" data-toggle="modal"
