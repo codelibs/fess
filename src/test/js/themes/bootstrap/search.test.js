@@ -175,7 +175,9 @@ describe("buildResultCard", () => {
     const a = li.querySelector("h3 a");
     expect(a.textContent).toBe("Hello");
     expect(a.getAttribute("href"))
-      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=1");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=0");
+    // JSP parity: /go/ order is the same 0-based value as data-order.
+    expect(a.getAttribute("data-order")).toBe("0");
     expect(li.querySelector("cite").textContent).toBe("https://ex.com/p");
     // No thumbnail / cache / similar for a minimal doc.
     expect(li.querySelector("img.thumbnail")).toBeNull();

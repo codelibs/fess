@@ -114,7 +114,10 @@ function copyToClipboard(text) {
  * @param {string} originalUrl - the document's url_link / url value
  * @param {string} docId       - document identifier
  * @param {string} queryId     - query identifier from the search response
- * @param {number} order       - 1-based rank of the result
+ * @param {number} order       - 0-based position of the result on the page,
+ *                               the same value as the link's data-order (JSP
+ *                               sends searchResults.jsp's ${s.index}); GoAction
+ *                               stores it as ClickLog.order
  * @param {number} rt          - requestedTime in epoch ms
  * @returns {string} the /go/ redirect URL, or "#" for unsafe schemes
  */
@@ -191,7 +194,7 @@ function buildResultCard(d, queryId, order) {
 
   // Build /go/ URL so click-logging + server-side redirect work for all click types.
   const originalUrl = d.url_link || d.url || "";
-  const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, order, state.requestedTime);
+  const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, idx0, state.requestedTime);
 
   // --- h3.title > a.link ---
   const h3 = el("h3", { className: "title text-truncate" });
@@ -610,7 +613,8 @@ function renderResults(env) {
   if (queryIdEl) queryIdEl.value = env.query_id || "";
   const rtEl = document.getElementById("rt");
   if (rtEl) rtEl.value = String(state.requestedTime || "");
-  // Pass 1-based order so buildResultCard can embed it in the /go/ URL.
+  // Pass 1-based order; buildResultCard derives the 0-based data-order and
+  // /go/ order from it.
   data.forEach((d, idx) => list.appendChild(buildResultCard(d, env.query_id, idx + 1)));
   list.querySelectorAll("li[data-doc-id]").forEach(li => {
     const btn = li.querySelector(".favorite-btn");
