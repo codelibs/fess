@@ -641,7 +641,27 @@ function showSearchLoading(show) {
   if (el) el.classList.toggle("d-none", !show);
 }
 
+/**
+ * Keep the address bar's start= in step with state.start, as the JSP paging links
+ * did, so reload, back/forward and a shared link land on the same page. Only start
+ * is written: facet selections stay in memory (see runFromUrl), which is also why
+ * paging does not go through navigate() - the runFromUrl() it dispatches would
+ * drop them.
+ *
+ * @param {boolean} push - add a history entry (paging) instead of correcting the
+ *                         current one (a filter change resetting to the first page)
+ */
+function syncStartParam(push) {
+  const params = new URLSearchParams(location.search);
+  if ((Number(params.get("start")) || 0) === state.start) return;
+  if (state.start > 0) params.set("start", String(state.start)); else params.delete("start");
+  const qs = params.toString();
+  const url = location.pathname + (qs ? "?" + qs : "");
+  if (push) history.pushState(null, "", url); else history.replaceState(null, "", url);
+}
+
 async function runSearch() {
+  syncStartParam(false);
   // Cancel any in-flight request before issuing a new one.
   if (currentSearchAbort) currentSearchAbort.abort();
   currentSearchAbort = new AbortController();
@@ -1928,6 +1948,7 @@ function renderPagination(env) {
   // Navigate to a page and scroll back to the top so the new results start in view.
   const goToPage = (start) => {
     state.start = Math.max(0, start);
+    syncStartParam(true);
     runSearch();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

@@ -1043,6 +1043,41 @@ describe("runSearch — facet and pagination click handlers", () => {
     expect(_state.start).toBe(20);
   });
 
+  it("pushes the page offset into the URL without re-dispatching the route", async () => {
+    setLocation("/search?q=foo&start=10&num=10");
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }], { prev_page: true, next_page: true, page_number: 2 }) });
+    _state.start = 10;
+    await runSearch();
+    await settle();
+    const before = searchCalls();
+    const historyLength = history.length;
+    document.querySelector("#pagination li:last-child a").click();
+    await settle();
+    // JSP parity: paging links carry start=, so reload/back/share keep the page.
+    expect(location.pathname).toBe("/search");
+    expect(new URLSearchParams(location.search).get("start")).toBe("20");
+    expect(new URLSearchParams(location.search).get("q")).toBe("foo");
+    expect(history.length).toBe(historyLength + 1);
+    // One fetch: the URL is pushed directly, not via navigate() -> runFromUrl().
+    expect(navigate).not.toHaveBeenCalled();
+    expect(searchCalls()).toBe(before + 1);
+  });
+
+  it("drops start from the URL when a facet click resets to the first page", async () => {
+    setLocation("/search?q=foo&start=20");
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }]) });
+    _state.start = 20;
+    await runSearch();
+    await settle();
+    const historyLength = history.length;
+    document.querySelector("#facet-body ul li.list-group-item a").click();
+    await settle();
+    expect(_state.start).toBe(0);
+    expect(location.search).toBe("?q=foo");
+    // Corrected in place: a filter change is not a new page in history.
+    expect(history.length).toBe(historyLength);
+  });
+
   it("jumps to a specific page when a numbered page link is clicked", async () => {
     installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }], { prev_page: true, next_page: true, page_number: 2 }) });
     _state.start = 10;
