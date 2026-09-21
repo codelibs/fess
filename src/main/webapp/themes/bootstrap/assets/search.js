@@ -114,7 +114,10 @@ function copyToClipboard(text) {
  * @param {string} originalUrl - the document's url_link / url value
  * @param {string} docId       - document identifier
  * @param {string} queryId     - query identifier from the search response
- * @param {number} order       - 1-based rank of the result
+ * @param {number} order       - 0-based position of the result on the page,
+ *                               the same value as the link's data-order (JSP
+ *                               sends searchResults.jsp's ${s.index}); GoAction
+ *                               stores it as ClickLog.order
  * @param {number} rt          - requestedTime in epoch ms
  * @returns {string} the /go/ redirect URL, or "#" for unsafe schemes
  */
@@ -191,7 +194,7 @@ function buildResultCard(d, queryId, order) {
 
   // Build /go/ URL so click-logging + server-side redirect work for all click types.
   const originalUrl = d.url_link || d.url || "";
-  const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, order, state.requestedTime);
+  const goHref = buildGoUrl(originalUrl, d.doc_id, queryId, idx0, state.requestedTime);
 
   // --- h3.title > a.link ---
   const h3 = el("h3", { className: "title text-truncate" });
@@ -610,7 +613,8 @@ function renderResults(env) {
   if (queryIdEl) queryIdEl.value = env.query_id || "";
   const rtEl = document.getElementById("rt");
   if (rtEl) rtEl.value = String(state.requestedTime || "");
-  // Pass 1-based order so buildResultCard can embed it in the /go/ URL.
+  // Pass 1-based order; buildResultCard derives the 0-based data-order and
+  // /go/ order from it.
   data.forEach((d, idx) => list.appendChild(buildResultCard(d, env.query_id, idx + 1)));
   list.querySelectorAll("li[data-doc-id]").forEach(li => {
     const btn = li.querySelector(".favorite-btn");
@@ -637,7 +641,27 @@ function showSearchLoading(show) {
   if (el) el.classList.toggle("d-none", !show);
 }
 
+/**
+ * Keep the address bar's start= in step with state.start, as the JSP paging links
+ * did, so reload, back/forward and a shared link land on the same page. Only start
+ * is written: facet selections stay in memory (see runFromUrl), which is also why
+ * paging does not go through navigate() - the runFromUrl() it dispatches would
+ * drop them.
+ *
+ * @param {boolean} push - add a history entry (paging) instead of correcting the
+ *                         current one (a filter change resetting to the first page)
+ */
+function syncStartParam(push) {
+  const params = new URLSearchParams(location.search);
+  if ((Number(params.get("start")) || 0) === state.start) return;
+  if (state.start > 0) params.set("start", String(state.start)); else params.delete("start");
+  const qs = params.toString();
+  const url = location.pathname + (qs ? "?" + qs : "");
+  if (push) history.pushState(null, "", url); else history.replaceState(null, "", url);
+}
+
 async function runSearch() {
+  syncStartParam(false);
   // Cancel any in-flight request before issuing a new one.
   if (currentSearchAbort) currentSearchAbort.abort();
   currentSearchAbort = new AbortController();
@@ -1202,7 +1226,9 @@ export function runFromUrl() {
 
 function ensureOsddLink() {
   const cfg = api.getConfig();
-  if (!cfg) return;
+  // JSP parity (osddLink): emit the link only when the server serves the OpenSearch
+  // description document (OsddHelper#hasOpenSearchFile).
+  if (!cfg || !(cfg.features || {}).osdd_link) return;
   if (document.querySelector('link[rel="search"]')) return;
   const link = document.createElement("link");
   link.setAttribute("rel", "search");
@@ -1924,6 +1950,7 @@ function renderPagination(env) {
   // Navigate to a page and scroll back to the top so the new results start in view.
   const goToPage = (start) => {
     state.start = Math.max(0, start);
+    syncStartParam(true);
     runSearch();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -2124,4 +2151,4 @@ export const _state = state;
 // renderPopularWords is exported inline at its declaration (line ~1515); do NOT
 // re-export it here — a duplicate export is a module-level SyntaxError that aborts
 // the entire SPA bootstrap (app.js never runs, so the home view never renders).
-export { safeHref, runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs };
+export { safeHref, runSearch, el, buildResultCard, buildGoUrl, renderSearchOptions, syncSearchInputs, ensureOsddLink };

@@ -39,6 +39,7 @@ import {
   _state,
   initialNum,
   forgetNum,
+  ensureOsddLink,
 } from "../../../../main/webapp/themes/bootstrap/assets/search.js";
 
 beforeEach(() => {
@@ -89,6 +90,31 @@ describe("buildGoUrl", () => {
   it("defaults order to 0 when omitted", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", undefined, 1))
       .toBe("go/?rt=1&docId=d1&queryId=q1&order=0");
+  });
+});
+
+describe("ensureOsddLink", () => {
+  const osddLinks = () => document.head.querySelectorAll('link[rel="search"]');
+
+  it("adds the OpenSearch description link when features.osdd_link is on", () => {
+    api.getConfig.mockReturnValue({ site_name: "Site", features: { osdd_link: true } });
+    ensureOsddLink();
+    ensureOsddLink();
+    expect(osddLinks().length).toBe(1);
+    const link = osddLinks()[0];
+    expect(link.getAttribute("href")).toBe("osdd");
+    expect(link.getAttribute("type")).toBe("application/opensearchdescription+xml");
+    expect(link.getAttribute("title")).toBe("Site");
+  });
+
+  it("adds no link when the server does not serve the OSDD (JSP osddLink parity)", () => {
+    api.getConfig.mockReturnValue({ features: { osdd_link: false } });
+    ensureOsddLink();
+    api.getConfig.mockReturnValue({ features: {} });
+    ensureOsddLink();
+    api.getConfig.mockReturnValue(null);
+    ensureOsddLink();
+    expect(osddLinks().length).toBe(0);
   });
 });
 
@@ -175,7 +201,9 @@ describe("buildResultCard", () => {
     const a = li.querySelector("h3 a");
     expect(a.textContent).toBe("Hello");
     expect(a.getAttribute("href"))
-      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=1");
+      .toBe("go/?rt=1700000000000&docId=d1&queryId=q1&order=0");
+    // JSP parity: /go/ order is the same 0-based value as data-order.
+    expect(a.getAttribute("data-order")).toBe("0");
     expect(li.querySelector("cite").textContent).toBe("https://ex.com/p");
     // No thumbnail / cache / similar for a minimal doc.
     expect(li.querySelector("img.thumbnail")).toBeNull();
@@ -1039,6 +1067,41 @@ describe("runSearch — facet and pagination click handlers", () => {
     await settle();
     expect(searchCalls()).toBe(before + 1);
     expect(_state.start).toBe(20);
+  });
+
+  it("pushes the page offset into the URL without re-dispatching the route", async () => {
+    setLocation("/search?q=foo&start=10&num=10");
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }], { prev_page: true, next_page: true, page_number: 2 }) });
+    _state.start = 10;
+    await runSearch();
+    await settle();
+    const before = searchCalls();
+    const historyLength = history.length;
+    document.querySelector("#pagination li:last-child a").click();
+    await settle();
+    // JSP parity: paging links carry start=, so reload/back/share keep the page.
+    expect(location.pathname).toBe("/search");
+    expect(new URLSearchParams(location.search).get("start")).toBe("20");
+    expect(new URLSearchParams(location.search).get("q")).toBe("foo");
+    expect(history.length).toBe(historyLength + 1);
+    // One fetch: the URL is pushed directly, not via navigate() -> runFromUrl().
+    expect(navigate).not.toHaveBeenCalled();
+    expect(searchCalls()).toBe(before + 1);
+  });
+
+  it("drops start from the URL when a facet click resets to the first page", async () => {
+    setLocation("/search?q=foo&start=20");
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }]) });
+    _state.start = 20;
+    await runSearch();
+    await settle();
+    const historyLength = history.length;
+    document.querySelector("#facet-body ul li.list-group-item a").click();
+    await settle();
+    expect(_state.start).toBe(0);
+    expect(location.search).toBe("?q=foo");
+    // Corrected in place: a filter change is not a new page in history.
+    expect(history.length).toBe(historyLength);
   });
 
   it("jumps to a specific page when a numbered page link is clicked", async () => {

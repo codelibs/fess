@@ -1470,6 +1470,7 @@ components:
                     - installation_link
                     - login_link
                     - sso_enabled
+                    - osdd_link
                     - rag_chat_enabled
                   properties:
                     user_favorite: { type: boolean }
@@ -1515,6 +1516,11 @@ components:
                       description: |-
                         `true` when `sso.type` is configured and the fess-sso-*
                         plugin serving it is installed.
+                    osdd_link:
+                      type: boolean
+                      description: |-
+                        `true` when the OpenSearch description document is served
+                        at `osdd` (`osdd.link.enabled`; `auto` turns it off under SSO).
                     rag_chat_enabled:
                       type: boolean
                       description: Whether the RAG chat feature is available.

@@ -28,6 +28,7 @@ import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.OsddHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -452,6 +453,28 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"sso_enabled\":true"), res.body());
         // login.link.enabled defaults to true.
         assertTrue(res.body().contains("\"login_link\":\"sso/\""), res.body());
+    }
+
+    @Test
+    public void test_features_osddLink_followsOsddHelper() throws Exception {
+        for (final boolean served : new boolean[] { true, false }) {
+            ComponentUtil.register(new OsddHelper() {
+                @Override
+                public boolean hasOpenSearchFile() {
+                    return served;
+                }
+            }, OsddHelper.class.getCanonicalName());
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"osdd_link\":" + served), res.body());
+        }
+    }
+
+    @Test
+    public void test_hasOpenSearchFile_falseWithoutOsddHelper() {
+        // test_app.xml defines no osddHelper, so the lookup fails and the link stays off.
+        assertFalse(new UiConfigHandler().hasOpenSearchFile());
     }
 
     @Test

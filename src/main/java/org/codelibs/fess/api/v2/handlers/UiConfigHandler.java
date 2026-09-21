@@ -35,6 +35,7 @@ import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.OsddHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
@@ -166,6 +167,22 @@ public class UiConfigHandler {
             return ssoManager != null && ssoManager.isServed();
         } catch (final Exception e) {
             logger.debug("SSO availability could not be resolved; reporting it as not served", e);
+            return false;
+        }
+    }
+
+    /**
+     * Tells whether the OpenSearch description document is served, as {@link OsddHelper#hasOpenSearchFile()}
+     * decides for the JSP pages.
+     *
+     * @return true if the OSDD link should be emitted
+     */
+    protected boolean hasOpenSearchFile() {
+        try {
+            final OsddHelper osddHelper = ComponentUtil.getComponent(OsddHelper.class);
+            return osddHelper != null && osddHelper.hasOpenSearchFile();
+        } catch (final Exception e) {
+            logger.debug("OSDD availability could not be resolved; reporting it as not served", e);
             return false;
         }
     }
@@ -387,6 +404,9 @@ public class UiConfigHandler {
             // B.2: login link availability flag.
             features.put("login_link", resolveLoginLink(loginLinkEnabled, ssoEnabled));
             features.put("sso_enabled", ssoEnabled);
+            // osdd_link: mirrors the JSP osddLink flag (FessSearchAction#setupHtmlData) that gates
+            // <link rel="search"> to the OpenSearch description document.
+            features.put("osdd_link", hasOpenSearchFile());
             // rag_chat_enabled: mirrors FessSearchAction#setupHtmlData chatClient.isAvailable()
             // so the static-theme SPA sees the same availability gate as the legacy JSP path.
             boolean ragChatEnabled = false;
