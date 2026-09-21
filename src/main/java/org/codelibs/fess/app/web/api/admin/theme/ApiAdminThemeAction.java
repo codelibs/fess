@@ -24,8 +24,8 @@ import java.util.Map;
 
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
+import org.codelibs.fess.helper.ThemeArtifactHelper;
 import org.codelibs.fess.theme.StaticThemeInstaller;
-import org.codelibs.fess.theme.ThemeArtifactHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;

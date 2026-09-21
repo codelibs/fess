@@ -529,7 +529,7 @@ public class AdminThemeActionTest extends UnitFessTestCase {
      * Wires the given {@link ThemeArtifactHelper} into the action's private field via
      * reflection, mirroring how {@link #createInjectedAction} wires {@code themeRegistry}.
      */
-    private static void setThemeArtifactHelper(final AdminThemeAction action, final org.codelibs.fess.theme.ThemeArtifactHelper helper)
+    private static void setThemeArtifactHelper(final AdminThemeAction action, final org.codelibs.fess.helper.ThemeArtifactHelper helper)
             throws Exception {
         final java.lang.reflect.Field field = AdminThemeAction.class.getDeclaredField("themeArtifactHelper");
         field.setAccessible(true);
@@ -540,8 +540,8 @@ public class AdminThemeActionTest extends UnitFessTestCase {
      * A {@link ThemeArtifactHelper} whose {@code getAvailableArtifacts()} always returns an
      * empty list and whose {@code install(...)} does nothing -- no filesystem, no network.
      */
-    private static org.codelibs.fess.theme.ThemeArtifactHelper noopThemeArtifactHelper() {
-        return new org.codelibs.fess.theme.ThemeArtifactHelper() {
+    private static org.codelibs.fess.helper.ThemeArtifactHelper noopThemeArtifactHelper() {
+        return new org.codelibs.fess.helper.ThemeArtifactHelper() {
             @Override
             public java.util.List<ThemeArtifact> getAvailableArtifacts() {
                 return java.util.Collections.emptyList();
@@ -765,7 +765,7 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         mockTokenRequested(action.getClass());
 
         final String[] recordedArgs = new String[2];
-        setThemeArtifactHelper(action, new org.codelibs.fess.theme.ThemeArtifactHelper() {
+        setThemeArtifactHelper(action, new org.codelibs.fess.helper.ThemeArtifactHelper() {
             @Override
             public void install(final String name, final String version) {
                 recordedArgs[0] = name;
@@ -809,7 +809,7 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // ## Arrange ##
         final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
         mockTokenRequested(action.getClass());
-        setThemeArtifactHelper(action, new org.codelibs.fess.theme.ThemeArtifactHelper() {
+        setThemeArtifactHelper(action, new org.codelibs.fess.helper.ThemeArtifactHelper() {
             @Override
             public void install(final String name, final String version) {
                 throw new StaticThemeInstaller.InstallException(StaticThemeInstaller.InstallException.Code.INCOMPATIBLE_FESS_VERSION,
@@ -838,10 +838,10 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // ## Arrange ##
         final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
         mockTokenRequested(action.getClass());
-        setThemeArtifactHelper(action, new org.codelibs.fess.theme.ThemeArtifactHelper() {
+        setThemeArtifactHelper(action, new org.codelibs.fess.helper.ThemeArtifactHelper() {
             @Override
             public void install(final String name, final String version) {
-                throw new org.codelibs.fess.theme.ThemeArtifactHelper.ThemeArtifactException(
+                throw new org.codelibs.fess.helper.ThemeArtifactHelper.ThemeArtifactException(
                         "Not a theme name and version: " + name + " " + version);
             }
         });

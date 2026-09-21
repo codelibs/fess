@@ -71,7 +71,7 @@
 	</component>
 	<component name="staticThemeInstaller" class="org.codelibs.fess.theme.StaticThemeInstaller">
 	</component>
-	<component name="themeArtifactHelper" class="org.codelibs.fess.theme.ThemeArtifactHelper">
+	<component name="themeArtifactHelper" class="org.codelibs.fess.helper.ThemeArtifactHelper">
 	</component>
 	<component name="sessionCsrfTokenManager" class="org.codelibs.fess.api.v2.SessionCsrfTokenManager">
 	</component>

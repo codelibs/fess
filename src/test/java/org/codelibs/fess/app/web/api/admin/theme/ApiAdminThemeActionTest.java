@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.web.api.ApiResult;
+import org.codelibs.fess.helper.ThemeArtifactHelper;
 import org.codelibs.fess.theme.StaticThemeInstaller;
-import org.codelibs.fess.theme.ThemeArtifactHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;

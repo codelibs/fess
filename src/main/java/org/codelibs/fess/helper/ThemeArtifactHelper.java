@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.theme;
+package org.codelibs.fess.helper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,6 +40,8 @@ import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlRequest;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.crawler.Constants;
+import org.codelibs.fess.theme.StaticThemeInstaller;
+import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.util.ComponentUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -62,7 +64,7 @@ import jakarta.annotation.Resource;
  * the listing for the parent group already lags what is published. Both files
  * are served directly and reflect a publish immediately.</p>
  *
- * <p>This helper deliberately does not reuse {@link org.codelibs.fess.helper.PluginHelper}:
+ * <p>This helper deliberately does not reuse {@link PluginHelper}:
  * themes live in their own namespace, carry no {@code fess-theme} prefix, and the
  * plugin installer's THEME branch handles JAR themes, which discard a static
  * theme's files.</p>
