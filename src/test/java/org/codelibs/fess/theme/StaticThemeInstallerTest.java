@@ -689,6 +689,62 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_isFessVersionCompatible() {
+        // running Fess meets or exceeds the floor
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("15.8", "15.8"));
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("15.8", "15.9"));
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("15.8", "16.0"));
+        // running Fess is older than the floor
+        assertFalse(StaticThemeInstaller.isFessVersionCompatible("15.9", "15.8"));
+        assertFalse(StaticThemeInstaller.isFessVersionCompatible("16.0", "15.9"));
+        // a missing or unreadable value must not block an otherwise valid install
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible(null, "15.9"));
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("", "15.9"));
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("15", "15.9"));
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("x.y", "15.9"));
+        assertTrue(StaticThemeInstaller.isFessVersionCompatible("15.8", null));
+    }
+
+    @Test
+    public void test_isForeignFessLine() {
+        // same major, different minor: a theme built for another Fess line
+        assertTrue(StaticThemeInstaller.isForeignFessLine("15.8.0", "15.9"));
+        assertFalse(StaticThemeInstaller.isForeignFessLine("15.9.0", "15.9"));
+        // a theme with its own versioning scheme is not reported
+        assertFalse(StaticThemeInstaller.isForeignFessLine("1.0.0", "15.9"));
+        assertFalse(StaticThemeInstaller.isForeignFessLine(null, "15.9"));
+    }
+
+    @Test
+    public void test_install_rejectsNewerMinFessVersion() throws Exception {
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            installer.setProductVersionSupplier(() -> "15.8");
+            final byte[] zip = buildValidZipWithMinFessVersion("alpha", "15.9");
+            final StaticThemeInstaller.InstallException ex =
+                    assertThrows(StaticThemeInstaller.InstallException.class, () -> installer.installZip(new ByteArrayInputStream(zip)));
+            assertEquals(StaticThemeInstaller.InstallException.Code.INCOMPATIBLE_FESS_VERSION, ex.code());
+            assertFalse(Files.exists(themesDir.resolve("alpha")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_acceptsSatisfiedMinFessVersion() throws Exception {
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            installer.setProductVersionSupplier(() -> "15.9");
+            installer.installZip(new ByteArrayInputStream(buildValidZipWithMinFessVersion("alpha", "15.8")));
+            assertTrue(Files.exists(themesDir.resolve("alpha/theme.yml")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
     private static StaticThemeInstaller newInstaller(final Path themesDir) {
         final StaticThemeInstaller installer = new StaticThemeInstaller();
         installer.setThemesDirOverride(themesDir);
@@ -712,6 +768,17 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
                     "displayName: \"" + name + "\"", "version: 1.0.0");
             putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
             putEntry(zos, "index.html", indexBody.getBytes(StandardCharsets.UTF_8));
+        }
+        return bao.toByteArray();
+    }
+
+    private byte[] buildValidZipWithMinFessVersion(final String name, final String minFessVersion) throws IOException {
+        final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+            final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: " + name,
+                    "displayName: \"" + name + "\"", "version: 1.0.0", "minFessVersion: \"" + minFessVersion + "\"");
+            putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+            putEntry(zos, "index.html", "<html></html>".getBytes(StandardCharsets.UTF_8));
         }
         return bao.toByteArray();
     }

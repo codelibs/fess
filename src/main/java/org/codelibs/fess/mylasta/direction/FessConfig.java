@@ -2143,6 +2143,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 7 */
     String THEME_UPLOAD_ATTIC_RETENTION_DAYS = "theme.upload.attic.retention.days";
 
+    /** The key of the configuration. e.g. https://maven.codelibs.org/release/org/codelibs/fess/themes/ */
+    String THEME_REPOSITORIES = "theme.repositories";
+
     /** The key of the configuration. e.g.  */
     String THEME_API_CSRF_SERVER_ORIGINS = "theme.api.csrf.server.origins";
 
@@ -10316,6 +10319,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getThemeUploadAtticRetentionDays();
 
     /**
+     * Get the value for the key 'theme.repositories'. <br>
+     * The value is, e.g. https://maven.codelibs.org/release/org/codelibs/fess/themes/ <br>
+     * comment: Repository URLs (comma separated) that static themes are downloaded from.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeRepositories();
+
+    /**
      * Get the value for the key 'theme.upload.attic.retention.days' as {@link Integer}. <br>
      * The value is, e.g. 7 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -14250,6 +14261,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS);
         }
 
+        public String getThemeRepositories() {
+            return get(FessConfig.THEME_REPOSITORIES);
+        }
+
         public Integer getThemeUploadAtticRetentionDaysAsInteger() {
             return getAsInteger(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS);
         }
@@ -14944,6 +14959,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX, "50");
             defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES, "65536");
             defaultMap.put(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS, "7");
+            defaultMap.put(FessConfig.THEME_REPOSITORIES, "https://maven.codelibs.org/release/org/codelibs/fess/themes/");
             defaultMap.put(FessConfig.THEME_API_CSRF_SERVER_ORIGINS, "");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");

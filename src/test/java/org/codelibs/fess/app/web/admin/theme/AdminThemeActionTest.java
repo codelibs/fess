@@ -514,7 +514,44 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         regField.setAccessible(true);
         regField.set(action, registry);
 
+        // themeArtifactHelper is also absent from the test DI container. asListHtml() (used by
+        // index()/reload()/setdefault()/install() on their default and fallback render paths)
+        // calls themeArtifactHelper.getAvailableArtifacts(). The real helper reads the
+        // production default of theme.repositories (a live codelibs.org Maven URL) and would
+        // make an actual HTTP call from inside a unit test, so tests wire a network-free stub
+        // here instead -- individual tests may replace it with one of their own.
+        setThemeArtifactHelper(action, noopThemeArtifactHelper());
+
         return action;
+    }
+
+    /**
+     * Wires the given {@link ThemeArtifactHelper} into the action's private field via
+     * reflection, mirroring how {@link #createInjectedAction} wires {@code themeRegistry}.
+     */
+    private static void setThemeArtifactHelper(final AdminThemeAction action, final org.codelibs.fess.helper.ThemeArtifactHelper helper)
+            throws Exception {
+        final java.lang.reflect.Field field = AdminThemeAction.class.getDeclaredField("themeArtifactHelper");
+        field.setAccessible(true);
+        field.set(action, helper);
+    }
+
+    /**
+     * A {@link ThemeArtifactHelper} whose {@code getAvailableArtifacts()} always returns an
+     * empty list and whose {@code install(...)} does nothing -- no filesystem, no network.
+     */
+    private static org.codelibs.fess.helper.ThemeArtifactHelper noopThemeArtifactHelper() {
+        return new org.codelibs.fess.helper.ThemeArtifactHelper() {
+            @Override
+            public java.util.List<ThemeArtifact> getAvailableArtifacts() {
+                return java.util.Collections.emptyList();
+            }
+
+            @Override
+            public void install(final String name, final String version) {
+                // no-op by default; tests that care about install() wire their own stub
+            }
+        };
     }
 
     /**
@@ -542,6 +579,8 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // (list may be empty in unit environment but the key must be present)
         assertNotNull(htmlData.getDataMap().get("themeItems"), "themeItems must be registered in render data");
         assertTrue(htmlData.getDataMap().containsKey("currentDefault"), "currentDefault must be registered in render data");
+        // Task 5: the "Available Themes" catalogue is registered by the same asListHtml() call.
+        assertNotNull(htmlData.getDataMap().get("availableArtifacts"), "availableArtifacts must be registered in render data");
     }
 
     /**
@@ -695,5 +734,166 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // The response must be a redirect back to AdminThemeAction (redirect(getClass()))
         final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(response);
         htmlData.assertRedirect(AdminThemeAction.class);
+    }
+
+    // ── Task 5: install a published theme from the admin screen ──────────────────
+
+    @Test
+    public void test_themeInstallForm_nameAndVersionAreRequiredAndBounded() throws Exception {
+        // Pin the form-layer safety net: install() relies on @Required + @Size(max=100)
+        // to reject a blank or absurdly long name/version before it ever reaches
+        // ThemeArtifactHelper#install (which itself pattern-checks both before building a URL).
+        for (final String fieldName : new String[] { "name", "version" }) {
+            final Field field = ThemeInstallForm.class.getDeclaredField(fieldName);
+            assertNotNull(field.getAnnotation(Required.class), fieldName + " must be @Required");
+            final jakarta.validation.constraints.Size size = field.getAnnotation(jakarta.validation.constraints.Size.class);
+            assertNotNull(size, fieldName + " must be @Size-bounded");
+            assertEquals(100, size.max(), fieldName + " must cap at 100 characters");
+        }
+    }
+
+    /**
+     * Production path covered: {@code AdminThemeAction#install} calls {@code validate()}, then
+     * {@code verifyToken()}, then {@code themeArtifactHelper.install(name, version)}, then
+     * {@code saveInfo(addSuccessInstallTheme)}, then {@code redirect(getClass())} — the full
+     * success flow, exercised through the real action method rather than simulated.
+     */
+    @Test
+    public void test_install_callsHelperWithFormArgsAndRedirectsOnSuccess() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        mockTokenRequested(action.getClass());
+
+        final String[] recordedArgs = new String[2];
+        setThemeArtifactHelper(action, new org.codelibs.fess.helper.ThemeArtifactHelper() {
+            @Override
+            public void install(final String name, final String version) {
+                recordedArgs[0] = name;
+                recordedArgs[1] = version;
+            }
+        });
+
+        final ThemeInstallForm form = new ThemeInstallForm();
+        form.name = "dark-mode";
+        form.version = "1.2.3";
+
+        // ## Act ##
+        final org.lastaflute.web.response.HtmlResponse response = action.install(form);
+
+        // ## Assert ##
+        // If install() stopped calling themeArtifactHelper.install(...), or passed the wrong
+        // arguments, this fails -- unlike a test that only checks the redirect happened.
+        // All three args are String, so the message-first (String, Object, Object) and
+        // message-last (Object, Object, String) overloads would be ambiguous; call
+        // org.junit.jupiter.api.Assertions directly, as UnitFessTestCase's own comment advises.
+        org.junit.jupiter.api.Assertions.assertEquals("dark-mode", recordedArgs[0],
+                "install() must pass the form's name through unchanged");
+        org.junit.jupiter.api.Assertions.assertEquals("1.2.3", recordedArgs[1], "install() must pass the form's version through unchanged");
+        assertTokenVerified();
+        final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(response);
+        htmlData.assertRedirect(AdminThemeAction.class);
+    }
+
+    /**
+     * Pins the ordering the brief calls out: {@code install()} catches
+     * {@code StaticThemeInstaller.InstallException} before the generic
+     * {@code ThemeArtifactHelper.ThemeArtifactException}, so an installer-level
+     * {@code INCOMPATIBLE_FESS_VERSION} rejection reaches the operator as the dedicated
+     * {@code errors.theme_incompatible_fess_version} message, not the generic
+     * {@code errors.failed_to_install_theme} fallback. Exercised through the real
+     * {@code install()} method (not just {@code mapInstallExceptionToMessage} in isolation),
+     * so a catch-order regression would fail this test.
+     */
+    @Test
+    public void test_install_incompatibleFessVersion_surfacesDedicatedMessage() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        mockTokenRequested(action.getClass());
+        setThemeArtifactHelper(action, new org.codelibs.fess.helper.ThemeArtifactHelper() {
+            @Override
+            public void install(final String name, final String version) {
+                throw new StaticThemeInstaller.InstallException(StaticThemeInstaller.InstallException.Code.INCOMPATIBLE_FESS_VERSION,
+                        "This theme requires a newer version of Fess than this server.");
+            }
+        });
+
+        final ThemeInstallForm form = new ThemeInstallForm();
+        form.name = "future-theme";
+        form.version = "9.9.9";
+
+        // ## Act & Assert ##
+        assertValidationError(() -> action.install(form))
+                .handle(data -> data.requiredMessageOf("_global", "errors.theme_incompatible_fess_version"));
+        assertTokenVerified();
+    }
+
+    /**
+     * When {@code ThemeArtifactHelper#install} raises its own {@code ThemeArtifactException}
+     * (unknown theme/version, download failure, checksum mismatch, ...), {@code install()}
+     * must route it to the generic {@code errors.failed_to_install_theme} key with the
+     * exception's message as the argument.
+     */
+    @Test
+    public void test_install_themeArtifactException_surfacesGenericFailedMessage() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        mockTokenRequested(action.getClass());
+        setThemeArtifactHelper(action, new org.codelibs.fess.helper.ThemeArtifactHelper() {
+            @Override
+            public void install(final String name, final String version) {
+                throw new org.codelibs.fess.helper.ThemeArtifactHelper.ThemeArtifactException(
+                        "Not a theme name and version: " + name + " " + version);
+            }
+        });
+
+        final ThemeInstallForm form = new ThemeInstallForm();
+        form.name = "ghost-theme";
+        form.version = "1.0.0";
+
+        // ## Act & Assert ##
+        assertValidationError(() -> action.install(form))
+                .handle(data -> data.requiredMessageOf("_global", "errors.failed_to_install_theme"));
+        assertTokenVerified();
+    }
+
+    @Test
+    public void test_adminThemeJsp_bothInstallEntryPointsPostToTheSameAction() throws Exception {
+        // Step 5's whole point: the catalogue table's per-row button and the "install by
+        // name" form are two ways into the same install action/form, not two actions.
+        final String jsp = java.nio.file.Files.readString(java.nio.file.Path.of("src/main/webapp/WEB-INF/view/admin/theme/admin_theme.jsp"),
+                java.nio.charset.StandardCharsets.UTF_8);
+        final String marker = "la:form action=\"/admin/theme/install\"";
+        int count = 0;
+        for (int i = jsp.indexOf(marker); i >= 0; i = jsp.indexOf(marker, i + marker.length())) {
+            count++;
+        }
+        assertEquals(2, count, "expected exactly two forms posting to /admin/theme/install (catalogue row + install-by-name)");
+
+        // Counting the action alone would still pass if a form lost the fields it posts, and
+        // one install action reading one ThemeInstallForm is the reason there are two forms
+        // rather than two actions. Pin both shapes of the same two fields.
+        assertTrue(jsp.contains("<input type=\"hidden\" name=\"name\""), "the catalogue row must post name");
+        assertTrue(jsp.contains("<input type=\"hidden\" name=\"version\""), "the catalogue row must post version");
+        // Matched without assuming attribute order: la:text here carries styleId first, per
+        // the convention the rest of the admin tree follows.
+        assertTrue(jsp.contains("property=\"name\""), "the install-by-name form must post name");
+        assertTrue(jsp.contains("property=\"version\""), "the install-by-name form must post version");
+    }
+
+    @Test
+    public void test_adminThemeJsp_emptyCatalogueUsesItsOwnLabelNotTheGenericCrudNotFound() throws Exception {
+        // labels.list_could_not_find_crud_table reads as "no themes are published"; an empty
+        // catalogue can also mean the repository's index was momentarily unreadable, which is
+        // why it gets its own labels.theme_available_empty message instead (see the brief).
+        final String jsp = java.nio.file.Files.readString(java.nio.file.Path.of("src/main/webapp/WEB-INF/view/admin/theme/admin_theme.jsp"),
+                java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(jsp.contains("key=\"labels.theme_available_empty\""),
+                "the empty-catalogue branch must render labels.theme_available_empty");
+        // Checked as an actual la:message reference, not a bare substring: the explanatory
+        // comment above the empty-catalogue branch names labels.list_could_not_find_crud_table
+        // on purpose (it must be kept, per the brief), so a naive jsp.contains(...) on the raw
+        // key name would false-positive on that comment text.
+        assertFalse(jsp.contains("key=\"labels.list_could_not_find_crud_table\""),
+                "admin_theme.jsp must not render the generic CRUD \"not found\" label for an empty theme catalogue");
     }
 }

@@ -39,6 +39,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 import jakarta.annotation.PostConstruct;
@@ -166,6 +167,9 @@ public class StaticThemeInstaller {
     /** Test seam: returns the currently active default theme name, or {@code null}. */
     private Supplier<String> activeDefaultProbe;
 
+    /** Supplies the running Fess product version ("major.minor"); overridable in tests. */
+    private Supplier<String> productVersionSupplier;
+
     /** Raised on any failure during ZIP validation or extraction. */
     public static class InstallException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -194,6 +198,8 @@ public class StaticThemeInstaller {
             RATIO_LIMIT,
             /** Cumulative uncompressed/compressed ratio exceeded the configured limit. */
             ZIP_BOMB_RATIO,
+            /** The running Fess is older than the theme's declared minFessVersion. */
+            INCOMPATIBLE_FESS_VERSION,
             /** Fallback for failures that do not fit any other category. */
             OTHER
         }
@@ -291,6 +297,15 @@ public class StaticThemeInstaller {
                 // already refuses to remove it. Without this guard an upload named "bootstrap"
                 // could overwrite it here and then never be removable via delete().
                 throw new InstallException(InstallException.Code.BUILT_IN, "Cannot overwrite the built-in theme: " + m.getName());
+            }
+            final String productVersion = resolveProductVersion();
+            if (!isFessVersionCompatible(m.getMinFessVersion(), productVersion)) {
+                throw new InstallException(InstallException.Code.INCOMPATIBLE_FESS_VERSION, "Theme " + m.getName() + " requires Fess "
+                        + m.getMinFessVersion() + " or later, but this server is " + productVersion);
+            }
+            if (isForeignFessLine(m.getVersion(), productVersion)) {
+                logger.warn("Theme {} is versioned for another Fess line: themeVersion={}, fessVersion={}", m.getName(), m.getVersion(),
+                        productVersion);
             }
             final Path target = themesDir.resolve(m.getName());
             // A-3: reject symlinks at the target path — a symlink could redirect the
@@ -513,6 +528,97 @@ public class StaticThemeInstaller {
             // Some filesystems (e.g. tmpfs across mount boundaries) don't
             // support ATOMIC_MOVE; fall back to a plain move.
             Files.move(source, dest, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    /**
+     * Sets the supplier used to resolve the running Fess product version.
+     * Tests use this instead of registering a SystemHelper.
+     *
+     * @param supplier supplier returning a {@code major.minor} version string
+     */
+    public void setProductVersionSupplier(final Supplier<String> supplier) {
+        this.productVersionSupplier = supplier;
+    }
+
+    /**
+     * Resolves the running Fess product version, or {@code null} when it cannot
+     * be determined (for example when DI is absent).
+     *
+     * @return the {@code major.minor} version string, or {@code null}
+     */
+    protected String resolveProductVersion() {
+        if (productVersionSupplier != null) {
+            return productVersionSupplier.get();
+        }
+        try {
+            return ComponentUtil.getSystemHelper().getProductVersion();
+        } catch (final Exception e) {
+            logger.debug("Could not resolve the running Fess version", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns {@code true} when a theme declaring {@code minFessVersion} may be
+     * installed on a Fess of {@code productVersion}. Both are compared as
+     * {@code (major, minor)} pairs. A blank or unparsable value on either side is
+     * treated as compatible: the field is optional, and an unreadable value must
+     * not block an otherwise valid install.
+     *
+     * @param minFessVersion the theme's declared floor, may be null
+     * @param productVersion the running Fess version, may be null
+     * @return true when the install is allowed
+     */
+    static boolean isFessVersionCompatible(final String minFessVersion, final String productVersion) {
+        final int[] min = parseMajorMinor(minFessVersion);
+        final int[] cur = parseMajorMinor(productVersion);
+        if (min == null || cur == null) {
+            return true;
+        }
+        if (cur[0] != min[0]) {
+            return cur[0] > min[0];
+        }
+        return cur[1] >= min[1];
+    }
+
+    /**
+     * Returns {@code true} when the theme's own version looks like a Fess-line
+     * version (same major as the running Fess) but targets a different minor
+     * line. A theme with its own versioning scheme (e.g. {@code 1.0.0}) has a
+     * different major and is not reported, so third-party themes stay quiet.
+     *
+     * @param themeVersion the theme's version, may be null
+     * @param productVersion the running Fess version, may be null
+     * @return true when the theme is versioned for another Fess line
+     */
+    static boolean isForeignFessLine(final String themeVersion, final String productVersion) {
+        final int[] theme = parseMajorMinor(themeVersion);
+        final int[] cur = parseMajorMinor(productVersion);
+        if (theme == null || cur == null) {
+            return false;
+        }
+        return theme[0] == cur[0] && theme[1] != cur[1];
+    }
+
+    /**
+     * Parses the leading {@code major.minor} of a version string.
+     *
+     * @param value the version string
+     * @return a two-element array, or {@code null} when it cannot be parsed
+     */
+    private static int[] parseMajorMinor(final String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        final String[] parts = value.trim().split("\\.");
+        if (parts.length < 2) {
+            return null;
+        }
+        try {
+            return new int[] { Integer.parseInt(parts[0]), Integer.parseInt(parts[1]) };
+        } catch (final NumberFormatException e) {
+            return null;
         }
     }
 

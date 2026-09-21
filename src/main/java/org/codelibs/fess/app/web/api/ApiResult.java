@@ -779,6 +779,35 @@ public class ApiResult {
     }
 
     /**
+     * API response carrying a list of themes.
+     */
+    public static class ApiThemeResponse extends ApiResponse {
+        /** The list of themes. */
+        protected List<Map<String, String>> themes;
+
+        /**
+         * Default constructor for ApiThemeResponse.
+         */
+        public ApiThemeResponse() {
+        }
+
+        /**
+         * Sets the list of themes.
+         * @param themes The list of themes.
+         * @return This ApiThemeResponse instance.
+         */
+        public ApiThemeResponse themes(final List<Map<String, String>> themes) {
+            this.themes = themes;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    /**
      * Represents an API response for storage-related operations, typically containing a list of items.
      */
     public static class ApiStorageResponse extends ApiResponse {
