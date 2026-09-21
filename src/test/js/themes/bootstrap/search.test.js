@@ -39,6 +39,7 @@ import {
   _state,
   initialNum,
   forgetNum,
+  ensureOsddLink,
 } from "../../../../main/webapp/themes/bootstrap/assets/search.js";
 
 beforeEach(() => {
@@ -89,6 +90,31 @@ describe("buildGoUrl", () => {
   it("defaults order to 0 when omitted", () => {
     expect(buildGoUrl("https://ex.com/d", "d1", "q1", undefined, 1))
       .toBe("go/?rt=1&docId=d1&queryId=q1&order=0");
+  });
+});
+
+describe("ensureOsddLink", () => {
+  const osddLinks = () => document.head.querySelectorAll('link[rel="search"]');
+
+  it("adds the OpenSearch description link when features.osdd_link is on", () => {
+    api.getConfig.mockReturnValue({ site_name: "Site", features: { osdd_link: true } });
+    ensureOsddLink();
+    ensureOsddLink();
+    expect(osddLinks().length).toBe(1);
+    const link = osddLinks()[0];
+    expect(link.getAttribute("href")).toBe("osdd");
+    expect(link.getAttribute("type")).toBe("application/opensearchdescription+xml");
+    expect(link.getAttribute("title")).toBe("Site");
+  });
+
+  it("adds no link when the server does not serve the OSDD (JSP osddLink parity)", () => {
+    api.getConfig.mockReturnValue({ features: { osdd_link: false } });
+    ensureOsddLink();
+    api.getConfig.mockReturnValue({ features: {} });
+    ensureOsddLink();
+    api.getConfig.mockReturnValue(null);
+    ensureOsddLink();
+    expect(osddLinks().length).toBe(0);
   });
 });
 
