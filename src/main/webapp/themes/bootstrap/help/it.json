@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "Ricerca di base",
+      "html": "<p>Per cercare, digitare la query nella casella di ricerca e premere Invio (oppure fare clic sul pulsante «Cerca»).</p><p>Per impostazione predefinita, più parole vengono combinate con AND. Ad esempio, <code>open source</code> trova i documenti che contengono sia «open» sia «source».</p>"
+    },
+    {
+      "id": "operators",
+      "title": "Operatori di ricerca",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operatore</th><th scope=\"col\">Descrizione</th><th scope=\"col\">Esempio</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Entrambi i termini devono essere presenti</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Può essere presente uno dei due termini</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Esclude il termine</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Frase esatta</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Limita a un sito</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Limita a un tipo di file</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "Caratteri jolly",
+      "html": "<p>È possibile usare <code>*</code> per trovare qualsiasi sequenza di caratteri e <code>?</code> per trovare un singolo carattere.</p><p>Esempi: <code>fess*</code> trova «fess», «fessbook», «fessful». <code>te?t</code> trova «test» o «text».</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "Query di intervallo",
+      "html": "<p>Usare le parentesi quadre per cercare un intervallo di valori: <code>content_length:[1024 TO 10240]</code> trova i documenti con dimensioni comprese tra 1KB e 10KB.</p> Le parentesi quadre <code>[ ]</code> includono gli estremi; le parentesi graffe <code>{ }</code> li escludono, ad esempio <code>content_length:{1024 TO 10240}</code> trova le dimensioni strettamente maggiori di 1KB e strettamente minori di 10KB."
+    },
+    {
+      "id": "facets",
+      "title": "Filtri a faccette",
+      "html": "<p>Usare le faccette nella barra laterale per restringere la ricerca per etichetta, periodo di tempo, dimensione del file o tipo di file. Fare clic su un elemento della faccetta per applicarlo e fare clic sul chip nella parte superiore dei risultati per rimuoverlo.</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "Scorciatoie da tastiera",
+      "html": "<ul><li><code>/</code> &mdash; Sposta il focus sulla casella di ricerca</li><li><code>Esc</code> &mdash; Chiude i suggerimenti o la finestra modale</li><li><code>Enter</code> &mdash; Esegue la ricerca o seleziona il suggerimento</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "Ricerca per campo",
+      "html": "<p>È possibile cercare in qualsiasi campo digitando il nome del campo seguito da due punti <code>:</code> e poi dal termine cercato. Ad esempio, per trovare i documenti con «Fess» nel titolo:</p><pre>title:Fess</pre><p>I campi disponibili includono <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> e <code>mimetype</code>. Sono personalizzabili.</p>"
+    },
+    {
+      "id": "sort",
+      "title": "Ordinamento",
+      "html": "<p>L'operatore <code>sort:</code> ordina i risultati in base a un campo specificato. Il formato è <code>sort:&lt;field&gt;.&lt;order&gt;</code>, dove <code>&lt;order&gt;</code> è <code>asc</code> o <code>desc</code>. Ad esempio, per cercare «Fess» ordinando per lunghezza del contenuto in ordine decrescente:</p><pre>Fess sort:content_length.desc</pre><p>I campi di ordinamento disponibili includono <code>created</code>, <code>content_length</code> e <code>last_modified</code>. Sono personalizzabili.</p>"
+    },
+    {
+      "id": "boost",
+      "title": "Boost",
+      "html": "<p>Per aumentare il peso (boost) di un termine, usare il simbolo <code>^</code> seguito da un fattore di boost (un numero) alla fine del termine di ricerca. Un fattore più alto aumenta il punteggio di pertinenza di quel termine.</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "Ricerca approssimata",
+      "html": "<p>Per eseguire una ricerca approssimata, usare il simbolo <code>~</code> alla fine di una singola parola. Il numero facoltativo dopo <code>~</code> (da 0 a 1) controlla la soglia di somiglianza. Il valore predefinito è <code>0.5</code>.</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

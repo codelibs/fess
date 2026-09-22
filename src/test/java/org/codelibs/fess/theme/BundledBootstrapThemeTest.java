@@ -25,7 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,6 +36,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -97,6 +100,33 @@ public class BundledBootstrapThemeTest {
     public void test_i18nBundlesArePresent() {
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("i18n/messages.en.json")), "messages.en.json missing");
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("i18n/messages.ja.json")), "messages.ja.json missing");
+    }
+
+    @Test
+    public void test_helpBundles_existForEveryI18nLocaleWithMatchingSectionIds() throws Exception {
+        // help.js falls back to help/en.json only after help/<locale>.json has 404ed, and the
+        // browser logs that 404 as a console error, so every served locale needs its own bundle.
+        final Set<String> locales = new TreeSet<>();
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.map(p -> p.getFileName().toString())
+                    .filter(n -> n.startsWith("messages.") && n.endsWith(".json"))
+                    .forEach(n -> locales.add(n.substring("messages.".length(), n.length() - ".json".length())));
+        }
+        assertTrue(locales.contains("en") && locales.contains("it"), "i18n bundles not found: " + locales);
+        final ObjectMapper mapper = new ObjectMapper();
+        final List<String> enIds = helpSectionIds(mapper, "en");
+        assertFalse(enIds.isEmpty(), "help/en.json has no sections");
+        for (final String locale : locales) {
+            assertTrue(Files.isRegularFile(THEME_DIR.resolve("help/" + locale + ".json")), "help/" + locale + ".json missing");
+            assertEquals(enIds, helpSectionIds(mapper, locale), "help section ids differ from en in " + locale);
+        }
+    }
+
+    private static List<String> helpSectionIds(final ObjectMapper mapper, final String locale) throws Exception {
+        final JsonNode root = mapper.readTree(Files.readAllBytes(THEME_DIR.resolve("help/" + locale + ".json")));
+        final List<String> ids = new ArrayList<>();
+        root.get("sections").forEach(s -> ids.add(s.get("id").asText()));
+        return ids;
     }
 
     @Test

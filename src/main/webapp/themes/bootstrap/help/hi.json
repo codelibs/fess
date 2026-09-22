@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "मूल खोज",
+      "html": "<p>खोजने के लिए, खोज बॉक्स में अपनी क्वेरी टाइप करें और Enter दबाएँ (या \"खोजें\" बटन पर क्लिक करें)।</p><p>डिफ़ॉल्ट रूप से कई शब्द AND से जोड़े जाते हैं। उदाहरण के लिए, <code>open source</code> उन दस्तावेज़ों को ढूँढता है जिनमें \"open\" और \"source\" दोनों हों।</p>"
+    },
+    {
+      "id": "operators",
+      "title": "खोज ऑपरेटर",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">ऑपरेटर</th><th scope=\"col\">विवरण</th><th scope=\"col\">उदाहरण</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>दोनों शब्द होने चाहिए</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>कोई भी एक शब्द हो सकता है</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>शब्द को बाहर रखें</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>सटीक वाक्यांश</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>किसी साइट तक सीमित करें</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>किसी फ़ाइल प्रकार तक सीमित करें</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "वाइल्डकार्ड",
+      "html": "<p>किसी भी वर्ण-क्रम से मेल खाने के लिए <code>*</code> और किसी एक वर्ण से मेल खाने के लिए <code>?</code> का उपयोग किया जा सकता है।</p><p>उदाहरण: <code>fess*</code> \"fess\", \"fessbook\", \"fessful\" से मेल खाता है। <code>te?t</code> \"test\" या \"text\" से मेल खाता है।</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "रेंज क्वेरी",
+      "html": "<p>मानों की किसी सीमा में खोजने के लिए वर्ग कोष्ठक का उपयोग करें: <code>content_length:[1024 TO 10240]</code> 1KB से 10KB आकार वाले दस्तावेज़ ढूँढता है।</p> वर्ग कोष्ठक <code>[ ]</code> सीमा-मानों को शामिल करते हैं; घुंघराले कोष्ठक <code>{ }</code> उन्हें बाहर रखते हैं, जैसे <code>content_length:{1024 TO 10240}</code> उन आकारों से मेल खाता है जो 1KB से सख्ती से बड़े और 10KB से सख्ती से छोटे हों।"
+    },
+    {
+      "id": "facets",
+      "title": "फ़ेसेट फ़िल्टर",
+      "html": "<p>लेबल, समय अवधि, फ़ाइल आकार या फ़ाइल प्रकार के अनुसार अपनी खोज को सीमित करने के लिए साइडबार के फ़ेसेट का उपयोग करें। किसी फ़ेसेट आइटम को लागू करने के लिए उस पर क्लिक करें, और उसे हटाने के लिए परिणामों के ऊपर दिए गए चिप पर क्लिक करें।</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "कीबोर्ड शॉर्टकट",
+      "html": "<ul><li><code>/</code> &mdash; खोज बॉक्स पर फ़ोकस करें</li><li><code>Esc</code> &mdash; सुझाव या मोडल बंद करें</li><li><code>Enter</code> &mdash; खोज चलाएँ या सुझाव चुनें</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "फ़ील्ड खोज",
+      "html": "<p>फ़ील्ड का नाम, उसके बाद कोलन <code>:</code> और फिर खोजा जाने वाला शब्द टाइप करके आप किसी भी फ़ील्ड में खोज सकते हैं। उदाहरण के लिए, शीर्षक में \"Fess\" वाले दस्तावेज़ ढूँढने के लिए:</p><pre>title:Fess</pre><p>उपलब्ध फ़ील्ड में <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> और <code>mimetype</code> शामिल हैं। इन्हें अनुकूलित किया जा सकता है।</p>"
+    },
+    {
+      "id": "sort",
+      "title": "क्रमबद्ध करें",
+      "html": "<p><code>sort:</code> ऑपरेटर परिणामों को किसी निर्दिष्ट फ़ील्ड के अनुसार क्रमबद्ध करता है। प्रारूप <code>sort:&lt;field&gt;.&lt;order&gt;</code> है, जहाँ <code>&lt;order&gt;</code> <code>asc</code> या <code>desc</code> होता है। उदाहरण के लिए, \"Fess\" खोजकर परिणामों को सामग्री की लंबाई के घटते क्रम में लगाने के लिए:</p><pre>Fess sort:content_length.desc</pre><p>उपलब्ध सॉर्ट फ़ील्ड में <code>created</code>, <code>content_length</code> और <code>last_modified</code> शामिल हैं। इन्हें अनुकूलित किया जा सकता है।</p>"
+    },
+    {
+      "id": "boost",
+      "title": "बूस्ट",
+      "html": "<p>किसी शब्द को बूस्ट करने के लिए, खोज शब्द के अंत में <code>^</code> चिह्न और उसके बाद बूस्ट गुणांक (एक संख्या) लगाएँ। अधिक गुणांक उस शब्द के प्रासंगिकता स्कोर को बढ़ाता है।</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "फ़ज़ी खोज",
+      "html": "<p>फ़ज़ी खोज करने के लिए, किसी एक शब्द के अंत में <code>~</code> चिह्न लगाएँ। <code>~</code> के बाद की वैकल्पिक संख्या (0 से 1) समानता की सीमा तय करती है। डिफ़ॉल्ट मान <code>0.5</code> है।</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

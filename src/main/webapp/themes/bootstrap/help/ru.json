@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "Простой поиск",
+      "html": "<p>Чтобы выполнить поиск, введите запрос в поле поиска и нажмите Enter (или нажмите кнопку «Поиск»).</p><p>По умолчанию несколько слов объединяются оператором AND. Например, <code>open source</code> находит документы, содержащие и «open», и «source».</p>"
+    },
+    {
+      "id": "operators",
+      "title": "Операторы поиска",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Оператор</th><th scope=\"col\">Описание</th><th scope=\"col\">Пример</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Должны присутствовать оба термина</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Может присутствовать любой из терминов</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Исключить термин</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Точная фраза</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Ограничить сайтом</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Ограничить типом файла</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "Подстановочные знаки",
+      "html": "<p>Символ <code>*</code> соответствует любой последовательности символов, а <code>?</code> — одному символу.</p><p>Примеры: <code>fess*</code> соответствует «fess», «fessbook», «fessful». <code>te?t</code> соответствует «test» или «text».</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "Поиск по диапазону",
+      "html": "<p>Используйте квадратные скобки для поиска по диапазону значений: <code>content_length:[1024 TO 10240]</code> находит документы размером от 1KB до 10KB.</p> Квадратные скобки <code>[ ]</code> включают границы, фигурные скобки <code>{ }</code> исключают их, например <code>content_length:{1024 TO 10240}</code> соответствует размерам строго больше 1KB и строго меньше 10KB."
+    },
+    {
+      "id": "facets",
+      "title": "Фасетные фильтры",
+      "html": "<p>Используйте фасеты на боковой панели, чтобы сузить поиск по метке, периоду времени, размеру файла или типу файла. Нажмите на элемент фасета, чтобы применить его, и нажмите на чип над результатами, чтобы снять его.</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "Сочетания клавиш",
+      "html": "<ul><li><code>/</code> &mdash; Перейти в поле поиска</li><li><code>Esc</code> &mdash; Закрыть подсказки или модальное окно</li><li><code>Enter</code> &mdash; Выполнить поиск или выбрать подсказку</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "Поиск по полям",
+      "html": "<p>Можно выполнять поиск по любому полю: введите имя поля, затем двоеточие <code>:</code> и искомый термин. Например, чтобы найти документы со словом «Fess» в заголовке:</p><pre>title:Fess</pre><p>Доступные поля включают <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> и <code>mimetype</code>. Их можно настроить.</p>"
+    },
+    {
+      "id": "sort",
+      "title": "Сортировка",
+      "html": "<p>Оператор <code>sort:</code> сортирует результаты по указанному полю. Формат: <code>sort:&lt;field&gt;.&lt;order&gt;</code>, где <code>&lt;order&gt;</code> — это <code>asc</code> или <code>desc</code>. Например, чтобы найти «Fess» с сортировкой по размеру содержимого по убыванию:</p><pre>Fess sort:content_length.desc</pre><p>Доступные поля сортировки включают <code>created</code>, <code>content_length</code> и <code>last_modified</code>. Их можно настроить.</p>"
+    },
+    {
+      "id": "boost",
+      "title": "Повышение веса",
+      "html": "<p>Чтобы повысить вес термина, добавьте в конце поискового термина символ <code>^</code> и коэффициент повышения (число). Чем выше коэффициент, тем выше оценка релевантности этого термина.</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "Нечёткий поиск",
+      "html": "<p>Для нечёткого поиска добавьте символ <code>~</code> в конце отдельного слова. Необязательное число после <code>~</code> (от 0 до 1) задаёт порог сходства. Значение по умолчанию — <code>0.5</code>.</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

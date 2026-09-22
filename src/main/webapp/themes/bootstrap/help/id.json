@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "Pencarian Dasar",
+      "html": "<p>Untuk mencari, ketik kueri Anda di kotak pencarian lalu tekan Enter (atau klik tombol \"Cari\").</p><p>Beberapa kata digabungkan dengan AND secara default. Misalnya, <code>open source</code> menemukan dokumen yang mengandung \"open\" dan \"source\" sekaligus.</p>"
+    },
+    {
+      "id": "operators",
+      "title": "Operator Pencarian",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operator</th><th scope=\"col\">Deskripsi</th><th scope=\"col\">Contoh</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Kedua istilah harus muncul</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Salah satu istilah boleh muncul</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Kecualikan istilah</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Frasa persis</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Batasi ke situs</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Batasi ke jenis berkas</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "Karakter Wildcard",
+      "html": "<p>Anda dapat menggunakan <code>*</code> untuk mencocokkan rangkaian karakter apa pun dan <code>?</code> untuk mencocokkan satu karakter.</p><p>Contoh: <code>fess*</code> cocok dengan \"fess\", \"fessbook\", \"fessful\". <code>te?t</code> cocok dengan \"test\" atau \"text\".</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "Kueri Rentang",
+      "html": "<p>Gunakan tanda kurung siku untuk mencari rentang nilai: <code>content_length:[1024 TO 10240]</code> menemukan dokumen berukuran antara 1KB dan 10KB.</p> Tanda kurung siku <code>[ ]</code> menyertakan batasnya; tanda kurung kurawal <code>{ }</code> mengecualikannya, misalnya <code>content_length:{1024 TO 10240}</code> cocok dengan ukuran yang benar-benar lebih besar dari 1KB dan benar-benar lebih kecil dari 10KB."
+    },
+    {
+      "id": "facets",
+      "title": "Filter Faset",
+      "html": "<p>Gunakan faset di bilah samping untuk mempersempit pencarian berdasarkan label, periode waktu, ukuran berkas, atau jenis berkas. Klik item faset untuk menerapkannya, dan klik chip di bagian atas hasil untuk menghapusnya.</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "Pintasan Keyboard",
+      "html": "<ul><li><code>/</code> &mdash; Fokus ke kotak pencarian</li><li><code>Esc</code> &mdash; Tutup saran atau modal</li><li><code>Enter</code> &mdash; Jalankan pencarian atau pilih saran</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "Pencarian Bidang",
+      "html": "<p>Anda dapat mencari di bidang apa pun dengan mengetik nama bidang diikuti titik dua <code>:</code> lalu istilah yang Anda cari. Misalnya, untuk menemukan dokumen dengan \"Fess\" di judulnya:</p><pre>title:Fess</pre><p>Bidang yang tersedia antara lain <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, dan <code>mimetype</code>. Bidang-bidang ini dapat disesuaikan.</p>"
+    },
+    {
+      "id": "sort",
+      "title": "Sortir",
+      "html": "<p>Operator <code>sort:</code> mengurutkan hasil berdasarkan bidang tertentu. Formatnya adalah <code>sort:&lt;field&gt;.&lt;order&gt;</code>, dengan <code>&lt;order&gt;</code> berupa <code>asc</code> atau <code>desc</code>. Misalnya, untuk mencari \"Fess\" yang diurutkan berdasarkan panjang konten secara menurun:</p><pre>Fess sort:content_length.desc</pre><p>Bidang pengurutan yang tersedia antara lain <code>created</code>, <code>content_length</code>, dan <code>last_modified</code>. Bidang-bidang ini dapat disesuaikan.</p>"
+    },
+    {
+      "id": "boost",
+      "title": "Boost",
+      "html": "<p>Untuk memberi boost pada suatu istilah, gunakan simbol <code>^</code> diikuti faktor boost (angka) di akhir istilah pencarian. Faktor yang lebih tinggi meningkatkan skor relevansi istilah tersebut.</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "Pencarian Fuzzy",
+      "html": "<p>Untuk melakukan pencarian fuzzy, gunakan simbol <code>~</code> di akhir satu kata. Angka opsional setelah <code>~</code> (0 hingga 1) mengatur ambang kemiripan. Nilai default-nya adalah <code>0.5</code>.</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

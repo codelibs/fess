@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "Wyszukiwanie podstawowe",
+      "html": "<p>Aby wyszukać, wpisz zapytanie w polu wyszukiwania i naciśnij Enter (lub kliknij przycisk „Szukaj”).</p><p>Domyślnie wiele słów jest łączonych operatorem AND. Na przykład <code>open source</code> znajduje dokumenty zawierające zarówno „open”, jak i „source”.</p>"
+    },
+    {
+      "id": "operators",
+      "title": "Operatory wyszukiwania",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operator</th><th scope=\"col\">Opis</th><th scope=\"col\">Przykład</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Muszą wystąpić oba terminy</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Może wystąpić dowolny z terminów</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Wyklucza termin</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Dokładna fraza</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Ogranicza do witryny</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Ogranicza do typu pliku</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "Symbole wieloznaczne",
+      "html": "<p>Symbol <code>*</code> dopasowuje dowolny ciąg znaków, a <code>?</code> — pojedynczy znak.</p><p>Przykłady: <code>fess*</code> dopasowuje „fess”, „fessbook”, „fessful”. <code>te?t</code> dopasowuje „test” lub „text”.</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "Zapytania o zakres",
+      "html": "<p>Użyj nawiasów kwadratowych, aby wyszukać zakres wartości: <code>content_length:[1024 TO 10240]</code> znajduje dokumenty o rozmiarze od 1KB do 10KB.</p> Nawiasy kwadratowe <code>[ ]</code> obejmują wartości graniczne; nawiasy klamrowe <code>{ }</code> je wykluczają, np. <code>content_length:{1024 TO 10240}</code> dopasowuje rozmiary ściśle większe niż 1KB i ściśle mniejsze niż 10KB."
+    },
+    {
+      "id": "facets",
+      "title": "Filtry faset",
+      "html": "<p>Użyj faset na pasku bocznym, aby zawęzić wyszukiwanie według etykiety, okresu, rozmiaru pliku lub typu pliku. Kliknij element fasety, aby go zastosować, a następnie kliknij chip nad wynikami, aby go usunąć.</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "Skróty klawiaturowe",
+      "html": "<ul><li><code>/</code> &mdash; Przejście do pola wyszukiwania</li><li><code>Esc</code> &mdash; Zamknięcie podpowiedzi lub okna modalnego</li><li><code>Enter</code> &mdash; Uruchomienie wyszukiwania lub wybór podpowiedzi</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "Wyszukiwanie w polach",
+      "html": "<p>Możesz przeszukać dowolne pole, wpisując nazwę pola, a po niej dwukropek <code>:</code> i szukany termin. Na przykład, aby znaleźć dokumenty zawierające „Fess” w tytule:</p><pre>title:Fess</pre><p>Dostępne pola to m.in. <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> i <code>mimetype</code>. Można je dostosować.</p>"
+    },
+    {
+      "id": "sort",
+      "title": "Sortowanie",
+      "html": "<p>Operator <code>sort:</code> sortuje wyniki według wskazanego pola. Format to <code>sort:&lt;field&gt;.&lt;order&gt;</code>, gdzie <code>&lt;order&gt;</code> to <code>asc</code> lub <code>desc</code>. Na przykład, aby wyszukać „Fess” z sortowaniem malejąco według rozmiaru treści:</p><pre>Fess sort:content_length.desc</pre><p>Dostępne pola sortowania to m.in. <code>created</code>, <code>content_length</code> i <code>last_modified</code>. Można je dostosować.</p>"
+    },
+    {
+      "id": "boost",
+      "title": "Wzmocnienie",
+      "html": "<p>Aby wzmocnić termin, dodaj na końcu wyszukiwanego terminu symbol <code>^</code>, a po nim współczynnik wzmocnienia (liczbę). Wyższy współczynnik zwiększa ocenę trafności tego terminu.</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "Wyszukiwanie przybliżone",
+      "html": "<p>Aby wykonać wyszukiwanie przybliżone, dodaj symbol <code>~</code> na końcu pojedynczego słowa. Opcjonalna liczba po <code>~</code> (od 0 do 1) określa próg podobieństwa. Wartość domyślna to <code>0.5</code>.</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

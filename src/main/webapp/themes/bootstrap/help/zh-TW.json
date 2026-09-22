@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "基本搜尋",
+      "html": "<p>要進行搜尋，請在搜尋框中輸入查詢內容，然後按 Enter 鍵（或點擊「搜尋」按鈕）。</p><p>多個詞預設以 AND 組合。例如，<code>open source</code> 會找出同時包含「open」和「source」的文件。</p>"
+    },
+    {
+      "id": "operators",
+      "title": "搜尋運算子",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">運算子</th><th scope=\"col\">說明</th><th scope=\"col\">範例</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>兩個詞都必須出現</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>任一詞出現即可</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>排除該詞</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>完全符合的片語</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>限定網站</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>限定檔案類型</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "萬用字元",
+      "html": "<p>可以使用 <code>*</code> 比對任意長度的字元序列，使用 <code>?</code> 比對單一字元。</p><p>範例：<code>fess*</code> 可比對「fess」、「fessbook」、「fessful」。<code>te?t</code> 可比對「test」或「text」。</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "範圍查詢",
+      "html": "<p>使用方括號搜尋某個範圍內的值：<code>content_length:[1024 TO 10240]</code> 會找出大小介於 1KB 到 10KB 之間的文件。</p> 方括號 <code>[ ]</code> 包含邊界值；大括號 <code>{ }</code> 則不包含，例如 <code>content_length:{1024 TO 10240}</code> 會比對大於 1KB 且小於 10KB 的大小。"
+    },
+    {
+      "id": "facets",
+      "title": "分面篩選",
+      "html": "<p>使用側邊欄的分面，可依標籤、時間範圍、檔案大小或檔案類型縮小搜尋範圍。點擊分面項目即可套用，點擊結果上方的篩選標記即可移除。</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "鍵盤快速鍵",
+      "html": "<ul><li><code>/</code> &mdash; 將焦點移至搜尋框</li><li><code>Esc</code> &mdash; 關閉建議或對話框</li><li><code>Enter</code> &mdash; 執行搜尋或選擇建議</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "欄位搜尋",
+      "html": "<p>輸入欄位名稱，接著輸入冒號 <code>:</code>，再輸入要搜尋的詞，即可搜尋任何欄位。例如，要找出標題中含有「Fess」的文件：</p><pre>title:Fess</pre><p>可用的欄位包括 <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code> 和 <code>mimetype</code>。這些欄位可以自訂。</p>"
+    },
+    {
+      "id": "sort",
+      "title": "排序",
+      "html": "<p><code>sort:</code> 運算子會依指定欄位排序結果。格式為 <code>sort:&lt;field&gt;.&lt;order&gt;</code>，其中 <code>&lt;order&gt;</code> 為 <code>asc</code> 或 <code>desc</code>。例如，要搜尋「Fess」並依內容長度遞減排序：</p><pre>Fess sort:content_length.desc</pre><p>可用的排序欄位包括 <code>created</code>、<code>content_length</code> 和 <code>last_modified</code>。這些欄位可以自訂。</p>"
+    },
+    {
+      "id": "boost",
+      "title": "加權搜尋",
+      "html": "<p>要提高某個詞的權重，請在搜尋詞末尾加上 <code>^</code> 符號，後面接加權係數（數字）。係數越大，該詞的相關性分數越高。</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "模糊搜尋",
+      "html": "<p>要進行模糊搜尋，請在單一詞語末尾加上 <code>~</code> 符號。<code>~</code> 後面可選的數字（0 到 1）用於控制相似度門檻。預設值為 <code>0.5</code>。</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}
