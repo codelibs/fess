@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "Temel Arama",
+      "html": "<p>Arama yapmak için sorgunuzu arama kutusuna yazın ve Enter tuşuna basın (veya \"Ara\" düğmesine tıklayın).</p><p>Birden fazla kelime varsayılan olarak AND ile birleştirilir. Örneğin <code>open source</code>, hem \"open\" hem de \"source\" içeren belgeleri bulur.</p>"
+    },
+    {
+      "id": "operators",
+      "title": "Arama Operatörleri",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operatör</th><th scope=\"col\">Açıklama</th><th scope=\"col\">Örnek</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Her iki terim de bulunmalıdır</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Terimlerden biri bulunabilir</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>Terimi hariç tut</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Tam ifade</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Bir siteyle sınırla</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Bir dosya türüyle sınırla</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "Joker Karakterler",
+      "html": "<p>Herhangi bir karakter dizisiyle eşleşmek için <code>*</code>, tek bir karakterle eşleşmek için <code>?</code> kullanabilirsiniz.</p><p>Örnekler: <code>fess*</code> \"fess\", \"fessbook\", \"fessful\" ile eşleşir. <code>te?t</code> \"test\" veya \"text\" ile eşleşir.</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "Aralık Sorguları",
+      "html": "<p>Bir değer aralığında arama yapmak için köşeli parantez kullanın: <code>content_length:[1024 TO 10240]</code>, boyutu 1KB ile 10KB arasında olan belgeleri bulur.</p> Köşeli parantezler <code>[ ]</code> sınır değerleri dahil eder; süslü parantezler <code>{ }</code> hariç tutar, örneğin <code>content_length:{1024 TO 10240}</code>, 1KB'den kesinlikle büyük ve 10KB'den kesinlikle küçük boyutlarla eşleşir."
+    },
+    {
+      "id": "facets",
+      "title": "Faset Filtreleri",
+      "html": "<p>Aramanızı etikete, zaman aralığına, dosya boyutuna veya dosya türüne göre daraltmak için kenar çubuğundaki fasetleri kullanın. Uygulamak için bir faset öğesine tıklayın; kaldırmak için sonuçların üst kısmındaki çipe tıklayın.</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "Klavye Kısayolları",
+      "html": "<ul><li><code>/</code> &mdash; Arama kutusuna odaklan</li><li><code>Esc</code> &mdash; Önerileri veya pencereyi kapat</li><li><code>Enter</code> &mdash; Aramayı çalıştır veya öneriyi seç</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "Alan Araması",
+      "html": "<p>Alan adını, ardından iki nokta üst üste <code>:</code> ve aradığınız terimi yazarak herhangi bir alanda arama yapabilirsiniz. Örneğin, başlığında \"Fess\" geçen belgeleri bulmak için:</p><pre>title:Fess</pre><p>Kullanılabilir alanlar arasında <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> ve <code>mimetype</code> bulunur. Bunlar özelleştirilebilir.</p>"
+    },
+    {
+      "id": "sort",
+      "title": "Sıralama",
+      "html": "<p><code>sort:</code> operatörü sonuçları belirtilen bir alana göre sıralar. Biçim <code>sort:&lt;field&gt;.&lt;order&gt;</code> şeklindedir; burada <code>&lt;order&gt;</code>, <code>asc</code> veya <code>desc</code> olur. Örneğin, \"Fess\" araması yapıp sonuçları içerik uzunluğuna göre azalan sırada sıralamak için:</p><pre>Fess sort:content_length.desc</pre><p>Kullanılabilir sıralama alanları arasında <code>created</code>, <code>content_length</code> ve <code>last_modified</code> bulunur. Bunlar özelleştirilebilir.</p>"
+    },
+    {
+      "id": "boost",
+      "title": "Güçlendirme",
+      "html": "<p>Bir terimi güçlendirmek için arama teriminin sonuna <code>^</code> sembolünü ve ardından bir güçlendirme katsayısı (sayı) ekleyin. Daha yüksek bir katsayı, o terimin alaka puanını artırır.</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "Bulanık Arama",
+      "html": "<p>Bulanık arama yapmak için tek bir kelimenin sonuna <code>~</code> sembolünü ekleyin. <code>~</code> sonrasındaki isteğe bağlı sayı (0 ile 1 arası) benzerlik eşiğini belirler. Varsayılan değer <code>0.5</code>'tir.</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}

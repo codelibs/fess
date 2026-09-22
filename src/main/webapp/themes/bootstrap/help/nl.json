@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "basic",
+      "title": "Eenvoudig zoeken",
+      "html": "<p>Typ uw zoekopdracht in het zoekvak en druk op Enter (of klik op de knop “Zoeken”) om te zoeken.</p><p>Meerdere woorden worden standaard gecombineerd met AND. <code>open source</code> vindt bijvoorbeeld documenten die zowel “open” als “source” bevatten.</p>"
+    },
+    {
+      "id": "operators",
+      "title": "Zoekoperatoren",
+      "html": "<table class=\"table table-sm\"><thead><tr><th scope=\"col\">Operator</th><th scope=\"col\">Beschrijving</th><th scope=\"col\">Voorbeeld</th></tr></thead><tbody><tr><td><code>AND</code> / <code>&amp;&amp;</code></td><td>Beide termen moeten voorkomen</td><td><code>fess AND search</code></td></tr><tr><td><code>OR</code> / <code>||</code></td><td>Een van beide termen mag voorkomen</td><td><code>fess OR opensearch</code></td></tr><tr><td><code>NOT</code> / <code>-</code></td><td>De term uitsluiten</td><td><code>fess -lucene</code></td></tr><tr><td><code>\"...\"</code></td><td>Exacte woordgroep</td><td><code>\"full text search\"</code></td></tr><tr><td><code>site:</code></td><td>Beperken tot een site</td><td><code>site:example.com fess</code></td></tr><tr><td><code>filetype:</code></td><td>Beperken tot een bestandstype</td><td><code>filetype:pdf fess</code></td></tr></tbody></table>"
+    },
+    {
+      "id": "wildcards",
+      "title": "Jokertekens",
+      "html": "<p>Gebruik <code>*</code> voor een willekeurige reeks tekens en <code>?</code> voor één enkel teken.</p><p>Voorbeelden: <code>fess*</code> vindt “fess”, “fessbook”, “fessful”. <code>te?t</code> vindt “test” of “text”.</p>"
+    },
+    {
+      "id": "ranges",
+      "title": "Bereikzoekopdrachten",
+      "html": "<p>Gebruik vierkante haken om naar een bereik van waarden te zoeken: <code>content_length:[1024 TO 10240]</code> vindt documenten met een grootte tussen 1KB en 10KB.</p> Vierkante haken <code>[ ]</code> sluiten de grenzen in; accolades <code>{ }</code> sluiten ze uit, bijvoorbeeld <code>content_length:{1024 TO 10240}</code> vindt groottes die strikt groter zijn dan 1KB en strikt kleiner dan 10KB."
+    },
+    {
+      "id": "facets",
+      "title": "Facetfilters",
+      "html": "<p>Gebruik de facetten in de zijbalk om uw zoekopdracht te verfijnen op label, periode, bestandsgrootte of bestandstype. Klik op een facetitem om het toe te passen en klik op de chip boven de resultaten om het te verwijderen.</p>"
+    },
+    {
+      "id": "shortcuts",
+      "title": "Sneltoetsen",
+      "html": "<ul><li><code>/</code> &mdash; Focus op het zoekvak</li><li><code>Esc</code> &mdash; Suggesties of venster sluiten</li><li><code>Enter</code> &mdash; Zoekopdracht uitvoeren of suggestie selecteren</li></ul>"
+    },
+    {
+      "id": "field",
+      "title": "Zoeken op veld",
+      "html": "<p>U kunt in elk veld zoeken door de veldnaam te typen, gevolgd door een dubbele punt <code>:</code> en de term die u zoekt. Om bijvoorbeeld documenten te vinden met “Fess” in de titel:</p><pre>title:Fess</pre><p>Beschikbare velden zijn onder meer <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> en <code>mimetype</code>. Deze zijn aanpasbaar.</p>"
+    },
+    {
+      "id": "sort",
+      "title": "Sorteren",
+      "html": "<p>De operator <code>sort:</code> sorteert de resultaten op een opgegeven veld. De notatie is <code>sort:&lt;field&gt;.&lt;order&gt;</code>, waarbij <code>&lt;order&gt;</code> <code>asc</code> of <code>desc</code> is. Om bijvoorbeeld naar “Fess” te zoeken, aflopend gesorteerd op inhoudsgrootte:</p><pre>Fess sort:content_length.desc</pre><p>Beschikbare sorteervelden zijn onder meer <code>created</code>, <code>content_length</code> en <code>last_modified</code>. Deze zijn aanpasbaar.</p>"
+    },
+    {
+      "id": "boost",
+      "title": "Boost",
+      "html": "<p>Om een term te boosten, plaatst u het symbool <code>^</code> gevolgd door een boostfactor (een getal) aan het einde van de zoekterm. Een hogere factor verhoogt de relevantiescore van die term.</p><pre>Fess^100</pre>"
+    },
+    {
+      "id": "fuzzy",
+      "title": "Fuzzy zoeken",
+      "html": "<p>Voor een fuzzy zoekopdracht plaatst u het symbool <code>~</code> aan het einde van één woord. Het optionele getal na <code>~</code> (0 tot 1) bepaalt de drempel voor overeenkomst. De standaardwaarde is <code>0.5</code>.</p><pre>Fess~0.5</pre>"
+    }
+  ]
+}
