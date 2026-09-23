@@ -642,26 +642,48 @@ function showSearchLoading(show) {
 }
 
 /**
- * Keep the address bar's start= in step with state.start, as the JSP paging links
- * did, so reload, back/forward and a shared link land on the same page. Only start
- * is written: facet selections stay in memory (see runFromUrl), which is also why
- * paging does not go through navigate() - the runFromUrl() it dispatches would
- * drop them.
+ * The ex_q clauses of the current filters, in request order: facet field selections
+ * (label:<value>), facet query views, then the clauses that came with the URL.
+ *
+ * @returns {string[]}
+ */
+function exQClauses() {
+  const clauses = [];
+  for (const [field, values] of Object.entries(state.facets)) {
+    (values || []).forEach(v => clauses.push(field + ":" + v));
+  }
+  if (Array.isArray(state.facetQueries)) clauses.push(...state.facetQueries);
+  if (Array.isArray(state.exQ)) clauses.push(...state.exQ);
+  return clauses;
+}
+
+/**
+ * Keep the address bar's start= and ex_q= in step with state.start and the facet
+ * selections, as the JSP paging and facet links did, so reload, back/forward and a
+ * shared link land on the same page with the same filters (runFromUrl reads them
+ * back).
  *
  * @param {boolean} push - add a history entry (paging) instead of correcting the
  *                         current one (a filter change resetting to the first page)
  */
-function syncStartParam(push) {
+function syncUrlParams(push) {
   const params = new URLSearchParams(location.search);
-  if ((Number(params.get("start")) || 0) === state.start) return;
+  const clauses = exQClauses();
+  const current = params.getAll("ex_q");
+  const sameExQ = current.length === clauses.length && current.every((v, i) => v === clauses[i]);
+  if ((Number(params.get("start")) || 0) === state.start && sameExQ) return;
   if (state.start > 0) params.set("start", String(state.start)); else params.delete("start");
+  if (!sameExQ) {
+    params.delete("ex_q");
+    clauses.forEach(v => params.append("ex_q", v));
+  }
   const qs = params.toString();
   const url = location.pathname + (qs ? "?" + qs : "");
   if (push) history.pushState(null, "", url); else history.replaceState(null, "", url);
 }
 
 async function runSearch() {
-  syncStartParam(false);
+  syncUrlParams(false);
   // Cancel any in-flight request before issuing a new one.
   if (currentSearchAbort) currentSearchAbort.abort();
   currentSearchAbort = new AbortController();
@@ -701,21 +723,10 @@ async function runSearch() {
     for (const [field, valueSet] of Object.entries(fieldSets)) {
       valueSet.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
     }
-    for (const [field, values] of Object.entries(state.facets)) {
-      (values || []).forEach(v => { (params["ex_q"] = params["ex_q"] || []).push(field + ":" + v); });
-    }
-    // facet query views — active ex_q clauses from server-driven facet_views (SRCH-4)
-    if (Array.isArray(state.facetQueries) && state.facetQueries.length > 0) {
-      params["ex_q"] = params["ex_q"] || [];
-      if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
-      state.facetQueries.forEach(v => params["ex_q"].push(v));
-    }
-    // ADV-2: extra ex_q clauses forwarded from advance search (e.g. time range)
-    if (Array.isArray(state.exQ) && state.exQ.length > 0) {
-      params["ex_q"] = params["ex_q"] || [];
-      if (!Array.isArray(params["ex_q"])) params["ex_q"] = [params["ex_q"]];
-      params["ex_q"].push(...state.exQ);
-    }
+    // Facet selections, facet query views (SRCH-4) and the URL's other ex_q clauses
+    // (ADV-2, e.g. an advanced-search time range).
+    const exQ = exQClauses();
+    if (exQ.length > 0) params["ex_q"] = exQ;
     // GEO-1: emit geo params when all three are present
     if (state.geo && state.geo.lat !== "" && state.geo.lon !== "" && state.geo.distance !== "") {
       params["geo.location.point"] = state.geo.lat + "," + state.geo.lon;
@@ -1151,12 +1162,9 @@ export function runFromUrl() {
   } else { state.geo = { lat: "", lon: "", distance: "" }; }
   // ADV-2: hydrate lang / fields.* / ex_q from URL (forwarded by advance search submit)
   state.lang = params.getAll("lang").filter(v => v !== "");
-  // Facet selections (sidebar label facets and facet query views) live only
-  // in memory and are never written to the URL. Every navigation re-derives filter
-  // state from the URL, so these in-memory stores must be cleared too; otherwise a
-  // previously clicked facet survives a search-options submit (which navigates with
-  // only fields.* in the URL) and gets merged back into the request, applying both
-  // the old facet label and the new one.
+  // Facet selections (sidebar label facets and facet query views) travel in the URL as
+  // ex_q clauses (see syncUrlParams), so every navigation re-derives them from the URL;
+  // a URL without them (e.g. a search-options submit) clears them.
   state.facets = {};
   state.facetQueries = [];
   // The similar-docs hash (sdh) is merged into the request. The SPA keeps it in memory,
@@ -1177,7 +1185,22 @@ export function runFromUrl() {
       (state.as[name] = state.as[name] || []).push(value);
     }
   }
-  state.exQ = params.getAll("ex_q").filter(v => v !== "");
+  // Sort each ex_q clause back into the store its facet group reads, so the group shows it
+  // active and a click removes it; any other clause (e.g. from advanced search) is kept as is.
+  const facetQueryValues = new Set();
+  ((api.getConfig() || {}).facet_views || []).forEach(v =>
+    (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.add(qy.value); }));
+  state.exQ = [];
+  for (const v of new Set(params.getAll("ex_q"))) {
+    if (v === "") continue;
+    if (v.startsWith("label:") && v.length > "label:".length) {
+      (state.facets.label = state.facets.label || []).push(v.slice("label:".length));
+    } else if (facetQueryValues.has(v)) {
+      state.facetQueries.push(v);
+    } else {
+      state.exQ.push(v);
+    }
+  }
   // Run a search when a keyword OR any active filter is present in the URL (label /
   // other fields, geo, or ex_q). The classic JSP theme issues the request for
   // filter-only URLs such as /search?fields.label=foo, so mirror that here instead
@@ -1187,7 +1210,7 @@ export function runFromUrl() {
   // runSearch() reads state.q, and the option-drawer Search button omits an empty q.
   const hasFields = Object.keys(state.fields).length > 0;
   const hasGeo = !!(state.geo.lat && state.geo.lon && state.geo.distance);
-  const hasExQ = state.exQ.length > 0;
+  const hasExQ = exQClauses().length > 0;
   // JSP parity (SearchRequestParams.hasConditionQuery): these advanced-search conditions
   // are a search on their own; as.occt only narrows one.
   const hasConditions = ["q", "epq", "oq", "nq", "timestamp", "sitesearch", "filetype"]
@@ -1950,7 +1973,7 @@ function renderPagination(env) {
   // Navigate to a page and scroll back to the top so the new results start in view.
   const goToPage = (start) => {
     state.start = Math.max(0, start);
-    syncStartParam(true);
+    syncUrlParams(true);
     runSearch();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
