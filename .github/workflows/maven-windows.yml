@@ -1,0 +1,115 @@
+# Builds the Fess ZIP on Windows, sets up OpenSearch with bin\fess-setup.bat, starts both with
+# the Windows launchers and runs the integration tests against them - the Windows counterpart of
+# maven.yml. Windows runners cannot run the Linux service container maven.yml uses, so the search
+# engine comes from `fess-setup install opensearch` instead, the way a ZIP user on Windows gets it.
+# Unit tests are skipped: maven.yml runs them, and several assume Unix paths.
+
+name: Java CI with Maven on Windows
+
+# Runs after a merge to main, or by hand to check a branch: the job is slower than maven.yml,
+# so pull requests rely on maven.yml and a Windows regression shows up on main.
+on:
+  push:
+    branches:
+    - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      PARENT_BRANCH: main
+      OPENSEARCH_JAVA_OPTS: -Xms1g -Xmx1g
+    timeout-minutes: 45
+    # PowerShell splits an unquoted -Dfoo.bar=baz at the dot, so Maven runs under bash where it can.
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    - uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Checkout fess-parent
+      uses: actions/checkout@v4
+      with:
+        repository: codelibs/fess-parent
+        ref: ${{ env.PARENT_BRANCH }}
+        path: fess-parent
+    - name: Install fess-parent
+      run: |
+        cd fess-parent
+        mvn -B install -Dgpg.skip=true
+    - name: Download Plugins with Maven
+      run: mvn -B antrun:run --file pom.xml
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml -DskipTests
+    - name: Extract Fess
+      shell: pwsh
+      run: |
+        # Outside the checkout, where fess-* would also match fess-parent.
+        Expand-Archive -Path (Get-Item target\releases\fess-*.zip) -DestinationPath "$env:RUNNER_TEMP\fess"
+        "FESS_HOME=$((Get-Item "$env:RUNNER_TEMP\fess\fess-*").FullName)" >> $env:GITHUB_ENV
+    - name: Install OpenSearch with fess-setup
+      shell: pwsh
+      run: |
+        & "$env:FESS_HOME\bin\fess-setup.bat" install opensearch
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        # -Directory: the downloaded opensearch-*.zip stays next to the extracted directory.
+        $opensearch = (Get-ChildItem -Directory "$env:FESS_HOME\opensearch\opensearch-*").FullName
+        Add-Content "$opensearch\config\opensearch.yml" "`ndiscovery.type: single-node"
+        Get-Content "$opensearch\config\opensearch.yml" | Select-String -NotMatch '^\s*(#|$)'
+        "OPENSEARCH_HOME=$opensearch" >> $env:GITHUB_ENV
+    # One step on purpose: the Windows runner stops what a step started with Start-Process when
+    # that step ends, so OpenSearch and Fess have to live in the step that runs the tests.
+    # FESS_DICTIONARY_PATH is left unset on purpose: fess.in.bat has to find
+    # config\dictionary of the OpenSearch fess-setup installed by itself.
+    - name: Run OpenSearch, Fess and Integration Test
+      shell: pwsh
+      run: |
+        function Wait-Http([string] $Url, [int] $Seconds) {
+          $deadline = (Get-Date).AddSeconds($Seconds)
+          while ((Get-Date) -lt $deadline) {
+            try { return Invoke-RestMethod $Url } catch { Start-Sleep -Seconds 2 }
+          }
+          throw "$Url is not available after $Seconds seconds."
+        }
+
+        Start-Process -FilePath "$env:OPENSEARCH_HOME\bin\opensearch.bat" -WorkingDirectory $env:OPENSEARCH_HOME `
+          -RedirectStandardOutput "$env:RUNNER_TEMP\opensearch.out" -RedirectStandardError "$env:RUNNER_TEMP\opensearch.err"
+        Wait-Http "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s" 240 | ConvertTo-Json
+
+        Start-Process -FilePath "$env:FESS_HOME\bin\fess.bat" -ArgumentList "-s" -WorkingDirectory $env:FESS_HOME `
+          -RedirectStandardOutput "$env:RUNNER_TEMP\fess.out" -RedirectStandardError "$env:RUNNER_TEMP\fess.err"
+        Wait-Http "http://localhost:8080/api/v2/health" 180 | ConvertTo-Json
+        Invoke-RestMethod "http://localhost:9200/_cat/indices?v"
+
+        # Quoted: PowerShell would split an unquoted -Dfoo.bar=baz at the dot.
+        mvn -B test -P integrationTests "-Dtest.fess.url=http://localhost:8080" "-Dtest.search_engine.url=http://localhost:9200"
+        exit $LASTEXITCODE
+    - name: Show logs
+      if: failure()
+      run: |
+        cat "$RUNNER_TEMP"/opensearch.out "$RUNNER_TEMP"/opensearch.err "$OPENSEARCH_HOME"/logs/*.log || true
+        cat "$RUNNER_TEMP"/fess.out "$RUNNER_TEMP"/fess.err "$FESS_HOME"/logs/*.log || true
+        find target/surefire-reports -type f ! -name 'TEST-*' -exec cat {} + 2>/dev/null || true
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-logs
+        path: |
+          ${{ runner.temp }}/*.out
+          ${{ runner.temp }}/*.err
+          ${{ runner.temp }}/fess/*/logs/
+          ${{ runner.temp }}/fess/*/opensearch/*/logs/
+          target/surefire-reports/
+        if-no-files-found: ignore
