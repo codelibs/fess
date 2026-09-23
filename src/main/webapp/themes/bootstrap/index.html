@@ -16,8 +16,9 @@
 </head>
 <body>
   <a href="#page-root" class="visually-hidden-focusable position-absolute top-0 start-0 m-2" data-i18n="aria.skip_to_main">Skip to main content</a>
-  <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. -->
-  <h1 class="visually-hidden" data-i18n="page.heading">Fess Search</h1>
+  <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. app.js hides
+       it on the home view, whose logo (h1.mainLogo) is the page's h1, as on index.jsp. -->
+  <h1 class="visually-hidden" id="page-heading" data-i18n="page.heading">Fess Search</h1>
 
   <!-- ===================================================================
        SHARED HEADER — tag-parity with WEB-INF/view/header.jsp.
@@ -28,7 +29,7 @@
        EVERY view (only hidden on /chat — toggled by app.js setSearchFormVisible).
        =================================================================== -->
   <header>
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none" role="banner" data-bs-theme="dark">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none" data-bs-theme="dark">
       <div id="content" class="container">
         <a class="navbar-brand d-inline-flex" href="./" id="brand-link" data-spa><img src="themes/bootstrap/assets/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="align-items-center"></a>
         <div class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0" role="search" id="search-form-wrap">

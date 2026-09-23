@@ -264,8 +264,8 @@ footer[role="contentinfo"] {
 #result .title a:visited { color: #014c8c; }
 /* Thumbnail + description sit on one flex row (thumbnail left, text right). */
 #result .body { display: flex; align-items: flex-start; }
-/* Site path shown as non-italic green, like JSP. */
-#result .site cite { color: #093; font-style: normal; }
+/* Site path shown as non-italic green, like JSP (#00852c: 4.78:1 on white, WCAG AA). */
+#result .site cite { color: #00852c; font-style: normal; }
 /* "More" link is desktop-hidden (shown only on phones, see media query below). */
 #result .more { display: none; }
 /* Info line (date / size / cache / similar / favorite) is small. */
