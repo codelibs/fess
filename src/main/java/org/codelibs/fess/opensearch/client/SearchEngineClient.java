@@ -351,8 +351,8 @@ public class SearchEngineClient implements Client {
         if (StringUtil.isBlank(httpAddress)) {
             throw new FessSystemException("""
                     No search engine address is configured, and Fess needs an OpenSearch server to run. \
-                    Set SEARCH_ENGINE_HTTP_URL in bin/fess.in.sh (bin\\fess.in.bat on Windows), or \
-                    search_engine.http.url in fess_config.properties. \
+                    Set SEARCH_ENGINE_HTTP_URL in bin/fess.in.sh, the -Dfess.search_engine.http_address option \
+                    in bin\\fess.in.bat on Windows, or search_engine.http.url in fess_config.properties. \
                     Run bin/fess-setup install opensearch to set one up.""");
         }
         client = createHttpClient(fessConfig, httpAddress);
