@@ -1,6 +1,6 @@
 import * as api from "./api.js";
 import { t, languageLabel, getLocale } from "./i18n.js";
-import { escapeHtml, formatFileSize, formatDate, renderHighlightedSnippet, renderSnippetText, sanitizeHtml } from "./format.js";
+import { escapeHtml, formatFileSize, formatDate, renderHighlightedSnippet, renderSnippetText, sanitizeAdminHtml } from "./format.js";
 import { navigate } from "./router.js";
 
 /** Guard: prevent duplicate event-listener registration on hot-reload. */
@@ -1882,7 +1882,9 @@ function renderRelatedQueries(queries) {
 /**
  * Render related content HTML above the active-chips row (Feature 2).
  * Content comes from /api/v2/related-content (key: `content`).
- * The HTML string is passed through the whitelist sanitizer from format.js.
+ * The HTML is written by an administrator, so it goes through sanitizeAdminHtml
+ * from format.js: images, class and style survive as they did on the JSP page,
+ * script does not.
  *
  * @param {string} html
  */
@@ -1895,7 +1897,7 @@ function renderRelatedContent(html) {
     return;
   }
   container.classList.remove("d-none");
-  container.appendChild(sanitizeHtml(html));
+  container.appendChild(sanitizeAdminHtml(html));
 }
 
 /**

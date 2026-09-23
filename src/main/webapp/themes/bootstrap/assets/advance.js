@@ -3,7 +3,7 @@
 // All DOM construction uses createElement/textContent/setAttribute — no innerHTML.
 
 import { getConfig } from "./api.js";
-import { sanitizeHtml } from "./format.js";
+import { sanitizeAdminHtml } from "./format.js";
 import { t, languageLabel } from "./i18n.js";
 import { navigate } from "./router.js";
 import { attachSuggest, disableSubmitBriefly } from "./search.js";
@@ -282,7 +282,7 @@ export function attach() {
   const advHtml = ((getConfig() || {}).notifications || {}).advance_search || "";
   if (typeof advHtml === "string" && advHtml.trim() !== "") {
     notification.classList.remove("d-none");
-    notification.appendChild(sanitizeHtml(advHtml));
+    notification.appendChild(sanitizeAdminHtml(advHtml));
   }
   view.appendChild(notification);
 
