@@ -20,6 +20,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeRegistry;
@@ -62,6 +64,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * <p>Behavior summary:
  * <ul>
+ *   <li>A request for a JSP (or similar server-side page) under {@code /themes/} is answered
+ *       with 404, whatever the method or active theme: a static theme contains plain files only.</li>
  *   <li>Requests other than GET and HEAD pass through unchanged.</li>
  *   <li>Requests that are neither a {@code /themes/...} asset nor an allowlisted UI path
  *       pass through unchanged (without even resolving the active theme).</li>
@@ -168,6 +172,14 @@ public class StaticThemeFilter implements Filter {
             return;
         }
         final HttpServletResponse res = (HttpServletResponse) response;
+
+        // A static theme is plain files. A JSP (or similar) page under /themes/ is never
+        // part of one, so it is not handed to the servlet container, whatever the method or
+        // active theme. Checked on the container-decoded path, which is what it maps to a servlet.
+        if (isServerSideThemePage(req)) {
+            res.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
         // GET and HEAD are the SPA's read paths. A HEAD response is built exactly like the GET
         // one — the container drops the body and keeps the headers, which is what a HEAD client
@@ -356,6 +368,21 @@ public class StaticThemeFilter implements Filter {
             uri = uri.substring(ctx.length());
         }
         return uri;
+    }
+
+    /**
+     * Returns whether the request targets a server-side page (JSP and the like) under
+     * {@code /themes/}. Uses the servlet path and path info, which the container has already
+     * decoded and normalized, rather than the raw request URI.
+     *
+     * @param req the request
+     * @return true when the request should not reach a servlet
+     */
+    static boolean isServerSideThemePage(final HttpServletRequest req) {
+        final String servletPath = req.getServletPath() == null ? "" : req.getServletPath();
+        final String pathInfo = req.getPathInfo() == null ? "" : req.getPathInfo();
+        final String path = servletPath + pathInfo;
+        return path.toLowerCase(Locale.ROOT).startsWith("/themes/") && StaticThemeInstaller.isServerSidePage(path);
     }
 
     private static boolean isThemeUiPath(final String uri) {

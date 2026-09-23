@@ -96,6 +96,62 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_doFilter_answersServerSidePageUnderThemesWith404() throws Exception {
+        // A static theme is plain files, so a JSP under /themes/ must never reach the
+        // container's JSP servlet: not for the active theme, not for another theme, not for
+        // any method, and not when no static theme is active.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        for (final Theme active : new Theme[] { staticTheme, null }) {
+            for (final String method : new String[] { "GET", "HEAD", "POST" }) {
+                for (final String path : new String[] { "/themes/t/x.jsp", "/themes/other/x.jsp", "/themes/other/sub/x.JSPX",
+                        "/themes/other/x.jspf" }) {
+                    final StaticThemeFilter f = new StaticThemeFilter();
+                    f.setThemeRegistry(new StubRegistry(active));
+                    final StubResponder stub = new StubResponder();
+                    f.setStaticThemeResponder(stub);
+                    final StubResponse res = new StubResponse();
+                    final StubChain chain = new StubChain();
+                    f.doFilter(new StubRequest(method, path), res, chain);
+                    final String label = method + " " + path + " active=" + (active == null ? null : active.getName());
+                    assertFalse(chain.called, label + " must not pass through to the container");
+                    assertFalse(stub.servedAsset, label + " must not be served as an asset");
+                    assertEquals(HttpServletResponse.SC_NOT_FOUND, res.errorStatus, label);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test_doFilter_matchesServerSidePageOnTheDecodedPath() throws Exception {
+        // The container maps the decoded path to a servlet, so the check must use it rather
+        // than the raw request URI (an encoded or ;param-suffixed URI decodes to x.jsp).
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(new StubRegistry(null));
+        f.setStaticThemeResponder(new StubResponder());
+        final StubResponse res = new StubResponse();
+        final StubChain chain = new StubChain();
+        f.doFilter(new StubRequest("GET", "/%74hemes/other/x.jsp;a=b").withServletPath("/themes/other/x.jsp"), res, chain);
+        assertFalse(chain.called);
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, res.errorStatus);
+    }
+
+    @Test
+    public void test_doFilter_passesThroughStaticFileOfInactiveTheme() throws Exception {
+        // Only server-side pages are stopped; a plain file of a theme that is not active
+        // still passes through to the container as before.
+        final Theme staticTheme = new Theme("t", Paths.get("/tmp/t"), null);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(new StubRegistry(staticTheme));
+        final StubResponder stub = new StubResponder();
+        f.setStaticThemeResponder(stub);
+        final StubResponse res = new StubResponse();
+        final StubChain chain = new StubChain();
+        f.doFilter(new StubRequest("GET", "/themes/other/app.js"), res, chain);
+        assertTrue(chain.called);
+        assertEquals(0, res.errorStatus);
+    }
+
+    @Test
     public void test_doFilter_servesHeadLikeGet() throws Exception {
         // HEAD must be served exactly like GET: same allowlist match, same serveIndex call.
         // The container (Tomcat) is responsible for discarding the response body for HEAD --
@@ -679,6 +735,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     static class StubResponse implements HttpServletResponse {
         // Implement the bare minimum; methods we don't call throw UnsupportedOperationException.
         String redirectLocation;
+        int errorStatus;
 
         @Override
         public String getCharacterEncoding() {
@@ -787,7 +844,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public void sendError(final int sc) {
-            throw new UnsupportedOperationException();
+            this.errorStatus = sc;
         }
 
         @Override
@@ -874,10 +931,17 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         private String contextPath = "";
         private String queryString;
         private final Map<String, String[]> params = new HashMap<>();
+        private String servletPath;
 
         StubRequest(final String method, final String uri) {
             this.method = method;
             this.uri = uri;
+        }
+
+        /** Sets the container-decoded servlet path when it differs from the raw request URI. */
+        StubRequest withServletPath(final String path) {
+            this.servletPath = path;
+            return this;
         }
 
         StubRequest withContextPath(final String ctx) {
@@ -1036,7 +1100,7 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public String getServletPath() {
-            return uri;
+            return servletPath != null ? servletPath : uri;
         }
 
         @Override

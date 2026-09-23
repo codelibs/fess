@@ -253,6 +253,48 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_install_rejectsServerSidePages() throws Exception {
+        // A static theme is plain files; a JSP (or similar) entry would be evaluated by the
+        // servlet container instead of served, so the whole archive is refused and nothing is
+        // left behind in the themes directory.
+        for (final String entryName : new String[] { "x.jsp", "sub/x.jspx", "inc/x.jspf", "X.JSP" }) {
+            final Path themesDir = Files.createTempDirectory("themes-installer-");
+            try {
+                final StaticThemeInstaller installer = newInstaller(themesDir);
+                final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+                try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                    final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: withpage",
+                            "displayName: \"withpage\"", "version: 1.0.0");
+                    putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                    putEntry(zos, "index.html", "<html></html>".getBytes(StandardCharsets.UTF_8));
+                    putEntry(zos, entryName, "<%= 1 %>".getBytes(StandardCharsets.UTF_8));
+                }
+                final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                        () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())), entryName);
+                assertEquals(entryName, StaticThemeInstaller.InstallException.Code.EXTRACT_FAILED, ex.code());
+                assertTrue(ex.getMessage().contains(entryName), ex.getMessage());
+                assertFalse(Files.exists(themesDir.resolve("withpage")), entryName);
+                try (java.util.stream.Stream<Path> left = Files.list(themesDir)) {
+                    assertEquals(entryName, 0L, left.filter(p -> p.getFileName().toString().startsWith(".staging-")).count());
+                }
+            } finally {
+                deleteRecursively(themesDir);
+            }
+        }
+    }
+
+    @Test
+    public void test_isServerSidePage() {
+        assertTrue(StaticThemeInstaller.isServerSidePage("x.jsp"));
+        assertTrue(StaticThemeInstaller.isServerSidePage("/themes/t/a/b.JSPX"));
+        assertTrue(StaticThemeInstaller.isServerSidePage("frag.jspf"));
+        assertFalse(StaticThemeInstaller.isServerSidePage("index.html"));
+        assertFalse(StaticThemeInstaller.isServerSidePage("app.js"));
+        assertFalse(StaticThemeInstaller.isServerSidePage("notes.jsp.txt"));
+        assertFalse(StaticThemeInstaller.isServerSidePage(null));
+    }
+
+    @Test
     public void test_install_rejectsDenylistedDirectories() throws Exception {
         // Denylist policy: .git, .svn, .hg, __MACOSX, .DS_Store path segments are rejected
         // anywhere in the tree. Other dotfiles (e.g. .well-known) are allowed by design.
