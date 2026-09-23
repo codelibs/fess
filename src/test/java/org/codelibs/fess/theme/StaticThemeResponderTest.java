@@ -698,6 +698,54 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_serveIndex_expandsTheThemePathPlaceholderWithTheThemeName() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-index-themepath-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html><head><link rel=\"stylesheet\" href=\"{{themePath}}/assets/s.css\"></head>"
+                    + "<body><script type=\"module\" src=\"{{themePath}}/assets/app.js\"></script></body></html>");
+            final Theme theme = new Theme("my-copy", tmp, manifest());
+            final StubRequest req = new StubRequest();
+            req.contextPath = "/fess";
+            final CapturingResponse res = new CapturingResponse();
+
+            new StaticThemeResponder().serveIndex(req, res, theme, "/search");
+
+            final String body = new String(res.body(), StandardCharsets.UTF_8);
+            assertEquals("<html><head><base href=\"/fess/\"><link rel=\"stylesheet\" href=\"themes/my-copy/assets/s.css\"></head>"
+                    + "<body><script type=\"module\" src=\"themes/my-copy/assets/app.js\"></script></body></html>", body);
+            assertEquals(res.body().length, (int) res.contentLength);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveErrorPage_expandsTheThemePathPlaceholder() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-errpage-themepath-");
+        try {
+            Files.writeString(tmp.resolve("index.html"),
+                    "<html><head></head><body><img src=\"{{themePath}}/assets/logo.png\"></body></html>");
+            final Theme theme = new Theme("my-copy", tmp, manifest());
+            final CapturingResponse res = new CapturingResponse();
+
+            assertTrue(new StaticThemeResponder().serveErrorPage(new StubRequest(), res, theme, 404, 404, null));
+
+            final String body = new String(res.body(), StandardCharsets.UTF_8);
+            assertTrue(body.contains("<img src=\"themes/my-copy/assets/logo.png\">"), body);
+            assertFalse(body.contains("{{themePath}}"), body);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_expandThemePath_returnsTheSameBytesWithoutAPlaceholder() {
+        final byte[] html = "<html><head></head><body><img src=\"themes/other/a.png\"></body></html>".getBytes(StandardCharsets.UTF_8);
+        assertSame(html, StaticThemeResponder.expandThemePath(html, "t"));
+        assertNull(StaticThemeResponder.expandThemePath(null, "t"));
+    }
+
+    @Test
     public void test_injectBaseHref_insertsRightAfterTheHeadStartTag() {
         final String out = new String(StaticThemeResponder.injectBaseHref(
                 "<html><head lang=\"en\"><title>T</title></head><body><header>h</header></body></html>".getBytes(StandardCharsets.UTF_8),

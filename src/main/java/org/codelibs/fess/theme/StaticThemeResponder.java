@@ -88,6 +88,14 @@ public class StaticThemeResponder {
     private static final Pattern HEAD_START_TAG = Pattern.compile("<head(?:\\s[^>]*)?>", Pattern.CASE_INSENSITIVE);
 
     /**
+     * Placeholder in a theme's entry file for the theme's own asset directory, relative to the
+     * inserted {@code <base>} element: {@code {{themePath}}/assets/app.js} is served as
+     * {@code themes/<name>/assets/app.js}. A copy of a theme saved under another name therefore
+     * loads its own assets without editing its entry file.
+     */
+    static final String THEME_PATH_PLACEHOLDER = "{{themePath}}";
+
+    /**
      * Default constructor.
      */
     public StaticThemeResponder() {
@@ -305,6 +313,27 @@ public class StaticThemeResponder {
                 .replace(">", "&gt;");
         final String modified = html.substring(0, matcher.end()) + "<base href=\"" + href + "\">" + html.substring(matcher.end());
         return modified.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Replaces every {@link #THEME_PATH_PLACEHOLDER} in the entry HTML with {@code themes/<name>},
+     * the path {@code StaticThemeFilter} serves the theme's assets under. Theme names match
+     * {@link ThemeManifest#NAME_PATTERN}, so the result needs no escaping. The bytes are returned
+     * unchanged when there is no placeholder.
+     *
+     * @param htmlBytes UTF-8 encoded HTML bytes
+     * @param themeName the name of the theme the entry file belongs to
+     * @return the HTML with the placeholder expanded
+     */
+    static byte[] expandThemePath(final byte[] htmlBytes, final String themeName) {
+        if (htmlBytes == null || themeName == null) {
+            return htmlBytes;
+        }
+        final String html = new String(htmlBytes, StandardCharsets.UTF_8);
+        if (!html.contains(THEME_PATH_PLACEHOLDER)) {
+            return htmlBytes;
+        }
+        return html.replace(THEME_PATH_PLACEHOLDER, "themes/" + themeName).getBytes(StandardCharsets.UTF_8);
     }
 
     /**
@@ -556,7 +585,8 @@ public class StaticThemeResponder {
      * exactly one place.</p>
      *
      * @param theme the theme whose entry file is read
-     * @return the file's bytes, or null when the entry is missing, blocked or unreadable
+     * @return the file's bytes with {@link #THEME_PATH_PLACEHOLDER} expanded, or null when the
+     *         entry is missing, blocked or unreadable
      */
     private byte[] readEntryBytes(final Theme theme) {
         final String entry = theme.getManifest().map(ThemeManifest::getEntry).orElse("index.html");
@@ -583,7 +613,7 @@ public class StaticThemeResponder {
         try (InputStream in = Files.newInputStream(indexFile)) {
             final ByteArrayOutputStream buf = new ByteArrayOutputStream((int) fileSize + 256);
             in.transferTo(buf);
-            return buf.toByteArray();
+            return expandThemePath(buf.toByteArray(), theme.getName());
         } catch (final IOException e) {
             return null;
         }
