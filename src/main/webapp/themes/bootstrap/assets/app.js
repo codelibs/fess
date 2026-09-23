@@ -31,6 +31,10 @@ function showView(id) {
       el.setAttribute("hidden", "");
     }
   }
+  // One h1 per view: the home view's logo is its h1 (JSP parity: index.jsp h1.mainLogo);
+  // every other view uses the visually-hidden page heading.
+  const pageHeading = document.getElementById("page-heading");
+  if (pageHeading) pageHeading.hidden = id === "home-view";
   // JSP parity: home (index.jsp) shows an empty navbar-brand; other views show the logo.
   setBrandVisible(id !== "home-view");
   // JSP parity (REFERENCE §HEADER): the shared header (header.jsp) is identical on

@@ -86,6 +86,36 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_indexHtml_landmarksAndHeadings() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        // app.js hides this h1 on the home view, whose logo is the h1 (see app.test.js).
+        assertTrue(html.contains("<h1 class=\"visually-hidden\" id=\"page-heading\""), "page heading h1 must carry id=page-heading");
+        // The header element is the banner; a role on the nav would hide the navigation landmark.
+        assertTrue(Pattern.compile("<nav\\s[^>]*class=\"navbar[^>]*>").matcher(html).find(), "header nav missing");
+        assertFalse(Pattern.compile("<nav\\s[^>]*role=").matcher(html).find(), "the header nav must stay a navigation landmark");
+    }
+
+    @Test
+    public void test_stylesCss_resultUrlColorMeetsContrastMinimum() throws Exception {
+        final String css = Files.readString(THEME_DIR.resolve("assets/styles.css"), StandardCharsets.UTF_8);
+        final java.util.regex.Matcher m = Pattern.compile("#result \\.site cite \\{ color: #([0-9a-fA-F]{6});").matcher(css);
+        assertTrue(m.find(), "#result .site cite color rule missing");
+        final int rgb = Integer.parseInt(m.group(1), 16);
+        final double ratio = (1.0 + 0.05) / (relativeLuminance(rgb) + 0.05);
+        assertTrue(ratio >= 4.5, "result URL color must reach 4.5:1 on white (WCAG AA), was " + ratio);
+    }
+
+    private static double relativeLuminance(final int rgb) {
+        double l = 0;
+        final double[] weights = { 0.2126, 0.7152, 0.0722 };
+        for (int i = 0; i < 3; i++) {
+            final double c = ((rgb >> (16 - 8 * i)) & 0xff) / 255.0;
+            l += weights[i] * (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+        }
+        return l;
+    }
+
+    @Test
     public void test_coreAssetFilesArePresent() {
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/app.js")), "assets/app.js missing");
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/api.js")), "assets/api.js missing");

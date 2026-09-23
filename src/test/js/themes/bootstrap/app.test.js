@@ -113,6 +113,7 @@ function mountFullDom() {
     <div id="home-notification"></div>
     <div id="results-notification"></div>
     <div id="advance-notification"></div>
+    <h1 id="page-heading" class="visually-hidden">Fess Search</h1>
     <div id="home-view">
       <h1>Home</h1>
       <form id="home-search-form">
@@ -389,11 +390,14 @@ describe("registerRoutes", () => {
     expect(isHidden("home-view")).toBe(false);
     expect(isHidden("results-view")).toBe(true);
     expect(search.clearSearchState).toHaveBeenCalled();
+    // One h1: the home view's logo heading, not the page heading as well.
+    expect(isHidden("page-heading")).toBe(true);
 
     // Results handler reveals results-view and runs the URL search.
     calls[2][1]();
     expect(isHidden("results-view")).toBe(false);
     expect(isHidden("home-view")).toBe(true);
+    expect(isHidden("page-heading")).toBe(false);
     expect(search.attach).toHaveBeenCalled();
     expect(search.runFromUrl).toHaveBeenCalled();
 
