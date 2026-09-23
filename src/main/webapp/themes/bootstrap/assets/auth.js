@@ -1,5 +1,5 @@
 import * as api from "./api.js";
-import { sanitizeHtml } from "./format.js";
+import { sanitizeAdminHtml } from "./format.js";
 import { t } from "./i18n.js";
 import * as router from "./router.js";
 
@@ -425,7 +425,7 @@ export function attach() {
     while (notification.firstChild) notification.removeChild(notification.firstChild);
     if (typeof html === "string" && html.trim() !== "") {
       notification.classList.remove("d-none");
-      notification.appendChild(sanitizeHtml(html));
+      notification.appendChild(sanitizeAdminHtml(html));
     } else {
       notification.classList.add("d-none");
     }

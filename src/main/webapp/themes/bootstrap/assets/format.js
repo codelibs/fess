@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Common formatting utilities for the Fess static theme SPA.
 // Importing is DOM-free; calling is not. Only formatFileSize / formatDate /
-// escapeHtml are pure — sanitizeHtml, renderHighlightedSnippet and
-// renderSnippetText parse via document, and isSafeHref needs window.location.
+// escapeHtml are pure — sanitizeHtml, sanitizeAdminHtml, renderHighlightedSnippet
+// and renderSnippetText parse via document, and isSafeHref needs window.location.
 
 // Intl unit identifiers; Intl.NumberFormat supplies the localised unit names.
 const UNITS = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte"];
@@ -137,7 +137,8 @@ export function renderSnippetText(raw) {
 }
 
 // ---------------------------------------------------------------------------
-// Whitelist HTML sanitizer (shared with help.js and related-content rendering)
+// Whitelist HTML sanitizer (sanitizeHtml: help, chat; sanitizeAdminHtml: related
+// content and notifications written by an administrator)
 // ---------------------------------------------------------------------------
 
 /** Tags whose content is kept (children are recursively sanitized). */
@@ -222,6 +223,79 @@ const ALLOWED_ATTRS = {
 const SAFE_HREF_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:", "ftp:", "ftps:"]);
 
 /**
+ * Tags kept as markup in HTML an administrator wrote: related content and the
+ * search-top, advanced-search and login notifications. ALLOWED_TAGS plus the
+ * presentational and structural elements such HTML is written with — images,
+ * inline formatting, sectioning, table furniture.
+ *
+ * The JSP pages printed this HTML verbatim, so administrators have long used
+ * <img>, <b>, class and style in it; the narrow ALLOWED_TAGS would silently
+ * drop them. Nothing here can run script: DROP_WITH_CONTENT still applies, no
+ * event-handler attribute is ever kept, URLs are scheme-checked, and the page's
+ * Content-Security-Policy (script-src 'self') blocks inline script regardless.
+ * HTML from anywhere else — chat answers, help pages — keeps ALLOWED_TAGS.
+ */
+const ADMIN_TAGS = new Set([
+  ...ALLOWED_TAGS,
+  "IMG", "FIGURE", "FIGCAPTION",
+  "B", "I", "U", "S", "SMALL", "BIG", "SUB", "SUP", "MARK", "DEL", "INS",
+  "ABBR", "CITE", "Q", "KBD", "SAMP", "VAR", "TIME", "FONT", "CENTER",
+  "SECTION", "ARTICLE", "ASIDE", "HEADER", "FOOTER", "NAV",
+  "DETAILS", "SUMMARY",
+  "CAPTION", "COLGROUP", "COL", "TFOOT"
+]);
+
+/** Attributes kept on every ADMIN_TAGS element (aria-* is kept as well). */
+const ADMIN_GLOBAL_ATTRS = new Set(["class", "style", "title", "lang", "dir", "role"]);
+
+/** Per-tag attributes kept in administrator HTML, on top of ALLOWED_ATTRS and ADMIN_GLOBAL_ATTRS. */
+const ADMIN_ATTRS = {
+  a:        new Set(["href", "target", "rel"]),
+  img:      new Set(["src", "alt", "width", "height", "loading"]),
+  ol:       new Set(["start", "type", "reversed"]),
+  li:       new Set(["value"]),
+  table:    new Set(["class", "border", "cellpadding", "cellspacing", "width", "summary"]),
+  th:       new Set(["scope", "colspan", "rowspan", "align", "valign", "width"]),
+  td:       new Set(["colspan", "rowspan", "align", "valign", "width"]),
+  tr:       new Set(["align", "valign"]),
+  col:      new Set(["span", "width"]),
+  colgroup: new Set(["span", "width"]),
+  time:     new Set(["datetime"]),
+  details:  new Set(["open"]),
+  font:     new Set(["color", "face", "size"]),
+  div:      new Set(["align"]),
+  p:        new Set(["align"])
+};
+
+/**
+ * Return true when `value` may be the src of an <img> in administrator HTML:
+ * http(s), a relative URL, or a data:image/ URI. An image cannot run script
+ * whatever it contains, so the check only keeps out schemes that navigate or
+ * execute (javascript:, vbscript:, …) and makes the rule explicit.
+ *
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isSafeImageSrc(value) {
+  const cleaned = value.replace(/[\t\n\r]/g, "").trim();
+  if (cleaned === "") return false;
+  if (/^data:/i.test(cleaned)) return /^data:image\//i.test(cleaned);
+  try {
+    const scheme = new URL(cleaned, window.location.href).protocol;
+    return scheme === "http:" || scheme === "https:";
+  } catch (e) {
+    if (e instanceof TypeError) return false;
+    throw e;
+  }
+}
+
+/** Whether `name` is an attribute kept on `tag` (lowercase) in administrator HTML. */
+function isAdminAttr(tag, name) {
+  return ADMIN_GLOBAL_ATTRS.has(name) || name.startsWith("aria-") ||
+    (ADMIN_ATTRS[tag] || ALLOWED_ATTRS[tag] || new Set()).has(name);
+}
+
+/**
  * Return true when `value` is safe to use as an <a href>.
  *
  * Parses with the WHATWG URL parser and checks the resolved scheme against an
@@ -260,9 +334,10 @@ export function isSafeHref(value) {
  *
  * @param {Node} node
  * @param {Set<string>} allowedTags - uppercase tag names kept as markup
+ * @param {boolean} [admin] - apply the administrator-HTML attribute rules
  * @returns {Node|null}
  */
-function sanitizeNode(node, allowedTags) {
+function sanitizeNode(node, allowedTags, admin = false) {
   if (node.nodeType === Node.TEXT_NODE) return node;
 
   if (node.nodeType === Node.ELEMENT_NODE) {
@@ -285,7 +360,7 @@ function sanitizeNode(node, allowedTags) {
       // Disallowed tag: unwrap — keep its sanitized children in a fragment.
       const frag = document.createDocumentFragment();
       for (const child of Array.from(node.childNodes)) {
-        const kept = sanitizeNode(child, allowedTags);
+        const kept = sanitizeNode(child, allowedTags, admin);
         if (kept) frag.appendChild(kept);
       }
       return frag.childNodes.length ? frag : null;
@@ -295,8 +370,16 @@ function sanitizeNode(node, allowedTags) {
     const allowed = ALLOWED_ATTRS[tag.toLowerCase()] || new Set();
     for (const attr of Array.from(node.attributes)) {
       const name = attr.name.toLowerCase();
-      if (!allowed.has(name)) {
+      if (admin ? !isAdminAttr(tag.toLowerCase(), name) : !allowed.has(name)) {
         node.removeAttribute(attr.name);
+        continue;
+      }
+      if (admin) {
+        if (tag === "A" && name === "href" && !isSafeHref(attr.value)) {
+          node.removeAttribute("href");
+        } else if (tag === "IMG" && name === "src" && !isSafeImageSrc(attr.value)) {
+          node.removeAttribute("src");
+        }
         continue;
       }
       if (tag === "A" && name === "href") {
@@ -311,8 +394,16 @@ function sanitizeNode(node, allowedTags) {
       }
     }
 
+    // The administrator chose the target; a new tab must not reach back into this page.
+    if (admin && tag === "A" && (node.getAttribute("target") || "").toLowerCase() === "_blank") {
+      const rel = new Set((node.getAttribute("rel") || "").toLowerCase().split(/\s+/).filter(Boolean));
+      rel.add("noopener");
+      rel.add("noreferrer");
+      node.setAttribute("rel", Array.from(rel).join(" "));
+    }
+
     for (const child of Array.from(node.childNodes)) {
-      const kept = sanitizeNode(child, allowedTags);
+      const kept = sanitizeNode(child, allowedTags, admin);
       if (kept !== child) {
         if (kept) {
           node.replaceChild(kept, child);
@@ -334,11 +425,12 @@ function sanitizeNode(node, allowedTags) {
  *
  * @param {DocumentFragment} frag
  * @param {Set<string>} allowedTags - uppercase tag names kept as markup
+ * @param {boolean} [admin] - apply the administrator-HTML attribute rules
  * @returns {DocumentFragment} the same fragment
  */
-function sanitizeFragment(frag, allowedTags) {
+function sanitizeFragment(frag, allowedTags, admin = false) {
   for (const child of Array.from(frag.childNodes)) {
-    const kept = sanitizeNode(child, allowedTags);
+    const kept = sanitizeNode(child, allowedTags, admin);
     if (kept !== child) {
       if (kept) {
         frag.replaceChild(kept, child);
@@ -368,4 +460,24 @@ export function sanitizeHtml(html) {
   tpl.innerHTML = html; // eslint-disable-line no-unsanitized/property
 
   return sanitizeFragment(tpl.content, ALLOWED_TAGS);
+}
+
+/**
+ * Parse HTML an administrator wrote — related content and the configured
+ * notifications — and return a sanitized DocumentFragment.
+ *
+ * Same parse-then-sanitize path as sanitizeHtml(), with the wider ADMIN_TAGS
+ * and administrator attribute rules, so markup that rendered on the JSP pages
+ * (images, class, style, inline formatting) keeps rendering while script
+ * still cannot run. Do not use it for HTML from any other source.
+ *
+ * @param {string} html - HTML from the administration screens.
+ * @returns {DocumentFragment}
+ */
+export function sanitizeAdminHtml(html) {
+  const tpl = document.createElement("template");
+  // Inert for the same reason sanitizeHtml()'s assignment is.
+  tpl.innerHTML = html; // eslint-disable-line no-unsanitized/property
+
+  return sanitizeFragment(tpl.content, ADMIN_TAGS, true);
 }

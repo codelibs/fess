@@ -13,6 +13,7 @@ import {
   formatDate,
   isSafeHref,
   sanitizeHtml,
+  sanitizeAdminHtml,
   renderHighlightedSnippet,
   renderSnippetText,
 } from "../../../../main/webapp/themes/bootstrap/assets/format.js";
@@ -21,6 +22,13 @@ import {
 const clean = (html) => {
   const host = document.createElement("div");
   host.appendChild(sanitizeHtml(html));
+  return host.innerHTML;
+};
+
+/** Serialise the DocumentFragment sanitizeAdminHtml() returns into an HTML string. */
+const cleanAdmin = (html) => {
+  const host = document.createElement("div");
+  host.appendChild(sanitizeAdminHtml(html));
   return host.innerHTML;
 };
 
@@ -251,5 +259,55 @@ describe("shared-asset header comment is theme-neutral", () => {
     const line2 = read("../../../../main/webapp/themes/bootstrap/assets/markdown.js")[1];
     expect(line2).toContain("Fess static theme SPA");
     expect(line2).not.toContain("bootstrap");
+  });
+});
+
+describe("sanitizeAdminHtml: markup an administrator writes survives", () => {
+  it("keeps images with an http(s), relative or data:image source", () => {
+    const out = cleanAdmin(
+      '<img src="https://example.com/a.png" alt="A" width="10" height="20">' +
+        '<img src="/images/b.png" alt="B"><img src="data:image/png;base64,AAAA" alt="C">'
+    );
+    expect(out).toContain('src="https://example.com/a.png"');
+    expect(out).toContain('width="10"');
+    expect(out).toContain('src="/images/b.png"');
+    expect(out).toContain('src="data:image/png;base64,AAAA"');
+  });
+
+  it("keeps class, style and inline formatting that sanitizeHtml drops", () => {
+    const html = '<div class="card" style="margin: 0"><b>bold</b> <i>it</i> <u>u</u> <small>s</small></div>';
+    expect(cleanAdmin(html)).toBe(html);
+    expect(clean(html)).toBe("<div>bold it u s</div>");
+  });
+
+  it("keeps the administrator's link target and adds noopener to a new tab", () => {
+    const out = cleanAdmin('<a href="https://example.com/" target="_blank">x</a><a href="/help">y</a>');
+    expect(out).toContain('target="_blank"');
+    expect(out).toContain('rel="noopener noreferrer"');
+    expect(out).toContain('<a href="/help">y</a>');
+  });
+});
+
+describe("sanitizeAdminHtml: script still cannot run", () => {
+  it("drops script and style elements with their content", () => {
+    const out = cleanAdmin("<p>a<script>alert(1)</script><iframe src=\"https://example.com\"></iframe>b</p>");
+    expect(out).toBe("<p>ab</p>");
+  });
+
+  it("strips event handlers and unsafe URLs", () => {
+    const out = cleanAdmin(
+      '<img src="javascript:alert(1)" onerror="alert(2)" alt="x"><a href="javascript:alert(3)" onclick="alert(4)">y</a>' +
+        '<img src="data:text/html;base64,AAAA" alt="z">'
+    );
+    expect(out).not.toContain("javascript:");
+    expect(out).not.toContain("onerror");
+    expect(out).not.toContain("onclick");
+    expect(out).not.toContain("data:text/html");
+    expect(out).toContain('alt="x"');
+  });
+
+  it("does not keep id or form controls, which could collide with the page", () => {
+    const out = cleanAdmin('<div id="search-form"><form action="/x"><input name="q"><button>go</button></form></div>');
+    expect(out).toBe("<div>go</div>");
   });
 });

@@ -730,6 +730,25 @@ describe("runSearch — successful render", () => {
     expect(rc.textContent).toContain("related");
   });
 
+  it("keeps the images, classes and styles an administrator put in related content", async () => {
+    installApiDispatch({
+      content: '<div class="alert alert-info" style="color: red"><img src="https://example.com/banner.png" alt="Banner" width="120"><b>Notice</b><script>window.__rc = 1;</script><img src="x" onerror="window.__rc = 2"></div>',
+    });
+    await runSearch();
+    await settle();
+    const rc = document.getElementById("related-content");
+    const box = rc.querySelector("div.alert.alert-info");
+    expect(box).not.toBeNull();
+    expect(box.getAttribute("style")).toBe("color: red");
+    const img = rc.querySelector('img[alt="Banner"]');
+    expect(img.getAttribute("src")).toBe("https://example.com/banner.png");
+    expect(img.getAttribute("width")).toBe("120");
+    expect(rc.querySelector("b").textContent).toBe("Notice");
+    expect(rc.querySelector("script")).toBeNull();
+    expect(rc.innerHTML).not.toContain("onerror");
+    expect(window.__rc).toBeUndefined();
+  });
+
   it("renders results popular words when the feature is enabled", async () => {
     await runSearch();
     await settle();

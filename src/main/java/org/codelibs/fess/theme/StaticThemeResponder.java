@@ -62,12 +62,14 @@ public class StaticThemeResponder {
 
     /**
      * Content-Security-Policy for the SPA index HTML entry.
-     * Restricts all resource origins to 'self', allows inline styles (required by most SPA themes),
+     * Restricts all resource origins to 'self', allows inline styles (required by most SPA themes), allows
+     * images from http(s) and data: URIs (administrators put external images in related content and
+     * notifications, which rendered on the JSP pages),
      * permits blob: frames and child frames so the cache viewer can display cached documents in a
      * sandboxed blob: iframe, and prevents the page itself from being embedded in frames.
      */
     static final String INDEX_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
-            + " img-src 'self' data:; connect-src 'self'; frame-src blob:; child-src blob:; frame-ancestors 'none'; base-uri 'self'";
+            + " img-src 'self' data: http: https:; connect-src 'self'; frame-src blob:; child-src blob:; frame-ancestors 'none'; base-uri 'self'";
 
     /**
      * Content-Security-Policy for inline SVG assets.

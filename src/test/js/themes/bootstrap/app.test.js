@@ -519,6 +519,9 @@ describe("main", () => {
     expect(home.textContent).toContain("Top");
     const adv = document.getElementById("advance-notification");
     expect(adv.textContent).toContain("Adv");
+    // Administrator HTML keeps its markup, as it did on the JSP pages.
+    expect(home.querySelector("b").textContent).toBe("Top");
+    expect(adv.querySelector("i").textContent).toBe("Adv");
   });
 
   it("renders the footer copyright with a CodeLibs link", async () => {
