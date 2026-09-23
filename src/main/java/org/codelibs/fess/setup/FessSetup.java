@@ -1139,14 +1139,21 @@ public final class FessSetup {
             added.forEach(setting -> out.println("  added to opensearch.yml: " + setting));
             out.println();
             out.println("Done. Start OpenSearch, then Fess.");
-            if (OpenSearchConfigurer.isFoundByLauncher(Path.of(fessHome()), home)) {
+            final boolean foundByLauncher = OpenSearchConfigurer.isFoundByLauncher(Path.of(fessHome()), home);
+            if (foundByLauncher) {
                 out.println("bin/fess.in.sh finds this OpenSearch on its own, so there is nothing else to set:");
             } else {
                 out.println("bin/fess.in.sh will not find this OpenSearch on its own. Set these in bin/fess.in.sh");
-                out.println("(bin\\fess.in.bat on Windows) or in the environment Fess starts with:");
+                out.println("or in the environment Fess starts with:");
             }
             out.println("  SEARCH_ENGINE_HTTP_URL=http://localhost:9200");
             out.println("  FESS_DICTIONARY_PATH=" + OpenSearchConfigurer.dictionaryPathValue(home));
+            if (!foundByLauncher) {
+                // bin\fess.in.bat reads FESS_DICTIONARY_PATH but never SEARCH_ENGINE_HTTP_URL.
+                out.println("On Windows, bin\\fess.in.bat reads FESS_DICTIONARY_PATH but not SEARCH_ENGINE_HTTP_URL: set the URL");
+                out.println("with the -Dfess.search_engine.http_address option in bin\\fess.in.bat, or with");
+                out.println("search_engine.http.url in fess_config.properties.");
+            }
             return EXIT_OK;
         }
 
