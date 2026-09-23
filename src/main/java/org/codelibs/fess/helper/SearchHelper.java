@@ -532,6 +532,34 @@ public class SearchHelper {
     }
 
     /**
+     * Tells whether the current request carries every name in
+     * {@code cookie.search.parameter.required_keys} with a value, which is what
+     * {@link #storeSearchParameters()} requires before it stores anything.
+     *
+     * @return true if the required keys are configured and all present; false otherwise
+     */
+    public boolean hasRequiredSearchParameters() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            final String requiredKeysStr = ComponentUtil.getFessConfig().getCookieSearchParameterRequiredKeys();
+            return StringUtil.isNotBlank(requiredKeysStr) && !isMissingRequiredParameter(req, requiredKeysStr);
+        }).orElse(false);
+    }
+
+    private boolean isMissingRequiredParameter(final HttpServletRequest req, final String requiredKeysStr) {
+        return StreamUtil.split(requiredKeysStr, ",")
+                .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).anyMatch(name -> {
+                    final String[] values = req.getParameterValues(name);
+                    if (values == null || values.length == 0 || StringUtil.isEmpty(values[0])) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Required parameter '{}' is missing or empty.", name);
+                        }
+                        return true;
+                    }
+                    return false;
+                }));
+    }
+
+    /**
      * Stores current search parameters in a browser cookie for later retrieval.
      *
      * This method serializes the current request parameters, compresses them using GZIP,
@@ -541,17 +569,7 @@ public class SearchHelper {
         LaRequestUtil.getOptionalRequest().ifPresent(req -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final String requiredKeysStr = fessConfig.getCookieSearchParameterRequiredKeys();
-            if (StringUtil.isNotBlank(requiredKeysStr) && StreamUtil.split(requiredKeysStr, ",")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).anyMatch(name -> {
-                        final String[] values = req.getParameterValues(name);
-                        if (values == null || values.length == 0 || StringUtil.isEmpty(values[0])) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Required parameter '{}' is missing or empty. Skip storing search parameters.", name);
-                            }
-                            return true;
-                        }
-                        return false;
-                    }))) {
+            if (StringUtil.isNotBlank(requiredKeysStr) && isMissingRequiredParameter(req, requiredKeysStr)) {
                 return;
             }
             final String keysStr = fessConfig.getCookieSearchParameterKeys();

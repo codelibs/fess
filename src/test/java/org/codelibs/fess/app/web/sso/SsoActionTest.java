@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.sso;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.RequestParameter;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -27,14 +28,17 @@ import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.exception.SsoProcessException;
 import org.codelibs.fess.exception.SsoStateException;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.UrlChain;
+import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaMessenger;
@@ -145,6 +149,50 @@ public class SsoActionTest extends UnitFessTestCase {
      */
     private TestableSsoAction actionWithStoredParameters(final RequestParameter... parameters) {
         return actionWithStoredParameters(4096, parameters);
+    }
+
+    // ===================================================================================
+    //                                                                               index
+    //                                                                               =====
+
+    @Test
+    public void test_index_keepsTheSearchAndRestartsOnTheBareEndpoint() {
+        final List<String> calls = new CopyOnWriteArrayList<>();
+        registerSsoManagerRecording(calls);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(calls, true);
+
+        action.index();
+
+        assertEquals("the handshake must not start on a URL carrying the query", List.of("store"), calls);
+        assertEquals(List.of(SsoAction.class), action.redirectTargets);
+    }
+
+    @Test
+    public void test_index_withoutASearchStartsTheHandshake() {
+        final List<String> calls = new CopyOnWriteArrayList<>();
+        registerSsoManagerRecording(calls);
+        final TestableSsoAction action = new TestableSsoAction();
+        action.anonymous(calls, false);
+
+        action.index();
+
+        assertEquals(List.of("credential"), calls);
+    }
+
+    private static void registerSsoManagerRecording(final List<String> calls) {
+        ComponentUtil.register(new SsoManager() {
+            @Override
+            public LoginCredential getLoginCredential() {
+                calls.add("credential");
+                return null;
+            }
+
+            @Override
+            public boolean available() {
+                return false;
+            }
+        }, "ssoManager");
     }
 
     /** @param maxRestoredLength the value of cookie.search.parameter.max.restored.length */
@@ -298,9 +346,33 @@ public class SsoActionTest extends UnitFessTestCase {
             savedInfos.add(String.valueOf(validationMessagesLambda));
         }
 
+        final List<Class<?>> redirectTargets = new CopyOnWriteArrayList<>();
+
         @Override
         protected HtmlResponse redirect(final Class<?> actionType) {
+            redirectTargets.add(actionType);
             return REDIRECT_TO_LOGIN;
+        }
+
+        /** No saved user, and a search helper that records when the query is stored. */
+        void anonymous(final List<String> calls, final boolean carriesSearch) {
+            fessLoginAssist = new FessLoginAssist() {
+                @Override
+                public OptionalThing<FessUserBean> getSavedUserBean() {
+                    return OptionalThing.empty();
+                }
+            };
+            searchHelper = new SearchHelper() {
+                @Override
+                public boolean hasRequiredSearchParameters() {
+                    return carriesSearch;
+                }
+
+                @Override
+                public void storeSearchParameters() {
+                    calls.add("store");
+                }
+            };
         }
     }
 }

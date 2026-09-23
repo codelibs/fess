@@ -266,7 +266,10 @@ export async function endSession() {
  */
 export function promptLogin() {
   if (api.getConfig()?.features?.sso_enabled) {
-    router.redirect("sso/");
+    // Carry the search the user opened: /sso/ keeps its q, num and sort (the server's
+    // cookie.search.parameter.keys) and lands on it after the login, as the JSP pages did.
+    const search = router.currentPath() === "/search" ? location.search : "";
+    router.redirect("sso/" + search);
     return;
   }
   const modal = document.getElementById("login-modal");
