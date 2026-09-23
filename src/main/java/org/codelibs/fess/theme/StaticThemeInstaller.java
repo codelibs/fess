@@ -28,6 +28,8 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -157,6 +159,33 @@ public class StaticThemeInstaller {
      * with '.' are now permitted (e.g. .well-known).
      */
     private static final Set<String> DENIED_SEGMENTS = Set.of(".git", ".svn", ".hg", "__MACOSX", ".DS_Store");
+
+    /**
+     * File extensions of server-side pages the servlet container would evaluate rather than
+     * serve as files. A static theme is plain files only, so these are refused at install time
+     * and never served from {@code /themes/}.
+     */
+    private static final List<String> SERVER_SIDE_EXTENSIONS = List.of(".jsp", ".jspx", ".jspf");
+
+    /**
+     * Returns whether the path names a server-side page (JSP and the like) rather than a static
+     * file. Compared case-insensitively.
+     *
+     * @param path a ZIP entry name or request path
+     * @return true when the path ends with one of the server-side page extensions
+     */
+    public static boolean isServerSidePage(final String path) {
+        if (path == null) {
+            return false;
+        }
+        final String lower = path.toLowerCase(Locale.ROOT);
+        for (final String ext : SERVER_SIDE_EXTENSIONS) {
+            if (lower.endsWith(ext)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /** Retention duration in days for attic dirs (used when fessConfig is absent). */
     private static final int DEFAULT_ATTIC_RETENTION_DAYS = 7;
@@ -460,6 +489,10 @@ public class StaticThemeInstaller {
                     Files.createDirectories(resolved);
                     zis.closeEntry();
                     continue;
+                }
+                if (isServerSidePage(name)) {
+                    throw new InstallException(InstallException.Code.EXTRACT_FAILED,
+                            "Server-side page not allowed in a static theme: " + name);
                 }
                 final Path parent = resolved.getParent();
                 if (parent != null) {
