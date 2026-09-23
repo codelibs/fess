@@ -13,18 +13,33 @@ bootstrap/
 ├── index.html            # SPA shell — semantic HTML5 + Bootstrap 5
 ├── thumbnail.png         # shown in /admin/theme/ (≤512KB, ≤512x512)
 ├── assets/
-│   ├── app.js            # entry point; loads modules in order
-│   ├── api.js            # centralised fetch wrapper (CSRF, envelope)
+│   ├── app.js            # entry point; wires the modules below together
+│   ├── api.js            # centralised fetch wrapper (CSRF, envelope, SSE)
+│   ├── router.js         # client-side router (pushState, data-spa links)
 │   ├── auth.js           # login, logout, /auth/me probe
 │   ├── search.js         # search, suggest, facets, pagination, sort, favorite
+│   ├── advance.js        # advanced search view
+│   ├── cache.js          # cached-document view (sandboxed iframe)
 │   ├── chat.js           # optional RAG chat (rag_chat_enabled feature flag)
-│   ├── i18n.js           # JSON bundle loader; navigator.language → en/ja
-│   └── styles.css        # overrides on top of /css/bootstrap.min.css
+│   ├── profile.js        # profile / password change view
+│   ├── help.js           # help page, rendered from help/<locale>.json
+│   ├── error.js          # in-place error view
+│   ├── i18n.js           # JSON bundle loader; server ui_locale, then navigator.language
+│   ├── format.js         # formatting helpers and the whitelist HTML sanitizer
+│   ├── markdown.js       # minimal Markdown renderer for chat answers
+│   ├── logo.png          # home page logo
+│   ├── logo-head.png     # header logo
+│   └── styles.css        # overrides on top of css/bootstrap.min.css
 ├── i18n/
-│   ├── messages.en.json
-│   └── messages.ja.json
+│   └── messages.<locale>.json   # UI messages, one file per locale
+├── help/
+│   └── <locale>.json            # help page content, one file per locale
 └── README.md
 ```
+
+Both `i18n/` and `help/` carry the same 16 locales: `de`, `en`, `es`, `fr`, `hi`, `id`, `it`,
+`ja`, `ko`, `nl`, `pl`, `pt-BR`, `ru`, `tr`, `zh-CN` and `zh-TW` (`SUPPORTED` in `i18n.js`).
+English is the fallback for a locale that is not in the list.
 
 ## API endpoints consumed
 
@@ -35,9 +50,15 @@ of truth — third-party themes are encouraged to start by copying it.
 | Module | Endpoints |
 |---|---|
 | `api.js` | `GET /ui/config` |
-| `auth.js` | `GET /auth/me`, `POST /auth/login`, `POST /auth/logout` |
-| `search.js` | `GET /search`, `GET /suggest-words`, `GET /labels`, `GET /popular-words`, `GET /documents/{id}/favorite`, `POST /documents/{id}/favorite`, `POST /click`, `GET /cache/{id}` (link target) |
-| `chat.js` | `POST /chat/stream` (streaming SSE via fetch — see below) |
+| `auth.js` | `GET /ui/config`, `GET /auth/me`, `POST /auth/login`, `POST /auth/logout`, `POST /auth/password` |
+| `search.js` | `GET /search`, `GET /suggest-words`, `GET /labels`, `GET /popular-words`, `GET /related-queries`, `GET /related-content`, `GET /favorites`, `POST /documents/{id}/favorite` |
+| `app.js` | `GET /popular-words` |
+| `cache.js` | `GET /cache/{id}` |
+| `profile.js` | `POST /auth/password` |
+| `chat.js` | `POST /chat/stream` (streaming SSE via fetch — see below), `DELETE /chat/sessions/{id}` |
+
+Result links go through `go/` rather than the API, so the click is logged by the same
+redirect the JSP pages use.
 
 ## Streaming chat (`/chat/stream`)
 
@@ -51,10 +72,10 @@ Use `api.sseStream(path, body, onEvent, onError)` instead:
 ```js
 import * as api from "./api.js";
 
-const ctrl = api.sseStream("/chat/stream", { q: "my question" }, (event) => {
-  // event.type — e.g. "message", "done", "error", "phase"
+const ctrl = api.sseStream("/chat/stream", { message: "my question" }, (event) => {
+  // event.type — e.g. "phase", "chunk", "sources", "done", "error"
   // event.data — JSON-parsed payload (or raw string if not valid JSON)
-  if (event.type === "message") bubble.textContent += event.data.token ?? "";
+  if (event.type === "chunk") bubble.textContent += event.data.content ?? "";
   if (event.type === "done")    ctrl.abort(); // tidy up
 }, (err) => {
   // err is ApiError (HTTP-level) or NetworkError (offline/DNS).
@@ -94,11 +115,13 @@ directly from the logout response body if the server embeds it there).
 
 ## XSS-safety
 
-No DOM construction in this theme uses `innerHTML` with dynamic data.
-All result cards, facet items, suggest items, pagination, and chat
-messages are built with `document.createElement` and `textContent`. The
-only `innerHTML` writes are static empty-string clears (`el.innerHTML = ""`).
-Theme authors who copy this code should preserve this pattern.
+No dynamic data reaches the page through `innerHTML` unsanitized. Plain text is set with
+`textContent` on nodes built with `document.createElement`. Server-supplied HTML — highlighted
+result titles and snippets, notification messages, help sections, chat answers rendered from
+Markdown — is parsed in an inert `<template>` and reduced to an allowlist of tags by the sanitizer
+in `format.js` (`renderHighlightedSnippet`, `sanitizeHtml`) before it is inserted. Cached
+documents are shown in a sandboxed iframe. Theme authors who copy this code should preserve
+this pattern.
 
 ## Customising
 
