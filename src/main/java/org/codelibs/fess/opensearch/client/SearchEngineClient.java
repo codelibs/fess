@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -87,6 +88,7 @@ import org.codelibs.fesen.opensearch.action.DocWriteRequest.OpType;
 import org.codelibs.fesen.opensearch.action.DocWriteResponse.Result;
 import org.codelibs.fesen.opensearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
+import org.codelibs.fesen.opensearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.codelibs.fesen.opensearch.action.admin.indices.create.CreateIndexResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.flush.FlushResponse;
@@ -372,31 +374,7 @@ public class SearchEngineClient implements Client {
                 final boolean isFessIndex = DOC_INDEX.equals(configIndex);
                 final String indexName;
                 if (isFessIndex) {
-                    final boolean exists = existsIndex(fessConfig.getIndexDocumentUpdateIndex());
-                    if (!exists) {
-                        indexName = generateNewIndexName(configIndex);
-                        createIndex(configIndex, indexName);
-                        createAlias(configIndex, indexName);
-                    } else {
-                        client.admin()
-                                .cluster()
-                                .prepareHealth(fessConfig.getIndexDocumentUpdateIndex())
-                                .setWaitForYellowStatus()
-                                .execute()
-                                .actionGet(fessConfig.getIndexIndicesTimeout());
-                        final GetIndexResponse response = client.admin()
-                                .indices()
-                                .prepareGetIndex()
-                                .addIndices(fessConfig.getIndexDocumentUpdateIndex())
-                                .execute()
-                                .actionGet(fessConfig.getIndexIndicesTimeout());
-                        final String[] indices = response.indices();
-                        if (indices.length == 1) {
-                            indexName = indices[0];
-                        } else {
-                            indexName = configIndex;
-                        }
-                    }
+                    indexName = setUpDocumentIndex(fessConfig, configIndex);
                 } else {
                     if (configIndex.startsWith(CONFIG_INDEX_PREFIX)) {
                         final String name = fessConfig.getIndexConfigIndex();
@@ -422,6 +400,64 @@ public class SearchEngineClient implements Client {
                 logger.warn("Invalid index config name: configName={}", configName);
             }
         });
+    }
+
+    /**
+     * Finds the document index behind the update alias, creating it on first boot.
+     *
+     * <p>Several instances that share index names can start at once against a cluster that has
+     * no document index yet. Each of them sees no update alias and creates its own
+     * {@code fess.<timestamp>} index. The index is therefore created together with its aliases in
+     * one request, and the update alias is marked as the write index. The search engine applies
+     * index creations one at a time and refuses a second write index for the same alias, so only
+     * the first request succeeds. Every other instance adopts the index that request created.</p>
+     *
+     * @param fessConfig  the Fess configuration
+     * @param configIndex the document index configuration name
+     * @return the concrete document index name
+     */
+    protected String setUpDocumentIndex(final FessConfig fessConfig, final String configIndex) {
+        final String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
+        if (existsIndex(updateAlias)) {
+            return getDocumentIndexName(fessConfig, configIndex);
+        }
+        final String newIndexName = generateNewIndexName(configIndex);
+        if (createIndex(configIndex, newIndexName, fessConfig.getIndexNumberOfShards(), fessConfig.getIndexAutoExpandReplicas(), true,
+                getDocumentIndexAliases(configIndex))) {
+            return newIndexName;
+        }
+        if (existsIndex(updateAlias)) {
+            final String indexName = getDocumentIndexName(fessConfig, configIndex);
+            logger.info("Using the document index created by another process: alias={}, index={}", updateAlias, indexName);
+            return indexName;
+        }
+        return newIndexName;
+    }
+
+    /**
+     * Returns the single index behind the document update alias.
+     *
+     * @param fessConfig  the Fess configuration
+     * @param configIndex the document index configuration name, returned when the alias does not point to exactly one index
+     * @return the concrete document index name
+     */
+    protected String getDocumentIndexName(final FessConfig fessConfig, final String configIndex) {
+        final String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
+        client.admin()
+                .cluster()
+                .prepareHealth(updateAlias)
+                .setWaitForYellowStatus()
+                .execute()
+                .actionGet(fessConfig.getIndexIndicesTimeout());
+        final GetIndexResponse response =
+                client.admin().indices().prepareGetIndex().addIndices(updateAlias).execute().actionGet(fessConfig.getIndexIndicesTimeout());
+        final String[] indices = response.indices();
+        if (indices.length == 1) {
+            return indices[0];
+        }
+        logger.warn("The document update alias does not point to exactly one index: alias={}, indices={}", updateAlias,
+                Arrays.toString(indices));
+        return configIndex;
     }
 
     /**
@@ -641,6 +677,22 @@ public class SearchEngineClient implements Client {
      */
     public boolean createIndex(final String index, final String indexName, final String numberOfShards, final String autoExpandReplicas,
             final boolean uploadConfig) {
+        return createIndex(index, indexName, numberOfShards, autoExpandReplicas, uploadConfig, Collections.emptyMap());
+    }
+
+    /**
+     * Creates a new index with specified settings and the given aliases in a single request.
+     *
+     * @param index              the index configuration name
+     * @param indexName          the actual index name to create
+     * @param numberOfShards     the number of primary shards
+     * @param autoExpandReplicas the auto expand replicas setting
+     * @param uploadConfig       whether to upload configuration files
+     * @param aliases            the aliases to create with the index, keyed by alias name; empty for none
+     * @return true if the index was created successfully, false otherwise
+     */
+    protected boolean createIndex(final String index, final String indexName, final String numberOfShards, final String autoExpandReplicas,
+            final boolean uploadConfig, final Map<String, Object> aliases) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final String fesenType = fessConfig.getFesenType();
@@ -660,12 +712,12 @@ public class SearchEngineClient implements Client {
         final String indexConfigFile = getResourcePath(indexConfigPath, fesenType, "/" + index + ".json");
         try {
             final String source = readIndexSetting(index, fesenType, indexConfigFile, numberOfShards, autoExpandReplicas);
-            final CreateIndexResponse indexResponse = client.admin()
-                    .indices()
-                    .prepareCreate(indexName)
-                    .setSource(source, XContentType.JSON)
-                    .execute()
-                    .actionGet(fessConfig.getIndexIndicesTimeout());
+            final CreateIndexRequestBuilder builder =
+                    client.admin().indices().prepareCreate(indexName).setSource(source, XContentType.JSON);
+            if (!aliases.isEmpty()) {
+                builder.setAliases(aliases);
+            }
+            final CreateIndexResponse indexResponse = builder.execute().actionGet(fessConfig.getIndexIndicesTimeout());
             if (indexResponse.isAcknowledged()) {
                 logger.info("Created index: indexName={}", indexName);
                 return true;
@@ -674,7 +726,10 @@ public class SearchEngineClient implements Client {
                 logger.debug("Failed to create index: indexName={}", indexName);
             }
         } catch (final Exception e) {
-            if (isMissingKnnPluginError(e)) {
+            if (isIndexCreatedByAnotherProcess(e)) {
+                logger.info("Skipped creating index because another process created it first: indexName={}, reason={}", indexName,
+                        e.getMessage());
+            } else if (isMissingKnnPluginError(e)) {
                 logger.warn("""
                         Failed to create index: index={}, path={}. This looks like the OpenSearch cluster is missing the \
                         opensearch-knn plugin -- every shipped index now declares "index.knn": true and a \
@@ -686,6 +741,29 @@ public class SearchEngineClient implements Client {
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Detects whether an index creation failed only because another process got there first.
+     *
+     * <p>That is either {@code resource_already_exists_exception} for the same index name, or
+     * {@code illegal_state_exception} for an alias that would get a second write index, which is
+     * how a concurrent first boot of the document index is refused (see
+     * {@link #setUpDocumentIndex(FessConfig, String)}). The HTTP client keeps the error type only in
+     * the exception message.</p>
+     *
+     * @param t the exception to inspect, including its cause chain
+     * @return {@code true} when the index or its write alias already exists
+     */
+    protected boolean isIndexCreatedByAnotherProcess(final Throwable t) {
+        for (Throwable cause = t; cause != null; cause = cause.getCause()) {
+            final String message = cause.getMessage();
+            if (message != null
+                    && (message.contains("resource_already_exists_exception") || message.contains("has more than one write index"))) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -1238,27 +1316,7 @@ public class SearchEngineClient implements Client {
             final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
             if (aliasConfigDir.isDirectory()) {
                 stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(stream -> stream.forEach(f -> {
-                    String aliasName = f.getName().replaceFirst(".json$", "");
-                    if (DOC_INDEX.equals(index)) {
-                        if ("fess.search".equals(aliasName)) {
-                            aliasName = fessConfig.getIndexDocumentSearchIndex();
-                        } else if ("fess.update".equals(aliasName)) {
-                            aliasName = fessConfig.getIndexDocumentUpdateIndex();
-                        }
-                    } else if (index.startsWith(CONFIG_INDEX_PREFIX)) {
-                        final String name = fessConfig.getIndexConfigIndex();
-                        if ("fess_basic_config".equals(aliasName) && !CONFIG_INDEX_PREFIX.equals(name)) {
-                            aliasName = aliasName.replaceFirst("fess_basic_config", "basic_" + name);
-                        } else {
-                            aliasName = aliasName.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
-                        }
-                    } else if (index.startsWith(USER_INDEX_PREFIX)) {
-                        final String name = fessConfig.getIndexUserIndex();
-                        aliasName = aliasName.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), name);
-                    } else if (index.startsWith(LOG_INDEX_PREFIX)) {
-                        final String name = fessConfig.getIndexLogIndex();
-                        aliasName = aliasName.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), name);
-                    }
+                    final String aliasName = resolveAliasName(index, f.getName().replaceFirst(".json$", ""));
                     String source = FileUtil.readUTF8(f);
                     if ("{}".equals(source.trim())) {
                         source = null;
@@ -1281,6 +1339,70 @@ public class SearchEngineClient implements Client {
         } catch (final Exception e) {
             logger.warn("{} is not found.", aliasConfigDirPath, e);
         }
+    }
+
+    /**
+     * Reads the aliases of the document index from its alias configuration files, for creating
+     * them together with the index. The update alias is marked as the write index, so the search
+     * engine refuses to create a second index behind it.
+     *
+     * @param index the document index configuration name
+     * @return the alias definitions keyed by alias name, or an empty map when there is no alias configuration
+     */
+    protected Map<String, Object> getDocumentIndexAliases(final String index) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
+        final Map<String, Object> aliases = new LinkedHashMap<>();
+        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/alias");
+        try {
+            final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
+            if (aliasConfigDir.isDirectory()) {
+                final ObjectMapper mapper = new ObjectMapper();
+                stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(stream -> stream.sorted().forEach(f -> {
+                    final String aliasName = resolveAliasName(index, f.getName().replaceFirst(".json$", ""));
+                    final Map<String, Object> definition =
+                            new LinkedHashMap<>(mapper.readValue(FileUtil.readUTF8(f), new TypeReference<Map<String, Object>>() {
+                            }));
+                    if (updateAlias.equals(aliasName)) {
+                        definition.put("is_write_index", true);
+                    }
+                    aliases.put(aliasName, definition);
+                }));
+            }
+        } catch (final ResourceNotFoundRuntimeException e) {
+            // no alias configuration
+        }
+        return aliases;
+    }
+
+    /**
+     * Resolves the alias name of an alias configuration file against the configured index names.
+     *
+     * @param index     the index configuration name
+     * @param aliasName the alias name taken from the alias configuration file name
+     * @return the alias name to create
+     */
+    protected String resolveAliasName(final String index, final String aliasName) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (DOC_INDEX.equals(index)) {
+            if ("fess.search".equals(aliasName)) {
+                return fessConfig.getIndexDocumentSearchIndex();
+            }
+            if ("fess.update".equals(aliasName)) {
+                return fessConfig.getIndexDocumentUpdateIndex();
+            }
+        } else if (index.startsWith(CONFIG_INDEX_PREFIX)) {
+            final String name = fessConfig.getIndexConfigIndex();
+            if ("fess_basic_config".equals(aliasName) && !CONFIG_INDEX_PREFIX.equals(name)) {
+                return aliasName.replaceFirst("fess_basic_config", "basic_" + name);
+            }
+            return aliasName.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+        } else if (index.startsWith(USER_INDEX_PREFIX)) {
+            return aliasName.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), fessConfig.getIndexUserIndex());
+        } else if (index.startsWith(LOG_INDEX_PREFIX)) {
+            return aliasName.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), fessConfig.getIndexLogIndex());
+        }
+        return aliasName;
     }
 
     /**
