@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -66,6 +68,13 @@ public final class ThemeInstaller {
      * page that happens to answer 200.
      */
     private static final Pattern NAME = Pattern.compile("[a-z0-9][a-z0-9_-]{0,63}");
+
+    /**
+     * File extensions of server-side pages the servlet container would evaluate rather than
+     * serve as files, from {@code StaticThemeInstaller.SERVER_SIDE_EXTENSIONS} in Fess. The admin
+     * screen's installer refuses an archive carrying one, and so does this one.
+     */
+    private static final List<String> SERVER_SIDE_EXTENSIONS = List.of(".jsp", ".jspx", ".jspf");
 
     private ThemeInstaller() {
     }
@@ -129,6 +138,7 @@ public final class ThemeInstaller {
             createDirectory(content);
             Archiver.extractZip(archive, content);
             verifyManifest(content, name);
+            rejectServerSidePages(content);
             promote(themesDir, name, content, target);
             return used;
         } finally {
@@ -154,6 +164,51 @@ public final class ThemeInstaller {
             // theme would download, extract, and never appear.
             throw new SetupException("The archive is not the " + name + " theme: its " + MANIFEST + " names '" + declared + "'.");
         }
+    }
+
+    /**
+     * Refuses a theme that carries a server-side page.
+     *
+     * <p>A static theme is plain files served as they are. Fess answers 404 for these extensions
+     * under {@code /themes/} anyway, but the admin screen's installer refuses such an archive
+     * outright, and a theme installed from the command line should not end up on disk with a file
+     * the admin screen would never have let in.</p>
+     *
+     * @param content the extracted archive
+     * @throws SetupException if a file in the archive is a server-side page, or the extracted
+     *         files cannot be read
+     */
+    private static void rejectServerSidePages(final Path content) throws SetupException {
+        final Optional<String> page;
+        try (Stream<Path> walk = Files.walk(content)) {
+            page = walk.filter(p -> Files.isRegularFile(p, LinkOption.NOFOLLOW_LINKS))
+                    .map(p -> content.relativize(p).toString().replace('\\', '/'))
+                    .filter(ThemeInstaller::isServerSidePage)
+                    .sorted()
+                    .findFirst();
+        } catch (final IOException | UncheckedIOException e) {
+            throw new SetupException("Failed to read " + content, e);
+        }
+        if (page.isPresent()) {
+            throw new SetupException("The archive has a server-side page, which a static theme may not carry: " + page.get());
+        }
+    }
+
+    /**
+     * Returns whether the path names a server-side page (JSP and the like) rather than a static
+     * file. Compared case-insensitively, as the admin screen's installer does.
+     *
+     * @param path a path inside the theme
+     * @return true when the path ends with one of the server-side page extensions
+     */
+    static boolean isServerSidePage(final String path) {
+        final String lower = path.toLowerCase(Locale.ROOT);
+        for (final String ext : SERVER_SIDE_EXTENSIONS) {
+            if (lower.endsWith(ext)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

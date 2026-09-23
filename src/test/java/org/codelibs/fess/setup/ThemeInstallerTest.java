@@ -217,6 +217,52 @@ public class ThemeInstallerTest {
     }
 
     @Test
+    public void test_install_archiveWithAServerSidePage_isRefused() throws Exception {
+        // A static theme is plain files. The admin screen's installer refuses an archive with a
+        // JSP (or similar) entry, so installing from the command line must refuse it too, and
+        // before anything reaches the themes directory.
+        final List<String> entryNames = List.of("assets/p.jsp", "x.jspx", "inc/x.jspf", "assets/P.JSP");
+        for (int i = 0; i < entryNames.size(); i++) {
+            // Each archive is published under its own version, since a context path is served once.
+            final String entryName = entryNames.get(i);
+            final String version = "15.9." + i;
+            publish("docuforge", version,
+                    zipOf(Map.of(ThemeInstaller.MANIFEST, MANIFEST, "index.html", "<html></html>", entryName, "<%= 1 %>")));
+
+            final SetupException e = assertThrows(SetupException.class, () -> install("docuforge", version), entryName);
+
+            assertTrue(e.getMessage().contains(entryName), e.getMessage());
+            assertFalse(Files.exists(tempDir.resolve("docuforge")), entryName);
+            assertTrue(dotDirs(tempDir, ".staging-").isEmpty(), "staging directory was left behind");
+        }
+    }
+
+    @Test
+    public void test_install_serverSidePage_leavesTheInstalledThemeAlone() throws Exception {
+        publish("docuforge", "15.9.0", themeZip());
+        install("docuforge", "15.9.0");
+        Files.writeString(tempDir.resolve("docuforge/marker.txt"), "still here");
+        publish("docuforge", "15.9.1", zipOf(Map.of(ThemeInstaller.MANIFEST, MANIFEST, "assets/p.jsp", "<%= 1 %>")));
+
+        assertThrows(SetupException.class, () -> install("docuforge", "15.9.1"));
+
+        assertEquals("still here", Files.readString(tempDir.resolve("docuforge/marker.txt")));
+        assertFalse(Files.exists(tempDir.resolve("docuforge/assets/p.jsp")));
+        assertTrue(dotDirs(tempDir, ".attic-").isEmpty(), "a refused install moved the theme aside");
+        assertTrue(dotDirs(tempDir, ".staging-").isEmpty());
+    }
+
+    @Test
+    public void test_isServerSidePage() {
+        assertTrue(ThemeInstaller.isServerSidePage("x.jsp"));
+        assertTrue(ThemeInstaller.isServerSidePage("a/b.JSPX"));
+        assertTrue(ThemeInstaller.isServerSidePage("frag.jspf"));
+        assertFalse(ThemeInstaller.isServerSidePage("index.html"));
+        assertFalse(ThemeInstaller.isServerSidePage("app.js"));
+        assertFalse(ThemeInstaller.isServerSidePage("notes.jsp.txt"));
+    }
+
+    @Test
     public void test_install_badChecksum_leavesTheInstalledThemeAlone() throws Exception {
         publish("docuforge", "15.9.0", themeZip());
         install("docuforge", "15.9.0");
