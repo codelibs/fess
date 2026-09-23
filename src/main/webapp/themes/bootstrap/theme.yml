@@ -17,6 +17,14 @@ supportedLocales:
   - ko
   - pt-BR
   - zh-CN
+  - hi
+  - id
+  - it
+  - nl
+  - pl
+  - ru
+  - tr
+  - zh-TW
 entry: index.html
 spaFallback: true
 type: static

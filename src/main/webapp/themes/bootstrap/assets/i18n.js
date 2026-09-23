@@ -5,17 +5,25 @@
 const SUPPORTED = ["de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "tr", "zh-CN", "zh-TW"];
 let messages = {};
 let locale = "en";
+// The requested language tag when no bundle matches it and the UI falls back to English
+// (e.g. "sr-Latn"); language names are then still shown in that language.
+let unbundledTag = null;
 
 /** The supported locale matching `tag` exactly or by its primary subtag, or null. */
 function matchLocale(tag) {
   if (!tag) return null;
   // Case-insensitive exact match first (e.g. "pt-BR", "zh-CN").
-  const lower = String(tag).toLowerCase();
+  const lower = String(tag).replace(/_/g, "-").toLowerCase();
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === lower) return s;
   }
+  const subtags = lower.split("-");
+  const primary = subtags[0];
+  // Chinese: the script or region picks the bundle (zh-Hant, zh-HK, zh-MO → zh-TW; zh, zh-Hans, zh-SG → zh-CN).
+  if (primary === "zh") {
+    return subtags.some(s => s === "hant" || s === "tw" || s === "hk" || s === "mo") ? "zh-TW" : "zh-CN";
+  }
   // Primary-subtag match (e.g. "ja-JP" → "ja", "de-AT" → "de").
-  const primary = lower.split("-")[0];
   for (const s of SUPPORTED) {
     if (s.toLowerCase() === primary) return s;
   }
@@ -34,6 +42,8 @@ export function pickLocale(preferred) {
 
 export async function init(preferred) {
   locale = pickLocale(preferred);
+  const requested = preferred || navigator.language;
+  unbundledTag = !matchLocale(preferred) && !matchLocale(navigator.language) && requested ? requested : null;
   // Bundles load relative to this module, so they are found under any context path.
   try {
     const r = await fetch(new URL(`../i18n/messages.${locale}.json`, import.meta.url).href, { credentials: "same-origin" });
@@ -95,6 +105,9 @@ export function getLocale() { return locale; }
  * Return a human-readable language name for a BCP-47 or underscore-variant code.
  *
  * Resolution order:
+ *  0. When the requested language has no theme bundle (the UI fell back to English),
+ *     Intl.DisplayNames in that language — the JSP pages named languages in the
+ *     browser's locale, e.g. "japanski" for sr-Latn.
  *  1. Theme i18n key "labels.lang_<value>" — used when it resolves to something
  *     other than the raw key string.
  *  2. Intl.DisplayNames in the current UI locale — robust for the ~53 server
@@ -108,23 +121,38 @@ export function getLocale() { return locale; }
 export function languageLabel(value, fallbackLabel) {
   if (!value) return fallbackLabel || value || "";
 
+  // Normalize underscore variants (e.g. pt_BR → pt-BR) for Intl
+  const normalized = value.replace(/_/g, "-");
+
+  // Step 0: a requested language without a theme bundle
+  if (unbundledTag) {
+    const name = intlLanguageName(unbundledTag, normalized, value);
+    if (name) return name;
+  }
+
   // Step 1: try theme i18n key
   const key = "labels.lang_" + value;
   const translated = t(key);
   if (translated !== key) return translated;
 
-  // Step 2: normalize underscore variants (e.g. pt_BR → pt-BR) for Intl
-  const normalized = value.replace(/_/g, "-");
+  // Step 2: Intl in the UI locale
+  const name = intlLanguageName(locale, normalized, value);
+  if (name) return name;
+
+  // Step 3: fallback
+  return fallbackLabel || value;
+}
+
+/** Intl.DisplayNames name of `normalized` in `displayLocale`, or null when Intl has none. */
+function intlLanguageName(displayLocale, normalized, value) {
   try {
-    const dn = new Intl.DisplayNames([locale, "en"], { type: "language" });
+    const dn = new Intl.DisplayNames([displayLocale, "en"], { type: "language" });
     const name = dn.of(normalized);
     if (name && name !== normalized && name !== value) return name;
   } catch (e) {
     // Intl.DisplayNames not supported or invalid tag — fall through
   }
-
-  // Step 3: fallback
-  return fallbackLabel || value;
+  return null;
 }
 
 /**

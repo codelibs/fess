@@ -103,6 +103,23 @@ public class BundledBootstrapThemeTest {
     }
 
     @Test
+    public void test_supportedLocales_matchTheShippedI18nBundles() throws Exception {
+        // /api/v2/ui/config echoes supportedLocales as theme.supported_locales, so it has to name
+        // exactly the locales the theme ships a message bundle for.
+        final Set<String> shipped = new TreeSet<>();
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.map(p -> p.getFileName().toString())
+                    .filter(n -> n.startsWith("messages.") && n.endsWith(".json"))
+                    .forEach(n -> shipped.add(n.substring("messages.".length(), n.length() - ".json".length())));
+        }
+        try (InputStream in = Files.newInputStream(THEME_DIR.resolve("theme.yml"))) {
+            final ThemeManifest m = ThemeManifest.parse(in);
+            assertEquals(shipped, new TreeSet<>(m.getSupportedLocales()));
+            assertEquals(shipped.size(), m.getSupportedLocales().size(), "supportedLocales lists a locale twice");
+        }
+    }
+
+    @Test
     public void test_helpBundles_existForEveryI18nLocaleWithMatchingSectionIds() throws Exception {
         // help.js falls back to help/en.json only after help/<locale>.json has 404ed, and the
         // browser logs that 404 as a console error, so every served locale needs its own bundle.

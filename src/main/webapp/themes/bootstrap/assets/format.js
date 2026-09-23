@@ -4,15 +4,18 @@
 // escapeHtml are pure — sanitizeHtml, renderHighlightedSnippet and
 // renderSnippetText parse via document, and isSafeHref needs window.location.
 
-const UNITS = ["B", "KB", "MB", "GB", "TB", "PB"];
+// Intl unit identifiers; Intl.NumberFormat supplies the localised unit names.
+const UNITS = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte", "petabyte"];
 
 /**
- * Format a byte count as a human-readable file size string.
+ * Format a byte count as a human-readable file size string in the given locale.
+ * Bytes use the long unit name ("578 bytes", "578 байт"), larger sizes the short one.
  *
  * @param {number|string|null|undefined} bytes
+ * @param {string} [locale] - BCP 47 tag of the UI locale; English when omitted
  * @returns {string} e.g. "1.4 MB" or "" for invalid input
  */
-export function formatFileSize(bytes) {
+export function formatFileSize(bytes, locale = "en") {
   if (bytes === null || bytes === undefined || bytes === "" || Number.isNaN(Number(bytes))) {
     return "";
   }
@@ -23,7 +26,19 @@ export function formatFileSize(bytes) {
     n /= 1024;
     i++;
   }
-  return `${n.toFixed(i === 0 ? 0 : 1)} ${UNITS[i]}`;
+  const digits = i === 0 ? 0 : 1;
+  const options = {
+    style: "unit",
+    unit: UNITS[i],
+    unitDisplay: i === 0 ? "long" : "short",
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  };
+  try {
+    return new Intl.NumberFormat(locale, options).format(n);
+  } catch {
+    return new Intl.NumberFormat("en", options).format(n);
+  }
 }
 
 /**

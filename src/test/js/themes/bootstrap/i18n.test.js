@@ -41,6 +41,14 @@ describe("pickLocale", () => {
     ["en-US", "en"],       // primary-subtag match
     ["xx", "en"],          // no match → English fallback
     ["xx-YY", "en"],       // no primary match → English fallback
+    ["zh-Hant", "zh-TW"],  // Traditional script → zh-TW
+    ["zh-HK", "zh-TW"],    // Traditional-script region → zh-TW
+    ["zh-Hant-HK", "zh-TW"],
+    ["zh-MO", "zh-TW"],
+    ["zh-Hans", "zh-CN"],  // Simplified script → zh-CN
+    ["zh-SG", "zh-CN"],
+    ["zh", "zh-CN"],
+    ["zh_TW", "zh-TW"],    // underscore variant
   ])("navigator.language %s → %s", (lang, expected) => {
     setLanguage(lang);
     expect(pickLocale()).toBe(expected);
@@ -113,6 +121,25 @@ describe("languageLabel", () => {
     const m = await import(I18N);
     await m.init();
     expect(m.languageLabel("ar")).toBe("Arabic (custom)");
+  });
+
+  it("names languages in a browser language that has no theme bundle", async () => {
+    vi.resetModules();
+    installFetch(async () => jsonResponse({ "labels.lang_ja": "Japanese" }));
+    setLanguage("sr-Latn");
+    const m = await import(I18N);
+    await m.init();
+    expect(m.getLocale()).toBe("en");
+    expect(m.languageLabel("ja")).toBe("japanski");
+  });
+
+  it("uses the bundle names when the browser language has a bundle", async () => {
+    vi.resetModules();
+    installFetch(async () => jsonResponse({ "labels.lang_ja": "Japonés" }));
+    setLanguage("es-MX");
+    const m = await import(I18N);
+    await m.init();
+    expect(m.languageLabel("ja")).toBe("Japonés");
   });
 });
 
