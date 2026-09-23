@@ -1099,9 +1099,24 @@ describe("runSearch — facet and pagination click handlers", () => {
     document.querySelector("#facet-body ul li.list-group-item a").click();
     await settle();
     expect(_state.start).toBe(0);
-    expect(location.search).toBe("?q=foo");
+    expect(location.search).toBe("?q=foo&ex_q=label%3AlblA");
     // Corrected in place: a filter change is not a new page in history.
     expect(history.length).toBe(historyLength);
+  });
+
+  it("writes facet selections to the URL as ex_q and drops them again on deselect", async () => {
+    setLocation("/search?q=foo");
+    installApiDispatch({ search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1" }]) });
+    await runSearch();
+    await settle();
+    [...document.querySelectorAll("#facet-body li.list-group-item a")].find((a) => a.textContent.startsWith("Label B")).click();
+    await settle();
+    [...document.querySelectorAll("#facet-body li.list-group-item a")].find((a) => a.textContent.startsWith("labels.facet_filetype_html")).click();
+    await settle();
+    expect(new URLSearchParams(location.search).getAll("ex_q")).toEqual(["label:lblB", "filetype:html"]);
+    document.querySelector("#facet-body li.list-group-item.active a").click();
+    await settle();
+    expect(new URLSearchParams(location.search).getAll("ex_q")).toEqual(["filetype:html"]);
   });
 
   it("jumps to a specific page when a numbered page link is clicked", async () => {
@@ -1529,6 +1544,55 @@ describe("attach — wiring", () => {
 
   it("is idempotent — a second attach() call is a quiet no-op", () => {
     expect(() => attach()).not.toThrow();
+  });
+});
+
+describe("runFromUrl — facet selections in the URL", () => {
+  const searchParams = () => api.get.mock.calls.filter((c) => c[0] === "/search").at(-1)[1];
+
+  beforeEach(() => {
+    api.getConfig.mockReturnValue(FULL_CFG);
+    installApiDispatch();
+    mountBody(SEARCH_FIXTURE);
+  });
+
+  it("restores label and facet-query selections as active facets and keeps other clauses", async () => {
+    setLocation("/search?q=foo&ex_q=label%3AlblB&ex_q=filetype%3Ahtml&ex_q=timestamp%3A%5Bnow%2Fd-1d+TO+*%5D");
+    runFromUrl();
+    await settle();
+    expect(_state.facets).toEqual({ label: ["lblB"] });
+    expect(_state.facetQueries).toEqual(["filetype:html"]);
+    expect(_state.exQ).toEqual(["timestamp:[now/d-1d TO *]"]);
+    expect(searchParams()["ex_q"]).toEqual(["label:lblB", "filetype:html", "timestamp:[now/d-1d TO *]"]);
+    const active = [...document.querySelectorAll("#facet-body li.list-group-item.active")].map((li) => li.textContent);
+    expect(active.some((txt) => txt.startsWith("Label B"))).toBe(true);
+    expect(active.length).toBe(2);
+  });
+
+  it("removes a restored facet when it is clicked, in the request and in the URL", async () => {
+    setLocation("/search?q=foo&ex_q=label%3AlblB");
+    runFromUrl();
+    await settle();
+    [...document.querySelectorAll("#facet-body li.list-group-item.active a")].find((a) => a.textContent.startsWith("Label B")).click();
+    await settle();
+    expect(_state.facets.label).toEqual([]);
+    expect(searchParams()).not.toHaveProperty("ex_q");
+    expect(new URLSearchParams(location.search).has("ex_q")).toBe(false);
+  });
+
+  it("runs a search for a URL carrying only a facet selection", async () => {
+    setLocation("/search?ex_q=label%3AlblA");
+    runFromUrl();
+    await settle();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(searchParams()["ex_q"]).toEqual(["label:lblA"]);
+  });
+
+  it("sends a repeated clause once", async () => {
+    setLocation("/search?q=foo&ex_q=label%3AlblA&ex_q=label%3AlblA");
+    runFromUrl();
+    await settle();
+    expect(searchParams()["ex_q"]).toEqual(["label:lblA"]);
   });
 });
 
