@@ -39,12 +39,27 @@ describe("escapeHtml", () => {
 
 describe("formatFileSize", () => {
   it.each([
-    [0, "0 B"],
-    [1023, "1023 B"],
-    [1024, "1.0 KB"],
+    [0, "0 bytes"],
+    [1, "1 byte"],
+    [1023, "1,023 bytes"],
+    [1024, "1.0 kB"],
     [1048576, "1.0 MB"],
   ])("formats %d bytes as %s", (bytes, expected) => {
     expect(formatFileSize(bytes)).toBe(expected);
+  });
+
+  it.each([
+    ["ja", 578, "578 バイト"],
+    ["ru", 578, "578 байт"],
+    ["tr", 578, "578 bayt"],
+    ["de", 1536, "1,5 kB"],
+    ["pl", 578, "578 bajtów"],
+  ])("localises the unit and number for %s: %d → %s", (locale, bytes, expected) => {
+    expect(formatFileSize(bytes, locale)).toBe(expected);
+  });
+
+  it("falls back to English for an invalid locale tag", () => {
+    expect(formatFileSize(578, "not a tag!")).toBe("578 bytes");
   });
 
   it("returns empty string for invalid or negative input", () => {

@@ -1,5 +1,5 @@
 import * as api from "./api.js";
-import { t, languageLabel } from "./i18n.js";
+import { t, languageLabel, getLocale } from "./i18n.js";
 import { escapeHtml, formatFileSize, formatDate, renderHighlightedSnippet, renderSnippetText, sanitizeHtml } from "./format.js";
 import { navigate } from "./router.js";
 
@@ -307,7 +307,7 @@ function buildResultCard(d, queryId, order) {
     info.appendChild(sp);
   };
 
-  const sizeStr = formatFileSize(d.content_length);
+  const sizeStr = formatFileSize(d.content_length, getLocale());
   if (sizeStr) {
     appendNbspSpacer();
     info.appendChild(document.createTextNode(sizeStr + " "));
