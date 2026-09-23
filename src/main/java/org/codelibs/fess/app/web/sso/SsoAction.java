@@ -88,6 +88,17 @@ public class SsoAction extends FessLoginAction {
                 return redirect(RootAction.class);
             });
         }
+        if (searchHelper.hasRequiredSearchParameters()) {
+            // The static theme answers the search pages to everyone and sends the user here itself,
+            // carrying the query it was showing (auth.js promptLogin). Keep it as
+            // FessSearchAction#redirectToLogin did for the JSP pages, so that redirectToSearchPage
+            // lands on it once the login succeeds, and run the login itself on the bare /sso/:
+            // a browser repeats the URL with its Kerberos ticket in the Authorization header, and a
+            // long query plus a large ticket exceeds the container's header limit, which answers
+            // 400 and loses the login rather than the query.
+            searchHelper.storeSearchParameters();
+            return redirect(SsoAction.class);
+        }
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
         final LoginCredential loginCredential;
         try {

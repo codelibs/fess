@@ -350,6 +350,33 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals("rewritten2", result.getQuery());
     }
 
+    @Test
+    public void test_hasRequiredSearchParameters() {
+        ComponentUtil.setFessConfig(new MockFessConfig() {
+            @Override
+            public String getCookieSearchParameterRequiredKeys() {
+                return "q";
+            }
+        });
+        assertFalse(searchHelper.hasRequiredSearchParameters());
+        getMockRequest().setParameter("q", "");
+        assertFalse(searchHelper.hasRequiredSearchParameters());
+        getMockRequest().setParameter("q", "test query");
+        assertTrue(searchHelper.hasRequiredSearchParameters());
+    }
+
+    @Test
+    public void test_hasRequiredSearchParameters_blankRequiredKeys() {
+        ComponentUtil.setFessConfig(new MockFessConfig() {
+            @Override
+            public String getCookieSearchParameterRequiredKeys() {
+                return "";
+            }
+        });
+        getMockRequest().setParameter("q", "test query");
+        assertFalse(searchHelper.hasRequiredSearchParameters());
+    }
+
     // Test storeSearchParameters with various scenarios
     @Test
     public void test_storeSearchParameters_withRequiredKeys() {
