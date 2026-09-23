@@ -79,6 +79,12 @@ load their JSON relative to the module URL. Keep new URLs relative: a root-absol
 (`/search`) skips the context path. Fragment-only links (`#id`) would resolve against the base,
 so the router keeps them on the current page.
 
+`index.html` refers to the theme's own files as `{{themePath}}/assets/…`. Fess replaces
+`{{themePath}}` with `themes/<name>` (the `name` in `theme.yml`) when it serves the page, so the
+same `index.html` loads the right files under whatever name the theme is installed. Use the
+placeholder for any file of the theme that `index.html` references; files loaded from JavaScript
+should stay relative to the module URL (`new URL("../i18n/…", import.meta.url)`).
+
 ## CSRF
 
 All state-changing requests echo the token returned by `/ui/config` in
@@ -96,9 +102,15 @@ Theme authors who copy this code should preserve this pattern.
 
 ## Customising
 
-Copy this directory, rename it, edit `theme.yml#name` to match, and
-upload as a ZIP via `/admin/theme/`. The reserved name `bootstrap`
-must remain on this bundled directory.
+1. Copy this directory and rename the copy, e.g. to `mytheme`.
+2. Set `name: mytheme` in the copy's `theme.yml`, and bump its `version`.
+3. Edit `assets/styles.css`, the logos in `assets/`, and `i18n/messages.*.json` as needed.
+   Nothing in `index.html` names the theme directory: its references go through
+   `{{themePath}}` (see [Context path](#context-path)), so the copy loads its own files.
+4. ZIP the directory contents (with `theme.yml` at the top level) and upload the ZIP at
+   `/admin/theme/`, then make it the default theme there or bind it to a virtual host.
+
+The reserved name `bootstrap` must remain on this bundled directory.
 
 ## License
 

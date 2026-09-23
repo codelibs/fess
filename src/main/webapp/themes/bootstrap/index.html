@@ -7,10 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fess</title>
   <!-- Fess inserts <base href="{context path}/"> right after <head>. Every URL in this
-       theme is relative to it, so the theme works under any context path. -->
+       theme is relative to it, so the theme works under any context path. Fess also replaces
+       the double-braced themePath placeholder with themes/<this theme's name>, so a renamed
+       copy of this theme loads its own assets. -->
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/font-awesome.min.css">
-  <link rel="stylesheet" href="themes/bootstrap/assets/styles.css">
+  <link rel="stylesheet" href="{{themePath}}/assets/styles.css">
   <link rel="icon" href="favicon.ico">
 
 </head>
@@ -31,7 +33,7 @@
   <header>
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none" data-bs-theme="dark">
       <div id="content" class="container">
-        <a class="navbar-brand d-inline-flex" href="./" id="brand-link" data-spa><img src="themes/bootstrap/assets/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="align-items-center"></a>
+        <a class="navbar-brand d-inline-flex" href="./" id="brand-link" data-spa><img src="{{themePath}}/assets/logo-head.png" alt="" data-i18n-alt="labels.header_brand_name" class="align-items-center"></a>
         <div class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0" role="search" id="search-form-wrap">
           <form class="input-group" id="search-form" role="search" aria-label="Site search">
             <input
@@ -134,7 +136,7 @@
         <div class="row">
           <div class="col text-center searchFormBox">
             <h1 class="mainLogo">
-              <img src="themes/bootstrap/assets/logo.png" alt="" data-i18n-alt="page.heading" class="home-logo">
+              <img src="{{themePath}}/assets/logo.png" alt="" data-i18n-alt="page.heading" class="home-logo">
             </h1>
             <!-- Notification banner (parity index.jsp .notification) — rendered by
                  app.js renderNotifications() from config.notifications.search_top. -->
@@ -346,6 +348,6 @@
   -->
   <script src="js/popper.min.js" defer></script>
   <script src="js/bootstrap.min.js" defer></script>
-  <script type="module" src="themes/bootstrap/assets/app.js"></script>
+  <script type="module" src="{{themePath}}/assets/app.js"></script>
 </body>
 </html>

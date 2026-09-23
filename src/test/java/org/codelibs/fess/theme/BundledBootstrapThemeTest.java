@@ -268,6 +268,29 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * A copy of this theme saved under another name must load its own assets, so index.html names
+     * them through the theme-path placeholder instead of {@code themes/bootstrap/}, and every such
+     * reference must exist in the theme.
+     */
+    @Test
+    public void test_indexHtml_referencesOwnAssetsThroughTheThemePathPlaceholder() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        assertFalse(html.contains("themes/bootstrap"), "index.html must not name its own theme directory");
+        final java.util.regex.Matcher m =
+                Pattern.compile("(?:href|src)=\"" + Pattern.quote(StaticThemeResponder.THEME_PATH_PLACEHOLDER) + "/([^\"]+)\"")
+                        .matcher(html);
+        final List<String> refs = new ArrayList<>();
+        while (m.find()) {
+            refs.add(m.group(1));
+        }
+        assertTrue(refs.containsAll(List.of("assets/styles.css", "assets/app.js", "assets/logo.png", "assets/logo-head.png")),
+                refs.toString());
+        for (final String ref : refs) {
+            assertTrue(Files.isRegularFile(THEME_DIR.resolve(ref)), "index.html references a missing theme file: " + ref);
+        }
+    }
+
+    /**
      * The login modal holds the new-password form auth.js shows when the password just used
      * must be changed (parity login/newpassword.jsp).
      */
