@@ -576,8 +576,32 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
                 List.of(0.9, 0.1), // chunk2: close -> high sim
                 List.of(-1.0, 0.0))); // chunk3: opposite -> sim -1
         final String result = f.selectBySemanticSimilarity(chunks, doc, new float[] { 1.0f, 0.0f });
-        // Top 2 by similarity are chunk1 and chunk2, joined in original array order.
+        // Top 2 by similarity are chunk1 and chunk2, most similar first.
         assertEquals("chunk1\n\nchunk2", result);
+    }
+
+    @Test
+    public void test_selectBySemanticSimilarity_putsTheBestChunkFirst() {
+        // The answer passage is the LAST chunk of the page. The relevance evaluation shows the model
+        // only the leading part of each document, so the best chunk must lead the selected text
+        // instead of trailing the page opening.
+        final TestableFetcher f = new TestableFetcher();
+        f.chatTopKOverride = 3;
+        final List<String> chunks = List.of("opening", "middle", "answer");
+        final Map<String, Object> doc = chunkedDoc("d1", chunks, List.of(List.of(0.5, 0.5), // opening -> sim ~0.71
+                List.of(0.0, 1.0), // middle -> sim 0
+                List.of(1.0, 0.0))); // answer -> sim 1.0
+        final String result = f.selectBySemanticSimilarity(chunks, doc, new float[] { 1.0f, 0.0f });
+        assertEquals("answer\n\nopening\n\nmiddle", result);
+    }
+
+    @Test
+    public void test_selectBySemanticSimilarity_equalScoresKeepArrayOrder() {
+        final TestableFetcher f = new TestableFetcher();
+        f.chatTopKOverride = 2;
+        final List<String> chunks = List.of("first", "second");
+        final Map<String, Object> doc = chunkedDoc("d1", chunks, List.of(List.of(1.0, 0.0), List.of(1.0, 0.0)));
+        assertEquals("first\n\nsecond", f.selectBySemanticSimilarity(chunks, doc, new float[] { 1.0f, 0.0f }));
     }
 
     @Test

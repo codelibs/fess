@@ -272,32 +272,220 @@ public class ChatClientStreamSourceFieldsTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_streamChatEnhanced_unmatchedFetchedDocKeepsTheFetchedMap() {
-        // Defensive: a fetched doc_id with no search-phase counterpart (the evaluation phase is
-        // LLM-driven and could name an id outside the result set) must still be published, using
-        // the fetched map exactly as before.
+    public void test_streamChatEnhanced_relevantIdOutsideTheEvaluatedDocsIsDropped() {
+        // The evaluation names documents by their position in the list it was shown, so every id it
+        // returns is one of the fetched documents. An id that is not (a stubbed or misbehaving
+        // evaluator) has no content to answer from and is not published as a source.
         ComponentUtil.register(new ProjectingFetcher(), "chatContentFetcher");
-        final CapturingChatClient client = newSearchChatClient(List.of(searchResultDoc()), List.of("ghost"));
+        final CapturingChatClient client = newSearchChatClient(List.of(searchResultDoc()), List.of("ghost", "id1"));
 
         final ChatResult result = stream(client, "how do I install?");
 
         final List<ChatSource> sources = result.getMessage().getSources();
         assertEquals(1, sources.size());
-        assertEquals("ghost", sources.get(0).getDocId());
-        assertNull(sources.get(0).getSnippet(), "an unmatched doc has no render-time snippet to restore");
+        assertEquals("id1", sources.get(0).getDocId());
+        assertEquals(1, client.answerContextDocs.size());
     }
 
     @Test
-    public void test_streamChatEnhanced_emptyFetchKeepsSourcesEmpty() {
-        // An empty fetch result must not start publishing the raw search results as sources:
-        // the source set stays exactly what the fetch phase resolved (previous behavior).
+    public void test_streamChatEnhanced_emptyFetchFallsBackToSearchResults() {
+        // An empty fetch degrades to the search-result maps, as the non-streaming chat does: the
+        // evaluation and the answer use them, and the relevant ones are published as sources.
         ComponentUtil.register((ChatContentFetcher) request -> Collections.emptyList(), "chatContentFetcher");
         final CapturingChatClient client = newSearchChatClient(List.of(searchResultDoc()), List.of("id1"));
 
         final ChatResult result = stream(client, "how do I install?");
 
-        assertTrue(result.getSources().isEmpty(), "an empty fetch must leave the sources empty");
-        assertTrue(result.getMessage().getSources().isEmpty(), "an empty fetch must leave the message sources empty");
+        final List<ChatSource> sources = result.getMessage().getSources();
+        assertEquals(1, sources.size());
+        assertEquals("id1", sources.get(0).getDocId());
+        assertEquals(SNIPPET, sources.get(0).getSnippet());
+    }
+
+    @Test
+    public void test_selectDocsByIds_keepsTheEvaluationOrderOnce() {
+        final ChatClient client = new ChatClient();
+        final Map<String, Object> a = indexedSource("a", "A");
+        final Map<String, Object> b = indexedSource("b", "B");
+        final Map<String, Object> c = indexedSource("c", "C");
+
+        final List<Map<String, Object>> selected = client.selectDocsByIds(List.of(a, b, c), List.of("c", "a", "c", "missing"));
+
+        assertEquals(2, selected.size());
+        assertSame(c, selected.get(0));
+        assertSame(a, selected.get(1));
+    }
+
+    // ===================================================================================
+    //                                    SEARCH intent: evaluation sees the answer passage
+    //                                                                           =========
+
+    /** A page whose opening says nothing about the question; the answer is in a later chunk. */
+    private static final String PAGE_OPENING = "Roasted beans behave like fresh produce. Oxidation starts the moment the bag is opened";
+
+    private static final String ANSWER_PASSAGE = "Let the kettle rest so it settles near ninety degrees Celsius, then pour.";
+
+    /** Returns the chunk that answers the question as the content of every requested document. */
+    private static class PassageFetcher implements ChatContentFetcher {
+        final List<ChatContentRequest> requests = new ArrayList<>();
+
+        @Override
+        public List<Map<String, Object>> fetchContent(final ChatContentRequest request) {
+            requests.add(request);
+            final List<Map<String, Object>> out = new ArrayList<>();
+            for (final String id : request.getDocIds()) {
+                final Map<String, Object> projected = new LinkedHashMap<>(indexedSource(id, "Pour-over at home"));
+                projected.put("content", ANSWER_PASSAGE);
+                out.add(projected);
+            }
+            return out;
+        }
+    }
+
+    /**
+     * Builds a client whose evaluation behaves like a model reading the documents: a document is
+     * relevant only when the text it is shown contains the answer passage. The search-phase maps
+     * carry the page opening as content_description and no content, as a vector-only hit does.
+     */
+    private CapturingChatClient newPassageJudgingChatClient(final List<List<Map<String, Object>>> evaluatedDocs,
+            final List<String> fallbackQueries) {
+        final CapturingChatClient client = new CapturingChatClient();
+        final Map<String, Object> hit = searchResultDoc("d06", "Pour-over at home", PAGE_OPENING);
+        hit.remove("content");
+        client.searchDocs = List.of(hit);
+        client.chatSessionManager = new ChatSessionManager();
+        client.llmClientManager = new LlmClientManager() {
+            @Override
+            public IntentDetectionResult detectIntent(final String userMessage, final List<LlmMessage> history) {
+                return IntentDetectionResult.search("kettle temperature pour-over", "test");
+            }
+
+            @Override
+            public RelevanceEvaluationResult evaluateResults(final String userMessage, final String query,
+                    final List<Map<String, Object>> searchResults) {
+                evaluatedDocs.add(searchResults);
+                final List<String> ids = new ArrayList<>();
+                final List<Integer> indexes = new ArrayList<>();
+                for (int i = 0; i < searchResults.size(); i++) {
+                    final Map<String, Object> doc = searchResults.get(i);
+                    final Object text = doc.containsKey("content") ? doc.get("content") : doc.get("content_description");
+                    if (String.valueOf(text).contains("ninety degrees")) {
+                        ids.add((String) doc.get("doc_id"));
+                        indexes.add(i + 1);
+                    }
+                }
+                return ids.isEmpty() ? RelevanceEvaluationResult.noRelevantResults()
+                        : RelevanceEvaluationResult.withRelevantDocs(ids, indexes);
+            }
+
+            @Override
+            public String regenerateQuery(final String userMessage, final String failedQuery, final String failureReason,
+                    final List<LlmMessage> history) {
+                fallbackQueries.add(failureReason);
+                return "coffee water temperature";
+            }
+
+            @Override
+            public void streamGenerateAnswer(final String userMessage, final List<Map<String, Object>> documents,
+                    final List<LlmMessage> history, final LlmStreamCallback callback) {
+                client.answerContextDocs = documents;
+                callback.onChunk("About 90 degrees.", true);
+            }
+
+            @Override
+            public void generateNoResultsResponse(final String userMessage, final List<LlmMessage> history,
+                    final LlmStreamCallback callback) {
+                callback.onChunk("No relevant documents.", true);
+            }
+        };
+        return client;
+    }
+
+    @Test
+    public void test_streamChatEnhanced_evaluationSeesTheAnswerPassageAndSourcesAreEmitted() {
+        final PassageFetcher fetcher = new PassageFetcher();
+        ComponentUtil.register(fetcher, "chatContentFetcher");
+        final List<List<Map<String, Object>>> evaluatedDocs = new ArrayList<>();
+        final List<String> fallbacks = new ArrayList<>();
+        final CapturingChatClient client = newPassageJudgingChatClient(evaluatedDocs, fallbacks);
+        final List<String> events = new ArrayList<>();
+
+        final ChatResult result = client.streamChatEnhanced(null, "How hot should the kettle be?", null, new ChatPhaseCallback() {
+            @Override
+            public void onPhaseStart(final String phase, final String message) {
+                events.add("start:" + phase);
+            }
+
+            @Override
+            public void onPhaseComplete(final String phase) {
+                events.add("complete:" + phase);
+            }
+
+            @Override
+            public void onChunk(final String content, final boolean done) {
+            }
+
+            @Override
+            public void onFallback(final String phase, final String reason, final String originalQuery, final String newQuery) {
+                events.add("fallback:" + reason);
+            }
+
+            @Override
+            public void onError(final String phase, final String error) {
+                events.add("error:" + phase);
+            }
+        });
+
+        // The evaluation was shown the fetched passage, not the page opening from the search hit.
+        assertEquals(1, evaluatedDocs.size());
+        assertEquals(ANSWER_PASSAGE, evaluatedDocs.get(0).get(0).get("content"));
+        assertTrue(fallbacks.isEmpty(), "the relevant document must not send the flow into the no_relevant_results fallback");
+        assertFalse(events.contains("fallback:no_relevant_results"));
+
+        // The content is fetched once, for every hit, with the search query for highlighting.
+        assertEquals(1, fetcher.requests.size());
+        assertEquals(List.of("d06"), fetcher.requests.get(0).getDocIds());
+        assertEquals("kettle temperature pour-over", fetcher.requests.get(0).getQuery());
+
+        // The answer is generated from the same passage, and the document is cited.
+        assertEquals(ANSWER_PASSAGE, client.answerContextDocs.get(0).get("content"));
+        final List<ChatSource> sources = result.getMessage().getSources();
+        assertEquals(1, sources.size());
+        assertEquals("d06", sources.get(0).getDocId());
+        assertEquals(PAGE_OPENING, sources.get(0).getSnippet());
+        assertEquals(1, result.getSources().size());
+
+        // The phase protocol the chat UIs render is unchanged: evaluate, then fetch, then answer.
+        assertEquals(List.of("start:intent", "complete:intent", "start:search", "complete:search", "start:evaluate", "complete:evaluate",
+                "start:fetch", "complete:fetch", "start:answer", "complete:answer"), events);
+    }
+
+    @Test
+    public void test_streamChatEnhanced_fallbackSearchIsEvaluatedOnFetchedContentToo() {
+        // First fetch returns only the page opening, so the first evaluation finds nothing; the
+        // refined search's hits must again be judged from their fetched passages.
+        final PassageFetcher passages = new PassageFetcher();
+        ComponentUtil.register((ChatContentFetcher) request -> {
+            if (passages.requests.isEmpty() && "kettle temperature pour-over".equals(request.getQuery())) {
+                passages.requests.add(request);
+                final Map<String, Object> projected = new LinkedHashMap<>(indexedSource("d06", "Pour-over at home"));
+                projected.put("content", PAGE_OPENING);
+                return List.of(projected);
+            }
+            return passages.fetchContent(request);
+        }, "chatContentFetcher");
+        final List<List<Map<String, Object>>> evaluatedDocs = new ArrayList<>();
+        final List<String> fallbacks = new ArrayList<>();
+        final CapturingChatClient client = newPassageJudgingChatClient(evaluatedDocs, fallbacks);
+
+        final ChatResult result = stream(client, "How hot should the kettle be?");
+
+        assertEquals(List.of("no_relevant_results"), fallbacks);
+        assertEquals(2, evaluatedDocs.size());
+        assertEquals(ANSWER_PASSAGE, evaluatedDocs.get(1).get(0).get("content"));
+        assertEquals("coffee water temperature", passages.requests.get(1).getQuery());
+        assertEquals(1, result.getMessage().getSources().size());
+        assertEquals("coffee water temperature", result.getMessage().getSearchQuery());
     }
 
     // ===================================================================================

@@ -415,10 +415,16 @@ public class ChatClient {
                                 fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
                     }
                 } else {
-                    // Phase 3: Evaluate results
+                    // Phase 3: Evaluate results. The model judges every hit from the passages the answer
+                    // would be generated from -- the fetcher's chunk-selected or highlighted content, the
+                    // same answer context the non-streaming chat uses -- not from the search-result
+                    // content_description. For a hit found only by the vector branch that description is
+                    // the opening of the page, so a document whose answer sits in a later chunk was always
+                    // judged irrelevant and the stream ended without sources.
                     phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
-                    RelevanceEvaluationResult evalResult = llmClientManager.evaluateResults(userMessage, query, searchResults);
+                    List<Map<String, Object>> candidateDocs = fetchContentForAnswer(searchResults, query);
+                    RelevanceEvaluationResult evalResult = llmClientManager.evaluateResults(userMessage, query, candidateDocs);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
 
                     if (logger.isDebugEnabled()) {
@@ -444,12 +450,15 @@ public class ChatClient {
                             if (!fallbackSearchResults.isEmpty()) {
                                 // Re-evaluate fallback results
                                 callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
+                                final List<Map<String, Object>> fallbackCandidateDocs =
+                                        fetchContentForAnswer(fallbackSearchResults, newQuery);
                                 final RelevanceEvaluationResult fallbackEvalResult =
-                                        llmClientManager.evaluateResults(userMessage, newQuery, fallbackSearchResults);
+                                        llmClientManager.evaluateResults(userMessage, newQuery, fallbackCandidateDocs);
                                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
 
                                 if (fallbackEvalResult.isHasRelevantResults()) {
                                     searchResults = fallbackSearchResults;
+                                    candidateDocs = fallbackCandidateDocs;
                                     searchQueryId = fallbackResult.getQueryId();
                                     searchRequestedTime = fallbackResult.getRequestedTime();
                                     evalResult = fallbackEvalResult;
@@ -479,11 +488,10 @@ public class ChatClient {
                     }
 
                     if (evalResult.isHasRelevantResults()) {
-                        // Phase 4: Fetch full content
+                        // Phase 4: Narrow the content fetched for the evaluation down to the relevant documents
                         phaseStartTime = System.currentTimeMillis();
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
-                        final List<Map<String, Object>> fullDocs = ComponentUtil.getChatContentFetcher()
-                                .fetchContent(new ChatContentRequest(evalResult.getRelevantDocIds(), searchResults, finalSearchQuery));
+                        final List<Map<String, Object>> fullDocs = selectDocsByIds(candidateDocs, evalResult.getRelevantDocIds());
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
                         // fullDocs stays the LLM context; the sources are resolved back to the
                         // search-phase maps, which alone carry content_description/content_title.
@@ -935,10 +943,11 @@ public class ChatClient {
     }
 
     /**
-     * Resolves the answer-context documents for the non-streaming chat path through
-     * {@link ChatContentFetcher}, so chunked documents ({@code content_chunk_status=done/chunked})
-     * get the same semantic/keyword chunk selection as the streaming path's fetch phase
-     * instead of feeding the raw search-result content to the LLM.
+     * Resolves the answer-context documents through {@link ChatContentFetcher}, so chunked
+     * documents ({@code content_chunk_status=done/chunked}) get semantic/keyword chunk selection
+     * instead of feeding the raw search-result content to the LLM. The non-streaming chat answers
+     * from the result; the streaming chat evaluates relevance on it and then answers from the
+     * relevant subset, so both paths show the model the same passages.
      *
      * <p>Falls back to the raw {@code searchResults} when no doc ids can be extracted or the
      * fetcher returns nothing, so an OpenSearch hiccup degrades to the previous behavior
@@ -980,6 +989,34 @@ public class ChatClient {
             logger.warn("[RAG] Failed to fetch answer content; using raw search results. docIds={}, error={}", docIds, e.getMessage(), e);
             return searchResults;
         }
+    }
+
+    /**
+     * Picks the documents named by {@code docIds} out of {@code docs}, in {@code docIds} order.
+     * Used by the streaming chat to keep only the documents the relevance evaluation accepted,
+     * from the content that evaluation was shown. An id with no matching document, or one named
+     * twice, contributes nothing (more).
+     *
+     * @param docs the documents the evaluation was run on
+     * @param docIds the relevant document ids
+     * @return the relevant documents, in {@code docIds} order
+     */
+    protected List<Map<String, Object>> selectDocsByIds(final List<Map<String, Object>> docs, final List<String> docIds) {
+        final String docIdField = ComponentUtil.getFessConfig().getIndexFieldDocId();
+        final Map<String, Map<String, Object>> docsByDocId = new HashMap<>();
+        for (final Map<String, Object> doc : docs) {
+            if (doc.get(docIdField) instanceof final String docId) {
+                docsByDocId.putIfAbsent(docId, doc);
+            }
+        }
+        final List<Map<String, Object>> selected = new ArrayList<>(docIds.size());
+        for (final String docId : docIds) {
+            final Map<String, Object> doc = docsByDocId.remove(docId);
+            if (doc != null) {
+                selected.add(doc);
+            }
+        }
+        return selected;
     }
 
     /**
