@@ -874,10 +874,34 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // rather than two actions. Pin both shapes of the same two fields.
         assertTrue(jsp.contains("<input type=\"hidden\" name=\"name\""), "the catalogue row must post name");
         assertTrue(jsp.contains("<input type=\"hidden\" name=\"version\""), "the catalogue row must post version");
-        // Matched without assuming attribute order: la:text here carries styleId first, per
-        // the convention the rest of the admin tree follows.
-        assertTrue(jsp.contains("property=\"name\""), "the install-by-name form must post name");
-        assertTrue(jsp.contains("property=\"version\""), "the install-by-name form must post version");
+        // Plain inputs rather than la:text: see test_adminThemeJsp_everyBoundPropertyExistsOnThemeListForm.
+        assertTrue(jsp.contains("<input type=\"text\" id=\"installName\" name=\"name\""), "the install-by-name form must post name");
+        assertTrue(jsp.contains("<input type=\"text\" id=\"installVersion\" name=\"version\""),
+                "the install-by-name form must post version");
+    }
+
+    @Test
+    public void test_adminThemeJsp_everyBoundPropertyExistsOnThemeListForm() throws Exception {
+        // The list page renders with ThemeListForm (asListHtml). A form-bound tag such as
+        // la:text or la:select resolves its property against that form while the page renders,
+        // so a property the form lacks aborts the response part-way through the HTML
+        // (FormPropertyNotFoundException). Fields posted to another action's form must be
+        // plain inputs instead.
+        final String jsp = java.nio.file.Files.readString(java.nio.file.Path.of("src/main/webapp/WEB-INF/view/admin/theme/admin_theme.jsp"),
+                java.nio.charset.StandardCharsets.UTF_8);
+        final java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("<la:\\w+\\b[^>]*?\\bproperty=\"([^\"]+)\"").matcher(jsp);
+        final java.util.List<String> properties = new java.util.ArrayList<>();
+        while (matcher.find()) {
+            properties.add(matcher.group(1));
+        }
+        assertFalse(properties.isEmpty(), "expected at least one form-bound property (defaultTheme) in admin_theme.jsp");
+        for (final String property : properties) {
+            try {
+                ThemeListForm.class.getField(property);
+            } catch (final NoSuchFieldException e) {
+                fail("admin_theme.jsp binds property '" + property + "', which ThemeListForm does not declare");
+            }
+        }
     }
 
     @Test

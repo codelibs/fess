@@ -245,13 +245,16 @@ ${fe:html(true)}
                             </h3>
                         </div>
                         <div class="card-body">
+                            <%-- Plain inputs, not la:text: this page renders with ThemeListForm,
+                                 which has no name/version property, so la:text would fail the
+                                 whole page. The install action binds them to ThemeInstallForm. --%>
                             <la:form action="/admin/theme/install">
                                 <div class="form-group row">
                                     <label for="installName" class="col-sm-3 col-form-label">
                                         <la:message key="labels.theme_name"/>
                                     </label>
                                     <div class="col-sm-9">
-                                        <la:text styleId="installName" property="name" styleClass="form-control"/>
+                                        <input type="text" id="installName" name="name" class="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -259,7 +262,7 @@ ${fe:html(true)}
                                         <la:message key="labels.theme_version"/>
                                     </label>
                                     <div class="col-sm-9">
-                                        <la:text styleId="installVersion" property="version" styleClass="form-control"/>
+                                        <input type="text" id="installVersion" name="version" class="form-control"/>
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary ${f:h(editableClass)}">
