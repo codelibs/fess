@@ -368,7 +368,10 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
     /**
      * Ranks a chunked document's chunks by cosine similarity to {@code queryVector}
      * and joins the top {@link #getChatTopK()} chunks (fewer if the document has
-     * fewer chunks), in their original array order.
+     * fewer chunks), most similar first. Anything that later cuts the text from the
+     * front -- the relevance evaluation shows the model only the leading part of each
+     * document, and {@link #truncateContent} bounds the answer context -- therefore
+     * keeps the passage that matched best. Equally similar chunks keep their array order.
      *
      * @param chunks the document's chunk texts
      * @param doc the document map (read-only here)
@@ -393,8 +396,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         }
         scored.sort(Comparator.comparing(Entry<Integer, Double>::getValue).reversed());
         final int topK = Math.max(1, getChatTopK());
-        final Set<Integer> selectedIndexes =
-                scored.stream().limit(topK).map(Map.Entry::getKey).collect(Collectors.toCollection(TreeSet::new));
+        final List<Integer> selectedIndexes = scored.stream().limit(topK).map(Map.Entry::getKey).collect(Collectors.toList());
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG] Selected chunks by semantic similarity. docId={}, selectedIndexes={}, scores={}",
                     doc.get(ComponentUtil.getFessConfig().getIndexFieldDocId()), selectedIndexes,
