@@ -291,7 +291,28 @@ public class ActivityHelper {
      * @param valueMap The value map.
      */
     protected void printByLtsv(final Map<String, String> valueMap) {
-        printLog(valueMap.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.joining("\t")));
+        printLog(valueMap.entrySet()
+                .stream()
+                .map(e -> toLtsvField(e.getKey()) + ":" + toLtsvField(e.getValue()))
+                .collect(Collectors.joining("\t")));
+    }
+
+    /**
+     * Makes a value safe to write as one LTSV field.
+     *
+     * The audit pattern is {@code %msg%n}, so a line break inside a value ends the record and a tab
+     * starts a new field. User names reach this from unauthenticated requests -- a failed login
+     * records the name that was typed -- so without this a login attempt could append a forged
+     * record such as {@code action:LOGIN}. The ECS format escapes its values as JSON instead.
+     *
+     * @param value the key or value (may be null)
+     * @return the value with CR and LF replaced by a space and a tab by an underscore
+     */
+    protected String toLtsvField(final String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace('\r', ' ').replace('\n', ' ').replace('\t', '_');
     }
 
     /**

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
@@ -81,6 +82,16 @@ public class ActivityHelperTest extends UnitFessTestCase {
         activityHelper.useEcsFormat = false;
         activityHelper.loginFailure(OptionalThing.empty());
         assertEquals("action:LOGIN_FAILURE", localLogMsg.get());
+    }
+
+    @Test
+    public void test_loginFailure_userNameCannotForgeARecord() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential("x\naction:LOGIN\tuser:admin\r\npermissions:Radmin", "pw")));
+        final String msg = localLogMsg.get();
+        assertEquals("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:x action:LOGIN_user:admin  permissions:Radmin", msg);
+        assertFalse(msg.contains("\n"));
+        assertFalse(msg.contains("\r"));
     }
 
     @Test
@@ -493,7 +504,8 @@ public class ActivityHelperTest extends UnitFessTestCase {
         activityHelper.print("test\taction", OptionalThing.empty(), params);
         String result = localLogMsg.get();
         assertTrue(result.contains("action:TEST_ACTION"));
-        assertTrue(result.contains("key\twith\ttabs:value_with_tabs"));
+        // A tab in a key would start a field of its own just as one in a value does.
+        assertTrue(result.contains("key_with_tabs:value_with_tabs"));
     }
 
     @Test
