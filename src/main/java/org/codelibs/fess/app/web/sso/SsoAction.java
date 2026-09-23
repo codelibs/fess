@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
@@ -81,11 +80,13 @@ public class SsoAction extends FessLoginAction {
     @Execute
     public ActionResponse index() {
         if (fessLoginAssist.getSavedUserBean().isPresent()) {
+            // Also the second leg of a login completed on a POST (see below), so land where that
+            // login would have landed.
             return redirectToSearchPage().orElseGet(() -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("User is already logged in, redirecting to root.");
+                    logger.debug("User is already logged in, redirecting by user.");
                 }
-                return redirect(RootAction.class);
+                return getHtmlResponse();
             });
         }
         if (searchHelper.hasRequiredSearchParameters()) {
@@ -144,12 +145,7 @@ public class SsoAction extends FessLoginAction {
                 }
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
-                return redirectToSearchPage().orElseGet(() -> {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("No search parameters found, redirecting to root.");
-                    }
-                    return getHtmlResponse();
-                });
+                return redirectAfterLogin();
             });
         } catch (final LoginFailureException lfe) {
             if (ssoManager.available()) {
@@ -198,6 +194,40 @@ public class SsoAction extends FessLoginAction {
             // is signalled with a status instead.
             return HtmlResponse.asEmptyBody().httpStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Chooses where a login that has just succeeded lands: the stored search when this request
+     * carries it, otherwise the landing page for the user.
+     *
+     * @return the response to answer the login with
+     */
+    protected HtmlResponse redirectAfterLogin() {
+        return redirectToSearchPage().orElseGet(() -> {
+            if (isPostRequest()) {
+                // A login that ends on a POST, such as the SAML HTTP-POST binding, arrives
+                // cross-site, and the browser withholds the SameSite=Lax cookie holding the
+                // stored search. Finish on a GET of this endpoint, a top-level navigation that
+                // does carry it, and restore the search there.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Login completed on a POST, restoring the search on a GET.");
+                }
+                return redirect(SsoAction.class);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("No search parameters found, redirecting by user.");
+            }
+            return getHtmlResponse();
+        });
+    }
+
+    /**
+     * Whether the current request is a POST.
+     *
+     * @return true for a POST
+     */
+    protected boolean isPostRequest() {
+        return "POST".equalsIgnoreCase(request.getMethod());
     }
 
     /**

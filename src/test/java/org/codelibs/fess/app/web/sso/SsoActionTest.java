@@ -180,6 +180,64 @@ public class SsoActionTest extends UnitFessTestCase {
         assertEquals(List.of("credential"), calls);
     }
 
+    @Test
+    public void test_index_loggedInWithNothingStoredLandsWhereALoginWould() {
+        final TestableSsoAction action = actionWithStoredParameters();
+        action.loggedIn();
+
+        action.index();
+
+        assertEquals(1, action.landingPages, "the second leg of a POST login must land as the login would");
+        assertEquals(List.of(), action.redirectTargets);
+    }
+
+    @Test
+    public void test_index_loggedInRestoresTheStoredSearch() {
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "saml" }));
+        action.loggedIn();
+
+        action.index();
+
+        assertEquals(List.of("q", "saml"), action.redirectParams);
+        assertEquals(0, action.landingPages);
+    }
+
+    @Test
+    public void test_redirectAfterLogin_postWithNothingStoredFinishesOnAGet() {
+        // The SAML HTTP-POST binding: the IdP posts cross-site, so the SameSite=Lax cookie holding
+        // the search is not on this request even when it exists.
+        final TestableSsoAction action = actionWithStoredParameters();
+        action.post = true;
+
+        action.redirectAfterLogin();
+
+        assertEquals(List.of(SsoAction.class), action.redirectTargets);
+        assertEquals(0, action.landingPages);
+    }
+
+    @Test
+    public void test_redirectAfterLogin_getWithNothingStoredLandsByUser() {
+        // A login completed on a GET (SPNEGO, an OpenID Connect callback) already carried the
+        // cookie, so there is nothing more to wait for.
+        final TestableSsoAction action = actionWithStoredParameters();
+
+        action.redirectAfterLogin();
+
+        assertEquals(List.of(), action.redirectTargets);
+        assertEquals(1, action.landingPages);
+    }
+
+    @Test
+    public void test_redirectAfterLogin_postThatCarriesTheSearchRestoresItAtOnce() {
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "saml" }));
+        action.post = true;
+
+        action.redirectAfterLogin();
+
+        assertEquals(List.of("q", "saml"), action.redirectParams);
+        assertEquals(List.of(), action.redirectTargets);
+    }
+
     private static void registerSsoManagerRecording(final List<String> calls) {
         ComponentUtil.register(new SsoManager() {
             @Override
@@ -352,6 +410,31 @@ public class SsoActionTest extends UnitFessTestCase {
         protected HtmlResponse redirect(final Class<?> actionType) {
             redirectTargets.add(actionType);
             return REDIRECT_TO_LOGIN;
+        }
+
+        boolean post;
+
+        int landingPages;
+
+        @Override
+        protected boolean isPostRequest() {
+            return post;
+        }
+
+        @Override
+        protected HtmlResponse getHtmlResponse() {
+            landingPages++;
+            return REDIRECT_TO_LOGIN;
+        }
+
+        /** A saved user; what it is does not matter to where it lands here. */
+        void loggedIn() {
+            fessLoginAssist = new FessLoginAssist() {
+                @Override
+                public OptionalThing<FessUserBean> getSavedUserBean() {
+                    return OptionalThing.of(new FessUserBean(null));
+                }
+            };
         }
 
         /** No saved user, and a search helper that records when the query is stored. */
