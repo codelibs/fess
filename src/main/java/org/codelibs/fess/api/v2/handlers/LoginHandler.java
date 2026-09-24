@@ -18,7 +18,6 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -62,9 +61,6 @@ public class LoginHandler {
     private static final Logger logger = LogManager.getLogger(LoginHandler.class);
 
     private static final int MAX_BODY_BYTES = 4 * 1024;
-
-    /** One-shot warning flag so we log only the first IP-resolve failure per JVM lifetime. */
-    private static final AtomicBoolean ipResolveWarned = new AtomicBoolean(false);
 
     /**
      * MJ-8: Allowlist pattern for return_to values.
@@ -454,8 +450,10 @@ public class LoginHandler {
         try {
             return ComponentUtil.getRateLimitHelper().getClientIp(req);
         } catch (final RuntimeException e) {
-            if (ipResolveWarned.compareAndSet(false, true)) {
+            if (logger.isDebugEnabled()) {
                 logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr", e);
+            } else {
+                logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr: {}", e.getMessage());
             }
             return req.getRemoteAddr();
         }

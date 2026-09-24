@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -122,29 +121,6 @@ public class StaticThemeFilter implements Filter {
 
     /** Overridable responder reference; production code uses the container lookup. */
     private StaticThemeResponder staticThemeResponder;
-
-    /**
-     * Latches on the first failed {@link ThemeRegistry} lookup so the operator
-     * sees a single WARN instead of one per request when the DI container is not
-     * yet ready (or has been torn down). Subsequent failures degrade to DEBUG.
-     * Instance field (not static) so redeploys re-emit the WARN.
-     */
-    private final AtomicBoolean firstFailure = new AtomicBoolean(false);
-
-    /**
-     * Latches on the first {@link VirtualHostHelper} lookup failure so the
-     * operator sees a single WARN instead of one per request when the helper
-     * cannot be resolved. Subsequent failures degrade to DEBUG. Mirrors
-     * {@link #firstFailure} but tracks the virtual-host helper independently.
-     */
-    private final AtomicBoolean hostKeyFirstFailure = new AtomicBoolean(false);
-
-    /**
-     * Latches on the first {@link StaticThemeResponder} lookup failure so the operator sees a
-     * single WARN instead of one per request. Subsequent failures degrade to DEBUG.
-     * Mirrors {@link #firstFailure} but tracks the responder component independently.
-     */
-    private final AtomicBoolean responderFirstFailure = new AtomicBoolean(false);
 
     /**
      * Default constructor.
@@ -400,20 +376,17 @@ public class StaticThemeFilter implements Filter {
     }
 
     /**
-     * Logs {@code warnMsg} at WARN the first time {@code latch} is tripped, then degrades
-     * subsequent occurrences to a DEBUG {@code debugMsg}. Keeps the per-component lookup
-     * failures from flooding the log one line per request.
+     * Logs a component lookup failure at WARN on every occurrence: the message and the cause's
+     * message on one line, with the stack trace only when DEBUG is enabled.
      *
-     * @param latch the per-component first-failure latch
-     * @param warnMsg the message logged once at WARN
-     * @param debugMsg the message logged at DEBUG on later failures
+     * @param msg the message
      * @param e the cause
      */
-    private void warnOnce(final AtomicBoolean latch, final String warnMsg, final String debugMsg, final Exception e) {
-        if (latch.compareAndSet(false, true)) {
-            logger.warn(warnMsg, e);
-        } else if (logger.isDebugEnabled()) {
-            logger.debug(debugMsg, e);
+    private void warnLookupFailure(final String msg, final Exception e) {
+        if (logger.isDebugEnabled()) {
+            logger.warn(msg, e);
+        } else {
+            logger.warn("{}: {}", msg, e.getMessage());
         }
     }
 
@@ -424,7 +397,7 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getThemeRegistry();
         } catch (final Exception e) {
-            warnOnce(firstFailure, "ThemeRegistry not available; static-theme routing disabled", "ThemeRegistry not available", e);
+            warnLookupFailure("ThemeRegistry not available; static-theme routing disabled", e);
             return null;
         }
     }
@@ -436,8 +409,7 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getStaticThemeResponder();
         } catch (final Exception e) {
-            warnOnce(responderFirstFailure, "StaticThemeResponder not available; static-theme routing disabled",
-                    "StaticThemeResponder not available", e);
+            warnLookupFailure("StaticThemeResponder not available; static-theme routing disabled", e);
             return null;
         }
     }
@@ -449,8 +421,7 @@ public class StaticThemeFilter implements Filter {
                 return h.getVirtualHostKey();
             }
         } catch (final Exception e) {
-            warnOnce(hostKeyFirstFailure, "VirtualHostHelper not available; using null host key for static-theme routing",
-                    "VirtualHostHelper not available; using null host key", e);
+            warnLookupFailure("VirtualHostHelper not available; using null host key for static-theme routing", e);
         }
         return null;
     }

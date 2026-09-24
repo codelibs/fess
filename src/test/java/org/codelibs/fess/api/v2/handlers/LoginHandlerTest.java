@@ -33,6 +33,7 @@ import org.codelibs.fess.api.v2.SessionCsrfTokenManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.helper.RateLimitHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -703,6 +704,36 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     // ── M-2: reverse-proxy / client IP resolution ───────────────────────────────
+
+    @Test
+    public void login_clientIpResolveFailure_warnsOnEveryRequest() throws Exception {
+        // The component map is cleared after each test, so the stub needs no restore.
+        ComponentUtil.register(new RateLimitHelper() {
+            @Override
+            public String getClientIp(final HttpServletRequest request) {
+                throw new IllegalStateException("helper broken");
+            }
+        }, "rateLimitHelper");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LoginHandler.class.getName(), Level.INFO);
+        try {
+            for (int i = 0; i < 2; i++) {
+                new LoginHandler(new LoginRateLimiter()).handle(
+                        new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}"),
+                        new CapturingResponse());
+            }
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("RateLimitHelper.getClientIp unavailable"))
+                    .toList();
+            assertEquals(2, warns.size());
+            warns.forEach(e -> {
+                assertTrue(e.getMessage().getFormattedMessage().contains("helper broken"));
+                assertNull(e.getThrown(), "the stack trace is only for DEBUG");
+            });
+        } finally {
+            appender.detach();
+        }
+    }
 
     @Test
     public void login_rateLimitUsesProxyResolvedIp_whenTrustedProxy() throws Exception {

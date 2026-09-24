@@ -202,11 +202,41 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     public void test_search_fallsBackWhenEmbeddingUnavailable() {
         final GuardedSearcher guarded = new GuardedSearcher();
         guarded.available = false;
-        // twice: the warn latch must not change the degradation behavior
-        for (int i = 0; i < 2; i++) {
-            final SearchResult result =
-                    guarded.search("plain query", new StubSearchRequestParams(0, 10), org.dbflute.optional.OptionalThing.empty());
-            assertEquals(0, result.getAllRecordCount());
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SemanticChunkSearcher.class);
+        try {
+            for (int i = 0; i < 2; i++) {
+                final SearchResult result =
+                        guarded.search("plain query", new StubSearchRequestParams(0, 10), org.dbflute.optional.OptionalThing.empty());
+                assertEquals(0, result.getAllRecordCount());
+            }
+            // No latch: every request that finds the provider unavailable reports it.
+            final List<String> warnings =
+                    appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("Embedding provider is unavailable")).toList();
+            assertEquals(2, warnings.size(), appender.messagesAt(Level.WARN).toString());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_resolveEngineMinScore_warnsOnEveryNonCosineCall() {
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper() {
+            @Override
+            public String getKnnSpaceType() {
+                return "l2";
+            }
+        }, org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SemanticChunkSearcher.class);
+        try {
+            assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
+            assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
+            final List<String> warnings =
+                    appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("cannot be applied to space_type=l2")).toList();
+            assertEquals(2, warnings.size(), appender.messagesAt(Level.WARN).toString());
+        } finally {
+            appender.detach();
+            org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper(),
+                    org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
         }
     }
 
@@ -403,18 +433,20 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     //                                                                      ----------------
 
     @Test
-    public void test_search_warnsOnceWhenExactModeIsUsed() {
+    public void test_search_logsExactModeAtDebugOnEveryQuery() {
         final LogCapturingAppender appender = LogCapturingAppender.attach(SemanticChunkSearcher.class);
         try {
             final GuardedSearcher guarded = new EmptyResponseSearcher();
             for (int i = 0; i < 2; i++) {
                 guarded.search("plain query", new StubSearchRequestParams(0, 10), OptionalThing.empty());
             }
-            final List<String> exactWarnings =
-                    appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("exact vector scan")).toList();
-            assertEquals(1, exactWarnings.size(), "the exact-mode fallback must warn exactly once: " + appender.messagesAt(Level.WARN));
-            assertTrue(exactWarnings.get(0).contains("content_chunker.search.enabled"),
-                    "the warning must name the remedy: " + exactWarnings.get(0));
+            assertTrue(appender.messagesAt(Level.WARN).stream().noneMatch(m -> m.contains("exact vector scan")),
+                    "the exact mode is a per-query notice, not a WARN: " + appender.messagesAt(Level.WARN));
+            final List<String> exactNotices =
+                    appender.messagesAt(Level.DEBUG).stream().filter(m -> m.contains("exact vector scan")).toList();
+            assertEquals(2, exactNotices.size(), "every exact-mode query must be logged: " + appender.messagesAt(Level.DEBUG));
+            assertTrue(exactNotices.get(0).contains("content_chunker.search.enabled"),
+                    "the notice must name the remedy: " + exactNotices.get(0));
         } finally {
             appender.detach();
         }
@@ -433,6 +465,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
             guarded.search("plain query", new StubSearchRequestParams(0, 10), OptionalThing.empty());
             assertTrue(appender.messagesAt(Level.WARN).stream().noneMatch(m -> m.contains("exact vector scan")),
                     appender.messagesAt(Level.WARN).toString());
+            assertTrue(appender.messagesAt(Level.DEBUG).stream().noneMatch(m -> m.contains("exact vector scan")),
+                    appender.messagesAt(Level.DEBUG).toString());
         } finally {
             appender.detach();
         }

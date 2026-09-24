@@ -16,7 +16,6 @@
 package org.codelibs.fess.indexer;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,9 +45,6 @@ public class DocBoostMatcher {
     /** The script engine type used for expression evaluation */
     private final String scriptType;
 
-    /** Guards the missing-engine warning so a rule reports it once, not once per document. */
-    private final AtomicBoolean missingEngineReported = new AtomicBoolean();
-
     /**
      * Default constructor that creates a DocBoostMatcher with default script type.
      * Uses the default script engine as defined in Constants.DEFAULT_SCRIPT.
@@ -76,6 +72,25 @@ public class DocBoostMatcher {
      */
     public String getScriptType() {
         return scriptType;
+    }
+
+    /**
+     * Checks that a script engine is registered for this rule's script type, and warns when none
+     * is. Without the engine the rule matches nothing, ever, and no expression the administrator
+     * writes can change that -- a rule saved before 15.9 carries no script type and so runs on
+     * Groovy, which now ships as a plugin. The crawler calls this each time it loads the rule, so
+     * every crawl that runs with the engine missing reports it, without a line per crawled
+     * document.
+     *
+     * @return true when a script engine is registered for the script type
+     */
+    public boolean checkScriptEngine() {
+        if (ComponentUtil.getScriptEngineFactory().hasScriptEngine(scriptType)) {
+            return true;
+        }
+        logger.warn("No script engine is registered for {}, so the document boost rule \"{}\" boosts nothing."
+                + " Install the plugin providing it, such as fess-script-groovy for groovy.", scriptType, matchExpression);
+        return false;
     }
 
     /**
@@ -110,9 +125,9 @@ public class DocBoostMatcher {
      * <p>
      * A missing engine is the other thing entirely. The rule then matches nothing, ever, and no
      * expression the administrator writes can change that -- a rule saved before 15.9 carries no
-     * script type and so runs on Groovy, which now ships as a plugin. Left at debug it looks
-     * exactly like a rule whose expressions never fit, so it is reported at warn instead, once
-     * per rule rather than once per crawled document.
+     * script type and so runs on Groovy, which now ships as a plugin. That is reported at warn by
+     * {@link #checkScriptEngine()} when the rule is loaded for a crawl; here, on every crawled
+     * document, it is only logged at debug.
      * </p>
      *
      * @param expression the expression to evaluate
@@ -122,9 +137,9 @@ public class DocBoostMatcher {
     protected Object evaluate(final String expression, final Map<String, Object> map) {
         final ScriptEngineFactory scriptEngineFactory = ComponentUtil.getScriptEngineFactory();
         if (!scriptEngineFactory.hasScriptEngine(scriptType)) {
-            if (missingEngineReported.compareAndSet(false, true)) {
-                logger.warn("No script engine is registered for {}, so the document boost rule \"{}\" boosts nothing."
-                        + " Install the plugin providing it, such as fess-script-groovy for groovy.", scriptType, matchExpression);
+            if (logger.isDebugEnabled()) {
+                logger.debug("No script engine is registered for {}; skipping the document boost rule \"{}\".", scriptType,
+                        matchExpression);
             }
             return null;
         }

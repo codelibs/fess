@@ -439,7 +439,9 @@ public class WebFsIndexHelper {
         indexUpdater.setDaemon(true);
         indexUpdater.setCrawlerList(crawlerList);
         getAvailableBoostDocumentRuleList().forEach(rule -> {
-            indexUpdater.addDocBoostMatcher(new org.codelibs.fess.indexer.DocBoostMatcher(rule));
+            final org.codelibs.fess.indexer.DocBoostMatcher docBoostMatcher = new org.codelibs.fess.indexer.DocBoostMatcher(rule);
+            docBoostMatcher.checkScriptEngine();
+            indexUpdater.addDocBoostMatcher(docBoostMatcher);
         });
         indexUpdater.start();
 

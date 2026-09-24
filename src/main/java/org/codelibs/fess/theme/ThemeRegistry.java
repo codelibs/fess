@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -87,23 +86,6 @@ public class ThemeRegistry {
 
     private volatile Snapshot snapshot = new Snapshot(Map.of(), null);
     private Path themesDirOverride; // test seam
-
-    /**
-     * Latches on the first servlet-context lookup failure inside
-     * {@link #resolveThemesDir()} so operators see a single WARN instead of one per
-     * reload when the container is not yet ready (or has been torn down).
-     * Subsequent failures degrade to DEBUG. Instance field (not static) so a
-     * redeploy re-emits the WARN.
-     */
-    private final AtomicBoolean themesDirFirstFailure = new AtomicBoolean(false);
-
-    /**
-     * Latches on the first system-property lookup failure inside
-     * {@link #lookupDefaultThemeName()} so operators see a single WARN instead of
-     * one per reload when the config layer is unavailable. Subsequent failures
-     * degrade to DEBUG.
-     */
-    private final AtomicBoolean defaultThemeFirstFailure = new AtomicBoolean(false);
 
     /**
      * Remembers the unknown {@code theme.default} value already reported, so it is logged once
@@ -191,12 +173,12 @@ public class ThemeRegistry {
             }
         } catch (final Exception e) {
             // Servlet context not available (e.g. unit tests, very early startup, or
-            // post-shutdown). Warn once so operators notice a real misconfiguration
-            // but avoid flooding the log on every reload.
-            if (themesDirFirstFailure.compareAndSet(false, true)) {
+            // post-shutdown). Reported on every reload that hits it.
+            if (logger.isDebugEnabled()) {
                 logger.warn("Servlet context unavailable while resolving themes dir; falling back to configured path={}", configured, e);
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("Servlet context unavailable while resolving themes dir; configured={}", configured, e);
+            } else {
+                logger.warn("Servlet context unavailable while resolving themes dir; falling back to configured path={}: {}", configured,
+                        e.getMessage());
             }
         }
         return p;
@@ -287,12 +269,11 @@ public class ThemeRegistry {
             return fessConfig.getDefaultTheme();
         } catch (final Exception e) {
             // System-property lookup can fail when the config layer is mid-init or
-            // the system-properties index is unreachable. Warn once so the
-            // condition is visible without spamming the log on every reload.
-            if (defaultThemeFirstFailure.compareAndSet(false, true)) {
+            // the system-properties index is unreachable. Reported on every reload that hits it.
+            if (logger.isDebugEnabled()) {
                 logger.warn("Failed to read default theme system property; key={}", Constants.DEFAULT_THEME_PROPERTY, e);
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to read default theme system property; key={}", Constants.DEFAULT_THEME_PROPERTY, e);
+            } else {
+                logger.warn("Failed to read default theme system property; key={}: {}", Constants.DEFAULT_THEME_PROPERTY, e.getMessage());
             }
             return null;
         }

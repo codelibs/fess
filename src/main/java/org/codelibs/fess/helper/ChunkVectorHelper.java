@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -65,16 +64,6 @@ import jakarta.annotation.PostConstruct;
 public class ChunkVectorHelper {
 
     private static final Logger logger = LogManager.getLogger(ChunkVectorHelper.class);
-
-    /**
-     * Tracks which {@code key=value} combinations {@link #getKnnConfigToken(String, String, Set)}/
-     * {@link #getKnnConfigPositiveInt(String, String, int)} have already WARNed about, so a single
-     * misconfigured value only logs once per component lifetime instead of once per call. Both
-     * methods are reached from the query path ({@code SemanticChunkSearcher#resolveEngineMinScore})
-     * with no caching of their own, so an invalid value would otherwise re-WARN on every ann-mode
-     * search request, not just once at startup.
-     */
-    private final Set<String> warnedInvalidConfigValues = ConcurrentHashMap.newKeySet();
 
     /** Sub-field of {@link Constants#CONTENT_CHUNK_VECTOR_FIELD} holding the knn_vector value. */
     public static final String VECTOR_SUBFIELD = "vector";
@@ -635,9 +624,8 @@ public class ChunkVectorHelper {
 
     /**
      * Reads a token-style knn query-time config value, rejecting anything outside the allowed set.
-     * WARNs at most once per distinct invalid {@code key=value} combination (see {@link
-     * #warnedInvalidConfigValues}), since this is reached from the query path on every ann-mode
-     * search request with no caching of its own.
+     * WARNs on every call that reads an invalid value, which on the query path means every
+     * ann-mode search request until the value is fixed.
      *
      * @param key the system property key
      * @param defaultValue the fallback value
@@ -647,9 +635,7 @@ public class ChunkVectorHelper {
     protected String getKnnConfigToken(final String key, final String defaultValue, final Set<String> allowedValues) {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(key, defaultValue);
         if (value == null || !allowedValues.contains(value)) {
-            if (warnedInvalidConfigValues.add(key + "=" + value)) {
-                logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
-            }
+            logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
             return defaultValue;
         }
         return value;
@@ -682,8 +668,8 @@ public class ChunkVectorHelper {
      * "dimension": ""}, a non-numeric value, or a value the k-NN plugin itself rejects (e.g. above
      * its own {@link #MAX_KNN_DIMENSION} cap) would all 400 at {@code preparePutMapping}, which
      * {@code SearchEngineClient#addMapping} only surfaces as a single WARN, silently leaving the
-     * index with no proper mapping. WARNs at most once per distinct invalid {@code key=value}
-     * combination, matching {@link #getKnnConfigToken(String, String, Set)}.
+     * index with no proper mapping. WARNs on every call that reads an invalid value, matching
+     * {@link #getKnnConfigToken(String, String, Set)}.
      *
      * @param key the system property key
      * @param defaultValue the fallback value, itself a valid positive integer string within bounds
@@ -703,9 +689,7 @@ public class ChunkVectorHelper {
                 // fall through to the warn+default below
             }
         }
-        if (warnedInvalidConfigValues.add(key + "=" + value)) {
-            logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
-        }
+        logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
         return defaultValue;
     }
 
