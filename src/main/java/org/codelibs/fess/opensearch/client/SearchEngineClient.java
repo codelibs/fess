@@ -2245,6 +2245,8 @@ public class SearchEngineClient implements Client {
         protected FacetInfo facetInfo;
         /** Highlighting configuration */
         protected HighlightInfo highlightInfo;
+        /** Query naming the terms to highlight, when the request's own query cannot */
+        protected QueryBuilder highlightQuery;
         /** Hash of document for similarity search */
         protected String similarDocHash;
         /** Type of search request */
@@ -2367,6 +2369,21 @@ public class SearchEngineClient implements Client {
          */
         public SearchConditionBuilder highlightInfo(final HighlightInfo highlightInfo) {
             this.highlightInfo = highlightInfo;
+            return this;
+        }
+
+        /**
+         * Sets the query that names the terms to highlight.
+         *
+         * <p>Leave it unset unless the request's query will be replaced by one the highlighter
+         * cannot read terms from. Unset, the search engine highlights with the request's query,
+         * which it has already parsed.</p>
+         *
+         * @param highlightQuery the highlight query, or null to highlight with the request's query
+         * @return this builder for method chaining
+         */
+        public SearchConditionBuilder highlightQuery(final QueryBuilder highlightQuery) {
+            this.highlightQuery = highlightQuery;
             return this;
         }
 
@@ -2640,6 +2657,9 @@ public class SearchEngineClient implements Client {
                             .noMatchSize(noMatchSize)
                             .order(order)
                             .phraseLimit(phraseLimit)).encoder(encoder)));
+            if (highlightQuery != null) {
+                highlightBuilder.highlightQuery(highlightQuery);
+            }
             searchRequestBuilder.highlighter(highlightBuilder);
         }
 

@@ -43,6 +43,7 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.action.search.SearchResponse;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.common.document.DocumentField;
 import org.codelibs.fesen.opensearch.search.SearchHit;
@@ -227,6 +228,21 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
      */
     protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
+        return createSearchCondition(query, params, userBean, null);
+    }
+
+    /**
+     * Creates a search condition for the OpenSearch request, naming the terms to highlight.
+     *
+     * @param query the search query string
+     * @param params the search request parameters
+     * @param userBean the optional user bean for access control
+     * @param highlightQuery the query naming the terms to highlight, or null to highlight with
+     *            the request's own query
+     * @return the search condition for the request
+     */
+    protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
+            final OptionalThing<FessUserBean> userBean, final QueryBuilder highlightQuery) {
         return searchRequestBuilder -> {
             ComponentUtil.getQueryHelper().processSearchPreference(searchRequestBuilder, userBean, query);
             return SearchConditionBuilder.builder(searchRequestBuilder)
@@ -236,6 +252,7 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
                     .facetInfo(params.getFacetInfo())
                     .geoInfo(params.getGeoInfo())
                     .highlightInfo(params.getHighlightInfo())
+                    .highlightQuery(highlightQuery)
                     .similarDocHash(params.getSimilarDocHash())
                     .responseFields(params.getResponseFields())
                     .searchRequestType(params.getType())

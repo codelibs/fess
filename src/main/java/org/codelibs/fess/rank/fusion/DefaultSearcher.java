@@ -96,7 +96,12 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             return Optional.empty();
         }
         try {
-            final SearchResult searchResult = execute(params, fuse(createSearchCondition(query, params, userBean), subQueries, pipeline));
+            // The fast vector highlighter, the default one, reads no terms out of a hybrid query,
+            // so the fused request names the terms to highlight itself.
+            final QueryBuilder highlightQuery =
+                    params.getHighlightInfo() != null ? ComponentUtil.getQueryHelper().buildHighlightQuery(query) : null;
+            final SearchResult searchResult =
+                    execute(params, fuse(createSearchCondition(query, params, userBean, highlightQuery), subQueries, pipeline));
             warnIfNotNormalized(searchResult);
             return Optional.of(searchResult);
         } catch (final Exception e) {

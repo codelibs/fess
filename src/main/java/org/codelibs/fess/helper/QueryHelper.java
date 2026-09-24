@@ -18,7 +18,9 @@ package org.codelibs.fess.helper;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,7 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.Query;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -47,8 +50,11 @@ import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchNoneQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilderVisitor;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.WithFieldName;
 import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -118,14 +124,7 @@ public class QueryHelper {
      * @return a fully constructed QueryContext ready for OpenSearch execution
      */
     public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {
-        String q;
-        if (additionalQuery != null && StringUtil.isNotBlank(query)) {
-            q = query + " " + additionalQuery;
-        } else {
-            q = query;
-        }
-
-        final QueryContext queryContext = new QueryContext(q, true);
+        final QueryContext queryContext = new QueryContext(appendAdditionalQuery(query), true);
         buildBaseQuery(queryContext, context);
         buildBoostQuery(queryContext);
         buildRoleQuery(queryContext, searchRequestType);
@@ -135,6 +134,73 @@ public class QueryHelper {
             queryContext.addSorts(defaultSortBuilders);
         }
         return queryContext;
+    }
+
+    /**
+     * Appends the configured additional query to the user's query string.
+     *
+     * @param query the user's search query string
+     * @return the query string to parse
+     */
+    protected String appendAdditionalQuery(final String query) {
+        if (additionalQuery != null && StringUtil.isNotBlank(query)) {
+            return query + " " + additionalQuery;
+        }
+        return query;
+    }
+
+    /**
+     * Builds a query that names only the terms the highlighter should mark.
+     *
+     * <p>The query string is parsed and converted exactly as {@link #build} does it, so the
+     * terms and their analysis match the keyword search. Only the clauses on the highlighted
+     * fields are kept, gathered into one disjunction. Excluded terms, other fields, the permission
+     * and virtual host filters, and the boost functions are dropped: they mark nothing, and the
+     * search engine would otherwise parse them again on every shard, and the fast vector
+     * highlighter would expand their wildcard and fuzzy terms against the index.</p>
+     *
+     * @param query the user's search query string
+     * @return the highlight query, which matches nothing when no clause targets a highlighted field
+     * @throws InvalidQueryException if the query string cannot be parsed
+     */
+    public QueryBuilder buildHighlightQuery(final String query) {
+        // not Set.of: query.additional.highlighted.fields may repeat a field
+        final Set<String> fields = new HashSet<>(Arrays.asList(ComponentUtil.getQueryFieldConfig().getHighlightedFields()));
+        final QueryContext queryContext = new QueryContext(appendAdditionalQuery(query), false);
+        final QueryBuilder queryBuilder;
+        try {
+            final Query parsedQuery = getQueryParser().parse(queryContext.getQueryString());
+            queryBuilder = ComponentUtil.getQueryProcessor().execute(queryContext, parsedQuery, 1.0f);
+        } catch (final QueryParseException e) {
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid query: " + queryContext.getQueryString(), e);
+        }
+        final List<QueryBuilder> clauses = new ArrayList<>();
+        if (queryBuilder != null) {
+            queryBuilder.visit(new QueryBuilderVisitor() {
+                @Override
+                public void accept(final QueryBuilder qb) {
+                    if (qb instanceof final WithFieldName withFieldName && fields.contains(withFieldName.fieldName())) {
+                        clauses.add(qb);
+                    }
+                }
+
+                @Override
+                public QueryBuilderVisitor getChildVisitor(final Occur occur) {
+                    return occur == Occur.MUST_NOT ? NO_OP_VISITOR : this;
+                }
+            });
+        }
+        if (clauses.isEmpty()) {
+            // Nothing to mark, and saying so keeps the highlighter from reading the request's query.
+            return new MatchNoneQueryBuilder();
+        }
+        if (clauses.size() == 1) {
+            return clauses.get(0);
+        }
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        clauses.forEach(boolQuery::should);
+        return boolQuery;
     }
 
     /**

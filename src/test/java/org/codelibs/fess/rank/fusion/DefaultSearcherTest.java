@@ -15,18 +15,26 @@
  */
 package org.codelibs.fess.rank.fusion;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
+import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
+import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBuilder;
 import org.codelibs.fess.opensearch.query.HybridQueryBuilder;
+import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -143,6 +151,90 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         final Map<String, Object> pipeline = searcher.buildPipelineSource(List.of("default", "semantic_chunk"));
         assertFalse(searcher.fuse(requestBuilder -> false, List.of(subQuery("semantic_chunk")), pipeline).build(builder));
         assertNull(builder.request().source(), "a refused request must not be built up any further");
+    }
+
+    @Test
+    public void test_fuse_highlightsWithTheHighlightQuery() {
+        // no givenConfig: the keyword condition reads far more of the configuration than rank
+        // fusion does, so these run on the shipped one
+        givenKeywordQuery(QueryBuilders.boolQuery()
+                .must(QueryBuilders.matchQuery("content", "opensearch"))
+                .filter(QueryBuilders.termQuery("role", "guest")));
+        final DefaultSearcher searcher = new DefaultSearcher();
+        final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
+        final SearchCondition<SearchRequestBuilder> base = requestBuilder -> SearchConditionBuilder.builder(requestBuilder)
+                .query("opensearch")
+                .highlightInfo(new HighlightInfo())
+                .highlightQuery(QueryBuilders.matchPhraseQuery("content", "opensearch"))
+                .build();
+        final Map<String, Object> pipeline = searcher.buildPipelineSource(List.of("default", "semantic_chunk"));
+        assertTrue(searcher.fuse(base, List.of(subQuery("semantic_chunk")), pipeline).build(builder));
+
+        final String json = builder.request().source().toString().replaceAll("\\s", "");
+        assertTrue(json.contains("\"hybrid\":{"), json);
+        // the fast vector highlighter reads no terms out of a hybrid query, so the fused request
+        // names the terms to highlight, and only those: no permission filter
+        final String highlight = json.substring(json.indexOf("\"highlight\":{"));
+        assertTrue(highlight.contains("\"highlight_query\":{\"match_phrase\":{\"content\""), json);
+        assertFalse(highlight.contains("\"role\""), json);
+    }
+
+    @Test
+    public void test_build_namesNoHighlightQueryByDefault() {
+        givenKeywordQuery(QueryBuilders.matchQuery("content", "opensearch"));
+        final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
+        assertTrue(SearchConditionBuilder.builder(builder).query("opensearch").highlightInfo(new HighlightInfo()).build());
+
+        // the search engine highlights with the request's own query, already parsed, so naming
+        // it again would only add work
+        final String json = builder.request().source().toString().replaceAll("\\s", "");
+        assertTrue(json.contains("\"highlight\":{"), json);
+        assertFalse(json.contains("\"highlight_query\""), json);
+    }
+
+    @Test
+    public void test_searchWithSubQueries_buildsTheHighlightQueryOnlyWhenHighlighting() {
+        // made before givenConfig, which leaves out the highlight settings
+        final HighlightInfo highlightInfo = new HighlightInfo();
+        givenConfig(true, "rrf", "");
+        givenKeywordQuery(QueryBuilders.matchQuery("content", "opensearch"));
+        final List<QueryBuilder> highlightQueries = new ArrayList<>();
+        final DefaultSearcher searcher = new DefaultSearcher() {
+            @Override
+            protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
+                    final OptionalThing<FessUserBean> userBean, final QueryBuilder highlightQuery) {
+                highlightQueries.add(highlightQuery);
+                return requestBuilder -> true;
+            }
+
+            @Override
+            protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
+                return SearchResult.create().build();
+            }
+        };
+
+        searcher.searchWithSubQueries("opensearch", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")));
+        assertNull(highlightQueries.get(0));
+        assertNull(highlightQueryString, "nothing is highlighted, so there is nothing to build");
+
+        searcher.searchWithSubQueries("opensearch", params(0, 10, null, highlightInfo), OptionalThing.empty(),
+                List.of(subQuery("semantic_chunk")));
+        assertEquals("opensearch", highlightQueryString);
+        assertEquals(QueryBuilders.matchPhraseQuery("content", "opensearch"), highlightQueries.get(1));
+    }
+
+    @Test
+    public void test_fuse_addsNoHighlighterWhenNoneWasRequested() {
+        givenKeywordQuery(QueryBuilders.matchQuery("content", "opensearch"));
+        final DefaultSearcher searcher = new DefaultSearcher();
+        final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
+        final SearchCondition<SearchRequestBuilder> base =
+                requestBuilder -> SearchConditionBuilder.builder(requestBuilder).query("opensearch").build();
+        final Map<String, Object> pipeline = searcher.buildPipelineSource(List.of("default", "semantic_chunk"));
+        assertTrue(searcher.fuse(base, List.of(subQuery("semantic_chunk")), pipeline).build(builder));
+
+        final String json = builder.request().source().toString().replaceAll("\\s", "");
+        assertFalse(json.contains("\"highlight\""), json);
     }
 
     // -------------------------------------------------------------------------------------
@@ -272,6 +364,32 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         });
     }
 
+    private String highlightQueryString;
+
+    /**
+     * Stands in for the query parser, so that the keyword condition builds the given query
+     * without the query parser's own configuration.
+     */
+    private void givenKeywordQuery(final QueryBuilder keywordQuery) {
+        ComponentUtil.register(new QueryHelper() {
+            @Override
+            public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {
+                final QueryContext queryContext = new QueryContext(query, false);
+                queryContext.setQueryBuilder(keywordQuery);
+                return queryContext;
+            }
+
+            @Override
+            public QueryBuilder buildHighlightQuery(final String query) {
+                highlightQueryString = query;
+                return QueryBuilders.matchPhraseQuery("content", query);
+            }
+        }, "queryHelper");
+        final QueryFieldConfig queryFieldConfig = new QueryFieldConfig();
+        queryFieldConfig.setHighlightedFields(new String[] { "content" });
+        ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+    }
+
     private static QueryBuilder subQuery(final String name) {
         return QueryBuilders.matchAllQuery().queryName(name);
     }
@@ -286,6 +404,10 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     private static SearchRequestParams params(final int start, final int size, final String sort) {
+        return params(start, size, sort, null);
+    }
+
+    private static SearchRequestParams params(final int start, final int size, final String sort, final HighlightInfo highlightInfo) {
         return new SearchRequestParams() {
             @Override
             public String getQuery() {
@@ -319,7 +441,7 @@ public class DefaultSearcherTest extends UnitFessTestCase {
 
             @Override
             public HighlightInfo getHighlightInfo() {
-                return null;
+                return highlightInfo;
             }
 
             @Override
