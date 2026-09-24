@@ -43,6 +43,10 @@
 		class="org.codelibs.fess.query.TermRangeQueryCommand">
 		<postConstruct name="register"></postConstruct>
 	</component>
+	<component name="markedQueryCommand"
+		class="org.codelibs.fess.query.MarkedQueryCommand">
+		<postConstruct name="register"></postConstruct>
+	</component>
 	<component name="wildcardQueryCommand"
 		class="org.codelibs.fess.query.WildcardQueryCommand">
 		<property name="lowercaseWildcard">false</property>

@@ -203,7 +203,11 @@ public class SearchAction extends FessSearchAction {
             buildFormParams(form);
             form.lang = searchHelper.getLanguages(request, form);
             final WebRenderData renderData = new WebRenderData();
+            form.enableRedirect();
             searchHelper.search(form, renderData, getUserBean());
+            if (renderData.getRedirectUrl() != null) {
+                return HtmlResponse.fromRedirectPathAsIs(renderData.getRedirectUrl());
+            }
             return asHtml(virtualHost(path_SearchJsp)).renderWith(data -> {
                 if (form.hasConditionQuery()) {
                     form.q = renderData.getSearchQuery();

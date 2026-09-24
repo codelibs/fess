@@ -104,7 +104,17 @@ public class SearchHandler {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final SearchRenderData data = new SearchRenderData();
             final V2JsonRequestParams params = new V2JsonRequestParams(request, fessConfig);
+            params.enableRedirect();
             searchHelper.search(params, data, OptionalThing.empty());
+            // A search request rewriter can send the search elsewhere (e.g. a bang to another
+            // search engine); the client is told where instead of being given results.
+            if (data.getRedirectUrl() != null) {
+                final Map<String, Object> payload = new LinkedHashMap<>();
+                payload.put("q", params.getQuery());
+                payload.put("redirect_url", data.getRedirectUrl());
+                ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
+                return;
+            }
             final Map<String, Object> payload = buildPayload(params.getQuery(), data);
             // Evaluated per search, like the JSP page's warning (FessSearchAction.hookBefore): a user
             // whose group and role permissions are still loading or failed sees fewer results.

@@ -123,6 +123,11 @@ paths:
       description: |-
         Mirrors the v1 `/documents` shape but emits the v2 envelope. Field
         names inside the payload remain snake_case.
+
+        A plugin can send a search elsewhere instead of running it (for
+        example a DuckDuckGo-style bang such as `!g`). The payload then holds
+        only `q` and `redirect_url`, and the client is expected to navigate to
+        `redirect_url`.
       operationId: searchV2
       parameters:
         - { $ref: '#/components/parameters/Q' }
@@ -240,7 +245,7 @@ paths:
           schema: { type: string, example: 10km }
       responses:
         '200':
-          description: Search executed.
+          description: Search executed, or redirected by a plugin (see `redirect_url`).
           content:
             application/json:
               schema:
@@ -1155,6 +1160,13 @@ components:
             - type: object
               properties:
                 q: { type: string, nullable: true }
+                redirect_url:
+                  type: string
+                  format: uri
+                  description: |-
+                    Present only when a plugin sent the search elsewhere instead of
+                    running it: an absolute http(s) URL for the client to navigate to.
+                    The payload then holds only `q` and `redirect_url`.
                 query_id: { type: string }
                 exec_time: { type: string, description: 'Elapsed time in seconds, as a decimal string.' }
                 query_time: { type: integer, format: int64 }

@@ -92,6 +92,9 @@ public class SearchRenderData {
     /** Unique identifier for this search query session. */
     protected String queryId;
 
+    /** The URL the search was sent to instead of being run, or null when it ran. */
+    protected String redirectUrl;
+
     /**
      * Default constructor for creating a new SearchRenderData instance.
      */
@@ -286,6 +289,24 @@ public class SearchRenderData {
      */
     public void setQueryId(final String queryId) {
         this.queryId = queryId;
+    }
+
+    /**
+     * Sets the URL the search was sent to instead of being run.
+     *
+     * @param redirectUrl The redirect URL
+     */
+    public void setRedirectUrl(final String redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
+
+    /**
+     * Gets the URL the search was sent to instead of being run.
+     *
+     * @return The redirect URL, or null when the search ran
+     */
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 
     /**

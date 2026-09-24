@@ -353,6 +353,32 @@ public class SearchHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * A redirected search makes the handler answer with the URL instead of results.
+     */
+    @Test
+    public void test_search_redirectedSearchReturnsTheUrl() throws Exception {
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                assertTrue(searchRequestParams.isRedirectable(), "the v2 search follows redirects");
+                data.setRedirectUrl("https://www.google.com/search?q=" + searchRequestParams.getQuery().replace(" !g", ""));
+            }
+        }, "searchHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "airplane !g" });
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(body.contains("\"redirect_url\":\"https://www.google.com/search?q=airplane\""), body);
+        assertTrue(body.contains("\"q\":\"airplane !g\""), body);
+        assertFalse(body.contains("\"data\""), body);
+    }
+
+    /**
      * The offset ceiling has its own message; it used to arrive as the exception's own text.
      */
     @Test
