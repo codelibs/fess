@@ -5667,7 +5667,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.response.fields'. <br>
      * The value is, e.g.  <br>
-     * comment: Additional response fields for queries.
+     * comment: <br>
+     * Additional fields fetched from the index for search results.<br>
+     * The search API returns a field added here only if it is also listed in<br>
+     * query.additional.api.response.fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalResponseFields();
@@ -5675,7 +5678,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
-     * comment: Additional response fields for queries.
+     * comment: <br>
+     * Additional fields fetched from the index for search results.<br>
+     * The search API returns a field added here only if it is also listed in<br>
+     * query.additional.api.response.fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5686,7 +5692,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g.  <br>
      * comment: <br>
      * Additional API response fields for queries.<br>
-     * This key only appends fields to the v2 API response allow-list (add-only).<br>
+     * This key only appends fields to the v2 API response allow-list (add-only); it<br>
+     * does not fetch them. A field must also be fetched: add it to<br>
+     * query.additional.response.fields for the search API, or to<br>
+     * query.additional.scroll.response.fields for the scroll API.<br>
      * Do not add ACL or internal fields (for example role, virtual_host); adding<br>
      * them would expose access-control information in the search API response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -5698,7 +5707,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * The value is, e.g.  <br>
      * comment: <br>
      * Additional API response fields for queries.<br>
-     * This key only appends fields to the v2 API response allow-list (add-only).<br>
+     * This key only appends fields to the v2 API response allow-list (add-only); it<br>
+     * does not fetch them. A field must also be fetched: add it to<br>
+     * query.additional.response.fields for the search API, or to<br>
+     * query.additional.scroll.response.fields for the scroll API.<br>
      * Do not add ACL or internal fields (for example role, virtual_host); adding<br>
      * them would expose access-control information in the search API response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -5709,7 +5721,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.scroll.response.fields'. <br>
      * The value is, e.g.  <br>
-     * comment: Additional scroll response fields for queries.
+     * comment: <br>
+     * Additional fields fetched from the index for scroll search results.<br>
+     * The scroll API returns a field added here only if it is also listed in<br>
+     * query.additional.api.response.fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalScrollResponseFields();
@@ -5717,7 +5732,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.scroll.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
-     * comment: Additional scroll response fields for queries.
+     * comment: <br>
+     * Additional fields fetched from the index for scroll search results.<br>
+     * The scroll API returns a field added here only if it is also listed in<br>
+     * query.additional.api.response.fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
