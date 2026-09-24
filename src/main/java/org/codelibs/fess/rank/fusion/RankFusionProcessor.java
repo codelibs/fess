@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -78,9 +77,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * and provides a unified search interface.
  */
 public class RankFusionProcessor implements AutoCloseable {
-
-    /** One-time warn latch for a main searcher that cannot fuse in the search engine. */
-    protected final AtomicBoolean engineFusionUnsupportedWarned = new AtomicBoolean(false);
 
     private static final Logger logger = LogManager.getLogger(RankFusionProcessor.class);
 
@@ -248,11 +244,8 @@ public class RankFusionProcessor implements AutoCloseable {
     protected List<Map<String, Object>> searchWithEngineFusion(final RankFusionSearcher[] searchers, final String query,
             final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (!searchers[0].supportsEngineFusion()) {
-            if (engineFusionUnsupportedWarned.compareAndSet(false, true)) {
-                logger.warn(
-                        "{} cannot fuse other searchers into one request, so rank fusion is performed by Fess even though " + "{} is true.",
-                        searchers[0].getName(), FessConfig.RANK_FUSION_ENGINE_ENABLED);
-            }
+            logger.warn("{} cannot fuse other searchers into one request, so rank fusion is performed by Fess even though {} is true.",
+                    searchers[0].getName(), FessConfig.RANK_FUSION_ENGINE_ENABLED);
             return null;
         }
         // Decided before any branch is built: a search that is not fused runs every searcher

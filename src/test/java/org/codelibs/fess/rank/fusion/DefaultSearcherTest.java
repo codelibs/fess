@@ -15,12 +15,15 @@
  */
 package org.codelibs.fess.rank.fusion;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -29,19 +32,26 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBuilder;
 import org.codelibs.fess.opensearch.query.HybridQueryBuilder;
 import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.core.message.UserMessages;
+import org.codelibs.fesen.opensearch.OpenSearchStatusException;
 import org.codelibs.fesen.opensearch.action.search.SearchAction;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 public class DefaultSearcherTest extends UnitFessTestCase {
@@ -91,6 +101,43 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isEngineFusionApplicable_reportsEveryPageBeyondPaginationDepth() {
+        givenConfig(true, "rrf", "");
+        final DefaultSearcher searcher = new DefaultSearcher();
+        final int depth = searcher.getPaginationDepth();
+        final LogCapturingAppender log = LogCapturingAppender.attach(DefaultSearcher.class.getName(), Level.DEBUG);
+        try {
+            searcher.isEngineFusionApplicable(params(depth, 10, null), List.of(subQuery("semantic_chunk")));
+            searcher.isEngineFusionApplicable(params(depth, 10, null), List.of(subQuery("semantic_chunk")));
+            // an expected consequence of the configured depth, so it is reported at DEBUG, and
+            // for every such search rather than only the first one since startup
+            assertEquals(2, log.messagesAt(Level.DEBUG).stream().filter(m -> m.contains("rank.fusion.pagination_depth")).count());
+            assertTrue(log.eventsAt(Level.INFO).isEmpty(), log.renderedEvents().toString());
+        } finally {
+            log.detach();
+        }
+    }
+
+    @Test
+    public void test_warnIfNotNormalized_reportsEveryUnnormalizedResult() {
+        final DefaultSearcher searcher = new DefaultSearcher();
+        final SearchResult unnormalized = SearchResult.create().addDocument(Map.of(Constants.SCORE, -9.9E8f)).build();
+        final SearchResult normalized = SearchResult.create().addDocument(Map.of(Constants.SCORE, 0.5f)).build();
+        final LogCapturingAppender log = LogCapturingAppender.attach(DefaultSearcher.class.getName(), Level.INFO);
+        try {
+            searcher.warnIfNotNormalized(unnormalized);
+            searcher.warnIfNotNormalized(normalized);
+            searcher.warnIfNotNormalized(unnormalized);
+            // the cluster can be fixed and break again without a restart, so every occurrence is
+            // reported, not only the first one since startup
+            assertEquals(2, log.warnings().size(), log.renderedEvents().toString());
+            assertTrue(log.errors().isEmpty(), "the search is still answered, so this is not an error");
+        } finally {
+            log.detach();
+        }
+    }
+
+    @Test
     public void test_isEngineFusionApplicable_declinesTooManyBranches() {
         givenConfig(true, "rrf", "");
         final DefaultSearcher searcher = new DefaultSearcher();
@@ -111,9 +158,6 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         assertFalse(searcher.canFuse(params(depth, 10, null), List.of("semantic_chunk")),
                 "a page past the depth is known not to be fused before any branch is built");
         assertFalse(searcher.canFuse(params(0, 10, "last_modified.desc"), List.of("semantic_chunk")));
-        searcher.engineFusionDisabled.set(true);
-        assertFalse(searcher.canFuse(params(0, 10, null), List.of("semantic_chunk")),
-                "once the engine has refused a fused request, no branch should be built for one");
     }
 
     @Test
@@ -136,6 +180,98 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         assertTrue(new LegacySearcher()
                 .searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
                 .isEmpty());
+    }
+
+    @Test
+    public void test_searchWithSubQueries_queryErrorPropagatesWithoutDisablingFusion() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        searcher.failure = engineError("search_phase_execution_exception",
+                "all shards failed; failed to parse date field [notadate] with format [strict_date_optional_time||epoch_millis]");
+        // the caller turns this into the same error, and the same escaped retry, that a search
+        // without engine-side fusion gets for this query
+        assertThrows(InvalidQueryException.class,
+                () -> searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        searcher.failure = null;
+        assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                .isPresent(), "one user's invalid query must not turn engine-side fusion off for everyone else");
+        assertEquals(2, searcher.calls);
+    }
+
+    @Test
+    public void test_searchWithSubQueries_transientErrorDoesNotDisableFusion() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        searcher.failure = engineError("index_closed_exception", "closed");
+        assertThrows(InvalidQueryException.class,
+                () -> searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        searcher.failure = new IllegalStateException("The keyword condition did not produce a query to fuse.");
+        // anything that is not the engine's answer is left to the caller, which falls back to
+        // Fess for this search only
+        assertThrows(IllegalStateException.class,
+                () -> searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        searcher.failure = null;
+        assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                .isPresent(), "a closed index or a failed shard must not turn engine-side fusion off until restart");
+        assertEquals(3, searcher.calls);
+    }
+
+    @Test
+    public void test_searchWithSubQueries_hybridUnsupportedFallsBackAndRecovers() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        final LogCapturingAppender log = LogCapturingAppender.attach(DefaultSearcher.class.getName(), Level.INFO);
+        try {
+            // what a cluster without the Neural Search plugin answers to a hybrid query
+            searcher.failure = engineError("parsing_exception", "unknown query [hybrid]");
+            assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                    .isEmpty(), "a cluster that cannot run hybrid queries is answered by Fess-side fusion");
+            assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                    .isEmpty());
+            // the plugin is installed: the next search is fused again without restarting Fess
+            searcher.failure = null;
+            assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                    .isPresent(), "fusion must come back by itself once the cluster can run it");
+            assertEquals(3, searcher.calls);
+
+            final List<LogEvent> warnings = log.eventsAt(Level.WARN);
+            assertEquals(2, warnings.size(), log.renderedEvents().toString());
+            assertTrue(warnings.get(0).getMessage().getFormattedMessage().contains("unknown query [hybrid]"));
+            assertNull(warnings.get(0).getThrown(), "the stack trace is for debug logging only");
+            assertTrue(log.errors().isEmpty(), "falling back is not an error that needs someone to act");
+        } finally {
+            log.detach();
+        }
+    }
+
+    @Test
+    public void test_searchWithSubQueries_unsupportedCarriesTheStackTraceWhenDebugging() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        final LogCapturingAppender log = LogCapturingAppender.attach(DefaultSearcher.class.getName(), Level.DEBUG);
+        try {
+            searcher.failure = engineError("parsing_exception", "unknown query [hybrid]");
+            searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")));
+            final List<LogEvent> warnings = log.eventsAt(Level.WARN);
+            assertEquals(1, warnings.size(), log.renderedEvents().toString());
+            assertNotNull(warnings.get(0).getThrown());
+        } finally {
+            log.detach();
+        }
+    }
+
+    @Test
+    public void test_searchWithSubQueries_missingPipelineProcessorFallsBackPerSearch() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        // what a Neural Search plugin too old for the configured technique answers
+        searcher.failure = engineError("illegal_argument_exception", "Invalid processor type score-ranker-processor");
+        assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                .isEmpty());
+        searcher.failure = null;
+        assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                .isPresent(), "an upgraded plugin is used without restarting Fess");
+        assertEquals(2, searcher.calls);
     }
 
     // -------------------------------------------------------------------------------------
@@ -500,6 +636,32 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         final QueryFieldConfig queryFieldConfig = new QueryFieldConfig();
         queryFieldConfig.setHighlightedFields(new String[] { "content" });
         ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+    }
+
+    /**
+     * Builds the exception a failed search reaches the searcher as: the engine's error, as the
+     * HTTP client decodes it, wrapped by SearchEngineClient.
+     */
+    private static InvalidQueryException engineError(final String type, final String reason) {
+        final OpenSearchStatusException cause = new OpenSearchStatusException(
+                "OpenSearch exception [type=" + type + ", reason=" + reason + "]", RestStatus.BAD_REQUEST, null);
+        return new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+                "Failed to process the query.", cause);
+    }
+
+    /** A searcher whose fused request fails, or succeeds, as the test says. */
+    private static class ScriptedSearcher extends DefaultSearcher {
+        RuntimeException failure;
+        int calls;
+
+        @Override
+        protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
+            calls++;
+            if (failure != null) {
+                throw failure;
+            }
+            return SearchResult.create().build();
+        }
     }
 
     private static QueryBuilder subQuery(final String name) {

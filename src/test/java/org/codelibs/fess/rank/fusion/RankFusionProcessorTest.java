@@ -548,19 +548,6 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_engineFusion_doesNotBuildTheSubQueryOnceTheEngineRefusedFusion() throws Exception {
-        givenEngineFusion("");
-        final FusingMainSearcher main = new FusingMainSearcher();
-        main.engineFusionDisabled.set(true);
-        final CountingSubSearcher sub = new CountingSubSearcher();
-        try (RankFusionProcessor processor = newEngineFusionProcessor(main, sub)) {
-            processor.search("q", fusionParams(0), OptionalThing.empty());
-        }
-        assertEquals(0, sub.buildCount.get());
-        assertEquals(1, sub.searchCount.get());
-    }
-
-    @Test
     public void test_engineFusion_aSearchThatIsNotFusedDoesNotWarn() throws Exception {
         givenEngineFusion("");
         final LogCapturingAppender appender = LogCapturingAppender.attach(RankFusionProcessor.class);
@@ -574,14 +561,15 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_engineFusion_warnsOnceWhenTheMainSearcherCannotFuse() throws Exception {
+    public void test_engineFusion_warnsOnEverySearchWhenTheMainSearcherCannotFuse() throws Exception {
         givenEngineFusion("");
         final CountingSubSearcher sub = new CountingSubSearcher();
         final LogCapturingAppender appender = LogCapturingAppender.attach(RankFusionProcessor.class);
         try (RankFusionProcessor processor = newEngineFusionProcessor(new TestMainSearcher(100), sub)) {
             processor.search("q", fusionParams(0), OptionalThing.empty());
             processor.search("q", fusionParams(0), OptionalThing.empty());
-            assertEquals(1, appender.warnings().size(), appender.warnings().toString());
+            // reported for every search, so it is not lost after the first one since startup
+            assertEquals(2, appender.warnings().size(), appender.warnings().toString());
         } finally {
             appender.detach();
         }
