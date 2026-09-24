@@ -19,6 +19,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.api.FessApiAction;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
  * Abstract base class for admin API actions in Fess.
@@ -65,5 +67,23 @@ public abstract class FessApiAdminAction extends FessApiAction {
             }
             return false;
         }
+    }
+
+    /**
+     * Records the request in the audit log before the action runs, as the admin screens do.
+     * <p>
+     * This runs only after {@link #godHandPrologue(ActionRuntime)} has accepted the access token,
+     * so every administrative change made through this API leaves an {@code ACCESS} record. The
+     * user is the logged-in user when the request carries a session and {@code -} otherwise; the
+     * access token itself is never written.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     * @return the action response from the parent hook
+     */
+    @Override
+    public ActionResponse hookBefore(final ActionRuntime runtime) {
+        activityHelper.access(getUserBean(), runtime.getRequestPath(), runtime.getExecuteMethod().getName());
+        return super.hookBefore(runtime);
     }
 }
