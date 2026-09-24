@@ -186,8 +186,8 @@ public class RoleQueryHelper {
                     loggedIn[0] = true;
                     stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add));
                 }).orElse(() -> {
-                    if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
-                        throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
+                    if (isApiRequest && !hasAccessToken && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
+                        throw new InvalidAccessTokenException("invalid_token", "Access token is required.");
                     }
                     if (!hasAccessToken || roleSet.isEmpty()) {
                         roleSet.addAll(fessConfig.getSearchGuestRoleList());

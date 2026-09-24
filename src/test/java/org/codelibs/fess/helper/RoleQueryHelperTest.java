@@ -570,6 +570,109 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    private RoleQueryHelper createAnonymousRoleQueryHelper(final String... tokenPermissions) {
+        return new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
+                // Stands in for AccessTokenService: a registered token resolves to its permissions,
+                // and no token resolves to nothing.
+                if (!isApiRequest || tokenPermissions.length == 0) {
+                    return false;
+                }
+                for (final String permission : tokenPermissions) {
+                    roleSet.add(permission);
+                }
+                return true;
+            }
+
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                    final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                return org.dbflute.optional.OptionalThing.empty();
+            }
+        };
+    }
+
+    /**
+     * With {@code api.access.token.required=true}, an API request carrying a registered access token
+     * is answered with the token's permissions. It used to be refused because the check looked only
+     * for a login session.
+     */
+    @Test
+    public void test_build_accessTokenRequired_withToken() {
+        ComponentUtil.setFessConfig(new MockFessConfig() {
+            @Override
+            public boolean getApiAccessTokenRequiredAsBoolean() {
+                return true;
+            }
+        });
+        final RoleQueryHelper roleQueryHelper = createAnonymousRoleQueryHelper("token_role");
+        roleQueryHelper.init();
+
+        getMockRequest();
+
+        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.JSON);
+
+        assertTrue(roleSet.contains("token_role"), roleSet.toString());
+        for (final String guestRole : ComponentUtil.getFessConfig().getSearchGuestRoleList()) {
+            assertFalse(roleSet.contains(guestRole), "a token request must not be given the guest roles: " + roleSet);
+        }
+    }
+
+    /**
+     * With {@code api.access.token.required=true}, an API request with neither a login session nor
+     * an access token is still refused.
+     */
+    @Test
+    public void test_build_accessTokenRequired_withoutToken() {
+        ComponentUtil.setFessConfig(new MockFessConfig() {
+            @Override
+            public boolean getApiAccessTokenRequiredAsBoolean() {
+                return true;
+            }
+        });
+        final RoleQueryHelper roleQueryHelper = createAnonymousRoleQueryHelper();
+        roleQueryHelper.init();
+
+        getMockRequest();
+
+        try {
+            roleQueryHelper.build(SearchRequestType.JSON);
+            fail("an API request without an access token must be refused");
+        } catch (final org.codelibs.fess.exception.InvalidAccessTokenException e) {
+            // expected
+        }
+    }
+
+    /**
+     * {@code api.access.token.required} applies to the API only: the search screen still answers
+     * an anonymous visitor with the guest roles.
+     */
+    @Test
+    public void test_build_accessTokenRequired_searchScreen() {
+        ComponentUtil.setFessConfig(new MockFessConfig() {
+            @Override
+            public boolean getApiAccessTokenRequiredAsBoolean() {
+                return true;
+            }
+        });
+        final RoleQueryHelper roleQueryHelper = createAnonymousRoleQueryHelper();
+        roleQueryHelper.init();
+
+        getMockRequest();
+
+        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.SEARCH);
+
+        for (final String guestRole : ComponentUtil.getFessConfig().getSearchGuestRoleList()) {
+            assertTrue(roleSet.contains(guestRole), roleSet.toString());
+        }
+    }
+
     /**
      * The fallback must not reach a user who does have permissions: adding the guest roles to
      * everyone would hand every logged-in account whatever the guest role can read.
