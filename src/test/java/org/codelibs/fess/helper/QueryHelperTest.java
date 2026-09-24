@@ -607,6 +607,79 @@ public class QueryHelperTest extends UnitFessTestCase {
     // Additional test methods for improved coverage
 
     @Test
+    public void test_buildHighlightQuery() {
+        setQueryType("bool");
+        // only the clauses on the highlighted field, content: no title clause, no excluded term,
+        // and none of the function score, permission or virtual host wrapping build() adds
+        assertEquals("{\"bool\":{\"should\":[" //
+                + "{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}," //
+                + "{\"fuzzy\":{\"content\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}," //
+                + "{\"match_phrase\":{\"content\":{\"query\":\"QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}," //
+                + "{\"fuzzy\":{\"content\":{\"value\":\"QUERY2\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}]," //
+                + "\"adjust_pure_negative\":true,\"boost\":1.0}}", //
+                toJson(queryHelper.buildHighlightQuery("QUERY1 QUERY2 -QUERY3")));
+
+        assertEquals("{\"match_phrase\":{\"content\":{\"query\":\"QUERY\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}",
+                toJson(queryHelper.buildHighlightQuery("content:QUERY site:example.com")));
+
+        final String json = toJson(queryHelper.buildHighlightQuery("\"QUERY1 QUERY2\" QUE* Q*RY title:QUERY3"));
+        assertTrue(json.contains("{\"match_phrase\":{\"content\":{\"query\":\"QUERY1 QUERY2\""), json);
+        assertTrue(json.contains("{\"match_phrase_prefix\":{\"content\":{\"query\":\"que\""), json);
+        assertTrue(json.contains("{\"wildcard\":{\"content\":{\"wildcard\":\"q*ry\""), json);
+        assertFalse(json.contains("title"), json);
+        assertFalse(json.contains("QUERY3"), json);
+
+        setQueryType("dismax");
+        assertFalse(toJson(queryHelper.buildHighlightQuery("QUERY")).contains("dis_max"));
+    }
+
+    @Test
+    public void test_buildHighlightQuery_nothingToHighlight() {
+        setQueryType("bool");
+        // the highlight query replaces the request's query for the highlighter, so it has to
+        // match nothing rather than be left out
+        assertEquals("{\"match_none\":{\"boost\":1.0}}", toJson(queryHelper.buildHighlightQuery("title:QUERY")));
+        assertEquals("{\"match_none\":{\"boost\":1.0}}", toJson(queryHelper.buildHighlightQuery("allintitle:QUERY")));
+        assertEquals("{\"match_none\":{\"boost\":1.0}}", toJson(queryHelper.buildHighlightQuery("-QUERY")));
+    }
+
+    @Test
+    public void test_buildHighlightQuery_additionalHighlightedFields() {
+        setQueryType("bool");
+        queryFieldConfig.setHighlightedFields(new String[] { "content", "title" });
+        final String json = toJson(queryHelper.buildHighlightQuery("title:QUERY1 QUERY2"));
+        assertTrue(json.contains("{\"match_phrase\":{\"title\":{\"query\":\"QUERY1\""), json);
+        assertTrue(json.contains("{\"match_phrase\":{\"title\":{\"query\":\"QUERY2\""), json);
+        assertTrue(json.contains("{\"match_phrase\":{\"content\":{\"query\":\"QUERY2\""), json);
+        assertFalse(json.contains("{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\""), json);
+    }
+
+    @Test
+    public void test_buildHighlightQuery_repeatedHighlightedField() {
+        setQueryType("bool");
+        // query.additional.highlighted.fields=content repeats the default field
+        queryFieldConfig.setHighlightedFields(new String[] { "content", "content" });
+        assertEquals("{\"match_phrase\":{\"content\":{\"query\":\"QUERY\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}",
+                toJson(queryHelper.buildHighlightQuery("content:QUERY")));
+    }
+
+    @Test
+    public void test_buildHighlightQuery_invalidQuery() {
+        setQueryType("bool");
+        // the same exception the keyword search throws, so the caller treats both alike
+        try {
+            queryHelper.buildHighlightQuery("QUERY AND");
+            fail();
+        } catch (InvalidQueryException e) {
+            // expected
+        }
+    }
+
+    private static String toJson(final QueryBuilder queryBuilder) {
+        return queryBuilder.toString().replaceAll("\\s*\n\\s*", "").replaceAll("\" : ", "\":");
+    }
+
+    @Test
     public void test_getSortPrefix() {
         assertEquals("sort:", queryHelper.getSortPrefix());
     }
