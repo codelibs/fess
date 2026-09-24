@@ -16,8 +16,11 @@
 package org.codelibs.fess.rank.fusion;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.lucene.search.TotalHits.Relation;
 import org.codelibs.fess.entity.FacetInfo;
@@ -25,11 +28,18 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 public class RankFusionProcessorTest extends UnitFessTestCase {
 
@@ -494,6 +504,208 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
             } catch (final org.codelibs.fess.exception.InvalidAccessTokenException e) {
                 // expected
             }
+        }
+    }
+
+    @Test
+    public void test_engineFusion_buildsTheSubQueryOnceWhenFused() throws Exception {
+        givenEngineFusion("");
+        final FusingMainSearcher main = new FusingMainSearcher();
+        final CountingSubSearcher sub = new CountingSubSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, sub)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+        }
+        assertEquals(1, main.fusedCount.get());
+        assertEquals(1, sub.buildCount.get());
+        assertEquals(0, sub.searchCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_doesNotBuildTheSubQueryPastThePaginationDepth() throws Exception {
+        givenEngineFusion("");
+        final FusingMainSearcher main = new FusingMainSearcher();
+        final CountingSubSearcher sub = new CountingSubSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, sub)) {
+            // a second page of 10 reaches past the depth of 10, so the search is fused in Fess
+            processor.search("q", fusionParams(10), OptionalThing.empty());
+        }
+        assertEquals(0, main.fusedCount.get());
+        assertEquals(0, sub.buildCount.get(), "a branch built for a search that is not fused embeds the query twice");
+        assertEquals(1, sub.searchCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_doesNotBuildTheSubQueryWithUnusableWeights() throws Exception {
+        givenEngineFusion("fusing_main:0.5,counting_sub:0.4");
+        final FusingMainSearcher main = new FusingMainSearcher();
+        final CountingSubSearcher sub = new CountingSubSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, sub)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+        }
+        assertEquals(0, main.fusedCount.get());
+        assertEquals(0, sub.buildCount.get(), "weights that can never be used must be refused before a branch is built");
+        assertEquals(1, sub.searchCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_aSearchThatIsNotFusedDoesNotWarn() throws Exception {
+        givenEngineFusion("");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RankFusionProcessor.class);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(), new CountingSubSearcher())) {
+            processor.search("q", fusionParams(10), OptionalThing.empty());
+            // a page past the depth is a property of this search, not of the main searcher
+            assertTrue(appender.warnings().isEmpty(), appender.warnings().toString());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_engineFusion_warnsOnEverySearchWhenTheMainSearcherCannotFuse() throws Exception {
+        givenEngineFusion("");
+        final CountingSubSearcher sub = new CountingSubSearcher();
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RankFusionProcessor.class);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new TestMainSearcher(100), sub)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+            // reported for every search, so it is not lost after the first one since startup
+            assertEquals(2, appender.warnings().size(), appender.warnings().toString());
+        } finally {
+            appender.detach();
+        }
+        assertEquals(0, sub.buildCount.get());
+    }
+
+    private static SearchRequestParams fusionParams(final int start) {
+        return new TestSearchRequestParams(start, 10, 0) {
+            @Override
+            public Map<String, String[]> getConditions() {
+                return Map.of();
+            }
+        };
+    }
+
+    private RankFusionProcessor newEngineFusionProcessor(final RankFusionSearcher main, final RankFusionSearcher sub) {
+        final RankFusionProcessor processor = new RankFusionProcessor();
+        processor.setSearcher(main);
+        processor.register(sub);
+        processor.init();
+        return processor;
+    }
+
+    private void givenEngineFusion(final String weights) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isRankFusionEngineEnabled() {
+                return true;
+            }
+
+            @Override
+            public String getRankFusionCombinationTechnique() {
+                return "rrf";
+            }
+
+            @Override
+            public String getRankFusionCombinationWeights() {
+                return weights;
+            }
+
+            @Override
+            public Integer getRankFusionPaginationDepthAsInteger() {
+                return Integer.valueOf(10);
+            }
+
+            @Override
+            public Integer getRankFusionTimeoutAsInteger() {
+                return Integer.valueOf(10000);
+            }
+
+            @Override
+            public Integer getPagingSearchPageMaxSizeAsInteger() {
+                return Integer.valueOf(100);
+            }
+
+            @Override
+            public Integer getRankFusionWindowSizeAsInteger() {
+                return Integer.valueOf(200);
+            }
+
+            @Override
+            public Integer getRankFusionRankConstantAsInteger() {
+                return Integer.valueOf(20);
+            }
+
+            @Override
+            public Integer getRankFusionThreadsAsInteger() {
+                return Integer.valueOf(-1);
+            }
+
+            @Override
+            public String getRankFusionScoreField() {
+                return "rf_score";
+            }
+
+            @Override
+            public String getIndexFieldId() {
+                return ID_FIELD;
+            }
+        });
+    }
+
+    /**
+     * A main searcher that fuses without a search engine: the fused request is answered by a
+     * canned result instead of being sent.
+     */
+    static class FusingMainSearcher extends DefaultSearcher {
+
+        final AtomicInteger fusedCount = new AtomicInteger();
+
+        FusingMainSearcher() {
+            name = "fusing_main";
+        }
+
+        @Override
+        protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
+            return new TestMainSearcher(100).search(null, params, OptionalThing.empty());
+        }
+
+        @Override
+        protected Optional<SearchResult> searchWithSubQueries(final String query, final SearchRequestParams params,
+                final OptionalThing<FessUserBean> userBean, final List<QueryBuilder> subQueries) {
+            final Optional<SearchResult> result = super.searchWithSubQueries(query, params, userBean, subQueries);
+            result.ifPresent(r -> fusedCount.incrementAndGet());
+            return result;
+        }
+    }
+
+    /**
+     * A branch that counts how often its query is built - for the semantic branch, each build
+     * embeds the query - and how often it runs a search of its own.
+     */
+    static class CountingSubSearcher extends TestMainSearcher {
+
+        final AtomicInteger buildCount = new AtomicInteger();
+
+        final AtomicInteger searchCount = new AtomicInteger();
+
+        CountingSubSearcher() {
+            super(100);
+            name = "counting_sub";
+        }
+
+        @Override
+        protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
+                final OptionalThing<FessUserBean> userBean) {
+            buildCount.incrementAndGet();
+            return Optional.of(QueryBuilders.matchAllQuery());
+        }
+
+        @Override
+        protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
+            searchCount.incrementAndGet();
+            return super.search(query, params, userBean);
         }
     }
 

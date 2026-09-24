@@ -170,18 +170,31 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         };
     }
 
+    @Override
+    protected boolean supportsEngineFusion() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Only what holds whichever branches end up taking part is checked here, so that a search
+     * this answers false for could never have been fused: the weights are refused only when no
+     * subset of the branches could match them.</p>
+     */
+    @Override
+    protected boolean canFuse(final SearchRequestParams params, final List<String> branchNames) {
+        return isEngineFusionApplicable(params) && canResolveWeights(branchNames);
+    }
+
     /**
      * Decides whether this request can be fused in the search engine.
      *
      * @param params the search request parameters
-     * @param subQueries the other searchers' queries
-     * @return true when the request can be fused
+     * @return true when the request can be fused, whichever branches take part
      */
-    protected boolean isEngineFusionApplicable(final SearchRequestParams params, final List<QueryBuilder> subQueries) {
-        if (engineFusionDisabled.get() || !ComponentUtil.getFessConfig().isRankFusionEngineEnabled()) {
-            return false;
-        }
-        if (subQueries.isEmpty() || subQueries.size() + 1 > HybridQueryBuilder.MAX_SUB_QUERIES) {
+    protected boolean isEngineFusionApplicable(final SearchRequestParams params) {
+        if (!ComponentUtil.getFessConfig().isRankFusionEngineEnabled()) {
             return false;
         }
         // Sorting by anything but the score makes the engine report null scores for every hit,
@@ -205,6 +218,20 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Decides whether this request can be fused in the search engine with these branches.
+     *
+     * @param params the search request parameters
+     * @param subQueries the other searchers' queries
+     * @return true when the request can be fused
+     */
+    protected boolean isEngineFusionApplicable(final SearchRequestParams params, final List<QueryBuilder> subQueries) {
+        if (subQueries.isEmpty() || subQueries.size() + 1 > HybridQueryBuilder.MAX_SUB_QUERIES) {
+            return false;
+        }
+        return isEngineFusionApplicable(params);
     }
 
     /**
@@ -254,26 +281,9 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         if (StringUtil.isBlank(configured)) {
             return List.of();
         }
-        final Map<String, Float> byName = new LinkedHashMap<>();
-        for (final String entry : configured.split(",")) {
-            final String pair = entry.trim();
-            if (pair.isEmpty()) {
-                continue;
-            }
-            final int index = pair.lastIndexOf(':');
-            if (index <= 0 || index == pair.length() - 1) {
-                return rejectWeights(configured, "expected name:weight pairs");
-            }
-            final Float weight;
-            try {
-                weight = Float.valueOf(pair.substring(index + 1).trim());
-            } catch (final NumberFormatException e) {
-                return rejectWeights(configured, "the weight of '" + pair.substring(0, index).trim() + "' is not a number");
-            }
-            if (weight.floatValue() < 0.0f || weight.floatValue() > 1.0f) {
-                return rejectWeights(configured, "weights must be between 0.0 and 1.0");
-            }
-            byName.put(pair.substring(0, index).trim(), weight);
+        final Map<String, Float> byName = parseWeights(configured);
+        if (byName == null) {
+            return null;
         }
         if (byName.size() != names.size() || !byName.keySet().containsAll(names)) {
             return rejectWeights(configured, "it must name exactly the searchers taking part: " + names);
@@ -289,6 +299,79 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             return rejectWeights(configured, "the weights must sum to 1.0 but sum to " + sum);
         }
         return weights;
+    }
+
+    /**
+     * Checks, before any branch is built, whether the configured weights could match the
+     * branches of this search.
+     *
+     * <p>Which of the other searchers take part is only known once their queries are built, so
+     * this refuses only a configuration that no subset of them could match: one that cannot be
+     * parsed, leaves out this searcher, names a searcher not listed, or does not sum to 1.0.
+     * {@link #resolveWeights(List)} checks the exact branches afterwards.</p>
+     *
+     * @param branchNames the names of the other searchers that may take part
+     * @return true unless the weights can never be used for this search
+     */
+    protected boolean canResolveWeights(final List<String> branchNames) {
+        final String configured = ComponentUtil.getFessConfig().getRankFusionCombinationWeights();
+        if (StringUtil.isBlank(configured)) {
+            return true;
+        }
+        final Map<String, Float> byName = parseWeights(configured);
+        if (byName == null) {
+            return false;
+        }
+        final List<String> names = new ArrayList<>(branchNames.size() + 1);
+        names.add(getName());
+        names.addAll(branchNames);
+        if (!byName.containsKey(getName()) || !names.containsAll(byName.keySet())) {
+            rejectWeights(configured, "it must name this searcher and only the searchers that can take part: " + names);
+            return false;
+        }
+        float sum = 0.0f;
+        for (final Float weight : byName.values()) {
+            sum += weight.floatValue();
+        }
+        if (Math.abs(sum - 1.0f) > WEIGHT_SUM_TOLERANCE) {
+            rejectWeights(configured, "the weights must sum to 1.0 but sum to " + sum);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Parses the configured {@code name:weight} pairs.
+     *
+     * @param configured the configured value, not blank
+     * @return the weights by searcher name, or null when the value is malformed
+     */
+    protected Map<String, Float> parseWeights(final String configured) {
+        final Map<String, Float> byName = new LinkedHashMap<>();
+        for (final String entry : configured.split(",")) {
+            final String pair = entry.trim();
+            if (pair.isEmpty()) {
+                continue;
+            }
+            final int index = pair.lastIndexOf(':');
+            if (index <= 0 || index == pair.length() - 1) {
+                rejectWeights(configured, "expected name:weight pairs");
+                return null;
+            }
+            final Float weight;
+            try {
+                weight = Float.valueOf(pair.substring(index + 1).trim());
+            } catch (final NumberFormatException e) {
+                rejectWeights(configured, "the weight of '" + pair.substring(0, index).trim() + "' is not a number");
+                return null;
+            }
+            if (weight.floatValue() < 0.0f || weight.floatValue() > 1.0f) {
+                rejectWeights(configured, "weights must be between 0.0 and 1.0");
+                return null;
+            }
+            byName.put(pair.substring(0, index).trim(), weight);
+        }
+        return byName;
     }
 
     /**
