@@ -247,6 +247,23 @@ public class RankFusionProcessor implements AutoCloseable {
      */
     protected List<Map<String, Object>> searchWithEngineFusion(final RankFusionSearcher[] searchers, final String query,
             final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
+        if (!searchers[0].supportsEngineFusion()) {
+            if (engineFusionUnsupportedWarned.compareAndSet(false, true)) {
+                logger.warn(
+                        "{} cannot fuse other searchers into one request, so rank fusion is performed by Fess even though " + "{} is true.",
+                        searchers[0].getName(), FessConfig.RANK_FUSION_ENGINE_ENABLED);
+            }
+            return null;
+        }
+        // Decided before any branch is built: a search that is not fused runs every searcher
+        // again on its own, and building the semantic branch embeds the query.
+        final List<String> branchNames = Arrays.stream(searchers, 1, searchers.length).map(RankFusionSearcher::getName).toList();
+        if (!searchers[0].canFuse(params, branchNames)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("This search is not fused in the search engine; rank fusion is performed by Fess. query={}", query);
+            }
+            return null;
+        }
         final int paginationDepth = ComponentUtil.getFessConfig().getRankFusionPaginationDepthAsInteger().intValue();
         // The branches are sized to the depth the engine ranks to, not to the requested page, so
         // that a branch asks the shards for as many candidates as the fusion can actually use.
@@ -280,10 +297,8 @@ public class RankFusionProcessor implements AutoCloseable {
             return null;
         }
         if (fused.isEmpty()) {
-            if (engineFusionUnsupportedWarned.compareAndSet(false, true)) {
-                logger.warn(
-                        "{} cannot fuse other searchers into one request, so rank fusion is performed by Fess even though " + "{} is true.",
-                        searchers[0].getName(), FessConfig.RANK_FUSION_ENGINE_ENABLED);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} declined to fuse this search; rank fusion is performed by Fess. query={}", searchers[0].getName(), query);
             }
             return null;
         }

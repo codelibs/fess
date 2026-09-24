@@ -95,6 +95,33 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_canFuse_decidesWithoutTheBranchesBeingBuilt() {
+        givenConfig(true, "rrf", "");
+        final DefaultSearcher searcher = new DefaultSearcher();
+        final int depth = searcher.getPaginationDepth();
+        assertTrue(searcher.canFuse(params(0, 10, null), List.of("semantic_chunk")));
+        assertFalse(searcher.canFuse(params(depth, 10, null), List.of("semantic_chunk")),
+                "a page past the depth is known not to be fused before any branch is built");
+        assertFalse(searcher.canFuse(params(0, 10, "last_modified.desc"), List.of("semantic_chunk")));
+        searcher.engineFusionDisabled.set(true);
+        assertFalse(searcher.canFuse(params(0, 10, null), List.of("semantic_chunk")),
+                "once the engine has refused a fused request, no branch should be built for one");
+    }
+
+    @Test
+    public void test_canFuse_leavesTheBranchCountToTheBuiltBranches() {
+        givenConfig(true, "rrf", "");
+        // some of these may decline to take part, so only the built branches can be counted
+        assertTrue(new DefaultSearcher().canFuse(params(0, 10, null), List.of("a", "b", "c", "d", "e")));
+    }
+
+    @Test
+    public void test_supportsEngineFusion() {
+        assertTrue(new DefaultSearcher().supportsEngineFusion());
+        assertFalse(new LegacySearcher().supportsEngineFusion());
+    }
+
+    @Test
     public void test_legacySearcher_refusesToFuse() {
         givenConfig(true, "rrf", "");
         // refusing is what keeps the branches from being dropped without anyone noticing
@@ -216,6 +243,25 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     public void test_resolveWeights_refusesWhenSumIsNotOne() {
         givenConfig(true, "rrf", "default:0.5,semantic_chunk:0.4");
         assertNull(new DefaultSearcher().resolveWeights(List.of("default", "semantic_chunk")));
+    }
+
+    @Test
+    public void test_canResolveWeights_refusesOnlyWeightsNoBranchesCouldMatch() {
+        final DefaultSearcher searcher = new DefaultSearcher();
+        givenConfig(true, "rrf", "default:0.7,semantic_chunk:0.3");
+        assertTrue(searcher.canResolveWeights(List.of("semantic_chunk")));
+        // multi_modal may yet decline to take part, which would leave the branches the weights name
+        assertTrue(searcher.canResolveWeights(List.of("semantic_chunk", "multi_modal")));
+        givenConfig(true, "rrf", "default:0.5,multi_modal:0.5");
+        assertFalse(searcher.canResolveWeights(List.of("semantic_chunk")));
+        givenConfig(true, "rrf", "semantic_chunk:1.0");
+        assertFalse(searcher.canResolveWeights(List.of("semantic_chunk")), "the main searcher is always a branch");
+        givenConfig(true, "rrf", "default:0.5,semantic_chunk:0.4");
+        assertFalse(searcher.canResolveWeights(List.of("semantic_chunk")));
+        givenConfig(true, "rrf", "default:half");
+        assertFalse(searcher.canResolveWeights(List.of("semantic_chunk")));
+        givenConfig(true, "rrf", "");
+        assertTrue(searcher.canResolveWeights(List.of("semantic_chunk")));
     }
 
     @Test
