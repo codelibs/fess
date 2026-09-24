@@ -93,6 +93,36 @@ public abstract class RankFusionSearcher {
     }
 
     /**
+     * Returns whether this searcher can fuse other searchers' queries into its own request at all.
+     *
+     * <p>This is a property of the searcher, not of a search: the default is false, and a
+     * searcher that implements {@link #searchWithSubQueries} returns true.</p>
+     *
+     * @return true when this searcher can do the fusing
+     */
+    protected boolean supportsEngineFusion() {
+        return false;
+    }
+
+    /**
+     * Decides whether this searcher would fuse the given branches for this request, before any of
+     * them is built.
+     *
+     * <p>Building a branch can be expensive - the semantic branch embeds the query - and a search
+     * that is not fused runs every branch again on its own. Answering here, from the request and
+     * the branch names alone, keeps a search that will not be fused from paying for its branches
+     * twice. A true answer is not a promise: {@link #searchWithSubQueries} still has the final
+     * say, since a branch may decline to take part.</p>
+     *
+     * @param params the search request parameters
+     * @param branchNames the names of the other searchers that may take part
+     * @return true when the request may be fused
+     */
+    protected boolean canFuse(final SearchRequestParams params, final List<String> branchNames) {
+        return false;
+    }
+
+    /**
      * Runs a single request that fuses this searcher's own query with the given subqueries, or
      * returns empty when it cannot.
      *
