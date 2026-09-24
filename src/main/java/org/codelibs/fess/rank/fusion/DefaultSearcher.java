@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,15 +82,6 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
     /** How far a weight sum may drift from 1.0 before it is rejected. */
     protected static final float WEIGHT_SUM_TOLERANCE = 0.001f;
 
-    /** Set once the search engine has refused a fused request, so it is not attempted again. */
-    protected final AtomicBoolean engineFusionDisabled = new AtomicBoolean(false);
-
-    /** One-time notice latch for a request that cannot be fused because it pages too deep. */
-    protected final AtomicBoolean paginationDepthNoticed = new AtomicBoolean(false);
-
-    /** One-time error latch for a fused result the search engine never normalized. */
-    protected final AtomicBoolean notNormalizedWarned = new AtomicBoolean(false);
-
     /**
      * Creates a new instance.
      */
@@ -120,17 +110,51 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
                     execute(params, fuse(createSearchCondition(query, params, userBean, highlightQuery), subQueries, pipeline));
             warnIfNotNormalized(searchResult);
             return Optional.of(searchResult);
-        } catch (final Exception e) {
-            // The likeliest cause is a cluster without the Neural Search plugin, where every
-            // fused request fails the same way. Retrying one per search would double the load
-            // for no benefit, so stop trying until the next restart and say why once.
-            if (engineFusionDisabled.compareAndSet(false, true)) {
-                logger.error("The search engine refused a fused request, so rank fusion falls back to Fess for the rest of this run. "
-                        + "Check that the cluster has the Neural Search plugin installed and that hybrid queries are not disabled "
-                        + "(plugins.neural_search.hybrid_search_disabled). query={}", query, e);
+        } catch (final RuntimeException e) {
+            final String unsupported = findUnsupportedFeature(e);
+            if (unsupported == null) {
+                // An invalid query, a closed index or a failed shard says nothing about the next
+                // search. Leave it to the caller, which reports it exactly as it would without
+                // engine-side fusion, and keep fusing for everyone else.
+                throw e;
+            }
+            // A cluster that does not know the hybrid query or the pipeline processor cannot fuse
+            // this search, so Fess fuses it instead. The next search asks the cluster again, so
+            // fusion comes back by itself once the plugin is installed or upgraded.
+            if (logger.isDebugEnabled()) {
+                logger.warn(
+                        "The search engine cannot run a fused request, so rank fusion falls back to Fess for this search. "
+                                + "Check that every node has the Neural Search plugin installed. reason={}, query={}",
+                        unsupported, query, e);
+            } else {
+                logger.warn("The search engine cannot run a fused request, so rank fusion falls back to Fess for this search. "
+                        + "Check that every node has the Neural Search plugin installed. reason={}, query={}", unsupported, query);
             }
             return Optional.empty();
         }
+    }
+
+    /**
+     * Finds the part of a failed fused request that says the cluster cannot run fused requests
+     * at all.
+     *
+     * <p>Only two answers mean that: a query type the cluster does not know, which is what it
+     * says to a {@code hybrid} query without the Neural Search plugin, and a search pipeline
+     * processor it does not know, which is what it says when the plugin is too old for the
+     * configured technique. Everything else - an invalid query, a closed index, a shard failure,
+     * a timeout - belongs to one request.</p>
+     *
+     * @param e the exception the fused request failed with
+     * @return the message naming the missing feature, or null when the failure is not one
+     */
+    protected String findUnsupportedFeature(final Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            final String message = t.getMessage();
+            if (message != null && (message.contains("unknown query [") || message.contains("Invalid processor type "))) {
+                return message;
+            }
+        }
+        return null;
     }
 
     /**
@@ -145,11 +169,9 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
     protected void warnIfNotNormalized(final SearchResult searchResult) {
         for (final Map<String, Object> doc : searchResult.getDocumentList()) {
             if (doc.get(Constants.SCORE) instanceof final Number score && score.floatValue() < 0.0f) {
-                if (notNormalizedWarned.compareAndSet(false, true)) {
-                    logger.error("A fused search came back with negative scores, which is what the search engine returns when a "
-                            + "hybrid query runs without the pipeline that normalizes it. These results are unranked and may repeat "
-                            + "documents. Check that the cluster accepts an inline search_pipeline carrying phase_results_processors.");
-                }
+                logger.warn("A fused search came back with negative scores, which is what the search engine returns when a "
+                        + "hybrid query runs without the pipeline that normalizes it. These results are unranked and may repeat "
+                        + "documents. Check that the cluster accepts an inline search_pipeline carrying phase_results_processors.");
                 return;
             }
         }
@@ -215,7 +237,7 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
      * @return true when the request can be fused, whichever branches take part
      */
     protected boolean isEngineFusionApplicable(final SearchRequestParams params) {
-        if (engineFusionDisabled.get() || !ComponentUtil.getFessConfig().isRankFusionEngineEnabled()) {
+        if (!ComponentUtil.getFessConfig().isRankFusionEngineEnabled()) {
             return false;
         }
         // Sorting by anything but the score makes the engine report null scores for every hit,
@@ -232,8 +254,8 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         if (params.getStartPosition() + params.getPageSize() > depth) {
             // Beyond the depth the engine ranks to, a fused page would silently be built from a
             // truncated set. Fall back rather than return a page nobody can explain.
-            if (paginationDepthNoticed.compareAndSet(false, true)) {
-                logger.info("A search reached past rank.fusion.pagination_depth ({}), so it was answered without fusing in the "
+            if (logger.isDebugEnabled()) {
+                logger.debug("A search reached past rank.fusion.pagination_depth ({}), so it was answered without fusing in the "
                         + "search engine. Raise the property to page deeper into fused results.", depth);
             }
             return false;
