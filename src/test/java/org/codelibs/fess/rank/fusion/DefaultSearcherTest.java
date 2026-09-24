@@ -179,6 +179,67 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_buildPipelineSource_zScoreWithArithmeticMean() {
+        givenConfig(true, "arithmetic_mean", "z_score", "", DEFAULT_RANK_CONSTANT);
+        final Map<String, Object> pipeline = new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk"));
+        final Map<String, Object> processor = firstProcessor(pipeline, "normalization-processor");
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> normalization = (Map<String, Object>) processor.get("normalization");
+        assertEquals("z_score", normalization.get("technique"));
+    }
+
+    @Test
+    public void test_buildPipelineSource_refusesZScoreWithOtherMeans() {
+        // the engine fails every request for these pairs, since z_score only combines with
+        // arithmetic_mean, so they are refused here where the settings can be named
+        givenConfig(true, "geometric_mean", "z_score", "", DEFAULT_RANK_CONSTANT);
+        assertNull(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")));
+        givenConfig(true, "harmonic_mean", "z_score", "", DEFAULT_RANK_CONSTANT);
+        assertNull(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")));
+    }
+
+    @Test
+    public void test_buildPipelineSource_refusesUnknownCombination() {
+        // the engine rejects the whole request for a technique it does not know
+        givenConfig(true, "median", "min_max", "", DEFAULT_RANK_CONSTANT);
+        assertNull(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")));
+    }
+
+    @Test
+    public void test_buildPipelineSource_refusesUnknownNormalization() {
+        givenConfig(true, "arithmetic_mean", "sigmoid", "", DEFAULT_RANK_CONSTANT);
+        assertNull(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")));
+    }
+
+    @Test
+    public void test_buildPipelineSource_rrfIgnoresTheNormalization() {
+        givenConfig(true, "rrf", "sigmoid", "", DEFAULT_RANK_CONSTANT);
+        assertNotNull(
+                firstProcessor(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")), "score-ranker-processor"));
+    }
+
+    @Test
+    public void test_buildPipelineSource_sendsTechniquesInLowerCase() {
+        // the engine looks the names up exactly
+        givenConfig(true, " Geometric_Mean ", "L2", "", DEFAULT_RANK_CONSTANT);
+        final Map<String, Object> processor =
+                firstProcessor(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")), "normalization-processor");
+        assertEquals(Map.of("technique", "l2"), processor.get("normalization"));
+        assertEquals(Map.of("technique", "geometric_mean"), processor.get("combination"));
+    }
+
+    @Test
+    public void test_buildPipelineSource_minMaxAndL2WithEveryMean() {
+        for (final String normalization : List.of("min_max", "l2")) {
+            for (final String technique : List.of("arithmetic_mean", "geometric_mean", "harmonic_mean")) {
+                givenConfig(true, technique, normalization, "", DEFAULT_RANK_CONSTANT);
+                assertNotNull(new DefaultSearcher().buildPipelineSource(List.of("default", "semantic_chunk")),
+                        normalization + " with " + technique);
+            }
+        }
+    }
+
+    @Test
     public void test_buildPipelineSource_rankConstantIsClampedToTheEngineRange() {
         // K - 1 would be 0, which the engine rejects
         givenConfig(true, "rrf", "", 1);
@@ -237,6 +298,11 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     private void givenConfig(final boolean engineEnabled, final String technique, final String weights, final int rankConstant) {
+        givenConfig(engineEnabled, technique, "min_max", weights, rankConstant);
+    }
+
+    private void givenConfig(final boolean engineEnabled, final String technique, final String normalization, final String weights,
+            final int rankConstant) {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
@@ -257,7 +323,7 @@ public class DefaultSearcherTest extends UnitFessTestCase {
 
             @Override
             public String getRankFusionNormalizationTechnique() {
-                return "min_max";
+                return normalization;
             }
 
             @Override

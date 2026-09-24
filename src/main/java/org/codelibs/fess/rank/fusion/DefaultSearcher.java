@@ -18,8 +18,11 @@ package org.codelibs.fess.rank.fusion;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
@@ -57,6 +60,19 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
 
     /** Combination technique that selects the score-ranker (reciprocal rank fusion) processor. */
     protected static final String TECHNIQUE_RRF = "rrf";
+
+    /** Normalization technique the search engine combines with arithmetic_mean only. */
+    protected static final String NORMALIZATION_Z_SCORE = "z_score";
+
+    /** The only combination technique the search engine accepts after z_score normalization. */
+    protected static final String TECHNIQUE_ARITHMETIC_MEAN = "arithmetic_mean";
+
+    /** Combination techniques the search engine knows. */
+    protected static final Set<String> COMBINATION_TECHNIQUES =
+            Set.of(TECHNIQUE_RRF, TECHNIQUE_ARITHMETIC_MEAN, "geometric_mean", "harmonic_mean");
+
+    /** Normalization techniques the search engine's normalization processor knows. */
+    protected static final Set<String> NORMALIZATION_TECHNIQUES = Set.of("min_max", "l2", NORMALIZATION_Z_SCORE, TECHNIQUE_RRF);
 
     /** Lowest rank constant the score-ranker processor accepts. */
     protected static final int MIN_RANK_CONSTANT = 1;
@@ -215,10 +231,33 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
      */
     protected Map<String, Object> buildPipelineSource(final List<String> names) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String technique = fessConfig.getRankFusionCombinationTechnique();
+        final String configuredTechnique = fessConfig.getRankFusionCombinationTechnique();
+        // The engine looks the names up exactly, so they are checked and sent in lower case
+        final String technique = toTechniqueName(configuredTechnique);
+        if (!COMBINATION_TECHNIQUES.contains(technique)) {
+            return rejectTechnique(FessConfig.RANK_FUSION_COMBINATION_TECHNIQUE, configuredTechnique, COMBINATION_TECHNIQUES);
+        }
+        // rrf ranks rather than normalizes, so the normalization is neither read nor sent for it
+        String normalization = null;
+        if (!TECHNIQUE_RRF.equals(technique)) {
+            final String configuredNormalization = fessConfig.getRankFusionNormalizationTechnique();
+            normalization = toTechniqueName(configuredNormalization);
+            if (!NORMALIZATION_TECHNIQUES.contains(normalization)) {
+                return rejectTechnique(FessConfig.RANK_FUSION_NORMALIZATION_TECHNIQUE, configuredNormalization, NORMALIZATION_TECHNIQUES);
+            }
+            if (NORMALIZATION_Z_SCORE.equals(normalization) && !TECHNIQUE_ARITHMETIC_MEAN.equals(technique)) {
+                // The engine fails every request for this pair, so name the settings here instead
+                logger.error(
+                        "{}='{}' cannot be used with {}='{}': the search engine combines z_score only with {}. "
+                                + "Rank fusion falls back to Fess for this search.",
+                        FessConfig.RANK_FUSION_COMBINATION_TECHNIQUE, configuredTechnique, FessConfig.RANK_FUSION_NORMALIZATION_TECHNIQUE,
+                        configuredNormalization, TECHNIQUE_ARITHMETIC_MEAN);
+                return null;
+            }
+        }
         final Map<String, Object> combination = new LinkedHashMap<>();
         combination.put("technique", technique);
-        if (TECHNIQUE_RRF.equalsIgnoreCase(technique)) {
+        if (TECHNIQUE_RRF.equals(technique)) {
             combination.put("rank_constant", Integer.valueOf(getEngineRankConstant()));
         }
         final List<Float> weights = resolveWeights(names);
@@ -229,12 +268,39 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             combination.put("parameters", Map.of("weights", weights));
         }
         final Map<String, Object> processorBody = new LinkedHashMap<>();
-        if (!TECHNIQUE_RRF.equalsIgnoreCase(technique)) {
-            processorBody.put("normalization", Map.of("technique", fessConfig.getRankFusionNormalizationTechnique()));
+        if (normalization != null) {
+            processorBody.put("normalization", Map.of("technique", normalization));
         }
         processorBody.put("combination", combination);
-        final String processorName = TECHNIQUE_RRF.equalsIgnoreCase(technique) ? "score-ranker-processor" : "normalization-processor";
+        final String processorName = TECHNIQUE_RRF.equals(technique) ? "score-ranker-processor" : "normalization-processor";
         return Map.of("phase_results_processors", List.of(Map.of(processorName, processorBody)));
+    }
+
+    /**
+     * Converts a configured technique to the name the search engine looks up.
+     *
+     * @param configured the configured value
+     * @return the trimmed, lower-case name, or an empty string when unset
+     */
+    protected String toTechniqueName(final String configured) {
+        return configured == null ? "" : configured.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Reports a technique the search engine does not know and refuses to fuse.
+     *
+     * <p>The engine rejects the whole request for an unknown technique, so this is caught here to
+     * name the property instead of failing every search.</p>
+     *
+     * @param key the property key
+     * @param configured the configured value
+     * @param supported the techniques the engine knows
+     * @return null, meaning the request must not be fused
+     */
+    protected Map<String, Object> rejectTechnique(final String key, final String configured, final Set<String> supported) {
+        logger.error("{}='{}' cannot be used: the search engine supports only {}. Rank fusion falls back to Fess for this search.", key,
+                configured, new TreeSet<>(supported));
+        return null;
     }
 
     /**
