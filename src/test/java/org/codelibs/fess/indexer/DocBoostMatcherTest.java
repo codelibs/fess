@@ -270,10 +270,34 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
     /**
      * A rule saved before 15.9 carries no script type, so it runs on Groovy, and Groovy now
      * ships as a plugin. With the plugin absent the rule can never match: that has to be said
-     * out loud, and said once rather than once per crawled document.
+     * out loud each time the rule is loaded for a crawl, and not once per crawled document.
      */
     @Test
-    public void test_missingEngineIsReportedOncePerRule() {
+    public void test_missingEngineIsReportedEachTimeTheRuleIsChecked() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add(Constants.DEFAULT_SCRIPT, (template, paramMap) -> Boolean.TRUE);
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final BoostDocumentRule rule = new BoostDocumentRule();
+        rule.setUrlExpr("url != null");
+        rule.setBoostExpr("100");
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DocBoostMatcher.class.getName(), Level.WARN);
+        try {
+            assertFalse(new DocBoostMatcher(rule).checkScriptEngine());
+            assertFalse(new DocBoostMatcher(rule).checkScriptEngine());
+
+            final List<String> warnings = appender.warnings();
+            assertEquals(2, warnings.size());
+            assertTrue(warnings.get(0).contains(Constants.LEGACY_SCRIPT));
+            assertTrue(warnings.get(0).contains("fess-script-groovy"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_missingEngineIsNotWarnedPerDocument() {
         final ScriptEngineFactory factory = new ScriptEngineFactory();
         factory.add(Constants.DEFAULT_SCRIPT, (template, paramMap) -> Boolean.TRUE);
         ComponentUtil.register(factory, "scriptEngineFactory");
@@ -292,11 +316,26 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
             assertFalse(docBoostMatcher.match(map));
             assertTrue(0.0f == docBoostMatcher.getValue(map));
             assertFalse(docBoostMatcher.match(map));
+            assertTrue(appender.warnings().isEmpty());
+        } finally {
+            appender.detach();
+        }
+    }
 
-            final List<String> warnings = appender.warnings();
-            assertEquals(1, warnings.size());
-            assertTrue(warnings.get(0).contains(Constants.LEGACY_SCRIPT));
-            assertTrue(warnings.get(0).contains("fess-script-groovy"));
+    @Test
+    public void test_registeredEngineIsNotReported() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add(Constants.LEGACY_SCRIPT, (template, paramMap) -> Boolean.TRUE);
+        ComponentUtil.register(factory, "scriptEngineFactory");
+
+        final BoostDocumentRule rule = new BoostDocumentRule();
+        rule.setUrlExpr("url != null");
+        rule.setBoostExpr("100");
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(DocBoostMatcher.class.getName(), Level.WARN);
+        try {
+            assertTrue(new DocBoostMatcher(rule).checkScriptEngine());
+            assertTrue(appender.warnings().isEmpty());
         } finally {
             appender.detach();
         }

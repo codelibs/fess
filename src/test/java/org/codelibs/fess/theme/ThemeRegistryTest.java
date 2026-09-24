@@ -27,7 +27,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -200,6 +203,63 @@ public class ThemeRegistryTest extends UnitFessTestCase {
             assertEquals(2, reg.getUnknownDefaultWarnCountForTest());
         } finally {
             cfg.setDefaultTheme(before == null ? "" : before);
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
+    public void test_reload_reportsDefaultThemeLookupFailureOnEveryReload() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final FessConfig failing = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getDefaultTheme() {
+                throw new IllegalStateException("config layer not ready");
+            }
+        };
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ThemeRegistry.class.getName(), Level.INFO);
+        try {
+            final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, failing);
+            reg.reload();
+            reg.reload();
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("Failed to read default theme"))
+                    .toList();
+            assertEquals(2, warns.size());
+            warns.forEach(e -> {
+                assertTrue(e.getMessage().getFormattedMessage().contains("config layer not ready"));
+                assertNull(e.getThrown(), "the stack trace is only for DEBUG");
+            });
+        } finally {
+            appender.detach();
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
+    public void test_reload_defaultThemeLookupFailureCarriesStackTraceAtDebug() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final FessConfig failing = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getDefaultTheme() {
+                throw new IllegalStateException("config layer not ready");
+            }
+        };
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ThemeRegistry.class.getName(), Level.DEBUG);
+        try {
+            newRegistryWithFessConfig(tempThemesDir, failing).reload();
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("Failed to read default theme"))
+                    .toList();
+            assertEquals(1, warns.size());
+            assertNotNull(warns.get(0).getThrown());
+        } finally {
+            appender.detach();
             deleteRecursively(tempThemesDir);
         }
     }

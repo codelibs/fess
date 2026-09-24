@@ -21,9 +21,12 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
@@ -408,30 +411,44 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         assertFalse(stub.servedAsset);
     }
 
-    // --- E-2: warn-once / firstFailure AtomicBoolean gate ---
+    // --- E-2: a component lookup failure is reported on every request, never latched ---
 
     @Test
-    public void test_warnOnce_logsOnlyOnceWhenRegistryUnavailable() throws Exception {
+    public void test_registryUnavailable_warnsOnEveryRequest() throws Exception {
         // When themeRegistry is NOT injected via setThemeRegistry() the filter falls
         // through to ComponentUtil.getThemeRegistry(), which throws in the slim test
-        // harness. The firstFailure AtomicBoolean ensures exactly one WARN is emitted
-        // no matter how many requests arrive.
-        //
-        // Capture log4j2 output via an appender bound to StaticThemeFilter's own logger.
-        final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class);
+        // harness. Every request that hits the failure is reported, as a one-line WARN
+        // without the stack trace unless DEBUG is enabled.
+        final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class.getName(), Level.INFO);
         try {
-            // Create a fresh filter with NO registry injected -- ComponentUtil will throw.
             final StaticThemeFilter f = new StaticThemeFilter();
-            // Send 5 GET requests. Each should pass through (registry unavailable).
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 3; i++) {
                 final StubChain chain = new StubChain();
                 f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), chain);
                 assertTrue(chain.called, "filter must pass through when registry is unavailable");
             }
-            // Count only WARN events about ThemeRegistry.
-            final long warnCount = appender.warnings().stream().filter(msg -> msg != null && msg.contains("ThemeRegistry")).count();
-            org.junit.jupiter.api.Assertions.assertEquals(1L, warnCount,
-                    "exactly 1 WARN must be emitted for ThemeRegistry unavailable across 5 requests; got " + warnCount);
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("ThemeRegistry"))
+                    .toList();
+            org.junit.jupiter.api.Assertions.assertEquals(3, warns.size(), "every request must WARN; got " + warns.size());
+            warns.forEach(e -> assertNull(e.getThrown(), "the stack trace is only for DEBUG"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_registryUnavailable_carriesStackTraceAtDebug() throws Exception {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class.getName(), Level.DEBUG);
+        try {
+            new StaticThemeFilter().doFilter(new StubRequest("GET", "/search"), new StubResponse(), new StubChain());
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("ThemeRegistry"))
+                    .toList();
+            org.junit.jupiter.api.Assertions.assertEquals(1, warns.size());
+            assertNotNull(warns.get(0).getThrown());
         } finally {
             appender.detach();
         }

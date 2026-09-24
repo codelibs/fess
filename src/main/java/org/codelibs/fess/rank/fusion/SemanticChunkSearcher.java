@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -125,15 +124,6 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
      */
     protected static final float SCORE_OFFSET = 1.0f;
 
-    /** One-time warn latch for provider unavailability, reset when it recovers. */
-    private final AtomicBoolean embeddingUnavailableWarned = new AtomicBoolean(false);
-
-    /** One-time warn latch for a min_score cutoff skipped due to a non-cosine space type. */
-    private final AtomicBoolean minScoreSkippedWarned = new AtomicBoolean(false);
-
-    /** One-time warn latch for the exact (full-scan) mode, reset when the ann mode becomes available. */
-    private final AtomicBoolean exactModeWarned = new AtomicBoolean(false);
-
     /** Timestamp of the last {@link #isKnnIndexReady()} probe. */
     private volatile long knnReadyCheckedAt;
 
@@ -235,15 +225,9 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         }
         final EmbeddingClientManager embeddingClientManager = getEmbeddingClientManager();
         if (!embeddingClientManager.available()) {
-            if (embeddingUnavailableWarned.compareAndSet(false, true)) {
-                logger.warn("Embedding provider is unavailable; semantic chunk search falls back to keyword-only results "
-                        + "until the provider recovers.");
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("Embedding provider still unavailable; skipping semantic chunk search.");
-            }
+            logger.warn("Embedding provider is unavailable; semantic chunk search falls back to keyword-only results.");
             return OptionalThing.empty();
         }
-        embeddingUnavailableWarned.set(false);
         final float[] queryVector;
         try {
             queryVector = embeddingClientManager.embedQuery(split.text);
@@ -255,7 +239,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
             return OptionalThing.empty();
         }
         final boolean annMode = isKnnIndexReady();
-        warnExactModeOnce(annMode);
+        logExactMode(annMode);
         return OptionalThing.of(new SemanticQueryContext(queryVector, annMode, split.conditionFilter));
     }
 
@@ -445,28 +429,22 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
     }
 
     /**
-     * Warns once when the exact (full-scan) vector mode is selected, i.e. the feature is enabled
-     * but the live index cannot serve approximate kNN. The exact mode is a
+     * Logs at DEBUG that the exact (full-scan) vector mode is selected, i.e. the feature is
+     * enabled but the live index cannot serve approximate kNN. The exact mode is a
      * {@code script_score} scan over every stored chunk vector on every plain-text query, and the
-     * only remedy is recreating/reindexing the index with the feature enabled, so a silent
-     * degradation would leave a permanent full scan undiagnosed. The latch resets once the ann
-     * mode becomes available so a later regression warns again.
+     * only remedy is recreating/reindexing the index with the feature enabled. Which mode a query
+     * runs in follows from how the index was created, so it is logged for every query that uses
+     * it rather than at WARN.
      *
      * @param annMode whether the ann (knn query) mode was selected for this request
      */
-    protected void warnExactModeOnce(final boolean annMode) {
-        if (annMode) {
-            exactModeWarned.set(false);
-            return;
-        }
-        if (exactModeWarned.compareAndSet(false, true)) {
-            logger.warn("""
-                    Semantic chunk search is falling back to the exact vector scan: the live index was not created with \
-                    index.knn and an ANN method on {}. Every plain-text query now scans all stored chunk vectors. \
+    protected void logExactMode(final boolean annMode) {
+        if (!annMode && logger.isDebugEnabled()) {
+            logger.debug("""
+                    Semantic chunk search is using the exact vector scan: the live index was not created with \
+                    index.knn and an ANN method on {}. Every plain-text query scans all stored chunk vectors. \
                     Recreate or reindex the index with {}=true so the ANN setting and method are baked in.""",
                     Constants.CONTENT_CHUNK_VECTOR_FIELD, SEARCH_ENABLED_PROPERTY);
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("Semantic chunk search still using the exact vector scan.");
         }
     }
 
@@ -557,10 +535,8 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         final ChunkVectorHelper chunkVectorHelper = ComponentUtil.getComponent(ChunkVectorHelper.class);
         final String spaceType = chunkVectorHelper.getKnnSpaceType();
         if (!"cosinesimil".equals(spaceType)) {
-            if (minScoreSkippedWarned.compareAndSet(false, true)) {
-                logger.warn("{} is cosine-based and cannot be applied to space_type={}; the cutoff is skipped in ann mode.",
-                        SEARCH_MIN_SCORE_PROPERTY, spaceType);
-            }
+            logger.warn("{} is cosine-based and cannot be applied to space_type={}; the cutoff is skipped in ann mode.",
+                    SEARCH_MIN_SCORE_PROPERTY, spaceType);
             return OptionalThing.empty();
         }
         if ("lucene".equals(chunkVectorHelper.getKnnEngine())) {

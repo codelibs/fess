@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -62,19 +61,6 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
 
     /** Default value of {@link #CHAT_TOP_K_PROPERTY}. */
     protected static final int DEFAULT_CHAT_TOP_K = 3;
-
-    /**
-     * Latches on the first time the embedding provider is found unavailable so the operator sees
-     * a single WARN instead of one per chat request during a sustained outage. Subsequent
-     * occurrences during the same outage degrade to DEBUG.
-     *
-     * <p>Unlike {@link org.codelibs.fess.filter.StaticThemeFilter}'s {@code warnOnce} convention
-     * (a permanent one-time DI-readiness latch that never resets), this latch is reset once the
-     * provider becomes available again -- embedding availability can flap over the process
-     * lifetime (e.g. the provider comes back up), so a later, distinct outage still surfaces its
-     * own WARN instead of silently degrading forever.</p>
-     */
-    private final AtomicBoolean embeddingUnavailableWarned = new AtomicBoolean(false);
 
     /** Per-document content resolution strategy. */
     protected enum Strategy {
@@ -295,28 +281,13 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         try {
             final EmbeddingClientManager manager = getEmbeddingClientManager();
             if (!manager.available()) {
-                warnEmbeddingUnavailableOnce();
+                logger.warn("[RAG] Embedding client unavailable; falling back to keyword/full content for chunk selection.");
                 return null;
             }
-            embeddingUnavailableWarned.set(false);
             return manager.embedQuery(query);
         } catch (final Exception e) {
             logger.warn("[RAG] Failed to embed chat query for chunk selection; falling back to keyword/full content.", e);
             return null;
-        }
-    }
-
-    /**
-     * Logs a WARN the first time the embedding provider is found unavailable in a given outage,
-     * then degrades subsequent occurrences during the same outage to DEBUG so a persistently
-     * unavailable provider does not spam a WARN on every chat request.
-     */
-    private void warnEmbeddingUnavailableOnce() {
-        if (embeddingUnavailableWarned.compareAndSet(false, true)) {
-            logger.warn("[RAG] Embedding client unavailable; falling back to keyword/full content for chunk selection "
-                    + "until availability is restored.");
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Embedding client still unavailable; falling back to keyword/full content for chunk selection.");
         }
     }
 

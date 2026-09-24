@@ -824,32 +824,10 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         assertNull(f.resolveQueryVector("query"));
     }
 
-    // --- Fix: WARN-once (not silent, not spammy) when the embedding provider is unavailable ---
+    // --- The embedding provider being unavailable is reported on every request, never latched ---
 
     @Test
-    public void test_resolveQueryVector_unavailableManager_warnsOnceAcrossMultipleCalls() {
-        final TestableFetcher f = new TestableFetcher();
-        final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
-        manager.available = false;
-        f.embeddingManager = manager;
-
-        final LogCapturingAppender appender = LogCapturingAppender.attach(DefaultChatContentFetcher.class);
-        try {
-            // A persistently unavailable embedding provider must not silently return null forever --
-            // exactly one WARN across repeated calls during the same outage, not zero and not one per call.
-            for (int i = 0; i < 5; i++) {
-                assertNull(f.resolveQueryVector("query"));
-            }
-            final long warnCount = appender.warnings().stream().filter(msg -> msg.contains("Embedding client unavailable")).count();
-            org.junit.jupiter.api.Assertions.assertEquals(1L, warnCount,
-                    "exactly 1 WARN must be emitted across 5 calls during the same outage; got " + warnCount);
-        } finally {
-            appender.detach();
-        }
-    }
-
-    @Test
-    public void test_resolveQueryVector_unavailableManager_warnsAgainAfterRecovery() {
+    public void test_resolveQueryVector_unavailableManager_warnsOnEveryCall() {
         final TestableFetcher f = new TestableFetcher();
         final FakeEmbeddingClientManager manager = new FakeEmbeddingClientManager();
         manager.available = false;
@@ -858,15 +836,16 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
 
         final LogCapturingAppender appender = LogCapturingAppender.attach(DefaultChatContentFetcher.class);
         try {
-            assertNull(f.resolveQueryVector("query")); // outage #1 -> 1st WARN
+            for (int i = 0; i < 3; i++) {
+                assertNull(f.resolveQueryVector("query"));
+            }
             manager.available = true;
-            f.resolveQueryVector("query"); // recovery -> resets the latch
+            f.resolveQueryVector("query");
             manager.available = false;
-            assertNull(f.resolveQueryVector("query")); // outage #2 -> must WARN again, not degrade to DEBUG forever
+            assertNull(f.resolveQueryVector("query"));
 
             final long warnCount = appender.warnings().stream().filter(msg -> msg.contains("Embedding client unavailable")).count();
-            org.junit.jupiter.api.Assertions.assertEquals(2L, warnCount,
-                    "a distinct later outage must surface its own WARN; got " + warnCount);
+            org.junit.jupiter.api.Assertions.assertEquals(4L, warnCount, "every unavailable call must WARN; got " + warnCount);
         } finally {
             appender.detach();
         }

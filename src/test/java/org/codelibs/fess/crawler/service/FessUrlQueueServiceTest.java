@@ -15,11 +15,16 @@
  */
 package org.codelibs.fess.crawler.service;
 
+import java.util.List;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.crawler.order.UrlQueueOrder;
 import org.codelibs.fess.crawler.order.impl.DepthFirstUrlQueueOrder;
 import org.codelibs.fess.crawler.order.impl.RandomUrlQueueOrder;
 import org.codelibs.fess.crawler.order.impl.SequentialUrlQueueOrder;
 import org.codelibs.fess.crawler.util.OpenSearchCrawlerConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -79,14 +84,36 @@ public class FessUrlQueueServiceTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_invalidNameIsReportedOnceNotPerPoll() {
+    public void test_invalidNameIsReportedOnEveryResolution() {
         final TestFessUrlQueueService service = new TestFessUrlQueueService("noSuchOrder");
-        for (int i = 0; i < 5; i++) {
-            assertTrue(service.getUrlQueueOrder("s1") instanceof SequentialUrlQueueOrder);
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessUrlQueueService.class.getName(), Level.INFO);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertTrue(service.getUrlQueueOrder("s1") instanceof SequentialUrlQueueOrder);
+            }
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN);
+            assertEquals(3, warns.size());
+            for (final LogEvent event : warns) {
+                assertTrue(event.getMessage().getFormattedMessage().contains("noSuchOrder"));
+                assertNull(event.getThrown(), "the stack trace is only for DEBUG");
+            }
+        } finally {
+            appender.detach();
         }
-        // getUrlQueueOrder runs once per queue poll; the warning must not.
-        assertEquals(1, service.reportedInvalidOrders.size());
-        assertTrue(service.reportedInvalidOrders.contains("noSuchOrder"));
+    }
+
+    @Test
+    public void test_invalidNameCarriesStackTraceAtDebug() {
+        final TestFessUrlQueueService service = new TestFessUrlQueueService("noSuchOrder");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessUrlQueueService.class.getName(), Level.DEBUG);
+        try {
+            service.getUrlQueueOrder("s1");
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN);
+            assertEquals(1, warns.size());
+            assertNotNull(warns.get(0).getThrown());
+        } finally {
+            appender.detach();
+        }
     }
 
     @Test

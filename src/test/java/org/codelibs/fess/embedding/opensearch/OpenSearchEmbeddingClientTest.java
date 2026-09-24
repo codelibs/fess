@@ -1488,7 +1488,7 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getApiUrl_real_userInfoErrorIsLoggedOncePerClient() {
+    public void test_getApiUrl_real_userInfoErrorIsLoggedOnEveryCall() {
         final FessConfig original = installFessConfigStub(USERINFO_API_URL);
         final LogCapturingAppender capture = LogCapturingAppender.attach(OpenSearchEmbeddingClient.class);
         try {
@@ -1496,9 +1496,9 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             realClient.getApiUrl();
             realClient.getApiUrl();
             realClient.getApiUrl();
-            // getApiUrl() runs on every availability probe (every 60s) and on every embed
-            // batch; the remedy must be stated once, not smeared across the log forever.
-            assertEquals(1, capture.errors().size(), "expected a one-shot ERROR, got: " + capture.errors());
+            // No latch: the refusal is reported every time it happens, so a configuration that is
+            // fixed and later broken again is reported again without a restart.
+            assertEquals(3, capture.errors().size(), "expected one ERROR per call, got: " + capture.errors());
         } finally {
             capture.detach();
             ComponentUtil.setFessConfig(original);

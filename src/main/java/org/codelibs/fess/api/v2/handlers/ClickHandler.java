@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -71,13 +70,6 @@ public class ClickHandler {
     // Click payloads are tiny — 2 KiB is generous enough for any reasonable
     // client and small enough to make payload-bomb attacks pointless.
     private static final int MAX_BODY_BYTES = 2 * 1024;
-
-    /**
-     * One-shot warning flag so a missing {@code UserInfoHelper} component is
-     * logged at WARN exactly once per JVM lifetime instead of being silently
-     * swallowed. Mirrors {@code LoginHandler.ipResolveWarned}.
-     */
-    private static final AtomicBoolean userInfoHelperWarned = new AtomicBoolean(false);
 
     /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
     private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
@@ -151,12 +143,13 @@ public class ClickHandler {
         try {
             userSessionId = ComponentUtil.getUserInfoHelper().getUserCode();
         } catch (final RuntimeException e) {
-            // UserInfoHelper unavailable (e.g. unit harness): behave as anonymous.
-            // Promote to WARN exactly once per JVM so an accidental misconfiguration
-            // in production (e.g. component removed from DI graph) is surfaced
-            // without flooding logs on every click.
-            if (userInfoHelperWarned.compareAndSet(false, true)) {
+            // UserInfoHelper unavailable (e.g. unit harness): behave as anonymous, and
+            // report it on every click so a misconfiguration in production (e.g. component
+            // removed from the DI graph) stays visible.
+            if (logger.isDebugEnabled()) {
                 logger.warn("UserInfoHelper unavailable; treating click as anonymous", e);
+            } else {
+                logger.warn("UserInfoHelper unavailable; treating click as anonymous: {}", e.getMessage());
             }
         }
         if (userSessionId == null) {

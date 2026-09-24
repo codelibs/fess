@@ -275,12 +275,9 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_substitutePlaceholders_repeatedInvalidValue_warnsOnlyOnce() {
-        // WARN-amplification guard: getKnnConfigToken/getKnnConfigPositiveInt are also reached from
-        // the query path (SemanticChunkSearcher#resolveEngineMinScore) on every ann-mode search
-        // request with no caching of their own, so the same invalid key=value combination must not
-        // re-WARN on every call -- otherwise tightening the allow-sets above would make a single
-        // stale misconfiguration far noisier than before.
+    public void test_substitutePlaceholders_repeatedInvalidValue_warnsOnEveryCall() {
+        // No latch: an invalid value is reported every time it is read, so a value that is fixed
+        // and later broken again is reported again without a restart.
         ComponentUtil.getFessConfig().setSystemProperty("content_chunker.search.knn.engine", "not-a-real-engine");
         final SearchEngineClient client = new SearchEngineClient();
         final String source = "{\"engine\":\"${fess.content_chunker.search.knn.engine}\"}";
@@ -292,7 +289,7 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
             client.substitutePlaceholders(source, "5", "0-1");
 
             final long matchingWarnings = capture.warnings().stream().filter(m -> m.contains("content_chunker.search.knn.engine")).count();
-            assertEquals(1, (int) matchingWarnings, "the same invalid value must WARN only once: " + capture.warnings());
+            assertEquals(3, (int) matchingWarnings, "every read of the invalid value must WARN: " + capture.warnings());
         } finally {
             capture.detach();
         }

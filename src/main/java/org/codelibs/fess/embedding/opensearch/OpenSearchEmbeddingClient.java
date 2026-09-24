@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -140,13 +139,6 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
 
     /** Default prefix prepended to query texts: empty (see {@link #DEFAULT_DOCUMENT_PREFIX}). */
     protected static final String DEFAULT_QUERY_PREFIX = StringUtil.EMPTY;
-
-    /**
-     * One-shot latch for the userinfo rejection reported by {@link #getApiUrl()}. That method runs
-     * on every availability probe (once per {@code availability.check.interval}) and on every embed
-     * batch, so the remedy is stated once per client instead of being smeared across the log.
-     */
-    private final AtomicBoolean userInfoRejectionLogged = new AtomicBoolean();
 
     /**
      * Default constructor.
@@ -531,7 +523,8 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
      * {@code ProtocolException("Request URI authority contains deprecated userinfo component")}
      * before a connection is even attempted - so such a value is a non-functional configuration,
      * not a deployment shape. Rather than probe it forever with the password sitting in every
-     * diagnostic, this method reports the remedy once at ERROR and returns blank, which makes
+     * diagnostic, this method reports the remedy at ERROR each time it is asked for the URL and
+     * returns blank, which makes
      * {@link #checkAvailabilityNow()} report the provider unavailable. That is deliberately the
      * <em>fail-closed</em> shape rather than a throw: {@link #init()} is the container's eager
      * init-method, and a {@link RuntimeException} escaping it aborts Tomcat context startup - the
@@ -553,18 +546,15 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
         }
         final String normalized = normalizeApiUrl(url);
         if (CredentialUrlUtil.hasUserInfo(normalized)) {
-            if (userInfoRejectionLogged.compareAndSet(false, true)) {
-                // Names the source and the remedy, never the value: the whole point is that the
-                // value holds a credential.
-                logger.error("""
-                        [Embedding:OPENSEARCH] {} embeds credentials in the URL (a 'user:password@' userinfo component). \
-                        The HTTP client rejects that form unconditionally (RFC 9110 4.2.4 forbids sending it), so it can \
-                        never work; reporting the provider as unavailable so no run is started against it. Remove the \
-                        userinfo part and configure {}.{} / {}.{} for the OpenSearch cluster itself, or \
-                        http.proxy.username / http.proxy.password when the endpoint sits behind an authenticating proxy. \
-                        The rejected value is not logged.""", source, getConfigPrefix(), CONFIG_USERNAME, getConfigPrefix(),
-                        CONFIG_PASSWORD);
-            }
+            // Names the source and the remedy, never the value: the whole point is that the
+            // value holds a credential.
+            logger.error("""
+                    [Embedding:OPENSEARCH] {} embeds credentials in the URL (a 'user:password@' userinfo component). \
+                    The HTTP client rejects that form unconditionally (RFC 9110 4.2.4 forbids sending it), so it can \
+                    never work; reporting the provider as unavailable so no run is started against it. Remove the \
+                    userinfo part and configure {}.{} / {}.{} for the OpenSearch cluster itself, or \
+                    http.proxy.username / http.proxy.password when the endpoint sits behind an authenticating proxy. \
+                    The rejected value is not logged.""", source, getConfigPrefix(), CONFIG_USERNAME, getConfigPrefix(), CONFIG_PASSWORD);
             return StringUtil.EMPTY;
         }
         return normalized;

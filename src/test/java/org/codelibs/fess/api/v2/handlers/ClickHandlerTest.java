@@ -23,8 +23,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -32,6 +35,7 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -82,6 +86,34 @@ public class ClickHandlerTest extends UnitFessTestCase {
             assertEquals(400, res.status);
             assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
         } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_userInfoHelperFailure_warnsOnEveryClick() throws Exception {
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                throw new IllegalStateException("helper broken");
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ClickHandler.class.getName(), Level.INFO);
+        try {
+            for (int i = 0; i < 2; i++) {
+                final CapturingResponse res = new CapturingResponse();
+                new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"d\"}"), res);
+                assertEquals(200, res.status);
+            }
+            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("UserInfoHelper unavailable"))
+                    .toList();
+            assertEquals(2, warns.size());
+            warns.forEach(e -> assertNull(e.getThrown(), "the stack trace is only for DEBUG"));
+        } finally {
+            appender.detach();
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
         }
     }
