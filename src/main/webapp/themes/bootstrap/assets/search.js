@@ -743,6 +743,12 @@ async function runSearch() {
       (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.push(qy.value); }));
     if (facetQueryValues.length > 0) params["facet.query"] = facetQueryValues;
     const env = await api.get("/search", params, { signal });
+    // A search request rewriter on the server (e.g. a bang such as "!g") sent this search elsewhere.
+    // replace() keeps the redirecting search out of the history, so Back does not bounce.
+    if (typeof env.redirect_url === "string" && /^https?:\/\//i.test(env.redirect_url)) {
+      location.replace(env.redirect_url);
+      return;
+    }
     // Prefer the server-supplied requested_time when available (more accurate).
     if (env.requested_time) state.requestedTime = env.requested_time;
     // A.5: store server-supplied highlight params for cache link construction.

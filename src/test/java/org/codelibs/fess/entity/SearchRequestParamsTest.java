@@ -19,11 +19,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.di.helper.beans.BeanDesc;
+import org.lastaflute.di.helper.beans.factory.BeanDescFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -37,6 +40,34 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         super.setUp(testInfo);
         testParams = new TestSearchRequestParams();
         searchRequestParams = testParams;
+    }
+
+    @Test
+    public void test_redirectTo() {
+        assertFalse(searchRequestParams.isRedirected());
+        assertNull(searchRequestParams.getRedirectUrl());
+        searchRequestParams.redirectTo("https://example.com/");
+        assertTrue(searchRequestParams.isRedirected());
+        assertEquals("https://example.com/", searchRequestParams.getRedirectUrl());
+        searchRequestParams.redirectTo(null);
+        assertFalse(searchRequestParams.isRedirected());
+    }
+
+    @Test
+    public void test_enableRedirect() {
+        assertFalse(searchRequestParams.isRedirectable());
+        searchRequestParams.enableRedirect();
+        assertTrue(searchRequestParams.isRedirectable());
+    }
+
+    /** LastaFlute binds a request parameter only to a writable property; the redirect state must never be one. */
+    @Test
+    public void test_redirectUrl_isNotBindableOnTheSearchForm() {
+        final BeanDesc beanDesc = BeanDescFactory.getBeanDesc(SearchForm.class);
+        assertTrue(beanDesc.hasPropertyDesc("redirectUrl"));
+        assertFalse(beanDesc.getPropertyDesc("redirectUrl").isWritable());
+        assertTrue(beanDesc.hasPropertyDesc("redirectable"));
+        assertFalse(beanDesc.getPropertyDesc("redirectable").isWritable());
     }
 
     // Test for hasConditionQuery method

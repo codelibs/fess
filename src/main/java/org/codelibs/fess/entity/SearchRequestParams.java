@@ -179,6 +179,64 @@ public abstract class SearchRequestParams {
      *
      * @return The track total hits.
      */
+    /**
+     * The URL this request is sent to instead of being searched. Deliberately not a JavaBean
+     * property with a setter: a search form must never bind it from a request parameter.
+     */
+    protected String redirectUrl;
+
+    /**
+     * Whether the caller can send the user to {@link #getRedirectUrl()}. Deliberately not a
+     * JavaBean property with a setter, for the same reason as {@link #redirectUrl}.
+     */
+    protected boolean redirectable;
+
+    /**
+     * Gets the URL this request is sent to instead of being searched.
+     *
+     * @return the redirect URL, or null when the request is searched
+     */
+    public String getRedirectUrl() {
+        return redirectUrl;
+    }
+
+    /**
+     * Sends this request to the given URL instead of searching. Called by a
+     * {@link org.codelibs.fess.helper.SearchHelper.SearchRequestParamsRewriter}.
+     *
+     * @param url an absolute http(s) URL, or null to search as usual
+     */
+    public void redirectTo(final String url) {
+        redirectUrl = url;
+    }
+
+    /**
+     * Returns whether the caller can send the user elsewhere instead of searching. Only the
+     * search page and {@code /api/v2/search} can; for any other caller a redirect is ignored.
+     *
+     * @return true if a redirect is honored for this request
+     */
+    public boolean isRedirectable() {
+        return redirectable;
+    }
+
+    /**
+     * Declares that the caller sends the user to {@link #getRedirectUrl()} when a
+     * {@link org.codelibs.fess.helper.SearchHelper.SearchRequestParamsRewriter} redirects this request.
+     */
+    public void enableRedirect() {
+        redirectable = true;
+    }
+
+    /**
+     * Returns whether this request is sent elsewhere instead of being searched.
+     *
+     * @return true if a redirect URL is set
+     */
+    public boolean isRedirected() {
+        return getRedirectUrl() != null;
+    }
+
     public String getTrackTotalHits() {
         return null;
     }

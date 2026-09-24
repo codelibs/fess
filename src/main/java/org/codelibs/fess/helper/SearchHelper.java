@@ -18,11 +18,13 @@ package org.codelibs.fess.helper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +41,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.search.TotalHits.Relation;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.exception.InterruptedRuntimeException;
 import org.codelibs.core.lang.StringUtil;
@@ -109,8 +112,11 @@ public class SearchHelper {
     //                                                                            Variable
     //
 
-    /** Array of search request parameter rewriters for modifying search parameters. */
-    protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
+    /**
+     * Array of search request parameter rewriters for modifying search parameters. Request threads
+     * read the array while {@link #addRewriter} replaces it, so it is never modified in place.
+     */
+    protected volatile SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
 
     /** Jackson ObjectMapper for JSON serialization/deserialization. */
     protected ObjectMapper mapper = new ObjectMapper();
@@ -144,6 +150,13 @@ public class SearchHelper {
         final long requestedTime = startTime;
 
         final SearchRequestParams params = rewrite(searchRequestParams);
+        if (params.isRedirected()) {
+            data.setRedirectUrl(params.getRedirectUrl());
+            data.setDocumentItems(new QueryResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null,
+                    params.getStartPosition(), params.getPageSize(), 0));
+            data.setRequestedTime(requestedTime);
+            return;
+        }
 
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
@@ -508,15 +521,52 @@ public class SearchHelper {
     }
 
     /**
+     * Checks whether the value is an absolute http or https URL with a host.
+     *
+     * @param url the value to check
+     * @return true if it is an absolute http(s) URL
+     */
+    protected boolean isHttpUrl(final String url) {
+        try {
+            final URI uri = new URI(url);
+            return ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()))
+                    && StringUtil.isNotBlank(uri.getHost());
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * Applies registered parameter rewriters to modify search request parameters.
+     * Once a rewriter redirects the request, the rest are skipped. A redirect is dropped when
+     * the caller did not {@link SearchRequestParams#enableRedirect() enable} it, and with a
+     * warning when it is not an absolute http(s) URL.
      *
      * @param params The original search request parameters
      * @return Modified search request parameters after applying all rewriters
      */
     protected SearchRequestParams rewrite(final SearchRequestParams params) {
+        // Decided by the caller: a rewriter may return parameters that do not carry the flag.
+        final boolean redirectable = params.isRedirectable();
         SearchRequestParams newParams = params;
         for (final SearchRequestParamsRewriter rewriter : searchRequestParamsRewriters) {
             newParams = rewriter.rewrite(newParams);
+            if (newParams.isRedirected()) {
+                if (!redirectable) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Ignoring a redirect the caller cannot follow: rewriter={}, url={}",
+                                rewriter.getClass().getSimpleName(), newParams.getRedirectUrl());
+                    }
+                    newParams.redirectTo(null);
+                    continue;
+                }
+                if (isHttpUrl(newParams.getRedirectUrl())) {
+                    break;
+                }
+                logger.warn("Ignoring a redirect that is not an absolute http(s) URL: rewriter={}, url={}",
+                        rewriter.getClass().getSimpleName(), newParams.getRedirectUrl());
+                newParams.redirectTo(null);
+            }
         }
         return newParams;
     }
@@ -526,9 +576,11 @@ public class SearchHelper {
      *
      * @param rewriter The parameter rewriter to add
      */
-    public void addRewriter(final SearchRequestParamsRewriter rewriter) {
-        searchRequestParamsRewriters = Arrays.copyOf(searchRequestParamsRewriters, searchRequestParamsRewriters.length + 1);
-        searchRequestParamsRewriters[searchRequestParamsRewriters.length - 1] = rewriter;
+    public synchronized void addRewriter(final SearchRequestParamsRewriter rewriter) {
+        final SearchRequestParamsRewriter[] rewriters =
+                Arrays.copyOf(searchRequestParamsRewriters, searchRequestParamsRewriters.length + 1);
+        rewriters[rewriters.length - 1] = rewriter;
+        searchRequestParamsRewriters = rewriters;
     }
 
     /**
@@ -824,6 +876,14 @@ public class SearchHelper {
      *
      * Implementations can modify search parameters before they are processed
      * by the search engine, allowing for custom parameter transformation logic.
+     * A rewriter can also call {@link SearchRequestParams#redirectTo} to send the
+     * request elsewhere instead of searching: the search page redirects and
+     * {@code /api/v2/search} returns the URL as {@code redirect_url}. Other callers
+     * (chat, MCP, the v1 and classic JSON APIs, admin search, facet caching) cannot
+     * follow a redirect, so it is ignored for them and the request is searched;
+     * {@link SearchRequestParams#isRedirectable()} tells which case applies.
+     * To look at the parsed query, parse {@link SearchRequestParams#getQuery()} with
+     * the query parser; the query markers are applied.
      */
     public interface SearchRequestParamsRewriter {
         /**
@@ -834,4 +894,5 @@ public class SearchHelper {
          */
         SearchRequestParams rewrite(SearchRequestParams params);
     }
+
 }

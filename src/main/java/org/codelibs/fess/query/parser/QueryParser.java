@@ -16,6 +16,8 @@
 package org.codelibs.fess.query.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -24,11 +26,17 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser.Operator;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.apache.lucene.queryparser.ext.Extensions.Pair;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.QueryParseException;
+import org.codelibs.fess.query.MarkedQuery;
+import org.codelibs.fess.query.QueryMarker;
 import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.annotation.PostConstruct;
@@ -70,6 +78,13 @@ public class QueryParser {
     protected FilterChain filterChain;
 
     /**
+     * Markers applied to the parsed query, in priority order. The parser is a singleton shared
+     * by request threads, so the list is never modified: {@link #addMarker} publishes a new
+     * immutable list and {@link #parse} reads the field once.
+     */
+    protected volatile List<QueryMarker> markerList = Collections.emptyList();
+
+    /**
      * Initializes the query parser by creating the filter chain.
      * This method is called automatically after construction.
      */
@@ -80,14 +95,73 @@ public class QueryParser {
 
     /**
      * Parses the given query string and returns a Lucene Query object.
-     * The query is processed through the filter chain before being parsed.
+     * The query is processed through the filter chain before being parsed,
+     * and the leaves of the parsed query are then offered to the registered markers.
      *
      * @param query the query string to parse
      * @return the parsed Query object
      * @throws QueryParseException if the query cannot be parsed
      */
     public Query parse(final String query) {
-        return filterChain.parse(query);
+        final Query parsed = filterChain.parse(query);
+        final List<QueryMarker> markers = markerList;
+        if (markers.isEmpty()) {
+            return parsed;
+        }
+        return mark(parsed, Occur.MUST, markers);
+    }
+
+    /**
+     * Adds a marker. Markers are offered each leaf in priority order (lower numbers first).
+     *
+     * @param marker the marker to add
+     */
+    public synchronized void addMarker(final QueryMarker marker) {
+        final List<QueryMarker> list = new ArrayList<>(markerList);
+        list.add(marker);
+        list.sort(Comparator.comparingInt(QueryMarker::getPriority));
+        markerList = Collections.unmodifiableList(list);
+    }
+
+    /**
+     * Gets the registered markers in priority order.
+     *
+     * @return the markers
+     */
+    public List<QueryMarker> getMarkers() {
+        return markerList;
+    }
+
+    /**
+     * Wraps the leaves a marker takes in {@link MarkedQuery}, keeping the rest of the tree.
+     *
+     * @param query the node
+     * @param occur how the node is combined into its parent
+     * @param markers the markers to offer the leaves to, in priority order
+     * @return the node, or a copy of it holding marked leaves
+     */
+    protected Query mark(final Query query, final Occur occur, final List<QueryMarker> markers) {
+        if (query instanceof final BooleanQuery booleanQuery) {
+            final BooleanQuery.Builder builder = new BooleanQuery.Builder();
+            builder.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
+            boolean changed = false;
+            for (final BooleanClause clause : booleanQuery.clauses()) {
+                final Query marked = mark(clause.query(), clause.occur(), markers);
+                changed |= marked != clause.query();
+                builder.add(marked, clause.occur());
+            }
+            return changed ? builder.build() : query;
+        }
+        if (query instanceof final BoostQuery boostQuery) {
+            final Query marked = mark(boostQuery.getQuery(), occur, markers);
+            return marked == boostQuery.getQuery() ? query : new BoostQuery(marked, boostQuery.getBoost());
+        }
+        for (final QueryMarker marker : markers) {
+            if (marker.matches(occur, query)) {
+                return new MarkedQuery(marker, occur, query);
+            }
+        }
+        return query;
     }
 
     /**

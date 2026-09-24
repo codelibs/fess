@@ -17,19 +17,31 @@ package org.codelibs.fess.helper;
 
 import java.util.Base64;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.RequestParameter;
+import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.query.MarkedQuery;
+import org.codelibs.fess.query.QueryMarker;
+import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -538,6 +550,131 @@ public class SearchHelperTest extends UnitFessTestCase {
         // So we just verify that compression/decompression works correctly
         assertNotNull(compressed);
         assertTrue(compressed.length > 0);
+    }
+
+    private void registerQueryParser(final QueryMarker... markers) {
+        final QueryParser queryParser = new QueryParser();
+        queryParser.init();
+        for (final QueryMarker marker : markers) {
+            queryParser.addMarker(marker);
+        }
+        ComponentUtil.register(queryParser, "queryParser");
+    }
+
+    /** Parameters of a caller that follows redirects, like the search page. */
+    private static MockSearchRequestParams params(final String query) {
+        final MockSearchRequestParams params = new MockSearchRequestParams();
+        params.setQuery(query);
+        params.enableRedirect();
+        return params;
+    }
+
+    @Test
+    public void test_rewrite_redirectIgnoredWhenCallerCannotFollow() {
+        searchHelper.addRewriter(p -> {
+            p.redirectTo("https://www.google.com/search?q=airplane");
+            return p;
+        });
+        final List<String> seen = new ArrayList<>();
+        searchHelper.addRewriter(p -> {
+            seen.add(p.getQuery());
+            return p;
+        });
+        final MockSearchRequestParams params = new MockSearchRequestParams();
+        params.setQuery("airplane !g");
+        final SearchRequestParams result = searchHelper.rewrite(params);
+        assertFalse(result.isRedirected());
+        // the rest of the rewriters still run
+        assertEquals(List.of("airplane !g"), seen);
+    }
+
+    @Test
+    public void test_rewrite_callerDecidesEvenIfRewriterReplacesParams() {
+        searchHelper.addRewriter(p -> {
+            final MockSearchRequestParams replaced = new MockSearchRequestParams();
+            replaced.setQuery(p.getQuery());
+            replaced.redirectTo("https://www.google.com/");
+            return replaced;
+        });
+        assertTrue(searchHelper.rewrite(params("airplane")).isRedirected());
+        final MockSearchRequestParams notRedirectable = new MockSearchRequestParams();
+        notRedirectable.setQuery("airplane");
+        assertFalse(searchHelper.rewrite(notRedirectable).isRedirected());
+    }
+
+    @Test
+    public void test_rewrite_redirectSkipsTheRest() {
+        searchHelper.addRewriter(p -> {
+            p.redirectTo("https://www.google.com/search?q=airplane");
+            return p;
+        });
+        searchHelper.addRewriter(p -> {
+            fail("a rewriter after a redirect must not run");
+            return p;
+        });
+        final SearchRequestParams result = searchHelper.rewrite(params("airplane !g"));
+        assertTrue(result.isRedirected());
+        assertEquals("https://www.google.com/search?q=airplane", result.getRedirectUrl());
+    }
+
+    @Test
+    public void test_rewrite_dropsNonHttpRedirect() {
+        for (final String url : new String[] { "javascript:alert(1)//", "/relative/path", "https:no-host" }) {
+            searchHelper.addRewriter(p -> {
+                p.redirectTo(url);
+                return p;
+            });
+        }
+        assertFalse(searchHelper.rewrite(params("airplane")).isRedirected());
+
+        searchHelper.addRewriter(p -> {
+            p.redirectTo("HTTP://example.com/?q=x");
+            return p;
+        });
+        assertEquals("HTTP://example.com/?q=x", searchHelper.rewrite(params("airplane")).getRedirectUrl());
+    }
+
+    @Test
+    public void test_search_redirectedRequestIsNotSearched() {
+        searchHelper.addRewriter(p -> {
+            p.redirectTo("https://www.google.com/search?q=airplane");
+            return p;
+        });
+        final SearchRenderData data = new SearchRenderData();
+        // no rank fusion processor is registered: searching would throw
+        searchHelper.search(params("airplane !g"), data, OptionalThing.empty());
+        assertEquals("https://www.google.com/search?q=airplane", data.getRedirectUrl());
+        assertEquals(0, data.getDocumentItems().size());
+    }
+
+    /** How a bang plugin combines a query marker with a rewriter. */
+    @Test
+    public void test_rewrite_withQueryMarker() {
+        final QueryMarker bang = new QueryMarker() {
+            @Override
+            public boolean matches(final Occur occur, final Query query) {
+                return occur == Occur.MUST_NOT && query instanceof final TermQuery termQuery
+                        && Constants.DEFAULT_FIELD.equals(termQuery.getTerm().field()) && "g".equals(termQuery.getTerm().text());
+            }
+        };
+        registerQueryParser(bang);
+        searchHelper.addRewriter(p -> {
+            final Query q = ComponentUtil.getQueryParser().parse(p.getQuery());
+            if (MarkedQuery.collect(q).stream().noneMatch(m -> m.getMarker() == bang)) {
+                return p;
+            }
+            final StringBuilder buf = new StringBuilder();
+            for (final BooleanClause clause : ((BooleanQuery) q).clauses()) {
+                if (!(clause.query() instanceof MarkedQuery)) {
+                    buf.append(buf.length() == 0 ? "" : "+").append(((TermQuery) clause.query()).getTerm().text());
+                }
+            }
+            p.redirectTo("https://www.google.com/search?q=" + buf);
+            return p;
+        });
+
+        assertEquals("https://www.google.com/search?q=airplane", searchHelper.rewrite(params("airplane !g")).getRedirectUrl());
+        assertFalse(searchHelper.rewrite(params("airplane !w")).isRedirected());
     }
 
     // Helper methods for creating mock objects
