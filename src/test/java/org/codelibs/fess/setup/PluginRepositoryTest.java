@@ -123,7 +123,7 @@ public class PluginRepositoryTest {
         final List<String> names = PluginRepository.namesFromListing(html);
         assertTrue(names.contains("fess-ds-git"), names.toString());
         assertTrue(names.contains("fess-script-groovy"), names.toString());
-        assertTrue(names.contains("fess-theme-classic"), names.toString());
+        assertFalse(names.contains("fess-theme-classic"), names.toString());
         assertTrue(names.contains("fess-crawler-playwright"), names.toString());
     }
 

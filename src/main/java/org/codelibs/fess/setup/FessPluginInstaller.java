@@ -36,14 +36,14 @@ import java.util.stream.Stream;
  * unlike the other components in {@code fess-setup.properties} there is no archive to extract.</p>
  *
  * <p>The jars are deliberately not inspected. A plugin that contributes classes to the webapp
- * carries a {@code Fess-WebAppJar} manifest attribute, but a data store, a theme, an ingester and
+ * carries a {@code Fess-WebAppJar} manifest attribute, but a data store, an ingester and
  * a thumbnail generator do not, so requiring the attribute would reject most of the catalogue.</p>
  */
 public final class FessPluginInstaller {
 
     /** The prefixes {@code PluginHelper.ArtifactType} recognises, which is what Fess can load. */
-    private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-theme", "fess-ingest", "fess-script", "fess-webapp",
-            "fess-thumbnail", "fess-crawler", "fess-llm", "fess-storage", "fess-sso" };
+    private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-ingest", "fess-script", "fess-webapp", "fess-thumbnail",
+            "fess-crawler", "fess-llm", "fess-storage", "fess-sso" };
 
     private static final String JAR = ".jar";
 

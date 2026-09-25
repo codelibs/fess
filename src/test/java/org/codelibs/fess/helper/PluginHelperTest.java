@@ -233,7 +233,6 @@ public class PluginHelperTest extends UnitFessTestCase {
     @Test
     public void test_isExcludedName_nonCrawler() {
         assertFalse(pluginHelper.isExcludedName(ArtifactType.DATA_STORE, "fess-crawler"));
-        assertFalse(pluginHelper.isExcludedName(ArtifactType.THEME, "fess-crawler"));
         assertFalse(pluginHelper.isExcludedName(ArtifactType.INGEST, "fess-crawler"));
     }
 
@@ -500,8 +499,9 @@ public class PluginHelperTest extends UnitFessTestCase {
         Artifact dsArtifact = new Artifact("fess-ds-test", "1.0.0");
         assertEquals(ArtifactType.DATA_STORE, dsArtifact.getType());
 
-        Artifact themeArtifact = new Artifact("fess-theme-test", "1.0.0");
-        assertEquals(ArtifactType.THEME, themeArtifact.getType());
+        // JSP themes are no longer a plugin type: a jar left over from an older release is a plain jar.
+        Artifact themeArtifact = new Artifact("fess-theme-simple", "15.8.0");
+        assertEquals(ArtifactType.UNKNOWN, themeArtifact.getType());
 
         Artifact ingestArtifact = new Artifact("fess-ingest-test", "1.0.0");
         assertEquals(ArtifactType.INGEST, ingestArtifact.getType());
@@ -525,7 +525,6 @@ public class PluginHelperTest extends UnitFessTestCase {
     @Test
     public void test_ArtifactType_getId() {
         assertEquals("fess-ds", ArtifactType.DATA_STORE.getId());
-        assertEquals("fess-theme", ArtifactType.THEME.getId());
         assertEquals("fess-ingest", ArtifactType.INGEST.getId());
         assertEquals("fess-script", ArtifactType.SCRIPT.getId());
         assertEquals("fess-webapp", ArtifactType.WEBAPP.getId());
@@ -537,7 +536,7 @@ public class PluginHelperTest extends UnitFessTestCase {
     @Test
     public void test_ArtifactType_getType() {
         assertEquals(ArtifactType.DATA_STORE, ArtifactType.getType("fess-ds-test"));
-        assertEquals(ArtifactType.THEME, ArtifactType.getType("fess-theme-test"));
+        assertEquals(ArtifactType.UNKNOWN, ArtifactType.getType("fess-theme-test"));
         assertEquals(ArtifactType.INGEST, ArtifactType.getType("fess-ingest-test"));
         assertEquals(ArtifactType.SCRIPT, ArtifactType.getType("fess-script-test"));
         assertEquals(ArtifactType.WEBAPP, ArtifactType.getType("fess-webapp-test"));

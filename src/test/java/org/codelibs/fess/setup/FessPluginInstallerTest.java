@@ -100,6 +100,27 @@ public class FessPluginInstallerTest {
     }
 
     @Test
+    public void test_installed_ignoresLeftoverJspThemes() throws Exception {
+        touch("fess-theme-simple-15.8.0.jar");
+        touch("fess-ds-git-15.9.0.jar");
+
+        assertEquals(List.of("fess-ds-git-15.9.0.jar"),
+                FessPluginInstaller.installed(tempDir).stream().map(p -> p.getFileName().toString()).toList());
+    }
+
+    @Test
+    public void test_remove_stillRemovesALeftoverJspTheme() throws Exception {
+        // Upgraded installations may still carry one; naming it must remove it even though it is
+        // no longer a plugin type.
+        touch("fess-theme-simple-15.8.0.jar");
+
+        final List<Path> removed = FessPluginInstaller.remove(tempDir, "fess-theme-simple");
+
+        assertEquals(List.of("fess-theme-simple-15.8.0.jar"), removed.stream().map(p -> p.getFileName().toString()).toList());
+        assertFalse(Files.exists(tempDir.resolve("fess-theme-simple-15.8.0.jar")));
+    }
+
+    @Test
     public void test_remove() throws Exception {
         touch("fess-ds-git-15.9.0.jar");
         touch("fess-ds-slack-15.9.0.jar");
