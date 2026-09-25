@@ -303,10 +303,9 @@ public class SearchApiV2Manager extends BaseApiManager {
             }
         } catch (final InvalidAccessTokenException e) {
             // The request presented a credential we could not accept: an access token that is not
-            // registered or has expired, or none at all where api.access.token.required demands
-            // one. That is a refusal, not a server fault, and the generic handler below turned it
-            // into a 500. The envelope carries no detail from the exception because its message
-            // describes the caller's own credential.
+            // registered or has expired. That is a refusal, not a server fault, and the generic
+            // handler below turned it into a 500. The envelope carries no detail from the exception
+            // because its message describes the caller's own credential.
             if (logger.isDebugEnabled()) {
                 logger.debug("/api/v2 rejected the access token for {}", sub, e);
             }

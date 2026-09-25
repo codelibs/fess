@@ -278,9 +278,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60 */
     String API_ACCESS_TOKEN_LENGTH = "api.access.token.length";
 
-    /** The key of the configuration. e.g. false */
-    String API_ACCESS_TOKEN_REQUIRED = "api.access.token.required";
-
     /** The key of the configuration. e.g.  */
     String API_ACCESS_TOKEN_REQUEST_PARAMETER = "api.access.token.request.parameter";
 
@@ -2834,22 +2831,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getApiAccessTokenLengthAsInteger();
-
-    /**
-     * Get the value for the key 'api.access.token.required'. <br>
-     * The value is, e.g. false <br>
-     * comment: Whether API access token is required.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getApiAccessTokenRequired();
-
-    /**
-     * Is the property for the key 'api.access.token.required' true? <br>
-     * The value is, e.g. false <br>
-     * comment: Whether API access token is required.
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isApiAccessTokenRequired();
 
     /**
      * Get the value for the key 'api.access.token.request.parameter'. <br>
@@ -10731,14 +10712,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.API_ACCESS_TOKEN_LENGTH);
         }
 
-        public String getApiAccessTokenRequired() {
-            return get(FessConfig.API_ACCESS_TOKEN_REQUIRED);
-        }
-
-        public boolean isApiAccessTokenRequired() {
-            return is(FessConfig.API_ACCESS_TOKEN_REQUIRED);
-        }
-
         public String getApiAccessTokenRequestParameter() {
             return get(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER);
         }
@@ -14388,7 +14361,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SUPPORTED_LANGUAGES,
                     "ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_LENGTH, "60");
-            defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUIRED, "false");
             defaultMap.put(FessConfig.API_ACCESS_TOKEN_REQUEST_PARAMETER, "");
             defaultMap.put(FessConfig.API_ADMIN_ACCESS_PERMISSIONS, "Radmin-api");
             defaultMap.put(FessConfig.API_SEARCH_ACCEPT_REFERERS, "");

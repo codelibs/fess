@@ -439,12 +439,10 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
      * guard always engages.
      *
      * <p>The anonymous context here is a request with no cached {@code userRoles} attribute, no
-     * presented access token, and no logged-in {@code FessUserBean}; with
-     * {@code api.access.token.required=false} (see MockFessConfig#getApiAccessTokenRequiredAsBoolean)
-     * the helper falls into the guest-role backfill branch (RoleQueryHelper.java:186-193).
-     * {@code processAccessToken} is overridden to return {@code false} (no token) so the test does
-     * not require the OpenSearch-backed {@code AccessTokenService} / {@code AccessTokenBhv}, while
-     * still exercising the real guest-backfill logic.
+     * presented access token, and no logged-in {@code FessUserBean}, so the helper falls into the
+     * guest-role backfill branch. {@code processAccessToken} is overridden to return {@code false}
+     * (no token) so the test does not require the OpenSearch-backed {@code AccessTokenService} /
+     * {@code AccessTokenBhv}, while still exercising the real guest-backfill logic.
      */
     @Test
     public void test_build_anonymousJson_isNonEmptyWithGuestRole() {
@@ -599,18 +597,11 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
     }
 
     /**
-     * With {@code api.access.token.required=true}, an API request carrying a registered access token
-     * is answered with the token's permissions. It used to be refused because the check looked only
-     * for a login session.
+     * An API request carrying a registered access token is answered with the token's permissions
+     * and not with the guest roles.
      */
     @Test
-    public void test_build_accessTokenRequired_withToken() {
-        ComponentUtil.setFessConfig(new MockFessConfig() {
-            @Override
-            public boolean getApiAccessTokenRequiredAsBoolean() {
-                return true;
-            }
-        });
+    public void test_build_apiRequestWithToken() {
         final RoleQueryHelper roleQueryHelper = createAnonymousRoleQueryHelper("token_role");
         roleQueryHelper.init();
 
@@ -621,55 +612,6 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("token_role"), roleSet.toString());
         for (final String guestRole : ComponentUtil.getFessConfig().getSearchGuestRoleList()) {
             assertFalse(roleSet.contains(guestRole), "a token request must not be given the guest roles: " + roleSet);
-        }
-    }
-
-    /**
-     * With {@code api.access.token.required=true}, an API request with neither a login session nor
-     * an access token is still refused.
-     */
-    @Test
-    public void test_build_accessTokenRequired_withoutToken() {
-        ComponentUtil.setFessConfig(new MockFessConfig() {
-            @Override
-            public boolean getApiAccessTokenRequiredAsBoolean() {
-                return true;
-            }
-        });
-        final RoleQueryHelper roleQueryHelper = createAnonymousRoleQueryHelper();
-        roleQueryHelper.init();
-
-        getMockRequest();
-
-        try {
-            roleQueryHelper.build(SearchRequestType.JSON);
-            fail("an API request without an access token must be refused");
-        } catch (final org.codelibs.fess.exception.InvalidAccessTokenException e) {
-            // expected
-        }
-    }
-
-    /**
-     * {@code api.access.token.required} applies to the API only: the search screen still answers
-     * an anonymous visitor with the guest roles.
-     */
-    @Test
-    public void test_build_accessTokenRequired_searchScreen() {
-        ComponentUtil.setFessConfig(new MockFessConfig() {
-            @Override
-            public boolean getApiAccessTokenRequiredAsBoolean() {
-                return true;
-            }
-        });
-        final RoleQueryHelper roleQueryHelper = createAnonymousRoleQueryHelper();
-        roleQueryHelper.init();
-
-        getMockRequest();
-
-        final Set<String> roleSet = roleQueryHelper.build(SearchRequestType.SEARCH);
-
-        for (final String guestRole : ComponentUtil.getFessConfig().getSearchGuestRoleList()) {
-            assertTrue(roleSet.contains(guestRole), roleSet.toString());
         }
     }
 
@@ -1087,11 +1029,6 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
             roles.add("guest_role1");
             roles.add("guest_role2");
             return roles;
-        }
-
-        @Override
-        public boolean getApiAccessTokenRequiredAsBoolean() {
-            return false;
         }
     }
 
