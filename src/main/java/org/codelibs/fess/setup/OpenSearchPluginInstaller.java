@@ -18,9 +18,11 @@ package org.codelibs.fess.setup;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Installs OpenSearch plugins through the distribution's own {@code opensearch-plugin} tool.
+ * Installs and removes OpenSearch plugins through the distribution's own {@code opensearch-plugin} tool.
  *
  * <p>Plugins are passed as zip URLs rather than Maven coordinates. The coordinate form requires
  * a direct connection to Maven Central and fails behind a proxy or an internal repository, and
@@ -85,28 +87,59 @@ public final class OpenSearchPluginInstaller {
      * @throws SetupException if the plugin tool is missing or reports an error
      */
     public static void install(final Path opensearchHome, final String url) throws SetupException {
+        final Result result = run(opensearchHome, "install", "--batch", url);
+        if (result.exit() != 0 && !result.output().contains("already exists")) {
+            throw new SetupException(
+                    "Failed to install " + url + ", opensearch-plugin exited with code " + result.exit() + ": " + result.output());
+        }
+    }
+
+    /**
+     * Removes one plugin by name.
+     *
+     * <p>A plugin that is not installed is skipped rather than reported, so removing from a
+     * distribution that never shipped it, or running setup again, is harmless.</p>
+     *
+     * @param opensearchHome the OpenSearch home directory
+     * @param name the plugin name, as {@code opensearch-plugin list} prints it
+     * @return true if the plugin was installed and has been removed
+     * @throws SetupException if the plugin tool is missing or reports an error
+     */
+    public static boolean remove(final Path opensearchHome, final String name) throws SetupException {
+        if (!Files.isDirectory(opensearchHome.resolve("plugins").resolve(name))) {
+            return false;
+        }
+        final Result result = run(opensearchHome, "remove", name);
+        if (result.exit() != 0) {
+            throw new SetupException(
+                    "Failed to remove " + name + ", opensearch-plugin exited with code " + result.exit() + ": " + result.output());
+        }
+        return true;
+    }
+
+    private static Result run(final Path opensearchHome, final String... args) throws SetupException {
         final Path command = pluginCommand(opensearchHome);
         if (!Files.isRegularFile(command)) {
             throw new SetupException("opensearch-plugin was not found at " + command
                     + ". Point --opensearch-home at an OpenSearch installation, or install OpenSearch first.");
         }
-        final ProcessBuilder builder = new ProcessBuilder(command.toAbsolutePath().toString(), "install", "--batch", url);
+        final List<String> commandLine = new ArrayList<>();
+        commandLine.add(command.toAbsolutePath().toString());
+        commandLine.addAll(List.of(args));
+        final ProcessBuilder builder = new ProcessBuilder(commandLine);
         builder.redirectErrorStream(true);
         try {
             final Process process = builder.start();
             final String output = new String(process.getInputStream().readAllBytes());
-            final int exit = process.waitFor();
-            if (exit != 0) {
-                if (output.contains("already exists")) {
-                    return;
-                }
-                throw new SetupException("Failed to install " + url + ", opensearch-plugin exited with code " + exit + ": " + output);
-            }
+            return new Result(process.waitFor(), output);
         } catch (final IOException e) {
             throw new SetupException("Failed to run " + command, e);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new SetupException("Interrupted while installing " + url, e);
+            throw new SetupException("Interrupted while running " + command + " " + String.join(" ", args), e);
         }
+    }
+
+    private record Result(int exit, String output) {
     }
 }

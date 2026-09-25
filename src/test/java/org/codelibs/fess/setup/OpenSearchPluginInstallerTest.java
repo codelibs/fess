@@ -16,12 +16,17 @@
 package org.codelibs.fess.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 public class OpenSearchPluginInstallerTest {
@@ -70,5 +75,49 @@ public class OpenSearchPluginInstallerTest {
                 assertThrows(SetupException.class, () -> OpenSearchPluginInstaller.install(tempDir, "https://example.org/a.zip"));
         assertTrue(e.getMessage().contains("opensearch-plugin"), e.getMessage());
         assertTrue(e.getMessage().contains("--opensearch-home"), e.getMessage());
+    }
+
+    @Test
+    public void test_remove_skipsAPluginThatIsNotInstalled() throws Exception {
+        // No bin/opensearch-plugin either: a plugin the bundle does not ship never runs the tool.
+        assertFalse(OpenSearchPluginInstaller.remove(tempDir, "opensearch-performance-analyzer"));
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_remove_runsThePluginTool() throws Exception {
+        final Path log = fakePluginTool("""
+                echo "$@" > "$(dirname "$0")/args"
+                rm -rf "$(dirname "$0")/../plugins/$2"
+                """);
+        Files.createDirectories(tempDir.resolve("plugins").resolve("opensearch-security-analytics"));
+
+        assertTrue(OpenSearchPluginInstaller.remove(tempDir, "opensearch-security-analytics"));
+        assertEquals("remove opensearch-security-analytics", Files.readString(log, StandardCharsets.UTF_8).trim());
+        assertFalse(Files.exists(tempDir.resolve("plugins").resolve("opensearch-security-analytics")));
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void test_remove_reportsAFailingPluginTool() throws Exception {
+        fakePluginTool("""
+                echo 'ERROR: boom'
+                exit 74
+                """);
+        Files.createDirectories(tempDir.resolve("plugins").resolve("opensearch-security-analytics"));
+
+        final SetupException e =
+                assertThrows(SetupException.class, () -> OpenSearchPluginInstaller.remove(tempDir, "opensearch-security-analytics"));
+        assertTrue(e.getMessage().contains("opensearch-security-analytics"), e.getMessage());
+        assertTrue(e.getMessage().contains("74"), e.getMessage());
+        assertTrue(e.getMessage().contains("boom"), e.getMessage());
+    }
+
+    private Path fakePluginTool(final String body) throws Exception {
+        final Path command = OpenSearchPluginInstaller.pluginCommand(tempDir, Platform.Os.LINUX);
+        Files.createDirectories(command.getParent());
+        Files.writeString(command, "#!/bin/sh\n" + body, StandardCharsets.UTF_8);
+        assertTrue(command.toFile().setExecutable(true));
+        return command.getParent().resolve("args");
     }
 }
