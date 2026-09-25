@@ -15,21 +15,18 @@
  */
 package org.codelibs.fess.helper;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
-
 import java.util.function.Function;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * Helper class for managing virtual host configurations and routing.
  * This class provides functionality to handle virtual host-based routing
- * and path resolution based on HTTP headers.
+ * based on HTTP headers.
  */
 public class VirtualHostHelper {
 
@@ -38,30 +35,6 @@ public class VirtualHostHelper {
      */
     public VirtualHostHelper() {
         // Default constructor
-    }
-
-    /**
-     * Gets the virtual host path for the specified HTML page.
-     *
-     * @param page The HTML page to get the virtual host path for
-     * @return The HTML page with updated virtual host path
-     */
-    public HtmlNext getVirtualHostPath(final HtmlNext page) {
-        return processVirtualHost(s -> {
-            final String basePath = getVirtualHostBasePath(s, page);
-            return new HtmlNext(basePath + page.getRoutingPath());
-        }, page);
-    }
-
-    /**
-     * Gets the base path for virtual host based on the virtual host key and page.
-     *
-     * @param s The virtual host key
-     * @param page The HTML page
-     * @return The base path for the virtual host
-     */
-    protected String getVirtualHostBasePath(final String s, final HtmlNext page) {
-        return StringUtil.isBlank(s) ? StringUtil.EMPTY : "/" + s;
     }
 
     /**
@@ -97,15 +70,5 @@ public class VirtualHostHelper {
             }
             return defaultValue;
         }).orElse(defaultValue);
-    }
-
-    /**
-     * Gets all configured virtual host paths.
-     *
-     * @return An array of virtual host paths
-     */
-    public String[] getVirtualHostPaths() {
-        return stream(ComponentUtil.getFessConfig().getVirtualHosts())
-                .get(stream -> stream.map(h -> "/" + h.getValue3()).toArray(n -> new String[n]));
     }
 }

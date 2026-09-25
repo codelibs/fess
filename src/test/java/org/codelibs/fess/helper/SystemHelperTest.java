@@ -18,7 +18,6 @@ package org.codelibs.fess.helper;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,8 +36,6 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Pair;
-import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -64,9 +61,6 @@ public class SystemHelperTest extends UnitFessTestCase {
         final File propFile = File.createTempFile("project", ".properties");
         propFile.deleteOnExit();
         FileUtil.writeBytes(propFile.getAbsolutePath(), "fess.version=98.76.5".getBytes());
-        final File desginJspRootFile = File.createTempFile("jsp", "");
-        desginJspRootFile.delete();
-        desginJspRootFile.deleteOnExit();
         systemHelper = new SystemHelper() {
             @Override
             protected void parseProjectProperties(final Path propPath) {
@@ -80,11 +74,6 @@ public class SystemHelperTest extends UnitFessTestCase {
             @Override
             protected Map<String, String> getEnvMap() {
                 return envMap;
-            }
-
-            @Override
-            protected File getDesignJspFile(String path) {
-                return new File(desginJspRootFile, path);
             }
 
             @Override
@@ -266,17 +255,6 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
         getMockRequest().setLocale(null);
         assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
-    }
-
-    @Test
-    public void test_getDesignJspFileName() {
-        assertNull(systemHelper.getDesignJspFileName("xxx"));
-        systemHelper.addDesignJspFileName("xxx", "yyy");
-        assertEquals("yyy", systemHelper.getDesignJspFileName("xxx"));
-        final Pair<String, String>[] designJspFileNames = systemHelper.getDesignJspFileNames();
-        assertEquals(1, designJspFileNames.length);
-        assertEquals("xxx", designJspFileNames[0].getFirst());
-        assertEquals("yyy", designJspFileNames[0].getSecond());
     }
 
     @Test
@@ -744,37 +722,6 @@ public class SystemHelperTest extends UnitFessTestCase {
         } catch (final FessSystemException e) {
             // ok
         }
-    }
-
-    @Test
-    public void test_refreshDesignJspFiles() {
-        final VirtualHostHelper virtualHostHelper = new VirtualHostHelper();
-        ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
-        final List<Tuple3<String, String, String>> virtualHostList = new ArrayList<>();
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public Tuple3<String, String, String>[] getVirtualHosts() {
-                return virtualHostList.toArray(n -> new Tuple3[n]);
-            }
-        });
-
-        List<Path> fileList = systemHelper.refreshDesignJspFiles();
-        assertEquals(0, fileList.size());
-
-        virtualHostList.add(new Tuple3<>("abc.example.com", "8080", "host1"));
-        fileList = systemHelper.refreshDesignJspFiles();
-        assertEquals(0, fileList.size());
-
-        systemHelper.addDesignJspFileName("xxx", "yyy.jsp");
-        final File designJspFile = systemHelper.getDesignJspFile("/WEB-INF/view/yyy.jsp");
-        designJspFile.getParentFile().mkdirs();
-        FileUtil.writeBytes(designJspFile.getAbsolutePath(), "ok".getBytes());
-        fileList = systemHelper.refreshDesignJspFiles();
-        assertEquals(1, fileList.size());
-        assertEquals("ok", FileUtil.readText(fileList.get(0).toFile()));
     }
 
     @Test

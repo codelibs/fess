@@ -47,7 +47,6 @@ import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import jakarta.annotation.Resource;
@@ -352,16 +351,5 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected HtmlResponse redirectToLogin() {
         searchHelper.storeSearchParameters();
         return systemHelper.getRedirectResponseToLogin(redirect(SsoAction.class));
-    }
-
-    /**
-     * Processes the given path through the virtual host helper to handle
-     * virtual host configurations and path modifications.
-     *
-     * @param path the HTML path to process
-     * @return the processed path with virtual host handling applied
-     */
-    protected HtmlNext virtualHost(final HtmlNext path) {
-        return ComponentUtil.getVirtualHostHelper().getVirtualHostPath(path);
     }
 }

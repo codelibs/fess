@@ -62,7 +62,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
-import org.codelibs.core.misc.Pair;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
@@ -84,7 +83,6 @@ import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
-import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.ActionValidator;
 import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
 
@@ -97,7 +95,7 @@ import jakarta.annotation.PreDestroy;
 
 /**
  * Helper class for system-level operations and utilities.
- * This class provides methods for managing system properties, handling JSP files,
+ * This class provides methods for managing system properties,
  * normalizing configurations, and other system-related tasks.
  */
 public class SystemHelper {
@@ -110,9 +108,6 @@ public class SystemHelper {
     }
 
     private static final Logger logger = LogManager.getLogger(SystemHelper.class);
-
-    /** A map of design JSP file names. */
-    protected final Map<String, String> designJspFileNameMap = new LinkedHashMap<>();
 
     /** A flag to indicate if the system should be forcefully stopped. */
     protected final AtomicBoolean forceStop = new AtomicBoolean(false);
@@ -455,73 +450,6 @@ public class SystemHelper {
      */
     public String getEolLink() {
         return getHelpUrl(ComponentUtil.getFessConfig().getOnlineHelpEol());
-    }
-
-    /**
-     * Adds a design JSP file name to the map.
-     *
-     * @param key   The key for the JSP file.
-     * @param value The file name.
-     */
-    public void addDesignJspFileName(final String key, final String value) {
-        designJspFileNameMap.put(key, value);
-    }
-
-    /**
-     * Gets the design JSP file name for a given key.
-     *
-     * @param fileName The key for the JSP file.
-     * @return The file name.
-     */
-    public String getDesignJspFileName(final String fileName) {
-        return designJspFileNameMap.get(fileName);
-    }
-
-    /**
-     * Gets an array of design JSP file names.
-     *
-     * @return An array of pairs of keys and file names.
-     */
-    @SuppressWarnings("unchecked")
-    public Pair<String, String>[] getDesignJspFileNames() {
-        return designJspFileNameMap.entrySet().stream().map(e -> new Pair<>(e.getKey(), e.getValue())).toArray(n -> new Pair[n]);
-    }
-
-    /**
-     * Refreshes the design JSP files for all virtual hosts.
-     *
-     * @return A list of paths to the refreshed files.
-     */
-    public List<Path> refreshDesignJspFiles() {
-        final List<Path> fileList = new ArrayList<>();
-        stream(ComponentUtil.getVirtualHostHelper().getVirtualHostPaths())
-                .of(stream -> stream.filter(s -> s != null && !"/".equals(s)).forEach(key -> {
-                    designJspFileNameMap.entrySet().stream().forEach(e -> {
-                        final File jspFile = getDesignJspFile("/WEB-INF/view" + key + "/" + e.getValue());
-                        if (!jspFile.exists()) {
-                            jspFile.getParentFile().mkdirs();
-                            final File baseJspFile = getDesignJspFile("/WEB-INF/view/" + e.getValue());
-                            try {
-                                final Path jspPath = jspFile.toPath();
-                                Files.copy(baseJspFile.toPath(), jspPath);
-                                fileList.add(jspPath);
-                            } catch (final IOException ex) {
-                                logger.warn("Could not copy from {} to {}", baseJspFile.getAbsolutePath(), jspFile.getAbsolutePath(), ex);
-                            }
-                        }
-                    });
-                }));
-        return fileList;
-    }
-
-    /**
-     * Gets a design JSP file for a given path.
-     *
-     * @param path The path to the JSP file.
-     * @return The JSP file.
-     */
-    protected File getDesignJspFile(final String path) {
-        return new File(LaServletContextUtil.getServletContext().getRealPath(path));
     }
 
     /**
