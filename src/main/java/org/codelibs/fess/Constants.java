@@ -499,9 +499,6 @@ public class Constants extends CoreLibConstants {
     /** Search log access type for other interfaces. */
     public static final String SEARCH_LOG_ACCESS_TYPE_OTHER = "other";
 
-    /** Results per page parameter name. */
-    public static final String RESULTS_PER_PAGE = "resultsPerPage";
-
     /** User code parameter name. */
     public static final String USER_CODE = "userCode";
 
@@ -520,21 +517,6 @@ public class Constants extends CoreLibConstants {
     // ============================================================
     // View Parameters
     // ============================================================
-
-    /** View parameter for facet query information. */
-    public static final String FACET_QUERY = "fess.FacetQuery";
-
-    /** View parameter for geo query information. */
-    public static final String GEO_QUERY = "fess.GeoQuery";
-
-    /** View parameter for facet form data. */
-    public static final String FACET_FORM = "fess.FacetForm";
-
-    /** View parameter for geo form data. */
-    public static final String GEO_FORM = "fess.GeoForm";
-
-    /** View parameter for label value mapping. */
-    public static final String LABEL_VALUE_MAP = "fess.LabelValueMap";
 
     /** Query parameter name for main search query. */
     public static final String OPTION_QUERY_Q = "q";
@@ -772,9 +754,6 @@ public class Constants extends CoreLibConstants {
     // ============================================================
     // Request and Search Constants
     // ============================================================
-
-    /** Paging query list parameter name. */
-    public static final String PAGING_QUERY_LIST = "pagingQueryList";
 
     /** Request languages parameter name. */
     public static final String REQUEST_LANGUAGES = "requestLanguages";
