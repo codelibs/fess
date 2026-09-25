@@ -216,6 +216,21 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     }
 
     /**
+     * Uploads bad words from a CSV file sent as a {@code multipart/form-data} request.
+     *
+     * <p>LastaFlute parses a multipart body only for POST, so this is the method to use for uploads;
+     * {@link #put$upload(UploadForm)} is kept for compatibility.</p>
+     *
+     * @param body the upload form containing the CSV file
+     * @return JSON response with result status
+     */
+    // POST /api/admin/badword/upload
+    @Execute
+    public JsonResponse<ApiResult> post$upload(final UploadForm body) {
+        return put$upload(body);
+    }
+
+    /**
      * Downloads bad word settings as a CSV file.
      *
      * @param body the download request body containing download parameters
