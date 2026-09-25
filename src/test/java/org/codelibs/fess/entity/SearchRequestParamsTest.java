@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.codelibs.fess.app.web.base.SearchForm;
+import org.codelibs.fess.app.web.admin.searchlist.ListForm;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -62,8 +62,8 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
 
     /** LastaFlute binds a request parameter only to a writable property; the redirect state must never be one. */
     @Test
-    public void test_redirectUrl_isNotBindableOnTheSearchForm() {
-        final BeanDesc beanDesc = BeanDescFactory.getBeanDesc(SearchForm.class);
+    public void test_redirectUrl_isNotBindableOnAForm() {
+        final BeanDesc beanDesc = BeanDescFactory.getBeanDesc(ListForm.class);
         assertTrue(beanDesc.hasPropertyDesc("redirectUrl"));
         assertFalse(beanDesc.getPropertyDesc("redirectUrl").isWritable());
         assertTrue(beanDesc.hasPropertyDesc("redirectable"));

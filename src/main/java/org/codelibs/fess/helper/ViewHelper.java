@@ -34,8 +34,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -51,9 +49,7 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
@@ -62,15 +58,12 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.HighlightInfo;
-import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.taglib.function.LaFunctions;
@@ -86,8 +79,6 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
@@ -194,12 +185,6 @@ public class ViewHelper {
     /** Set of MIME types that should be displayed inline */
     protected final Set<String> inlineMimeTypeSet = new HashSet<>();
 
-    /** Cache for facet responses */
-    protected Cache<String, FacetResponse> facetCache;
-
-    /** Duration for facet cache in seconds (10 minutes) */
-    protected long facetCacheDuration = 60 * 10L;
-
     /** Length of text fragment prefix */
     protected int textFragmentPrefixLength;
 
@@ -253,8 +238,6 @@ public class ViewHelper {
                 logger.debug("loaded {}", facetQueryView);
             }
         }));
-
-        facetCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(facetCacheDuration, TimeUnit.SECONDS).build();
 
         textFragmentPrefixLength = fessConfig.getQueryHighlightTextFragmentPrefixLengthAsInteger();
         textFragmentSuffixLength = fessConfig.getQueryHighlightTextFragmentSuffixLengthAsInteger();
@@ -1030,46 +1013,6 @@ public class ViewHelper {
     }
 
     /**
-     * Gets a cached facet response for the given query.
-     * Creates and caches the response if not already cached.
-     *
-     * @param query the search query
-     * @return the facet response
-     * @throws FessSystemException if facet data cannot be loaded
-     */
-    public FacetResponse getCachedFacetResponse(final String query) {
-        final OptionalThing<FessUserBean> userBean = ComponentUtil.getFessLoginAssist().getSavedUserBean();
-        final String permissionKey = userBean.map(user -> StreamUtil.stream(user.getPermissions())
-                .get(stream -> stream.sorted().distinct().collect(Collectors.joining("\n")))).orElse(StringUtil.EMPTY);
-
-        try {
-            return facetCache.get(query + "\n" + permissionKey, () -> {
-                final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
-                final SearchForm params = new SearchForm() {
-                    @Override
-                    public int getPageSize() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int getStartPosition() {
-                        return 0;
-                    }
-                };
-                params.q = query;
-                final SearchRenderData data = new SearchRenderData();
-                searchHelper.search(params, data, userBean);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("loaded facet data: {}", data);
-                }
-                return data.getFacetResponse();
-            });
-        } catch (final ExecutionException e) {
-            throw new FessSystemException("Cannot load facet from cache.", e);
-        }
-    }
-
-    /**
      * Creates highlighted text from highlight field fragments.
      *
      * @param highlightField the highlight field containing fragments
@@ -1278,15 +1221,6 @@ public class ViewHelper {
      */
     public void setCacheTemplateName(final String cacheTemplateName) {
         this.cacheTemplateName = cacheTemplateName;
-    }
-
-    /**
-     * Sets the facet cache duration in seconds.
-     *
-     * @param facetCacheDuration the cache duration in seconds
-     */
-    public void setFacetCacheDuration(final long facetCacheDuration) {
-        this.facetCacheDuration = facetCacheDuration;
     }
 
     /**

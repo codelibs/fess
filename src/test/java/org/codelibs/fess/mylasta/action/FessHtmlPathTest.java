@@ -59,11 +59,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/admin/dashboard/admin_dashboard.jsp", FessHtmlPath.path_AdminDashboard_AdminDashboardJsp.getRoutingPath());
         assertEquals("/admin/general/admin_general.jsp", FessHtmlPath.path_AdminGeneral_AdminGeneralJsp.getRoutingPath());
         assertEquals("/admin/wizard/admin_wizard.jsp", FessHtmlPath.path_AdminWizard_AdminWizardJsp.getRoutingPath());
-        assertEquals("/index.jsp", FessHtmlPath.path_IndexJsp.getRoutingPath());
-        assertEquals("/search.jsp", FessHtmlPath.path_SearchJsp.getRoutingPath());
-        assertEquals("/error/error.jsp", FessHtmlPath.path_Error_ErrorJsp.getRoutingPath());
         assertEquals("/admin/login/index.jsp", FessHtmlPath.path_AdminLogin_IndexJsp.getRoutingPath());
-        assertEquals("/profile/index.jsp", FessHtmlPath.path_Profile_IndexJsp.getRoutingPath());
     }
 
     @Test
@@ -127,15 +123,6 @@ public class FessHtmlPathTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_errorPaths() throws Exception {
-        // Test error paths
-        assertEquals("/error/badRequest.jsp", FessHtmlPath.path_Error_BadRequestJsp.getRoutingPath());
-        assertEquals("/error/error.jsp", FessHtmlPath.path_Error_ErrorJsp.getRoutingPath());
-        assertEquals("/error/notFound.jsp", FessHtmlPath.path_Error_NotFoundJsp.getRoutingPath());
-        assertEquals("/error/system.jsp", FessHtmlPath.path_Error_SystemJsp.getRoutingPath());
-    }
-
-    @Test
     public void test_dictPaths() throws Exception {
         // Test dictionary paths structure
         assertEquals("/admin/dict/admin_dict.jsp", FessHtmlPath.path_AdminDict_AdminDictJsp.getRoutingPath());
@@ -149,25 +136,6 @@ public class FessHtmlPathTest extends UnitFessTestCase {
                 FessHtmlPath.path_AdminDictProtwords_AdminDictProtwordsJsp.getRoutingPath());
         assertEquals("/admin/dict/stemmeroverride/admin_dict_stemmeroverride.jsp",
                 FessHtmlPath.path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp.getRoutingPath());
-    }
-
-    @Test
-    public void test_searchRelatedPaths() throws Exception {
-        // Test search-related paths
-        assertEquals("/search.jsp", FessHtmlPath.path_SearchJsp.getRoutingPath());
-        assertEquals("/searchNoResult.jsp", FessHtmlPath.path_SearchNoResultJsp.getRoutingPath());
-        assertEquals("/searchOptions.jsp", FessHtmlPath.path_SearchOptionsJsp.getRoutingPath());
-        assertEquals("/searchResults.jsp", FessHtmlPath.path_SearchResultsJsp.getRoutingPath());
-        assertEquals("/advance.jsp", FessHtmlPath.path_AdvanceJsp.getRoutingPath());
-    }
-
-    @Test
-    public void test_commonPaths() throws Exception {
-        // Test common paths
-        assertEquals("/index.jsp", FessHtmlPath.path_IndexJsp.getRoutingPath());
-        assertEquals("/header.jsp", FessHtmlPath.path_HeaderJsp.getRoutingPath());
-        assertEquals("/footer.jsp", FessHtmlPath.path_FooterJsp.getRoutingPath());
-        assertEquals("/help.jsp", FessHtmlPath.path_HelpJsp.getRoutingPath());
     }
 
     @Test

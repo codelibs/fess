@@ -730,7 +730,6 @@ public class ViewHelperTest extends UnitFessTestCase {
         viewHelper.setOriginalHighlightTagPre("<mark>");
         viewHelper.setOriginalHighlightTagPost("</mark>");
         viewHelper.setCacheTemplateName("cache");
-        viewHelper.setFacetCacheDuration(600L);
     }
 
     @Test
@@ -764,19 +763,6 @@ public class ViewHelperTest extends UnitFessTestCase {
             actionHook.godHandEpilogue(null, runtime -> {});
             assertNull(actionHook.hookBefore(null, runtime -> null));
             actionHook.hookFinally(null, runtime -> {});
-            assertTrue(true);
-        } catch (Exception e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
-    public void test_getCachedFacetResponse() {
-        ViewHelper viewHelper = new ViewHelper();
-        viewHelper.init();
-
-        try {
-            viewHelper.getCachedFacetResponse("test query");
             assertTrue(true);
         } catch (Exception e) {
             assertTrue(true);

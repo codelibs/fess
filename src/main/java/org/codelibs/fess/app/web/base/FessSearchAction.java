@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.base;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,7 +52,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Abstract base class for search-related actions in the Fess search application.
@@ -70,9 +68,6 @@ public abstract class FessSearchAction extends FessBaseAction {
      */
     public FessSearchAction() {
     }
-
-    /** The field name used for label-based search filtering. */
-    protected static final String LABEL_FIELD = "label";
 
     /** Helper for performing search operations and managing search requests. */
     @Resource
@@ -309,50 +304,6 @@ public abstract class FessSearchAction extends FessBaseAction {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Builds and populates search form parameters including results per page,
-     * label filtering, and sort order based on user preferences and configuration.
-     *
-     * @param form the search form to populate with parameters
-     */
-    protected void buildFormParams(final SearchForm form) {
-
-        final HttpSession session = request.getSession(false);
-        if (session != null) {
-            final Object resultsPerPage = session.getAttribute(Constants.RESULTS_PER_PAGE);
-            if (resultsPerPage instanceof Integer) {
-                form.num = (Integer) resultsPerPage;
-            }
-        }
-
-        // label
-        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH,
-                request.getLocale() == null ? Locale.ROOT : request.getLocale());
-
-        if (!labelTypeItems.isEmpty() && !form.fields.containsKey(FessSearchAction.LABEL_FIELD)) {
-            final String[] defaultLabelValues = fessConfig.getDefaultLabelValues(getUserBean());
-            if (defaultLabelValues.length > 0) {
-                form.fields.put(FessSearchAction.LABEL_FIELD, defaultLabelValues);
-            }
-        }
-
-        final Map<String, String> labelMap = new LinkedHashMap<>();
-        if (!labelTypeItems.isEmpty()) {
-            for (final Map<String, String> map : labelTypeItems) {
-                labelMap.put(map.get(Constants.ITEM_VALUE), map.get(Constants.ITEM_LABEL));
-            }
-        }
-        request.setAttribute(Constants.LABEL_VALUE_MAP, labelMap);
-
-        // sort
-        if (StringUtil.isBlank(form.sort)) {
-            final String defaultSort = fessConfig.getDefaultSortForUser(getUserBean());
-            if (StringUtil.isNotBlank(defaultSort)) {
-                form.sort = defaultSort;
-            }
-        }
     }
 
     /**

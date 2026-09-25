@@ -17,10 +17,10 @@ ${fe:html(true)}
 <body class="hold-transition login-page">
 	<div class="login-box">
 		<div class="login-logo">
-			<la:link href="/">
+			<a href="${fe:url('/')}">
 				<img src="${fe:url('/images/logo-top.png')}"
 					alt="<la:message key="labels.header_brand_name" />" />
-			</la:link>
+			</a>
 		</div>
 		<div class="notification">${notification}</div>
 		<div class="card">
