@@ -1376,6 +1376,11 @@ export function attach() {
         params.set("geo.location.point", geoLat + "," + geoLon);
         params.set("geo.location.distance", geoDist);
       }
+      // The drawer changes how the results are shown, not what they were narrowed to: keep the
+      // URL's ex_q clauses (sidebar facet selections and advanced-search conditions) so that
+      // changing the sort does not silently drop a selected label. Only a new query from the
+      // header form starts over without them.
+      new URLSearchParams(location.search).getAll("ex_q").forEach(v => params.append("ex_q", v));
       navigate("search?" + params.toString());
     });
   }

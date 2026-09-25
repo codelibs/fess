@@ -1535,6 +1535,23 @@ describe("attach — wiring", () => {
     expect(navigate).toHaveBeenCalled();
     expect(navigate.mock.calls.at(-1)[0]).toContain("q=drawerq");
 
+    // 3b. On the results view, changing the sort from the drawer keeps the URL's ex_q
+    // clauses (a sidebar label facet and a facet query view) instead of dropping them.
+    setLocation("/search?q=fess&ex_q=label%3AlblA&ex_q=filetype%3Ahtml&start=20");
+    document.getElementById("home-view").setAttribute("hidden", "");
+    document.getElementById("query").value = "fess";
+    document.getElementById("sortSearchOption").value = "last_modified.desc";
+    navigate.mockClear();
+    document.querySelector('#searchOptions button[type="submit"]').click();
+    const drawerTarget = navigate.mock.calls.at(-1)[0];
+    const drawerParams = new URLSearchParams(drawerTarget.slice(drawerTarget.indexOf("?") + 1));
+    expect(drawerParams.get("q")).toBe("fess");
+    expect(drawerParams.get("sort")).toBe("last_modified.desc");
+    expect(drawerParams.getAll("ex_q")).toEqual(["label:lblA", "filetype:html"]);
+    expect(drawerParams.has("start")).toBe(false);
+    document.getElementById("home-view").removeAttribute("hidden");
+    setLocation("/");
+
     // 4. Header suggest: typing renders items after the 150ms debounce.
     const input = document.getElementById("query");
     input.value = "he";
