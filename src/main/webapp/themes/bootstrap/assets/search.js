@@ -477,7 +477,7 @@ function renderCurrentFilters() {
   // Label field filter
   (state.fields.label || []).forEach(val => {
     const opt = (cfg.label_options || []).find(o => o.value === val);
-    const name = opt ? (opt.label || opt.value) : val;
+    const name = opt ? (opt.name || opt.value) : val;
     badges.push({ name, targetId: "labelSearchOption" });
   });
 
@@ -568,7 +568,7 @@ function renderOptionsBar() {
     } else {
       labelText = activeLabels.map(val => {
         const opt = (cfg.label_options || []).find(o => o.value === val);
-        return opt ? (opt.label || opt.value) : val;
+        return opt ? (opt.name || opt.value) : val;
       }).join(", ");
     }
     bar.appendChild(makeItem(t("search.menu_labels"), labelText));
@@ -1077,7 +1077,7 @@ function renderLangOptions() {
 
 /**
  * Task 3.4 — Build the label filter dropdown (checkbox list) using createElement only.
- * label_options: [{ value, label }] from api config.
+ * label_options: [{ value, name }] from api config.
  */
 function renderLabelOptions() {
   // Parity with searchOptions.jsp label fieldset: a multi-select #labelSearchOption
@@ -1096,7 +1096,7 @@ function renderLabelOptions() {
   for (const lo of labelOpts) {
     const opt = document.createElement("option");
     opt.value = lo.value != null ? lo.value : "";
-    opt.textContent = lo.label || lo.value || "";
+    opt.textContent = lo.name || lo.value || "";
     opt.selected = selected.includes(opt.value);
     sel.appendChild(opt);
   }

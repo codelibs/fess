@@ -305,8 +305,8 @@ describe("buildFilterPanel", () => {
   it("renders label options and facet-view queries as checkboxes", () => {
     apiMock.getConfig.mockReturnValue({
       label_options: [
-        { value: "label1", label: "Label One" },
-        { value: "label2", label: "Label Two" },
+        { value: "label1", name: "Label One" },
+        { value: "label2", name: "Label Two" },
       ],
       facet_views: [
         { title: "Time", queries: [{ label: "Recent", value: "ts:[now-1M TO now]" }] },
@@ -324,7 +324,7 @@ describe("buildFilterPanel", () => {
 
   it("collects checked label/ex_q values into getFilters().fields / .extraQ", () => {
     apiMock.getConfig.mockReturnValue({
-      label_options: [{ value: "label1", label: "One" }],
+      label_options: [{ value: "label1", name: "One" }],
       facet_views: [{ title: "T", queries: [{ label: "R", value: "exq1" }] }],
     });
     const { panel, getFilters } = buildFilterPanel();
@@ -339,7 +339,7 @@ describe("buildFilterPanel", () => {
 
   it("updates the count badge and toggles d-none as checkboxes change", () => {
     apiMock.getConfig.mockReturnValue({
-      label_options: [{ value: "label1", label: "One" }],
+      label_options: [{ value: "label1", name: "One" }],
       facet_views: [{ title: "T", queries: [{ label: "R", value: "exq1" }] }],
     });
     const { panel } = buildFilterPanel();
@@ -359,7 +359,7 @@ describe("buildFilterPanel", () => {
 
   it("resetFilters unchecks everything and restores the badge", () => {
     apiMock.getConfig.mockReturnValue({
-      label_options: [{ value: "label1", label: "One" }],
+      label_options: [{ value: "label1", name: "One" }],
       facet_views: [{ title: "T", queries: [{ label: "R", value: "exq1" }] }],
     });
     const { panel, getFilters, resetFilters } = buildFilterPanel();
@@ -377,6 +377,13 @@ describe("buildFilterPanel", () => {
     expect(exqCb.checked).toBe(false);
     expect(mainBadge.textContent).toBe("0");
     expect(mainBadge.classList.contains("d-none")).toBe(true);
+  });
+
+  it("shows the label name, not its value, next to each label checkbox", () => {
+    apiMock.getConfig.mockReturnValue({ label_options: [{ value: "dept1", name: "Planning" }] });
+    const { panel } = buildFilterPanel();
+    const row = panel.querySelector('input[data-filter-type="label"]').parentElement;
+    expect(row.textContent).toBe("Planning");
   });
 
   it("accepts label options given as plain strings", () => {
@@ -479,7 +486,7 @@ describe("attachInline / attachStandalone submit", () => {
     vi.resetModules();
     apiMock.getConfig.mockReturnValue({
       features: { rag_chat_enabled: true },
-      label_options: [{ value: "lblA", label: "A" }],
+      label_options: [{ value: "lblA", name: "A" }],
       facet_views: [{ title: "T", queries: [{ label: "R", value: "exq1" }] }],
     });
     const chat = await import(CHAT_PATH);

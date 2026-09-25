@@ -301,7 +301,7 @@ export function buildFilterPanel(opts) {
       checkboxes.push(cb);
       groupCbs.push(cb);
       labelEl.appendChild(cb);
-      labelEl.appendChild(document.createTextNode(opt.label_key ? t(opt.label_key) : (opt.label || opt.value || opt)));
+      labelEl.appendChild(document.createTextNode(opt.label_key ? t(opt.label_key) : (opt.name || opt.value || opt)));
       groupWrap.appendChild(labelEl);
       rowEls.push(labelEl);
     }
