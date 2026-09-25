@@ -30,7 +30,6 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -186,9 +185,6 @@ public class RoleQueryHelper {
                     loggedIn[0] = true;
                     stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add));
                 }).orElse(() -> {
-                    if (isApiRequest && !hasAccessToken && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
-                        throw new InvalidAccessTokenException("invalid_token", "Access token is required.");
-                    }
                     if (!hasAccessToken || roleSet.isEmpty()) {
                         roleSet.addAll(fessConfig.getSearchGuestRoleList());
                     }

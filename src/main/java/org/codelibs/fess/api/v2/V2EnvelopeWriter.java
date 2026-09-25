@@ -238,10 +238,10 @@ public class V2EnvelopeWriter {
      *
      * <p>Every handler funnels its unexpected failures here, which makes this the one place that
      * can tell the caller's fault from ours. An {@link InvalidAccessTokenException} is the
-     * caller's: the request presented an access token that is not registered or has expired, or
-     * none at all where {@code api.access.token.required} demands one. Reporting that as a 500
-     * both misleads the caller and writes a stack trace per request; classifying it here rather
-     * than in each handler keeps a handler added later from reintroducing it.</p>
+     * caller's: the request presented an access token that is not registered or has expired.
+     * Reporting that as a 500 both misleads the caller and writes a stack trace per request;
+     * classifying it here rather than in each handler keeps a handler added later from
+     * reintroducing it.</p>
      *
      * @param res the HTTP response to write to
      * @param cause the cause to log (may be null; only logged, never written to wire)

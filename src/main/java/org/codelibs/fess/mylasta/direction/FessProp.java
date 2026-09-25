@@ -972,12 +972,6 @@ public interface FessProp {
         return Constants.TRUE.equalsIgnoreCase(getIndexerFavoriteCountEnabled());
     }
 
-    String getApiAccessTokenRequired();
-
-    default boolean getApiAccessTokenRequiredAsBoolean() {
-        return Constants.TRUE.equalsIgnoreCase(getApiAccessTokenRequired());
-    }
-
     String getIndexerThreadDumpEnabled();
 
     default boolean getIndexerThreadDumpEnabledAsBoolean() {
