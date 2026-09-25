@@ -75,7 +75,7 @@ public class LoginAction extends FessLoginAction {
         if (form != null) {
             form.clearSecurityInfo();
         }
-        return asHtml(virtualHost(path_Login_IndexJsp)).renderWith(data -> {
+        return asHtml(path_AdminLogin_IndexJsp).renderWith(data -> {
             RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
             saveToken();
         });
@@ -104,7 +104,7 @@ public class LoginAction extends FessLoginAction {
                 return loginRedirect;
             }
             getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
-            return asHtml(virtualHost(path_Login_NewpasswordJsp));
+            return asHtml(path_AdminLogin_NewpasswordJsp);
         } catch (final LoginFailureException lfe) {
             if (logger.isInfoEnabled()) {
                 logger.info("Login failed for user: username={}, reason={}", username, lfe.getMessage());
@@ -125,7 +125,7 @@ public class LoginAction extends FessLoginAction {
     public HtmlResponse changePassword(final PasswordForm form) {
         final VaErrorHook toIndexPage = () -> {
             form.clearSecurityInfo();
-            return getUserBean().map(u -> asHtml(virtualHost(path_Login_NewpasswordJsp)).useForm(PasswordForm.class))
+            return getUserBean().map(u -> asHtml(path_AdminLogin_NewpasswordJsp).useForm(PasswordForm.class))
                     .orElseGet(() -> redirect(LoginAction.class));
         };
         validatePasswordForm(form, toIndexPage);

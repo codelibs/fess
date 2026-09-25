@@ -40,7 +40,7 @@ public abstract class FessLoginAction extends FessSearchAction {
      * @return HTML response for login page or redirect to admin interface
      */
     protected HtmlResponse getHtmlResponse() {
-        return getUserBean().map(this::redirectByUser).orElse(asHtml(virtualHost(path_Login_IndexJsp)));
+        return getUserBean().map(this::redirectByUser).orElse(asHtml(path_AdminLogin_IndexJsp));
     }
 
     /**

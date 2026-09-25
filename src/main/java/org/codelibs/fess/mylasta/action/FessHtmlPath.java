@@ -267,6 +267,12 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/log/admin_log.jsp */
     HtmlNext path_AdminLog_AdminLogJsp = new HtmlNext("/admin/log/admin_log.jsp");
 
+    /** The path of the HTML: /admin/login/index.jsp */
+    HtmlNext path_AdminLogin_IndexJsp = new HtmlNext("/admin/login/index.jsp");
+
+    /** The path of the HTML: /admin/login/newpassword.jsp */
+    HtmlNext path_AdminLogin_NewpasswordJsp = new HtmlNext("/admin/login/newpassword.jsp");
+
     /** The path of the HTML: /admin/maintenance/admin_maintenance.jsp */
     HtmlNext path_AdminMaintenance_AdminMaintenanceJsp = new HtmlNext("/admin/maintenance/admin_maintenance.jsp");
 
@@ -435,12 +441,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /index.jsp */
     HtmlNext path_IndexJsp = new HtmlNext("/index.jsp");
-
-    /** The path of the HTML: /login/index.jsp */
-    HtmlNext path_Login_IndexJsp = new HtmlNext("/login/index.jsp");
-
-    /** The path of the HTML: /login/newpassword.jsp */
-    HtmlNext path_Login_NewpasswordJsp = new HtmlNext("/login/newpassword.jsp");
 
     /** The path of the HTML: /profile/index.jsp */
     HtmlNext path_Profile_IndexJsp = new HtmlNext("/profile/index.jsp");

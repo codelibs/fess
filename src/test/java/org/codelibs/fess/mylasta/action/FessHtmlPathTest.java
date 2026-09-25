@@ -17,7 +17,11 @@ package org.codelibs.fess.mylasta.action;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -58,7 +62,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/index.jsp", FessHtmlPath.path_IndexJsp.getRoutingPath());
         assertEquals("/search.jsp", FessHtmlPath.path_SearchJsp.getRoutingPath());
         assertEquals("/error/error.jsp", FessHtmlPath.path_Error_ErrorJsp.getRoutingPath());
-        assertEquals("/login/index.jsp", FessHtmlPath.path_Login_IndexJsp.getRoutingPath());
+        assertEquals("/admin/login/index.jsp", FessHtmlPath.path_AdminLogin_IndexJsp.getRoutingPath());
         assertEquals("/profile/index.jsp", FessHtmlPath.path_Profile_IndexJsp.getRoutingPath());
     }
 
@@ -168,9 +172,9 @@ public class FessHtmlPathTest extends UnitFessTestCase {
 
     @Test
     public void test_loginPaths() throws Exception {
-        // Test login-related paths
-        assertEquals("/login/index.jsp", FessHtmlPath.path_Login_IndexJsp.getRoutingPath());
-        assertEquals("/login/newpassword.jsp", FessHtmlPath.path_Login_NewpasswordJsp.getRoutingPath());
+        // The login pages are rendered from the admin view tree; their URL stays /login/.
+        assertEquals("/admin/login/index.jsp", FessHtmlPath.path_AdminLogin_IndexJsp.getRoutingPath());
+        assertEquals("/admin/login/newpassword.jsp", FessHtmlPath.path_AdminLogin_NewpasswordJsp.getRoutingPath());
     }
 
     @Test
@@ -221,6 +225,26 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         verifyPathPattern("AdminUser", "/admin/user/");
         verifyPathPattern("AdminWebauth", "/admin/webauth/");
         verifyPathPattern("AdminWebconfig", "/admin/webconfig/");
+    }
+
+    @Test
+    public void test_everyPathNamesAnExistingJsp() throws Exception {
+        // FessHtmlPath is edited by hand (freegen does not run on JDK 21) and a JSP is not compiled
+        // by the build, so a constant left pointing at a moved or deleted page is only found when
+        // a user opens it. Every constant must name a file under WEB-INF/view.
+        final List<String> missing = new ArrayList<>();
+        int checked = 0;
+        for (final Field field : FessHtmlPath.class.getDeclaredFields()) {
+            if (field.getType().equals(HtmlNext.class)) {
+                final String path = ((HtmlNext) field.get(null)).getRoutingPath();
+                if (!Files.isRegularFile(Paths.get("src/main/webapp/WEB-INF/view" + path))) {
+                    missing.add(field.getName() + " -> " + path);
+                }
+                checked++;
+            }
+        }
+        assertTrue("checked only " + checked + " paths", checked >= 100);
+        assertEquals("every FessHtmlPath constant must name an existing JSP: " + missing, 0, missing.size());
     }
 
     private void verifyPathPattern(String prefix, String basePath) throws Exception {

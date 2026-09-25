@@ -35,7 +35,7 @@ ${fe:html(true)}
 					</la:info>
 					<la:errors />
 				</div>
-				<la:form styleId="login" method="post">
+				<la:form action="/login/" styleId="login" method="post">
 					<div class="input-group mb-3">
 						<c:set var="ph_username">
 							<la:message key="labels.login.placeholder_username" />
