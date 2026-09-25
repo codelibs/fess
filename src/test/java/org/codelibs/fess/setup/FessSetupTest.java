@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -103,6 +104,8 @@ public class FessSetupTest {
         assertTrue(defs.containsKey("opensearch"), defs.keySet().toString());
         assertEquals("3.8.0", defs.get("opensearch").get("version"));
         assertEquals(4, defs.get("opensearch").list("plugin.artifacts").size());
+        assertEquals(List.of("opensearch-security-analytics", "opensearch-performance-analyzer"),
+                defs.get("opensearch").list("plugin.removals"));
     }
 
     @Test

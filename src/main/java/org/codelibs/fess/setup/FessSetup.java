@@ -61,7 +61,8 @@ public final class FessSetup {
 
             Commands:
               install opensearch [--dest <dir>] [--version <version>]
-                  Download OpenSearch, install the Fess plugins into it and configure it.
+                  Download OpenSearch, install the Fess plugins into it, remove the bundled
+                  plugins Fess does not use and configure it.
                   Official builds exist for Linux and Windows only.
 
               install opensearch-plugins --opensearch-home <dir> [--version <version>]
@@ -1130,6 +1131,7 @@ public final class FessSetup {
         }
 
         if (POST_OPENSEARCH.equals(definition.get("post"))) {
+            removePlugins(definition, home, out);
             installPlugins(definition, home, options, out);
             out.println("Configuring " + home);
             final List<String> added = OpenSearchConfigurer.configure(home);
@@ -1188,6 +1190,14 @@ public final class FessSetup {
             out.println("It is outside the Fess directory, so bin/fess.in.sh will not find it. Add this");
             out.println("to bin/fess.in.sh (bin\\fess.in.bat on Windows) so Fess and its crawler processes can:");
             out.println("  export " + envName + "=" + path);
+        }
+    }
+
+    private static void removePlugins(final ComponentDefinition definition, final Path home, final PrintStream out) throws SetupException {
+        for (final String name : definition.list("plugin.removals")) {
+            if (OpenSearchPluginInstaller.remove(home, name)) {
+                out.println("Removed " + name + ", which Fess does not use");
+            }
         }
     }
 
