@@ -150,16 +150,6 @@ public class ResourceUtil {
     }
 
     /**
-     * Gets the path to original files directory.
-     *
-     * @param names the path components to append to the orig directory
-     * @return the Path object pointing to the original files directory
-     */
-    public static Path getOrigPath(final String... names) {
-        return getPath("WEB-INF/", "orig", names);
-    }
-
-    /**
      * Gets the path to email template files directory.
      *
      * @param names the path components to append to the mail template directory

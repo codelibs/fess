@@ -171,13 +171,6 @@ public class ResourceUtilTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getOrigPath() {
-        Path origPath = ResourceUtil.getOrigPath("original.file");
-        assertNotNull(origPath);
-        assertTrue(origPath.toString().contains("orig"));
-    }
-
-    @Test
     public void test_getMailTemplatePath() {
         Path mailPath = ResourceUtil.getMailTemplatePath("template.vm");
         assertNotNull(mailPath);
