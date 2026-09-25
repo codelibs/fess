@@ -284,9 +284,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Web Crawl Config Name */
     public static final String LABELS_WEB_CONFIG_NAME = "{labels.webConfigName}";
 
-    /** The key of the message: All Languages */
-    public static final String LABELS_ALL_LANGUAGES = "{labels.allLanguages}";
-
     /** The key of the message: Dictionary ID */
     public static final String LABELS_DICT_ID = "{labels.dictId}";
 
@@ -295,9 +292,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: End Time */
     public static final String LABELS_END_TIME = "{labels.endTime}";
-
-    /** The key of the message: hq */
-    public static final String LABELS_HQ = "{labels.hq}";
 
     /** The key of the message: Inputs */
     public static final String LABELS_INPUTS = "{labels.inputs}";
@@ -446,15 +440,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Extended Query */
     public static final String LABELS_ex_q = "{labels.ex_q}";
 
-    /** The key of the message: Current Password */
-    public static final String LABELS_OLD_PASSWORD = "{labels.oldPassword}";
-
-    /** The key of the message: New Password */
-    public static final String LABELS_NEW_PASSWORD = "{labels.newPassword}";
-
-    /** The key of the message: New Password (Confirm) */
-    public static final String LABELS_CONFIRM_NEW_PASSWORD = "{labels.confirmNewPassword}";
-
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
 
@@ -593,9 +578,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Search */
     public static final String LABELS_SEARCH = "{labels.search}";
 
-    /** The key of the message: Showing similar results. */
-    public static final String LABELS_similar_doc_result_status = "{labels.similar_doc_result_status}";
-
     /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt; - &lt;b&gt;{3}&lt;/b&gt; of &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
     public static final String LABELS_search_result_status = "{labels.search_result_status}";
 
@@ -613,24 +595,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Your search - &lt;b&gt;{0}&lt;/b&gt; - did not match any documents. */
     public static final String LABELS_did_not_match = "{labels.did_not_match}";
-
-    /** The key of the message: Try different keywords or check your spelling. */
-    public static final String LABELS_did_not_match_suggestion = "{labels.did_not_match_suggestion}";
-
-    /** The key of the message: Fess */
-    public static final String LABELS_search_title = "{labels.search_title}";
-
-    /** The key of the message: Popular Words: */
-    public static final String LABELS_search_popular_word_word = "{labels.search_popular_word_word}";
-
-    /** The key of the message: Related Words: */
-    public static final String LABELS_search_related_queries = "{labels.search_related_queries}";
-
-    /** The key of the message: -  Sort  - */
-    public static final String LABELS_search_result_select_sort = "{labels.search_result_select_sort}";
-
-    /** The key of the message: - Display Count - */
-    public static final String LABELS_search_result_select_num = "{labels.search_result_select_num}";
 
     /** The key of the message: by Score */
     public static final String LABELS_search_result_sort_score_desc = "{labels.search_result_sort_score_desc}";
@@ -671,12 +635,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: by Favorite Count (desc) */
     public static final String LABELS_search_result_sort_favorite_count_desc = "{labels.search_result_sort_favorite_count_desc}";
 
-    /** The key of the message: Multiple */
-    public static final String LABELS_search_result_sort_multiple = "{labels.search_result_sort_multiple}";
-
-    /** The key of the message: {0} bytes */
-    public static final String LABELS_search_result_size = "{labels.search_result_size}";
-
     /** The key of the message: Created: */
     public static final String LABELS_search_result_created = "{labels.search_result_created}";
 
@@ -691,21 +649,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Click Count ({0}) */
     public static final String LABELS_search_click_count = "{labels.search_click_count}";
-
-    /** The key of the message: {0} views */
-    public static final String LABELS_search_click_views = "{labels.search_click_views}";
-
-    /** The key of the message: More.. */
-    public static final String LABELS_search_result_more = "{labels.search_result_more}";
-
-    /** The key of the message: Cache */
-    public static final String LABELS_search_result_cache = "{labels.search_result_cache}";
-
-    /** The key of the message: Similar Results ({0}) */
-    public static final String LABELS_search_result_similar = "{labels.search_result_similar}";
-
-    /** The key of the message: Label */
-    public static final String LABELS_facet_label_title = "{labels.facet_label_title}";
 
     /** The key of the message: Time */
     public static final String LABELS_facet_timestamp_title = "{labels.facet_timestamp_title}";
@@ -974,59 +917,8 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
 
-    /** The key of the message: Reset */
-    public static final String LABELS_facet_label_reset = "{labels.facet_label_reset}";
-
-    /** The key of the message: Filter */
-    public static final String LABELS_facet_filter_button = "{labels.facet_filter_button}";
-
-    /** The key of the message: All */
-    public static final String LABELS_searchoptions_all = "{labels.searchoptions_all}";
-
-    /** The key of the message: Score */
-    public static final String LABELS_searchoptions_score = "{labels.searchoptions_score}";
-
-    /** The key of the message: Sort */
-    public static final String LABELS_searchoptions_menu_sort = "{labels.searchoptions_menu_sort}";
-
-    /** The key of the message: Num */
-    public static final String LABELS_searchoptions_menu_num = "{labels.searchoptions_menu_num}";
-
-    /** The key of the message: {0} results */
-    public static final String LABELS_searchoptions_num = "{labels.searchoptions_num}";
-
-    /** The key of the message: Language */
-    public static final String LABELS_searchoptions_menu_lang = "{labels.searchoptions_menu_lang}";
-
-    /** The key of the message: Labels */
-    public static final String LABELS_searchoptions_menu_labels = "{labels.searchoptions_menu_labels}";
-
     /** The key of the message: Error */
     public static final String LABELS_error_title = "{labels.error_title}";
-
-    /** The key of the message: System Error */
-    public static final String LABELS_system_error_title = "{labels.system_error_title}";
-
-    /** The key of the message: Please contact your site administrator. */
-    public static final String LABELS_contact_site_admin = "{labels.contact_site_admin}";
-
-    /** The key of the message: Invalid Request Format. */
-    public static final String LABELS_request_error_title = "{labels.request_error_title}";
-
-    /** The key of the message: Your request to the URL is invalid. */
-    public static final String LABELS_bad_request = "{labels.bad_request}";
-
-    /** The key of the message: Page Not Found. */
-    public static final String LABELS_page_not_found_title = "{labels.page_not_found_title}";
-
-    /** The key of the message: Please check the URL. */
-    public static final String LABELS_check_url = "{labels.check_url}";
-
-    /** The key of the message: Service Temporarily Unavailable */
-    public static final String LABELS_busy_title = "{labels.busy_title}";
-
-    /** The key of the message: The server is currently experiencing high load. Please try again later. */
-    public static final String LABELS_busy_message = "{labels.busy_message}";
 
     /** The key of the message: Username */
     public static final String LABELS_user_name = "{labels.user_name}";
@@ -1043,18 +935,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Login */
     public static final String LABELS_LOGIN_TITLE = "{labels.login.title}";
 
-    /** The key of the message: Label */
-    public static final String LABELS_index_label = "{labels.index_label}";
-
-    /** The key of the message: Preferred Language */
-    public static final String LABELS_index_lang = "{labels.index_lang}";
-
-    /** The key of the message: Sort */
-    public static final String LABELS_index_sort = "{labels.index_sort}";
-
-    /** The key of the message: Display Count */
-    public static final String LABELS_index_num = "{labels.index_num}";
-
     /** The key of the message: Logout */
     public static final String LABELS_logout_title = "{labels.logout_title}";
 
@@ -1067,59 +947,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Logout */
     public static final String LABELS_logout_button = "{labels.logout_button}";
 
-    /** The key of the message: Change Password */
-    public static final String LABELS_PROFILE = "{labels.profile}";
-
-    /** The key of the message: Administration */
-    public static final String LABELS_ADMINISTRATION = "{labels.administration}";
-
     /** The key of the message: Settings */
     public static final String LABELS_profile_button = "{labels.profile_button}";
-
-    /** The key of the message: Settings */
-    public static final String LABELS_PROFILE_TITLE = "{labels.profile.title}";
-
-    /** The key of the message: Update */
-    public static final String LABELS_PROFILE_UPDATE = "{labels.profile.update}";
-
-    /** The key of the message: Back */
-    public static final String LABELS_PROFILE_BACK = "{labels.profile.back}";
-
-    /** The key of the message: Current Password */
-    public static final String LABELS_PROFILE_placeholder_old_password = "{labels.profile.placeholder_old_password}";
-
-    /** The key of the message: New Password */
-    public static final String LABELS_PROFILE_placeholder_new_password = "{labels.profile.placeholder_new_password}";
-
-    /** The key of the message: Confirm New Password */
-    public static final String LABELS_PROFILE_placeholder_confirm_new_password = "{labels.profile.placeholder_confirm_new_password}";
 
     /** The key of the message: Search */
     public static final String LABELS_TOP_SEARCH = "{labels.top.search}";
 
-    /** The key of the message: Fess */
-    public static final String LABELS_index_title = "{labels.index_title}";
-
-    /** The key of the message: Search */
-    public static final String LABELS_index_form_search_btn = "{labels.index_form_search_btn}";
-
-    /** The key of the message: Search */
-    public static final String LABELS_index_osdd_title = "{labels.index_osdd_title}";
-
-    /** The key of the message: Options */
-    public static final String LABELS_index_form_option_btn = "{labels.index_form_option_btn}";
-
-    /** The key of the message: Help */
-    public static final String LABELS_index_help = "{labels.index_help}";
-
-    /** The key of the message: Search Options */
-    public static final String LABELS_search_options = "{labels.search_options}";
-
     /** The key of the message: Close */
     public static final String LABELS_search_options_close = "{labels.search_options_close}";
-
-    /** The key of the message: Clear */
-    public static final String LABELS_search_options_clear = "{labels.search_options_clear}";
 
     /** The key of the message: This is a cache of {0}. It is a snapshot of the page as it appeared on {1}. */
     public static final String LABELS_search_cache_msg = "{labels.search_cache_msg}";
@@ -1127,14 +962,8 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Unknown */
     public static final String LABELS_search_unknown = "{labels.search_unknown}";
 
-    /** The key of the message: Back to Top */
-    public static final String LABELS_footer_back_to_top = "{labels.footer_back_to_top}";
-
     /** The key of the message: Fess */
     public static final String LABELS_header_brand_name = "{labels.header_brand_name}";
-
-    /** The key of the message: Options */
-    public static final String LABELS_header_form_option_btn = "{labels.header_form_option_btn}";
 
     /** The key of the message: File Crawling */
     public static final String LABELS_file_crawling_configuration = "{labels.file_crawling_configuration}";
@@ -2835,15 +2664,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload */
     public static final String LABELS_backup_button_upload = "{labels.backup_button_upload}";
 
-    /** The key of the message: The search processing time has exceeded the limit. The displayed results may be partial. */
-    public static final String LABELS_process_time_is_exceeded = "{labels.process_time_is_exceeded}";
-
-    /** The key of the message: The search could not be completed, so no results can be shown. This does not mean that no document matched. Please try again later. */
-    public static final String LABELS_search_could_not_be_completed = "{labels.search_could_not_be_completed}";
-
-    /** The key of the message: Part of the search could not be completed. The displayed results may be partial. */
-    public static final String LABELS_search_partially_failed = "{labels.search_partially_failed}";
-
     /** The key of the message: Given Name */
     public static final String LABELS_user_given_name = "{labels.user_given_name}";
 
@@ -3102,9 +2922,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Send */
     public static final String LABELS_sereq_button_upload = "{labels.sereq_button_upload}";
 
-    /** The key of the message: Not found */
-    public static final String LABELS_facet_is_not_found = "{labels.facet_is_not_found}";
-
     /** The key of the message: Score: */
     public static final String LABELS_doc_score = "{labels.doc_score}";
 
@@ -3128,78 +2945,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Logout */
     public static final String LABELS_tooltip_logout = "{labels.tooltip_logout}";
-
-    /** The key of the message: Advanced Search */
-    public static final String LABELS_ADVANCE = "{labels.advance}";
-
-    /** The key of the message: Advanced Search */
-    public static final String LABELS_advance_search_title = "{labels.advance_search_title}";
-
-    /** The key of the message: with all of the words */
-    public static final String LABELS_advance_search_must_queries = "{labels.advance_search_must_queries}";
-
-    /** The key of the message: with the exact phrase */
-    public static final String LABELS_advance_search_phrase_query = "{labels.advance_search_phrase_query}";
-
-    /** The key of the message: with at least one of the words */
-    public static final String LABELS_advance_search_should_queries = "{labels.advance_search_should_queries}";
-
-    /** The key of the message: without the words */
-    public static final String LABELS_advance_search_not_queries = "{labels.advance_search_not_queries}";
-
-    /** The key of the message: File type */
-    public static final String LABELS_advance_search_filetype = "{labels.advance_search_filetype}";
-
-    /** The key of the message: Any format */
-    public static final String LABELS_advance_search_filetype_default = "{labels.advance_search_filetype_default}";
-
-    /** The key of the message: HTML */
-    public static final String LABELS_advance_search_filetype_html = "{labels.advance_search_filetype_html}";
-
-    /** The key of the message: PDF */
-    public static final String LABELS_advance_search_filetype_pdf = "{labels.advance_search_filetype_pdf}";
-
-    /** The key of the message: MS Word */
-    public static final String LABELS_advance_search_filetype_word = "{labels.advance_search_filetype_word}";
-
-    /** The key of the message: MS Excel */
-    public static final String LABELS_advance_search_filetype_excel = "{labels.advance_search_filetype_excel}";
-
-    /** The key of the message: MS PowerPoint */
-    public static final String LABELS_advance_search_filetype_powerpoint = "{labels.advance_search_filetype_powerpoint}";
-
-    /** The key of the message: Occurence */
-    public static final String LABELS_advance_search_occt = "{labels.advance_search_occt}";
-
-    /** The key of the message: Anywhere in the page */
-    public static final String LABELS_advance_search_occt_default = "{labels.advance_search_occt_default}";
-
-    /** The key of the message: in the title of the page */
-    public static final String LABELS_advance_search_occt_allintitle = "{labels.advance_search_occt_allintitle}";
-
-    /** The key of the message: in the URL of the page */
-    public static final String LABELS_advance_search_occt_allinurl = "{labels.advance_search_occt_allinurl}";
-
-    /** The key of the message: Site or domain */
-    public static final String LABELS_advance_search_sitesearch = "{labels.advance_search_sitesearch}";
-
-    /** The key of the message: Last update */
-    public static final String LABELS_advance_search_timestamp = "{labels.advance_search_timestamp}";
-
-    /** The key of the message: Anytime */
-    public static final String LABELS_advance_search_timestamp_default = "{labels.advance_search_timestamp_default}";
-
-    /** The key of the message: Past 24 hours */
-    public static final String LABELS_advance_search_timestamp_pastday = "{labels.advance_search_timestamp_pastday}";
-
-    /** The key of the message: Past week */
-    public static final String LABELS_advance_search_timestamp_pastweek = "{labels.advance_search_timestamp_pastweek}";
-
-    /** The key of the message: Past month */
-    public static final String LABELS_advance_search_timestamp_pastmonth = "{labels.advance_search_timestamp_pastmonth}";
-
-    /** The key of the message: Past year */
-    public static final String LABELS_advance_search_timestamp_pastyear = "{labels.advance_search_timestamp_pastyear}";
 
     /** The key of the message: Search Log */
     public static final String LABELS_searchlog_configuration = "{labels.searchlog_configuration}";
@@ -3428,147 +3173,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Update */
     public static final String LABELS_LOGIN_UPDATE = "{labels.login.update}";
-
-    /** The key of the message: AI Search - Fess */
-    public static final String LABELS_chat_title = "{labels.chat_title}";
-
-    /** The key of the message: New Chat */
-    public static final String LABELS_chat_new_chat = "{labels.chat_new_chat}";
-
-    /** The key of the message: Ask a question... */
-    public static final String LABELS_chat_input_placeholder = "{labels.chat_input_placeholder}";
-
-    /** The key of the message: Thinking... */
-    public static final String LABELS_chat_thinking = "{labels.chat_thinking}";
-
-    /** The key of the message: An error occurred. Please try again. */
-    public static final String LABELS_chat_error = "{labels.chat_error}";
-
-    /** The key of the message: It's currently busy. Please wait a moment and try again. */
-    public static final String LABELS_chat_error_rate_limit = "{labels.chat_error_rate_limit}";
-
-    /** The key of the message: AI service authentication failed. Please contact the administrator. */
-    public static final String LABELS_chat_error_auth = "{labels.chat_error_auth}";
-
-    /** The key of the message: The AI service is temporarily unavailable. Please try again later. */
-    public static final String LABELS_chat_error_service_unavailable = "{labels.chat_error_service_unavailable}";
-
-    /** The key of the message: The request timed out. Please try again. */
-    public static final String LABELS_chat_error_timeout = "{labels.chat_error_timeout}";
-
-    /** The key of the message: The message is too long to process. Please shorten it and try again. */
-    public static final String LABELS_chat_error_context_length_exceeded = "{labels.chat_error_context_length_exceeded}";
-
-    /** The key of the message: The AI model was not found. Please contact the administrator. */
-    public static final String LABELS_chat_error_model_not_found = "{labels.chat_error_model_not_found}";
-
-    /** The key of the message: Received an invalid response from the AI service. Please try again. */
-    public static final String LABELS_chat_error_invalid_response = "{labels.chat_error_invalid_response}";
-
-    /** The key of the message: Unable to connect to the AI service. Please check the network connection. */
-    public static final String LABELS_chat_error_connection = "{labels.chat_error_connection}";
-
-    /** The key of the message: Sources */
-    public static final String LABELS_chat_sources = "{labels.chat_sources}";
-
-    /** The key of the message: AI Search */
-    public static final String LABELS_chat_ai_mode = "{labels.chat_ai_mode}";
-
-    /** The key of the message: AI Search Mode */
-    public static final String LABELS_chat_status_ready = "{labels.chat_status_ready}";
-
-    /** The key of the message: Processing */
-    public static final String LABELS_chat_status_thinking = "{labels.chat_status_thinking}";
-
-    /** The key of the message: Error */
-    public static final String LABELS_chat_status_error = "{labels.chat_status_error}";
-
-    /** The key of the message: ... */
-    public static final String LABELS_chat_waiting = "{labels.chat_waiting}";
-
-    /** The key of the message: Thinking... */
-    public static final String LABELS_chat_phase_intent = "{labels.chat_phase_intent}";
-
-    /** The key of the message: Searching for __keywords__... */
-    public static final String LABELS_chat_phase_search = "{labels.chat_phase_search}";
-
-    /** The key of the message: Reviewing search results... */
-    public static final String LABELS_chat_phase_evaluate = "{labels.chat_phase_evaluate}";
-
-    /** The key of the message: Retrieving documents... */
-    public static final String LABELS_chat_phase_fetch = "{labels.chat_phase_fetch}";
-
-    /** The key of the message: Generating answer... */
-    public static final String LABELS_chat_phase_answer = "{labels.chat_phase_answer}";
-
-    /** The key of the message: Chat messages */
-    public static final String LABELS_chat_messages_area = "{labels.chat_messages_area}";
-
-    /** The key of the message: Ask and Discover. */
-    public static final String LABELS_chat_welcome_title = "{labels.chat_welcome_title}";
-
-    /** The key of the message: Ask questions and I'll search through documents to find the answers you need. */
-    public static final String LABELS_chat_welcome_description = "{labels.chat_welcome_description}";
-
-    /** The key of the message: Analyze */
-    public static final String LABELS_chat_step_intent = "{labels.chat_step_intent}";
-
-    /** The key of the message: Search */
-    public static final String LABELS_chat_step_search = "{labels.chat_step_search}";
-
-    /** The key of the message: Evaluate */
-    public static final String LABELS_chat_step_evaluate = "{labels.chat_step_evaluate}";
-
-    /** The key of the message: Retrieve */
-    public static final String LABELS_chat_step_fetch = "{labels.chat_step_fetch}";
-
-    /** The key of the message: Answer */
-    public static final String LABELS_chat_step_answer = "{labels.chat_step_answer}";
-
-    /** The key of the message: Press Enter to send, Shift+Enter for new line */
-    public static final String LABELS_chat_input_hint = "{labels.chat_input_hint}";
-
-    /** The key of the message: Send message */
-    public static final String LABELS_chat_send = "{labels.chat_send}";
-
-    /** The key of the message: Retry */
-    public static final String LABELS_chat_retry = "{labels.chat_retry}";
-
-    /** The key of the message: Dismiss */
-    public static final String LABELS_chat_dismiss = "{labels.chat_dismiss}";
-
-    /** The key of the message: Copied! */
-    public static final String LABELS_chat_copied = "{labels.chat_copied}";
-
-    /** The key of the message: Copy failed */
-    public static final String LABELS_chat_copy_failed = "{labels.chat_copy_failed}";
-
-    /** The key of the message: Filter */
-    public static final String LABELS_chat_filter = "{labels.chat_filter}";
-
-    /** The key of the message: Search... */
-    public static final String LABELS_chat_filter_search_placeholder = "{labels.chat_filter_search_placeholder}";
-
-    /** The key of the message: Clear */
-    public static final String LABELS_chat_clear = "{labels.chat_clear}";
-
-    /** The key of the message: Retrying... ({attempt}/{max}, next attempt in {seconds}s) */
-    public static final String LABELS_chat_retrying = "{labels.chat_retrying}";
-
-    /** The key of the message: Waiting for an available slot... */
-    public static final String LABELS_chat_waiting_queue = "{labels.chat_waiting_queue}";
-
-    /** The key of the message: {count} documents found */
-    public static final String LABELS_chat_hit_count = "{labels.chat_hit_count}";
-
-    /** The key of the message: No documents found. Refining the query and searching again... */
-    public static final String LABELS_chat_fallback_no_results = "{labels.chat_fallback_no_results}";
-
-    /** The key of the message: No relevant documents found. Refining the query and searching again... */
-    public static final String LABELS_chat_fallback_no_relevant_results = "{labels.chat_fallback_no_relevant_results}";
-
-    /** The key of the message: The model ran out of reasoning tokens; falling back. Result accuracy may be reduced. */
-    public static final String LABELS_chat_warning_token_exhausted = "{labels.chat_warning_token_exhausted}";
 
     /** The key of the message: Search File Proxy */
     public static final String LABELS_search_file_proxy_enabled = "{labels.search_file_proxy_enabled}";
