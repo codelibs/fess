@@ -351,7 +351,7 @@ export function attach() {
       const cbLabel = document.createElement("label");
       cbLabel.htmlFor = cb.id;
       cbLabel.className = "form-check-label";
-      cbLabel.textContent = lo.label || lo.value || "";
+      cbLabel.textContent = lo.name || lo.value || "";
 
       checkWrap.append(cb, cbLabel);
       checksCol.appendChild(checkWrap);

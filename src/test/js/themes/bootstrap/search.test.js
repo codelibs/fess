@@ -512,7 +512,7 @@ const FULL_CFG = {
   ],
   num_options: [10, 20, 50],
   lang_options: [{ value: "ja" }, { value: "en" }],
-  label_options: [{ value: "lblA", label: "Label A" }, { value: "lblB", label: "Label B" }],
+  label_options: [{ value: "lblA", name: "Label A" }, { value: "lblB", name: "Label B" }],
   facet_views: [
     {
       group_name: "labels.facet_filetype_title",
@@ -1034,6 +1034,17 @@ describe("runSearch — active filters, chips and current filters", () => {
     expect(document.activeElement).toBe(document.getElementById("sortSearchOption"));
   });
 
+  it("shows the label name from label_options, not its value, in the badge and options bar", async () => {
+    await runSearch();
+    await settle();
+    const badges = [...document.querySelectorAll("#current-filters > li")].map((li) => li.textContent);
+    expect(badges.some((txt) => txt.includes("Label B"))).toBe(true);
+    expect(badges.some((txt) => txt.includes("lblB"))).toBe(false);
+    const bar = document.getElementById("options-bar").textContent;
+    expect(bar).toContain("Label B");
+    expect(bar).not.toContain("lblB");
+  });
+
   it("shows a facet-reset link when filters are active", async () => {
     await runSearch();
     await settle();
@@ -1312,7 +1323,7 @@ describe("renderSearchOptions / initSearchOptions", () => {
   });
 
   it("hides the label fieldset when display_label_type is disabled", () => {
-    api.getConfig.mockReturnValue({ features: { display_label_type: false }, label_options: [{ value: "lblA", label: "A" }] });
+    api.getConfig.mockReturnValue({ features: { display_label_type: false }, label_options: [{ value: "lblA", name: "A" }] });
     renderSearchOptions();
     expect(document.getElementById("labelSearchOptionFieldset").classList.contains("d-none")).toBe(true);
     expect(document.getElementById("labelSearchOption").options.length).toBe(0);

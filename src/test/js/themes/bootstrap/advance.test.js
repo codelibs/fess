@@ -31,6 +31,7 @@ import {
   attach,
 } from "../../../../main/webapp/themes/bootstrap/assets/advance.js";
 import { navigate } from "../../../../main/webapp/themes/bootstrap/assets/router.js";
+import { getConfig } from "../../../../main/webapp/themes/bootstrap/assets/api.js";
 import { resetDom, setLocation } from "../../helpers/dom.js";
 
 // ---------------------------------------------------------------------------
@@ -196,6 +197,18 @@ describe("attach: submit builds the /search URL", () => {
     document.body.innerHTML = "";
     expect(() => attach()).not.toThrow();
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("labels each label checkbox with the label name, not its value", () => {
+    getConfig.mockReturnValue({ label_options: [{ value: "dept1", name: "Planning" }, { value: "dept2" }] });
+    try {
+      attach();
+    } finally {
+      getConfig.mockReturnValue({});
+    }
+    expect(document.querySelector('label[for="adv-label-dept1"]').textContent).toBe("Planning");
+    // A label without a name falls back to its value.
+    expect(document.querySelector('label[for="adv-label-dept2"]').textContent).toBe("dept2");
   });
 
   it("preserves unrelated params, drops advance-owned ones, appends timestamp date-math", () => {
