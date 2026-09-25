@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.job;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Proxy;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,16 +27,20 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.ProcessHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.cbean.ScheduledJobCB;
 import org.codelibs.fess.opensearch.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
+import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.ServletContext;
 
 public class CrawlJobTest extends UnitFessTestCase {
 
@@ -822,6 +830,93 @@ public class CrawlJobTest extends UnitFessTestCase {
 
         assertNotNull(result);
         assertEquals(1, shutdownListeners.size());
+    }
+
+    // Test that the hosts to bypass the proxy for reach the crawler process
+    @Test
+    public void test_executeCrawler_passesNonProxyHosts() throws Exception {
+        final List<String> capturedCmdList = new ArrayList<>();
+        final File webappDir = Files.createTempDirectory("webapp").toFile();
+        webappDir.deleteOnExit();
+        // The container's mock ServletContext resolves no real path, so the test one is given through the seam.
+        final ServletContext servletContext = (ServletContext) Proxy.newProxyInstance(ServletContext.class.getClassLoader(),
+                new Class<?>[] { ServletContext.class }, (proxy, method,
+                        args) -> "getRealPath".equals(method.getName()) ? new File(webappDir, (String) args[0]).getAbsolutePath() : null);
+        crawlJob = new CrawlJob() {
+            @Override
+            protected ServletContext getServletContext() {
+                return servletContext;
+            }
+
+            @Override
+            protected void createSystemProperties(final List<String> cmdList, final File propFile) {
+                capturedCmdList.addAll(cmdList);
+                throw new IllegalStateException("the process is not started in this test");
+            }
+        };
+        crawlJob.sessionId("test");
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public File createTempFile(final String prefix, final String suffix) {
+                try {
+                    final File file = File.createTempFile(prefix, suffix);
+                    file.deleteOnExit();
+                    return file;
+                } catch (final IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }, "systemHelper");
+        ComponentUtil.register(new ProcessHelper() {
+            @Override
+            public synchronized int destroyProcess(final String sessionId) {
+                return -1;
+            }
+        }, "processHelper");
+        ComponentUtil.register(new ThumbnailManager() {
+            @Override
+            public String getThumbnailPathOption() {
+                return "-Dfess.thumbnail.path=thumbnails";
+            }
+        }, "thumbnailManager");
+        ComponentUtil.setFessConfig(new TestFessConfig() {
+            @Override
+            public String getJavaCommandPath() {
+                return "java";
+            }
+
+            @Override
+            public String getJobSystemPropertyFilterPattern() {
+                return null;
+            }
+
+            @Override
+            public String[] getJvmCrawlerOptionsAsArray() {
+                return new String[0];
+            }
+
+            @Override
+            public boolean isUseOwnTmpDir() {
+                return false;
+            }
+        });
+
+        final String original = System.getProperty("http.nonProxyHosts");
+        System.setProperty("http.nonProxyHosts", "localhost|127.*");
+        try {
+            crawlJob.executeCrawler();
+            fail("JobProcessingException expected");
+        } catch (final JobProcessingException e) {
+            // expected
+        } finally {
+            if (original == null) {
+                System.clearProperty("http.nonProxyHosts");
+            } else {
+                System.setProperty("http.nonProxyHosts", original);
+            }
+        }
+
+        assertTrue(capturedCmdList.toString(), capturedCmdList.contains("-Dhttp.nonProxyHosts=localhost|127.*"));
     }
 
     // Test configuration class extending FessConfig.SimpleImpl

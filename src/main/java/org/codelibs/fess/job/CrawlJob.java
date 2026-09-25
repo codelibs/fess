@@ -306,7 +306,7 @@ public class CrawlJob extends ExecJob {
     protected void executeCrawler() {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
+        final ServletContext servletContext = getServletContext();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final ProcessHelper processHelper = ComponentUtil.getProcessHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -386,6 +386,8 @@ public class CrawlJob extends ExecJob {
         addFessCustomSystemProperties(cmdList, fessConfig.getJobSystemPropertyFilterPattern());
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
         addSystemProperty(cmdList, Constants.FESS_HOME, null, null);
+        // the crawler connects to these hosts directly, bypassing its proxy
+        addSystemProperty(cmdList, "http.nonProxyHosts", null, null);
         cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
         addSystemProperty(cmdList, "fess.log.name", getLogName("fess"), getLogName(StringUtil.EMPTY));
@@ -497,6 +499,16 @@ public class CrawlJob extends ExecJob {
                 deleteTempDir(ownTmpDir);
             }
         }
+    }
+
+    /**
+     * Gets the servlet context used to resolve webapp paths for the crawler
+     * process classpath. Overridable seam for tests.
+     *
+     * @return the servlet context
+     */
+    protected ServletContext getServletContext() {
+        return ComponentUtil.getComponent(ServletContext.class);
     }
 
     @Override
