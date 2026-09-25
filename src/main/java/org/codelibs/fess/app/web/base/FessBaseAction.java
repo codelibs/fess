@@ -39,6 +39,7 @@ import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextArranger;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.ResponseManager;
@@ -302,6 +303,18 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         final FessMessages messages = createMessages();
         validationMessagesLambda.message(messages);
         sessionManager.errors().saveMessages(messages);
+    }
+
+    /**
+     * Redirects to the application root, where the static theme serves the search page.
+     *
+     * <p>{@link SystemHelper#getRedirectResponseToRoot(HtmlResponse)} is the hook a customized
+     * system helper uses to send the user somewhere else.</p>
+     *
+     * @return the redirect response
+     */
+    protected HtmlResponse redirectToRoot() {
+        return systemHelper.getRedirectResponseToRoot(newHtmlResponseAsRedirect("/"));
     }
 
     /**

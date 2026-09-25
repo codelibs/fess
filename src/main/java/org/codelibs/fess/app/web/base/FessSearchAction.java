@@ -404,15 +404,6 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     /**
-     * Redirects the user to the root path of the application.
-     *
-     * @return HTML response that redirects to the root page
-     */
-    protected HtmlResponse redirectToRoot() {
-        return systemHelper.getRedirectResponseToRoot(newHtmlResponseAsRedirect("/"));
-    }
-
-    /**
      * Processes the given path through the virtual host helper to handle
      * virtual host configurations and path modifications.
      *

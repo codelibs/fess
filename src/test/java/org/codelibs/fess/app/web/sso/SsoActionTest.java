@@ -37,7 +37,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.core.message.UserMessages;
-import org.lastaflute.web.UrlChain;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -196,9 +195,9 @@ public class SsoActionTest extends UnitFessTestCase {
         final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "saml" }));
         action.loggedIn();
 
-        action.index();
+        final ActionResponse response = action.index();
 
-        assertEquals(List.of("q", "saml"), action.redirectParams);
+        assertEquals("/search/?q=saml", ((HtmlResponse) response).getRoutingPath());
         assertEquals(0, action.landingPages);
     }
 
@@ -232,9 +231,9 @@ public class SsoActionTest extends UnitFessTestCase {
         final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "saml" }));
         action.post = true;
 
-        action.redirectAfterLogin();
+        final HtmlResponse response = action.redirectAfterLogin();
 
-        assertEquals(List.of("q", "saml"), action.redirectParams);
+        assertEquals("/search/?q=saml", response.getRoutingPath());
         assertEquals(List.of(), action.redirectTargets);
     }
 
@@ -264,8 +263,7 @@ public class SsoActionTest extends UnitFessTestCase {
     public void test_redirectToSearchPage_restoresAQueryThatFits() {
         final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "kerberos" }));
 
-        assertTrue(action.redirectToSearchPage().isPresent());
-        assertEquals(List.of("q", "kerberos"), action.redirectParams);
+        assertEquals("/search/?q=kerberos", action.redirectToSearchPage().get().getRoutingPath());
     }
 
     @Test
@@ -295,7 +293,6 @@ public class SsoActionTest extends UnitFessTestCase {
                 new RequestParameter("num", new String[] { "20" }));
 
         assertFalse(action.redirectToSearchPage().isPresent());
-        assertTrue(action.redirectParams.isEmpty());
     }
 
     @Test
@@ -330,8 +327,7 @@ public class SsoActionTest extends UnitFessTestCase {
         // URL is assembled.
         final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q&injected=1&x", new String[] { "ok" }));
 
-        assertTrue(action.redirectToSearchPage().isPresent());
-        assertEquals(List.of("q%26injected%3D1%26x", "ok"), action.redirectParams);
+        assertEquals("/search/?q%26injected%3D1%26x=ok", action.redirectToSearchPage().get().getRoutingPath());
     }
 
     @Test
@@ -339,8 +335,28 @@ public class SsoActionTest extends UnitFessTestCase {
         // The falsification: encoding must not disturb the names the mechanism actually stores.
         final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("num", new String[] { "20" }));
 
-        assertTrue(action.redirectToSearchPage().isPresent());
-        assertEquals(List.of("num", "20"), action.redirectParams);
+        assertEquals("/search/?num=20", action.redirectToSearchPage().get().getRoutingPath());
+    }
+
+    @Test
+    public void test_redirectToSearchPage_keepsEveryValueInOrder() {
+        // The static theme restores filters from repeated parameters, so a multi-valued one must
+        // come back as repeated name=value pairs in the order they were stored.
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "a b" }),
+                new RequestParameter("ex_q", new String[] { "label:x", "label:y" }));
+
+        assertEquals("/search/?q=a+b&ex_q=label%3Ax&ex_q=label%3Ay", action.redirectToSearchPage().get().getRoutingPath());
+    }
+
+    @Test
+    public void test_redirectToSearchPage_isARedirectBelowTheContextPath() {
+        final TestableSsoAction action = actionWithStoredParameters(new RequestParameter("q", new String[] { "saml" }));
+
+        final HtmlResponse response = action.redirectToSearchPage().get();
+
+        // fromRedirectPath, not fromRedirectPathAsIs: LastaFlute prefixes the context path.
+        assertTrue(response.isRedirectTo());
+        assertFalse(response.isAsIs());
     }
 
     @Test
@@ -355,13 +371,6 @@ public class SsoActionTest extends UnitFessTestCase {
     private static class TestableSsoAction extends SsoAction {
         final List<String> savedErrors = new CopyOnWriteArrayList<>();
         final List<String> savedInfos = new CopyOnWriteArrayList<>();
-        final List<Object> redirectParams = new CopyOnWriteArrayList<>();
-
-        @Override
-        protected HtmlResponse redirectWith(final Class<?> actionType, final UrlChain moreUrl) {
-            redirectParams.addAll(List.of(moreUrl.getParamsOnGet()));
-            return REDIRECT_TO_LOGIN;
-        }
 
         /** searchHelper and fessConfig are protected in another package, so they are set here. */
         void storeParameters(final int maxRestoredLength, final RequestParameter... parameters) {

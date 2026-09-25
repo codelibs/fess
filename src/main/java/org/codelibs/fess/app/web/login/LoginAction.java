@@ -21,7 +21,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
-import org.codelibs.fess.app.web.profile.ProfileAction;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -142,7 +141,8 @@ public class LoginAction extends FessLoginAction {
             throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
         }
         getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
-        return redirect(ProfileAction.class);
+        // The JSP profile page this used to land on is gone: go where a login lands instead.
+        return redirectByUser(getUserBean().get());
     }
 
     private void validatePasswordForm(final PasswordForm form, final VaErrorHook validationErrorLambda) {
