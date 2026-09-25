@@ -241,6 +241,21 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Uploads and imports elevate words from a CSV file sent as a {@code multipart/form-data} request.
+     *
+     * <p>LastaFlute parses a multipart body only for POST, so this is the method to use for uploads;
+     * {@link #put$upload(UploadForm)} is kept for compatibility.</p>
+     *
+     * @param body upload form containing the CSV file
+     * @return JSON response with result status
+     */
+    // POST /api/admin/elevateword/upload
+    @Execute
+    public JsonResponse<ApiResult> post$upload(final UploadForm body) {
+        return put$upload(body);
+    }
+
     // GET /api/admin/elevateword/download
     /**
      * Downloads all elevate words as a CSV file.

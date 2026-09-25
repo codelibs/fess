@@ -153,4 +153,19 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
         return null;
     }
 
+    /**
+     * Uploads a file to storage, sent as a {@code multipart/form-data} request.
+     *
+     * <p>LastaFlute parses a multipart body only for POST, so this is the method to use for uploads;
+     * {@link #put$upload(UploadForm)} is kept for compatibility.</p>
+     *
+     * @param form The form containing the file to upload and the target path.
+     * @return JSON response with result status
+     */
+    // POST /api/admin/storage/upload/
+    @Execute
+    public JsonResponse<ApiResult> post$upload(final UploadForm form) {
+        return put$upload(form);
+    }
+
 }

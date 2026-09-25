@@ -201,6 +201,22 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
     }
 
     /**
+     * Uploads the dictionary file sent as a {@code multipart/form-data} request.
+     *
+     * <p>LastaFlute parses a multipart body only for POST, so this is the method to use for uploads;
+     * {@link #put$upload(String, UploadForm)} is kept for compatibility.</p>
+     *
+     * @param dictId the dictionary ID
+     * @param form the upload form containing the dictionary file
+     * @return JSON response with result status
+     */
+    // POST /api/admin/dict/kuromoji/upload/{dictId}
+    @Execute
+    public JsonResponse<ApiResult> post$upload(final String dictId, final UploadForm form) {
+        return put$upload(dictId, form);
+    }
+
+    /**
      * Downloads Kuromoji dictionary file.
      *
      * @param dictId the dictionary ID
