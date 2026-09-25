@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,28 @@ public class FessSetupTest {
     public void test_installOpensearchPlugins_requiresOpensearchHome() {
         assertEquals(2, run("install", "opensearch-plugins"));
         assertTrue(err().contains("--opensearch-home"), err());
+    }
+
+    @Test
+    public void test_removePlugins_keepBundledPlugins_leavesThemInPlace() throws Exception {
+        final ComponentDefinition opensearch =
+                new ComponentDefinition("opensearch", Map.of("plugin.removals", "opensearch-security-analytics"));
+        final Path plugin = Files.createDirectories(tempDir.resolve("plugins").resolve("opensearch-security-analytics"));
+
+        // No bin/opensearch-plugin: removing would fail, so passing means the tool was never run.
+        FessSetup.removePlugins(opensearch, tempDir, FessSetup.parseOptions(new String[] { "--keep-bundled-plugins" }, 0),
+                new PrintStream(out, true, StandardCharsets.UTF_8));
+        assertTrue(Files.isDirectory(plugin));
+        assertEquals("", out());
+
+        assertThrows(SetupException.class,
+                () -> FessSetup.removePlugins(opensearch, tempDir, Map.of(), new PrintStream(out, true, StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void test_usage_mentionsKeepBundledPlugins() {
+        assertEquals(2, run());
+        assertTrue(err().contains("--keep-bundled-plugins"), err());
     }
 
     @Test

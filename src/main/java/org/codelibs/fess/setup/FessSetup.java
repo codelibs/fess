@@ -56,13 +56,16 @@ public final class FessSetup {
 
     private static final int EXIT_USAGE = 2;
 
+    private static final String KEEP_BUNDLED_PLUGINS = "keep-bundled-plugins";
+
     private static final String USAGE = """
             Usage: fess-setup <command> [options]
 
             Commands:
-              install opensearch [--dest <dir>] [--version <version>]
+              install opensearch [--dest <dir>] [--version <version>] [--keep-bundled-plugins]
                   Download OpenSearch, install the Fess plugins into it, remove the bundled
-                  plugins Fess does not use and configure it.
+                  plugins Fess does not use and configure it. --keep-bundled-plugins leaves
+                  the bundled plugins in place.
                   Official builds exist for Linux and Windows only.
 
               install opensearch-plugins --opensearch-home <dir> [--version <version>]
@@ -1131,7 +1134,7 @@ public final class FessSetup {
         }
 
         if (POST_OPENSEARCH.equals(definition.get("post"))) {
-            removePlugins(definition, home, out);
+            removePlugins(definition, home, options, out);
             installPlugins(definition, home, options, out);
             out.println("Configuring " + home);
             final List<String> added = OpenSearchConfigurer.configure(home);
@@ -1193,7 +1196,11 @@ public final class FessSetup {
         }
     }
 
-    private static void removePlugins(final ComponentDefinition definition, final Path home, final PrintStream out) throws SetupException {
+    static void removePlugins(final ComponentDefinition definition, final Path home, final Map<String, String> options,
+            final PrintStream out) throws SetupException {
+        if (options.containsKey(KEEP_BUNDLED_PLUGINS)) {
+            return;
+        }
         for (final String name : definition.list("plugin.removals")) {
             if (OpenSearchPluginInstaller.remove(home, name)) {
                 out.println("Removed " + name + ", which Fess does not use");
