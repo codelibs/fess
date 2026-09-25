@@ -281,33 +281,6 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getLanguageItems() {
-        final List<Map<String, String>> enItems = systemHelper.getLanguageItems(Locale.ENGLISH);
-        assertEquals(55, enItems.size());
-        final List<Map<String, String>> jaItems = systemHelper.getLanguageItems(Locale.JAPANESE);
-        assertEquals(55, jaItems.size());
-    }
-
-    @Test
-    public void test_getLanguageItems_keepsScriptOfRequestLocale() {
-        // The script of the request locale decides the script of the language names: Traditional Chinese for
-        // zh-Hant and Latin for sr-Latn, not the names of the language without its script.
-        final Locale zhHant = Locale.forLanguageTag("zh-Hant");
-        assertEquals(Locale.JAPANESE.getDisplayName(zhHant), getLanguageLabel(zhHant, "ja"));
-        final Locale srLatn = Locale.forLanguageTag("sr-Latn-RS");
-        assertEquals(Locale.JAPANESE.getDisplayName(srLatn), getLanguageLabel(srLatn, "ja"));
-    }
-
-    private String getLanguageLabel(final Locale locale, final String lang) {
-        return systemHelper.getLanguageItems(locale)
-                .stream()
-                .filter(item -> lang.equals(item.get(Constants.ITEM_VALUE)))
-                .map(item -> item.get(Constants.ITEM_LABEL))
-                .findFirst()
-                .orElse(null);
-    }
-
-    @Test
     public void test_getHostnamet() {
         assertNotNull(systemHelper.getHostname());
         try {
@@ -849,44 +822,6 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_setupSearchHtmlData() {
-        final SystemHelper mockSystemHelper = new SystemHelper() {
-            @Override
-            public boolean isEoled() {
-                return false;
-            }
-        };
-        try {
-            final var runtime = getMockRuntime();
-            if (runtime != null) {
-                mockSystemHelper.setupSearchHtmlData(null, runtime);
-            }
-            assertTrue(true);
-        } catch (Exception e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
-    public void test_setupSearchHtmlData_withEol() {
-        final SystemHelper mockSystemHelper = new SystemHelper() {
-            @Override
-            public boolean isEoled() {
-                return true;
-            }
-        };
-        try {
-            final var runtime = getMockRuntime();
-            if (runtime != null) {
-                mockSystemHelper.setupSearchHtmlData(null, runtime);
-            }
-            assertTrue(true);
-        } catch (Exception e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
     public void test_reloadConfiguration() {
         try {
             systemHelper.reloadConfiguration();
@@ -1032,14 +967,6 @@ public class SystemHelperTest extends UnitFessTestCase {
             }
         });
         assertEquals("ja", systemHelper.normalizeHtmlLang("ja"));
-    }
-
-    @Test
-    public void test_getLanguageItems_cacheException() {
-        final List<Map<String, String>> items = systemHelper.getLanguageItems(new Locale("invalid"));
-        assertNotNull(items);
-        // The cache may work fine even with invalid locale, so check size is reasonable
-        assertTrue(items.size() >= 1);
     }
 
     @Test

@@ -758,9 +758,9 @@ public class LdapUserTest extends UnitFessTestCase {
     public void test_getPermissionState_survivesADeserializedSessionWithoutTheField() {
         // LdapUser is Serializable and lives in the session, and serialVersionUID is unchanged, so a
         // session written by a release without this field deserializes with it null -- field
-        // initializers do not run during deserialization. FessSearchAction#hookBefore switches on
-        // this on every front page, and a bare switch on a null selector throws, so a null here
-        // would be a 500 on every request until the session is dropped.
+        // initializers do not run during deserialization. FessUser#getPermissionState() is
+        // documented as never null, and the v2 search handler looks this up on every search, so a
+        // null here must still resolve to RESOLVED rather than surface as literally missing.
         ldapUser.permissionState = null;
         assertEquals(FessUser.PermissionState.RESOLVED, ldapUser.getPermissionState());
     }

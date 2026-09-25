@@ -56,8 +56,8 @@ import jakarta.servlet.http.HttpSession;
  * }</pre>
  *
  * <p>All three fields are required. The {@code current_password} check follows the
- * same {@link FessLoginAssist#findLoginUser} pattern used by
- * {@code ProfileAction.changePassword}.</p>
+ * same {@link FessLoginAssist#findLoginUser} pattern the login flow itself uses to
+ * verify a password.</p>
  *
  * <p>C-3: although the caller is already authenticated, a stolen-session attacker
  * could otherwise brute-force {@code current_password} unbounded. The handler
@@ -255,10 +255,9 @@ public class PasswordChangeHandler {
             return;
         }
 
-        // Re-authenticate the current user with the supplied current_password. We mirror
-        // ProfileAction.validatePasswordForm — findLoginUser performs the same hash compare
-        // that the login flow uses, so we get an early reject for wrong-password without
-        // leaking timing differences vs. a hand-rolled compare.
+        // Re-authenticate the current user with the supplied current_password. findLoginUser
+        // performs the same hash compare that the login flow uses, so we get an early reject
+        // for wrong-password without leaking timing differences vs. a hand-rolled compare.
         final OptionalEntity<? extends FessUser> verified;
         try {
             verified = assist.findLoginUser(new LocalUserCredential(userId, currentPw));

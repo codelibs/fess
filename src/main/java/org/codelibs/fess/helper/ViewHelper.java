@@ -18,7 +18,6 @@ package org.codelibs.fess.helper;
 import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -27,13 +26,11 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -71,7 +68,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.util.LaServletContextUtil;
 import org.codelibs.fesen.opensearch.core.common.text.Text;
 import org.codelibs.fesen.opensearch.search.fetch.subphase.highlight.HighlightField;
 
@@ -151,18 +147,6 @@ public class ViewHelper {
 
     /** Configured highlight tag suffix */
     protected String highlightTagPost;
-
-    /** Whether to use HTTP sessions */
-    protected boolean useSession = true;
-
-    /** Cache for page paths */
-    protected final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
-
-    /** Initial facet parameter mappings */
-    protected final Map<String, String> initFacetParamMap = new HashMap<>();
-
-    /** Initial geographic parameter mappings */
-    protected final Map<String, String> initGeoParamMap = new HashMap<>();
 
     /** List of facet query views */
     protected final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
@@ -622,84 +606,6 @@ public class ViewHelper {
     }
 
     /**
-     * Gets the localized page path for a given page name.
-     * Checks for locale-specific versions before falling back to default.
-     *
-     * @param page the page name
-     * @return the localized page path
-     */
-    public String getPagePath(final String page) {
-        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
-        final String lang = locale.getLanguage();
-        final String country = locale.getCountry();
-
-        final String pathLC = getLocalizedPagePath(page, lang, country);
-        final String pLC = pageCacheMap.get(pathLC);
-        if (pLC != null) {
-            return pLC;
-        }
-        if (existsPage(pathLC)) {
-            pageCacheMap.put(pathLC, pathLC);
-            return pathLC;
-        }
-
-        final String pathL = getLocalizedPagePath(page, lang, null);
-        final String pL = pageCacheMap.get(pathL);
-        if (pL != null) {
-            return pL;
-        }
-        if (existsPage(pathL)) {
-            pageCacheMap.put(pathLC, pathL);
-            return pathL;
-        }
-
-        final String path = getLocalizedPagePath(page, null, null);
-        final String p = pageCacheMap.get(path);
-        if (p != null) {
-            return p;
-        }
-        if (existsPage(path)) {
-            pageCacheMap.put(pathLC, path);
-            return path;
-        }
-
-        return "index.jsp";
-    }
-
-    /**
-     * Constructs a localized page path with language and country.
-     *
-     * @param page the page name
-     * @param lang the language code
-     * @param country the country code
-     * @return the localized page path
-     */
-    private String getLocalizedPagePath(final String page, final String lang, final String country) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("/WEB-INF/view/").append(page);
-        if (StringUtil.isNotBlank(lang)) {
-            buf.append('_').append(lang);
-            if (StringUtil.isNotBlank(country)) {
-                buf.append('_').append(country);
-            }
-        }
-        buf.append(".jsp");
-        return buf.toString();
-    }
-
-    /**
-     * Checks if a page file exists at the given path.
-     *
-     * @param path the page path to check
-     * @return true if the page exists, false otherwise
-     */
-    private boolean existsPage(final String path) {
-        final String realPath = LaServletContextUtil.getServletContext().getRealPath(path);
-        final File file = new File(realPath);
-        return file.isFile();
-    }
-
-    /**
      * Creates cached content with highlighting for a document.
      * Uses Handlebars templates to render the cached content.
      *
@@ -1075,62 +981,6 @@ public class ViewHelper {
             }
             return new TextFragment[0];
         }).orElse(new TextFragment[0]);
-    }
-
-    /**
-     * Checks if HTTP sessions are enabled.
-     *
-     * @return true if sessions are used, false otherwise
-     */
-    public boolean isUseSession() {
-        return useSession;
-    }
-
-    /**
-     * Sets whether to use HTTP sessions.
-     *
-     * @param useSession true to enable sessions, false to disable
-     */
-    public void setUseSession(final boolean useSession) {
-        this.useSession = useSession;
-    }
-
-    /**
-     * Adds an initial facet parameter mapping.
-     *
-     * @param key the parameter key
-     * @param value the parameter value
-     */
-    public void addInitFacetParam(final String key, final String value) {
-        initFacetParamMap.put(value, key);
-    }
-
-    /**
-     * Gets the initial facet parameter mappings.
-     *
-     * @return the facet parameter map
-     */
-    public Map<String, String> getInitFacetParamMap() {
-        return initFacetParamMap;
-    }
-
-    /**
-     * Adds an initial geographic parameter mapping.
-     *
-     * @param key the parameter key
-     * @param value the parameter value
-     */
-    public void addInitGeoParam(final String key, final String value) {
-        initGeoParamMap.put(value, key);
-    }
-
-    /**
-     * Gets the initial geographic parameter mappings.
-     *
-     * @return the geographic parameter map
-     */
-    public Map<String, String> getInitGeoParamMap() {
-        return initGeoParamMap;
     }
 
     /**

@@ -178,11 +178,11 @@ public class LdapUser implements FessUser {
     /**
      * {@inheritDoc}
      *
-     * <p>A bare field read. It must stay one: this is called on every request by
-     * {@code FessSearchAction#hookBefore}, and {@link #getPermissions()} performs the directory
-     * search inline, so anything that consulted the permissions here -- including
-     * {@link #getGroupNames()} and {@link #getRoleNames()}, which derive from them -- would turn a
-     * status check into an LDAP round trip.
+     * <p>A bare field read. It must stay one: this is called on every search, through the v2
+     * search handler's per-request permission-state lookup, and {@link #getPermissions()}
+     * performs the directory search inline, so anything that consulted the permissions here --
+     * including {@link #getGroupNames()} and {@link #getRoleNames()}, which derive from them --
+     * would turn a status check into an LDAP round trip.
      */
     @Override
     public PermissionState getPermissionState() {

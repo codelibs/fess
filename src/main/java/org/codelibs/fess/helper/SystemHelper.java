@@ -45,15 +45,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -86,10 +83,6 @@ import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.codelibs.fesen.opensearch.monitor.os.OsProbe;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -111,9 +104,6 @@ public class SystemHelper {
 
     /** A flag to indicate if the system should be forcefully stopped. */
     protected final AtomicBoolean forceStop = new AtomicBoolean(false);
-
-    /** A cache for language items. */
-    protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
 
     /** The encoding for filtering paths. */
     protected String filterPathEncoding;
@@ -178,31 +168,6 @@ public class SystemHelper {
         reportSearchRolePrefixProblems(fessConfig);
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
-        langItemsCache = CacheBuilder.newBuilder()
-                .maximumSize(20)
-                .expireAfterAccess(1, TimeUnit.HOURS)
-                .build(new CacheLoader<String, List<Map<String, String>>>() {
-                    @Override
-                    public List<Map<String, String>> load(final String key) throws Exception {
-                        final Locale displayLocale = Locale.forLanguageTag(key);
-                        final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-                        final String msg = ComponentUtil.getMessageManager().getMessage(displayLocale, "labels.allLanguages");
-                        final Map<String, String> defaultMap = new HashMap<>(2);
-                        defaultMap.put(Constants.ITEM_LABEL, msg);
-                        defaultMap.put(Constants.ITEM_VALUE, "all");
-                        langItems.add(defaultMap);
-
-                        for (final String lang : supportedLanguages) {
-                            final Locale locale = LocaleUtils.toLocale(lang);
-                            final String label = locale.getDisplayName(displayLocale);
-                            final Map<String, String> map = new HashMap<>(2);
-                            map.put(Constants.ITEM_LABEL, label);
-                            map.put(Constants.ITEM_VALUE, lang);
-                            langItems.add(map);
-                        }
-                        return langItems;
-                    }
-                });
 
         ComponentUtil.doInitProcesses(Runnable::run);
 
@@ -527,27 +492,6 @@ public class SystemHelper {
     }
 
     /**
-     * Gets a list of language items for a given locale.
-     *
-     * @param locale The locale.
-     * @return A list of language items.
-     */
-    public List<Map<String, String>> getLanguageItems(final Locale locale) {
-        try {
-            // A language tag, unlike Locale#toString, carries the script and extensions through the cache key.
-            return langItemsCache.get(locale.toLanguageTag());
-        } catch (final ExecutionException e) {
-            final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-            final String msg = ComponentUtil.getMessageManager().getMessage(locale, "labels.allLanguages");
-            final Map<String, String> defaultMap = new HashMap<>(2);
-            defaultMap.put(Constants.ITEM_LABEL, msg);
-            defaultMap.put(Constants.ITEM_VALUE, "all");
-            langItems.add(defaultMap);
-            return langItems;
-        }
-    }
-
-    /**
      * Adds a shutdown hook.
      *
      * @param hook The shutdown hook to add.
@@ -627,20 +571,6 @@ public class SystemHelper {
             return true;
         }
         return StorageType.GCS.name().equalsIgnoreCase(fessConfig.getStorageType());
-    }
-
-    /**
-     * Sets up search HTML data for a given action.
-     *
-     * @param action  The action to set up data for.
-     * @param runtime The action runtime.
-     */
-    public void setupSearchHtmlData(final TypicalAction action, final ActionRuntime runtime) {
-        final boolean eoled = isEoled();
-        runtime.registerData("eoled", eoled);
-        if (eoled) {
-            runtime.registerData("eolLink", getEolLink());
-        }
     }
 
     /**

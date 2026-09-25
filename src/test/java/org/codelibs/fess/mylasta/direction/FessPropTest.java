@@ -1059,7 +1059,8 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("", sortConfig().getDefaultSortForUser(OptionalThing.empty()));
         assertEquals("last_modified.desc,score.desc",
                 sortConfig("last_modified.desc,score.desc").getDefaultSortForUser(OptionalThing.empty()));
-        // Two applicable values: the first one given for a field wins, as FessSearchAction did.
+        // Two applicable values: the first one given for a field wins, matching how ui/config's
+        // default_sort has always resolved it.
         assertEquals("last_modified.desc,score.desc",
                 sortConfig("last_modified.desc", "last_modified.asc,score.desc").getDefaultSortForUser(OptionalThing.empty()));
     }
