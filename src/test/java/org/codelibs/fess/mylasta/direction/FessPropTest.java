@@ -362,6 +362,45 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_endsWithFullstop() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerDocumentFullstopChars() {
+                return "u002eu06d4u2e3cu3002";
+            }
+        };
+
+        assertTrue(fessConfig.endsWithFullstop("abc."));
+        assertTrue(fessConfig.endsWithFullstop("abc\u3002"));
+        assertTrue(fessConfig.endsWithFullstop("abc\u06d4"));
+        assertTrue(fessConfig.endsWithFullstop("."));
+        assertFalse(fessConfig.endsWithFullstop("abc"));
+        assertFalse(fessConfig.endsWithFullstop("abc.def"));
+        assertFalse(fessConfig.endsWithFullstop("abc!"));
+        assertFalse(fessConfig.endsWithFullstop("abc?"));
+        assertFalse(fessConfig.endsWithFullstop("abc46"));
+        assertFalse(fessConfig.endsWithFullstop("abc\uD83D\uDE00"));
+        assertFalse(fessConfig.endsWithFullstop(""));
+        assertFalse(fessConfig.endsWithFullstop(" "));
+        assertFalse(fessConfig.endsWithFullstop(null));
+    }
+
+    @Test
+    public void test_endsWithFullstop_supplementaryChar() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerDocumentFullstopChars() {
+                return "u1f600";
+            }
+        };
+
+        assertTrue(fessConfig.endsWithFullstop("abc\uD83D\uDE00"));
+        assertFalse(fessConfig.endsWithFullstop("abc."));
+    }
+
+    @Test
     public void test_getCrawlerDocumentHtmlPrunedTagsAsArray() throws Exception {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {

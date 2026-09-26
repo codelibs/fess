@@ -1776,8 +1776,9 @@ public interface FessProp {
         if (StringUtil.isBlank(s)) {
             return false;
         }
-        for (final int i : getCrawlerDocumentFullstopCharsAsArray()) {
-            if (s.endsWith(String.valueOf(i))) {
+        final int lastCodePoint = s.codePointBefore(s.length());
+        for (final int fullstop : getCrawlerDocumentFullstopCharsAsArray()) {
+            if (lastCodePoint == fullstop) {
                 return true;
             }
         }
