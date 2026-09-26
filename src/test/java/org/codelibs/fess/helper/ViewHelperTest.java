@@ -28,10 +28,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fesen.opensearch.core.common.text.Text;
+import org.codelibs.fesen.opensearch.search.fetch.subphase.highlight.HighlightField;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -652,6 +655,41 @@ public class ViewHelperTest extends UnitFessTestCase {
         } catch (Exception e) {
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void test_createHighlightText_ellipsisAfterFullstop() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        FessProp.propMap.clear();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentFullstopChars() {
+                return "u002eu06d4u2e3cu3002";
+            }
+        });
+
+        // ends with a configured full stop: no trailing ellipsis
+        assertEquals("Restart the service.", viewHelper.createHighlightText(highlightField("Restart the service.")));
+        assertEquals("サービスを再起動します。", viewHelper.createHighlightText(highlightField("サービスを再起動します。")));
+        assertEquals("first part...Restart the service.",
+                viewHelper.createHighlightText(highlightField("first part", "Restart the service.")));
+
+        // does not end with a full stop: ellipsis appended
+        assertEquals("Restart the service...", viewHelper.createHighlightText(highlightField("Restart the service")));
+        assertEquals("Restart the service....and then...",
+                viewHelper.createHighlightText(highlightField("Restart the service.", "and then")));
+    }
+
+    private static HighlightField highlightField(final String... fragments) {
+        final Text[] texts = new Text[fragments.length];
+        for (int i = 0; i < fragments.length; i++) {
+            texts[i] = new Text(fragments[i]);
+        }
+        return new HighlightField("content", texts);
     }
 
     @Test
