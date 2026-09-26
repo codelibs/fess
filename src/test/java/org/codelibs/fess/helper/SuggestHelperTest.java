@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exbhv.BadWordBhv;
@@ -28,6 +30,8 @@ import org.codelibs.fess.opensearch.config.exentity.BadWord;
 import org.codelibs.fess.opensearch.config.exentity.ElevateWord;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
+import org.codelibs.fess.suggest.index.SuggestIndexResponse;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -108,6 +112,51 @@ public class SuggestHelperTest extends UnitFessTestCase {
         } catch (Exception e) {
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void test_indexFromSearchLog_writeFailureIsLogged() {
+        final RuntimeException cause = new RuntimeException("no write index is defined for alias [fess.suggest.update]");
+        final List<String> storedWords = new ArrayList<>();
+        final SuggestHelper helper = new SuggestHelper() {
+            @Override
+            protected SuggestIndexResponse indexSearchWord(final String searchWord, final String[] fields, final String[] tags,
+                    final String[] roles, final String[] langs) {
+                storedWords.add(searchWord);
+                return new SuggestIndexResponse(1, 1, List.of(cause), 0);
+            }
+
+            @Override
+            public void refresh() {
+                // no suggest index
+            }
+        };
+        helper.fessConfig = ComponentUtil.getFessConfig();
+        helper.contentFieldNameSet.add("content");
+
+        final List<SearchLog> searchLogList = new ArrayList<>();
+        for (final String word : new String[] { "alpha", "beta" }) {
+            final SearchLog searchLog = new SearchLog();
+            searchLog.setHitCount(10L);
+            searchLog.setUserSessionId("session-" + word);
+            searchLog.setRequestedAt(LocalDateTime.now());
+            searchLog.addSearchFieldLogValue("content", word);
+            searchLogList.add(searchLog);
+        }
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SuggestHelper.class);
+        try {
+            helper.indexFromSearchLog(searchLogList);
+        } finally {
+            appender.detach();
+        }
+
+        assertEquals(List.of("alpha", "beta"), storedWords);
+        final List<LogEvent> warnings = appender.eventsAt(Level.WARN);
+        assertEquals(1, warnings.size());
+        final String message = warnings.get(0).getMessage().getFormattedMessage();
+        assertTrue(message, message.contains("failed=2"));
+        assertEquals(cause, warnings.get(0).getThrown());
     }
 
     @Test
