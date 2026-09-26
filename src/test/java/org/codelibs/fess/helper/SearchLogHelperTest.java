@@ -26,10 +26,13 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
+import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -100,6 +103,20 @@ public class SearchLogHelperTest extends UnitFessTestCase {
             // Expected in test environment
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void test_getUserInfo_loadFailureIsNotFatal() {
+        final SearchLogHelper helper = new SearchLogHelper() {
+            @Override
+            protected UserInfo storeUserInfo(final String userCode) {
+                throw new SearchEngineClientException("search engine is unreachable");
+            }
+        };
+        helper.init();
+
+        final OptionalEntity<UserInfo> result = helper.getUserInfo("user001");
+        assertFalse(result.isPresent());
     }
 
     @Test
