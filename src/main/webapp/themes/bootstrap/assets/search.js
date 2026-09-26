@@ -1827,6 +1827,8 @@ export function renderPopularWords(words, targetEl) {
 async function loadPopularWords() {
   const target = document.getElementById("popular-words");
   if (!target) return;
+  const cfg = api.getConfig() || {};
+  if (!cfg.features || !cfg.features.popular_word) return;
   try {
     const env = await api.get("/popular-words");
     const words = env.popular_words || [];
