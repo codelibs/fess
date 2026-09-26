@@ -462,6 +462,39 @@ describe("home search form", () => {
   });
 });
 
+describe("home popular words", () => {
+  // /popular-words answers 400 when the server disables popular words
+  // (web.api.popularword=false), which /ui/config reports as features.popular_word.
+  const popularWordsCalls = () => api.get.mock.calls.filter((c) => c[0] === "/popular-words").length;
+  const openHome = async () => {
+    mountFullDom();
+    registerRoutes();
+    setLocation("/");
+    router.register.mock.calls[1][1]();
+    await flush();
+  };
+
+  it("does not request /popular-words when features.popular_word is false", async () => {
+    api.getConfig.mockReturnValue({ features: { popular_word: false } });
+    await openHome();
+    expect(popularWordsCalls()).toBe(0);
+    expect(search.renderPopularWords).not.toHaveBeenCalled();
+  });
+
+  it("does not request /popular-words when features.popular_word is absent", async () => {
+    await openHome();
+    expect(popularWordsCalls()).toBe(0);
+  });
+
+  it("requests and renders popular words when features.popular_word is true", async () => {
+    api.getConfig.mockReturnValue({ features: { popular_word: true } });
+    api.get.mockResolvedValue({ popular_words: ["alpha"] });
+    await openHome();
+    expect(popularWordsCalls()).toBe(1);
+    expect(search.renderPopularWords).toHaveBeenCalledWith(["alpha"], document.getElementById("home-popular-words"));
+  });
+});
+
 // ---------------------------------------------------------------------------
 // main — the SPA boot sequence
 // ---------------------------------------------------------------------------

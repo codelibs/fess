@@ -182,6 +182,9 @@ export function renderHomeFlash(message, level = "info") {
 async function renderHomePopularWords() {
   const host = document.getElementById("home-popular-words");
   if (!host) return;
+  // features.popular_word is false when the server disables popular words, and
+  // /popular-words then answers 400 — skip the request.
+  if (!api.getConfig()?.features?.popular_word) return;
   try {
     const data = await api.get("/popular-words");
     const words = data?.popular_words || data?.words || [];

@@ -1592,6 +1592,23 @@ describe("attach — wiring", () => {
   it("is idempotent — a second attach() call is a quiet no-op", () => {
     expect(() => attach()).not.toThrow();
   });
+
+  it("does not request /popular-words on the empty state when features.popular_word is false", async () => {
+    // attach() wires once per module instance, so this case runs against a fresh one.
+    vi.resetModules();
+    const freshApi = await import("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    const fresh = await import("../../../../main/webapp/themes/bootstrap/assets/search.js");
+    freshApi.getConfig.mockReturnValue({ ...FULL_CFG, features: { ...FULL_CFG.features, popular_word: false } });
+    freshApi.get.mockImplementation(async (path) => (path === "/popular-words" ? { popular_words: ["alpha"] } : {}));
+    setLocation("/");
+    mountBody(ATTACH_FIXTURE);
+
+    fresh.attach();
+    await settle();
+
+    expect(freshApi.get.mock.calls.filter((c) => c[0] === "/popular-words").length).toBe(0);
+    expect(document.getElementById("popular-words").classList.contains("d-none")).toBe(true);
+  });
 });
 
 describe("runFromUrl — facet selections in the URL", () => {
