@@ -900,4 +900,45 @@ public class CrawlerTest extends UnitFessTestCase {
         assertTrue(executionOrder.contains("data-start"));
         assertTrue(executionOrder.contains("data-end"));
     }
+
+    // A web/file or data store crawl that dies with an exception runs on its own thread; the process
+    // must not report success for it.
+    @Test
+    public void test_doCrawl_webFsCrawlFailure() {
+        crawler.webFsIndexHelper = new WebFsIndexHelper() {
+            @Override
+            public void crawl(String sessionId, List<String> webConfigIdList, List<String> fileConfigIdList) {
+                throw new IllegalStateException("no such index [fess_crawler.queue]");
+            }
+        };
+
+        Crawler.Options options = new Crawler.Options();
+        options.sessionId = "test-session";
+        options.webConfigIds = "web1";
+
+        assertEquals(Constants.EXIT_FAIL, crawler.doCrawl(options));
+        final Map<String, String> infoMap = crawlingInfoHelper.getInfoMap(options.sessionId);
+        assertEquals(Constants.F.toString(), infoMap.get(Constants.CRAWLER_STATUS));
+        assertTrue(infoMap.get(Constants.CRAWLER_ERRORS).contains("IllegalStateException"));
+    }
+
+    @Test
+    public void test_doCrawl_dataCrawlFailure() {
+        crawler.dataIndexHelper = new DataIndexHelper() {
+            @Override
+            public void crawl(String sessionId, List<String> dataConfigIdList) {
+                throw new IllegalStateException("data store failed");
+            }
+        };
+
+        Crawler.Options options = new Crawler.Options();
+        options.sessionId = "test-session";
+        options.webConfigIds = "web1";
+        options.dataConfigIds = "data1";
+
+        assertEquals(Constants.EXIT_FAIL, crawler.doCrawl(options));
+        final Map<String, String> infoMap = crawlingInfoHelper.getInfoMap(options.sessionId);
+        assertEquals(Constants.F.toString(), infoMap.get(Constants.CRAWLER_STATUS));
+        assertTrue(infoMap.get(Constants.CRAWLER_ERRORS).contains("IllegalStateException"));
+    }
 }

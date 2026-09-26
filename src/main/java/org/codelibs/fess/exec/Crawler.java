@@ -673,29 +673,34 @@ public class Crawler {
 
             Thread webFsCrawlerThread = null;
             Thread dataCrawlerThread = null;
+            final AtomicBoolean crawlFailed = new AtomicBoolean(false);
 
             if (runAll || webConfigIdList != null || fileConfigIdList != null) {
-                webFsCrawlerThread = new Thread((Runnable) () -> {
+                webFsCrawlerThread = new Thread(failOnException(crawlFailed, () -> {
                     // crawl web
                     writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_START_TIME);
                     webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList);
                     writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_END_TIME);
-                }, WEB_FS_CRAWLING_PROCESS);
+                }), WEB_FS_CRAWLING_PROCESS);
                 webFsCrawlerThread.start();
             }
 
             if (runAll || dataConfigIdList != null) {
-                dataCrawlerThread = new Thread((Runnable) () -> {
+                dataCrawlerThread = new Thread(failOnException(crawlFailed, () -> {
                     // crawl data system
                     writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_START_TIME);
                     dataIndexHelper.crawl(options.sessionId, dataConfigIdList);
                     writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_END_TIME);
-                }, DATA_CRAWLING_PROCESS);
+                }), DATA_CRAWLING_PROCESS);
                 dataCrawlerThread.start();
             }
 
             joinCrawlerThread(webFsCrawlerThread);
             joinCrawlerThread(dataCrawlerThread);
+
+            if (crawlFailed.get()) {
+                return Constants.EXIT_FAIL;
+            }
 
             if (logger.isInfoEnabled()) {
                 logger.info("Finished Crawler.");
@@ -716,6 +721,27 @@ public class Crawler {
             crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(systemHelper.getCurrentTimeAsLong() - totalTime));
 
         }
+    }
+
+    /**
+     * Wraps a crawling process so that an exception ending it is logged and fails the crawl.
+     * The process runs on its own thread, where an uncaught exception would otherwise end
+     * the thread without a log entry while the crawler still reports success.
+     *
+     * @param crawlFailed the flag set when the process ends with an exception
+     * @param process the crawling process
+     * @return the wrapped process
+     */
+    protected Runnable failOnException(final AtomicBoolean crawlFailed, final Runnable process) {
+        return () -> {
+            try {
+                process.run();
+            } catch (final Throwable t) {
+                logger.error("Crawling process failed: name={}", Thread.currentThread().getName(), t);
+                addError(t.getClass().getSimpleName());
+                crawlFailed.set(true);
+            }
+        };
     }
 
     /**
