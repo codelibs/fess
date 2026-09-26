@@ -46,6 +46,8 @@ public class QueryStringBuilder {
 
     private String sortField;
 
+    private boolean relatedQuery = true;
+
     /**
      * Default constructor for QueryStringBuilder.
      * Initializes a new instance with default settings for escape and sortField.
@@ -174,7 +176,7 @@ public class QueryStringBuilder {
         } else {
             final String query = params.getQuery();
             if (StringUtil.isNotBlank(query)) {
-                if (ComponentUtil.hasRelatedQueryHelper()) {
+                if (relatedQuery && ComponentUtil.hasRelatedQueryHelper()) {
                     final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
                     final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
                     if (relatedQueries.length == 0) {
@@ -304,6 +306,20 @@ public class QueryStringBuilder {
      */
     public QueryStringBuilder escape(final boolean escape) {
         this.escape = escape;
+        return this;
+    }
+
+    /**
+     * Sets whether to expand the query with its registered related queries.
+     * Enabled by default; disable it where the user's own words matter rather than keyword recall,
+     * such as the text a semantic search embeds.
+     * This method follows the builder pattern for method chaining.
+     *
+     * @param relatedQuery true to expand the query with related queries, false to use it as entered
+     * @return this QueryStringBuilder instance for method chaining
+     */
+    public QueryStringBuilder relatedQuery(final boolean relatedQuery) {
+        this.relatedQuery = relatedQuery;
         return this;
     }
 }

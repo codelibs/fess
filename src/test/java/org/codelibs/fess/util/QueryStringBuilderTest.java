@@ -24,6 +24,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -312,11 +313,39 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_relatedQuery_expandsByDefault() {
+        registerRelatedQueries("password", "password reset", "credential");
+        assertEquals("(password OR \"password reset\" OR credential)",
+                new QueryStringBuilder().params(createSimpleParams("password")).build());
+        assertEquals("(password OR \"password reset\" OR credential)",
+                new QueryStringBuilder().params(createSimpleParams("password")).relatedQuery(true).build());
+        assertEquals("fess", new QueryStringBuilder().params(createSimpleParams("fess")).build());
+    }
+
+    @Test
+    public void test_relatedQuery_disabled() {
+        registerRelatedQueries("password", "password reset", "credential");
+        assertEquals("password", new QueryStringBuilder().params(createSimpleParams("password")).relatedQuery(false).build());
+        assertEquals("password sort:score",
+                new QueryStringBuilder().params(createSimpleParams("password")).sortField("score").relatedQuery(false).build());
+    }
+
+    private void registerRelatedQueries(final String term, final String... relatedQueries) {
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return term.equals(query) ? relatedQueries : new String[0];
+            }
+        }, "relatedQueryHelper");
+    }
+
+    @Test
     public void test_builderChaining() {
         QueryStringBuilder builder = new QueryStringBuilder();
         assertSame(builder, builder.params(createSimpleParams("test")));
         assertSame(builder, builder.sortField("score"));
         assertSame(builder, builder.escape(true));
+        assertSame(builder, builder.relatedQuery(false));
     }
 
     @Test

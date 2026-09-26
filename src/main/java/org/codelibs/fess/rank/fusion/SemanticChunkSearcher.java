@@ -213,7 +213,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         // The assembled query is not the user's words: QueryStringBuilder has appended whatever
         // the user narrowed by, so a search stops being embeddable the moment a facet is
         // clicked. Split it instead of refusing it - embed the words, filter on the rest.
-        final Split split = getQuerySplitter().split(query);
+        final Split split = getQuerySplitter().split(toSemanticQuery(query, params));
         if (split == null) {
             return OptionalThing.empty();
         }
@@ -241,6 +241,35 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         final boolean annMode = isKnnIndexReady();
         logExactMode(annMode);
         return OptionalThing.of(new SemanticQueryContext(queryVector, annMode, split.conditionFilter));
+    }
+
+    /**
+     * Returns the query string the semantic branch splits: the assembled query, rebuilt without
+     * related-query expansion when the user's query has related queries.
+     *
+     * <p>Related queries widen keyword recall. Expanded into the assembled query they turn
+     * {@code password} into {@code (password OR "password reset")}: a phrase the splitter cannot
+     * separate from the conditions, which silently drops the vector branch, or - for a one-word
+     * related query - words that drift into the embedding. The rebuild keeps everything else the
+     * user narrowed by (fields, extra queries, sort), so what the splitter accepts or rejects is
+     * otherwise unchanged.</p>
+     *
+     * @param query the assembled query string
+     * @param params the search request parameters
+     * @return the query string to split
+     */
+    protected String toSemanticQuery(final String query, final SearchRequestParams params) {
+        final String userQuery = params.getQuery();
+        if (params.hasConditionQuery() || StringUtil.isBlank(userQuery) || !ComponentUtil.hasRelatedQueryHelper()
+                || ComponentUtil.getRelatedQueryHelper().getRelatedQueries(userQuery).length == 0) {
+            return query;
+        }
+        // SearchHelper retries a query the engine rejected with its reserved characters escaped,
+        // and the searchers are not told which of the two they received. Tell them apart by
+        // rebuilding the escaped form, and rebuild the semantic query the same way.
+        final boolean escaped =
+                query.equals(ComponentUtil.getQueryStringBuilder().params(params).sortField(params.getSort()).escape(true).build());
+        return ComponentUtil.getQueryStringBuilder().params(params).sortField(params.getSort()).escape(escaped).relatedQuery(false).build();
     }
 
     /**
