@@ -64,6 +64,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -402,16 +403,14 @@ public class SearchLogHelper {
      * Gets user information.
      *
      * @param userCode The user code.
-     * @return The user information.
+     * @return The user information, or empty if the user code is blank or the user information cannot be loaded.
      */
     public OptionalEntity<UserInfo> getUserInfo(final String userCode) {
         if (StringUtil.isNotBlank(userCode)) {
             try {
                 return OptionalEntity.of(userInfoCache.get(userCode));
-            } catch (final ExecutionException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to access UserInfo cache.", e);
-                }
+            } catch (final ExecutionException | UncheckedExecutionException e) {
+                logger.warn("Failed to load the user info; continuing without it.", e.getCause());
             }
         }
         return OptionalEntity.empty();
