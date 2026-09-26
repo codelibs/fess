@@ -25,6 +25,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -36,6 +37,7 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.QueryStringBuilder;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
@@ -340,6 +342,41 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         searcher.prepare("opensearch label:\"news\"", new StubSearchRequestParams(0, 10));
         // label:"news" is noise to an embedding model
         assertEquals("opensearch", searcher.embeddedQuery);
+    }
+
+    @Test
+    public void test_prepare_embedsTheUserQueryWithoutRelatedQueries() {
+        // A related query widens keyword recall. Expanded into the assembled query it becomes
+        // (password OR "password reset"), which the splitter rejects - the vector branch used to
+        // disappear for the very term the administrator had tuned.
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return "password".equals(query) ? new String[] { "password reset" } : new String[0];
+            }
+        }, "relatedQueryHelper");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "password";
+            }
+
+            @Override
+            public java.util.Map<String, String[]> getFields() {
+                return java.util.Collections.singletonMap("label", new String[] { "news" });
+            }
+        };
+        final String assembled = ComponentUtil.getQueryStringBuilder().params(params).build();
+        assertEquals("(password OR \"password reset\") label:\"news\"", assembled);
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(assembled, params);
+        assertTrue(context.isPresent(), "a related query must not take the vector branch away");
+        assertEquals("password", searcher.embeddedQuery);
+        assertNotNull(context.get().getConditionFilter(), "the label must still narrow the semantic branch");
+        assertEquals(1, searcher.splitter.converted.size(), searcher.splitter.converted.toString());
+        assertTrue(searcher.splitter.converted.get(0).contains("news"), searcher.splitter.converted.toString());
     }
 
     @Test
