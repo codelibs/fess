@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.rank.fusion;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +29,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
@@ -521,17 +524,122 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_engineFusion_doesNotBuildTheSubQueryPastThePaginationDepth() throws Exception {
+    public void test_engineFusion_refusesAPagePastThePaginationDepth() throws Exception {
         givenEngineFusion("");
         final FusingMainSearcher main = new FusingMainSearcher();
         final CountingSubSearcher sub = new CountingSubSearcher();
         try (RankFusionProcessor processor = newEngineFusionProcessor(main, sub)) {
-            // a second page of 10 reaches past the depth of 10, so the search is fused in Fess
-            processor.search("q", fusionParams(10), OptionalThing.empty());
+            // a second page of 10 starts past the depth of 10: it is refused the way a page past
+            // index.max_result_window is, not answered with keyword-only results
+            assertThrows(InvalidQueryException.class, () -> processor.search("q", fusionParams(10), OptionalThing.empty()));
         }
         assertEquals(0, main.fusedCount.get());
-        assertEquals(0, sub.buildCount.get(), "a branch built for a search that is not fused embeds the query twice");
-        assertEquals(1, sub.searchCount.get());
+        assertEquals(0, sub.searchCount.get(), "a page past the depth must not be answered by Fess-side fusion");
+    }
+
+    @Test
+    public void test_engineFusion_buildsTheBranchWithoutAWindowOfItsOwn() throws Exception {
+        givenEngineFusion("", 1000, 10000);
+        final CountingSubSearcher sub = new CountingSubSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(), sub)) {
+            processor.search("q", fusionParams(990), OptionalThing.empty());
+        }
+        // the engine pages the fused list; sized to nothing, the semantic branch asks each shard
+        // for content_chunker.search.knn.k neighbours instead of the pagination depth
+        assertEquals(1, sub.buildCount.get());
+        assertEquals(0, sub.builtWith.getStartPosition());
+        assertEquals(0, sub.builtWith.getPageSize());
+    }
+
+    @Test
+    public void test_engineFusion_stopsThePagerAtThePaginationDepth() throws Exception {
+        givenEngineFusion("", 1000, 10000);
+        // the fused list of one shard, and of five shards whose union is larger: the pager stops
+        // at the depth either way
+        for (final int total : new int[] { 1500, 5000 }) {
+            try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(total), new CountingSubSearcher())) {
+                final QueryResponseList first = (QueryResponseList) processor.search("q", fusionParams(0), OptionalThing.empty());
+                // the count is reported as the engine counted it
+                assertEquals(total, (int) first.getAllRecordCount());
+                assertEquals(Relation.GREATER_THAN_OR_EQUAL_TO.toString(), first.getAllRecordCountRelation());
+                assertEquals(100, first.getAllPageCount());
+                assertTrue(first.isExistNextPage());
+
+                final QueryResponseList last = (QueryResponseList) processor.search("q", fusionParams(990), OptionalThing.empty());
+                assertEquals(10, last.size());
+                assertEquals(100, last.getAllPageCount());
+                assertEquals(100, last.getCurrentPageNumber());
+                assertFalse(last.isExistNextPage(), "no page is offered past the depth");
+                assertEquals("100", last.getPageNumberList().get(last.getPageNumberList().size() - 1));
+                assertEquals(1000, last.getCurrentEndRecordNumber());
+
+                assertThrows(InvalidQueryException.class, () -> processor.search("q", fusionParams(1000), OptionalThing.empty()));
+            }
+        }
+    }
+
+    @Test
+    public void test_engineFusion_countBelowTheDepthIsExact() throws Exception {
+        givenEngineFusion("", 1000, 10000);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(300), new CountingSubSearcher())) {
+            final QueryResponseList list = (QueryResponseList) processor.search("q", fusionParams(0), OptionalThing.empty());
+            assertEquals(300, list.getAllRecordCount());
+            assertEquals(Relation.EQUAL_TO.toString(), list.getAllRecordCountRelation());
+            assertEquals(30, list.getAllPageCount());
+        }
+    }
+
+    @Test
+    public void test_engineFusion_countAtTheDepthIsALowerBound() throws Exception {
+        givenEngineFusion("", 1000, 10000);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(1000), new CountingSubSearcher())) {
+            final QueryResponseList list = (QueryResponseList) processor.search("q", fusionParams(0), OptionalThing.empty());
+            // once a branch matches the depth, the engine can count fewer hits than match and
+            // still call the count exact
+            assertEquals(1000, list.getAllRecordCount());
+            assertEquals(Relation.GREATER_THAN_OR_EQUAL_TO.toString(), list.getAllRecordCountRelation());
+            assertEquals(100, list.getAllPageCount());
+        }
+    }
+
+    @Test
+    public void test_engineFusion_pagerNeverPassesTheResultWindow() throws Exception {
+        givenEngineFusion("", 20000, 10000);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(50000), new CountingSubSearcher())) {
+            final QueryResponseList list = (QueryResponseList) processor.search("q", fusionParams(0), OptionalThing.empty());
+            assertEquals(1000, list.getAllPageCount());
+            assertThrows(InvalidQueryException.class, () -> processor.search("q", fusionParams(10000), OptionalThing.empty()));
+        }
+    }
+
+    @Test
+    public void test_searchesThatAreNotFusedInTheEngineKeepTheirPager() throws Exception {
+        // engine-side fusion off: Fess fuses, and pages as far as the index lets it
+        givenEngineFusion("", 1000, 10000, false);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new TestMainSearcher(5000), new TestSubSearcher(0, 0, 0))) {
+            final QueryResponseList list = (QueryResponseList) processor.search("q", fusionParams(990), OptionalThing.empty());
+            assertEquals(500, list.getAllPageCount());
+            assertTrue(list.isExistNextPage());
+            assertEquals(Relation.EQUAL_TO.toString(), list.getAllRecordCountRelation());
+            final QueryResponseList past = (QueryResponseList) processor.search("q", fusionParams(1000), OptionalThing.empty());
+            assertEquals(10, past.size(), "a page past the depth is answered as before");
+        }
+        // on, but the search cannot be fused in the engine
+        givenEngineFusion("", 1000, 10000);
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(5000), new CountingSubSearcher())) {
+            final QueryResponseList list = (QueryResponseList) processor.search("q", sortedParams(990), OptionalThing.empty());
+            assertEquals(500, list.getAllPageCount());
+            assertTrue(list.isExistNextPage());
+        }
+        // a single searcher: no fusion at all
+        final RankFusionProcessor single = new RankFusionProcessor();
+        single.setSearcher(new TestMainSearcher(5000));
+        single.init();
+        try (single) {
+            final QueryResponseList list = (QueryResponseList) single.search("q", fusionParams(990), OptionalThing.empty());
+            assertEquals(500, list.getAllPageCount());
+            assertEquals(Relation.EQUAL_TO.toString(), list.getAllRecordCountRelation());
+        }
     }
 
     @Test
@@ -552,8 +660,8 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         givenEngineFusion("");
         final LogCapturingAppender appender = LogCapturingAppender.attach(RankFusionProcessor.class);
         try (RankFusionProcessor processor = newEngineFusionProcessor(new FusingMainSearcher(), new CountingSubSearcher())) {
-            processor.search("q", fusionParams(10), OptionalThing.empty());
-            // a page past the depth is a property of this search, not of the main searcher
+            processor.search("q", sortedParams(0), OptionalThing.empty());
+            // a sorted search is a property of this search, not of the main searcher
             assertTrue(appender.warnings().isEmpty(), appender.warnings().toString());
         } finally {
             appender.detach();
@@ -585,6 +693,20 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         };
     }
 
+    private static SearchRequestParams sortedParams(final int start) {
+        return new TestSearchRequestParams(start, 10, 0) {
+            @Override
+            public Map<String, String[]> getConditions() {
+                return Map.of();
+            }
+
+            @Override
+            public String getSort() {
+                return "last_modified.desc";
+            }
+        };
+    }
+
     private RankFusionProcessor newEngineFusionProcessor(final RankFusionSearcher main, final RankFusionSearcher sub) {
         final RankFusionProcessor processor = new RankFusionProcessor();
         processor.setSearcher(main);
@@ -594,12 +716,26 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
     }
 
     private void givenEngineFusion(final String weights) {
+        givenEngineFusion(weights, 10, 10000);
+    }
+
+    private void givenEngineFusion(final String weights, final int paginationDepth, final int maxResultWindow) {
+        givenEngineFusion(weights, paginationDepth, maxResultWindow, true);
+    }
+
+    private void givenEngineFusion(final String weights, final int paginationDepth, final int maxResultWindow,
+            final boolean engineEnabled) {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public boolean isRankFusionEngineEnabled() {
-                return true;
+                return engineEnabled;
+            }
+
+            @Override
+            public Integer getIndexerMaxResultWindowSizeAsInteger() {
+                return Integer.valueOf(maxResultWindow);
             }
 
             @Override
@@ -614,7 +750,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
             @Override
             public Integer getRankFusionPaginationDepthAsInteger() {
-                return Integer.valueOf(10);
+                return Integer.valueOf(paginationDepth);
             }
 
             @Override
@@ -662,13 +798,20 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
         final AtomicInteger fusedCount = new AtomicInteger();
 
+        private final int allRecordCount;
+
         FusingMainSearcher() {
+            this(100);
+        }
+
+        FusingMainSearcher(final int allRecordCount) {
             name = "fusing_main";
+            this.allRecordCount = allRecordCount;
         }
 
         @Override
         protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
-            return new TestMainSearcher(100).search(null, params, OptionalThing.empty());
+            return new TestMainSearcher(allRecordCount).search(null, params, OptionalThing.empty());
         }
 
         @Override
@@ -690,6 +833,8 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
         final AtomicInteger searchCount = new AtomicInteger();
 
+        SearchRequestParams builtWith;
+
         CountingSubSearcher() {
             super(100);
             name = "counting_sub";
@@ -699,6 +844,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
                 final OptionalThing<FessUserBean> userBean) {
             buildCount.incrementAndGet();
+            builtWith = params;
             return Optional.of(QueryBuilders.matchAllQuery());
         }
 

@@ -257,10 +257,11 @@ public class RankFusionProcessor implements AutoCloseable {
             }
             return null;
         }
-        final int paginationDepth = ComponentUtil.getFessConfig().getRankFusionPaginationDepthAsInteger().intValue();
-        // The branches are sized to the depth the engine ranks to, not to the requested page, so
-        // that a branch asks the shards for as many candidates as the fusion can actually use.
-        final SearchRequestParams subQueryParams = new SearchRequestParamsWrapper(params, 0, paginationDepth);
+        // A branch has no page of its own: the engine pages the fused list. Sized to nothing, the
+        // semantic branch asks each shard for content_chunker.search.knn.k neighbours rather than
+        // for rank.fusion.pagination_depth of them, which roughly doubled the latency of every
+        // fused search at a depth of 1000.
+        final SearchRequestParams subQueryParams = new SearchRequestParamsWrapper(params, 0, 0);
         final List<QueryBuilder> subQueries = new ArrayList<>(searchers.length - 1);
         for (int i = 1; i < searchers.length; i++) {
             final RankFusionSearcher searcher = searchers[i];
@@ -296,10 +297,17 @@ public class RankFusionProcessor implements AutoCloseable {
             return null;
         }
         final SearchResult searchResult = fused.get();
-        return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
-                searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
-                searchResult.isTimedOut(), searchResult.isShardFailed(), searchResult.getFacetResponse(), params.getStartPosition(),
-                params.getPageSize(), 0);
+        // The engine ranks pagination_depth results of each branch per shard, so the pager stops
+        // there. Its total is exact below the depth; at or above it, the engine can count fewer
+        // hits than match while still calling the count exact.
+        final int paginationDepth = ComponentUtil.getFessConfig().getRankFusionEnginePaginationDepth();
+        final String relation = searchResult.getAllRecordCount() >= paginationDepth ? Relation.GREATER_THAN_OR_EQUAL_TO.toString()
+                : searchResult.getAllRecordCountRelation();
+        final QueryResponseList responseList = createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
+                relation, searchResult.getQueryTime(), searchResult.isPartialResults(), searchResult.isTimedOut(),
+                searchResult.isShardFailed(), searchResult.getFacetResponse(), params.getStartPosition(), params.getPageSize(), 0);
+        responseList.limitPagedRecordCount(paginationDepth);
+        return responseList;
     }
 
     /**

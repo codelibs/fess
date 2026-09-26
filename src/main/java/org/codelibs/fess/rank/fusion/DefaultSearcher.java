@@ -29,12 +29,14 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.opensearch.query.HybridQueryBuilder;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.UserMessages;
 import org.codelibs.fesen.opensearch.OpenSearchStatusException;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.core.rest.RestStatus;
@@ -103,13 +105,14 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         if (pipeline == null) {
             return Optional.empty();
         }
+        final SearchRequestParams pageParams = toFusedPage(params);
         try {
             // The fast vector highlighter, the default one, reads no terms out of a hybrid query,
             // so the fused request names the terms to highlight itself.
             final QueryBuilder highlightQuery =
                     params.getHighlightInfo() != null ? ComponentUtil.getQueryHelper().buildHighlightQuery(query) : null;
             final SearchResult searchResult =
-                    execute(params, fuse(createSearchCondition(query, params, userBean, highlightQuery), subQueries, pipeline));
+                    execute(params, fuse(createSearchCondition(query, pageParams, userBean, highlightQuery), subQueries, pipeline));
             warnIfNotNormalized(searchResult);
             return Optional.of(searchResult);
         } catch (final RuntimeException e) {
@@ -144,6 +147,37 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             }
             return Optional.empty();
         }
+    }
+
+    /**
+     * Fits the requested page into the fused results a search can page through.
+     *
+     * <p>The engine ranks {@link #getPaginationDepth()} results of each branch per shard, so a
+     * fused search pages through that many results and no further, the same way any other search
+     * stops at {@code index.max_result_window}. A page that starts past them is refused exactly
+     * like a page past {@code index.max_result_window}, and a page that runs past them is cut
+     * short; neither is answered with keyword-only results that the pages before it did not
+     * rank.</p>
+     *
+     * @param params the search request parameters
+     * @return the parameters of the page to request
+     * @throws InvalidQueryException when the page starts past the fused results
+     */
+    protected SearchRequestParams toFusedPage(final SearchRequestParams params) {
+        final int depth = getPaginationDepth();
+        final int start = params.getStartPosition();
+        if (start >= depth) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("A fused search reached past its last page: start={}, rank.fusion.pagination_depth={}", start, depth);
+            }
+            // The engine's answer to a page past index.max_result_window, as SearchEngineClient reports it
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+                    "The page starts past the fused results.");
+        }
+        if (start + params.getPageSize() > depth) {
+            return new RankFusionProcessor.SearchRequestParamsWrapper(params, start, depth - start);
+        }
+        return params;
     }
 
     /**
@@ -286,16 +320,6 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         }
         if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null
                 || StringUtil.isNotBlank(params.getSimilarDocHash())) {
-            return false;
-        }
-        final int depth = getPaginationDepth();
-        if (params.getStartPosition() + params.getPageSize() > depth) {
-            // Beyond the depth the engine ranks to, a fused page would silently be built from a
-            // truncated set. Fall back rather than return a page nobody can explain.
-            if (logger.isDebugEnabled()) {
-                logger.debug("A search reached past rank.fusion.pagination_depth ({}), so it was answered without fusing in the "
-                        + "search engine. Raise the property to page deeper into fused results.", depth);
-            }
             return false;
         }
         return true;
@@ -542,12 +566,13 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
     }
 
     /**
-     * Returns how many results each branch contributes per shard.
+     * Returns how many results each branch contributes per shard, which is also how many fused
+     * results a search can page through.
      *
      * @return the pagination depth
      */
     protected int getPaginationDepth() {
-        return ComponentUtil.getFessConfig().getRankFusionPaginationDepthAsInteger().intValue();
+        return ComponentUtil.getFessConfig().getRankFusionEnginePaginationDepth();
     }
 
 }

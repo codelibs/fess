@@ -31,6 +31,7 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -60,7 +61,14 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     private static final int DEFAULT_RANK_CONSTANT = 20;
 
     /** The shipped rank.fusion.pagination_depth. */
-    private static final int DEFAULT_PAGINATION_DEPTH = 200;
+    private static final int DEFAULT_PAGINATION_DEPTH = 1000;
+
+    /** The shipped indexer.max.result.window.size, the default index.max_result_window. */
+    private static final int DEFAULT_MAX_RESULT_WINDOW = 10000;
+
+    private int paginationDepth = DEFAULT_PAGINATION_DEPTH;
+
+    private int maxResultWindow = DEFAULT_MAX_RESULT_WINDOW;
 
     // -------------------------------------------------------------------------------------
     //                                                                    fusion applicability
@@ -91,31 +99,78 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_isEngineFusionApplicable_declinesBeyondPaginationDepth() {
+    public void test_isEngineFusionApplicable_fusesEveryPage() {
         givenConfig(true, "rrf", "");
         final DefaultSearcher searcher = new DefaultSearcher();
         final int depth = searcher.getPaginationDepth();
         assertTrue(searcher.isEngineFusionApplicable(params(depth - 10, 10, null), List.of(subQuery("semantic_chunk"))));
-        assertFalse(searcher.isEngineFusionApplicable(params(depth, 10, null), List.of(subQuery("semantic_chunk"))),
-                "a page the engine does not rank that deep must not be answered from a fused request");
+        // a page past the depth is refused by the fused search rather than answered with
+        // keyword-only results from a different ranking
+        assertTrue(searcher.isEngineFusionApplicable(params(depth, 10, null), List.of(subQuery("semantic_chunk"))));
     }
 
     @Test
-    public void test_isEngineFusionApplicable_reportsEveryPageBeyondPaginationDepth() {
+    public void test_getPaginationDepth_isTheConfiguredDepth() {
         givenConfig(true, "rrf", "");
-        final DefaultSearcher searcher = new DefaultSearcher();
-        final int depth = searcher.getPaginationDepth();
-        final LogCapturingAppender log = LogCapturingAppender.attach(DefaultSearcher.class.getName(), Level.DEBUG);
-        try {
-            searcher.isEngineFusionApplicable(params(depth, 10, null), List.of(subQuery("semantic_chunk")));
-            searcher.isEngineFusionApplicable(params(depth, 10, null), List.of(subQuery("semantic_chunk")));
-            // an expected consequence of the configured depth, so it is reported at DEBUG, and
-            // for every such search rather than only the first one since startup
-            assertEquals(2, log.messagesAt(Level.DEBUG).stream().filter(m -> m.contains("rank.fusion.pagination_depth")).count());
-            assertTrue(log.eventsAt(Level.INFO).isEmpty(), log.renderedEvents().toString());
-        } finally {
-            log.detach();
-        }
+        assertEquals(DEFAULT_PAGINATION_DEPTH, new DefaultSearcher().getPaginationDepth());
+        paginationDepth = 200;
+        givenConfig(true, "rrf", "");
+        assertEquals(200, new DefaultSearcher().getPaginationDepth());
+    }
+
+    @Test
+    public void test_getPaginationDepth_neverExceedsTheResultWindow() {
+        // the engine rejects a hybrid query whose pagination_depth is above index.max_result_window
+        paginationDepth = 20000;
+        givenConfig(true, "rrf", "");
+        assertEquals(DEFAULT_MAX_RESULT_WINDOW, new DefaultSearcher().getPaginationDepth());
+        paginationDepth = 1000;
+        maxResultWindow = 500;
+        givenConfig(true, "rrf", "");
+        assertEquals(500, new DefaultSearcher().getPaginationDepth());
+    }
+
+    @Test
+    public void test_toFusedPage_keepsAPageWithinTheDepth() {
+        givenConfig(true, "rrf", "");
+        final SearchRequestParams first = params(0, 10, null);
+        assertSame(first, new DefaultSearcher().toFusedPage(first));
+        final SearchRequestParams last = params(DEFAULT_PAGINATION_DEPTH - 10, 10, null);
+        assertSame(last, new DefaultSearcher().toFusedPage(last), "the last page ends exactly at the depth");
+    }
+
+    @Test
+    public void test_toFusedPage_cutsAPageShortAtTheDepth() {
+        givenConfig(true, "rrf", "");
+        final SearchRequestParams page = new DefaultSearcher().toFusedPage(params(DEFAULT_PAGINATION_DEPTH - 5, 10, null));
+        assertEquals(DEFAULT_PAGINATION_DEPTH - 5, page.getStartPosition());
+        assertEquals(5, page.getPageSize(), "a fused search pages through pagination_depth results and no further");
+    }
+
+    @Test
+    public void test_toFusedPage_refusesAPagePastTheDepthLikeAPagePastTheResultWindow() {
+        givenConfig(true, "rrf", "");
+        final InvalidQueryException e = assertThrows(InvalidQueryException.class,
+                () -> new DefaultSearcher().toFusedPage(params(DEFAULT_PAGINATION_DEPTH, 10, null)));
+        // what SearchEngineClient reports when the engine refuses a page past index.max_result_window
+        final FessMessages messages = new FessMessages();
+        e.getMessageCode().message(messages);
+        assertTrue(messages.hasMessageOf(UserMessages.GLOBAL_PROPERTY_KEY, FessMessages.ERRORS_invalid_query_cannot_process),
+                "the page past the depth must be reported as the query the engine cannot process");
+    }
+
+    @Test
+    public void test_searchWithSubQueries_requestsOnlyThePagesWithinTheDepth() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        assertTrue(searcher.searchWithSubQueries("q", params(DEFAULT_PAGINATION_DEPTH - 5, 10, null), OptionalThing.empty(),
+                List.of(subQuery("semantic_chunk"))).isPresent());
+        assertEquals(5, searcher.conditionParams.getPageSize(), "the fused request must not reach past the depth");
+        assertEquals(10, searcher.executeParams.getPageSize(), "the page itself keeps its size");
+
+        assertThrows(InvalidQueryException.class, () -> searcher.searchWithSubQueries("q", params(DEFAULT_PAGINATION_DEPTH, 10, null),
+                OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        assertEquals(1, searcher.calls, "a page past the depth is refused without a request");
     }
 
     @Test
@@ -155,8 +210,8 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         final DefaultSearcher searcher = new DefaultSearcher();
         final int depth = searcher.getPaginationDepth();
         assertTrue(searcher.canFuse(params(0, 10, null), List.of("semantic_chunk")));
-        assertFalse(searcher.canFuse(params(depth, 10, null), List.of("semantic_chunk")),
-                "a page past the depth is known not to be fused before any branch is built");
+        assertTrue(searcher.canFuse(params(depth, 10, null), List.of("semantic_chunk")),
+                "a page past the depth is still a fused search, which stops at the depth");
         assertFalse(searcher.canFuse(params(0, 10, "last_modified.desc"), List.of("semantic_chunk")));
     }
 
@@ -347,6 +402,23 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         assertTrue(json.contains("\"search_pipeline\":"), json);
         assertTrue(json.contains("score-ranker-processor"), json);
         assertNotNull(builder.request().source().searchPipelineSource());
+    }
+
+    @Test
+    public void test_fuse_neverSendsADepthAboveTheResultWindow() {
+        paginationDepth = 20000;
+        givenConfig(true, "rrf", "");
+        final DefaultSearcher searcher = new DefaultSearcher();
+        final SearchRequestBuilder builder = new SearchRequestBuilder(new SearchEngineClient(), SearchAction.INSTANCE);
+        final SearchCondition<SearchRequestBuilder> base = requestBuilder -> {
+            requestBuilder.setQuery(QueryBuilders.matchQuery("content", "opensearch"));
+            return true;
+        };
+        final Map<String, Object> pipeline = searcher.buildPipelineSource(List.of("default", "semantic_chunk"));
+        assertTrue(searcher.fuse(base, List.of(subQuery("semantic_chunk")), pipeline).build(builder));
+        final String json = builder.request().source().toString().replaceAll("\\s", "");
+        // the engine rejects every request whose pagination_depth is above index.max_result_window
+        assertTrue(json.contains("\"pagination_depth\":" + DEFAULT_MAX_RESULT_WINDOW), json);
     }
 
     @Test
@@ -645,7 +717,12 @@ public class DefaultSearcherTest extends UnitFessTestCase {
 
             @Override
             public Integer getRankFusionPaginationDepthAsInteger() {
-                return Integer.valueOf(DEFAULT_PAGINATION_DEPTH);
+                return Integer.valueOf(paginationDepth);
+            }
+
+            @Override
+            public Integer getIndexerMaxResultWindowSizeAsInteger() {
+                return Integer.valueOf(maxResultWindow);
             }
 
             @Override
@@ -700,9 +777,19 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     private static class ScriptedSearcher extends DefaultSearcher {
         RuntimeException failure;
         int calls;
+        SearchRequestParams conditionParams;
+        SearchRequestParams executeParams;
+
+        @Override
+        protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
+                final OptionalThing<FessUserBean> userBean, final QueryBuilder highlightQuery) {
+            conditionParams = params;
+            return super.createSearchCondition(query, params, userBean, highlightQuery);
+        }
 
         @Override
         protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
+            executeParams = params;
             calls++;
             if (failure != null) {
                 throw failure;
