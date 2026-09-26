@@ -25,7 +25,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
-import org.codelibs.fess.app.web.search.SearchAction;
 import org.codelibs.fess.entity.RequestParameter;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.exception.SsoMessageException;
@@ -35,7 +34,6 @@ import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.UrlChain;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
@@ -56,6 +54,12 @@ public class SsoAction extends FessLoginAction {
     //                                                                            Constant
     //
     private static final Logger logger = LogManager.getLogger(SsoAction.class);
+
+    /**
+     * Where a restored search lands. The static theme serves it; the trailing slash is the URL the
+     * JSP search action had, and the theme's router treats it as {@code /search}.
+     */
+    private static final String SEARCH_PATH = "/search/";
 
     /**
      * Constructs a new SSO action.
@@ -286,14 +290,13 @@ public class SsoAction extends FessLoginAction {
                                 maxLength);
                         return OptionalThing.empty();
                     }
-                    paramList.add(encodedName);
-                    paramList.add(encoded);
+                    paramList.add(encodedName + "=" + encoded);
                 }
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Redirecting to SearchAction with parameters: {}", paramList);
+                logger.debug("Redirecting to the search page with parameters: {}", paramList);
             }
-            return OptionalThing.of(redirectWith(SearchAction.class, new UrlChain(this).params(paramList.toArray(n -> new Object[n]))));
+            return OptionalThing.of(newHtmlResponseAsRedirect(SEARCH_PATH + "?" + String.join("&", paramList)));
         }
         return OptionalThing.empty();
     }

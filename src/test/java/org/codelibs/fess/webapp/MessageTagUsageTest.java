@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
  */
 public class MessageTagUsageTest extends UnitFessTestCase {
 
-    /** Root of the JSP tree, covering both the served views and the design-editor originals. */
+    /** Root of the JSP tree the application renders. */
     private static final String WEB_INF_DIR = "src/main/webapp/WEB-INF";
 
     /** Matches a whole {@code <la:message ...>} tag, tolerating quoted attribute values. */

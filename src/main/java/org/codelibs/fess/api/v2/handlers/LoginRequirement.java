@@ -19,13 +19,12 @@ package org.codelibs.fess.api.v2.handlers;
  * Static decision table for the {@code login.required} gate on the {@code /api/v2} surface.
  *
  * <p>{@code login.required} promises that search requires a login. The v1 actions honor it
- * ({@code SearchAction}, {@code GoAction}, {@code CacheAction}, {@code ThumbnailAction},
- * {@code OsddAction}, {@code HelpAction} and {@code RootAction} all redirect to the login page),
- * but on the v2 surface only {@code /api/v2/cache/{docId}} did. Every other v2 endpoint answered
- * anonymously, so {@code GET /api/v2/search} returned every document carrying the guest role —
- * and {@code role.search.default.display.permissions} seeds exactly that role into each crawl
- * configuration created from the admin UI, so in a default installation that is the whole
- * corpus.</p>
+ * ({@code GoAction}, {@code ThumbnailAction} and {@code OsddAction} all redirect to the login
+ * page), but on the v2 surface only {@code /api/v2/cache/{docId}} did. Every other v2 endpoint
+ * answered anonymously, so {@code GET /api/v2/search} returned every document carrying the
+ * guest role — and {@code role.search.default.display.permissions} seeds exactly that role
+ * into each crawl configuration created from the admin UI, so in a default installation that
+ * is the whole corpus.</p>
  *
  * <p><strong>Default policy: a login is REQUIRED for every sub-path.</strong> Exemptions are
  * listed explicitly in {@link #requiresLogin}, so an endpoint added to

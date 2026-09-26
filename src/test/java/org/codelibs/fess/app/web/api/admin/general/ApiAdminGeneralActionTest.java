@@ -16,9 +16,6 @@
 package org.codelibs.fess.app.web.api.admin.general;
 
 import java.lang.reflect.Field;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -78,14 +75,9 @@ public class ApiAdminGeneralActionTest extends UnitFessTestCase {
     public void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         ComponentUtil.register(new LdapManager(), "ldapManager");
-        // updateConfig refreshes design files and re-reads app values, which are unrelated to the
-        // stored properties under test and pull in further components.
+        // updateConfig re-reads app values, which are unrelated to the stored properties under
+        // test and pull in further components.
         ComponentUtil.register(new SystemHelper() {
-            @Override
-            public List<Path> refreshDesignJspFiles() {
-                return Collections.emptyList();
-            }
-
             @Override
             public void updateSystemProperties() {
                 // nothing

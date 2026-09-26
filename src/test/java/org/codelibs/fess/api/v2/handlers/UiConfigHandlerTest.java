@@ -553,7 +553,7 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
     /**
      * rag_chat_enabled must be present as a boolean in the features map.
-     * Mirrors the gate used by FessSearchAction#setupHtmlData (chatClient.isAvailable()).
+     * Mirrors the availability gate the feature exposes (chatClient.isAvailable()).
      * In the unit harness ChatClient is not wired, so the value defaults to false —
      * but the key must always be present so the SPA never sees undefined.
      */

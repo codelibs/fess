@@ -65,9 +65,8 @@ import jakarta.annotation.Resource;
  * are served directly and reflect a publish immediately.</p>
  *
  * <p>This helper deliberately does not reuse {@link PluginHelper}:
- * themes live in their own namespace, carry no {@code fess-theme} prefix, and the
- * plugin installer's THEME branch handles JAR themes, which discard a static
- * theme's files.</p>
+ * themes live in their own namespace and are ZIP archives extracted into the
+ * themes directory, not jars dropped into the plugin directory.</p>
  */
 public class ThemeArtifactHelper {
 

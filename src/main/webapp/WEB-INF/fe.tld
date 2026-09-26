@@ -25,30 +25,6 @@
 
   <function>
     <description>
-      Returns a label name.
-    </description>
-    <name>labelexists</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.Boolean labelExists(java.lang.String)</function-signature>
-    <example>
-      ${fe:labelexists("value")}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns a label name.
-    </description>
-    <name>label</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String label(java.lang.String)</function-signature>
-    <example>
-      ${fe:label("value")}
-    </example>
-  </function>
-
-  <function>
-    <description>
       Returns Date from a given value.
     </description>
     <name>date</name>
@@ -61,42 +37,6 @@
 
   <function>
     <description>
-      Returns Date from a given value.
-    </description>
-    <name>parseDate</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.util.Date parseDate(java.lang.String)</function-signature>
-    <example>
-      ${fe:parseDate(doc.tstamp)}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns Date from a given value.
-    </description>
-    <name>parseDateFormat</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.util.Date parseDate(java.lang.String, java.lang.String)</function-signature>
-    <example>
-      ${fe:parseDate(doc.tstamp, "yyyy-MM-dd HH:mm:ss")}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns formatted duration from a given value.
-    </description>
-    <name>formatDuration</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String formatDuration(long)</function-signature>
-    <example>
-      ${fe:formatDuration(1234)}
-    </example>
-  </function>
-
-  <function>
-    <description>
       Returns formatted date from a given value.
     </description>
     <name>formatDate</name>
@@ -104,126 +44,6 @@
     <function-signature>java.lang.String formatDate(java.time.ZonedDateTime, java.lang.String)</function-signature>
     <example>
       ${fe:formatDate(d, 'yyyy')}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns formatted number as a file size from a given value.
-    </description>
-    <name>formatFileSize</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String formatFileSize(long)</function-signature>
-    <example>
-      ${fe:formatFileSize(doc.content_length)}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns formatted number from a given value.
-    </description>
-    <name>formatNumber</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String formatNumber(long, java.lang.String)</function-signature>
-    <example>
-      ${fe:formatNumber(doc.content_length, "###,###")}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns query parameters for paging.
-    </description>
-    <name>pagingQuery</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String pagingQuery(java.lang.String)</function-signature>
-    <example>
-      ${fe:pagingQuery("ex_q=timestamp:")}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns query parameters for Facet.
-    </description>
-    <name>facetQuery</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String facetQuery()</function-signature>
-    <example>
-      ${fe:facetQuery()}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns query parameters for More Like This.
-    </description>
-    <name>mltQuery</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String mltQuery()</function-signature>
-    <example>
-      ${fe:mltQuery()}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns query parameters for Geo.
-    </description>
-    <name>geoQuery</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String geoQuery()</function-signature>
-    <example>
-      ${fe:geoQuery()}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns a hidden form for Facet.
-    </description>
-    <name>facetForm</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String facetForm()</function-signature>
-    <example>
-      ${fe:facetForm()}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns a hidden form for More Like This.
-    </description>
-    <name>mltForm</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String mltForm()</function-signature>
-    <example>
-      ${fe:mltForm()}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns a hidden form for Geo.
-    </description>
-    <name>geoForm</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String geoForm()</function-signature>
-    <example>
-      ${fe:geoForm()}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns a list of FacetQueryView.
-    </description>
-    <name>facetQueryViewList</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.util.List facetQueryViewList()</function-signature>
-    <example>
-      ${fe:facetQueryViewList()}
     </example>
   </function>
 
@@ -260,22 +80,6 @@
   </function>
 
   <function>
-    <description>Encode Similar Document Hash.</description>
-    <name>sdh</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String sdh(java.lang.String)</function-signature>
-    <example>${fe:sdh(doc.similar_docs_hash)}</example>
-  </function>
-
-  <function>
-    <description>Concatenate strings.</description>
-    <name>join</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String join(java.lang.Object)</function-signature>
-    <example>${fe:join(values)}</example>
-  </function>
-
-  <function>
     <description>
       Returns a string resulting from replacing in an input string all occurrences
       of a "before" string into an "after" substring.
@@ -284,38 +88,6 @@
     <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
     <function-signature>java.lang.String replace(java.lang.Object, java.lang.String, java.lang.String)</function-signature>
     <example>${fe:replace(input, regex, replacement)}</example>
-  </function>
-
-  <function>
-    <description>Escape a string for safe embedding inside a JavaScript string literal.</description>
-    <name>escapeJs</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String escapeJs(java.lang.String)</function-signature>
-    <example>${fe:escapeJs(value)}</example>
-  </function>
-
-  <function>
-    <description>Format a content as code.</description>
-    <name>formatCode</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String formatCode(java.lang.String, java.lang.String, java.lang.String, java.lang.String)</function-signature>
-    <example>${fe:formatCode("L", "prettyprint", doc.mimetype, doc.content_description)}</example>
-  </function>
-
-  <function>
-    <description>Mask e-mail address.</description>
-    <name>maskEmail</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String maskEmail(java.lang.String)</function-signature>
-    <example>${fe:maskEmail(doc.content_description)}</example>
-  </function>
-
-  <function>
-    <description>Get a message from properties files.</description>
-    <name>message</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.String getMessage(java.lang.String, java.lang.String)</function-signature>
-    <example>${fe:message("labels.foobar", "default value")}</example>
   </function>
 
   <function>

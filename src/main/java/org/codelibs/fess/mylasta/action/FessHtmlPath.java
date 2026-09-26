@@ -267,6 +267,12 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/log/admin_log.jsp */
     HtmlNext path_AdminLog_AdminLogJsp = new HtmlNext("/admin/log/admin_log.jsp");
 
+    /** The path of the HTML: /admin/login/index.jsp */
+    HtmlNext path_AdminLogin_IndexJsp = new HtmlNext("/admin/login/index.jsp");
+
+    /** The path of the HTML: /admin/login/newpassword.jsp */
+    HtmlNext path_AdminLogin_NewpasswordJsp = new HtmlNext("/admin/login/newpassword.jsp");
+
     /** The path of the HTML: /admin/maintenance/admin_maintenance.jsp */
     HtmlNext path_AdminMaintenance_AdminMaintenanceJsp = new HtmlNext("/admin/maintenance/admin_maintenance.jsp");
 
@@ -402,58 +408,4 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/wizard/admin_wizard_start.jsp */
     HtmlNext path_AdminWizard_AdminWizardStartJsp = new HtmlNext("/admin/wizard/admin_wizard_start.jsp");
-
-    /** The path of the HTML: /advance.jsp */
-    HtmlNext path_AdvanceJsp = new HtmlNext("/advance.jsp");
-
-    /** The path of the HTML: /chat/chat.jsp */
-    HtmlNext path_Chat_ChatJsp = new HtmlNext("/chat/chat.jsp");
-
-    /** The path of the HTML: /error/badRequest.jsp */
-    HtmlNext path_Error_BadRequestJsp = new HtmlNext("/error/badRequest.jsp");
-
-    /** The path of the HTML: /error/busy.jsp */
-    HtmlNext path_Error_BusyJsp = new HtmlNext("/error/busy.jsp");
-
-    /** The path of the HTML: /error/error.jsp */
-    HtmlNext path_Error_ErrorJsp = new HtmlNext("/error/error.jsp");
-
-    /** The path of the HTML: /error/notFound.jsp */
-    HtmlNext path_Error_NotFoundJsp = new HtmlNext("/error/notFound.jsp");
-
-    /** The path of the HTML: /error/system.jsp */
-    HtmlNext path_Error_SystemJsp = new HtmlNext("/error/system.jsp");
-
-    /** The path of the HTML: /footer.jsp */
-    HtmlNext path_FooterJsp = new HtmlNext("/footer.jsp");
-
-    /** The path of the HTML: /header.jsp */
-    HtmlNext path_HeaderJsp = new HtmlNext("/header.jsp");
-
-    /** The path of the HTML: /help.jsp */
-    HtmlNext path_HelpJsp = new HtmlNext("/help.jsp");
-
-    /** The path of the HTML: /index.jsp */
-    HtmlNext path_IndexJsp = new HtmlNext("/index.jsp");
-
-    /** The path of the HTML: /login/index.jsp */
-    HtmlNext path_Login_IndexJsp = new HtmlNext("/login/index.jsp");
-
-    /** The path of the HTML: /login/newpassword.jsp */
-    HtmlNext path_Login_NewpasswordJsp = new HtmlNext("/login/newpassword.jsp");
-
-    /** The path of the HTML: /profile/index.jsp */
-    HtmlNext path_Profile_IndexJsp = new HtmlNext("/profile/index.jsp");
-
-    /** The path of the HTML: /search.jsp */
-    HtmlNext path_SearchJsp = new HtmlNext("/search.jsp");
-
-    /** The path of the HTML: /searchNoResult.jsp */
-    HtmlNext path_SearchNoResultJsp = new HtmlNext("/searchNoResult.jsp");
-
-    /** The path of the HTML: /searchOptions.jsp */
-    HtmlNext path_SearchOptionsJsp = new HtmlNext("/searchOptions.jsp");
-
-    /** The path of the HTML: /searchResults.jsp */
-    HtmlNext path_SearchResultsJsp = new HtmlNext("/searchResults.jsp");
 }

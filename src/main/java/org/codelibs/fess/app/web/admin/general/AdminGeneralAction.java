@@ -327,7 +327,6 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        systemHelper.refreshDesignJspFiles();
         systemHelper.updateSystemProperties();
 
         if (StringUtil.isNotBlank(form.logLevel)) {

@@ -22,7 +22,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.lastaflute.web.response.next.HtmlNext;
 
 public class VirtualHostHelperTest extends UnitFessTestCase {
 
@@ -32,51 +31,6 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         virtualHostHelper = new VirtualHostHelper();
-    }
-
-    @Test
-    public void test_getVirtualHostPath() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Tuple3<String, String, String>[] getVirtualHosts() {
-                return new Tuple3[] { new Tuple3<>("Host", "example.com", "site1"), new Tuple3<>("X-Forwarded-Host", "test.com", "site2") };
-            }
-        });
-
-        MockletHttpServletRequest request = getMockRequest();
-        HtmlNext page = new HtmlNext("/search");
-
-        // No matching host header
-        HtmlNext result = virtualHostHelper.getVirtualHostPath(page);
-        assertEquals("/search", result.getRoutingPath());
-
-        // Matching host header
-        request.addHeader("Host", "example.com");
-        result = virtualHostHelper.getVirtualHostPath(page);
-        assertEquals("/site1/search", result.getRoutingPath());
-
-        // The header remains for subsequent tests due to static request handling
-        // Different matching header added to same request
-        request.addHeader("X-Forwarded-Host", "test.com");
-        result = virtualHostHelper.getVirtualHostPath(page);
-        assertEquals("/site1/search", result.getRoutingPath()); // Still site1 due to header precedence
-    }
-
-    @Test
-    public void test_getVirtualHostBasePath() {
-        String basePath = virtualHostHelper.getVirtualHostBasePath("site1", new HtmlNext("/test"));
-        assertEquals("/site1", basePath);
-
-        basePath = virtualHostHelper.getVirtualHostBasePath("", new HtmlNext("/test"));
-        assertEquals("", basePath);
-
-        basePath = virtualHostHelper.getVirtualHostBasePath(null, new HtmlNext("/test"));
-        assertEquals("", basePath);
-
-        basePath = virtualHostHelper.getVirtualHostBasePath("  ", new HtmlNext("/test"));
-        assertEquals("", basePath); // StringUtil.isBlank considers whitespace as blank
     }
 
     @Test
@@ -193,82 +147,6 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
 
         String result = virtualHostHelper.processVirtualHost(s -> "processed_" + s, "default");
         assertEquals("default", result);
-    }
-
-    @Test
-    public void test_getVirtualHostPaths() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Tuple3<String, String, String>[] getVirtualHosts() {
-                return new Tuple3[] { new Tuple3<>("Host", "example.com", "site1"), new Tuple3<>("X-Forwarded-Host", "test.com", "site2"),
-                        new Tuple3<>("Custom-Header", "custom.value", "site3") };
-            }
-        });
-
-        String[] paths = virtualHostHelper.getVirtualHostPaths();
-        assertNotNull(paths);
-        assertEquals(3, paths.length);
-        assertEquals("/site1", paths[0]);
-        assertEquals("/site2", paths[1]);
-        assertEquals("/site3", paths[2]);
-    }
-
-    @Test
-    public void test_getVirtualHostPaths_withEmptyVirtualHosts() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Tuple3<String, String, String>[] getVirtualHosts() {
-                return new Tuple3[0];
-            }
-        });
-
-        String[] paths = virtualHostHelper.getVirtualHostPaths();
-        assertNotNull(paths);
-        assertEquals(0, paths.length);
-    }
-
-    @Test
-    public void test_getVirtualHostPath_withNullPage() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Tuple3<String, String, String>[] getVirtualHosts() {
-                return new Tuple3[] { new Tuple3<>("Host", "example.com", "site1") };
-            }
-        });
-
-        try {
-            HtmlNext result = virtualHostHelper.getVirtualHostPath(null);
-            // If it doesn't throw an exception, the test passes
-            assertTrue(true);
-        } catch (Exception e) {
-            // If it throws any exception, the test passes
-            assertTrue(true);
-        }
-    }
-
-    @Test
-    public void test_getVirtualHostPath_withComplexPath() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Tuple3<String, String, String>[] getVirtualHosts() {
-                return new Tuple3[] { new Tuple3<>("Host", "example.com", "site1/subpath") };
-            }
-        });
-
-        MockletHttpServletRequest request = getMockRequest();
-        request.addHeader("Host", "example.com");
-
-        HtmlNext page = new HtmlNext("/search/advanced");
-        HtmlNext result = virtualHostHelper.getVirtualHostPath(page);
-        assertEquals("/site1/subpath/search/advanced", result.getRoutingPath());
     }
 
     @Test

@@ -17,10 +17,10 @@ ${fe:html(true)}
 <body class="hold-transition login-page">
 	<div class="login-box">
 		<div class="login-logo">
-			<la:link href="/">
+			<a href="${fe:url('/')}">
 				<img src="${fe:url('/images/logo-top.png')}"
 					alt="<la:message key="labels.header_brand_name" />" />
-			</la:link>
+			</a>
 		</div>
 		<div class="card">
 			<div class="card-body login-card-body">
@@ -34,7 +34,7 @@ ${fe:html(true)}
 					</la:info>
 					<la:errors />
 				</div>
-				<la:form styleId="newPassword" method="post">
+				<la:form action="/login/" styleId="newPassword" method="post">
 					<div class="input-group mb-3">
 						<c:set var="ph_new_password">
 							<la:message key="labels.login.placeholder_new_password" />

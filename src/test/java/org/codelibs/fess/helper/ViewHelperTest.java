@@ -574,19 +574,6 @@ public class ViewHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getPagePath() {
-        ViewHelper viewHelper = new ViewHelper();
-        viewHelper.init();
-
-        try {
-            String pagePath = viewHelper.getPagePath("index");
-            assertNotNull(pagePath);
-        } catch (Exception e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
     public void test_createCacheContent() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -700,18 +687,6 @@ public class ViewHelperTest extends UnitFessTestCase {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
 
-        viewHelper.setUseSession(false);
-        assertFalse(viewHelper.isUseSession());
-
-        viewHelper.setUseSession(true);
-        assertTrue(viewHelper.isUseSession());
-
-        viewHelper.addInitFacetParam("key1", "value1");
-        assertEquals("key1", viewHelper.getInitFacetParamMap().get("value1"));
-
-        viewHelper.addInitGeoParam("key2", "value2");
-        assertEquals("key2", viewHelper.getInitGeoParamMap().get("value2"));
-
         FacetQueryView facetQueryView = new FacetQueryView();
         facetQueryView.setTitle("test");
         viewHelper.addFacetQueryView(facetQueryView);
@@ -730,7 +705,6 @@ public class ViewHelperTest extends UnitFessTestCase {
         viewHelper.setOriginalHighlightTagPre("<mark>");
         viewHelper.setOriginalHighlightTagPost("</mark>");
         viewHelper.setCacheTemplateName("cache");
-        viewHelper.setFacetCacheDuration(600L);
     }
 
     @Test
@@ -764,19 +738,6 @@ public class ViewHelperTest extends UnitFessTestCase {
             actionHook.godHandEpilogue(null, runtime -> {});
             assertNull(actionHook.hookBefore(null, runtime -> null));
             actionHook.hookFinally(null, runtime -> {});
-            assertTrue(true);
-        } catch (Exception e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
-    public void test_getCachedFacetResponse() {
-        ViewHelper viewHelper = new ViewHelper();
-        viewHelper.init();
-
-        try {
-            viewHelper.getCachedFacetResponse("test query");
             assertTrue(true);
         } catch (Exception e) {
             assertTrue(true);

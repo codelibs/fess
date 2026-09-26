@@ -93,8 +93,8 @@ public class UserPayloads {
      * {@code RESOLVED}, {@code PENDING} or {@code FAILED}.
      *
      * <p>No user, {@code FessUserBean.empty()} (which wraps no user) and a null state -- a session
-     * deserialized from before the field existed -- all count as {@code RESOLVED}, as they do for
-     * the JSP pages ({@code FessSearchAction.getPermissionStateMessageKey}).</p>
+     * deserialized from before the field existed -- all count as {@code RESOLVED}: a missing or
+     * not-yet-tracked state is treated as no restriction.</p>
      *
      * @param u the user bean, may be null
      * @return the state name

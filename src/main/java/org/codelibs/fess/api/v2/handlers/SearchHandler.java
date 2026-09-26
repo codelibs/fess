@@ -116,8 +116,8 @@ public class SearchHandler {
                 return;
             }
             final Map<String, Object> payload = buildPayload(params.getQuery(), data);
-            // Evaluated per search, like the JSP page's warning (FessSearchAction.hookBefore): a user
-            // whose group and role permissions are still loading or failed sees fewer results.
+            // Evaluated per search: a user whose group and role permissions are still loading or
+            // failed sees fewer results.
             final OptionalThing<FessUserBean> userBean = getSavedUserBean();
             payload.put("permission_state",
                     ComponentUtil.getV2UserPayloads().permissionState(userBean.isPresent() ? userBean.get() : null));

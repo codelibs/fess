@@ -18,7 +18,6 @@ package org.codelibs.fess.helper;
 import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -27,15 +26,11 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -51,9 +46,7 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.io.CloseableUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
@@ -62,15 +55,12 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.HighlightInfo;
-import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.taglib.function.LaFunctions;
@@ -78,7 +68,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.util.LaServletContextUtil;
 import org.codelibs.fesen.opensearch.core.common.text.Text;
 import org.codelibs.fesen.opensearch.search.fetch.subphase.highlight.HighlightField;
 
@@ -86,8 +75,6 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
@@ -161,18 +148,6 @@ public class ViewHelper {
     /** Configured highlight tag suffix */
     protected String highlightTagPost;
 
-    /** Whether to use HTTP sessions */
-    protected boolean useSession = true;
-
-    /** Cache for page paths */
-    protected final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
-
-    /** Initial facet parameter mappings */
-    protected final Map<String, String> initFacetParamMap = new HashMap<>();
-
-    /** Initial geographic parameter mappings */
-    protected final Map<String, String> initGeoParamMap = new HashMap<>();
-
     /** List of facet query views */
     protected final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
 
@@ -193,12 +168,6 @@ public class ViewHelper {
 
     /** Set of MIME types that should be displayed inline */
     protected final Set<String> inlineMimeTypeSet = new HashSet<>();
-
-    /** Cache for facet responses */
-    protected Cache<String, FacetResponse> facetCache;
-
-    /** Duration for facet cache in seconds (10 minutes) */
-    protected long facetCacheDuration = 60 * 10L;
 
     /** Length of text fragment prefix */
     protected int textFragmentPrefixLength;
@@ -253,8 +222,6 @@ public class ViewHelper {
                 logger.debug("loaded {}", facetQueryView);
             }
         }));
-
-        facetCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(facetCacheDuration, TimeUnit.SECONDS).build();
 
         textFragmentPrefixLength = fessConfig.getQueryHighlightTextFragmentPrefixLengthAsInteger();
         textFragmentSuffixLength = fessConfig.getQueryHighlightTextFragmentSuffixLengthAsInteger();
@@ -639,84 +606,6 @@ public class ViewHelper {
     }
 
     /**
-     * Gets the localized page path for a given page name.
-     * Checks for locale-specific versions before falling back to default.
-     *
-     * @param page the page name
-     * @return the localized page path
-     */
-    public String getPagePath(final String page) {
-        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
-        final String lang = locale.getLanguage();
-        final String country = locale.getCountry();
-
-        final String pathLC = getLocalizedPagePath(page, lang, country);
-        final String pLC = pageCacheMap.get(pathLC);
-        if (pLC != null) {
-            return pLC;
-        }
-        if (existsPage(pathLC)) {
-            pageCacheMap.put(pathLC, pathLC);
-            return pathLC;
-        }
-
-        final String pathL = getLocalizedPagePath(page, lang, null);
-        final String pL = pageCacheMap.get(pathL);
-        if (pL != null) {
-            return pL;
-        }
-        if (existsPage(pathL)) {
-            pageCacheMap.put(pathLC, pathL);
-            return pathL;
-        }
-
-        final String path = getLocalizedPagePath(page, null, null);
-        final String p = pageCacheMap.get(path);
-        if (p != null) {
-            return p;
-        }
-        if (existsPage(path)) {
-            pageCacheMap.put(pathLC, path);
-            return path;
-        }
-
-        return "index.jsp";
-    }
-
-    /**
-     * Constructs a localized page path with language and country.
-     *
-     * @param page the page name
-     * @param lang the language code
-     * @param country the country code
-     * @return the localized page path
-     */
-    private String getLocalizedPagePath(final String page, final String lang, final String country) {
-        final StringBuilder buf = new StringBuilder(100);
-        buf.append("/WEB-INF/view/").append(page);
-        if (StringUtil.isNotBlank(lang)) {
-            buf.append('_').append(lang);
-            if (StringUtil.isNotBlank(country)) {
-                buf.append('_').append(country);
-            }
-        }
-        buf.append(".jsp");
-        return buf.toString();
-    }
-
-    /**
-     * Checks if a page file exists at the given path.
-     *
-     * @param path the page path to check
-     * @return true if the page exists, false otherwise
-     */
-    private boolean existsPage(final String path) {
-        final String realPath = LaServletContextUtil.getServletContext().getRealPath(path);
-        final File file = new File(realPath);
-        return file.isFile();
-    }
-
-    /**
      * Creates cached content with highlighting for a document.
      * Uses Handlebars templates to render the cached content.
      *
@@ -1030,46 +919,6 @@ public class ViewHelper {
     }
 
     /**
-     * Gets a cached facet response for the given query.
-     * Creates and caches the response if not already cached.
-     *
-     * @param query the search query
-     * @return the facet response
-     * @throws FessSystemException if facet data cannot be loaded
-     */
-    public FacetResponse getCachedFacetResponse(final String query) {
-        final OptionalThing<FessUserBean> userBean = ComponentUtil.getFessLoginAssist().getSavedUserBean();
-        final String permissionKey = userBean.map(user -> StreamUtil.stream(user.getPermissions())
-                .get(stream -> stream.sorted().distinct().collect(Collectors.joining("\n")))).orElse(StringUtil.EMPTY);
-
-        try {
-            return facetCache.get(query + "\n" + permissionKey, () -> {
-                final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
-                final SearchForm params = new SearchForm() {
-                    @Override
-                    public int getPageSize() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int getStartPosition() {
-                        return 0;
-                    }
-                };
-                params.q = query;
-                final SearchRenderData data = new SearchRenderData();
-                searchHelper.search(params, data, userBean);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("loaded facet data: {}", data);
-                }
-                return data.getFacetResponse();
-            });
-        } catch (final ExecutionException e) {
-            throw new FessSystemException("Cannot load facet from cache.", e);
-        }
-    }
-
-    /**
      * Creates highlighted text from highlight field fragments.
      *
      * @param highlightField the highlight field containing fragments
@@ -1132,62 +981,6 @@ public class ViewHelper {
             }
             return new TextFragment[0];
         }).orElse(new TextFragment[0]);
-    }
-
-    /**
-     * Checks if HTTP sessions are enabled.
-     *
-     * @return true if sessions are used, false otherwise
-     */
-    public boolean isUseSession() {
-        return useSession;
-    }
-
-    /**
-     * Sets whether to use HTTP sessions.
-     *
-     * @param useSession true to enable sessions, false to disable
-     */
-    public void setUseSession(final boolean useSession) {
-        this.useSession = useSession;
-    }
-
-    /**
-     * Adds an initial facet parameter mapping.
-     *
-     * @param key the parameter key
-     * @param value the parameter value
-     */
-    public void addInitFacetParam(final String key, final String value) {
-        initFacetParamMap.put(value, key);
-    }
-
-    /**
-     * Gets the initial facet parameter mappings.
-     *
-     * @return the facet parameter map
-     */
-    public Map<String, String> getInitFacetParamMap() {
-        return initFacetParamMap;
-    }
-
-    /**
-     * Adds an initial geographic parameter mapping.
-     *
-     * @param key the parameter key
-     * @param value the parameter value
-     */
-    public void addInitGeoParam(final String key, final String value) {
-        initGeoParamMap.put(value, key);
-    }
-
-    /**
-     * Gets the initial geographic parameter mappings.
-     *
-     * @return the geographic parameter map
-     */
-    public Map<String, String> getInitGeoParamMap() {
-        return initGeoParamMap;
     }
 
     /**
@@ -1278,15 +1071,6 @@ public class ViewHelper {
      */
     public void setCacheTemplateName(final String cacheTemplateName) {
         this.cacheTemplateName = cacheTemplateName;
-    }
-
-    /**
-     * Sets the facet cache duration in seconds.
-     *
-     * @param facetCacheDuration the cache duration in seconds
-     */
-    public void setFacetCacheDuration(final long facetCacheDuration) {
-        this.facetCacheDuration = facetCacheDuration;
     }
 
     /**

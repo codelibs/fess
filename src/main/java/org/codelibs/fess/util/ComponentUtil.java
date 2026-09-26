@@ -87,7 +87,6 @@ import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ThemeArtifactHelper;
-import org.codelibs.fess.helper.ThemeHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
@@ -140,8 +139,6 @@ public final class ComponentUtil {
     private static final String LOG_NOTIFICATION_HELPER = "logNotificationHelper";
 
     private static final String SEARCH_HELPER = "searchHelper";
-
-    private static final String THEME_HELPER = "themeHelper";
 
     private static final String THEME_ARTIFACT_HELPER = "themeArtifactHelper";
 
@@ -944,14 +941,6 @@ public final class ComponentUtil {
      */
     public static PluginHelper getPluginHelper() {
         return getComponent(PLUGIN_HELPER);
-    }
-
-    /**
-     * Gets the theme helper component.
-     * @return The theme helper.
-     */
-    public static ThemeHelper getThemeHelper() {
-        return getComponent(THEME_HELPER);
     }
 
     /**

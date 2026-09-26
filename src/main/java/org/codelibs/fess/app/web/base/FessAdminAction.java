@@ -228,7 +228,7 @@ public abstract class FessAdminAction extends FessBaseAction {
      * Handles the prologue phase of action execution.
      * <p>
      * This method catches UserRoleLoginException and redirects to the
-     * appropriate action class.
+     * application root.
      * </p>
      *
      * @param runtime the action runtime context
@@ -240,7 +240,7 @@ public abstract class FessAdminAction extends FessBaseAction {
             return superGodHandPrologue(runtime);
         } catch (final UserRoleLoginException e) {
             activityHelper.accessDenied(getUserBean(), runtime.getRequestPath());
-            return redirect(e.getActionClass());
+            return redirectToRoot();
         }
     }
 

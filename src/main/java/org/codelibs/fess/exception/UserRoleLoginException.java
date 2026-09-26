@@ -15,37 +15,20 @@
  */
 package org.codelibs.fess.exception;
 
-import org.codelibs.fess.app.web.RootAction;
-
 /**
- * Exception thrown when user role authentication fails during login attempts.
- * This exception is used to indicate that a user does not have the required role
- * to access a specific action or resource.
- *
+ * Thrown when a logged-in user opens an administration page their roles do not allow.
+ * {@code FessAdminAction#godHandPrologue} records the denial and redirects the user to the
+ * application root, where the static theme serves the search page.
  */
 public class UserRoleLoginException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    /** The action class that requires specific user roles */
-    private final Class<? extends RootAction> actionClass;
-
     /**
-     * Constructs a new UserRoleLoginException with the specified action class.
-     *
-     * @param actionClass the action class that requires specific user roles
+     * Constructs a new UserRoleLoginException.
      */
-    public UserRoleLoginException(final Class<? extends RootAction> actionClass) {
-        this.actionClass = actionClass;
-    }
-
-    /**
-     * Gets the action class associated with this exception.
-     *
-     * @return the action class that requires specific user roles
-     */
-    public Class<? extends RootAction> getActionClass() {
-        return actionClass;
+    public UserRoleLoginException() {
+        // nothing
     }
 
     /**

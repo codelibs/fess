@@ -349,10 +349,11 @@ public class UiConfigHandler {
             }
 
             // eol_link / installation_link — surfaced as resolved URLs. Derivation mirrors
-            // the JSP runtime data registered by SystemHelper (setupSearchHtmlData /
-            // setupAdminHtmlData): the installation link resolves the online.help.installation
-            // template and the EOL link resolves the online.help.eol template, both via the
-            // shared SystemHelper#getHelpUrl locale/version substitution.
+            // SystemHelper's own installation/EOL link resolution (also used to register
+            // eolLink for the admin screens via setupAdminHtmlData): the installation link
+            // resolves the online.help.installation template and the EOL link resolves the
+            // online.help.eol template, both via the shared SystemHelper#getHelpUrl
+            // locale/version substitution.
             // Falls back to empty string when SystemHelper / RequestManager are unavailable.
             String eolLink = "";
             String installationLink = "";
@@ -404,11 +405,11 @@ public class UiConfigHandler {
             // B.2: login link availability flag.
             features.put("login_link", resolveLoginLink(loginLinkEnabled, ssoEnabled));
             features.put("sso_enabled", ssoEnabled);
-            // osdd_link: mirrors the JSP osddLink flag (FessSearchAction#setupHtmlData) that gates
-            // <link rel="search"> to the OpenSearch description document.
+            // osdd_link: whether an OpenSearch description document is configured, so the
+            // static theme can render <link rel="search"> only when applicable.
             features.put("osdd_link", hasOpenSearchFile());
-            // rag_chat_enabled: mirrors FessSearchAction#setupHtmlData chatClient.isAvailable()
-            // so the static-theme SPA sees the same availability gate as the legacy JSP path.
+            // rag_chat_enabled: whether the RAG chat client is available, so the static-theme
+            // SPA can gate the chat entry point accordingly.
             boolean ragChatEnabled = false;
             try {
                 final ChatClient chatClient = ComponentUtil.getComponent(ChatClient.class);
@@ -503,10 +504,10 @@ public class UiConfigHandler {
             payload.put("locales", langs == null ? java.util.List.of() : Arrays.asList(langs));
             payload.put("ui_locale", uiLocale);
             final OptionalThing<FessUserBean> userBean = getSavedUserBean();
-            // The label and sort the JSP search page pre-selects for this user (label.value /
+            // The label and sort the search UI pre-selects for this user (label.value /
             // sort.value). /api/v2/search does not apply them, so API clients see no change.
-            // The JSP page applies label.value only when it offers labels (FessSearchAction.buildFormParams),
-            // so a default for a label the user cannot see is not sent either.
+            // The default labels are sent only when label_options offers labels, so a default for
+            // a label the user cannot see is not sent either.
             payload.put("default_label_values", labelOptions.isEmpty() ? List.of() : Arrays.asList(cfg.getDefaultLabelValues(userBean)));
             payload.put("default_sort", cfg.getDefaultSortForUser(userBean));
             payload.put("theme", themePayload);

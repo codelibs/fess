@@ -372,18 +372,12 @@ public class PluginHelper {
     }
 
     /**
-     * Installs an artifact based on its type.
+     * Installs an artifact by downloading it into the plugin directory.
      *
      * @param artifact the artifact to install
      */
     public void installArtifact(final Artifact artifact) {
-        switch (artifact.getType()) {
-        case THEME -> {
-            install(artifact);
-            ComponentUtil.getThemeHelper().install(artifact);
-        }
-        default -> install(artifact);
-        }
+        install(artifact);
     }
 
     /**
@@ -446,14 +440,7 @@ public class PluginHelper {
             throw new PluginException(fileName + " does not exist.");
         }
 
-        switch (artifact.getType()) {
-        case THEME -> {
-            ComponentUtil.getThemeHelper().uninstall(artifact);
-            uninstall(fileName, jarPath);
-        }
-        default -> uninstall(fileName, jarPath);
-        }
-
+        uninstall(fileName, jarPath);
     }
 
     /**
@@ -587,8 +574,6 @@ public class PluginHelper {
     public enum ArtifactType {
         /** Data store plugins */
         DATA_STORE("fess-ds"), //
-        /** Theme plugins */
-        THEME("fess-theme"), //
         /** Ingest processor plugins */
         INGEST("fess-ingest"), //
         /** Script plugins */
@@ -649,9 +634,6 @@ public class PluginHelper {
         public static ArtifactType getType(final String name) {
             if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;
-            }
-            if (name.startsWith(THEME.getId())) {
-                return THEME;
             }
             if (name.startsWith(INGEST.getId())) {
                 return INGEST;

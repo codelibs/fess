@@ -171,35 +171,13 @@ public class FessLabelsTest extends UnitFessTestCase {
         assertEquals("{labels.logout_button}", FessLabels.LABELS_logout_button);
         assertEquals("{labels.do_you_want_to_logout}", FessLabels.LABELS_do_you_want_to_logout);
 
-        // Test profile related labels
-        assertEquals("{labels.profile}", FessLabels.LABELS_PROFILE);
-        assertEquals("{labels.profile.title}", FessLabels.LABELS_PROFILE_TITLE);
-        assertEquals("{labels.profile.update}", FessLabels.LABELS_PROFILE_UPDATE);
-        assertEquals("{labels.profile.back}", FessLabels.LABELS_PROFILE_BACK);
-        assertEquals("{labels.profile.placeholder_old_password}", FessLabels.LABELS_PROFILE_placeholder_old_password);
-        assertEquals("{labels.profile.placeholder_new_password}", FessLabels.LABELS_PROFILE_placeholder_new_password);
-        assertEquals("{labels.profile.placeholder_confirm_new_password}", FessLabels.LABELS_PROFILE_placeholder_confirm_new_password);
-
         // Test search related labels
         assertEquals("{labels.top.search}", FessLabels.LABELS_TOP_SEARCH);
-        assertEquals("{labels.index_title}", FessLabels.LABELS_index_title);
-        assertEquals("{labels.index_form_search_btn}", FessLabels.LABELS_index_form_search_btn);
-        assertEquals("{labels.index_label}", FessLabels.LABELS_index_label);
-        assertEquals("{labels.index_lang}", FessLabels.LABELS_index_lang);
-        assertEquals("{labels.index_sort}", FessLabels.LABELS_index_sort);
-        assertEquals("{labels.index_num}", FessLabels.LABELS_index_num);
 
         // Test error related labels
         assertEquals("{labels.error_title}", FessLabels.LABELS_error_title);
-        assertEquals("{labels.system_error_title}", FessLabels.LABELS_system_error_title);
-        assertEquals("{labels.contact_site_admin}", FessLabels.LABELS_contact_site_admin);
-        assertEquals("{labels.request_error_title}", FessLabels.LABELS_request_error_title);
-        assertEquals("{labels.bad_request}", FessLabels.LABELS_bad_request);
-        assertEquals("{labels.page_not_found_title}", FessLabels.LABELS_page_not_found_title);
-        assertEquals("{labels.check_url}", FessLabels.LABELS_check_url);
 
         // Test administration labels
-        assertEquals("{labels.administration}", FessLabels.LABELS_ADMINISTRATION);
         assertEquals("{labels.user_name}", FessLabels.LABELS_user_name);
         assertEquals("{labels.profile_button}", FessLabels.LABELS_profile_button);
 
@@ -293,14 +271,6 @@ public class FessLabelsTest extends UnitFessTestCase {
         assertTrue(Modifier.isStatic(field.getModifiers()));
         assertTrue(Modifier.isFinal(field.getModifiers()));
         assertEquals("{labels.login}", field.get(null));
-    }
-
-    /**
-     * Test for search options menu labels
-     */
-    @Test
-    public void test_searchOptionsMenuLabels() {
-        assertEquals("{labels.searchoptions_menu_labels}", FessLabels.LABELS_searchoptions_menu_labels);
     }
 
     /**

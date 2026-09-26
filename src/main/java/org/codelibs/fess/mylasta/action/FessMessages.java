@@ -26,18 +26,6 @@ public class FessMessages extends FessLabels {
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
 
-    /** The key of the message:  */
-    public static final String ERRORS_front_header = "{errors.front_header}";
-
-    /** The key of the message:  */
-    public static final String ERRORS_front_footer = "{errors.front_footer}";
-
-    /** The key of the message: &lt;div class="alert alert-warning"&gt; */
-    public static final String ERRORS_front_prefix = "{errors.front_prefix}";
-
-    /** The key of the message: &lt;/div&gt; */
-    public static final String ERRORS_front_suffix = "{errors.front_suffix}";
-
     /** The key of the message: &lt;ul class="has-error"&gt; */
     public static final String ERRORS_HEADER = "{errors.header}";
 
@@ -181,12 +169,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: SSO login process failed. */
     public static final String ERRORS_sso_login_error = "{errors.sso_login_error}";
-
-    /** The key of the message: Your group and role permissions are still loading, so you may see few or no results. Please search again in a moment. */
-    public static final String ERRORS_user_permissions_loading = "{errors.user_permissions_loading}";
-
-    /** The key of the message: Your group and role permissions could not be fully loaded, so you may see few or no results. Please log out and log in again, and contact your administrator if this keeps happening. */
-    public static final String ERRORS_user_permissions_unavailable = "{errors.user_permissions_unavailable}";
 
     /** The key of the message: Could not find {0}. */
     public static final String ERRORS_could_not_find_log_file = "{errors.could_not_find_log_file}";
@@ -655,62 +637,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Deleted the data. */
     public static final String SUCCESS_crud_delete_crud_table = "{success.crud_delete_crud_table}";
-
-    /**
-     * Add the created action message for the key 'errors.front_header' with parameters.
-     * <pre>
-     * message:
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontHeader(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_front_header));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_footer' with parameters.
-     * <pre>
-     * message:
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontFooter(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_front_footer));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_prefix' with parameters.
-     * <pre>
-     * message: &lt;div class="alert alert-warning"&gt;
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontPrefix(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_front_prefix));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_suffix' with parameters.
-     * <pre>
-     * message: &lt;/div&gt;
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontSuffix(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_front_suffix));
-        return this;
-    }
 
     /**
      * Add the created action message for the key 'errors.header' with parameters.
@@ -1405,34 +1331,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsSsoLoginError(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_sso_login_error));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.user_permissions_loading' with parameters.
-     * <pre>
-     * message: Your group and role permissions are still loading, so you may see few or no results. Please search again in a moment.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsUserPermissionsLoading(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_user_permissions_loading));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.user_permissions_unavailable' with parameters.
-     * <pre>
-     * message: Your group and role permissions could not be fully loaded, so you may see few or no results. Please log out and log in again, and contact your administrator if this keeps happening.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsUserPermissionsUnavailable(String property) {
-        assertPropertyNotNull(property);
-        add(property, new UserMessage(ERRORS_user_permissions_unavailable));
         return this;
     }
 

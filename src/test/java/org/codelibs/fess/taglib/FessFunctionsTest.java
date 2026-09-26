@@ -22,23 +22,6 @@ import org.junit.jupiter.api.Test;
 
 public class FessFunctionsTest extends UnitFessTestCase {
     @Test
-    public void test_formatNumber() {
-        assertEquals("0", FessFunctions.formatNumber(0, "###,###"));
-        assertEquals("1,000", FessFunctions.formatNumber(1000, "###,###"));
-        assertEquals("1,000,000", FessFunctions.formatNumber(1000000, "###,###"));
-    }
-
-    @Test
-    public void test_formatFileSize() {
-        assertEquals("0", FessFunctions.formatFileSize(0));
-        assertEquals("1000", FessFunctions.formatFileSize(1000));
-        assertEquals("976.6K", FessFunctions.formatFileSize(1000000));
-        assertEquals("953.7M", FessFunctions.formatFileSize(1000000000));
-        assertEquals("931.3G", FessFunctions.formatFileSize(1000000000000L));
-        assertEquals("909.5T", FessFunctions.formatFileSize(1000000000000000L));
-    }
-
-    @Test
     public void test_parseDate() {
         Date date;
 
@@ -62,93 +45,6 @@ public class FessFunctionsTest extends UnitFessTestCase {
 
         date = FessFunctions.parseDate("D:20040401033456-05'00'", "pdf_date");
         assertEquals("2004-04-01T08:34:56.000Z", FessFunctions.formatDate(date));
-    }
-
-    @Test
-    public void test_formatCode() {
-        String code;
-        String value;
-
-        code = "";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint\"></pre>", value);
-
-        code = "aaa";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint\">aaa</pre>", value);
-
-        code = "aaa\nbbb";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint\">aaa\nbbb</pre>", value);
-
-        code = "aaa\nbbb\nccc";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint\">aaa\nbbb\nccc</pre>", value);
-
-        code = "L10:aaa";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:10\">aaa</pre>", value);
-
-        code = "L10:aaa\nL11:bbb";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb</pre>", value);
-
-        code = "L10:aaa\nL11:bbb\nL12:ccc";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb\nccc</pre>", value);
-
-        code = "aaa\nL11:bbb\nL12:ccc";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:11\">bbb\nccc</pre>", value);
-
-        code = "L10:aaa\nL11:bbb\nL12:ccc...";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:10\">aaa\nbbb</pre>", value);
-
-        code = "aaa\nL11:bbb\nL12:ccc...";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:11\">bbb</pre>", value);
-
-        code = "aaa\nL10:";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint\">aaa</pre>", value);
-
-        code = "aaa\nL10:\nL11:ccc...";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint\">aaa\n\nccc...</pre>", value);
-
-        code = "aaa\nL10:\nL11:ccc";
-        value = FessFunctions.formatCode("L", "prettyprint", "text/plain", code);
-        assertEquals("<pre class=\"prettyprint linenums:10\">\nccc</pre>", value);
-    }
-
-    @Test
-    public void test_maskEmail() {
-        String value;
-
-        value = FessFunctions.maskEmail(null);
-        assertEquals("", value);
-
-        value = FessFunctions.maskEmail("");
-        assertEquals("", value);
-
-        value = FessFunctions.maskEmail("aaa bbb ccc");
-        assertEquals("aaa bbb ccc", value);
-
-        value = FessFunctions.maskEmail("aaa@bbb.ccc");
-        assertEquals("******@****.***", value);
-
-        value = FessFunctions.maskEmail("111.aaa@bbb.ccc");
-        assertEquals("******@****.***", value);
-
-        value = FessFunctions.maskEmail("111 aaa+@bbb.ccc 222");
-        assertEquals("111 ******@****.*** 222", value);
-
-        value = FessFunctions.maskEmail("あaaa@bbb.ccc１");
-        assertEquals("あ******@****.***１", value);
-
-        value = FessFunctions.maskEmail("<aaa@bbb.ccc>");
-        assertEquals("<******@****.***>", value);
     }
 
     @Test

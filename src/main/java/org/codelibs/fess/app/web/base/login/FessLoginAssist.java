@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.service.UserService;
-import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.FessUser;
@@ -266,7 +265,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
                 if (secured != null && user.hasRoles(secured.value())) {
                     return;
                 }
-                throw new UserRoleLoginException(RootAction.class);
+                throw new UserRoleLoginException();
             });
         }
     }

@@ -17,15 +17,16 @@ ${fe:html(true)}
 <body class="hold-transition login-page">
 	<div class="login-box">
 		<div class="login-logo">
-			<la:link href="/">
+			<a href="${fe:url('/')}">
 				<img src="${fe:url('/images/logo-top.png')}"
 					alt="<la:message key="labels.header_brand_name" />" />
-			</la:link>
+			</a>
 		</div>
+		<div class="notification">${notification}</div>
 		<div class="card">
 			<div class="card-body login-card-body">
 				<p class="login-box-msg">
-					<la:message key="labels.login.newpassword" />
+					<la:message key="labels.login" />
 				</p>
 				<%-- Message --%>
 				<div>
@@ -34,25 +35,25 @@ ${fe:html(true)}
 					</la:info>
 					<la:errors />
 				</div>
-				<la:form styleId="newPassword" method="post">
+				<la:form action="/login/" styleId="login" method="post">
 					<div class="input-group mb-3">
-						<c:set var="ph_new_password">
-							<la:message key="labels.login.placeholder_new_password" />
+						<c:set var="ph_username">
+							<la:message key="labels.login.placeholder_username" />
 						</c:set>
-						<la:password property="password" class="form-control"
-							placeholder="${ph_new_password}" />
+						<la:text property="username" styleId="username"
+							class="form-control" placeholder="${ph_username}" />
 						<div class="input-group-append">
 							<span class="input-group-text">
-								<i class="fa fa-lock fa-fw" aria-hidden="true"></i>
-							</span>
+								<i class="fa fa-user fa-fw" aria-hidden="true"></i>
+            				</span>
 						</div>
 					</div>
 					<div class="input-group mb-3">
-						<c:set var="ph_confirm_password">
-							<la:message key="labels.login.placeholder_confirm_new_password" />
+						<c:set var="ph_password">
+							<la:message key="labels.login.placeholder_password" />
 						</c:set>
-						<la:password property="confirmPassword" class="form-control"
-							placeholder="${ph_confirm_password}" />
+						<la:password property="password" class="form-control"
+							placeholder="${ph_password}" />
 						<div class="input-group-append">
 							<span class="input-group-text">
 								<i class="fa fa-lock fa-fw" aria-hidden="true"></i>
@@ -60,11 +61,11 @@ ${fe:html(true)}
 						</div>
 					</div>
 					<div class="text-center">
-						<button type="submit" name="changePassword"
+						<button type="submit" name="login"
 							class="btn btn-primary btn-block"
-							value="<la:message key="labels.login.update"/>">
-							<i class="fa fa-pencil-alt" aria-hidden="true"></i>
-							<la:message key="labels.login.update" />
+							value="<la:message key="labels.login"/>">
+							<i class="fa fa-sign-in" aria-hidden="true"></i>
+							<la:message key="labels.login" />
 						</button>
 					</div>
 				</la:form>

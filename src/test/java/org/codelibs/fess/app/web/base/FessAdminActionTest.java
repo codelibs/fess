@@ -23,10 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
@@ -398,6 +398,20 @@ public class FessAdminActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_godHandPrologue_redirectsADeniedUserToTheRoot() {
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(new ArrayList<>());
+        final FessAdminAction action =
+                createGodHandAction(spyActivityHelper, OptionalThing.of(new FessUserBean(new TestUser("taro", new String[0]))), true);
+
+        final ActionResponse response = action.godHandPrologue(new TestActionRuntime("/admin/user/"));
+
+        // The search page is the static theme at the root now; there is no RootAction to redirect to.
+        assertTrue(response instanceof HtmlResponse);
+        assertEquals("/", ((HtmlResponse) response).getRoutingPath());
+        assertTrue(((HtmlResponse) response).isRedirectTo());
+    }
+
+    @Test
     public void test_godHandPrologue_doesNotCallAccessDeniedOnNormalFlow() {
         final List<Map<String, String>> capturedLogs = new ArrayList<>();
         final ActivityHelper spyActivityHelper = createSpyActivityHelper(capturedLogs);
@@ -473,6 +487,7 @@ public class FessAdminActionTest extends UnitFessTestCase {
         return new FessAdminAction() {
             {
                 activityHelper = spyActivityHelper;
+                systemHelper = new SystemHelper();
             }
 
             @Override
@@ -488,14 +503,9 @@ public class FessAdminActionTest extends UnitFessTestCase {
             @Override
             protected ActionResponse superGodHandPrologue(final ActionRuntime runtime) {
                 if (throwException) {
-                    throw new UserRoleLoginException(RootAction.class);
+                    throw new UserRoleLoginException();
                 }
                 return ActionResponse.undefined();
-            }
-
-            @Override
-            protected HtmlResponse redirect(final Class<?> actionType) {
-                return HtmlResponse.undefined();
             }
         };
     }
