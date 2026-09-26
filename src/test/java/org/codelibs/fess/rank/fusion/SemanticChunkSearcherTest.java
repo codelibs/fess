@@ -150,6 +150,18 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_buildKnnChunkQuery_engineFusedBranchUsesTheConfiguredK() {
+        // the branch of a search fused in the engine is built with no window of its own, whatever
+        // page is requested, so k stays content_chunker.search.knn.k per shard
+        final String json = searcher
+                .buildKnnChunkQuery(new float[] { 0.1f },
+                        new RankFusionProcessor.SearchRequestParamsWrapper(new StubSearchRequestParams(990, 10), 0, 0))
+                .toString()
+                .replaceAll("\\s", "");
+        assertTrue(json.contains("\"k\":100"), json);
+    }
+
+    @Test
     public void test_resolveEngineMinScore() {
         org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper(),
                 org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());

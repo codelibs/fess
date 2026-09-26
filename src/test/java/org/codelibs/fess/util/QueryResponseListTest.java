@@ -1181,4 +1181,42 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains("facetResponse=null"));
         assertTrue(toStringResult.contains("searchQuery=null"));
     }
+
+    @Test
+    public void test_limitPagedRecordCount_stopsThePagesButKeepsTheCount() {
+        final List<Map<String, Object>> page = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            page.add(new HashMap<>());
+        }
+        final QueryResponseList first = new QueryResponseList(page, 5000, "gte", 0, false, null, 0, 10, 0);
+        assertEquals(500, first.getAllPageCount());
+        first.limitPagedRecordCount(1000);
+        assertEquals(5000, first.getAllRecordCount());
+        assertEquals(100, first.getAllPageCount());
+        assertTrue(first.isExistNextPage());
+        assertEquals(List.of("1", "2", "3", "4", "5", "6"), first.getPageNumberList());
+
+        final QueryResponseList last = new QueryResponseList(page, 5000, "gte", 0, false, null, 990, 10, 0);
+        last.limitPagedRecordCount(1000);
+        assertEquals(100, last.getCurrentPageNumber());
+        assertEquals(100, last.getAllPageCount());
+        assertFalse(last.isExistNextPage());
+        assertTrue(last.isExistPrevPage());
+        assertEquals(991, last.getCurrentStartRecordNumber());
+        assertEquals(1000, last.getCurrentEndRecordNumber());
+        assertEquals(List.of("95", "96", "97", "98", "99", "100"), last.getPageNumberList());
+    }
+
+    @Test
+    public void test_limitPagedRecordCount_aboveTheCountChangesNothing() {
+        final List<Map<String, Object>> page = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            page.add(new HashMap<>());
+        }
+        final QueryResponseList list = new QueryResponseList(page, 300, "eq", 0, false, null, 0, 10, 0);
+        list.limitPagedRecordCount(1000);
+        assertEquals(30, list.getAllPageCount());
+        assertEquals(10, list.getCurrentEndRecordNumber());
+        assertTrue(list.isExistNextPage());
+    }
 }

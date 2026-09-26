@@ -2675,4 +2675,23 @@ public interface FessProp {
         }
         return 9999999999999L;
     }
+
+    Integer getRankFusionPaginationDepthAsInteger();
+
+    Integer getIndexerMaxResultWindowSizeAsInteger();
+
+    /**
+     * Returns the pagination depth sent with a search fused in the search engine, which is also
+     * how many fused results such a search can page through.
+     *
+     * <p>This is {@code rank.fusion.pagination_depth}, but never more than
+     * {@code indexer.max.result.window.size}, the value Fess takes for the index's
+     * {@code index.max_result_window}: the search engine rejects a hybrid query whose
+     * pagination depth is above that setting.</p>
+     *
+     * @return the pagination depth for engine-side fusion
+     */
+    default int getRankFusionEnginePaginationDepth() {
+        return Math.min(getRankFusionPaginationDepthAsInteger().intValue(), getIndexerMaxResultWindowSizeAsInteger().intValue());
+    }
 }

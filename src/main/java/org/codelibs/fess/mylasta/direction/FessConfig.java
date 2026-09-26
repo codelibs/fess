@@ -1270,7 +1270,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String RANK_FUSION_COMBINATION_WEIGHTS = "rank.fusion.combination.weights";
 
-    /** The key of the configuration. e.g. 200 */
+    /** The key of the configuration. e.g. 1000 */
     String RANK_FUSION_pagination_depth = "rank.fusion.pagination_depth";
 
     /** The key of the configuration. e.g. true */
@@ -6674,7 +6674,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rank.fusion.pagination_depth'. <br>
-     * The value is, e.g. 200 <br>
+     * The value is, e.g. 1000 <br>
      * comment: How many results each searcher contributes per shard to engine-side fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -6682,7 +6682,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rank.fusion.pagination_depth' as {@link Integer}. <br>
-     * The value is, e.g. 200 <br>
+     * The value is, e.g. 1000 <br>
      * comment: How many results each searcher contributes per shard to engine-side fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
