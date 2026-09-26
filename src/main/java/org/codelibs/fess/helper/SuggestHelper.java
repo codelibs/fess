@@ -50,6 +50,7 @@ import org.codelibs.fess.suggest.constants.FieldNames;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.exception.SuggestSettingsException;
 import org.codelibs.fess.suggest.index.SuggestDeleteResponse;
+import org.codelibs.fess.suggest.index.SuggestIndexResponse;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.settings.SuggestSettingsBuilder;
@@ -198,6 +199,7 @@ public class SuggestHelper {
      */
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
         final Map<String, LocalDateTime> duplicateSessionMap = new HashMap<>();
+        final List<Throwable> failures = new ArrayList<>();
         searchLogList.stream().forEach(searchLog -> {
             if (searchLog.getHitCount() == null
                     || searchLog.getHitCount().longValue() < fessConfig.getSuggestMinHitCountAsInteger().longValue()) {
@@ -248,14 +250,34 @@ public class SuggestHelper {
                 final String[] langs = searchLog.getLanguages() == null ? new String[] {} : searchLog.getLanguages().split(",");
                 stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
                 if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
-                    suggester.indexer()
-                            .indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
-                                    tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
+                    final SuggestIndexResponse response = indexSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
+                            tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), langs);
+                    if (response.hasError()) {
+                        failures.add(response.getErrors().get(0));
+                    }
                     duplicateSessionMap.put(sessionId, requestedAt);
                 }
             }
         });
+        if (!failures.isEmpty()) {
+            logger.warn("Failed to store search words in the suggest index: failed={}", failures.size(), failures.get(0));
+        }
         refresh();
+    }
+
+    /**
+     * Stores one search word in the suggest index.
+     *
+     * @param searchWord The search word.
+     * @param fields The fields the word was searched in.
+     * @param tags The tags.
+     * @param roles The roles.
+     * @param langs The languages.
+     * @return The response of the suggest indexer.
+     */
+    protected SuggestIndexResponse indexSearchWord(final String searchWord, final String[] fields, final String[] tags,
+            final String[] roles, final String[] langs) {
+        return suggester.indexer().indexFromSearchWord(searchWord, fields, tags, roles, 1, langs);
     }
 
     /**
