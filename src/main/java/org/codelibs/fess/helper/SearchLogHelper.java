@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -190,6 +191,32 @@ public class SearchLogHelper {
     }
 
     /**
+     * Returns the related queries that QueryStringBuilder ORs into the given query, in the form
+     * the query commands record them as field logs. Those words were never typed by the user, so
+     * they must not reach the search log's field logs (and from there the suggest index).
+     * The user's own query is excluded so that it is still logged when it is also a related query.
+     *
+     * @param query The user's search query.
+     * @return The related query values to skip on the default field.
+     */
+    protected Set<String> getRelatedQueryLogValues(final String query) {
+        if (StringUtil.isBlank(query) || !ComponentUtil.hasRelatedQueryHelper()) {
+            return Collections.emptySet();
+        }
+        final String[] relatedQueries = ComponentUtil.getRelatedQueryHelper().getRelatedQueries(query);
+        if (relatedQueries.length == 0) {
+            return Collections.emptySet();
+        }
+        // QueryStringBuilder#quote replaces '"' with a space and the whitespace analyzer splits on
+        // whitespace, so a phrase is logged with its terms joined by single spaces.
+        final String userQuery = StringUtils.normalizeSpace(query.replace('"', ' '));
+        return Arrays.stream(relatedQueries)
+                .map(s -> StringUtils.normalizeSpace(s.replace('"', ' ')))
+                .filter(s -> StringUtil.isNotBlank(s) && !s.equals(userQuery))
+                .collect(Collectors.toSet());
+    }
+
+    /**
      * Builds a SearchLog from the given parameters and context, then adds it to the queue.
      *
      * @param params The search request parameters.
@@ -245,8 +272,13 @@ public class SearchLogHelper {
             final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) context.request.getAttribute(Constants.FIELD_LOGS);
             if (fieldLogMap != null) {
                 final int queryMaxLength = context.fessConfig.getQueryMaxLengthAsInteger();
+                final Set<String> relatedQueryValues = getRelatedQueryLogValues(params.getQuery());
                 for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
+                    final boolean isDefaultField = Constants.DEFAULT_FIELD.equals(logEntry.getKey());
                     for (final String value : logEntry.getValue()) {
+                        if (isDefaultField && relatedQueryValues.contains(value)) {
+                            continue;
+                        }
                         searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
                     }
                 }
