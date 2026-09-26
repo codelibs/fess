@@ -16,10 +16,14 @@
 package org.codelibs.fess.helper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -284,6 +288,92 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertFalse(searchLogHelper.searchLogQueue.isEmpty());
         final SearchLog searchLog = searchLogHelper.searchLogQueue.poll();
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLog.getAccessType());
+    }
+
+    // ===== createSearchLog field log tests =====
+
+    private List<String> createSearchLogAndGetFieldLogs(final String query, final Map<String, List<String>> fieldLogMap,
+            final String field) {
+        setMockRequestAttribute(Constants.FIELD_LOGS, fieldLogMap);
+
+        final jakarta.servlet.http.HttpServletRequest request = org.lastaflute.web.util.LaRequestUtil.getOptionalRequest().orElse(null);
+        final SearchLogHelper.SearchLogContext context = createTestContext(request);
+
+        final MockSearchRequestParams params = new MockSearchRequestParams() {
+            @Override
+            public String getQuery() {
+                return query;
+            }
+        };
+        final QueryResponseList queryResponseList = new QueryResponseList(Collections.emptyList(), 0L, "eq", 0L, false, null, 0, 10, 0);
+
+        searchLogHelper.createSearchLog(params, LocalDateTime.now(), "test-query-id", query, 0, 10, queryResponseList, context);
+
+        final SearchLog searchLog = searchLogHelper.searchLogQueue.poll();
+        assertNotNull(searchLog);
+        return searchLog.getSearchFieldLogList()
+                .stream()
+                .filter(p -> field.equals(p.getFirst()))
+                .map(Pair::getSecond)
+                .collect(Collectors.toList());
+    }
+
+    private void registerRelatedQueries(final String... relatedQueries) {
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return relatedQueries;
+            }
+        }, "relatedQueryHelper");
+    }
+
+    @Test
+    public void test_createSearchLog_fieldLogs_skipRelatedQueries() {
+        registerRelatedQueries("password reset", "pass\"word  change");
+        final Map<String, List<String>> fieldLogMap = new HashMap<>();
+        // QueryStringBuilder expands q=password into (password OR "password reset" OR "pass word change")
+        fieldLogMap.put(Constants.DEFAULT_FIELD, new ArrayList<>(List.of("password", "password reset", "pass word change")));
+        fieldLogMap.put("title", new ArrayList<>(List.of("password reset")));
+
+        assertEquals(List.of("password"), createSearchLogAndGetFieldLogs("password", fieldLogMap, Constants.DEFAULT_FIELD));
+    }
+
+    @Test
+    public void test_createSearchLog_fieldLogs_keepOtherFields() {
+        registerRelatedQueries("password reset");
+        final Map<String, List<String>> fieldLogMap = new HashMap<>();
+        fieldLogMap.put(Constants.DEFAULT_FIELD, new ArrayList<>(List.of("password", "password reset")));
+        fieldLogMap.put("title", new ArrayList<>(List.of("password reset")));
+
+        assertEquals(List.of("password reset"), createSearchLogAndGetFieldLogs("password", fieldLogMap, "title"));
+    }
+
+    @Test
+    public void test_createSearchLog_fieldLogs_keepUserQueryAlsoRelated() {
+        registerRelatedQueries("password reset", "password");
+        final Map<String, List<String>> fieldLogMap = new HashMap<>();
+        fieldLogMap.put(Constants.DEFAULT_FIELD, new ArrayList<>(List.of("password", "password reset", "password")));
+
+        assertEquals(List.of("password", "password"), createSearchLogAndGetFieldLogs("password", fieldLogMap, Constants.DEFAULT_FIELD));
+    }
+
+    @Test
+    public void test_createSearchLog_fieldLogs_noRelatedQueries() {
+        registerRelatedQueries();
+        final Map<String, List<String>> fieldLogMap = new HashMap<>();
+        fieldLogMap.put(Constants.DEFAULT_FIELD, new ArrayList<>(List.of("password", "password reset")));
+
+        assertEquals(List.of("password", "password reset"),
+                createSearchLogAndGetFieldLogs("password", fieldLogMap, Constants.DEFAULT_FIELD));
+    }
+
+    @Test
+    public void test_createSearchLog_fieldLogs_noRelatedQueryHelper() {
+        final Map<String, List<String>> fieldLogMap = new HashMap<>();
+        fieldLogMap.put(Constants.DEFAULT_FIELD, new ArrayList<>(List.of("password", "password reset")));
+
+        assertEquals(List.of("password", "password reset"),
+                createSearchLogAndGetFieldLogs("password", fieldLogMap, Constants.DEFAULT_FIELD));
     }
 
     // ===== determineAccessType direct tests =====
