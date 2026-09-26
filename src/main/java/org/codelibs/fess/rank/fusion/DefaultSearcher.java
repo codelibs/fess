@@ -35,7 +35,9 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
 import org.codelibs.fess.opensearch.query.HybridQueryBuilder;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.codelibs.fesen.opensearch.OpenSearchStatusException;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.search.builder.SearchSourceBuilder;
 
@@ -113,6 +115,16 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         } catch (final RuntimeException e) {
             final String unsupported = findUnsupportedFeature(e);
             if (unsupported == null) {
+                if (isRejectedLaterPage(params, e)) {
+                    // The engine refuses a page that starts after the last fused hit instead of
+                    // returning it empty. Fess-side fusion answers such a page with no hits and the
+                    // total, and a query that is invalid on its own fails there the same way.
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("The search engine rejected a later page of a fused request, so rank fusion is performed by Fess. "
+                                + "start={}, query={}", params.getStartPosition(), query, e);
+                    }
+                    return Optional.empty();
+                }
                 // An invalid query, a closed index or a failed shard says nothing about the next
                 // search. Leave it to the caller, which reports it exactly as it would without
                 // engine-side fusion, and keep fusing for everyone else.
@@ -155,6 +167,32 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
             }
         }
         return null;
+    }
+
+    /**
+     * Tells whether the search engine rejected a fused request for a page after the first one.
+     *
+     * <p>The engine answers a page that starts after the last fused hit, a stale link or a
+     * hand-edited offset, with a bad request rather than an empty page. The error carries no
+     * type of its own, so any bad request for a later page is answered by Fess-side fusion:
+     * it returns the empty page with the total, and fails with the same error when the query
+     * itself is invalid. Other failures, and every failure of the first page, stay with the
+     * caller.</p>
+     *
+     * @param params the search request parameters
+     * @param e the exception the fused request failed with
+     * @return true when a page after the first one was rejected as a bad request
+     */
+    protected boolean isRejectedLaterPage(final SearchRequestParams params, final Throwable e) {
+        if (params.getStartPosition() <= 0) {
+            return false;
+        }
+        for (Throwable t = e; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            if (t instanceof final OpenSearchStatusException statusException && statusException.status() == RestStatus.BAD_REQUEST) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

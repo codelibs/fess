@@ -274,6 +274,49 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         assertEquals(2, searcher.calls);
     }
 
+    @Test
+    public void test_searchWithSubQueries_pagePastTheLastHitFallsBackWithoutAnError() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        final LogCapturingAppender log = LogCapturingAppender.attach(DefaultSearcher.class.getName(), Level.INFO);
+        try {
+            // what the engine answers to a fused request whose from is past the last fused hit
+            searcher.failure = engineError("illegal_argument_exception",
+                    "Reached end of search result, increase pagination_depth value to see more results");
+            assertTrue(searcher.searchWithSubQueries("q", params(10, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                    .isEmpty(), "a page past the last hit is answered by Fess-side fusion, not reported as an invalid query");
+            searcher.failure = null;
+            assertTrue(searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                    .isPresent(), "the next search is fused again");
+            assertEquals(2, searcher.calls);
+            assertTrue(log.eventsAt(Level.WARN).isEmpty(), log.renderedEvents().toString());
+            assertTrue(log.errors().isEmpty(), log.renderedEvents().toString());
+        } finally {
+            log.detach();
+        }
+    }
+
+    @Test
+    public void test_searchWithSubQueries_laterPageFallsBackOnlyForABadRequest() {
+        givenConfig(true, "rrf", "");
+        final ScriptedSearcher searcher = new ScriptedSearcher();
+        // the bad request is told apart by its status and the page, not by its wording
+        searcher.failure = engineError("illegal_argument_exception", "any reason", RestStatus.BAD_REQUEST);
+        assertTrue(searcher.searchWithSubQueries("q", params(10, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk")))
+                .isEmpty(), "Fess-side fusion answers the page, or fails with the query's own error");
+        // the first page is never rejected for its position, so its bad request is the query's
+        assertThrows(InvalidQueryException.class,
+                () -> searcher.searchWithSubQueries("q", params(0, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        // a failure that is not a bad request is left to the caller on any page
+        searcher.failure = engineError("search_phase_execution_exception", "all shards failed", RestStatus.SERVICE_UNAVAILABLE);
+        assertThrows(InvalidQueryException.class,
+                () -> searcher.searchWithSubQueries("q", params(10, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        searcher.failure = new IllegalStateException("The keyword condition did not produce a query to fuse.");
+        assertThrows(IllegalStateException.class,
+                () -> searcher.searchWithSubQueries("q", params(10, 10, null), OptionalThing.empty(), List.of(subQuery("semantic_chunk"))));
+        assertEquals(4, searcher.calls);
+    }
+
     // -------------------------------------------------------------------------------------
     //                                                                          fused request
     //                                                                          -------------
@@ -643,8 +686,12 @@ public class DefaultSearcherTest extends UnitFessTestCase {
      * HTTP client decodes it, wrapped by SearchEngineClient.
      */
     private static InvalidQueryException engineError(final String type, final String reason) {
-        final OpenSearchStatusException cause = new OpenSearchStatusException(
-                "OpenSearch exception [type=" + type + ", reason=" + reason + "]", RestStatus.BAD_REQUEST, null);
+        return engineError(type, reason, RestStatus.BAD_REQUEST);
+    }
+
+    private static InvalidQueryException engineError(final String type, final String reason, final RestStatus status) {
+        final OpenSearchStatusException cause =
+                new OpenSearchStatusException("OpenSearch exception [type=" + type + ", reason=" + reason + "]", status, null);
         return new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
                 "Failed to process the query.", cause);
     }
