@@ -22,14 +22,21 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Set;
 
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.handlers.LoginRequirement;
+import org.codelibs.fess.api.v2.handlers.SearchHandler;
+import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.helper.AccessTokenHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.opensearch.config.exentity.AccessToken;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,6 +85,11 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
         };
         ComponentUtil.register(anonymous, "fessLoginAssist");
         ComponentUtil.setFessLoginAssist(anonymous);
+        if (!ComponentUtil.hasComponent("accessTokenHelper")) {
+            ComponentUtil.register(new AccessTokenHelper(), "accessTokenHelper");
+        }
+        // AccessTokenService#collectPermissions compares the expiry against the system clock.
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
     }
 
     @Override
@@ -143,6 +155,154 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
         assertFalse(res.body().contains("\"code\":\"auth_required\""), res.body());
     }
 
+    @Test
+    public void test_search_isServedWithValidAccessTokenWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        final boolean[] called = { false };
+        final SearchApiV2Manager manager = newManagerWithTokens();
+        manager.searchHandler = new SearchHandler() {
+            @Override
+            public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+                called[0] = true;
+                response.getWriter().write("{\"stub\":\"search\"}");
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        manager.process(request("/api/v2/search", "Bearer " + VALID_TOKEN), res, nopChain());
+        assertTrue(called[0], res.body());
+        assertEquals(200, res.status);
+        assertFalse(res.body().contains("\"code\":\"auth_required\""), res.body());
+    }
+
+    @Test
+    public void test_tokenEndpoints_passTheGateWithValidAccessTokenWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        for (final String path : new String[] { "/api/v2/documents/all", "/api/v2/suggest-words", "/api/v2/labels",
+                "/api/v2/popular-words" }) {
+            final CapturingResponse res = processWithTokens(path, "Bearer " + VALID_TOKEN);
+            // The handler needs a search engine the unit container does not provide, so it may
+            // still fail -- but never with the authentication decision.
+            assertFalse(res.body().contains("\"code\":\"auth_required\""), path + " -> " + res.body());
+        }
+    }
+
+    @Test
+    public void test_search_isRejectedWithoutAccessTokenWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        final CapturingResponse res = processWithTokens("/api/v2/search", null);
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertTrue(res.body().contains("login required"), res.body());
+    }
+
+    @Test
+    public void test_search_isRejectedWithUnregisteredAccessTokenWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        final CapturingResponse res = processWithTokens("/api/v2/search", "Bearer unregistered-token");
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertTrue(res.body().contains("invalid access token"), res.body());
+    }
+
+    @Test
+    public void test_search_isRejectedWithExpiredAccessTokenWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        final CapturingResponse res = processWithTokens("/api/v2/search", "Bearer " + EXPIRED_TOKEN);
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertTrue(res.body().contains("invalid access token"), res.body());
+    }
+
+    @Test
+    public void test_sessionOnlyEndpoints_stayGatedWithValidAccessTokenWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        for (final String path : new String[] { "/api/v2/chat", "/api/v2/favorites", "/api/v2/click", "/api/v2/cache/abc123",
+                "/api/v2/related-queries", "/api/v2/related-content", "/api/v2/auth/password" }) {
+            final CapturingResponse res = processWithTokens(path, "Bearer " + VALID_TOKEN);
+            assertEquals(401, res.status, path);
+            assertTrue(res.body().contains("login required"), path + " -> " + res.body());
+        }
+    }
+
+    @Test
+    public void test_search_isNotGatedByAccessTokenWhenLoginIsNotRequired() throws Exception {
+        setLoginRequired(false);
+        final boolean[] consulted = { false };
+        final SearchApiV2Manager manager = new SearchApiV2Manager() {
+            @Override
+            protected boolean hasValidAccessToken(final HttpServletRequest request) {
+                consulted[0] = true;
+                return false;
+            }
+        };
+        copyHandlers(manager);
+        final CapturingResponse res = new CapturingResponse();
+        manager.process(request("/api/v2/search", "Bearer " + VALID_TOKEN), res, nopChain());
+        assertFalse(consulted[0], "the gate must not look at the token when login.required is off");
+        assertFalse(res.body().contains("\"code\":\"auth_required\""), res.body());
+    }
+
+    private static final String VALID_TOKEN = "valid-token";
+
+    private static final String EXPIRED_TOKEN = "expired-token";
+
+    /**
+     * Stands in for the token index: resolves the two known tokens and refuses any other one the
+     * way {@link AccessTokenService} does. Expiry is decided by the real
+     * {@link AccessTokenService#collectPermissions}.
+     */
+    private static final AccessTokenService TOKEN_SERVICE = new AccessTokenService() {
+        @Override
+        protected OptionalEntity<Set<String>> resolvePermissions(final HttpServletRequest request, final boolean withRequestParameter) {
+            final String token = ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request);
+            if (token == null) {
+                return OptionalEntity.empty();
+            }
+            final AccessToken accessToken = new AccessToken();
+            accessToken.setPermissions(new String[] { "Rtoken-role" });
+            if (VALID_TOKEN.equals(token)) {
+                return OptionalEntity.of(collectPermissions(accessToken, request, withRequestParameter));
+            }
+            if (EXPIRED_TOKEN.equals(token)) {
+                accessToken.setExpiredTime(1L);
+                return OptionalEntity.of(collectPermissions(accessToken, request, withRequestParameter));
+            }
+            throw new org.codelibs.fess.exception.InvalidAccessTokenException("invalid_token", "The access token is not registered.");
+        }
+    };
+
+    private static SearchApiV2Manager newManagerWithTokens() {
+        final SearchApiV2Manager manager = new SearchApiV2Manager() {
+            @Override
+            protected boolean hasValidAccessToken(final HttpServletRequest request) {
+                return TOKEN_SERVICE.getTokenPermissions(request).isPresent();
+            }
+        };
+        copyHandlers(manager);
+        return manager;
+    }
+
+    private static void copyHandlers(final SearchApiV2Manager target) {
+        final SearchApiV2Manager source = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        for (final java.lang.reflect.Field field : SearchApiV2Manager.class.getDeclaredFields()) {
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            try {
+                field.setAccessible(true);
+                field.set(target, field.get(source));
+            } catch (final ReflectiveOperationException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    private CapturingResponse processWithTokens(final String servletPath, final String authorization) throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        newManagerWithTokens().process(request(servletPath, authorization), res, nopChain());
+        return res;
+    }
+
     private CapturingResponse process(final String servletPath) throws Exception {
         final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
@@ -151,7 +311,12 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
     }
 
     private static HttpServletRequest request(final String servletPath) {
+        return request(servletPath, null);
+    }
+
+    private static HttpServletRequest request(final String servletPath, final String authorization) {
         final InvocationHandler h = (proxy, method, args) -> switch (method.getName()) {
+        case "getHeader" -> "Authorization".equalsIgnoreCase((String) args[0]) ? authorization : null;
         case "getServletPath" -> servletPath;
         case "getMethod" -> "GET";
         case "getRequestURI" -> servletPath;

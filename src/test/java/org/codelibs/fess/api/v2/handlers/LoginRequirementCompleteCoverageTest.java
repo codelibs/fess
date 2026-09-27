@@ -119,4 +119,19 @@ public class LoginRequirementCompleteCoverageTest {
         Collections.sort(exempt);
         assertEquals(List.of("/auth/login", "/auth/logout", "/auth/me", "/health", "/ui/config"), exempt);
     }
+
+    @Test
+    public void test_accessTokenSetIsExactlyTheRoleFilteredEndpoints() {
+        // A regression here means an access token now opens an endpoint it did not before. The
+        // set is limited to the endpoints on which a token already decides what the caller sees.
+        final List<String> accepted = new ArrayList<>();
+        for (final String subPath : ENDPOINT_DECISIONS.keySet()) {
+            if (new LoginRequirement().acceptsAccessToken(subPath)) {
+                accepted.add(subPath);
+            }
+        }
+        Collections.sort(accepted);
+        assertEquals(List.of("/documents/all", "/labels", "/popular-words", "/search", "/suggest-words"), accepted);
+        assertTrue(!new LoginRequirement().acceptsAccessToken(null));
+    }
 }

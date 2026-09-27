@@ -78,4 +78,27 @@ public class LoginRequirement {
         default -> true;
         };
     }
+
+    /**
+     * Returns whether a registered, unexpired access token may stand in for a login on the
+     * given v2 sub-path while {@code login.required} is enabled.
+     *
+     * <p>The accepted set is the endpoints on which a token already decides what the caller
+     * sees: they resolve the caller's roles through {@code RoleQueryHelper}, which adds the
+     * token's permissions to an API request. Endpoints that act for a signed-in user (favorites,
+     * click logging, password change), generative endpoints (chat) and the cache view, which
+     * checks the session itself, keep requiring a login.</p>
+     *
+     * @param subPath the v2 sub-path (e.g. {@code /search})
+     * @return {@code true} if a valid access token satisfies the login requirement
+     */
+    public boolean acceptsAccessToken(final String subPath) {
+        if (subPath == null) {
+            return false;
+        }
+        return switch (subPath) {
+        case "/search", "/documents/all", "/suggest-words", "/labels", "/popular-words" -> true;
+        default -> false;
+        };
+    }
 }
