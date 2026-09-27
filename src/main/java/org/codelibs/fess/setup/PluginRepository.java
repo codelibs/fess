@@ -48,17 +48,19 @@ import org.xml.sax.SAXException;
 public final class PluginRepository {
 
     /**
-     * The artifact name prefixes Fess treats as plugins. Anything else in the group directory
-     * -- {@code fess} itself, {@code fess-parent} -- is not installable.
+     * The artifact name prefixes Fess treats as plugins, the ids of
+     * {@code PluginHelper.ArtifactType} other than {@code UNKNOWN}. Anything else in the group
+     * directory -- {@code fess} itself, {@code fess-parent}, the retired {@code fess-theme-*}
+     * JSP themes -- is not installable.
      */
-    private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-ingest", "fess-script", "fess-webapp", "fess-thumbnail",
-            "fess-crawler", "fess-llm", "fess-storage", "fess-sso" };
+    static final List<String> PLUGIN_PREFIXES = List.of("fess-ds", "fess-ingest", "fess-script", "fess-webapp", "fess-thumbnail",
+            "fess-crawler", "fess-llm", "fess-storage", "fess-sso");
 
     /**
      * Crawler artifacts that are libraries rather than plugins. PluginHelper hides these from
      * the admin list, and offering them here would let someone install a jar that cannot work.
      */
-    private static final Set<String> EXCLUDED = Set.of("fess-crawler", "fess-crawler-db", "fess-crawler-db-h2", "fess-crawler-db-mysql",
+    static final Set<String> EXCLUDED = Set.of("fess-crawler", "fess-crawler-db", "fess-crawler-db-h2", "fess-crawler-db-mysql",
             "fess-crawler-es", "fess-crawler-opensearch", "fess-crawler-lasta", "fess-crawler-parent", "fess-crawler-webdriver");
 
     private static final Pattern HREF = Pattern.compile("href=\"[^\"]*?([a-zA-Z0-9\\-]+)/?\"");
@@ -356,16 +358,42 @@ public final class PluginRepository {
         final Matcher matcher = HREF.matcher(html);
         while (matcher.find()) {
             final String name = matcher.group(1);
-            if (EXCLUDED.contains(name)) {
-                continue;
-            }
-            for (final String prefix : PLUGIN_PREFIXES) {
-                if (name.startsWith(prefix + "-")) {
-                    names.add(name);
-                    break;
-                }
+            if (isPlugin(name)) {
+                names.add(name);
             }
         }
         return new ArrayList<>(names);
+    }
+
+    /**
+     * Returns whether an artifact is one Fess loads as a plugin: its name carries one of the
+     * plugin prefixes, and it is not one of the crawler libraries. This is what
+     * {@code list plugins} offers and all {@code install plugin} accepts.
+     *
+     * @param artifactId the artifact name
+     * @return whether it is a plugin
+     */
+    static boolean isPlugin(final String artifactId) {
+        return !EXCLUDED.contains(artifactId) && hasPluginPrefix(artifactId);
+    }
+
+    /**
+     * Returns whether a name starts with one of the plugin prefixes followed by a hyphen. Unlike
+     * {@link #isPlugin(String)} it also takes a jar file name, which carries the version.
+     *
+     * @param name an artifact or jar file name
+     * @return whether it has a plugin prefix
+     */
+    static boolean hasPluginPrefix(final String name) {
+        return PLUGIN_PREFIXES.stream().anyMatch(prefix -> name.startsWith(prefix + "-"));
+    }
+
+    /**
+     * Describes the installable plugin names, for an error message.
+     *
+     * @return the prefixes, each followed by {@code -*}
+     */
+    static String describePluginPrefixes() {
+        return String.join(", ", PLUGIN_PREFIXES.stream().map(prefix -> prefix + "-*").toList());
     }
 }

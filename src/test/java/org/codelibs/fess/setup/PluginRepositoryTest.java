@@ -20,8 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.codelibs.fess.helper.PluginHelper;
+import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.junit.jupiter.api.Test;
 
 public class PluginRepositoryTest {
@@ -288,5 +291,46 @@ public class PluginRepositoryTest {
         final SetupException e =
                 assertThrows(SetupException.class, () -> PluginRepository.repositoryJarUrl(sources, "fess-ds-git", "15.9.0", "15.9.0"));
         assertTrue(e.getMessage().contains("plugin.repository"), e.getMessage());
+    }
+
+    /**
+     * fess-setup cannot use PluginHelper at run time (it runs with only the JDK), so it keeps its
+     * own copy of the plugin types; this pins the copy to the one the admin UI uses.
+     */
+    @Test
+    public void test_pluginPrefixes_matchTheArtifactTypesFessLoads() {
+        final List<String> webTypes =
+                Arrays.stream(ArtifactType.values()).filter(type -> type != ArtifactType.UNKNOWN).map(ArtifactType::getId).toList();
+        assertEquals(webTypes, PluginRepository.PLUGIN_PREFIXES);
+    }
+
+    @Test
+    public void test_excludedCrawlerLibraries_matchWhatTheAdminUiHides() {
+        class Helper extends PluginHelper {
+            boolean excluded(final String name) {
+                return isExcludedName(ArtifactType.getType(name), name);
+            }
+        }
+        final Helper helper = new Helper();
+        for (final String name : PluginRepository.EXCLUDED) {
+            assertTrue(helper.excluded(name), name + " is excluded by fess-setup but not by PluginHelper");
+        }
+        for (final String name : List.of("fess-crawler-playwright", "fess-crawler-smb", "fess-ds-git", "fess-crawler-db-postgresql")) {
+            assertFalse(helper.excluded(name), name);
+            assertTrue(PluginRepository.isPlugin(name), name);
+        }
+    }
+
+    @Test
+    public void test_isPlugin() {
+        assertTrue(PluginRepository.isPlugin("fess-sso-oidc"));
+        assertTrue(PluginRepository.isPlugin("fess-storage-gcs"));
+        assertFalse(PluginRepository.isPlugin("fess"));
+        assertFalse(PluginRepository.isPlugin("fess-parent"));
+        assertFalse(PluginRepository.isPlugin("fess-theme-simple"));
+        assertFalse(PluginRepository.isPlugin("fess-crawler"));
+        assertFalse(PluginRepository.isPlugin("fess-crawler-webdriver"));
+        assertFalse(PluginRepository.isPlugin("fess-ds"));
+        assertFalse(PluginRepository.isPlugin("something-else"));
     }
 }

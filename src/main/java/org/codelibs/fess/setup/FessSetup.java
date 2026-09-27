@@ -385,13 +385,26 @@ public final class FessSetup {
      * which is resolved against the plugin directory, so a separator in either would write the
      * jar somewhere else entirely.</p>
      *
+     * <p>Only a name {@code list plugins} would offer is accepted, one of the plugin types Fess
+     * loads ({@link PluginRepository#isPlugin(String)}); anything else -- {@code fess} itself,
+     * a crawler library, a retired {@code fess-theme-*} JSP theme -- would be installed and then
+     * ignored. {@code remove plugin} still takes any name, so that a jar an older release left
+     * behind can be removed.</p>
+     *
      * @param argument the argument, either {@code <name>} or {@code <name>:<version>}
      * @param defaultVersion the version {@code --version} named, or null
      * @return the plugin and its version
-     * @throws SetupException if the argument or the default version is not in that shape
+     * @throws SetupException if the argument or the default version is not in that shape, or the
+     *             argument does not name a plugin Fess loads
      */
     static PluginSpec parsePluginSpec(final String argument, final String defaultVersion) throws SetupException {
-        return parseSpec(argument, defaultVersion, "plugin", "fess-script-groovy");
+        final PluginSpec spec = parseSpec(argument, defaultVersion, "plugin", "fess-script-groovy");
+        if (!PluginRepository.isPlugin(spec.artifactId())) {
+            throw new SetupException(spec.artifactId() + " is not a plugin Fess loads; install plugin takes "
+                    + PluginRepository.describePluginPrefixes()
+                    + ". For a static theme use `fess-setup install theme <name>`; run `fess-setup list plugins` to see what is published.");
+        }
+        return spec;
     }
 
     /**

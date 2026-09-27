@@ -285,6 +285,17 @@ public class FessSetupTest {
     }
 
     @Test
+    public void test_removePlugin_stillRemovesALeftoverJspTheme() throws Exception {
+        // install plugin refuses the name, but a jar an older release left behind must still go.
+        java.nio.file.Files.writeString(tempDir.resolve("fess-theme-simple-15.8.0.jar"), "x");
+
+        assertEquals(0, run("remove", "plugin", "fess-theme-simple", "--dest", tempDir.toString()));
+
+        assertTrue(out().contains("fess-theme-simple-15.8.0.jar"), out());
+        assertTrue(!java.nio.file.Files.exists(tempDir.resolve("fess-theme-simple-15.8.0.jar")));
+    }
+
+    @Test
     public void test_list_rejectsAnUnknownTarget() {
         assertEquals(2, run("list", "widgets"));
         assertTrue(err().contains("widgets"), err());
@@ -398,6 +409,46 @@ public class FessSetupTest {
         // directory, so a separator in it would write outside that directory.
         assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec("fess-ds-git:../../evil", null));
         assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec("fess-ds-git", "../../evil"));
+    }
+
+    @Test
+    public void test_parsePluginSpec_acceptsEveryPluginType() throws SetupException {
+        for (final String name : new String[] { "fess-ds-git", "fess-ingest-langfilter", "fess-script-groovy", "fess-webapp-mcp",
+                "fess-thumbnail-pdfbox", "fess-crawler-playwright", "fess-llm-ollama", "fess-storage-s3", "fess-sso-saml" }) {
+            assertEquals(name, FessSetup.parsePluginSpec(name, null).artifactId());
+            assertEquals("15.9.0", FessSetup.parsePluginSpec(name + ":15.9.0", null).version());
+        }
+    }
+
+    @Test
+    public void test_parsePluginSpec_rejectsWhatFessDoesNotLoadAsAPlugin() {
+        for (final String name : new String[] { "fess-theme-simple", "fess-theme-simple:15.8.0", "fess", "fess:15.9.0", "fess-parent",
+                "fess-crawler", "fess-crawler-lasta", "fess-crawler-opensearch", "fess-suggest", "fess-ds", "fess-dsx-git", "opensearch",
+                "commons-io" }) {
+            final SetupException e = assertThrows(SetupException.class, () -> FessSetup.parsePluginSpec(name, null), name);
+            final String artifactId = name.contains(":") ? name.substring(0, name.indexOf(':')) : name;
+            assertTrue(e.getMessage().startsWith(artifactId + " is not a plugin Fess loads"), e.getMessage());
+            assertTrue(e.getMessage().contains("fess-ds-*"), e.getMessage());
+            assertTrue(e.getMessage().contains("fess-sso-*"), e.getMessage());
+            assertTrue(e.getMessage().contains("fess-setup install theme"), e.getMessage());
+        }
+    }
+
+    @Test
+    public void test_installPlugin_refusesANonPluginBeforeDownloadingAnything() {
+        // The first name is valid, so an install that checked names one by one would download it
+        // before reaching the second; nothing may be written to the plugin directory.
+        for (final String rejected : new String[] { "fess-theme-simple:15.8.0", "fess-parent", "fess-crawler-lasta" }) {
+            out.reset();
+            err.reset();
+            assertEquals(2, run("install", "plugin", "fess-ds-git:15.9.0", rejected, "--dest", tempDir.toString()));
+            final String[] lines = err().strip().split("\\R");
+            assertEquals(1, lines.length, err());
+            assertTrue(lines[0].startsWith("error: " + rejected.split(":")[0] + " is not a plugin Fess loads"), err());
+            assertTrue(lines[0].contains("fess-setup install theme"), err());
+            assertEquals("", out());
+            assertEquals(0, tempDir.toFile().list().length);
+        }
     }
 
     @Test
