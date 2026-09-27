@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.CacheHandler;
 import org.codelibs.fess.api.v2.handlers.ChatHandler;
@@ -43,6 +44,7 @@ import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
+import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -238,7 +240,7 @@ public class SearchApiV2Manager extends BaseApiManager {
         // the setting stopped short of the endpoint the single-page application searches with.
         // The policy table is default-deny, so an endpoint added later is gated until it is
         // explicitly listed as reachable before login.
-        if (ComponentUtil.getV2LoginRequirement().requiresLogin(sub) && isLoginRequiredForAnonymous(sub, response)) {
+        if (ComponentUtil.getV2LoginRequirement().requiresLogin(sub) && isLoginRequiredForAnonymous(sub, request, response)) {
             return;
         }
 
@@ -356,12 +358,20 @@ public class SearchApiV2Manager extends BaseApiManager {
      * misleading session-expired message for a user who is in fact signed in, and the latter
      * would open the very hole this gate closes.</p>
      *
-     * @param sub the v2 sub-path, used for logging only
+     * <p>On the endpoints where an access token decides what the caller sees (see
+     * {@link org.codelibs.fess.api.v2.handlers.LoginRequirement#acceptsAccessToken(String)}), a
+     * registered, unexpired token stands in for the login, so an API client keeps the token's
+     * permissions as it does without {@code login.required}. An unregistered or expired token is
+     * refused exactly as the dispatcher refuses it when the gate is off.</p>
+     *
+     * @param sub the v2 sub-path
+     * @param request the incoming request, read for its access token
      * @param response the response to write the error envelope to
      * @return {@code true} when an error envelope was written and dispatch must stop
      * @throws IOException if the error envelope cannot be written
      */
-    protected boolean isLoginRequiredForAnonymous(final String sub, final HttpServletResponse response) throws IOException {
+    protected boolean isLoginRequiredForAnonymous(final String sub, final HttpServletRequest request, final HttpServletResponse response)
+            throws IOException {
         try {
             if (!ComponentUtil.getFessConfig().isLoginRequired()) {
                 return false;
@@ -382,8 +392,43 @@ public class SearchApiV2Manager extends BaseApiManager {
         if (userBean.isPresent()) {
             return false;
         }
+        if (ComponentUtil.getV2LoginRequirement().acceptsAccessToken(sub)) {
+            try {
+                if (hasValidAccessToken(request)) {
+                    return false;
+                }
+            } catch (final InvalidAccessTokenException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("/api/v2 rejected the access token for {}", sub, e);
+                }
+                ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.AUTH_REQUIRED, "invalid access token");
+                return true;
+            } catch (final RuntimeException e) {
+                logger.warn("/api/v2{}: could not resolve the access token", sub, e);
+                ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2" + sub);
+                return true;
+            }
+        }
         ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.AUTH_REQUIRED, "login required");
         return true;
+    }
+
+    /**
+     * Returns whether the request carries a registered, unexpired access token.
+     *
+     * <p>Resolved through {@link AccessTokenService}, the same lookup {@code RoleQueryHelper} uses
+     * to add the token's permissions, so a token accepted here is the token whose permissions the
+     * handler later applies. A request that carries no token is answered without the lookup.</p>
+     *
+     * @param request the incoming request
+     * @return {@code true} if a valid access token is present, {@code false} if none is present
+     * @throws InvalidAccessTokenException if the token is malformed, not registered or expired
+     */
+    protected boolean hasValidAccessToken(final HttpServletRequest request) {
+        if (StringUtil.isBlank(ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request))) {
+            return false;
+        }
+        return ComponentUtil.getComponent(AccessTokenService.class).getTokenPermissions(request).isPresent();
     }
 
     /**
