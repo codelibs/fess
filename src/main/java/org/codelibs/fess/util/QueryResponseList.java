@@ -51,6 +51,9 @@ public class QueryResponseList implements List<Map<String, Object>> {
     /** The relation type for the total record count (e.g., "eq", "gte"). */
     protected String allRecordCountRelation;
 
+    /** The number of records the pages can reach, which the total record count may exceed. */
+    protected long maxPagedRecordCount = Long.MAX_VALUE;
+
     /** The total number of pages based on the page size and total record count. */
     protected int allPageCount;
 
@@ -166,7 +169,8 @@ public class QueryResponseList implements List<Map<String, Object>> {
         if (startWithOffset < 0) {
             startWithOffset = 0;
         }
-        allPageCount = (int) ((allRecordCount - 1) / pageSize) + 1;
+        final long pagedRecordCount = Math.min(allRecordCount, maxPagedRecordCount);
+        allPageCount = (int) ((pagedRecordCount - 1) / pageSize) + 1;
         currentPageNumber = start / pageSize + 1;
         // A previous page exists when the offset-adjusted start is positive, or simply
         // when we are past the first page. The second term guards the rank-fusion case
@@ -185,7 +189,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
         }
         currentStartRecordNumber = allRecordCount != 0 ? start + 1 : 0;
         currentEndRecordNumber = currentStartRecordNumber + pageSize - 1;
-        currentEndRecordNumber = allRecordCount < currentEndRecordNumber ? allRecordCount : currentEndRecordNumber;
+        currentEndRecordNumber = pagedRecordCount < currentEndRecordNumber ? pagedRecordCount : currentEndRecordNumber;
 
         final int pageRangeSize = 5;
         int startPageRangeSize = currentPageNumber - pageRangeSize;
@@ -199,6 +203,19 @@ public class QueryResponseList implements List<Map<String, Object>> {
         pageNumberList = new ArrayList<>();
         for (int i = startPageRangeSize; i <= endPageRangeSize; i++) {
             pageNumberList.add(String.valueOf(i));
+        }
+    }
+
+    /**
+     * Stops the pages at the given number of records, for a search that can page through fewer
+     * results than it counts. The total record count is left as it is.
+     *
+     * @param maxRecordCount the number of records the pages can reach
+     */
+    public void limitPagedRecordCount(final long maxRecordCount) {
+        maxPagedRecordCount = maxRecordCount;
+        if (pageSize > 0) {
+            calculatePageInfo();
         }
     }
 
