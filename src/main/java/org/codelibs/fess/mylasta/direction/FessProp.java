@@ -2440,11 +2440,32 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Set<String> set = (Set<String>) propMap.get(RATE_LIMIT_WHITELIST_IPS_SET);
         if (set == null) {
-            set = split(getRateLimitWhitelistIps(), ",")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            set = split(getRateLimitWhitelistIps(), ",").get(stream -> stream.map(String::trim)
+                    .filter(StringUtil::isNotEmpty)
+                    .map(FessProp::normalizeIpAddress)
+                    .collect(Collectors.toSet()));
             propMap.put(RATE_LIMIT_WHITELIST_IPS_SET, set);
         }
         return set;
+    }
+
+    /**
+     * Tells whether {@code ip} is one of the addresses listed in {@code rate.limit.whitelist.ips}.
+     * <p>
+     * Both sides are canonicalised first, for the same reason as {@link #isRateLimitTrustedProxy}:
+     * the shipped default lists {@code ::1}, while {@code getRemoteAddr()} reports the IPv6
+     * loopback as {@code 0:0:0:0:0:0:0:1}, so a plain string match left a client on IPv6 loopback
+     * rate limited and then blocked.
+     * </p>
+     *
+     * @param ip the client address to test, may be null
+     * @return true when the address is whitelisted
+     */
+    default boolean isRateLimitWhitelisted(final String ip) {
+        if (StringUtil.isBlank(ip)) {
+            return false;
+        }
+        return getRateLimitWhitelistIpsAsSet().contains(normalizeIpAddress(ip));
     }
 
     String getRateLimitBlockedIps();

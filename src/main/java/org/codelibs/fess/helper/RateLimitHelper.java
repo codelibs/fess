@@ -169,8 +169,7 @@ public class RateLimitHelper {
      * @return true if whitelisted
      */
     public boolean isWhitelisted(final String ip) {
-        final Set<String> whitelist = ComponentUtil.getFessConfig().getRateLimitWhitelistIpsAsSet();
-        final boolean whitelisted = whitelist.contains(ip);
+        final boolean whitelisted = ComponentUtil.getFessConfig().isRateLimitWhitelisted(ip);
         if (logger.isDebugEnabled() && whitelisted) {
             logger.debug("Whitelisted IP: ip={}", ip);
         }

@@ -230,4 +230,21 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         // Note: The actual expiration depends on the configured block duration
         assertTrue(rateLimitHelper.getBlockedIpCount() >= 0);
     }
+
+    @Test
+    public void test_isWhitelisted_ipv6LoopbackInEitherSpelling() {
+        // The default rate.limit.whitelist.ips lists "::1", while the servlet container reports
+        // the IPv6 loopback as "0:0:0:0:0:0:0:1".
+        assertTrue(rateLimitHelper.isWhitelisted("0:0:0:0:0:0:0:1"));
+        assertTrue(rateLimitHelper.isWhitelisted("::1"));
+        assertFalse(rateLimitHelper.isBlocked("0:0:0:0:0:0:0:1"));
+    }
+
+    @Test
+    public void test_isWhitelisted_ipv4Unchanged() {
+        assertTrue(rateLimitHelper.isWhitelisted("127.0.0.1"));
+        assertFalse(rateLimitHelper.isWhitelisted("192.168.1.100"));
+        assertFalse(rateLimitHelper.isWhitelisted("::2"));
+        assertFalse(rateLimitHelper.isWhitelisted(null));
+    }
 }

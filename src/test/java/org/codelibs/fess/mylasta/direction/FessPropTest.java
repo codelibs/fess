@@ -1050,6 +1050,39 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     // ------------------------------------------------------------------
+    // Rate-limit whitelist address canonicalisation
+
+    private FessConfig createWhitelistConfig(final String value) {
+        return new FessConfig.SimpleImpl() {
+            @Override
+            public String getRateLimitWhitelistIps() {
+                return value;
+            }
+        };
+    }
+
+    @Test
+    public void test_isRateLimitWhitelisted_matchesEitherIpv6LoopbackSpelling() {
+        final FessConfig config = createWhitelistConfig("127.0.0.1,::1");
+        assertTrue(config.isRateLimitWhitelisted("0:0:0:0:0:0:0:1"));
+        assertTrue(config.isRateLimitWhitelisted("::1"));
+
+        final FessConfig expanded = createWhitelistConfig("0:0:0:0:0:0:0:1");
+        assertTrue(expanded.isRateLimitWhitelisted("::1"));
+    }
+
+    @Test
+    public void test_isRateLimitWhitelisted_ipv4Unchanged() {
+        final FessConfig config = createWhitelistConfig("127.0.0.1, 192.168.1.10");
+        assertTrue(config.isRateLimitWhitelisted("127.0.0.1"));
+        assertTrue(config.isRateLimitWhitelisted("192.168.1.10"));
+        assertFalse(config.isRateLimitWhitelisted("192.168.1.11"));
+        assertFalse(config.isRateLimitWhitelisted("::1"));
+        assertFalse(config.isRateLimitWhitelisted(""));
+        assertFalse(config.isRateLimitWhitelisted(null));
+    }
+
+    // ------------------------------------------------------------------
     // Trusted-proxy address canonicalisation
 
     @Test
