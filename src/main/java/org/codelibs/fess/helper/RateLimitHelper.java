@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -169,8 +168,7 @@ public class RateLimitHelper {
      * @return true if whitelisted
      */
     public boolean isWhitelisted(final String ip) {
-        final Set<String> whitelist = ComponentUtil.getFessConfig().getRateLimitWhitelistIpsAsSet();
-        final boolean whitelisted = whitelist.contains(ip);
+        final boolean whitelisted = ComponentUtil.getFessConfig().isRateLimitWhitelisted(ip);
         if (logger.isDebugEnabled() && whitelisted) {
             logger.debug("Whitelisted IP: ip={}", ip);
         }
@@ -188,8 +186,7 @@ public class RateLimitHelper {
         }
 
         // Check statically configured blocked IPs
-        final Set<String> blockedIpSet = ComponentUtil.getFessConfig().getRateLimitBlockedIpsAsSet();
-        if (blockedIpSet.contains(ip)) {
+        if (ComponentUtil.getFessConfig().isRateLimitBlockedIp(ip)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("IP in static block list: ip={}", ip);
             }

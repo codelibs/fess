@@ -1050,6 +1050,85 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     // ------------------------------------------------------------------
+    // Rate-limit whitelist / block list address canonicalisation
+
+    private FessConfig createWhitelistConfig(final String value) {
+        // The parsed set is cached in the static propMap, so each configuration starts clean.
+        FessProp.propMap.clear();
+        return new FessConfig.SimpleImpl() {
+            @Override
+            public String getRateLimitWhitelistIps() {
+                return value;
+            }
+        };
+    }
+
+    private FessConfig createBlockedIpsConfig(final String value) {
+        FessProp.propMap.clear();
+        return new FessConfig.SimpleImpl() {
+            @Override
+            public String getRateLimitBlockedIps() {
+                return value;
+            }
+        };
+    }
+
+    @Test
+    public void test_isRateLimitWhitelisted_matchesEitherIpv6LoopbackSpelling() {
+        final FessConfig config = createWhitelistConfig("127.0.0.1,::1");
+        assertTrue(config.isRateLimitWhitelisted("0:0:0:0:0:0:0:1"));
+        assertTrue(config.isRateLimitWhitelisted("::1"));
+
+        final FessConfig expanded = createWhitelistConfig("0:0:0:0:0:0:0:1");
+        assertTrue(expanded.isRateLimitWhitelisted("::1"));
+        assertTrue(expanded.isRateLimitWhitelisted("0:0:0:0:0:0:0:1"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isRateLimitWhitelisted_ipv4Unchanged() {
+        final FessConfig config = createWhitelistConfig("127.0.0.1, 192.168.1.10");
+        assertTrue(config.isRateLimitWhitelisted("127.0.0.1"));
+        assertTrue(config.isRateLimitWhitelisted("192.168.1.10"));
+        assertFalse(config.isRateLimitWhitelisted("192.168.1.11"));
+        assertFalse(config.isRateLimitWhitelisted("::1"));
+        assertFalse(config.isRateLimitWhitelisted(""));
+        assertFalse(config.isRateLimitWhitelisted(null));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isRateLimitBlockedIp_matchesEitherIpv6LoopbackSpelling() {
+        final FessConfig compressed = createBlockedIpsConfig("::1");
+        assertTrue(compressed.isRateLimitBlockedIp("0:0:0:0:0:0:0:1"));
+        assertTrue(compressed.isRateLimitBlockedIp("::1"));
+
+        final FessConfig expanded = createBlockedIpsConfig("0:0:0:0:0:0:0:1");
+        assertTrue(expanded.isRateLimitBlockedIp("::1"));
+        assertTrue(expanded.isRateLimitBlockedIp("0:0:0:0:0:0:0:1"));
+
+        final FessConfig documentation = createBlockedIpsConfig("2001:db8::1");
+        assertTrue(documentation.isRateLimitBlockedIp("2001:db8:0:0:0:0:0:1"));
+        assertFalse(documentation.isRateLimitBlockedIp("2001:db8::2"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isRateLimitBlockedIp_ipv4UnchangedAndEmptyBlocksNothing() {
+        final FessConfig config = createBlockedIpsConfig("192.168.1.10, 10.0.0.1");
+        assertTrue(config.isRateLimitBlockedIp("192.168.1.10"));
+        assertTrue(config.isRateLimitBlockedIp("10.0.0.1"));
+        assertFalse(config.isRateLimitBlockedIp("192.168.1.11"));
+        assertFalse(config.isRateLimitBlockedIp(""));
+        assertFalse(config.isRateLimitBlockedIp(null));
+
+        final FessConfig empty = createBlockedIpsConfig("");
+        assertFalse(empty.isRateLimitBlockedIp("127.0.0.1"));
+        assertFalse(empty.isRateLimitBlockedIp("0:0:0:0:0:0:0:1"));
+        FessProp.propMap.clear();
+    }
+
+    // ------------------------------------------------------------------
     // Trusted-proxy address canonicalisation
 
     @Test
