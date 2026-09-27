@@ -41,10 +41,6 @@ import java.util.stream.Stream;
  */
 public final class FessPluginInstaller {
 
-    /** The prefixes {@code PluginHelper.ArtifactType} recognises, which is what Fess can load. */
-    private static final String[] PLUGIN_PREFIXES = { "fess-ds", "fess-ingest", "fess-script", "fess-webapp", "fess-thumbnail",
-            "fess-crawler", "fess-llm", "fess-storage", "fess-sso" };
-
     private static final String JAR = ".jar";
 
     /** Suffix of the file a download is written to until its checksum has been checked. */
@@ -243,15 +239,7 @@ public final class FessPluginInstaller {
     public static List<Path> installed(final Path directory) throws SetupException {
         return list(directory, path -> {
             final String name = path.getFileName().toString();
-            if (!name.endsWith(JAR)) {
-                return false;
-            }
-            for (final String prefix : PLUGIN_PREFIXES) {
-                if (name.startsWith(prefix + "-")) {
-                    return true;
-                }
-            }
-            return false;
+            return name.endsWith(JAR) && PluginRepository.hasPluginPrefix(name);
         });
     }
 
