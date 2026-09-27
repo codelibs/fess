@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -948,6 +949,22 @@ public class FessPropTest extends UnitFessTestCase {
 
         // Asterisk injection attempt
         assertEquals("cn=dev\\2a,ou=groups,dc=example,dc=com", fessConfig.getLdapAdminGroupSecurityPrincipal("dev*"));
+    }
+
+    @Test
+    public void test_getCrawlerMetadataNameMapping_markdownFrontMatterTitle() {
+        // The Markdown extractor reports a front matter "title:" as frontmatter.title; without a
+        // mapping the document fell back to its file name as the title.
+        FessProp.propMap.clear();
+        // The container's configuration is loaded from the shipped fess_config.properties.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Tuple3<String, String, String> mapping = fessConfig.getCrawlerMetadataNameMapping("frontmatter.title");
+        assertNotNull(mapping);
+        assertEquals("title", mapping.getValue1());
+        assertEquals("string", mapping.getValue2());
+        assertNotNull(fessConfig.getCrawlerMetadataNameMapping("dc:title"));
+        assertNull(fessConfig.getCrawlerMetadataNameMapping("frontmatter.author"));
+        FessProp.propMap.clear();
     }
 
     @Test
