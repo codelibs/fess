@@ -2474,11 +2474,30 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Set<String> set = (Set<String>) propMap.get(RATE_LIMIT_BLOCKED_IPS_SET);
         if (set == null) {
-            set = split(getRateLimitBlockedIps(), ",")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            set = split(getRateLimitBlockedIps(), ",").get(stream -> stream.map(String::trim)
+                    .filter(StringUtil::isNotEmpty)
+                    .map(FessProp::normalizeIpAddress)
+                    .collect(Collectors.toSet()));
             propMap.put(RATE_LIMIT_BLOCKED_IPS_SET, set);
         }
         return set;
+    }
+
+    /**
+     * Tells whether {@code ip} is one of the addresses listed in {@code rate.limit.blocked.ips}.
+     * <p>
+     * Both sides are canonicalised first, as in {@link #isRateLimitWhitelisted}, so an IPv6 address
+     * is blocked however it is spelled in the configuration or by {@code getRemoteAddr()}.
+     * </p>
+     *
+     * @param ip the client address to test, may be null
+     * @return true when the address is statically blocked
+     */
+    default boolean isRateLimitBlockedIp(final String ip) {
+        if (StringUtil.isBlank(ip)) {
+            return false;
+        }
+        return getRateLimitBlockedIpsAsSet().contains(normalizeIpAddress(ip));
     }
 
     /** Matches a dotted-quad, so only real IPv4 literals reach InetAddress. */

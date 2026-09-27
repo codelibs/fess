@@ -15,7 +15,10 @@
  */
 package org.codelibs.fess.helper;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -246,5 +249,32 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertFalse(rateLimitHelper.isWhitelisted("192.168.1.100"));
         assertFalse(rateLimitHelper.isWhitelisted("::2"));
         assertFalse(rateLimitHelper.isWhitelisted(null));
+    }
+
+    @Test
+    public void test_isBlocked_staticBlockListMatchesEitherIpv6Spelling() {
+        final FessConfig original = ComponentUtil.getFessConfig();
+        FessProp.propMap.clear();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getRateLimitWhitelistIps() {
+                return "127.0.0.1";
+            }
+
+            @Override
+            public String getRateLimitBlockedIps() {
+                return "::1,2001:db8:0:0:0:0:0:5";
+            }
+        });
+        try {
+            assertTrue(rateLimitHelper.isBlocked("0:0:0:0:0:0:0:1"));
+            assertTrue(rateLimitHelper.isBlocked("::1"));
+            assertTrue(rateLimitHelper.isBlocked("2001:db8::5"));
+            assertFalse(rateLimitHelper.isBlocked("2001:db8::6"));
+            assertFalse(rateLimitHelper.isBlocked("127.0.0.1"));
+        } finally {
+            ComponentUtil.setFessConfig(original);
+            FessProp.propMap.clear();
+        }
     }
 }
