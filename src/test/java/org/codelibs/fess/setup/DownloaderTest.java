@@ -210,4 +210,70 @@ public class DownloaderTest {
         final SetupException e = assertThrows(SetupException.class, () -> Downloader.readStringIfPresent(uri("/broken")));
         assertTrue(e.getMessage().contains("500"), e.getMessage());
     }
+
+    @Test
+    public void test_readString_readsAFileUrl() throws Exception {
+        final Path file = Files.writeString(tempDir.resolve("maven-metadata.xml"), "<metadata/>");
+        assertEquals("<metadata/>", Downloader.readString(file.toUri()));
+    }
+
+    @Test
+    public void test_readString_failsOnAMissingFileUrl() {
+        final SetupException e =
+                assertThrows(SetupException.class, () -> Downloader.readString(tempDir.resolve("maven-metadata.xml").toUri()));
+        assertTrue(e.getMessage().contains("no such file"), e.getMessage());
+    }
+
+    @Test
+    public void test_readStringIfPresent_returnsNullForAMissingFileUrl() throws Exception {
+        assertNull(Downloader.readStringIfPresent(tempDir.resolve("fess-ds-git-15.9.0.jar.sha1").toUri()));
+    }
+
+    @Test
+    public void test_readString_listsADirectoryLikeAWebServerIndex() throws Exception {
+        Files.createDirectories(tempDir.resolve("fess-ds-git"));
+        Files.writeString(tempDir.resolve("maven-metadata.xml"), "<metadata/>");
+        assertEquals("<a href=\"fess-ds-git/\">fess-ds-git/</a>\n<a href=\"maven-metadata.xml\">maven-metadata.xml</a>\n",
+                Downloader.readString(tempDir.toUri()));
+    }
+
+    @Test
+    public void test_download_copiesAFileUrl() throws Exception {
+        final Path source = Files.write(tempDir.resolve("source.bin"), BODY);
+        final Path dest = tempDir.resolve("out").resolve("payload.bin");
+        final long[] last = { -1L, -1L };
+        Downloader.download(source.toUri(), dest, (bytes, total) -> {
+            last[0] = bytes;
+            last[1] = total;
+        });
+        assertArrayEquals(BODY, Files.readAllBytes(dest));
+        assertEquals(BODY.length, last[0]);
+        assertEquals(BODY.length, last[1]);
+        assertFalse(Files.exists(tempDir.resolve("out").resolve("payload.bin.part")));
+    }
+
+    @Test
+    public void test_downloadIfPresent_returnsNullForAMissingFileUrl() throws Exception {
+        final Path dest = tempDir.resolve("payload.bin");
+        assertNull(Downloader.downloadIfPresent(tempDir.resolve("missing.jar").toUri(), dest, NO_PROGRESS));
+        assertFalse(Files.exists(dest));
+    }
+
+    @Test
+    public void test_download_failsOnAMissingFileUrl() {
+        final Path dest = tempDir.resolve("payload.bin");
+        final SetupException e =
+                assertThrows(SetupException.class, () -> Downloader.download(tempDir.resolve("missing.jar").toUri(), dest));
+        assertTrue(e.getMessage().contains("no such file"), e.getMessage());
+    }
+
+    @Test
+    public void test_download_refusesAnUnsupportedScheme() {
+        // HttpClient throws an unchecked IllegalArgumentException for these, which used to reach
+        // the user as a stack trace.
+        final Path dest = tempDir.resolve("payload.bin");
+        final SetupException e = assertThrows(SetupException.class, () -> Downloader.download(URI.create("ftp://example.com/a.jar"), dest));
+        assertTrue(e.getMessage().contains("only http, https and file URLs"), e.getMessage());
+        assertThrows(SetupException.class, () -> Downloader.readString(URI.create("repository/maven-metadata.xml")));
+    }
 }

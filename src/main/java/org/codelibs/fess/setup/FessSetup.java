@@ -86,7 +86,8 @@ public final class FessSetup {
                   installs the snapshots of its own line as well, and prefers them.
                   Every jar is checked against the SHA-1 the Maven repository publishes.
                   --repository takes every version, jar and checksum from one repository,
-                  GitHub included.
+                  GitHub included. A file:/// URL names a copy of the repository on this
+                  machine, for a server with no route to the Internet.
 
               install theme <name>[:<version>]... [--version <version>] [--repository <url>]
                   Install static themes, for example docuforge or voicebox.

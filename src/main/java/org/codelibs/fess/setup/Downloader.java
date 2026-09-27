@@ -22,14 +22,17 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 /**
  * Downloads an artifact to a local file.
@@ -37,6 +40,13 @@ import java.util.Locale;
  * <p>The body is streamed straight to disk rather than buffered: the OpenSearch bundle is
  * around 1 GB, and a buffering client would need that much heap, or a temporary file plus a
  * second copy, to deliver it.</p>
+ *
+ * <p>A {@code file:} URI is read from the local file system instead, so that a copy of a Maven
+ * repository brought onto a machine with no route to the Internet can serve as the repository.
+ * It behaves like the HTTP one: a missing file is what a 404 is, and a directory reads as the
+ * index of its entries that a web server would list for it. Any other scheme is refused with a
+ * {@link SetupException} rather than left to {@code HttpClient}, which throws an unchecked
+ * exception for it.</p>
  */
 public final class Downloader {
 
@@ -47,6 +57,10 @@ public final class Downloader {
     private static final int SHA1_HEX_LENGTH = 40;
 
     private static final int HTTP_NOT_FOUND = 404;
+
+    private static final String FILE_SCHEME = "file";
+
+    private static final List<String> HTTP_SCHEMES = List.of("http", "https");
 
     /** Receives download progress. */
     @FunctionalInterface
@@ -146,6 +160,10 @@ public final class Downloader {
     }
 
     private static String read(final URI uri, final boolean absentIsNull) throws SetupException {
+        final Path local = localFile(uri);
+        if (local != null) {
+            return readLocal(uri, local, absentIsNull);
+        }
         try (HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT_SECONDS))
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -218,6 +236,10 @@ public final class Downloader {
     }
 
     private static Path fetch(final URI uri, final Path dest, final Progress progress, final boolean absentIsNull) throws SetupException {
+        final Path local = localFile(uri);
+        if (local != null) {
+            return fetchLocal(uri, local, dest, progress, absentIsNull);
+        }
         try (HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT_SECONDS))
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -231,34 +253,122 @@ public final class Downloader {
                 if (response.statusCode() != 200) {
                     throw new SetupException("Failed to download " + uri + ": HTTP " + response.statusCode());
                 }
-                final long total = response.headers().firstValueAsLong("content-length").orElse(-1L);
-                if (Files.exists(dest) && total >= 0 && Files.size(dest) == total) {
-                    progress.report(total, total);
-                    return dest;
-                }
-                final Path parent = dest.toAbsolutePath().getParent();
-                if (parent != null) {
-                    Files.createDirectories(parent);
-                }
-                final Path part = dest.resolveSibling(dest.getFileName() + ".part");
-                long written = 0L;
-                try (OutputStream out = Files.newOutputStream(part)) {
-                    final byte[] buffer = new byte[BUFFER_SIZE];
-                    int read;
-                    while ((read = in.read(buffer)) >= 0) {
-                        out.write(buffer, 0, read);
-                        written += read;
-                        progress.report(written, total);
-                    }
-                }
-                Files.move(part, dest, StandardCopyOption.REPLACE_EXISTING);
-                return dest;
+                return store(in, response.headers().firstValueAsLong("content-length").orElse(-1L), dest, progress);
             }
         } catch (final IOException e) {
             throw new SetupException("Failed to download " + uri, e);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new SetupException("Interrupted while downloading " + uri, e);
+        }
+    }
+
+    /**
+     * Writes a body to {@code dest}, through a {@code .part} file, unless {@code dest} already
+     * has its size.
+     *
+     * @param in the body
+     * @param total the body's size, or -1 when it is not known
+     * @param dest the destination file
+     * @param progress receives progress updates
+     * @return {@code dest}
+     * @throws IOException if the body cannot be read or the file cannot be written
+     */
+    private static Path store(final InputStream in, final long total, final Path dest, final Progress progress) throws IOException {
+        if (Files.exists(dest) && total >= 0 && Files.size(dest) == total) {
+            progress.report(total, total);
+            return dest;
+        }
+        final Path parent = dest.toAbsolutePath().getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        final Path part = dest.resolveSibling(dest.getFileName() + ".part");
+        long written = 0L;
+        try (OutputStream out = Files.newOutputStream(part)) {
+            final byte[] buffer = new byte[BUFFER_SIZE];
+            int read;
+            while ((read = in.read(buffer)) >= 0) {
+                out.write(buffer, 0, read);
+                written += read;
+                progress.report(written, total);
+            }
+        }
+        Files.move(part, dest, StandardCopyOption.REPLACE_EXISTING);
+        return dest;
+    }
+
+    /**
+     * Returns the local file a {@code file:} URI names.
+     *
+     * @param uri the source
+     * @return the file, or {@code null} when the URI is an HTTP one
+     * @throws SetupException if the scheme is neither HTTP nor {@code file}, or the {@code file:}
+     *             URI does not name an absolute local path
+     */
+    private static Path localFile(final URI uri) throws SetupException {
+        final String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
+        if (HTTP_SCHEMES.contains(scheme)) {
+            return null;
+        }
+        if (!FILE_SCHEME.equals(scheme)) {
+            throw new SetupException("Cannot read " + uri + ": only http, https and file URLs are supported");
+        }
+        try {
+            return Path.of(uri);
+        } catch (final IllegalArgumentException | FileSystemNotFoundException e) {
+            throw new SetupException("Cannot read " + uri + ": a file URL names an absolute path, such as file:///opt/repository/", e);
+        }
+    }
+
+    private static String readLocal(final URI uri, final Path file, final boolean absentIsNull) throws SetupException {
+        try {
+            if (Files.isDirectory(file)) {
+                return listing(file);
+            }
+            if (!Files.isRegularFile(file)) {
+                if (absentIsNull) {
+                    return null;
+                }
+                throw new SetupException("Failed to read " + uri + ": no such file");
+            }
+            return Files.readString(file, StandardCharsets.UTF_8);
+        } catch (final IOException e) {
+            throw new SetupException("Failed to read " + uri, e);
+        }
+    }
+
+    /**
+     * Renders a directory the way a web server's directory index lists it, one link per entry
+     * and a trailing slash on a directory, which is what a plugin listing is read from.
+     *
+     * @param directory the directory
+     * @return the index
+     * @throws IOException if the directory cannot be read
+     */
+    private static String listing(final Path directory) throws IOException {
+        final StringBuilder html = new StringBuilder();
+        try (Stream<Path> entries = Files.list(directory)) {
+            for (final Path entry : entries.sorted().toList()) {
+                final String name = entry.getFileName() + (Files.isDirectory(entry) ? "/" : "");
+                html.append("<a href=\"").append(name).append("\">").append(name).append("</a>\n");
+            }
+        }
+        return html.toString();
+    }
+
+    private static Path fetchLocal(final URI uri, final Path file, final Path dest, final Progress progress, final boolean absentIsNull)
+            throws SetupException {
+        if (!Files.isRegularFile(file)) {
+            if (absentIsNull) {
+                return null;
+            }
+            throw new SetupException("Failed to download " + uri + ": no such file");
+        }
+        try (InputStream in = Files.newInputStream(file)) {
+            return store(in, Files.size(file), dest, progress);
+        } catch (final IOException e) {
+            throw new SetupException("Failed to download " + uri, e);
         }
     }
 }
