@@ -24,12 +24,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -40,6 +42,7 @@ import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.fess.util.ComponentUtil;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
@@ -73,6 +76,15 @@ public class DataSerializer {
     protected final ThreadLocal<Kryo> kryoThreadLocal;
 
     /**
+     * The classes plugins have registered, ordered by class name so that the class ids Kryo
+     * assigns do not depend on the order plugins were loaded in.
+     */
+    protected final Map<Class<?>, Serializer<?>> pluginSerializerMap = new TreeMap<>(Comparator.comparing(Class::getName));
+
+    /** Whether a Kryo instance has been created, after which no class can be registered. */
+    protected boolean kryoCreated;
+
+    /**
      * Constructs a new DataSerializer.
      * <p>
      * Initializes the ThreadLocal Kryo instances with appropriate configuration.
@@ -82,17 +94,61 @@ public class DataSerializer {
      * </p>
      */
     public DataSerializer() {
-        kryoThreadLocal = ThreadLocal.withInitial(() -> {
-            final Kryo kryo = new Kryo();
-            // Enable registration requirement for security - only registered classes can be deserialized
-            kryo.setRegistrationRequired(true);
-            if (logger.isDebugEnabled()) {
-                kryo.setWarnUnregisteredClasses(true);
-            }
-            // Register allowed classes for serialization/deserialization
-            registerClasses(kryo);
-            return kryo;
-        });
+        kryoThreadLocal = ThreadLocal.withInitial(this::createKryo);
+    }
+
+    /**
+     * Creates a Kryo instance with the core classes and the classes plugins have registered.
+     *
+     * @return the Kryo instance
+     */
+    protected Kryo createKryo() {
+        final Kryo kryo = new Kryo();
+        // Enable registration requirement for security - only registered classes can be deserialized
+        kryo.setRegistrationRequired(true);
+        if (logger.isDebugEnabled()) {
+            kryo.setWarnUnregisteredClasses(true);
+        }
+        // Register allowed classes for serialization/deserialization
+        registerClasses(kryo);
+        synchronized (this) {
+            kryoCreated = true;
+            // Registered after the core classes, in class name order, so the ids are the same
+            // in every process that has the same plugins.
+            pluginSerializerMap.forEach((type, serializer) -> kryo.register(type, serializer));
+        }
+        return kryo;
+    }
+
+    /**
+     * Allows a plugin to add a class to the classes that can be serialized and deserialized.
+     * <p>
+     * A plugin calls this while the DI container initializes, for example from a
+     * <code>postConstruct</code> method of a component it adds to <code>crawler/transformer++.xml</code>.
+     * A serializer is required: a class is never opened to Kryo's default field-by-field
+     * serialization, so the plugin decides exactly what is written and read back.
+     * The class ids follow the class name order, so plugins do not have to agree on ids.
+     * </p>
+     *
+     * @param type the class to register
+     * @param serializer the serializer that writes and reads the class
+     * @throws IllegalArgumentException if the type or the serializer is null, or the type is already registered
+     * @throws IllegalStateException if a serialization has already started
+     */
+    public synchronized void register(final Class<?> type, final Serializer<?> serializer) {
+        if (type == null || serializer == null) {
+            throw new IllegalArgumentException("Both type and serializer are required. type: " + type + ", serializer: " + serializer);
+        }
+        if (kryoCreated) {
+            throw new IllegalStateException("Cannot register " + type.getName() + " because serialization has already started.");
+        }
+        if (pluginSerializerMap.containsKey(type)) {
+            throw new IllegalArgumentException(type.getName() + " is already registered.");
+        }
+        pluginSerializerMap.put(type, serializer);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registered {} for Kryo serialization.", type.getName());
+        }
     }
 
     /**
