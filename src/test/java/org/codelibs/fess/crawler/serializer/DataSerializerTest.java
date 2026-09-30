@@ -28,6 +28,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -560,5 +564,160 @@ public class DataSerializerTest extends UnitFessTestCase {
         CustomTestClass(String value) {
             this.value = value;
         }
+    }
+
+    /** A plugin-owned type that is not registered by the core. */
+    public static class PluginValue {
+        final String text;
+
+        PluginValue(final String text) {
+            this.text = text;
+        }
+    }
+
+    /** Another plugin-owned type, used to check registration order. */
+    public static class OtherPluginValue {
+        final String text;
+
+        OtherPluginValue(final String text) {
+            this.text = text;
+        }
+    }
+
+    private static <T> Serializer<T> textSerializer(final java.util.function.Function<String, T> factory,
+            final java.util.function.Function<T, String> reader) {
+        return new Serializer<>() {
+            @Override
+            public void write(final Kryo kryo, final Output output, final T object) {
+                output.writeString(reader.apply(object));
+            }
+
+            @Override
+            public T read(final Kryo kryo, final Input input, final Class<? extends T> type) {
+                return factory.apply(input.readString());
+            }
+        };
+    }
+
+    private static void registerPluginValue(final DataSerializer target) {
+        target.register(PluginValue.class, textSerializer(PluginValue::new, v -> v.text));
+    }
+
+    private static void registerOtherPluginValue(final DataSerializer target) {
+        target.register(OtherPluginValue.class, textSerializer(OtherPluginValue::new, v -> v.text));
+    }
+
+    /**
+     * Test that a type is rejected until a plugin registers it
+     */
+    @Test
+    public void test_register_unregisteredTypeIsRejected() {
+        try {
+            serializer.fromObjectToBinary(new PluginValue("a"));
+            fail("An unregistered type must be rejected");
+        } catch (final RuntimeException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Test that a registered type round-trips, alone and inside a map
+     */
+    @Test
+    public void test_register_roundTrip() {
+        registerPluginValue(serializer);
+
+        final PluginValue single = (PluginValue) serializer.fromBinaryToObject(serializer.fromObjectToBinary(new PluginValue("hello")));
+        assertEquals("hello", single.text);
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("key", new PluginValue("nested"));
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> restored = (Map<String, Object>) serializer.fromBinaryToObject(serializer.fromObjectToBinary(map));
+        assertEquals("nested", ((PluginValue) restored.get("key")).text);
+    }
+
+    /**
+     * Test that a registration is seen by threads other than the registering one
+     */
+    @Test
+    public void test_register_visibleFromOtherThread() throws Exception {
+        registerPluginValue(serializer);
+
+        final Object[] holder = new Object[1];
+        final Thread thread = new Thread(() -> {
+            holder[0] = serializer.fromBinaryToObject(serializer.fromObjectToBinary(new PluginValue("thread")));
+        });
+        thread.start();
+        thread.join();
+        assertEquals("thread", ((PluginValue) holder[0]).text);
+    }
+
+    /**
+     * Test that registering the same class twice is rejected
+     */
+    @Test
+    public void test_register_duplicateIsRejected() {
+        registerPluginValue(serializer);
+        try {
+            registerPluginValue(serializer);
+            fail("A second registration of the same class must be rejected");
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Test that a type and a serializer are both required, so that no plugin can open a type to
+     * Kryo's default field-by-field serialization
+     */
+    @Test
+    public void test_register_requiresTypeAndSerializer() {
+        try {
+            serializer.register(null, textSerializer(PluginValue::new, v -> v.text));
+            fail("A null type must be rejected");
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            serializer.register(PluginValue.class, null);
+            fail("A null serializer must be rejected");
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Test that a registration after the first serialization is rejected, because Kryo instances
+     * that already exist would not see it
+     */
+    @Test
+    public void test_register_afterFirstUseIsRejected() {
+        serializer.fromObjectToBinary("first use");
+        try {
+            registerPluginValue(serializer);
+            fail("A registration after the first serialization must be rejected");
+        } catch (final IllegalStateException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Test that the order plugins register in does not change the bytes written, so that a writer
+     * and a reader with the same plugins agree on the class ids
+     */
+    @Test
+    public void test_register_orderDoesNotChangeTheBytes() {
+        final DataSerializer first = new DataSerializer();
+        registerPluginValue(first);
+        registerOtherPluginValue(first);
+        final DataSerializer second = new DataSerializer();
+        registerOtherPluginValue(second);
+        registerPluginValue(second);
+
+        final byte[] written = first.fromObjectToBinary(new OtherPluginValue("x"));
+        assertTrue("Both orders must write the same bytes",
+                java.util.Arrays.equals(written, second.fromObjectToBinary(new OtherPluginValue("x"))));
+        assertEquals("x", ((OtherPluginValue) second.fromBinaryToObject(written)).text);
     }
 }
