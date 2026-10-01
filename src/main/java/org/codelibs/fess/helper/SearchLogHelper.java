@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -259,7 +260,14 @@ public class SearchLogHelper {
             searchLog.setReferer(StringUtils.abbreviate(context.request.getHeader("referer"), 1000));
             searchLog.setUserAgent(StringUtils.abbreviate(context.request.getHeader("user-agent"), 255));
 
-            searchLog.setAccessType(determineAccessType(context.request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE)));
+            final String accessType = determineAccessType(context.request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE));
+            searchLog.setAccessType(accessType);
+
+            // Only JSON API searches are read back as search history, so no other access type records the conditions.
+            if (context.userId != null && Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)
+                    && context.fessConfig.isSearchHistoryEnabled()) {
+                searchLog.setSearchParams(buildSearchParams(params));
+            }
 
             final Object languages = context.request.getAttribute(Constants.REQUEST_LANGUAGES);
             if (languages != null) {
@@ -300,6 +308,63 @@ public class SearchLogHelper {
 
         addDocumentsInResponse(queryResponseList, searchLog);
         searchLogQueue.add(searchLog);
+    }
+
+    /**
+     * Builds the compact JSON string that records the search conditions of a request, so that the
+     * search can be re-run later. Only the query, the field conditions, the extra queries, the sort
+     * and the languages explicitly requested by the client are recorded; blank values are omitted.
+     *
+     * @param params The search request parameters.
+     * @return The JSON string, or null if there is nothing to record.
+     */
+    protected String buildSearchParams(final SearchRequestParams params) {
+        final Map<String, Object> conditions = new LinkedHashMap<>();
+        if (StringUtil.isNotBlank(params.getQuery())) {
+            conditions.put("q", params.getQuery());
+        }
+        final Map<String, String[]> requestFields = params.getFields();
+        if (requestFields != null) {
+            final Map<String, List<String>> fields = new LinkedHashMap<>();
+            requestFields.forEach((name, values) -> {
+                final List<String> list = toNonBlankList(values);
+                if (StringUtil.isNotBlank(name) && !list.isEmpty()) {
+                    fields.put(name, list);
+                }
+            });
+            if (!fields.isEmpty()) {
+                conditions.put("fields", fields);
+            }
+        }
+        final List<String> extraQueries = toNonBlankList(params.getExtraQueries());
+        if (!extraQueries.isEmpty()) {
+            conditions.put("ex_q", extraQueries);
+        }
+        if (StringUtil.isNotBlank(params.getSort())) {
+            conditions.put("sort", params.getSort());
+        }
+        // getLanguages() of the JSON API returns only the values of the lang request parameter;
+        // the browser locale is resolved later by SearchHelper#getLanguages and is not recorded.
+        final List<String> languages = toNonBlankList(params.getLanguages());
+        if (!languages.isEmpty()) {
+            conditions.put("lang", languages);
+        }
+        if (conditions.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(conditions);
+        } catch (final JacksonException e) {
+            logger.warn("Failed to build the search conditions: query={}", params.getQuery(), e);
+            return null;
+        }
+    }
+
+    private List<String> toNonBlankList(final String[] values) {
+        if (values == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(values).filter(StringUtil::isNotBlank).collect(Collectors.toList());
     }
 
     /**

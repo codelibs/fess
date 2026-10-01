@@ -388,6 +388,8 @@ public class UiConfigHandler {
 
             final Map<String, Object> features = new LinkedHashMap<>();
             features.put("user_favorite", userFavoriteEnabled);
+            // search_history: whether GET /api/v2/search-history serves the logged-in user's recent searches.
+            features.put("search_history", cfg.isSearchHistoryEnabled() && searchLogEnabled);
             features.put("popular_word", cfg.isWebApiPopularWord());
             features.put("suggest_search_log", cfg.isSuggestSearchLog());
             features.put("suggest_documents", cfg.isSuggestDocuments());

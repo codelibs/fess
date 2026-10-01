@@ -49,6 +49,8 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     private Map<String, Object> fields;
 
+    private String searchParams;
+
     private final List<Map<String, Object>> documentList = new ArrayList<>();
 
     @Override
@@ -83,6 +85,14 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
 
     public void addDocument(final Map<String, Object> doc) {
         documentList.add(doc);
+    }
+
+    public String getSearchParams() {
+        return searchParams;
+    }
+
+    public void setSearchParams(final String searchParams) {
+        this.searchParams = searchParams;
     }
 
     public void setSearchQuery(final String query) {
@@ -136,6 +146,9 @@ public class SearchLog extends BsSearchLog implements SearchLogEvent {
                 .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
         sourceMap.put("headers", headerMap);
         sourceMap.put("documents", documentList);
+        if (StringUtil.isNotBlank(searchParams)) {
+            sourceMap.put("searchParams", searchParams);
+        }
         return sourceMap;
     }
 

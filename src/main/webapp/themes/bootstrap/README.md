@@ -51,7 +51,7 @@ of truth — third-party themes are encouraged to start by copying it.
 |---|---|
 | `api.js` | `GET /ui/config` |
 | `auth.js` | `GET /ui/config`, `GET /auth/me`, `POST /auth/login`, `POST /auth/logout`, `POST /auth/password` |
-| `search.js` | `GET /search`, `GET /suggest-words`, `GET /labels`, `GET /popular-words`, `GET /related-queries`, `GET /related-content`, `GET /favorites`, `POST /documents/{id}/favorite` |
+| `search.js` | `GET /search`, `GET /suggest-words`, `GET /search-history`, `GET /labels`, `GET /popular-words`, `GET /related-queries`, `GET /related-content`, `GET /favorites`, `POST /documents/{id}/favorite` |
 | `app.js` | `GET /popular-words` |
 | `cache.js` | `GET /cache/{id}` |
 | `profile.js` | `POST /auth/password` |

@@ -3,6 +3,7 @@
   "search.button": "Buscar",
   "search.no_results": "Sin resultados.",
   "search.popular_searches": "Búsquedas populares",
+  "search_history.title": "Búsquedas recientes",
   "search.did_not_match": "Su búsqueda — {0} — no coincidió con ningún documento.",
   "search.did_not_match_suggestion": "Pruebe con palabras clave diferentes o menos palabras clave.",
   "search.options": "Opciones",

@@ -42,6 +42,7 @@ import org.codelibs.fess.api.v2.handlers.RelatedContentHandler;
 import org.codelibs.fess.api.v2.handlers.RelatedQueriesHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
+import org.codelibs.fess.api.v2.handlers.SearchHistoryHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
 import org.codelibs.fess.app.service.AccessTokenService;
@@ -98,6 +99,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code GET /api/v2/favorites} (list favorited doc ids in a previously issued search result). */
     @Resource
     protected FavoritesListHandler favoritesListHandler;
+
+    /** Handles {@code GET /api/v2/search-history} (recent searches of the logged-in user). */
+    @Resource
+    protected SearchHistoryHandler searchHistoryHandler;
 
     /** Handles {@code GET /api/v2/auth/me} (current authenticated user). */
     @Resource
@@ -288,6 +293,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/health" -> healthHandler.handle(request, response);
             case "/search" -> searchHandler.handle(request, response);
             case "/favorites" -> favoritesListHandler.handle(request, response);
+            case "/search-history" -> searchHistoryHandler.handle(request, response);
             case "/suggest-words" -> suggestWordsHandler.handle(request, response);
             case "/labels" -> labelsHandler.handle(request, response);
             case "/popular-words" -> popularWordsHandler.handle(request, response);

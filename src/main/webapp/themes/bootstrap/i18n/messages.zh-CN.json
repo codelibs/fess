@@ -3,6 +3,7 @@
   "search.button": "搜索",
   "search.no_results": "无结果。",
   "search.popular_searches": "热门搜索",
+  "search_history.title": "最近搜索",
   "search.did_not_match": "您的搜索 — {0} — 未匹配到任何文档。",
   "search.did_not_match_suggestion": "请尝试其他关键词或减少关键词。",
   "search.options": "选项",

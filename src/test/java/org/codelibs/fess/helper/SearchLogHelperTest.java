@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -418,6 +419,146 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLogHelper.determineAccessType(Integer.valueOf(123)));
     }
 
+    // ===== createSearchLog search history (searchParams) tests =====
+
+    private SearchLog createSearchLogForHistory(final String userId, final boolean historyEnabled, final SearchRequestParams params) {
+        return createSearchLogForHistory(userId, historyEnabled, Constants.SEARCH_LOG_ACCESS_TYPE_JSON, params);
+    }
+
+    private SearchLog createSearchLogForHistory(final String userId, final boolean historyEnabled, final String accessType,
+            final SearchRequestParams params) {
+        ((MockFessConfig) ComponentUtil.getFessConfig()).searchHistoryEnabled = historyEnabled;
+        setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, accessType);
+        final jakarta.servlet.http.HttpServletRequest request = org.lastaflute.web.util.LaRequestUtil.getOptionalRequest().orElse(null);
+        final SearchLogHelper.SearchLogContext context = new SearchLogHelper.SearchLogContext((FessConfig) ComponentUtil.getFessConfig(),
+                new String[0], null, userId, request, "127.0.0.1", "");
+        final QueryResponseList queryResponseList = new QueryResponseList(Collections.emptyList(), 0L, "eq", 0L, false, null, 0, 10, 0);
+        searchLogHelper.createSearchLog(params, LocalDateTime.now(), "test-query-id", "test query", 0, 10, queryResponseList, context);
+        return searchLogHelper.searchLogQueue.poll();
+    }
+
+    private MockSearchRequestParams historyParams() {
+        return new MockSearchRequestParams() {
+            @Override
+            public String getQuery() {
+                return "fess \"full text\"";
+            }
+
+            @Override
+            public Map<String, String[]> getFields() {
+                final Map<String, String[]> fields = new LinkedHashMap<>();
+                fields.put("label", new String[] { "docs", "blog" });
+                fields.put("filetype", new String[] { "pdf" });
+                return fields;
+            }
+
+            @Override
+            public String[] getExtraQueries() {
+                return new String[] { "title:fess" };
+            }
+
+            @Override
+            public String getSort() {
+                return "last_modified.desc";
+            }
+
+            @Override
+            public String[] getLanguages() {
+                return new String[] { "ja" };
+            }
+        };
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_loggedInUser() {
+        final SearchLog searchLog = createSearchLogForHistory("user001", true, historyParams());
+
+        assertEquals("user001", searchLog.getUser());
+        assertEquals("{\"q\":\"fess \\\"full text\\\"\",\"fields\":{\"label\":[\"docs\",\"blog\"],\"filetype\":[\"pdf\"]},"
+                + "\"ex_q\":[\"title:fess\"],\"sort\":\"last_modified.desc\",\"lang\":[\"ja\"]}", searchLog.getSearchParams());
+        assertEquals(searchLog.getSearchParams(), searchLog.toSource().get("searchParams"));
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_anonymousUser() {
+        final SearchLog searchLog = createSearchLogForHistory(null, true, historyParams());
+
+        assertNull(searchLog.getSearchParams());
+        assertFalse(searchLog.toSource().containsKey("searchParams"));
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_disabled() {
+        final SearchLog searchLog = createSearchLogForHistory("user001", false, historyParams());
+
+        assertNull(searchLog.getSearchParams());
+        assertFalse(searchLog.toSource().containsKey("searchParams"));
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_recordedOnlyForJsonAccessType() {
+        final SearchLog json = createSearchLogForHistory("user001", true, Constants.SEARCH_LOG_ACCESS_TYPE_JSON, historyParams());
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_JSON, json.getAccessType());
+        assertNotNull(json.getSearchParams());
+
+        for (final String accessType : new String[] { Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN, Constants.SEARCH_LOG_ACCESS_TYPE_WEB }) {
+            final SearchLog searchLog = createSearchLogForHistory("user001", true, accessType, historyParams());
+            assertEquals(accessType, searchLog.getAccessType());
+            assertEquals("user001", searchLog.getUser());
+            assertNull(searchLog.getSearchParams(), accessType);
+            assertFalse(searchLog.toSource().containsKey("searchParams"), accessType);
+        }
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_omitsBlankValues() {
+        final SearchLog searchLog = createSearchLogForHistory("user001", true, new MockSearchRequestParams() {
+            @Override
+            public Map<String, String[]> getFields() {
+                final Map<String, String[]> fields = new LinkedHashMap<>();
+                fields.put("label", new String[] { "", " " });
+                fields.put("filetype", new String[] { "pdf", "" });
+                return fields;
+            }
+
+            @Override
+            public String[] getExtraQueries() {
+                return new String[] { "" };
+            }
+
+            @Override
+            public String getSort() {
+                return " ";
+            }
+
+            @Override
+            public String[] getLanguages() {
+                return null;
+            }
+        });
+
+        assertEquals("{\"q\":\"test query\",\"fields\":{\"filetype\":[\"pdf\"]}}", searchLog.getSearchParams());
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_onlyQuery() {
+        final SearchLog searchLog = createSearchLogForHistory("user001", true, new MockSearchRequestParams());
+
+        assertEquals("{\"q\":\"test query\"}", searchLog.getSearchParams());
+    }
+
+    @Test
+    public void test_createSearchLog_searchParams_nothingToRecord() {
+        final SearchLog searchLog = createSearchLogForHistory("user001", true, new MockSearchRequestParams() {
+            @Override
+            public String getQuery() {
+                return "";
+            }
+        });
+
+        assertNull(searchLog.getSearchParams());
+    }
+
     // ===== addSearchLog integration test (exercises wrapper wiring) =====
 
     @Test
@@ -537,6 +678,13 @@ public class SearchLogHelperTest extends UnitFessTestCase {
     // Mock classes
     private static class MockFessConfig extends FessConfig.SimpleImpl {
         private static final long serialVersionUID = 1L;
+
+        private boolean searchHistoryEnabled = true;
+
+        @Override
+        public boolean isSearchHistoryEnabled() {
+            return searchHistoryEnabled;
+        }
 
         @Override
         public boolean isUserInfo() {

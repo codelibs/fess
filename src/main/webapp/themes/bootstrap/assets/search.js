@@ -973,6 +973,153 @@ export function attachSuggest(input, dropdown, opts = {}) {
   input.addEventListener("blur", () => setTimeout(clear, 120));
 }
 
+/** The search URL that re-runs a /search-history entry, with the parameter names runFromUrl() reads. */
+function searchHistoryUrl(entry) {
+  const params = new URLSearchParams();
+  params.set("q", entry.q);
+  for (const [name, values] of Object.entries(entry.fields || {})) {
+    (values || []).forEach(v => params.append("fields." + name, v));
+  }
+  (entry.ex_q || []).forEach(v => params.append("ex_q", v));
+  if (entry.sort) params.set("sort", entry.sort);
+  (entry.lang || []).forEach(v => params.append("lang", v));
+  return "search?" + params.toString();
+}
+
+/** A one-line summary of a /search-history entry's conditions; "" when it has none. */
+function searchHistorySummary(entry) {
+  const parts = [];
+  Object.values(entry.fields || {}).forEach(values => parts.push(...(values || [])));
+  parts.push(...(entry.ex_q || []));
+  if (entry.sort) {
+    const opt = ((api.getConfig() || {}).sort_options || []).find(o => o.value === entry.sort);
+    parts.push(opt && opt.label_key ? t(opt.label_key) : entry.sort);
+  }
+  (entry.lang || []).forEach(v => parts.push(languageLabel(v)));
+  return parts.join(", ");
+}
+
+/**
+ * Show the logged-in user's recent searches (GET /search-history) in a search box's suggest
+ * dropdown when the user clicks the empty box or presses ArrowDown in it, and re-run the chosen
+ * one with its conditions through the router. Focus alone does not open the list, so the home
+ * view's autofocus and other programmatic focus stay quiet. Keyboard handling
+ * (ArrowUp/ArrowDown/Enter/Escape), blur-to-close and the ARIA attributes mirror the header
+ * suggest. Typing closes the list so the normal suggest takes over. The request is made only
+ * when features.search_history is on and the user is logged in; an empty list or a failed
+ * request leaves the dropdown closed. The header suggest keyboard handler stands aside while
+ * the dropdown holds history entries (.search-history-item).
+ *
+ * @param {HTMLInputElement} input    - the search box
+ * @param {HTMLElement}      dropdown - the box's suggest <ul role="listbox">
+ */
+export function attachSearchHistory(input, dropdown) {
+  if (!input || !dropdown) return;
+  let entries = [];
+  let index = -1;
+  let loading = false;
+  const items = () => dropdown.querySelectorAll(".search-history-item");
+  // The entries in the dropdown are the state: a suggest render replaces them, and
+  // hideSuggest() only hides them.
+  const isOpen = () => items().length > 0 && !dropdown.classList.contains("d-none");
+  const close = () => {
+    if (!dropdown.querySelector(".search-history-heading, .search-history-item")) return;
+    while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
+    dropdown.classList.add("d-none");
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+    entries = [];
+    index = -1;
+  };
+  const choose = (entry) => {
+    close();
+    navigate(searchHistoryUrl(entry));
+  };
+  const render = () => {
+    while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
+    // The heading is not a .list-group-item (the header suggest handlers treat those as
+    // choosable), so it has no display:block to suppress the <li> bullet: list-unstyled does.
+    dropdown.appendChild(el("li", {
+      className: "search-history-heading list-unstyled px-3 py-1 small text-body-secondary",
+      text: t("search_history.title"),
+      attrs: { role: "presentation" }
+    }));
+    entries.forEach((entry, i) => {
+      const li = el("li", {
+        className: "list-group-item search-history-item",
+        attrs: { role: "option", id: input.id + "-history-" + i, "aria-selected": "false" }
+      });
+      li.appendChild(el("span", { className: "search-history-query", text: entry.q }));
+      const summary = searchHistorySummary(entry);
+      if (summary) {
+        li.appendChild(el("small", { className: "search-history-conditions text-body-secondary ms-2", text: summary }));
+      }
+      // stopPropagation keeps the header dropdown's own mousedown handler (which submits the
+      // header form with the item text) from running for a history entry.
+      li.addEventListener("mousedown", e => { e.preventDefault(); e.stopPropagation(); choose(entry); });
+      dropdown.appendChild(li);
+    });
+    dropdown.classList.remove("d-none");
+    input.setAttribute("aria-expanded", "true");
+    input.removeAttribute("aria-activedescendant");
+    index = -1;
+  };
+  const open = async () => {
+    if (loading || isOpen() || input.value.trim() !== "") return;
+    if (!api.getConfig()?.features?.search_history || !api.isAuthenticated()) return;
+    loading = true;
+    let data;
+    try {
+      data = (await api.get("/search-history")).data;
+    } catch {
+      return; // best-effort, like suggest: no error banner
+    } finally {
+      loading = false;
+    }
+    if (!Array.isArray(data) || data.length === 0) return;
+    // The user may have typed or left the box while the request was in flight.
+    if (document.activeElement !== input || input.value.trim() !== "") return;
+    entries = data;
+    render();
+  };
+  input.addEventListener("click", open);
+  input.addEventListener("input", close);
+  input.addEventListener("keydown", ev => {
+    if (!isOpen()) {
+      // ArrowDown in the empty box opens the list, unless the suggest already took the key.
+      if (ev.key === "ArrowDown" && !ev.defaultPrevented && input.value.trim() === "") {
+        ev.preventDefault();
+        open();
+      }
+      return;
+    }
+    const list = items();
+    if (ev.key === "ArrowDown") {
+      ev.preventDefault();
+      index = index >= list.length - 1 ? 0 : index + 1;
+    } else if (ev.key === "ArrowUp") {
+      ev.preventDefault();
+      index = index <= 0 ? list.length - 1 : index - 1;
+    } else if (ev.key === "Enter" && index >= 0) {
+      ev.preventDefault();
+      choose(entries[index]);
+      return;
+    } else if (ev.key === "Escape") {
+      close();
+      return;
+    } else {
+      return;
+    }
+    list.forEach((it, i) => {
+      const active = i === index;
+      it.classList.toggle("active", active);
+      it.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    input.setAttribute("aria-activedescendant", list[index].id);
+  });
+  input.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== input) close(); }, 150));
+}
+
 /**
  * H.4: Subscribe once to the fess:route:change event so that navigating away
  * from the search view (/, /search, /index) cancels any pending suggest timer
@@ -1415,7 +1562,8 @@ export function attach() {
     });
     input.addEventListener("keydown", ev => {
       const items = dropdown.querySelectorAll(".list-group-item");
-      if (!items.length || dropdown.classList.contains("d-none")) return;
+      // The recent-searches list (attachSearchHistory) handles its own keys.
+      if (!items.length || dropdown.classList.contains("d-none") || dropdown.querySelector(".search-history-item")) return;
       if (ev.key === "ArrowDown") {
         ev.preventDefault();
         suggestIndex = suggestIndex >= items.length - 1 ? 0 : suggestIndex + 1;
@@ -1460,6 +1608,8 @@ export function attach() {
       form.dispatchEvent(new Event("submit"));
     });
   }
+  // Recent searches of the logged-in user, shown in the same dropdown while #query is empty.
+  attachSearchHistory(input, dropdown);
   // Geo filter apply/clear is handled by the drawer's main Search / Clear buttons
   // (geo inputs were migrated into #searchOptions); no separate geo buttons.
 

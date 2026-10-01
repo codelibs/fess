@@ -363,6 +363,20 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_searchHistoryRoutesToSearchHistoryHandler() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final boolean[] called = { false };
+        m.searchHistoryHandler = new org.codelibs.fess.api.v2.handlers.SearchHistoryHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
+                called[0] = true;
+            }
+        };
+        m.process(new StubRequest("/api/v2/search-history"), new CapturingResponse(), new NopChain());
+        assertTrue(called[0], "dispatch must route /search-history to the searchHistoryHandler field");
+    }
+
+    @Test
     public void test_process_uiConfigRoutesToUiConfigHandler() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();

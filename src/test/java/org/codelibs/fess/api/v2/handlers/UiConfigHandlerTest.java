@@ -551,6 +551,53 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_features_searchHistory_enabledByDefault() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"search_history\":true"), res.body());
+    }
+
+    @Test
+    public void test_features_searchHistory_offWithoutSearchLog() throws Exception {
+        final org.codelibs.core.misc.DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        FessProp.propMap.clear();
+        systemProperties.setProperty(Constants.SEARCH_LOG_PROPERTY, Constants.FALSE);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"search_history\":false"), res.body());
+        } finally {
+            systemProperties.remove(Constants.SEARCH_LOG_PROPERTY);
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
+    public void test_features_searchHistory_offWhenDisabled() throws Exception {
+        // Delegate every call to the real configuration except search.history.enabled, so the
+        // rest of the handler sees a fully initialised config.
+        final org.codelibs.fess.mylasta.direction.FessConfig real = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig((org.codelibs.fess.mylasta.direction.FessConfig) java.lang.reflect.Proxy.newProxyInstance(
+                org.codelibs.fess.mylasta.direction.FessConfig.class.getClassLoader(),
+                new Class<?>[] { org.codelibs.fess.mylasta.direction.FessConfig.class }, (proxy, method, args) -> {
+                    if ("isSearchHistoryEnabled".equals(method.getName())) {
+                        return false;
+                    }
+                    try {
+                        return method.invoke(real, args);
+                    } catch (final java.lang.reflect.InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                }));
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"search_history\":false"), res.body());
+    }
+
     /**
      * rag_chat_enabled must be present as a boolean in the features map.
      * Mirrors the availability gate the feature exposes (chatClient.isAvailable()).
