@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -44,6 +45,28 @@ public final class DocumentUtil {
      */
     private DocumentUtil() {
         // Utility class - no instantiation
+    }
+
+    /**
+     * Gets the value of an HTTP response header, ignoring the case of the header name.
+     * The crawler copies every response header into the meta data map of the response with the
+     * name exactly as the server sent it (e.g. {@code ETag}, {@code Etag} or {@code etag}).
+     *
+     * @param responseData the response data whose meta data map holds the headers
+     * @param name the header name to look up
+     * @return the {@code toString()} of the header value, or null if the header is absent
+     */
+    public static String getHeaderValue(final ResponseData responseData, final String name) {
+        if (responseData == null || name == null) {
+            return null;
+        }
+        for (final Map.Entry<String, Object> entry : responseData.getMetaDataMap().entrySet()) {
+            if (name.equalsIgnoreCase(entry.getKey())) {
+                final Object value = entry.getValue();
+                return value != null ? value.toString() : null;
+            }
+        }
+        return null;
     }
 
     /**

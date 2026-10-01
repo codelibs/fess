@@ -660,6 +660,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. last_modified */
     String INDEX_FIELD_last_modified = "index.field.last_modified";
 
+    /** The key of the configuration. e.g. etag */
+    String INDEX_FIELD_ETAG = "index.field.etag";
+
     /** The key of the configuration. e.g. anchor */
     String INDEX_FIELD_ANCHOR = "index.field.anchor";
 
@@ -4500,6 +4503,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldLastModified();
+
+    /**
+     * Get the value for the key 'index.field.etag'. <br>
+     * The value is, e.g. etag <br>
+     * comment: Field name for the ETag response header of the crawled document in the index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldEtag();
 
     /**
      * Get the value for the key 'index.field.anchor'. <br>
@@ -11518,6 +11529,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_last_modified);
         }
 
+        public String getIndexFieldEtag() {
+            return get(FessConfig.INDEX_FIELD_ETAG);
+        }
+
         public String getIndexFieldAnchor() {
             return get(FessConfig.INDEX_FIELD_ANCHOR);
         }
@@ -14494,6 +14509,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_LANG, "lang");
             defaultMap.put(FessConfig.INDEX_FIELD_has_cache, "has_cache");
             defaultMap.put(FessConfig.INDEX_FIELD_last_modified, "last_modified");
+            defaultMap.put(FessConfig.INDEX_FIELD_ETAG, "etag");
             defaultMap.put(FessConfig.INDEX_FIELD_ANCHOR, "anchor");
             defaultMap.put(FessConfig.INDEX_FIELD_SEGMENT, "segment");
             defaultMap.put(FessConfig.INDEX_FIELD_ROLE, "role");
