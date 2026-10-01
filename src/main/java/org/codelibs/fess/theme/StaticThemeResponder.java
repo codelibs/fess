@@ -110,10 +110,11 @@ public class StaticThemeResponder {
      * <p>When {@code requestPath} starts with {@code /error}, the response also carries:
      * <ul>
      *   <li>{@code X-Fess-Route: error} — signals to the SPA that this is an error route.</li>
-     *   <li>{@code X-Fess-Error-Code: <status>} — the HTTP status code derived from the URI
-     *       (e.g. {@code 404} for {@code /error/notFound}).</li>
-     *   <li>{@code <meta name="x-fess-error-code" content="<status>">} — the same status
-     *       code injected as a meta tag into the HTML {@code <head>} so client-side JS can
+     *   <li>{@code X-Fess-Error-Code: <code>} — the code the page shows, derived from the URI
+     *       (e.g. {@code 404} for {@code /error/notFound}); see {@link #displayCode(int)} for how it
+     *       differs from the HTTP status of a code the SPA has no page for.</li>
+     *   <li>{@code <meta name="x-fess-error-code" content="<code>">} — the same code
+     *       injected as a meta tag into the HTML {@code <head>} so client-side JS can
      *       read it directly without relying on the HTTP header.</li>
      *   <li>{@code <meta name="x-fess-error-detail-key" content="...">} — when a safe
      *       {@code message_key} query parameter is present.</li>
@@ -145,11 +146,12 @@ public class StaticThemeResponder {
 
         if (isErrorRoute) {
             final int status = computeErrorStatus(requestPath);
-            byte[] modifiedBytes = injectErrorCodeMeta(indexBytes, status);
+            final int displayCode = displayCode(status);
+            byte[] modifiedBytes = injectErrorCodeMeta(indexBytes, displayCode);
             if (messageKey != null && !messageKey.isEmpty()) {
                 modifiedBytes = injectErrorDetailMeta(modifiedBytes, messageKey);
             }
-            writeIndexBytes(res, modifiedBytes, status, status);
+            writeIndexBytes(res, modifiedBytes, status, displayCode);
             return;
         }
 
@@ -214,20 +216,24 @@ public class StaticThemeResponder {
     /**
      * Derives the HTTP status code corresponding to an {@code /error/...} URI.
      *
-     * <p>Mapping:
+     * <p>The segment after {@code /error/} is compared the way the SPA's error view compares it:
+     * case-insensitively and ignoring underscores, so {@code notFound}, {@code notfound} and
+     * {@code not_found} are one name. Mapping:
      * <ul>
-     *   <li>{@code /error}, {@code /error/error}, {@code /error/system} → 500</li>
-     *   <li>{@code /error/badRequest} or {@code /error/badrequest} → 400</li>
-     *   <li>{@code /error/notFound} or {@code /error/notfound} → 404</li>
+     *   <li>{@code /error}, {@code /error/error}, {@code /error/system},
+     *       {@code /error/internalServerError} → 500</li>
+     *   <li>{@code /error/badRequest} → 400</li>
+     *   <li>{@code /error/notFound} → 404</li>
      *   <li>{@code /error/busy} → 429</li>
-     *   <li>{@code /error/403} or {@code /error/forbidden} → 403</li>
-     *   <li>{@code /error/503}, {@code /error/serviceUnavailable} or
-     *       {@code /error/service_unavailable} → 503</li>
-     *   <li>Any other {@code /error/*} path → 500</li>
+     *   <li>{@code /error/forbidden} → 403</li>
+     *   <li>{@code /error/serviceUnavailable} → 503</li>
+     *   <li>a three-digit code from 400 to 599 ({@code /error/404}, {@code /error/401},
+     *       {@code /error/502}) → that code</li>
+     *   <li>Any other {@code /error/*} path, including a number outside 400..599 → 500</li>
      * </ul>
      *
      * @param uri the request path (context-path-stripped); must start with {@code /error}
-     * @return the HTTP status code to report in the {@code X-Fess-Error-Code} header
+     * @return the HTTP status code to answer with
      */
     static int computeErrorStatus(final String uri) {
         if (uri == null) {
@@ -244,14 +250,52 @@ public class StaticThemeResponder {
             final int slash = rest.indexOf('/');
             kind = (slash < 0 ? rest : rest.substring(0, slash)).toLowerCase(Locale.ROOT);
         }
-        return switch (kind) {
-        case "", "error", "system" -> 500;
+        return switch (kind.replace("_", "")) {
+        case "", "error", "system", "internalservererror" -> 500;
         case "badrequest" -> 400;
         case "notfound" -> 404;
         case "busy" -> 429;
-        case "403", "forbidden" -> 403;
-        case "503", "serviceunavailable", "service_unavailable" -> 503;
-        default -> 500;
+        case "forbidden" -> 403;
+        case "serviceunavailable" -> 503;
+        default -> numericErrorStatus(kind);
+        };
+    }
+
+    /**
+     * Reads a path segment as an HTTP error status.
+     *
+     * @param segment the segment
+     * @return the status when it is exactly three ASCII digits from 400 to 599; otherwise 500
+     */
+    private static int numericErrorStatus(final String segment) {
+        if (segment.length() != 3) {
+            return 500;
+        }
+        int status = 0;
+        for (int i = 0; i < 3; i++) {
+            final char c = segment.charAt(i);
+            if (c < '0' || c > '9') {
+                return 500;
+            }
+            status = status * 10 + (c - '0');
+        }
+        return status >= 400 && status <= 599 ? status : 500;
+    }
+
+    /**
+     * Maps the HTTP status of an error response to the code the SPA's error page shows: the six
+     * it has a page for (400, 403, 404, 429, 500, 503) as they are, a 401 as 403 (the SPA has no 401
+     * page, and a browser reaching it has already failed the challenge), any other 4xx as 400 and
+     * any other 5xx as 500. The HTTP status itself is never changed.
+     *
+     * @param status the HTTP status being sent
+     * @return 400, 403, 404, 429, 500 or 503
+     */
+    public static int displayCode(final int status) {
+        return switch (status) {
+        case 400, 403, 404, 429, 500, 503 -> status;
+        case 401 -> HttpServletResponse.SC_FORBIDDEN;
+        default -> status < 500 ? HttpServletResponse.SC_BAD_REQUEST : HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
         };
     }
 

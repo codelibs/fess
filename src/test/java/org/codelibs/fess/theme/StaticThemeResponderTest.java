@@ -269,9 +269,49 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertErrorStatus(theme, "/error/forbidden", 403);
             assertErrorStatus(theme, "/error/503", 503);
             assertErrorStatus(theme, "/error/service_unavailable", 503);
+            // The numeric codes and snake_case names the SPA's error view knows are the same route.
+            assertErrorStatus(theme, "/error/404", 404);
+            assertErrorStatus(theme, "/error/400", 400);
+            assertErrorStatus(theme, "/error/429", 429);
+            assertErrorStatus(theme, "/error/500", 500);
+            assertErrorStatus(theme, "/error/not_found", 404);
+            assertErrorStatus(theme, "/error/bad_request", 400);
+            assertErrorStatus(theme, "/error/internal_server_error", 500);
         } finally {
             deleteTree(tmp);
         }
+    }
+
+    @Test
+    public void test_serveIndex_errorRoute_numericCodeWithoutAPageKeepsItsStatus() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-index-error-numeric-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<!DOCTYPE html><html><head></head><body></body></html>");
+            final Theme theme = new Theme("t", tmp, manifest());
+            // The status is the one in the URL; the page shows the code the SPA has a page for,
+            // exactly as the error-page servlet reports the same status.
+            assertErrorRoute(theme, "/error/401", 401, 403);
+            assertErrorRoute(theme, "/error/408", 408, 400);
+            assertErrorRoute(theme, "/error/418", 418, 400);
+            assertErrorRoute(theme, "/error/502", 502, 500);
+            assertErrorRoute(theme, "/error/599", 599, 500);
+            // Not an error status: no such route, answered as before.
+            assertErrorRoute(theme, "/error/200", 500, 500);
+            assertErrorRoute(theme, "/error/302", 500, 500);
+            assertErrorRoute(theme, "/error/600", 500, 500);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    private void assertErrorRoute(final Theme theme, final String path, final int status, final int displayCode) throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new StaticThemeResponder().serveIndex(new StubRequest(), res, theme, path);
+        assertEquals("status for " + path, status, res.status);
+        assertEquals("X-Fess-Error-Code for " + path, String.valueOf(displayCode), res.headers.get("X-Fess-Error-Code"));
+        final String body = new String(res.body(), StandardCharsets.UTF_8);
+        assertTrue(body.contains("<meta name=\"x-fess-error-code\" content=\"" + displayCode + "\">"),
+                "meta code for " + path + ": " + body);
     }
 
     private void assertErrorStatus(final Theme theme, final String path, final int expected) throws Exception {
@@ -611,6 +651,53 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/503"));
         assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/serviceUnavailable"));
         assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/service_unavailable"));
+    }
+
+    @Test
+    public void test_computeErrorStatus_numericCodesAndSnakeCaseNames() {
+        // Every status the SPA has a page for, by number.
+        assertEquals(400, StaticThemeResponder.computeErrorStatus("/error/400"));
+        assertEquals(403, StaticThemeResponder.computeErrorStatus("/error/403"));
+        assertEquals(404, StaticThemeResponder.computeErrorStatus("/error/404"));
+        assertEquals(429, StaticThemeResponder.computeErrorStatus("/error/429"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/500"));
+        assertEquals(503, StaticThemeResponder.computeErrorStatus("/error/503"));
+        // A number without a page keeps its own status instead of becoming a 500.
+        assertEquals(401, StaticThemeResponder.computeErrorStatus("/error/401"));
+        assertEquals(408, StaticThemeResponder.computeErrorStatus("/error/408"));
+        assertEquals(418, StaticThemeResponder.computeErrorStatus("/error/418"));
+        assertEquals(502, StaticThemeResponder.computeErrorStatus("/error/502"));
+        assertEquals(599, StaticThemeResponder.computeErrorStatus("/error/599"));
+        assertEquals(404, StaticThemeResponder.computeErrorStatus("/error/404/extra"));
+        // Names, as the SPA's error view reads them: case and underscores do not matter.
+        assertEquals(404, StaticThemeResponder.computeErrorStatus("/error/not_found"));
+        assertEquals(404, StaticThemeResponder.computeErrorStatus("/error/NOT_FOUND"));
+        assertEquals(400, StaticThemeResponder.computeErrorStatus("/error/bad_request"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/internal_server_error"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/internalServerError"));
+        assertEquals(429, StaticThemeResponder.computeErrorStatus("/error/Busy"));
+        // Not an error status, not three digits, or not a number: the 500 default.
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/200"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/399"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/600"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/0404"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/40"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/4_0_4"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/\u0664\u0660\u0664"));
+        assertEquals(500, StaticThemeResponder.computeErrorStatus("/error/-404"));
+    }
+
+    @Test
+    public void test_displayCode() {
+        assertEquals(400, StaticThemeResponder.displayCode(400));
+        assertEquals(403, StaticThemeResponder.displayCode(403));
+        assertEquals(404, StaticThemeResponder.displayCode(404));
+        assertEquals(429, StaticThemeResponder.displayCode(429));
+        assertEquals(500, StaticThemeResponder.displayCode(500));
+        assertEquals(503, StaticThemeResponder.displayCode(503));
+        assertEquals(403, StaticThemeResponder.displayCode(401));
+        assertEquals(400, StaticThemeResponder.displayCode(418));
+        assertEquals(500, StaticThemeResponder.displayCode(502));
     }
 
     @Test
