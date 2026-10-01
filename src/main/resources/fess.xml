@@ -76,4 +76,6 @@
 	<component name="tikaConfig" class="org.apache.tika.config.TikaConfig">
 		<arg>org.codelibs.fess.util.ResourceUtil.getConfOrClassesPath("tika.xml")</arg>
 	</component>
+	<component name="tesseractOCRConfig" class="org.codelibs.fess.crawler.extractor.FessTesseractOCRConfig">
+	</component>
 </components>
