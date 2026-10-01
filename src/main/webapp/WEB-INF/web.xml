@@ -57,6 +57,11 @@
   </filter>
 
   <filter>
+    <filter-name>invalidParameterFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.InvalidParameterFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>lastaPrepareFilter</filter-name>
     <filter-class>org.lastaflute.web.servlet.filter.LastaPrepareFilter</filter-class>
   </filter>
@@ -165,6 +170,19 @@
 
   <filter-mapping>
     <filter-name>webApiFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <!--
+    invalidParameterFilter MUST come AFTER webApiFilter and BEFORE lastaShowbaseFilter. After
+    webApiFilter: a request an API manager serves is answered there in the API's own format and
+    never reaches this filter (SearchApiV2Manager reads the parameters first itself). Before
+    lastaShowbaseFilter: LastaFlute reads request parameters while routing, and a request whose
+    parameters Tomcat cannot decode would otherwise end as a 500 inside it.
+  -->
+  <filter-mapping>
+    <filter-name>invalidParameterFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>

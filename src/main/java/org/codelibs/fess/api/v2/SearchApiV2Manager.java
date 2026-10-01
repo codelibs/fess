@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.CacheHandler;
@@ -220,6 +221,25 @@ public class SearchApiV2Manager extends BaseApiManager {
         // servlet spec; headers set here are preserved.
         writeHeaders(response);
         final String sub = subPath(request);
+
+        // Parameters Tomcat cannot decode (?q=%ff) make the first read of any parameter throw,
+        // and the first read can come from any layer or handler below. Reading them here first
+        // answers the caller's mistake as the 400 it is, instead of the 500 the generic catch
+        // further down makes of it. The layers ahead of that try block (the login gate may read the
+        // access token parameter) have no catch of their own at all.
+        try {
+            request.getParameterNames();
+        } catch (final InvalidParameterException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("/api/v2 rejected undecodable parameters for {}", sub, e);
+            }
+            if (e.getErrorCode() == V2ErrorCode.PAYLOAD_TOO_LARGE.defaultHttpStatus()) {
+                ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.PAYLOAD_TOO_LARGE, "request parameters are too large");
+            } else {
+                ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.INVALID_REQUEST, "malformed request parameters");
+            }
+            return;
+        }
 
         // Layer 1: baseline Origin check (always applied). Rejects browser-driven
         // cross-site state-changing requests before any handler runs. A missing
