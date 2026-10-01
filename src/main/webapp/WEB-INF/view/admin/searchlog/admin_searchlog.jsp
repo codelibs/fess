@@ -136,6 +136,11 @@ ${fe:html(true)}
                                                 value="<la:message key="labels.crud_button_reset" />">
                                             <la:message key="labels.crud_button_reset"/>
                                         </button>
+                                        <button type="submit" class="btn btn-default" name="download"
+                                                value="<la:message key="labels.searchlog_download_csv" />">
+                                            <i class="fa fa-download" aria-hidden="true"></i>
+                                            <la:message key="labels.searchlog_download_csv"/>
+                                        </button>
                                     </div>
                                 </div>
                             </la:form>

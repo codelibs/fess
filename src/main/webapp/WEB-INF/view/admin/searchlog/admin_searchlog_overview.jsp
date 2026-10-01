@@ -4,8 +4,8 @@
 <div class="card">
     <div class="card-header">
         <h3 class="card-title"><la:message key="labels.searchlog_chart_trend"/></h3>
-        <c:if test="${not trendNoData}">
-            <div class="card-tools">
+        <div class="card-tools">
+            <c:if test="${not trendNoData}">
                 <div class="btn-group btn-group-sm" role="group">
                     <c:forEach var="s" items="${trend.series}" varStatus="st">
                         <button type="button" class="btn btn-outline-secondary ${st.first ? 'active' : ''}"
@@ -13,8 +13,9 @@
                                 key="labels.searchlog_metric_${s.key}"/></button>
                     </c:forEach>
                 </div>
-            </div>
-        </c:if>
+            </c:if>
+            <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="trend"/></jsp:include>
+        </div>
     </div>
     <div class="card-body">
         <c:choose>
@@ -33,6 +34,9 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title"><la:message key="labels.searchlog_table_${tableName}"/></h3>
+                    <div class="card-tools">
+                        <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="${tableName}"/></jsp:include>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-hover mb-0">

@@ -83,6 +83,9 @@ ${fe:html(true)}
                 <button type="submit" class="btn btn-primary btn-sm">
                     <la:message key="labels.searchlog_apply"/>
                 </button>
+                <c:if test="${not empty report.kpis}">
+                    <span class="ml-2"><jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="kpis"/></jsp:include></span>
+                </c:if>
                 <span class="ml-auto text-muted small"><i class="far fa-calendar-alt" aria-hidden="true"></i>
                     ${f:h(cond.from)} - ${f:h(cond.to)}</span>
             </form>

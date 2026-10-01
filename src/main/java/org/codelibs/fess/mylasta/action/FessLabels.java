@@ -3231,6 +3231,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Failed to load analytics data. See the log for details. */
     public static final String LABELS_searchlog_notice_failed = "{labels.searchlog_notice_failed}";
 
+    /** The key of the message: Download CSV */
+    public static final String LABELS_searchlog_download_csv = "{labels.searchlog_download_csv}";
+
     /** The key of the message: Maintenance */
     public static final String LABELS_maintenance_title_configuration = "{labels.maintenance_title_configuration}";
 

@@ -15,10 +15,17 @@
  */
 package org.codelibs.fess.app.web.admin.searchlog;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -38,7 +45,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
@@ -61,6 +70,8 @@ public class AdminSearchlogAction extends FessAdminAction {
 
     /** Role name for admin search log operations */
     public static final String ROLE = "admin-searchlog";
+
+    private static final DateTimeFormatter FILE_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private static final String[] CONDITION_FIELDS =
             { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize", "searchWord" };
@@ -123,6 +134,31 @@ public class AdminSearchlogAction extends FessAdminAction {
     }
 
     /**
+     * Downloads one table, chart or KPI list of an analytics tab as CSV. The report is the one the tab
+     * shows for the same filter.
+     *
+     * @param tab the tab name (overview, queries, clicks, performance or audience)
+     * @param item the item of the tab, see {@link SearchLogAnalyticsService#isExportable(String, String)}
+     * @param form the analytics filter form
+     * @return the CSV file, a redirect to the overview when the tab or the item is unknown, or a redirect to the tab when the report failed
+     */
+    @Execute
+    @Secured({ ROLE, ROLE + VIEW })
+    public ActionResponse downloadreport(final String tab, final String item, final AnalyticsForm form) {
+        validate(form, messages -> {}, () -> redirect(getClass()));
+        if (!searchLogAnalyticsService.isExportable(tab, item)) {
+            return redirect(getClass());
+        }
+        final AnalyticsCondition cond = createAnalyticsCondition(tab, form);
+        final AnalyticsReport report = searchLogAnalyticsService.getReport(tab, cond);
+        if (report.isFailed()) {
+            return redirectWith(getClass(), moreUrl("report", tab).params(buildAnalyticsParams(cond, form).toArray()));
+        }
+        return asCsvStream("searchlog_" + tab + "_" + item + "_" + cond.getFrom() + "_" + cond.getTo() + ".csv",
+                writer -> searchLogAnalyticsService.exportCsv(report, tab, item, writer));
+    }
+
+    /**
      * Displays the log list tab.
      *
      * @return HTML response for the search log list page
@@ -170,6 +206,26 @@ public class AdminSearchlogAction extends FessAdminAction {
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
+    }
+
+    /**
+     * Downloads all search log entries matching the search criteria as CSV, newest first. The criteria
+     * come from the submitted form, not from the pager of the session, and the paging is ignored.
+     *
+     * @param form the search form containing search criteria
+     * @return the CSV file
+     */
+    @Execute
+    @Secured({ ROLE, ROLE + VIEW })
+    public ActionResponse download(final SearchForm form) {
+        validate(form, messages -> {}, this::asListHtml);
+        verifyTokenKeep(this::asListHtml);
+        final SearchLogPager pager = new SearchLogPager();
+        copyBeanToBean(form, pager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        pager.logType = SearchLogPager.normalizeLogType(pager.logType);
+        return asCsvStream(
+                "searchlog_" + pager.logType + "_" + systemHelper.getCurrentTimeAsLocalDateTime().format(FILE_TIMESTAMP) + ".csv",
+                writer -> searchLogService.exportCsv(pager, writer));
     }
 
     /**
@@ -321,10 +377,48 @@ public class AdminSearchlogAction extends FessAdminAction {
         }
     }
 
-    private HtmlResponse asAnalyticsHtml(final String tab, final AnalyticsForm form) {
+    private AnalyticsCondition createAnalyticsCondition(final String tab, final AnalyticsForm form) {
         final int defaultSize = SearchLogAnalyticsService.TAB_OVERVIEW.equals(tab) ? 10 : 25;
-        final AnalyticsCondition cond = AnalyticsCondition.create(form.range, form.from, form.to, form.compare, form.accessType, form.size,
-                defaultSize, Clock.systemDefaultZone());
+        return AnalyticsCondition.create(form.range, form.from, form.to, form.compare, form.accessType, form.size, defaultSize,
+                Clock.systemDefaultZone());
+    }
+
+    /**
+     * Streams a CSV file in the CSV encoding of the configuration, with a byte order mark for UTF-8 so
+     * that Excel reads it as UTF-8. The size is not known and not limited, so nothing is buffered
+     * beyond the writer. A failure to read the logs is rethrown, so the browser gets an error instead
+     * of a file that looks complete; a failure to write means the client is gone and is only logged.
+     *
+     * @param fileName the name of the downloaded file
+     * @param writeCall writes the CSV
+     * @return the stream response
+     */
+    private StreamResponse asCsvStream(final String fileName, final CsvWriteCall writeCall) {
+        final String encoding = fessConfig.getCsvFileEncoding();
+        return asStream(fileName).contentTypeOctetStream().stream(out -> {
+            // not closed: the container owns the response stream
+            final Writer writer = new BufferedWriter(new OutputStreamWriter(out.stream(), encoding));
+            try {
+                if (Constants.UTF_8.equalsIgnoreCase(encoding)) {
+                    writer.write('\uFEFF');
+                }
+                writeCall.write(writer);
+                writer.flush();
+            } catch (final IOException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to write {} to the response.", fileName, e);
+                }
+            }
+        });
+    }
+
+    @FunctionalInterface
+    private interface CsvWriteCall {
+        void write(Writer writer) throws IOException;
+    }
+
+    private HtmlResponse asAnalyticsHtml(final String tab, final AnalyticsForm form) {
+        final AnalyticsCondition cond = createAnalyticsCondition(tab, form);
         final AnalyticsReport report = searchLogAnalyticsService.getReport(tab, cond);
         if (cond.isAdjusted()) {
             report.getNotices().add(0, new AnalyticsReport.Notice("warning", "labels.searchlog_notice_range_adjusted"));
@@ -363,29 +457,42 @@ public class AdminSearchlogAction extends FessAdminAction {
     }
 
     private String buildAnalyticsQuery(final AnalyticsCondition cond, final AnalyticsForm form) {
+        final List<String> params = buildAnalyticsParams(cond, form);
         final StringBuilder buf = new StringBuilder();
-        appendParam(buf, "range", cond.getRange());
-        if (AnalyticsCondition.RANGE_CUSTOM.equals(cond.getRange())) {
-            appendParam(buf, "from", cond.getFrom());
-            appendParam(buf, "to", cond.getTo());
-        }
-        if (cond.isCompare()) {
-            appendParam(buf, "compare", "true");
-        }
-        if (cond.getAccessType() != null) {
-            appendParam(buf, "accessType", cond.getAccessType());
-        }
-        if (StringUtil.isNotBlank(form.size)) {
-            appendParam(buf, "size", String.valueOf(cond.getSize()));
+        for (int i = 0; i < params.size(); i += 2) {
+            if (buf.length() > 0) {
+                buf.append('&');
+            }
+            buf.append(params.get(i)).append('=').append(params.get(i + 1));
         }
         return buf.toString();
     }
 
-    private void appendParam(final StringBuilder buf, final String name, final String value) {
-        if (buf.length() > 0) {
-            buf.append('&');
+    /**
+     * Lists the filter parameters of the condition as names and URL-encoded values, alternately.
+     */
+    private List<String> buildAnalyticsParams(final AnalyticsCondition cond, final AnalyticsForm form) {
+        final List<String> params = new ArrayList<>();
+        addParam(params, "range", cond.getRange());
+        if (AnalyticsCondition.RANGE_CUSTOM.equals(cond.getRange())) {
+            addParam(params, "from", cond.getFrom());
+            addParam(params, "to", cond.getTo());
         }
-        buf.append(name).append('=').append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+        if (cond.isCompare()) {
+            addParam(params, "compare", "true");
+        }
+        if (cond.getAccessType() != null) {
+            addParam(params, "accessType", cond.getAccessType());
+        }
+        if (StringUtil.isNotBlank(form.size)) {
+            addParam(params, "size", String.valueOf(cond.getSize()));
+        }
+        return params;
+    }
+
+    private void addParam(final List<String> params, final String name, final String value) {
+        params.add(name);
+        params.add(URLEncoder.encode(value, StandardCharsets.UTF_8));
     }
 
     // ===================================================================================
