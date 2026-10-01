@@ -555,6 +555,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES = "crawler.document.mimetype.extension.overrides";
 
+    /** The key of the configuration. e.g. false */
+    String CRAWLER_DOCUMENT_OCR_ENABLED = "crawler.document.ocr.enabled";
+
+    /** The key of the configuration. e.g. eng */
+    String CRAWLER_DOCUMENT_OCR_LANGUAGE = "crawler.document.ocr.language";
+
+    /** The key of the configuration. e.g. 120 */
+    String CRAWLER_DOCUMENT_OCR_TIMEOUT = "crawler.document.ocr.timeout";
+
     /** The key of the configuration. e.g. true */
     String INDEXER_THREAD_DUMP_ENABLED = "indexer.thread.dump.enabled";
 
@@ -4082,6 +4091,47 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerDocumentMimetypeExtensionOverridesAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.ocr.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to extract text from images and scanned PDFs with Tesseract OCR (requires the tesseract command).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentOcrEnabled();
+
+    /**
+     * Is the property for the key 'crawler.document.ocr.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to extract text from images and scanned PDFs with Tesseract OCR (requires the tesseract command).
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentOcrEnabled();
+
+    /**
+     * Get the value for the key 'crawler.document.ocr.language'. <br>
+     * The value is, e.g. eng <br>
+     * comment: Tesseract OCR languages, joined with '+' (e.g. jpn+eng).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentOcrLanguage();
+
+    /**
+     * Get the value for the key 'crawler.document.ocr.timeout'. <br>
+     * The value is, e.g. 120 <br>
+     * comment: Timeout in seconds for one Tesseract OCR run.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentOcrTimeout();
+
+    /**
+     * Get the value for the key 'crawler.document.ocr.timeout' as {@link Integer}. <br>
+     * The value is, e.g. 120 <br>
+     * comment: Timeout in seconds for one Tesseract OCR run.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentOcrTimeoutAsInteger();
 
     /**
      * Get the value for the key 'indexer.thread.dump.enabled'. <br>
@@ -11386,6 +11436,26 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES);
         }
 
+        public String getCrawlerDocumentOcrEnabled() {
+            return get(FessConfig.CRAWLER_DOCUMENT_OCR_ENABLED);
+        }
+
+        public boolean isCrawlerDocumentOcrEnabled() {
+            return is(FessConfig.CRAWLER_DOCUMENT_OCR_ENABLED);
+        }
+
+        public String getCrawlerDocumentOcrLanguage() {
+            return get(FessConfig.CRAWLER_DOCUMENT_OCR_LANGUAGE);
+        }
+
+        public String getCrawlerDocumentOcrTimeout() {
+            return get(FessConfig.CRAWLER_DOCUMENT_OCR_TIMEOUT);
+        }
+
+        public Integer getCrawlerDocumentOcrTimeoutAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_OCR_TIMEOUT);
+        }
+
         public String getIndexerThreadDumpEnabled() {
             return get(FessConfig.INDEXER_THREAD_DUMP_ENABLED);
         }
@@ -14563,6 +14633,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_SUPPORTED_MIMETYPES, "text/html");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES, "text/html");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_OCR_ENABLED, "false");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_OCR_LANGUAGE, "eng");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_OCR_TIMEOUT, "120");
             defaultMap.put(FessConfig.INDEXER_THREAD_DUMP_ENABLED, "true");
             defaultMap.put(FessConfig.INDEXER_UNPROCESSED_DOCUMENT_SIZE, "1000");
             defaultMap.put(FessConfig.INDEXER_CLICK_COUNT_ENABLED, "true");
