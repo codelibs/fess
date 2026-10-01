@@ -18,7 +18,13 @@ package org.codelibs.fess.opensearch.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
 import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -26,6 +32,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -41,13 +48,17 @@ import tools.jackson.databind.ObjectMapper;
  * {@code ChunkVectorHelper}'s query-time score-scale conversion, and that an unset, blank, or
  * out-of-set operator value for any of {@code dimension}/{@code method}/{@code engine}/
  * {@code space_type} always falls back to the documented default (with a WARN) rather than
- * splicing an unvalidated token into the shipped mapping.
+ * splicing an unvalidated token into the shipped mapping. Also covers
+ * {@code addMissingProperties}, which adds the fields of a bundled non-document mapping that an
+ * existing index does not have yet.
  */
 public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
 
     private static final String DOC_INDEX_CONFIG = "fess_indices/fess.json";
 
     private static final String CONFIG_INDEX_CONFIG = "fess_indices/fess_config.web_config.json";
+
+    private static final String SEARCH_LOG_MAPPING = "fess_indices/fess_log.search_log/search_log.json";
 
     private static final String[] SETTINGS_JSON_PATHS =
             { "fess_indices/fess.json", "fess_indices/_aws/fess.json", "fess_indices/_cloud/fess.json" };
@@ -307,6 +318,141 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getMissingProperties_returnsOnlyAbsentNamesWithBundledDefinitions() {
+        final SearchEngineClient client = new SearchEngineClient();
+        final Map<String, Object> existing = Map.of("user", Map.of("type", "text"));
+        final Map<String, Object> bundled = new LinkedHashMap<>();
+        bundled.put("user", Map.of("type", "keyword"));
+        bundled.put("virtualHost", Map.of("type", "keyword"));
+        bundled.put("hitCount", Map.of("type", "long"));
+
+        final Map<String, Object> missing = client.getMissingProperties(existing, bundled);
+
+        assertEquals(List.of("virtualHost", "hitCount"), new ArrayList<>(missing.keySet()));
+        assertEquals(Map.of("type", "keyword"), missing.get("virtualHost"));
+        assertEquals(Map.of("type", "long"), missing.get("hitCount"));
+    }
+
+    @Test
+    public void test_getMissingProperties_emptyWhenNothingIsMissing() {
+        final SearchEngineClient client = new SearchEngineClient();
+        final Map<String, Object> properties = Map.of("user", Map.of("type", "keyword"));
+
+        assertTrue(client.getMissingProperties(properties, properties).isEmpty());
+        assertTrue(client.getMissingProperties(properties, Map.of()).isEmpty());
+    }
+
+    @Test
+    public void test_addMissingProperties_putsOnlyMissingFields() throws Exception {
+        final PutRecordingClient client = new PutRecordingClient();
+        final Map<String, Object> existing = readBundledProperties(SEARCH_LOG_MAPPING);
+        existing.remove("virtualHost");
+        existing.remove("languages");
+        // an existing field whose definition differs from the bundled one must be left alone
+        existing.put("user", Map.of("type", "text"));
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess_log.search_log", "search_log", "fess_log.search_log", toMappingMetadata(existing));
+
+            assertEquals(1, client.putSources.size());
+            assertEquals("fess_log.search_log", client.putIndexNames.get(0));
+            final Map<String, Object> put =
+                    new ObjectMapper().readValue(client.putSources.get(0), new TypeReference<Map<String, Object>>() {
+                    });
+            assertEquals(Map.of("properties", Map.of("virtualHost", Map.of("type", "keyword"), "languages", Map.of("type", "keyword"))),
+                    put);
+            final List<String> infos = capture.messagesAt(Level.INFO);
+            assertEquals(1, infos.size(), infos.toString());
+            assertTrue(infos.get(0).contains("fess_log.search_log"), infos.get(0));
+            assertTrue(infos.get(0).contains("virtualHost"), infos.get(0));
+            assertTrue(infos.get(0).contains("languages"), infos.get(0));
+            assertTrue(capture.warnings().isEmpty(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_noPutWhenNothingIsMissing() throws Exception {
+        final PutRecordingClient client = new PutRecordingClient();
+        final Map<String, Object> existing = readBundledProperties(SEARCH_LOG_MAPPING);
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess_log.search_log", "search_log", "fess_log.search_log", toMappingMetadata(existing));
+
+            assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+            assertTrue(capture.messagesAt(Level.INFO).isEmpty(), capture.messagesAt(Level.INFO).toString());
+            assertTrue(capture.warnings().isEmpty(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_skipsDocumentIndex() {
+        final PutRecordingClient client = new PutRecordingClient();
+
+        client.addMissingProperties("fess", "doc", "fess.20260101000000000", toMappingMetadata(Map.of("url", Map.of("type", "keyword"))));
+
+        assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+    }
+
+    @Test
+    public void test_addMissingProperties_putFailureLogsWarnAndDoesNotThrow() {
+        final PutRecordingClient client = new PutRecordingClient();
+        client.putFailure = new IllegalStateException("put failed");
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess_log.search_log", "search_log", "fess_log.search_log",
+                    toMappingMetadata(Map.of("user", Map.of("type", "keyword"))));
+
+            assertEquals(1, client.putSources.size());
+            assertTrue(capture.messagesAt(Level.INFO).isEmpty(), capture.messagesAt(Level.INFO).toString());
+            assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+            assertTrue(capture.warnings().get(0).contains("fess_log.search_log"), capture.warnings().get(0));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_notAcknowledgedLogsWarn() {
+        final PutRecordingClient client = new PutRecordingClient();
+        client.acknowledged = false;
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess_log.search_log", "search_log", "fess_log.search_log",
+                    toMappingMetadata(Map.of("user", Map.of("type", "keyword"))));
+
+            assertEquals(1, client.putSources.size());
+            assertTrue(capture.messagesAt(Level.INFO).isEmpty(), capture.messagesAt(Level.INFO).toString());
+            assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_missingBundledFileLogsWarnAndSkips() {
+        final PutRecordingClient client = new PutRecordingClient();
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess_log.no_such_index", "no_such_index", "fess_log.no_such_index",
+                    toMappingMetadata(Map.of("user", Map.of("type", "keyword"))));
+
+            assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+            assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
     public void test_indexDefinitions_areValidJson() throws Exception {
         final ObjectMapper mapper = new ObjectMapper();
         final String[] paths = { "fess_indices/fess.json", "fess_indices/_aws/fess.json", "fess_indices/_cloud/fess.json",
@@ -442,6 +588,37 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(path)) {
             assertNotNull(in, path + " must exist");
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private Map<String, Object> readBundledProperties(final String path) throws IOException {
+        final Map<String, Object> mapping =
+                new ObjectMapper().readValue(readResourceAsString(path), new TypeReference<Map<String, Object>>() {
+                });
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> properties = (Map<String, Object>) mapping.get("properties");
+        return new LinkedHashMap<>(properties);
+    }
+
+    /** Builds the "properties" entry the way the HTTP client's get-mappings response does. */
+    private static MappingMetadata toMappingMetadata(final Map<String, Object> properties) {
+        return new MappingMetadata("properties", properties);
+    }
+
+    private static class PutRecordingClient extends SearchEngineClient {
+        final List<String> putIndexNames = new ArrayList<>();
+        final List<String> putSources = new ArrayList<>();
+        boolean acknowledged = true;
+        RuntimeException putFailure;
+
+        @Override
+        protected boolean putMapping(final String indexName, final String source) {
+            putIndexNames.add(indexName);
+            putSources.add(source);
+            if (putFailure != null) {
+                throw putFailure;
+            }
+            return acknowledged;
         }
     }
 }

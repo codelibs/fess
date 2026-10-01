@@ -1214,6 +1214,7 @@ public class SearchEngineClient implements Client {
             if (logger.isDebugEnabled()) {
                 logger.debug("{}/{} mapping exists.", indexName, docType);
             }
+            addMissingProperties(index, docType, indexName, indexMappings.get("properties"));
             if (loadBulkData && isStartupBulkReloadTarget(index) && isWebappProcess()) {
                 final String dataPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
                 if (ResourceUtil.isExist(dataPath)) {
@@ -1221,6 +1222,89 @@ public class SearchEngineClient implements Client {
                 }
             }
         }
+    }
+
+    /**
+     * Adds the top-level fields of the bundled mapping that an existing index does not have yet.
+     *
+     * <p>The bundled mapping is put only when an index is created, so an upgraded installation
+     * never receives fields that a new release adds to it. The first write of such a field would
+     * map it dynamically, and the intended type could then only be applied by a reindex. Fields
+     * the index already has are never changed. The document index is skipped: its mapping is
+     * rewritten by plugins and is upgraded by a reindex.</p>
+     *
+     * @param index              the index configuration name
+     * @param docType            the document type name
+     * @param indexName          the actual index name
+     * @param existingProperties the index's current {@code properties} mapping
+     */
+    protected void addMissingProperties(final String index, final String docType, final String indexName,
+            final MappingMetadata existingProperties) {
+        if (DOC_INDEX.equals(index)) {
+            return;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
+        final Map<String, Object> missingProperties;
+        try {
+            final String source = substitutePlaceholders(FileUtil.readUTF8(mappingFile), fessConfig.getIndexNumberOfShards(),
+                    fessConfig.getIndexAutoExpandReplicas());
+            final Map<String, Object> mapping = new ObjectMapper().readValue(source, new TypeReference<Map<String, Object>>() {
+            });
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> bundledProperties = (Map<String, Object>) mapping.getOrDefault("properties", Collections.emptyMap());
+            missingProperties = getMissingProperties(existingProperties.sourceAsMap(), bundledProperties);
+        } catch (final Exception e) {
+            logger.warn("{} is not found.", mappingFile, e);
+            return;
+        }
+        if (missingProperties.isEmpty()) {
+            return;
+        }
+        try {
+            if (putMapping(indexName, new ObjectMapper().writeValueAsString(Collections.singletonMap("properties", missingProperties)))) {
+                logger.info("Added fields to {}/{} mapping: fields={}", indexName, docType, missingProperties.keySet());
+            } else {
+                logger.warn("Failed to add fields to {}/{} mapping: fields={}", indexName, docType, missingProperties.keySet());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to add fields to {}/{} mapping: fields={}", indexName, docType, missingProperties.keySet(), e);
+        }
+    }
+
+    /**
+     * Returns the bundled properties whose names the existing mapping does not have.
+     *
+     * @param existingProperties the top-level properties of the existing index
+     * @param bundledProperties  the top-level properties of the bundled mapping
+     * @return the missing properties with their bundled definitions, in bundled order
+     */
+    protected Map<String, Object> getMissingProperties(final Map<String, Object> existingProperties,
+            final Map<String, Object> bundledProperties) {
+        final Map<String, Object> missingProperties = new LinkedHashMap<>();
+        bundledProperties.forEach((name, definition) -> {
+            if (!existingProperties.containsKey(name)) {
+                missingProperties.put(name, definition);
+            }
+        });
+        return missingProperties;
+    }
+
+    /**
+     * Puts a mapping on an index.
+     *
+     * @param indexName the actual index name
+     * @param source    the mapping JSON
+     * @return {@code true} when the request was acknowledged
+     */
+    protected boolean putMapping(final String indexName, final String source) {
+        return client.admin()
+                .indices()
+                .preparePutMapping(indexName)
+                .setSource(source, XContentType.JSON)
+                .execute()
+                .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout())
+                .isAcknowledged();
     }
 
     /**
