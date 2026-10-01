@@ -55,6 +55,16 @@ function qs(params) {
 }
 
 /**
+ * The URL of /api/v2{path} with the given query parameters, for links the browser follows itself
+ * (e.g. a download), relative to the <base href> like every other request.
+ * @param {string} path
+ * @param {object} [params] - query parameters
+ */
+export function url(path, params) {
+  return BASE + path + qs(params);
+}
+
+/**
  * GET /api/v2{path}
  * @param {string} path
  * @param {object} [params] - query parameters

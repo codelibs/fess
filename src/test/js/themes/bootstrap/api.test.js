@@ -84,6 +84,17 @@ describe("get", () => {
   });
 });
 
+describe("url", () => {
+  it("builds the relative /api/v2 URL with the query string, repeating array values", () => {
+    expect(api.url("/documents/export", { q: "a b", lang: ["ja", "en"], skip: null }))
+      .toBe("api/v2/documents/export?q=a+b&lang=ja&lang=en");
+  });
+
+  it("omits the query string when there are no parameters", () => {
+    expect(api.url("/search")).toBe("api/v2/search");
+  });
+});
+
 describe("post", () => {
   it("POSTs JSON with the CSRF header from module state", async () => {
     api.setCsrfToken("tok-123");

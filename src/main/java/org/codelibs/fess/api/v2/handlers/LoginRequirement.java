@@ -97,7 +97,7 @@ public class LoginRequirement {
             return false;
         }
         return switch (subPath) {
-        case "/search", "/documents/all", "/suggest-words", "/labels", "/popular-words" -> true;
+        case "/search", "/documents/all", "/documents/export", "/suggest-words", "/labels", "/popular-words" -> true;
         default -> false;
         };
     }

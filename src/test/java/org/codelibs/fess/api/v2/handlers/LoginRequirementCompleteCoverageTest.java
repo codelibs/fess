@@ -50,7 +50,7 @@ public class LoginRequirementCompleteCoverageTest {
     private static final Map<String, Boolean> ENDPOINT_DECISIONS;
 
     /** Must equal {@code ENDPOINT_DECISIONS.size()}. */
-    private static final int EXPECTED_ENTRY_COUNT = 19;
+    private static final int EXPECTED_ENTRY_COUNT = 20;
 
     static {
         final Map<String, Boolean> m = new LinkedHashMap<>();
@@ -66,6 +66,7 @@ public class LoginRequirementCompleteCoverageTest {
         // --- Search and everything derived from the index. ---
         m.put("/search", true);
         m.put("/documents/all", true);
+        m.put("/documents/export", true);
         m.put("/suggest-words", true);
         m.put("/labels", true);
         m.put("/popular-words", true);
@@ -132,7 +133,7 @@ public class LoginRequirementCompleteCoverageTest {
             }
         }
         Collections.sort(accepted);
-        assertEquals(List.of("/documents/all", "/labels", "/popular-words", "/search", "/suggest-words"), accepted);
+        assertEquals(List.of("/documents/all", "/documents/export", "/labels", "/popular-words", "/search", "/suggest-words"), accepted);
         assertTrue(!new LoginRequirement().acceptsAccessToken(null));
     }
 }

@@ -12,6 +12,14 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
   get: vi.fn(async () => ({})),
   post: vi.fn(async () => ({})),
   isAuthenticated: vi.fn(() => false),
+  // Same shape as the real api.url (BASE + path + query string).
+  url: vi.fn((path, params) => {
+    const u = new URLSearchParams();
+    for (const [k, v] of Object.entries(params || {})) {
+      (Array.isArray(v) ? v : [v]).forEach(x => u.append(k, String(x)));
+    }
+    return "api/v2" + path + "?" + u.toString();
+  }),
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
   navigate: vi.fn(),
@@ -633,6 +641,51 @@ const settle = () => new Promise((r) => setTimeout(r));
 
 /** How many "/search" API calls have been made so far. */
 const searchCalls = () => api.get.mock.calls.filter((c) => c[0] === "/search").length;
+
+describe("runSearch — export menu", () => {
+  const EXPORT_FIXTURE = SEARCH_FIXTURE
+    + '<div id="results-export" class="d-none"><a id="export-csv" href="#"></a><a id="export-json" href="#"></a></div>';
+
+  beforeEach(() => {
+    mountBody(EXPORT_FIXTURE);
+    _state.q = "foo";
+    _state.start = 20;
+    _state.fields = { label: ["lblA"] };
+  });
+
+  it("links CSV and JSON to the export endpoint with the search but without paging or facets", async () => {
+    api.getConfig.mockReturnValue({ ...FULL_CFG, features: { ...FULL_CFG.features, search_export: true } });
+    installApiDispatch();
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-export").classList.contains("d-none")).toBe(false);
+    for (const format of ["csv", "json"]) {
+      const href = document.getElementById("export-" + format).getAttribute("href");
+      expect(href.startsWith("api/v2/documents/export?")).toBe(true);
+      const params = new URLSearchParams(href.split("?")[1]);
+      expect(params.get("format")).toBe(format);
+      expect(params.get("q")).toBe("foo");
+      expect(params.getAll("fields.label")).toEqual(["lblA"]);
+      for (const name of ["start", "num", "offset", "facet.field", "facet.query"]) expect(params.has(name)).toBe(false);
+    }
+  });
+
+  it("stays hidden when the server does not offer the export", async () => {
+    api.getConfig.mockReturnValue(FULL_CFG);
+    installApiDispatch();
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-export").classList.contains("d-none")).toBe(true);
+  });
+
+  it("is hidden when the search has no results", async () => {
+    api.getConfig.mockReturnValue({ ...FULL_CFG, features: { ...FULL_CFG.features, search_export: true } });
+    installApiDispatch({ search: makeSearchEnv([]) });
+    await runSearch();
+    await settle();
+    expect(document.getElementById("results-export").classList.contains("d-none")).toBe(true);
+  });
+});
 
 describe("runSearch — successful render", () => {
   beforeEach(() => {

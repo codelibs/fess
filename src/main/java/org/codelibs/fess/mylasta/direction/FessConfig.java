@@ -290,6 +290,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String API_SEARCH_SCROLL = "api.search.scroll";
 
+    /** The key of the configuration. e.g. false */
+    String API_SEARCH_EXPORT = "api.search.export";
+
+    /** The key of the configuration. e.g. 1000 */
+    String API_SEARCH_EXPORT_MAX_SIZE = "api.search.export.max.size";
+
+    /** The key of the configuration. e.g. title,url_link,last_modified,content_length,filetype */
+    String API_SEARCH_EXPORT_FIELDS = "api.search.export.fields";
+
+    /** The key of the configuration. e.g. 10 */
+    String API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE = "api.search.export.rate.limit.per.minute";
+
     /** The key of the configuration. e.g. Referrer-Policy:strict-origin-when-cross-origin */
     String API_JSON_RESPONSE_HEADERS = "api.json.response.headers";
 
@@ -2902,6 +2914,73 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiSearchScroll();
+
+    /**
+     * Get the value for the key 'api.search.export'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to enable the end-user export of search results (CSV/JSON) at /api/v2/documents/export.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiSearchExport();
+
+    /**
+     * Is the property for the key 'api.search.export' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Whether to enable the end-user export of search results (CSV/JSON) at /api/v2/documents/export.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isApiSearchExport();
+
+    /**
+     * Get the value for the key 'api.search.export.max.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of documents written by one search result export.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiSearchExportMaxSize();
+
+    /**
+     * Get the value for the key 'api.search.export.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of documents written by one search result export.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiSearchExportMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'api.search.export.fields'. <br>
+     * The value is, e.g. title,url_link,last_modified,content_length,filetype <br>
+     * comment: Fields written by the search result export (comma-separated). A field that is not an API response field is ignored.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiSearchExportFields();
+
+    /**
+     * Get the value for the key 'api.search.export.fields' as {@link Integer}. <br>
+     * The value is, e.g. title,url_link,last_modified,content_length,filetype <br>
+     * comment: Fields written by the search result export (comma-separated). A field that is not an API response field is ignored.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiSearchExportFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'api.search.export.rate.limit.per.minute'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of search result exports per minute for each user (each client IP for a guest). 0 or less disables the limit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiSearchExportRateLimitPerMinute();
+
+    /**
+     * Get the value for the key 'api.search.export.rate.limit.per.minute' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of search result exports per minute for each user (each client IP for a guest). 0 or less disables the limit.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiSearchExportRateLimitPerMinuteAsInteger();
 
     /**
      * Get the value for the key 'api.json.response.headers'. <br>
@@ -10818,6 +10897,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_SEARCH_SCROLL);
         }
 
+        public String getApiSearchExport() {
+            return get(FessConfig.API_SEARCH_EXPORT);
+        }
+
+        public boolean isApiSearchExport() {
+            return is(FessConfig.API_SEARCH_EXPORT);
+        }
+
+        public String getApiSearchExportMaxSize() {
+            return get(FessConfig.API_SEARCH_EXPORT_MAX_SIZE);
+        }
+
+        public Integer getApiSearchExportMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.API_SEARCH_EXPORT_MAX_SIZE);
+        }
+
+        public String getApiSearchExportFields() {
+            return get(FessConfig.API_SEARCH_EXPORT_FIELDS);
+        }
+
+        public Integer getApiSearchExportFieldsAsInteger() {
+            return getAsInteger(FessConfig.API_SEARCH_EXPORT_FIELDS);
+        }
+
+        public String getApiSearchExportRateLimitPerMinute() {
+            return get(FessConfig.API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE);
+        }
+
+        public Integer getApiSearchExportRateLimitPerMinuteAsInteger() {
+            return getAsInteger(FessConfig.API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE);
+        }
+
         public String getApiJsonResponseHeaders() {
             return get(FessConfig.API_JSON_RESPONSE_HEADERS);
         }
@@ -14471,6 +14582,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_ADMIN_ACCESS_PERMISSIONS, "Radmin-api");
             defaultMap.put(FessConfig.API_SEARCH_ACCEPT_REFERERS, "");
             defaultMap.put(FessConfig.API_SEARCH_SCROLL, "false");
+            defaultMap.put(FessConfig.API_SEARCH_EXPORT, "false");
+            defaultMap.put(FessConfig.API_SEARCH_EXPORT_MAX_SIZE, "1000");
+            defaultMap.put(FessConfig.API_SEARCH_EXPORT_FIELDS, "title,url_link,last_modified,content_length,filetype");
+            defaultMap.put(FessConfig.API_SEARCH_EXPORT_RATE_LIMIT_PER_MINUTE, "10");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED, "false");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");

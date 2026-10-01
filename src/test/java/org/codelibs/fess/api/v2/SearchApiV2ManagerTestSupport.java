@@ -20,6 +20,7 @@ import org.codelibs.fess.api.v2.handlers.ChatHandler;
 import org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler;
 import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
+import org.codelibs.fess.api.v2.handlers.ExportSearchHandler;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
 import org.codelibs.fess.api.v2.handlers.LoginHandler;
@@ -78,6 +79,7 @@ final class SearchApiV2ManagerTestSupport {
         final SearchApiV2Manager m = new SearchApiV2Manager();
         m.searchHandler = new SearchHandler();
         m.scrollSearchHandler = new ScrollSearchHandler();
+        m.exportSearchHandler = new ExportSearchHandler();
         m.favoriteGetHandler = new FavoriteGetHandler();
         m.favoritePostHandler = new FavoritePostHandler();
         m.favoritesListHandler = new FavoritesListHandler();

@@ -27,6 +27,7 @@ import org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler;
 import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
+import org.codelibs.fess.api.v2.handlers.ExportSearchHandler;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritesListHandler;
@@ -87,6 +88,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code GET /api/v2/documents/all} (scroll over all matching documents). */
     @Resource
     protected ScrollSearchHandler scrollSearchHandler;
+
+    /** Handles {@code GET /api/v2/documents/export} (CSV/JSON download of the matching documents). */
+    @Resource
+    protected ExportSearchHandler exportSearchHandler;
 
     /** Handles {@code GET /api/v2/documents/{id}/favorite} (read favorite state). */
     @Resource
@@ -256,6 +261,12 @@ public class SearchApiV2Manager extends BaseApiManager {
             // pattern because "all" would otherwise be interpreted as a doc id.
             if ("/documents/all".equals(sub)) {
                 scrollSearchHandler.handle(request, response);
+                return;
+            }
+            // "/documents/export" is matched exactly for the same reason: it must not fall into
+            // the unknown-action arm below.
+            if ("/documents/export".equals(sub)) {
+                exportSearchHandler.handle(request, response);
                 return;
             }
             // "/documents/favorite" satisfies both ends of the pattern while leaving no doc id
