@@ -346,6 +346,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/searchlog/admin_searchlog.jsp */
     HtmlNext path_AdminSearchlog_AdminSearchlogJsp = new HtmlNext("/admin/searchlog/admin_searchlog.jsp");
 
+    /** The path of the HTML: /admin/searchlog/admin_searchlog_analytics.jsp */
+    HtmlNext path_AdminSearchlog_AdminSearchlogAnalyticsJsp = new HtmlNext("/admin/searchlog/admin_searchlog_analytics.jsp");
+
     /** The path of the HTML: /admin/searchlog/admin_searchlog_details.jsp */
     HtmlNext path_AdminSearchlog_AdminSearchlogDetailsJsp = new HtmlNext("/admin/searchlog/admin_searchlog_details.jsp");
 

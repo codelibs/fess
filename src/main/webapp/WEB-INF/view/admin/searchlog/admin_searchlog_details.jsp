@@ -24,7 +24,7 @@ ${fe:html(true)}
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><la:link href="/admin/searchlog">
+                            <li class="breadcrumb-item"><la:link href="/admin/searchlog/logs/">
                                 <la:message key="labels.searchlog_configuration_link_top"/>
                             </la:link></li>
                             <c:if test="${crudMode == 4}">
@@ -53,7 +53,7 @@ ${fe:html(true)}
                                 </h3>
                                 <div class="card-tools">
                                     <div class="btn-group">
-                                        <la:link href="/admin/searchlog"
+                                        <la:link href="/admin/searchlog/logs/"
                                                  styleClass="btn btn-primary btn-xs">
                                             <la:message key="labels.searchlog_configuration_link_top"/>
                                         </la:link>
