@@ -29,6 +29,15 @@
           },
           "userSessionId" : {
             "type" : "keyword"
+          },
+          "searchWord" : {
+            "type" : "keyword"
+          },
+          "accessType" : {
+            "type" : "keyword"
+          },
+          "rank" : {
+            "type" : "integer"
           }
         }
       }

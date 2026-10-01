@@ -80,13 +80,18 @@ public class ClickLogDbm extends AbstractDBMeta {
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, et -> ((ClickLog) et).getUrlId(), (et, vl) -> ((ClickLog) et).setUrlId(DfTypeUtil.toString(vl)), "urlId");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getAccessType(), (et, vl) -> ((ClickLog) et).setAccessType(DfTypeUtil.toString(vl)),
+                "accessType");
         setupEpg(_epgMap, et -> ((ClickLog) et).getDocId(), (et, vl) -> ((ClickLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
         setupEpg(_epgMap, et -> ((ClickLog) et).getOrder(), (et, vl) -> ((ClickLog) et).setOrder(DfTypeUtil.toInteger(vl)), "order");
         setupEpg(_epgMap, et -> ((ClickLog) et).getQueryId(), (et, vl) -> ((ClickLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
         setupEpg(_epgMap, et -> ((ClickLog) et).getQueryRequestedAt(),
                 (et, vl) -> ((ClickLog) et).setQueryRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "queryRequestedAt");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getRank(), (et, vl) -> ((ClickLog) et).setRank(DfTypeUtil.toInteger(vl)), "rank");
         setupEpg(_epgMap, et -> ((ClickLog) et).getRequestedAt(),
                 (et, vl) -> ((ClickLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getSearchWord(), (et, vl) -> ((ClickLog) et).setSearchWord(DfTypeUtil.toString(vl)),
+                "searchWord");
         setupEpg(_epgMap, et -> ((ClickLog) et).getUrl(), (et, vl) -> ((ClickLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
         setupEpg(_epgMap, et -> ((ClickLog) et).getUserSessionId(), (et, vl) -> ((ClickLog) et).setUserSessionId(DfTypeUtil.toString(vl)),
                 "userSessionId");
@@ -128,6 +133,8 @@ public class ClickLogDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnUrlId = cci("urlId", "urlId", null, null, String.class, "urlId", null, false, false, false, "keyword",
             0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnAccessType = cci("accessType", "accessType", null, null, String.class, "accessType", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false, "keyword",
             0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnOrder = cci("order", "order", null, null, Integer.class, "order", null, false, false, false,
@@ -136,8 +143,12 @@ public class ClickLogDbm extends AbstractDBMeta {
             "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryRequestedAt = cci("queryRequestedAt", "queryRequestedAt", null, null, LocalDateTime.class,
             "queryRequestedAt", null, false, false, false, "LocalDateTime", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRank = cci("rank", "rank", null, null, Integer.class, "rank", null, false, false, false, "Integer", 0,
+            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null,
             false, false, false, "LocalDateTime", 0, 0, null, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSearchWord = cci("searchWord", "searchWord", null, null, String.class, "searchWord", null, false,
+            false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
             null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId", null,
@@ -145,6 +156,10 @@ public class ClickLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnUrlId() {
         return _columnUrlId;
+    }
+
+    public ColumnInfo columnAccessType() {
+        return _columnAccessType;
     }
 
     public ColumnInfo columnDocId() {
@@ -163,8 +178,16 @@ public class ClickLogDbm extends AbstractDBMeta {
         return _columnQueryRequestedAt;
     }
 
+    public ColumnInfo columnRank() {
+        return _columnRank;
+    }
+
     public ColumnInfo columnRequestedAt() {
         return _columnRequestedAt;
+    }
+
+    public ColumnInfo columnSearchWord() {
+        return _columnSearchWord;
     }
 
     public ColumnInfo columnUrl() {
@@ -178,11 +201,14 @@ public class ClickLogDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnUrlId());
+        ls.add(columnAccessType());
         ls.add(columnDocId());
         ls.add(columnOrder());
         ls.add(columnQueryId());
         ls.add(columnQueryRequestedAt());
+        ls.add(columnRank());
         ls.add(columnRequestedAt());
+        ls.add(columnSearchWord());
         ls.add(columnUrl());
         ls.add(columnUserSessionId());
         return ls;

@@ -19,6 +19,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.SearchLogPager;
 import org.codelibs.fess.util.ComponentUtil;
 
+import jakarta.validation.constraints.Size;
+
 /**
  * The search form for Search Log.
  */
@@ -54,6 +56,12 @@ public class SearchForm {
      * The access type field for filtering logs by access method.
      */
     public String accessType;
+
+    /**
+     * The search word field for filtering logs by the searched keyword.
+     */
+    @Size(max = 1000)
+    public String searchWord;
 
     /**
      * The size field for controlling page size.

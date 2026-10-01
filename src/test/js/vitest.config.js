@@ -21,13 +21,13 @@ export default defineConfig({
   server: { fs: { allow: [repoRoot] } },
   test: {
     environment: "jsdom",
-    include: ["src/test/js/themes/**/*.test.js"],
+    include: ["src/test/js/themes/**/*.test.js", "src/test/js/admin/**/*.test.js"],
     coverage: {
       provider: "v8",
       // Instrument every shipped asset (all:true) so a new module without a
       // test drags coverage down and trips the gate, not just the loaded ones.
       all: true,
-      include: [`${assets}/*.js`],
+      include: [`${assets}/*.js`, "src/main/webapp/js/admin/searchlog.js"],
       // skipFull:false so fully-covered files (e.g. format.js, router.js at 100%)
       // still print in the text table. Vitest 4's text reporter defaults to
       // skipFull:true, which hides them — making an instrumented, gated file look

@@ -74,11 +74,14 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
         try {
             final RESULT result = entityType.newInstance();
             result.setUrlId(DfTypeUtil.toString(source.get("urlId")));
+            result.setAccessType(DfTypeUtil.toString(source.get("accessType")));
             result.setDocId(DfTypeUtil.toString(source.get("docId")));
             result.setOrder(DfTypeUtil.toInteger(source.get("order")));
             result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
             result.setQueryRequestedAt(toLocalDateTime(source.get("queryRequestedAt")));
+            result.setRank(DfTypeUtil.toInteger(source.get("rank")));
             result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
+            result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
             result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             return updateEntity(source, result);

@@ -33,6 +33,9 @@ ${fe:html(true)}
             </div>
         </div>
         <section class="content">
+            <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_tabs.jsp">
+                <jsp:param name="tab" value="logs"/>
+            </jsp:include>
             <div class="row">
                 <div class="col-12">
                     <div class="card card-outline card-primary">
@@ -63,26 +66,6 @@ ${fe:html(true)}
                                                     key="labels.searchlog_log_type_user_info"/></la:option>
                                             <la:option value="favorite"><la:message
                                                     key="labels.searchlog_log_type_favorite"/></la:option>
-                                            <la:option value="search_keyword_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_keyword"/></la:option>
-                                            <la:option value="search_zerohit_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_zerohit"/></la:option>
-                                            <la:option value="click_count_agg"><la:message
-                                                    key="labels.searchlog_log_type_click_count"/></la:option>
-                                            <la:option value="favorite_count_agg"><la:message
-                                                    key="labels.searchlog_log_type_favorite_count"/></la:option>
-                                            <la:option value="search_count_hour_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_count_hour"/></la:option>
-                                            <la:option value="search_count_day_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_count_day"/></la:option>
-                                            <la:option value="search_user_hour_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_user_hour"/></la:option>
-                                            <la:option value="search_user_day_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_user_day"/></la:option>
-                                            <la:option value="search_reqtimeavg_hour_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_reqtimeavg_hour"/></la:option>
-                                            <la:option value="search_reqtimeavg_day_agg"><la:message
-                                                    key="labels.searchlog_log_type_search_reqtimeavg_day"/></la:option>
                                         </la:select>
                                     </div>
                                 </div>
@@ -110,6 +93,14 @@ ${fe:html(true)}
                                                      styleClass="form-control"/>
                                         </div>
                                     </div>
+                                    <div class="form-group row">
+                                        <label for="searchWordSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
+                                                key="labels.searchlog_searchword"/></label>
+                                        <div class="col-sm-4">
+                                            <la:text styleId="searchWordSearch" property="searchWord"
+                                                     styleClass="form-control"/>
+                                        </div>
+                                    </div>
                                 </c:if>
                                 <div class="form-group row">
                                     <label for="requestedTimeRangeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
@@ -128,7 +119,7 @@ ${fe:html(true)}
                                             <la:option value="25">25</la:option>
                                             <la:option value="50">50</la:option>
                                             <la:option value="100">100</la:option>
-                                            <la:option value="200">500</la:option>
+                                            <la:option value="500">500</la:option>
                                             <la:option value="1000">1000</la:option>
                                         </la:select>
                                     </div>
@@ -163,48 +154,20 @@ ${fe:html(true)}
                                         <table class="table table-bordered table-striped" aria-label="<la:message key="labels.search_log_list" />">
                                             <thead>
                                             <tr>
-                                                <c:if test="${!logType.endsWith('_agg')}">
-                                                    <th style="width: 25%"><la:message
-                                                            key="labels.searchlog_requested_time"/></th>
-                                                    <th><la:message
-                                                            key="labels.searchlog_log_message"/></th>
-                                                </c:if>
-                                                <c:if test="${logType.startsWith('search_count_') or logType.startsWith('search_user_')}">
-                                                    <th><la:message
-                                                            key="labels.searchlog_requested_time"/></th>
-                                                    <th style="width: 25%"><la:message
-                                                            key="labels.searchlog_count"/></th>
-                                                </c:if>
-                                                <c:if test="${logType.startsWith('search_reqtimeavg_')}">
-                                                    <th><la:message
-                                                            key="labels.searchlog_requested_time"/></th>
-                                                    <th style="width: 25%"><la:message
-                                                            key="labels.searchlog_value"/></th>
-                                                </c:if>
-                                                <c:if test="${logType.startsWith('search_keyword_') or logType.startsWith('search_zerohit_')} or logType.endsWith('_count_agg')}">
-                                                    <th><la:message
-                                                            key="labels.searchlog_value"/></th>
-                                                    <th style="width: 25%"><la:message
-                                                            key="labels.searchlog_count"/></th>
-                                                </c:if>
+                                                <th style="width: 25%"><la:message
+                                                        key="labels.searchlog_requested_time"/></th>
+                                                <th><la:message
+                                                        key="labels.searchlog_log_message"/></th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             <c:forEach var="data" varStatus="s"
                                                        items="${searchLogItems}">
-                                                <c:if test="${!logType.endsWith('_agg')}">
-                                                    <tr
-                                                            data-href="${contextPath}/admin/searchlog/details/4/${f:u(logType)}/${f:u(data.id)}">
-                                                        <td>${f:h(data.requestedAt)}</td>
-                                                        <td>${f:h(data.logMessage)}</td>
-                                                    </tr>
-                                                </c:if>
-                                                <c:if test="${logType.endsWith('_agg')}">
-                                                    <tr>
-                                                        <td>${f:h(data.key)}</td>
-                                                        <td>${f:h(data.count)}</td>
-                                                    </tr>
-                                                </c:if>
+                                                <tr
+                                                        data-href="${contextPath}/admin/searchlog/details/4/${f:u(logType)}/${f:u(data.id)}">
+                                                    <td>${f:h(data.requestedAt)}</td>
+                                                    <td>${f:h(data.logMessage)}</td>
+                                                </tr>
                                             </c:forEach>
                                             </tbody>
                                         </table>
@@ -212,19 +175,7 @@ ${fe:html(true)}
                                 </div>
                                 <c:set var="pager" value="${searchLogPager}"
                                        scope="request"/>
-                                <c:if test="${!logType.endsWith('_agg')}">
-                                    <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>
-                                </c:if>
-                                <c:if test="${logType.endsWith('_agg')}">
-                                    <div class="row">
-                                        <div class="col-sm-2">
-                                            <la:message key="labels.pagination_page_guide_msg"
-                                                        arg0="${f:h(pager.currentPageNumber)}"
-                                                        arg1="${f:h(pager.allPageCount)}"
-                                                        arg2="${f:h(pager.allRecordCount)}"/>
-                                        </div>
-                                    </div>
-                                </c:if>
+                                <c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp"/>
                             </c:if>
                         </div>
                     </div>

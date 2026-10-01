@@ -33,6 +33,9 @@ public class ClickLog extends BsClickLog implements SearchLogEvent {
 
     private Map<String, Object> fields;
 
+    /** True when {@link #getOrder()} is the 0-based position on the result page (the /go/ link path). */
+    private boolean orderOnPage;
+
     @Override
     public String getId() {
         return asDocMeta().id();
@@ -53,6 +56,14 @@ public class ClickLog extends BsClickLog implements SearchLogEvent {
 
     public void addField(final String key, final Object value) {
         fields.put(key, value);
+    }
+
+    public boolean isOrderOnPage() {
+        return orderOnPage;
+    }
+
+    public void setOrderOnPage(final boolean orderOnPage) {
+        this.orderOnPage = orderOnPage;
     }
 
     public String getLogMessage() {

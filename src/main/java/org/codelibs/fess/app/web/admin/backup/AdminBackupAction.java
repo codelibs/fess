@@ -735,6 +735,9 @@ public class AdminBackupAction extends FessAdminAction {
                     appendJson("url", entity.getUrl(), buf).append(',');
                     appendJson("order", entity.getOrder(), buf).append(',');
                     appendJson("query-requested-at", entity.getQueryRequestedAt(), buf).append(',');
+                    appendJson("search-word", entity.getSearchWord(), buf).append(',');
+                    appendJson("access-type", entity.getAccessType(), buf).append(',');
+                    appendJson("rank", entity.getRank(), buf).append(',');
                     appendJson("requested-at", entity.getRequestedAt(), buf);
                     buf.append('}');
                     buf.append('\n');

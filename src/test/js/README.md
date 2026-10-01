@@ -56,6 +56,9 @@ src/test/js/
     ├── profile.test.js search.test.js    app.test.js
 ```
 
+`src/test/js/admin/searchlog.test.js` additionally tests the admin search-log chart renderer
+(`src/main/webapp/js/admin/searchlog.js`, a classic script) the same way.
+
 Every JavaScript module shipped in `assets/` is imported and executed by a test
 here (the coverage gate uses `all: true`, so a new asset module with no test
 drags coverage down and fails the build). Tests import the shipped files by

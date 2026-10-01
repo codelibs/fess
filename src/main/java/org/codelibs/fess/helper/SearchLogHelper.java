@@ -75,6 +75,13 @@ import jakarta.servlet.http.HttpServletRequest;
  * Helper class for managing search logs.
  */
 public class SearchLogHelper {
+
+    /**
+     * Upper bound for the 1-based click rank; aligns with OpenSearch default {@code index.max_result_window}.
+     * Larger values are not recorded (and are rejected by the v2 click API) to limit analytics forgery.
+     */
+    public static final int MAX_CLICK_RANK = 10000;
+
     private static final Logger logger = LogManager.getLogger(SearchLogHelper.class);
 
     /**
@@ -653,9 +660,10 @@ public class SearchLogHelper {
             if (clickLog != null) {
                 try {
                     final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
-                    searchLogBhv.selectEntity(cb -> {
+                    final OptionalEntity<SearchLog> searchLog = searchLogBhv.selectEntity(cb -> {
                         cb.query().setQueryId_Equal(clickLog.getQueryId());
-                    }).ifPresent(entity -> {
+                    });
+                    if (acceptClickLog(clickLog, searchLog)) {
                         clickLogList.add(clickLog);
                         final String docId = clickLog.getDocId();
                         Integer countObj = clickCountMap.get(docId);
@@ -665,9 +673,7 @@ public class SearchLogHelper {
                             countObj = countObj.intValue() + 1;
                         }
                         clickCountMap.put(docId, countObj);
-                    }).orElse(() -> {
-                        logger.warn("Not Found for SearchLog: {}", clickLog);
-                    });
+                    }
                 } catch (final Exception e) {
                     logger.warn("Failed to process: {}", clickLog, e);
                 }
@@ -683,6 +689,48 @@ public class SearchLogHelper {
         if (!clickLogList.isEmpty()) {
             processClickLog(clickLogList);
             updateClickFieldInIndex(clickCountMap);
+        }
+    }
+
+    /**
+     * Enriches a click log with the originating search log, or warns when that search log is missing.
+     *
+     * @param clickLog the click log
+     * @param searchLog the search log with the same query ID
+     * @return true if the search log exists and the click log should be stored
+     */
+    protected boolean acceptClickLog(final ClickLog clickLog, final OptionalEntity<SearchLog> searchLog) {
+        if (searchLog.isPresent()) {
+            enrichClickLog(clickLog, searchLog.get());
+            return true;
+        }
+        logger.warn("Not Found for SearchLog: {}", clickLog);
+        return false;
+    }
+
+    /**
+     * Copies the originating search's context onto a click log and normalizes its position.
+     * The rank is left unset when it is not within 1 to {@link #MAX_CLICK_RANK}.
+     *
+     * @param clickLog the click log to enrich
+     * @param searchLog the search log with the same query ID
+     */
+    protected void enrichClickLog(final ClickLog clickLog, final SearchLog searchLog) {
+        clickLog.setSearchWord(searchLog.getSearchWord());
+        clickLog.setAccessType(searchLog.getAccessType());
+        final Integer order = clickLog.getOrder();
+        if (order == null || order < 0) {
+            return;
+        }
+        final long rank;
+        if (clickLog.isOrderOnPage()) {
+            final Integer offset = searchLog.getQueryOffset();
+            rank = (offset != null && offset > 0 ? offset : 0L) + order + 1L;
+        } else {
+            rank = order;
+        }
+        if (rank >= 1 && rank <= MAX_CLICK_RANK) {
+            clickLog.setRank((int) rank);
         }
     }
 

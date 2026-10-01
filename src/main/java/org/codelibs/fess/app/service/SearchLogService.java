@@ -15,17 +15,13 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,43 +47,20 @@ import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.dbflute.optional.OptionalEntity;
-import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
-import org.codelibs.fesen.opensearch.search.aggregations.BucketOrder;
-import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.Histogram;
-import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
-import org.codelibs.fesen.opensearch.search.aggregations.metrics.Avg;
-import org.codelibs.fesen.opensearch.search.aggregations.metrics.Cardinality;
 
 import jakarta.annotation.Resource;
 
 /**
- * Service class for managing search logs and related analytics.
+ * Service class for managing raw search logs.
  *
- * This service provides functionality for querying, aggregating, and managing
+ * This service provides functionality for querying and managing
  * various types of search logs including search logs, click logs, favorite logs,
- * and user information logs. It supports different aggregation types for
- * analytics and reporting purposes.
+ * and user information logs.
  */
 public class SearchLogService {
 
     /** Date format pattern for parsing time ranges. */
     private static final String YYYY_MM_DD_HH_MM = "yyyy-MM-dd HH:mm";
-
-    /** Field name for count values in aggregation results. */
-    private static final String COUNT = "count";
-
-    /** Field name for key values in aggregation results. */
-    private static final String KEY = "key";
-
-    /** Field name for ID values in aggregation results. */
-    private static final String ID = "id";
-
-    /** Field name for user information ID in aggregations. */
-    private static final String USER_INFO_ID = "userInfoId";
-
-    /** Field name for query time in aggregations. */
-    private static final String QUERY_TIME = "queryTime";
 
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SearchLogService.class);
@@ -159,13 +132,14 @@ public class SearchLogService {
     /**
      * Retrieves a list of search logs based on the specified pager criteria.
      *
-     * This method supports various log types including search logs, click logs,
-     * favorite logs, user information, and different aggregation types for analytics.
+     * This method supports the search, click, favorite and user information log types.
+     * Any other log type is handled as the search log.
      *
      * @param pager The search log pager containing filter criteria and pagination settings
-     * @return List of search log entries or aggregated data based on the log type
+     * @return List of log entries based on the log type
      */
     public List<?> getSearchLogList(final SearchLogPager pager) {
+        pager.logType = SearchLogPager.normalizeLogType(pager.logType);
         final EsPagingResultBean<?> list;
         if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) userInfoBhv.selectPage(cb -> {
@@ -179,231 +153,12 @@ public class SearchLogService {
                 cb.query().addOrderBy_RequestedAt_Desc();
                 createClickLogCondition(pager, cb);
             });
-        } else if (SearchLogPager.LOG_TYPE_CLICK_COUNT.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) clickLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createClickLogCondition(pager, cb);
-                cb.aggregation().setUrl_Terms(SearchLogPager.LOG_TYPE_CLICK_COUNT, op -> {
-                    op.size(pager.getPageSize());
-                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
-                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
-                    }
-                }, null);
-            });
-            final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_CLICK_COUNT);
-            final List<? extends Terms.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                map.put(COUNT, e.getDocCount());
-                return map;
-            }).collect(Collectors.toList());
         } else if (SearchLogPager.LOG_TYPE_FAVORITE.equalsIgnoreCase(pager.logType)) {
             list = (EsPagingResultBean<?>) favoriteLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
                 cb.query().addOrderBy_CreatedAt_Desc();
                 createFavoriteLogCondition(pager, cb);
             });
-        } else if (SearchLogPager.LOG_TYPE_FAVORITE_COUNT.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) favoriteLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createFavoriteLogCondition(pager, cb);
-                cb.aggregation().setUrl_Terms(SearchLogPager.LOG_TYPE_FAVORITE_COUNT, op -> {
-                    op.size(pager.getPageSize());
-                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
-                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
-                    }
-                }, null);
-            });
-            final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_FAVORITE_COUNT);
-            final List<? extends Terms.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                map.put(COUNT, e.getDocCount());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_COUNT_HOUR.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_COUNT_HOUR, op -> {
-                    op.calendarInterval(DateHistogramInterval.HOUR);
-                    op.minDocCount(0);
-                    op.order(BucketOrder.key(true));
-                }, null);
-            });
-            final Histogram agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_COUNT_HOUR);
-            final List<? extends Histogram.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                map.put(COUNT, e.getDocCount());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_COUNT_DAY.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_COUNT_DAY, op -> {
-                    op.calendarInterval(DateHistogramInterval.DAY);
-                    op.minDocCount(0);
-                    op.order(BucketOrder.key(true));
-                }, null);
-            });
-            final Histogram agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_COUNT_DAY);
-            final List<? extends Histogram.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                map.put(COUNT, e.getDocCount());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_USER_HOUR.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_USER_HOUR, op -> {
-                    op.calendarInterval(DateHistogramInterval.HOUR);
-                    op.subAggregation(AggregationBuilders.cardinality(USER_INFO_ID).field(USER_INFO_ID));
-                    op.minDocCount(0);
-                    op.order(BucketOrder.key(true));
-                }, null);
-            });
-            final Histogram agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_USER_HOUR);
-            final List<? extends Histogram.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                final Cardinality value = e.getAggregations().get(USER_INFO_ID);
-                map.put(COUNT, value.getValue());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_USER_DAY.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_USER_DAY, op -> {
-                    op.calendarInterval(DateHistogramInterval.DAY);
-                    op.subAggregation(AggregationBuilders.cardinality(USER_INFO_ID).field(USER_INFO_ID));
-                    op.minDocCount(0);
-                    op.order(BucketOrder.key(true));
-                }, null);
-            });
-            final Histogram agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_USER_DAY);
-            final List<? extends Histogram.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                final Cardinality value = e.getAggregations().get(USER_INFO_ID);
-                map.put(COUNT, value.getValue());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_HOUR.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_HOUR, op -> {
-                    op.calendarInterval(DateHistogramInterval.HOUR);
-                    op.subAggregation(AggregationBuilders.avg(QUERY_TIME).field(QUERY_TIME));
-                    op.minDocCount(0);
-                    op.order(BucketOrder.key(true));
-                }, null);
-            });
-            final Histogram agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_HOUR);
-            final List<? extends Histogram.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                final Avg value = e.getAggregations().get(QUERY_TIME);
-                map.put(COUNT, value.getValueAsString());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_DAY.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setRequestedAt_DateHistogram(SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_DAY, op -> {
-                    op.calendarInterval(DateHistogramInterval.DAY);
-                    op.subAggregation(AggregationBuilders.avg(QUERY_TIME).field(QUERY_TIME));
-                    op.minDocCount(0);
-                    op.order(BucketOrder.key(true));
-                }, null);
-            });
-            final Histogram agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_REQTIMEAVG_DAY);
-            final List<? extends Histogram.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                final Avg value = e.getAggregations().get(QUERY_TIME);
-                map.put(COUNT, value.getValueAsString());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_KEYWORD.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.aggregation().setSearchWord_Terms(SearchLogPager.LOG_TYPE_SEARCH_KEYWORD, op -> {
-                    op.size(pager.getPageSize());
-                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
-                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
-                    }
-                }, null);
-            });
-            final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_KEYWORD);
-            final List<? extends Terms.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                map.put(COUNT, e.getDocCount());
-                return map;
-            }).collect(Collectors.toList());
-        } else if (SearchLogPager.LOG_TYPE_SEARCH_ZEROHIT.equalsIgnoreCase(pager.logType)) {
-            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-                cb.fetchFirst(0);
-                createSearchLogCondition(pager, cb);
-                cb.query().setHitCount_Equal(0L);
-                cb.aggregation().setSearchWord_Terms(SearchLogPager.LOG_TYPE_SEARCH_ZEROHIT, op -> {
-                    op.size(pager.getPageSize());
-                    if (fessConfig.getSearchlogAggShardSizeAsInteger() >= 0) {
-                        op.shardSize(fessConfig.getSearchlogAggShardSizeAsInteger());
-                    }
-                }, null);
-            });
-            final Terms agg = list.getAggregations().get(SearchLogPager.LOG_TYPE_SEARCH_ZEROHIT);
-            final List<? extends Terms.Bucket> buckets = agg.getBuckets();
-            updatePagerByAgg(pager, buckets.size());
-            return buckets.stream().map(e -> {
-                final Map<String, Object> map = new HashMap<>();
-                map.put(ID, Base64.getUrlEncoder().encodeToString(e.getKeyAsString().getBytes(StandardCharsets.UTF_8)));
-                map.put(KEY, e.getKeyAsString());
-                map.put(COUNT, e.getDocCount());
-                return map;
-            }).collect(Collectors.toList());
-            //        } else if (SearchLogPager.LOG_TYPE_SEARCH_ZEROCLICK.equalsIgnoreCase(pager.logType)) {
-            //            list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
-            //                cb.fetchFirst(0);
-            //                createSearchLogCondition(pager, cb);
-            //                // TODO 0 clicked
-            //                });
         } else {
             list = (EsPagingResultBean<?>) searchLogBhv.selectPage(cb -> {
                 cb.paging(pager.getPageSize(), pager.getCurrentPageNumber());
@@ -422,21 +177,6 @@ public class SearchLogService {
     }
 
     /**
-     * Updates the pager with aggregation result information.
-     *
-     * @param pager The search log pager to update
-     * @param size The size of the aggregation results
-     */
-    private void updatePagerByAgg(final SearchLogPager pager, final int size) {
-        pager.setAllPageCount(1);
-        pager.setAllRecordCount(size);
-        pager.setCurrentPageNumber(1);
-        pager.setExistNextPage(false);
-        pager.setExistPrePage(false);
-        pager.setPageSize(pager.getPageSize());
-    }
-
-    /**
      * Creates search conditions for search log queries based on pager criteria.
      *
      * @param pager The search log pager containing filter criteria
@@ -452,21 +192,15 @@ public class SearchLogService {
         if (StringUtil.isNotBlank(pager.accessType)) {
             cb.query().setAccessType_Term(pager.accessType);
         }
-        if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
-            final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
-            try {
-                if (values.length > 0) {
-                    cb.query().setRequestedAt_GreaterEqual(parseDateTime(values[0], formatter));
-                }
-                if (values.length > 1) {
-                    cb.query().setRequestedAt_LessEqual(LocalDateTime.parse(values[1], formatter));
-                }
-            } catch (final Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
-                }
-            }
+        if (StringUtil.isNotBlank(pager.searchWord)) {
+            cb.query().setSearchWord_Term(pager.searchWord);
+        }
+        final LocalDateTime[] range = parseRequestedTimeRange(pager.requestedTimeRange);
+        if (range[0] != null) {
+            cb.query().setRequestedAt_GreaterEqual(range[0]);
+        }
+        if (range[1] != null) {
+            cb.query().setRequestedAt_LessEqual(range[1]);
         }
     }
 
@@ -483,21 +217,12 @@ public class SearchLogService {
         if (StringUtil.isNotBlank(pager.userSessionId)) {
             cb.query().setUserInfoId_Term(pager.userSessionId);
         }
-        if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
-            final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
-            try {
-                if (values.length > 0) {
-                    cb.query().setCreatedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
-                }
-                if (values.length > 1) {
-                    cb.query().setCreatedAt_LessEqual(parseDateTime(values[1], formatter));
-                }
-            } catch (final Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
-                }
-            }
+        final LocalDateTime[] range = parseRequestedTimeRange(pager.requestedTimeRange);
+        if (range[0] != null) {
+            cb.query().setCreatedAt_GreaterEqual(range[0]);
+        }
+        if (range[1] != null) {
+            cb.query().setCreatedAt_LessEqual(range[1]);
         }
     }
 
@@ -511,21 +236,12 @@ public class SearchLogService {
         if (StringUtil.isNotBlank(pager.userSessionId)) {
             cb.query().setId_Equal(pager.userSessionId);
         }
-        if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
-            final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
-            try {
-                if (values.length > 0) {
-                    cb.query().setUpdatedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
-                }
-                if (values.length > 1) {
-                    cb.query().setUpdatedAt_LessEqual(LocalDateTime.parse(values[1], formatter));
-                }
-            } catch (final Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
-                }
-            }
+        final LocalDateTime[] range = parseRequestedTimeRange(pager.requestedTimeRange);
+        if (range[0] != null) {
+            cb.query().setUpdatedAt_GreaterEqual(range[0]);
+        }
+        if (range[1] != null) {
+            cb.query().setUpdatedAt_LessEqual(range[1]);
         }
     }
 
@@ -542,22 +258,38 @@ public class SearchLogService {
         if (StringUtil.isNotBlank(pager.userSessionId)) {
             cb.query().setUserSessionId_Term(pager.userSessionId);
         }
-        if (StringUtil.isNotBlank(pager.requestedTimeRange)) {
-            final String[] values = pager.requestedTimeRange.split(" - ");
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
+        final LocalDateTime[] range = parseRequestedTimeRange(pager.requestedTimeRange);
+        if (range[0] != null) {
+            cb.query().setRequestedAt_GreaterEqual(range[0]);
+        }
+        if (range[1] != null) {
+            cb.query().setRequestedAt_LessEqual(range[1]);
+        }
+    }
+
+    /**
+     * Parses the requested time range ("yyyy-MM-dd HH:mm - yyyy-MM-dd HH:mm") and converts both ends to UTC.
+     *
+     * @param requestedTimeRange The time range string in the system default time zone
+     * @return An array of two elements (start, end) in UTC; an element is null when absent or unparsable
+     */
+    protected LocalDateTime[] parseRequestedTimeRange(final String requestedTimeRange) {
+        final LocalDateTime[] result = new LocalDateTime[2];
+        if (StringUtil.isBlank(requestedTimeRange)) {
+            return result;
+        }
+        final String[] values = requestedTimeRange.split(" - ");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM);
+        for (int i = 0; i < values.length && i < 2; i++) {
             try {
-                if (values.length > 0) {
-                    cb.query().setRequestedAt_GreaterEqual(LocalDateTime.parse(values[0], formatter));
-                }
-                if (values.length > 1) {
-                    cb.query().setRequestedAt_LessEqual(LocalDateTime.parse(values[1], formatter));
-                }
+                result[i] = parseDateTime(values[i].trim(), formatter);
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to parse {}", pager.requestedTimeRange, e);
+                    logger.debug("Failed to parse {}", requestedTimeRange, e);
                 }
             }
         }
+        return result;
     }
 
     /**
@@ -618,6 +350,9 @@ public class SearchLogService {
                 params.put("URL", e.getUrl());
                 params.put("URL ID", e.getUrlId());
                 params.put("Order", toNumberString(e.getOrder()));
+                params.put("Search Word", e.getSearchWord());
+                params.put("Access Type", e.getAccessType());
+                params.put("Rank", toNumberString(e.getRank()));
                 params.put("Query Requested Time", FessFunctions.formatDate(e.getQueryRequestedAt()));
                 params.put("Requested Time", FessFunctions.formatDate(e.getRequestedAt()));
                 return params;

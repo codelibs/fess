@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class SearchLogPagerTest extends UnitFessTestCase {
 
+    @Test
     public void test_SearchLogPager() {
         SearchLogPager searchLogPager = new SearchLogPager();
 
@@ -60,12 +62,14 @@ public class SearchLogPagerTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_clear() {
         SearchLogPager searchLogPager = new SearchLogPager();
         searchLogPager.queryId = "testQueryId";
         searchLogPager.userSessionId = "testSessionId";
         searchLogPager.requestedTimeRange = "2025-01-01 00:00 - 2025-01-02 00:00";
         searchLogPager.accessType = "web";
+        searchLogPager.searchWord = "w";
         searchLogPager.logType = SearchLogPager.LOG_TYPE_CLICK;
         searchLogPager.setAllRecordCount(100);
         searchLogPager.setAllPageCount(10);
@@ -78,6 +82,7 @@ public class SearchLogPagerTest extends UnitFessTestCase {
         assertNull(searchLogPager.userSessionId);
         assertNull(searchLogPager.requestedTimeRange);
         assertNull(searchLogPager.accessType);
+        assertNull(searchLogPager.searchWord, "cleared");
         assertEquals(SearchLogPager.LOG_TYPE_SEARCH, searchLogPager.logType);
         assertEquals(0, searchLogPager.getAllRecordCount());
         assertEquals(0, searchLogPager.getAllPageCount());
@@ -85,10 +90,21 @@ public class SearchLogPagerTest extends UnitFessTestCase {
         assertFalse(searchLogPager.isExistNextPage());
     }
 
+    @Test
     public void test_logTypeConstants() {
         assertEquals("search", SearchLogPager.LOG_TYPE_SEARCH);
         assertEquals("click", SearchLogPager.LOG_TYPE_CLICK);
         assertEquals("favorite", SearchLogPager.LOG_TYPE_FAVORITE);
         assertEquals("user_info", SearchLogPager.LOG_TYPE_USERINFO);
+    }
+
+    @Test
+    public void test_normalizeLogType() {
+        assertEquals("search", SearchLogPager.normalizeLogType("search"));
+        assertEquals("click", SearchLogPager.normalizeLogType("CLICK"));
+        assertEquals("favorite", SearchLogPager.normalizeLogType("Favorite"));
+        assertEquals("user_info", SearchLogPager.normalizeLogType("USER_INFO"));
+        assertEquals("search", SearchLogPager.normalizeLogType("search_keyword_agg"));
+        assertEquals("search", SearchLogPager.normalizeLogType(null));
     }
 }
