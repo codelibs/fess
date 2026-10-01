@@ -5,6 +5,9 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title"><la:message key="labels.searchlog_chart_${chartName}"/></h3>
+                    <div class="card-tools">
+                        <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="${chartName}"/></jsp:include>
+                    </div>
                 </div>
                 <div class="card-body">
                     <c:choose>
@@ -23,6 +26,9 @@
 <div class="card">
     <div class="card-header">
         <h3 class="card-title"><la:message key="labels.searchlog_table_slowQueries"/></h3>
+        <div class="card-tools">
+            <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="slowQueries"/></jsp:include>
+        </div>
     </div>
     <div class="card-body p-0">
         <table class="table table-sm table-hover mb-0">

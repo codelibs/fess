@@ -15,10 +15,14 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +50,10 @@ import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.taglib.FessFunctions;
+import org.codelibs.fess.util.CsvUtil;
 import org.dbflute.optional.OptionalEntity;
+
+import com.orangesignal.csv.CsvWriter;
 
 import jakarta.annotation.Resource;
 
@@ -65,21 +72,36 @@ public class SearchLogService {
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SearchLogService.class);
 
+    /** CSV columns of the search log: the entity field names. */
+    protected static final List<String> SEARCH_LOG_CSV_COLUMNS = List.of("id", "requestedAt", "searchWord", "hitCount", "hitCountRelation",
+            "queryOffset", "queryPageSize", "queryTime", "responseTime", "accessType", "queryId", "userInfoId", "userSessionId", "user",
+            "roles", "clientIp", "referer", "userAgent", "languages", "virtualHost");
+
+    /** CSV columns of the click log: the entity field names. */
+    protected static final List<String> CLICK_LOG_CSV_COLUMNS = List.of("id", "requestedAt", "queryRequestedAt", "searchWord", "accessType",
+            "rank", "order", "url", "urlId", "docId", "queryId", "userSessionId");
+
+    /** CSV columns of the favorite log: the entity field names. */
+    protected static final List<String> FAVORITE_LOG_CSV_COLUMNS = List.of("id", "createdAt", "url", "docId", "queryId", "userInfoId");
+
+    /** CSV columns of the user info: the entity field names. */
+    protected static final List<String> USER_INFO_CSV_COLUMNS = List.of("id", "createdAt", "updatedAt");
+
     /** Behavior handler for search log operations. */
     @Resource
-    private SearchLogBhv searchLogBhv;
+    protected SearchLogBhv searchLogBhv;
 
     /** Behavior handler for click log operations. */
     @Resource
-    private ClickLogBhv clickLogBhv;
+    protected ClickLogBhv clickLogBhv;
 
     /** Behavior handler for favorite log operations. */
     @Resource
-    private FavoriteLogBhv favoriteLogBhv;
+    protected FavoriteLogBhv favoriteLogBhv;
 
     /** Behavior handler for user information operations. */
     @Resource
-    private UserInfoBhv userInfoBhv;
+    protected UserInfoBhv userInfoBhv;
 
     /** System helper for date/time operations. */
     @Resource
@@ -174,6 +196,75 @@ public class SearchLogService {
         }).createPageNumberList());
 
         return list;
+    }
+
+    /**
+     * Writes every log entry matching the pager criteria as CSV, newest first: a header row of the
+     * entity field names followed by one row per entry. The paging of the pager is ignored and the
+     * number of rows is not limited, so the entries are read with a cursor and written one by one.
+     * The writer is flushed but not closed.
+     *
+     * @param pager The search log pager containing the filter criteria and the log type
+     * @param writer The writer to write the CSV to
+     * @throws IOException if writing fails
+     */
+    public void exportCsv(final SearchLogPager pager, final Writer writer) throws IOException {
+        pager.logType = SearchLogPager.normalizeLogType(pager.logType);
+        // not closed: that would close the writer of the caller
+        @SuppressWarnings("resource")
+        final CsvWriter csvWriter = new CsvWriter(writer, CsvUtil.createCsvConfig());
+        try {
+            if (SearchLogPager.LOG_TYPE_USERINFO.equals(pager.logType)) {
+                csvWriter.writeValues(USER_INFO_CSV_COLUMNS);
+                userInfoBhv.selectCursor(cb -> {
+                    cb.query().addOrderBy_UpdatedAt_Desc();
+                    createUserInfoCondition(pager, cb);
+                }, e -> writeRow(csvWriter, e.getId(), e.getCreatedAt(), e.getUpdatedAt()));
+            } else if (SearchLogPager.LOG_TYPE_CLICK.equals(pager.logType)) {
+                csvWriter.writeValues(CLICK_LOG_CSV_COLUMNS);
+                clickLogBhv.selectCursor(cb -> {
+                    cb.query().addOrderBy_RequestedAt_Desc();
+                    createClickLogCondition(pager, cb);
+                }, e -> writeRow(csvWriter, e.getId(), e.getRequestedAt(), e.getQueryRequestedAt(), e.getSearchWord(), e.getAccessType(),
+                        e.getRank(), e.getOrder(), e.getUrl(), e.getUrlId(), e.getDocId(), e.getQueryId(), e.getUserSessionId()));
+            } else if (SearchLogPager.LOG_TYPE_FAVORITE.equals(pager.logType)) {
+                csvWriter.writeValues(FAVORITE_LOG_CSV_COLUMNS);
+                favoriteLogBhv.selectCursor(cb -> {
+                    cb.query().addOrderBy_CreatedAt_Desc();
+                    createFavoriteLogCondition(pager, cb);
+                }, e -> writeRow(csvWriter, e.getId(), e.getCreatedAt(), e.getUrl(), e.getDocId(), e.getQueryId(), e.getUserInfoId()));
+            } else {
+                csvWriter.writeValues(SEARCH_LOG_CSV_COLUMNS);
+                searchLogBhv.selectCursor(cb -> {
+                    cb.query().addOrderBy_RequestedAt_Desc();
+                    createSearchLogCondition(pager, cb);
+                }, e -> writeRow(csvWriter, e.getId(), e.getRequestedAt(), e.getSearchWord(), e.getHitCount(), e.getHitCountRelation(),
+                        e.getQueryOffset(), e.getQueryPageSize(), e.getQueryTime(), e.getResponseTime(), e.getAccessType(), e.getQueryId(),
+                        e.getUserInfoId(), e.getUserSessionId(), e.getUser(), e.getRoles() != null ? String.join(" ", e.getRoles()) : null,
+                        e.getClientIp(), e.getReferer(), e.getUserAgent(), e.getLanguages(), e.getVirtualHost()));
+            }
+            csvWriter.flush();
+        } catch (final UncheckedIOException e) {
+            // thrown by the cursor handler, which cannot throw a checked exception
+            throw e.getCause();
+        }
+    }
+
+    /**
+     * Writes one CSV row, formatting a date like the details page and guarding a text against formulas.
+     *
+     * @param csvWriter The CSV writer
+     * @param values The cell values
+     * @throws UncheckedIOException if writing fails
+     */
+    private void writeRow(final CsvWriter csvWriter, final Object... values) {
+        try {
+            csvWriter.writeValues(Arrays.stream(values)
+                    .map(value -> CsvUtil.toCell(value instanceof final LocalDateTime date ? FessFunctions.formatDate(date) : value))
+                    .toList());
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**

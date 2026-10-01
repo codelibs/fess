@@ -36,10 +36,10 @@ import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.CsvUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.message.UserMessages;
 
-import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvWriter;
 
 import tools.jackson.core.JsonGenerator;
@@ -301,11 +301,8 @@ public class ExportSearchHandler {
                         // Excel needs the BOM to read the file as UTF-8.
                         writer.write('\uFEFF');
                     }
-                    final CsvConfig cfg = new CsvConfig(',', '"', '"');
-                    cfg.setEscapeDisabled(false);
-                    cfg.setQuoteDisabled(false);
                     // Never closed: closing it would close the servlet writer (see ScrollSearchHandler).
-                    csvWriter = new CsvWriter(writer, cfg);
+                    csvWriter = new CsvWriter(writer, CsvUtil.createCsvConfig());
                     csvWriter.writeValues(columns);
                 }
             } catch (final IOException e) {
@@ -359,10 +356,7 @@ public class ExportSearchHandler {
             }
             final String text =
                     value instanceof Collection<?> c ? c.stream().map(String::valueOf).collect(Collectors.joining(" ")) : value.toString();
-            if (!text.isEmpty() && "=+-@\t\r".indexOf(text.charAt(0)) >= 0) {
-                return "'" + text;
-            }
-            return text;
+            return CsvUtil.escapeFormula(text);
         }
     }
 }

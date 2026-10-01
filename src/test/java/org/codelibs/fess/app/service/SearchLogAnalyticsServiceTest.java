@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -30,7 +32,10 @@ import java.util.Set;
 import org.codelibs.fess.entity.AnalyticsCondition;
 import org.codelibs.fess.entity.AnalyticsReport;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.CsvUtil;
 import org.junit.jupiter.api.Test;
+
+import com.orangesignal.csv.CsvReader;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -296,6 +301,158 @@ public class SearchLogAnalyticsServiceTest extends UnitFessTestCase {
         service.getReport("unknown", cond);
         service.getReport(null, cond);
         assertEquals(List.of("overview", "queries", "clicks", "performance", "audience", "overview", "overview"), called);
+    }
+
+    private static List<List<String>> parseCsv(final String csv) throws java.io.IOException {
+        final List<List<String>> rows = new ArrayList<>();
+        try (CsvReader reader = new CsvReader(new StringReader(csv), CsvUtil.createCsvConfig())) {
+            List<String> row;
+            while ((row = reader.readValues()) != null) {
+                // the reader reports the end of the last line as an empty record
+                if (!row.isEmpty() && !(row.size() == 1 && row.get(0).isEmpty())) {
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
+    }
+
+    private static List<List<String>> export(final AnalyticsReport report, final String tab, final String item) throws java.io.IOException {
+        final StringWriter out = new StringWriter();
+        new SearchLogAnalyticsService().exportCsv(report, tab, item, out);
+        return parseCsv(out.toString());
+    }
+
+    @Test
+    public void test_isExportable() {
+        final SearchLogAnalyticsService service = new SearchLogAnalyticsService();
+        assertTrue(service.isExportable("overview", "kpis"));
+        assertTrue(service.isExportable("overview", "trend"));
+        assertTrue(service.isExportable("queries", "queries"));
+        assertTrue(service.isExportable("queries", "zeroClickQueries"));
+        assertTrue(service.isExportable("clicks", "favoriteUrls"));
+        assertTrue(service.isExportable("performance", "slowQueries"));
+        assertTrue(service.isExportable("audience", "weekHour"));
+        assertTrue(service.isExportable("audience", "accessTypes"));
+        assertFalse(service.isExportable("overview", "weekHour"), "item of another tab");
+        assertFalse(service.isExportable("queries", "kpis"), "tab without KPIs");
+        assertFalse(service.isExportable("overview", "unknown"));
+        assertFalse(service.isExportable("unknown", "kpis"));
+        assertFalse(service.isExportable("logs", "kpis"));
+        assertFalse(service.isExportable("../x", "../y"));
+        assertFalse(service.isExportable(null, "kpis"));
+        assertFalse(service.isExportable("overview", null));
+    }
+
+    @Test
+    public void test_exportCsv_rejectsUnknownItem() throws java.io.IOException {
+        try {
+            export(new AnalyticsReport(), "overview", "weekHour");
+            fail();
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            export(new AnalyticsReport(), "nothing", "kpis");
+            fail();
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void test_exportCsv_kpis() throws java.io.IOException {
+        final AnalyticsReport report = new AnalyticsReport();
+        report.addKpi(new AnalyticsReport.Kpi("searches", "count", 150L, 100L));
+        report.addKpi(new AnalyticsReport.Kpi("ctr", "percent", 0.31, 0.29));
+        report.addKpi(new AnalyticsReport.Kpi("avgResponseTime", "ms", null, null));
+        final List<List<String>> rows = export(report, "overview", "kpis");
+        assertEquals(List.of("metric", "unit", "value", "previous", "change"), rows.get(0));
+        assertEquals(List.of("searches", "count", "150", "100", "50.0"), rows.get(1));
+        assertEquals("ctr", rows.get(2).get(0));
+        assertEquals("percent", rows.get(2).get(1));
+        assertEquals("0.31", rows.get(2).get(2));
+        assertEquals("0.29", rows.get(2).get(3));
+        assertEquals(List.of("avgResponseTime", "ms", "", "", ""), rows.get(3));
+        assertEquals(4, rows.size());
+    }
+
+    @Test
+    public void test_exportCsv_tableDropsBarAndGuardsFormulas() throws java.io.IOException {
+        final AnalyticsReport report = new AnalyticsReport();
+        report.putTable("topQueries",
+                SearchLogAnalyticsService.withBars(new ArrayList<>(List.of(row("=1+1", 200L), row("-foo", 50L))), "count"));
+        final List<List<String>> rows = export(report, "overview", "topQueries");
+        assertEquals(List.of(List.of("word", "count"), List.of("'=1+1", "200"), List.of("'-foo", "50")), rows);
+    }
+
+    @Test
+    public void test_exportCsv_emptyTableStillHasHeader() throws java.io.IOException {
+        final AnalyticsReport report = new AnalyticsReport();
+        report.putTable("zeroClickQueries", new ArrayList<>());
+        assertEquals(List.of(List.of("word", "count", "lastSearchedAt")), export(report, "queries", "zeroClickQueries"));
+        // a table the report does not carry at all (e.g. no click data) is an empty one too
+        assertEquals(List.of(List.of("word", "count", "users")), export(new AnalyticsReport(), "queries", "zeroHitQueries"));
+    }
+
+    @Test
+    public void test_exportCsv_tableWithNullCells() throws java.io.IOException {
+        final AnalyticsReport report = new AnalyticsReport();
+        final Map<String, Object> r = row("foo", 3L);
+        r.put("users", 2L);
+        r.put("avgHits", 12.5);
+        r.put("clicks", null);
+        r.put("ctr", null);
+        r.put("avgRank", null);
+        report.putTable("queries", List.of(r));
+        final List<List<String>> rows = export(report, "queries", "queries");
+        assertEquals(List.of("word", "count", "users", "avgHits", "clicks", "ctr", "avgRank"), rows.get(0));
+        assertEquals(List.of("foo", "3", "2", "12.5", "", "", ""), rows.get(1));
+    }
+
+    @Test
+    public void test_exportCsv_weekHour() throws java.io.IOException {
+        final long[][] grid = new long[7][24];
+        grid[0][9] = 7;
+        grid[6][23] = 1;
+        final AnalyticsReport report = new AnalyticsReport();
+        report.putTable("weekHour", SearchLogAnalyticsService.weekHourRows(grid));
+        final List<List<String>> rows = export(report, "audience", "weekHour");
+        assertEquals(8, rows.size());
+        assertEquals(25, rows.get(0).size());
+        assertEquals("day", rows.get(0).get(0));
+        assertEquals("h00", rows.get(0).get(1));
+        assertEquals("h23", rows.get(0).get(24));
+        assertEquals("1", rows.get(1).get(0));
+        assertEquals("7", rows.get(1).get(10)); // Monday 09
+        assertEquals("0", rows.get(1).get(1));
+        assertEquals("7", rows.get(7).get(0));
+        assertEquals("1", rows.get(7).get(24)); // Sunday 23
+    }
+
+    @Test
+    public void test_exportCsv_chartWithPrevious() throws java.io.IOException {
+        final AnalyticsReport.Series searches = new AnalyticsReport.Series("searches", List.of(10L, 20L, 30L));
+        searches.setPrevious(List.of(5L, 15L));
+        final AnalyticsReport.Series ctr = new AnalyticsReport.Series("ctr", java.util.Arrays.asList(0.5, null, 0.25));
+        final AnalyticsReport report = new AnalyticsReport();
+        report.putChart("trend", new AnalyticsReport.Chart("line", "mixed", List.of("09-14", "09-15", "09-16"), List.of(searches, ctr)));
+        final List<List<String>> rows = export(report, "overview", "trend");
+        assertEquals(List.of("x", "searches", "searches_previous", "ctr"), rows.get(0));
+        assertEquals(List.of("09-14", "10", "5", "0.5"), rows.get(1));
+        assertEquals(List.of("09-15", "20", "15", ""), rows.get(2));
+        // a previous period shorter than the period leaves an empty cell
+        assertEquals(List.of("09-16", "30", "", "0.25"), rows.get(3));
+        assertEquals(4, rows.size());
+    }
+
+    @Test
+    public void test_exportCsv_chartWithoutPrevious() throws java.io.IOException {
+        final AnalyticsReport report = new AnalyticsReport();
+        report.putChart("accessTypes", new AnalyticsReport.Chart("pie", "count", List.of("web", "=json"),
+                List.of(new AnalyticsReport.Series("searches", List.of(8L, 2L)))));
+        assertEquals(List.of(List.of("x", "searches"), List.of("web", "8"), List.of("'=json", "2")),
+                export(report, "audience", "accessTypes"));
     }
 
     private static Map<String, Object> row(final String word, final long count) {

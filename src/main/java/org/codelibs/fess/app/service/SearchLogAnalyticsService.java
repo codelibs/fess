@@ -27,12 +27,15 @@ import static org.codelibs.fess.app.service.SearchLogAggregationReader.totalDocC
 import static org.codelibs.fess.app.service.SearchLogAggregationReader.value;
 import static org.codelibs.fess.app.service.SearchLogAggregationReader.valueCount;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -64,6 +67,7 @@ import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
+import org.codelibs.fess.util.CsvUtil;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
 import org.codelibs.fesen.opensearch.search.aggregations.Aggregations;
@@ -74,6 +78,8 @@ import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.Histog
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.Range;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+
+import com.orangesignal.csv.CsvWriter;
 
 import jakarta.annotation.Resource;
 
@@ -102,6 +108,12 @@ public class SearchLogAnalyticsService {
 
     /** All tabs in display order. */
     public static final List<String> TABS = List.of(TAB_OVERVIEW, TAB_QUERIES, TAB_CLICKS, TAB_PERFORMANCE, TAB_AUDIENCE);
+
+    /** The export item that downloads the KPI cards. */
+    public static final String ITEM_KPIS = "kpis";
+
+    /** The export item that downloads the weekday by hour table. */
+    public static final String ITEM_WEEK_HOUR = "weekHour";
 
     /** Number of search words with hits checked for clicks when listing zero-click words. */
     protected static final int ZERO_CLICK_CANDIDATES = 1000;
@@ -202,6 +214,31 @@ public class SearchLogAnalyticsService {
 
     private static final String COUNT = "count";
 
+    private static final List<String> KPI_COLUMNS = List.of("metric", "unit", "value", "previous", "change");
+
+    private static final List<String> WORD_COLUMNS = List.of(WORD, COUNT);
+
+    private static final List<String> URL_COLUMNS = List.of(URL, COUNT);
+
+    private static final List<String> VALUE_COLUMNS = List.of(VALUE, COUNT);
+
+    /**
+     * The items of each tab that can be downloaded as CSV. A table lists its columns (the presentational
+     * bar width is not one of them); a KPI list, a chart and the weekday by hour table list none.
+     */
+    private static final Map<String, Map<String, List<String>>> EXPORT_ITEMS = Map.of(TAB_OVERVIEW,
+            Map.of(ITEM_KPIS, List.of(), TREND, List.of(), "topQueries", WORD_COLUMNS, "zeroHitQueries", WORD_COLUMNS), TAB_QUERIES,
+            Map.of(TAB_QUERIES, List.of(WORD, COUNT, USERS, AVG_HITS, CLICKS, CTR, AVG_RANK), "zeroHitQueries", List.of(WORD, COUNT, USERS),
+                    "zeroClickQueries", List.of(WORD, COUNT, LAST_SEARCHED_AT)),
+            TAB_CLICKS,
+            Map.of(ITEM_KPIS, List.of(), "rankDistribution", List.of(), "pagingRate", List.of(), "clickedUrls", URL_COLUMNS, "favoriteUrls",
+                    URL_COLUMNS),
+            TAB_PERFORMANCE,
+            Map.of("responseTime", List.of(), "responseTimeDistribution", List.of(), "queryTime", List.of(), "slowQueries",
+                    List.of(WORD, COUNT, AVG_RESPONSE_TIME)),
+            TAB_AUDIENCE, Map.of(USERS, List.of(), ACCESS_TYPES, List.of(), ITEM_WEEK_HOUR, List.of(), "userAgents", VALUE_COLUMNS,
+                    "referers", VALUE_COLUMNS, "languages", VALUE_COLUMNS, "virtualHosts", VALUE_COLUMNS));
+
     /** Behavior for the search log index. */
     @Resource
     protected SearchLogBhv searchLogBhv;
@@ -274,6 +311,123 @@ public class SearchLogAnalyticsService {
             logger.warn("Failed to aggregate access types of search logs.", e);
             return new ArrayList<>();
         }
+    }
+
+    // ===================================================================================
+    //                                                                                Export
+    //                                                                                ======
+
+    /**
+     * Checks whether an item of a tab can be downloaded as CSV.
+     *
+     * @param tab the tab name
+     * @param item the item: "kpis", "weekHour", a chart name or a table name of the tab
+     * @return true if the tab has the item
+     */
+    public boolean isExportable(final String tab, final String item) {
+        final Map<String, List<String>> items = tab == null ? null : EXPORT_ITEMS.get(tab);
+        return items != null && item != null && items.containsKey(item);
+    }
+
+    /**
+     * Writes one item of a report as CSV, with raw numbers (no locale formatting): the KPIs as
+     * metric, unit, value, previous and change; the weekday by hour table as day (1 = Monday) and h00 to h23;
+     * a chart as x, one column per series and {@code <key>_previous} for a series with a comparison period;
+     * any other table as its columns. The writer is flushed but not closed.
+     *
+     * @param report the report of the tab
+     * @param tab the tab name
+     * @param item the item, see {@link #isExportable(String, String)}
+     * @param writer the writer to write the CSV to
+     * @throws IOException if writing fails
+     * @throws IllegalArgumentException if the tab does not have the item
+     */
+    public void exportCsv(final AnalyticsReport report, final String tab, final String item, final Writer writer) throws IOException {
+        if (!isExportable(tab, item)) {
+            throw new IllegalArgumentException("Unknown export item: " + tab + "/" + item);
+        }
+        // not closed: that would close the writer of the caller
+        @SuppressWarnings("resource")
+        final CsvWriter csvWriter = new CsvWriter(writer, CsvUtil.createCsvConfig());
+        if (ITEM_KPIS.equals(item)) {
+            writeKpis(csvWriter, report);
+        } else if (ITEM_WEEK_HOUR.equals(item)) {
+            writeWeekHour(csvWriter, report.getTables().get(item));
+        } else if (report.getCharts().containsKey(item)) {
+            writeChart(csvWriter, report.getCharts().get(item));
+        } else {
+            writeTable(csvWriter, EXPORT_ITEMS.get(tab).get(item), report.getTables().get(item));
+        }
+        csvWriter.flush();
+    }
+
+    private static void writeKpis(final CsvWriter csvWriter, final AnalyticsReport report) throws IOException {
+        csvWriter.writeValues(KPI_COLUMNS);
+        for (final Kpi kpi : report.getKpis()) {
+            writeRow(csvWriter, kpi.getKey(), kpi.getUnit(), kpi.getValue(), kpi.getPrevious(), kpi.getChange());
+        }
+    }
+
+    private static void writeWeekHour(final CsvWriter csvWriter, final List<Map<String, Object>> rows) throws IOException {
+        final List<String> header = new ArrayList<>();
+        header.add("day");
+        for (int hour = 0; hour < 24; hour++) {
+            header.add(String.format("h%02d", hour));
+        }
+        csvWriter.writeValues(header);
+        if (rows == null) {
+            return;
+        }
+        for (final Map<String, Object> row : rows) {
+            final List<Object> values = new ArrayList<>();
+            values.add(row.get("day"));
+            for (final Object cell : (List<?>) row.get("cells")) {
+                values.add(((Map<?, ?>) cell).get(COUNT));
+            }
+            writeRow(csvWriter, values.toArray());
+        }
+    }
+
+    private static void writeChart(final CsvWriter csvWriter, final Chart chart) throws IOException {
+        final List<String> header = new ArrayList<>();
+        header.add("x");
+        for (final Series series : chart.getSeries()) {
+            header.add(series.getKey());
+            if (series.getPrevious() != null) {
+                header.add(series.getKey() + "_previous");
+            }
+        }
+        csvWriter.writeValues(header);
+        for (int i = 0; i < chart.getX().size(); i++) {
+            final List<Object> values = new ArrayList<>();
+            values.add(chart.getX().get(i));
+            for (final Series series : chart.getSeries()) {
+                values.add(valueAt(series.getData(), i));
+                if (series.getPrevious() != null) {
+                    values.add(valueAt(series.getPrevious(), i));
+                }
+            }
+            writeRow(csvWriter, values.toArray());
+        }
+    }
+
+    private static Number valueAt(final List<Number> values, final int index) {
+        return values != null && index < values.size() ? values.get(index) : null;
+    }
+
+    private static void writeTable(final CsvWriter csvWriter, final List<String> columns, final List<Map<String, Object>> rows)
+            throws IOException {
+        csvWriter.writeValues(columns);
+        if (rows == null) {
+            return;
+        }
+        for (final Map<String, Object> row : rows) {
+            writeRow(csvWriter, columns.stream().map(row::get).toArray());
+        }
+    }
+
+    private static void writeRow(final CsvWriter csvWriter, final Object... values) throws IOException {
+        csvWriter.writeValues(Arrays.stream(values).map(CsvUtil::toCell).toList());
     }
 
     // ===================================================================================
