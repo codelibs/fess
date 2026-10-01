@@ -30,7 +30,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -89,7 +91,8 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertEquals(200, res.status);
             assertEquals("text/html; charset=UTF-8", res.contentType);
             assertEquals("no-store", res.headers.get("Cache-Control"));
-            assertEquals(StaticThemeResponder.INDEX_CSP, res.headers.get("Content-Security-Policy"));
+            assertEquals(StaticThemeResponder.indexCsp(), res.headers.get("Content-Security-Policy"));
+            assertEquals("DENY", res.headers.get("X-Frame-Options"));
             assertEquals("same-origin", res.headers.get("Referrer-Policy"));
             assertEquals("inline; filename=\"index.html\"", res.headers.get("Content-Disposition"));
             assertEquals(expected, new String(res.body(), StandardCharsets.UTF_8));
@@ -98,6 +101,67 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         } finally {
             deleteTree(tmp);
         }
+    }
+
+    /** Installs a {@link FessConfig} whose {@code theme.index.frame.ancestors} is fixed for the test. */
+    private void useFrameAncestors(final String value) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getThemeIndexFrameAncestors() {
+                return value;
+            }
+        });
+    }
+
+    private String indexCspOf(final String path) throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-index-frame-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html><head></head><body></body></html>");
+            final CapturingResponse res = new CapturingResponse();
+            new StaticThemeResponder().serveIndex(new StubRequest(), res, new Theme("t", tmp, manifest()), path);
+            assertEquals("X-Frame-Options for " + path, "DENY", res.headers.get("X-Frame-Options"));
+            return res.headers.get("Content-Security-Policy");
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_indexCsp_forbidsFramingByDefault() throws Exception {
+        // The shipped fess_config.properties value.
+        assertEquals("'none'", ComponentUtil.getFessConfig().getThemeIndexFrameAncestors());
+        for (final String path : new String[] { "/", "/search", "/error/notFound" }) {
+            final String csp = indexCspOf(path);
+            assertEquals(path, StaticThemeResponder.INDEX_CSP_BASE + "; frame-ancestors 'none'", csp);
+        }
+    }
+
+    @Test
+    public void test_indexCsp_allowsBlobFramesForThePreviewAndCacheViewers() throws Exception {
+        for (final String value : new String[] { "'none'", "", "'self'" }) {
+            useFrameAncestors(value);
+            final String csp = indexCspOf("/");
+            assertTrue(csp.contains("frame-src blob:"), csp);
+            assertTrue(csp.contains("child-src blob:"), csp);
+        }
+    }
+
+    @Test
+    public void test_indexCsp_dropsFrameAncestorsWhenTheKeyIsEmpty() throws Exception {
+        // WebKit enforces frame-ancestors on the blob: frames of the viewers; with the directive
+        // gone X-Frame-Options: DENY (asserted in indexCspOf) is what keeps the page out of frames.
+        for (final String value : new String[] { "", "  ", null }) {
+            useFrameAncestors(value);
+            assertEquals(StaticThemeResponder.INDEX_CSP_BASE, indexCspOf("/search"));
+        }
+    }
+
+    @Test
+    public void test_indexCsp_usesTheConfiguredFrameAncestors() throws Exception {
+        useFrameAncestors(" 'self' https://portal.example.com ");
+        assertEquals(StaticThemeResponder.INDEX_CSP_BASE + "; frame-ancestors 'self' https://portal.example.com", indexCspOf("/"));
     }
 
     @Test
@@ -243,7 +307,7 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertEquals("error", res.headers.get("X-Fess-Route"));
             assertEquals("404", res.headers.get("X-Fess-Error-Code"));
             assertEquals("no-store", res.headers.get("Cache-Control"));
-            assertEquals(StaticThemeResponder.INDEX_CSP, res.headers.get("Content-Security-Policy"));
+            assertEquals(StaticThemeResponder.indexCsp(), res.headers.get("Content-Security-Policy"));
             final String body = new String(res.body(), StandardCharsets.UTF_8);
             assertTrue(body.contains("<meta name=\"x-fess-error-code\" content=\"404\">"), body);
             // No message_key supplied -> no detail meta.
@@ -896,7 +960,7 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertEquals("404", res.headers.get("X-Fess-Error-Code"));
             assertEquals("error", res.headers.get("X-Fess-Route"));
             assertEquals("no-store", res.headers.get("Cache-Control"));
-            assertEquals(StaticThemeResponder.INDEX_CSP, res.headers.get("Content-Security-Policy"));
+            assertEquals(StaticThemeResponder.indexCsp(), res.headers.get("Content-Security-Policy"));
             assertEquals("DENY", res.headers.get("X-Frame-Options"));
             assertEquals("same-origin", res.headers.get("Referrer-Policy"));
             assertEquals("inline; filename=\"index.html\"", res.headers.get("Content-Disposition"));

@@ -31,6 +31,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -65,11 +68,30 @@ public class StaticThemeResponder {
      * Restricts all resource origins to 'self', allows inline styles (required by most SPA themes), allows
      * images from http(s) and data: URIs (administrators put external images in related content and
      * notifications, which rendered on the JSP pages),
-     * permits blob: frames and child frames so the cache viewer can display cached documents in a
-     * sandboxed blob: iframe, and prevents the page itself from being embedded in frames.
+     * and permits blob: frames and child frames so the preview and cache viewers can display documents
+     * in a blob: iframe.
+     *
+     * <p>{@code frame-ancestors} is not part of this constant: {@link #indexCsp()} appends it from
+     * {@code theme.index.frame.ancestors} ({@code 'none'} by default), because a blob: document inherits
+     * the policy of the page that created it and WebKit enforces {@code frame-ancestors} on that document.
+     * With {@code 'none'} WebKit refuses to show a blob: frame inside the page itself, so previews and
+     * cached copies stay blank there. An empty value drops the directive; the page is then kept out of
+     * frames by {@code X-Frame-Options: DENY} (see {@code writeIndexBytes}).</p>
      */
-    static final String INDEX_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
-            + " img-src 'self' data: http: https:; connect-src 'self'; frame-src blob:; child-src blob:; frame-ancestors 'none'; base-uri 'self'";
+    static final String INDEX_CSP_BASE = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+            + " img-src 'self' data: http: https:; connect-src 'self'; frame-src blob:; child-src blob:; base-uri 'self'";
+
+    /**
+     * Returns the Content-Security-Policy of the SPA index HTML entry: {@link #INDEX_CSP_BASE} plus a
+     * {@code frame-ancestors} directive carrying {@code theme.index.frame.ancestors}, or no directive when
+     * that value is blank.
+     *
+     * @return the policy for the {@code Content-Security-Policy} header
+     */
+    static String indexCsp() {
+        final String ancestors = ComponentUtil.getFessConfig().getThemeIndexFrameAncestors();
+        return StringUtil.isBlank(ancestors) ? INDEX_CSP_BASE : INDEX_CSP_BASE + "; frame-ancestors " + ancestors.trim();
+    }
 
     /**
      * Content-Security-Policy for inline SVG assets.
@@ -337,7 +359,7 @@ public class StaticThemeResponder {
     /**
      * Inserts {@code <base href="{contextPath}/">} right after the {@code <head>} start tag, so a
      * theme's relative URLs resolve against the web application root whatever context path Fess is
-     * deployed under. {@code INDEX_CSP}'s {@code base-uri 'self'} allows it: the href is always
+     * deployed under. {@code INDEX_CSP_BASE}'s {@code base-uri 'self'} allows it: the href is always
      * on this origin. The bytes are returned unchanged when there is no {@code <head>} tag.
      *
      * @param htmlBytes UTF-8 encoded HTML bytes
@@ -603,7 +625,7 @@ public class StaticThemeResponder {
         // Assets load inline so <link>/<script>/<img> references in index.html behave normally.
         // HTML asset files are forced to "attachment" to prevent same-origin XSS via a malicious
         // theme dropping an executable HTML page next to the SPA entry — only index.html (served
-        // by serveIndex() with INDEX_CSP) should render as HTML. SVG keeps inline because SVG_CSP
+        // by serveIndex() with the index CSP) should render as HTML. SVG keeps inline because SVG_CSP
         // below blocks script execution.
         final boolean isHtml = "text/html; charset=UTF-8".equals(contentType);
         res.setStatus(HttpServletResponse.SC_OK);
@@ -693,10 +715,10 @@ public class StaticThemeResponder {
         res.setContentType("text/html; charset=UTF-8");
         res.setHeader("Content-Disposition", "inline; filename=\"index.html\"");
         res.setHeader("Cache-Control", "no-store");
-        res.setHeader("Content-Security-Policy", INDEX_CSP);
-        // Clickjacking defense-in-depth: INDEX_CSP already sets frame-ancestors 'none'
-        // (enforced via this HTTP header, unlike a <meta> CSP); X-Frame-Options covers
-        // older browsers that don't honor frame-ancestors.
+        res.setHeader("Content-Security-Policy", indexCsp());
+        // Clickjacking defense for a policy without frame-ancestors (theme.index.frame.ancestors
+        // left empty) and for older browsers: DENY refuses every parent, the page's own origin
+        // included. A browser that honors a frame-ancestors directive ignores this header.
         res.setHeader("X-Frame-Options", "DENY");
         res.setHeader("Referrer-Policy", "same-origin");
         if (errorCode != null) {
