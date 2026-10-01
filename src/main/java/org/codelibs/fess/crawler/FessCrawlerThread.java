@@ -17,6 +17,8 @@ package org.codelibs.fess.crawler;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -24,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -96,9 +99,50 @@ public class FessCrawlerThread extends CrawlerThread {
     protected ConcurrentHashMap<String, Pair<String, Pattern>> clientRuleCache = new ConcurrentHashMap<>();
 
     /**
+     * Formats an HTTP-date (IMF-fixdate of RFC 9110, e.g. {@code Sun, 06 Nov 1994 08:49:37 GMT}).
+     * {@link DateTimeFormatter#RFC_1123_DATE_TIME} is not used because it does not zero-pad the day.
+     */
+    private static final DateTimeFormatter HTTP_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH).withZone(ZoneOffset.UTC);
+
+    /**
+     * The validators sent with a conditional GET.
+     *
+     * @param ifNoneMatch the value of the If-None-Match header (the indexed ETag), or null
+     * @param ifModifiedSince the value of the If-Modified-Since header (the indexed last_modified as an HTTP-date), or null
+     */
+    protected record ConditionalHeaders(String ifNoneMatch, String ifModifiedSince) {
+    }
+
+    /**
+     * The conditional GET that {@link #isContentUpdated(CrawlerClient, UrlQueue)} prepared for a URL.
+     *
+     * @param url the URL the conditional GET is for
+     * @param document the indexed document of the URL
+     * @param id the id of the indexed document
+     * @param headers the validators to send
+     */
+    protected record ConditionalGetState(String url, Map<String, Object> document, String id, ConditionalHeaders headers) {
+    }
+
+    /**
+     * The conditional GET pending for the URL this thread is crawling, or null. It is cleared at the
+     * start of each {@link #isContentUpdated(CrawlerClient, UrlQueue)} call, when the response of the
+     * URL is processed, and when the crawl of the URL ends ({@link #finishCrawling()}), and it applies
+     * only to the URL it was prepared for.
+     */
+    protected ConditionalGetState conditionalGetState;
+
+    /**
      * Determines whether the content at the given URL has been updated since the last crawl.
      * This method implements incremental crawling by comparing timestamps and checking document
      * expiration. It also handles special cases for different URL schemes (SMB, file, FTP).
+     *
+     * <p>For an http or https URL whose indexed document cannot be judged by a HEAD request and its
+     * Last-Modified (no indexed last_modified, no Last-Modified in the HEAD response, or a HEAD status
+     * other than 200 and 404), the GET is sent as a conditional request with the indexed ETag and
+     * last_modified; see {@link #createRequestData(UrlQueue)} and
+     * {@link #processResponse(UrlQueue, ResponseData)}.</p>
      *
      * @param client the crawler client to use for accessing the URL
      * @param urlQueue the URL queue item containing the URL to check
@@ -106,6 +150,7 @@ public class FessCrawlerThread extends CrawlerThread {
      */
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
+        conditionalGetState = null;
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isIncrementalCrawling()) {
 
@@ -156,7 +201,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Map<String, Object> document = indexingHelper.getDocument(searchEngineClient, id,
                         new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldLastModified(),
                                 fessConfig.getIndexFieldAnchor(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldExpires(),
-                                fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() });
+                                fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
+                                fessConfig.getIndexFieldEtag() });
                 if (document == null) {
                     storeChildUrlsToQueue(urlQueue, getChildUrlSet(searchEngineClient, id));
                     return true;
@@ -174,6 +220,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
                 final Date lastModified = DocumentUtil.getValue(document, fessConfig.getIndexFieldLastModified(), Date.class);
                 if (lastModified == null) {
+                    prepareConditionalGet(url, document, id, null);
                     return true;
                 }
                 urlQueue.setLastModified(lastModified.getTime());
@@ -200,29 +247,15 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
                 final Date responseLastModified = responseData.getLastModified();
                 if (responseLastModified == null) {
+                    prepareConditionalGet(url, document, id, responseData);
                     return true;
                 }
                 if (responseLastModified.getTime() <= lastModified.getTime() && httpStatusCode == Constants.OK_STATUS_CODE) {
-
-                    log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
-
                     responseData.setExecutionTime(systemHelper.getCurrentTimeAsLong() - startTime);
-                    responseData.setParentUrl(urlQueue.getParentUrl());
-                    responseData.setSessionId(crawlerContext.getSessionId());
-                    responseData.setHttpStatusCode(Constants.NOT_MODIFIED_STATUS);
-                    processResponse(urlQueue, responseData);
-
-                    storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
-
-                    final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
-                    if (documentExpires != null
-                            && !indexingHelper.updateDocument(searchEngineClient, id, fessConfig.getIndexFieldExpires(), documentExpires)
-                            && logger.isDebugEnabled()) {
-                        logger.debug("Failed to update field: field={}, url={}", fessConfig.getIndexFieldExpires(), url);
-                    }
-
+                    handleUnchangedDocument(urlQueue, document, id, responseData);
                     return false;
                 }
+                prepareConditionalGet(url, document, id, responseData);
             } finally {
                 if (responseData != null) {
                     CloseableUtil.closeQuietly(responseData);
@@ -230,6 +263,123 @@ public class FessCrawlerThread extends CrawlerThread {
             }
         }
         return true;
+    }
+
+    /**
+     * Handles an indexed document whose content has not changed, either because the Last-Modified of a
+     * HEAD response is not newer than the indexed one, or because a conditional GET returned 304. The
+     * response is processed as not modified, the anchors of the indexed document are queued, and the
+     * expiration of the indexed document is extended.
+     *
+     * @param urlQueue the URL queue item of the document
+     * @param document the indexed document
+     * @param id the id of the indexed document
+     * @param responseData the HEAD response, or the 304 response of the conditional GET
+     */
+    protected void handleUnchangedDocument(final UrlQueue<?> urlQueue, final Map<String, Object> document, final String id,
+            final ResponseData responseData) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
+
+        responseData.setParentUrl(urlQueue.getParentUrl());
+        responseData.setSessionId(crawlerContext.getSessionId());
+        responseData.setHttpStatusCode(Constants.NOT_MODIFIED_STATUS);
+        processResponse(urlQueue, responseData);
+
+        storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
+
+        final CrawlingConfig crawlingConfig = ComponentUtil.getCrawlingConfigHelper().get(crawlerContext.getSessionId());
+        final Date documentExpires = ComponentUtil.getCrawlingInfoHelper().getDocumentExpires(crawlingConfig);
+        if (documentExpires != null
+                && !ComponentUtil.getIndexingHelper()
+                        .updateDocument(ComponentUtil.getSearchEngineClient(), id, fessConfig.getIndexFieldExpires(), documentExpires)
+                && logger.isDebugEnabled()) {
+            logger.debug("Failed to update field: field={}, url={}", fessConfig.getIndexFieldExpires(), urlQueue.getUrl());
+        }
+    }
+
+    /**
+     * Keeps a conditional GET for an http or https URL when the indexed document has a validator.
+     *
+     * @param url the URL to fetch
+     * @param document the indexed document
+     * @param id the id of the indexed document
+     * @param headResponse the HEAD response, or null if no HEAD request was sent
+     */
+    private void prepareConditionalGet(final String url, final Map<String, Object> document, final String id,
+            final ResponseData headResponse) {
+        if (!url.startsWith("http:") && !url.startsWith("https:")) {
+            return;
+        }
+        final ConditionalHeaders headers = resolveConditionalHeaders(document, headResponse);
+        if (headers != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Sending a conditional GET: url={}, headers={}", url, headers);
+            }
+            conditionalGetState = new ConditionalGetState(url, document, id, headers);
+        }
+    }
+
+    /**
+     * Resolves the validators of a conditional GET for an indexed document. A conditional GET is used
+     * when the HEAD comparison cannot decide: the document has no last_modified, the HEAD response has
+     * no Last-Modified, or the HEAD status is neither 200 nor 404.
+     *
+     * @param document the indexed document
+     * @param headResponse the HEAD response, or null if no HEAD request was sent
+     * @return the validators to send, or null for a plain GET (the HEAD comparison decides, or the
+     *         document has neither an ETag nor a last_modified)
+     */
+    protected ConditionalHeaders resolveConditionalHeaders(final Map<String, Object> document, final ResponseData headResponse) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Date lastModified = DocumentUtil.getValue(document, fessConfig.getIndexFieldLastModified(), Date.class);
+        if (lastModified != null && headResponse != null && headResponse.getLastModified() != null) {
+            final int httpStatusCode = headResponse.getHttpStatusCode();
+            if (httpStatusCode == Constants.OK_STATUS_CODE || httpStatusCode == Constants.NOT_FOUND_STATUS_CODE) {
+                return null;
+            }
+        }
+        final String etag = DocumentUtil.getValue(document, fessConfig.getIndexFieldEtag(), String.class);
+        final String ifNoneMatch = StringUtil.isNotBlank(etag) ? etag : null;
+        final String ifModifiedSince = lastModified != null ? HTTP_DATE_FORMATTER.format(lastModified.toInstant()) : null;
+        if (ifNoneMatch == null && ifModifiedSince == null) {
+            return null;
+        }
+        return new ConditionalHeaders(ifNoneMatch, ifModifiedSince);
+    }
+
+    /**
+     * Creates the GET request for the URL, adding If-None-Match and If-Modified-Since when a
+     * conditional GET was prepared for this URL.
+     *
+     * @param urlQueue the URL queue item to fetch
+     * @return the request data
+     */
+    @Override
+    protected RequestData createRequestData(final UrlQueue<?> urlQueue) {
+        final RequestData requestData = super.createRequestData(urlQueue);
+        final ConditionalGetState state = conditionalGetState;
+        if (state != null && state.url().equals(urlQueue.getUrl())) {
+            final ConditionalHeaders headers = state.headers();
+            if (headers.ifNoneMatch() != null) {
+                requestData.addHeader("If-None-Match", headers.ifNoneMatch());
+            }
+            if (headers.ifModifiedSince() != null) {
+                requestData.addHeader("If-Modified-Since", headers.ifModifiedSince());
+            }
+        }
+        return requestData;
+    }
+
+    /**
+     * Clears the pending conditional GET when the crawl of a URL ends, so that it is not kept when
+     * the GET threw or redirected and {@link #processResponse(UrlQueue, ResponseData)} was not reached.
+     */
+    @Override
+    protected void finishCrawling() {
+        conditionalGetState = null;
+        super.finishCrawling();
     }
 
     /**
@@ -318,13 +468,23 @@ public class FessCrawlerThread extends CrawlerThread {
     /**
      * Processes the response data from a crawled URL, including failure handling.
      * This method extends the base response processing to handle Fess-specific failure
-     * URL tracking when certain HTTP status codes are encountered.
+     * URL tracking when certain HTTP status codes are encountered. A 304 response to the conditional
+     * GET prepared for the URL is handled by {@link #handleUnchangedDocument}.
      *
      * @param urlQueue the URL queue item that was processed
      * @param responseData the response data from the crawl operation
      */
     @Override
     protected void processResponse(final UrlQueue<?> urlQueue, final ResponseData responseData) {
+        final ConditionalGetState state = conditionalGetState;
+        if (state != null && state.url().equals(urlQueue.getUrl())) {
+            conditionalGetState = null;
+            if (responseData.getHttpStatusCode() == Constants.NOT_MODIFIED_STATUS_CODE) {
+                handleUnchangedDocument(urlQueue, state.document(), state.id(), responseData);
+                return;
+            }
+        }
+
         super.processResponse(urlQueue, responseData);
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

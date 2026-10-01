@@ -15,7 +15,10 @@
  */
 package org.codelibs.fess.crawler;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,18 +30,38 @@ import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.entity.UrlQueueImpl;
+import org.codelibs.fess.crawler.rule.Rule;
+import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.IndexingHelper;
+import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.helper.SambaHelper;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Test class for FessCrawlerThread.
  * Tests HTTP status code constants, null handling, and anchor processing.
  */
 public class FessCrawlerThreadTest extends UnitFessTestCase {
+
+    @Override
+    protected void tearDown(final TestInfo testInfo) throws Exception {
+        // do not leave the stubs of this class in the ComponentUtil cache for later test classes
+        clearCachedComponent("indexingHelper");
+        clearCachedComponent("crawlingConfigHelper");
+        super.tearDown(testInfo);
+    }
 
     @Test
     public void test_getClientRuleList() {
@@ -384,5 +407,513 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         // Since it returns a Set, duplicates should be handled by URL comparison
         // The exact behavior depends on RequestData.equals() implementation
         assertTrue("Should have at most 5 items", result.size() <= 5);
+    }
+
+    // ===== conditional GET =====
+
+    private static final String PAGE_URL = "https://example.com/page.html";
+
+    /** The indexed last_modified as the _source of the document returns it. */
+    private static final String INDEXED_LAST_MODIFIED = "2026-10-01T02:03:04.000Z";
+
+    /** INDEXED_LAST_MODIFIED as an HTTP-date (IMF-fixdate, two-digit day). */
+    private static final String INDEXED_LAST_MODIFIED_HTTP_DATE = "Thu, 01 Oct 2026 02:03:04 GMT";
+
+    @Test
+    public void test_resolveConditionalHeaders_etagAndHeadWithoutLastModified() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("etag", "W/\"abc\"");
+
+        final FessCrawlerThread.ConditionalHeaders headers = crawlerThread.resolveConditionalHeaders(doc, headResponse(200, null));
+        assertNotNull(headers);
+        assertEquals("W/\"abc\"", headers.ifNoneMatch());
+        assertNull(headers.ifModifiedSince());
+
+        // no indexed last_modified: no HEAD is sent at all
+        final FessCrawlerThread.ConditionalHeaders noHead = crawlerThread.resolveConditionalHeaders(doc, null);
+        assertNotNull(noHead);
+        assertEquals("W/\"abc\"", noHead.ifNoneMatch());
+        assertNull(noHead.ifModifiedSince());
+    }
+
+    @Test
+    public void test_resolveConditionalHeaders_lastModifiedAndHead405() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("last_modified", INDEXED_LAST_MODIFIED);
+
+        final FessCrawlerThread.ConditionalHeaders headers = crawlerThread.resolveConditionalHeaders(doc, headResponse(405, null));
+        assertNotNull(headers);
+        assertNull(headers.ifNoneMatch());
+        assertEquals(INDEXED_LAST_MODIFIED_HTTP_DATE, headers.ifModifiedSince());
+
+        // a status other than 200/404 makes the HEAD unusable even with a Last-Modified
+        final FessCrawlerThread.ConditionalHeaders withLastModified =
+                crawlerThread.resolveConditionalHeaders(doc, headResponse(405, new Date(0L)));
+        assertNotNull(withLastModified);
+        assertEquals(INDEXED_LAST_MODIFIED_HTTP_DATE, withLastModified.ifModifiedSince());
+    }
+
+    @Test
+    public void test_resolveConditionalHeaders_dateValueAndBothHeaders() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("etag", "\"v1\"");
+        doc.put("last_modified", new Date(java.time.Instant.parse("2026-12-24T23:59:58Z").toEpochMilli()));
+
+        final FessCrawlerThread.ConditionalHeaders headers = crawlerThread.resolveConditionalHeaders(doc, headResponse(200, null));
+        assertNotNull(headers);
+        assertEquals("\"v1\"", headers.ifNoneMatch());
+        assertEquals("Thu, 24 Dec 2026 23:59:58 GMT", headers.ifModifiedSince());
+    }
+
+    @Test
+    public void test_resolveConditionalHeaders_plainGet() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        assertNull(crawlerThread.resolveConditionalHeaders(new HashMap<>(), null));
+        assertNull(crawlerThread.resolveConditionalHeaders(new HashMap<>(), headResponse(200, null)));
+        assertNull(crawlerThread.resolveConditionalHeaders(new HashMap<>(), headResponse(405, null)));
+
+        final Map<String, Object> blankEtag = new HashMap<>();
+        blankEtag.put("etag", " ");
+        assertNull(crawlerThread.resolveConditionalHeaders(blankEtag, headResponse(200, null)));
+
+        // the HEAD comparison decides: no conditional GET
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("etag", "\"v1\"");
+        doc.put("last_modified", INDEXED_LAST_MODIFIED);
+        assertNull(crawlerThread.resolveConditionalHeaders(doc, headResponse(200, new Date())));
+        assertNull(crawlerThread.resolveConditionalHeaders(doc, headResponse(404, new Date())));
+    }
+
+    @Test
+    public void test_createRequestData_addsHeadersOnlyForThePendingUrl() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState(PAGE_URL, new HashMap<>(), "id1",
+                new FessCrawlerThread.ConditionalHeaders("\"v1\"", INDEXED_LAST_MODIFIED_HTTP_DATE));
+
+        final RequestData requestData = crawlerThread.createRequestData(urlQueue(PAGE_URL));
+        assertEquals(PAGE_URL, requestData.getUrl());
+        assertEquals(RequestData.Method.GET, requestData.getMethod());
+        assertEquals("\"v1\"", requestData.getHeaders().get("If-None-Match"));
+        assertEquals(INDEXED_LAST_MODIFIED_HTTP_DATE, requestData.getHeaders().get("If-Modified-Since"));
+
+        final RequestData other = crawlerThread.createRequestData(urlQueue("https://example.com/other.html"));
+        assertEquals("https://example.com/other.html", other.getUrl());
+        assertTrue(other.getHeaders().isEmpty(), String.valueOf(other.getHeaders()));
+    }
+
+    @Test
+    public void test_createRequestData_onlyTheAvailableHeader() {
+        final FessCrawlerThread crawlerThread = new FessCrawlerThread();
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState(PAGE_URL, new HashMap<>(), "id1",
+                new FessCrawlerThread.ConditionalHeaders("\"v1\"", null));
+
+        final RequestData requestData = crawlerThread.createRequestData(urlQueue(PAGE_URL));
+        assertEquals(1, requestData.getHeaders().size(), String.valueOf(requestData.getHeaders()));
+        assertEquals("\"v1\"", requestData.getHeaders().get("If-None-Match"));
+
+        final FessCrawlerThread noState = new FessCrawlerThread();
+        assertTrue(noState.createRequestData(urlQueue(PAGE_URL)).getHeaders().isEmpty());
+    }
+
+    @Test
+    public void test_processResponse_304WithPendingStateHandlesUnchangedDocumentOnce() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        crawlerThread.stubUnchanged = true;
+        final Map<String, Object> document = new HashMap<>();
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState(PAGE_URL, document, "id1",
+                new FessCrawlerThread.ConditionalHeaders("\"v1\"", null));
+
+        final ResponseData notModified = headResponse(304, null);
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        crawlerThread.processResponse(urlQueue, notModified);
+
+        assertEquals(1, crawlerThread.unchangedCalls.size());
+        final Object[] call = crawlerThread.unchangedCalls.get(0);
+        assertSame(urlQueue, call[0]);
+        assertSame(document, call[1]);
+        assertEquals("id1", call[2]);
+        assertSame(notModified, call[3]);
+        assertNull(crawlerThread.conditionalGetState);
+        // handleUnchangedDocument runs the rule itself; processResponse does not run it a second time
+        assertEquals(0, env.ruleManager.responses.size());
+    }
+
+    @Test
+    public void test_processResponse_304WithoutPendingStateGoesToTheRule() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        crawlerThread.stubUnchanged = true;
+
+        crawlerThread.processResponse(urlQueue(PAGE_URL), headResponse(304, null));
+        assertEquals(0, crawlerThread.unchangedCalls.size());
+        assertEquals(1, env.ruleManager.responses.size());
+
+        // a pending state of another URL does not apply
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState("https://example.com/other.html", new HashMap<>(),
+                "id2", new FessCrawlerThread.ConditionalHeaders("\"v1\"", null));
+        crawlerThread.processResponse(urlQueue(PAGE_URL), headResponse(304, null));
+        assertEquals(0, crawlerThread.unchangedCalls.size());
+        assertEquals(2, env.ruleManager.responses.size());
+    }
+
+    @Test
+    public void test_processResponse_200AfterConditionalGetClearsTheState() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        crawlerThread.stubUnchanged = true;
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState(PAGE_URL, new HashMap<>(), "id1",
+                new FessCrawlerThread.ConditionalHeaders("\"v1\"", null));
+
+        crawlerThread.processResponse(urlQueue(PAGE_URL), headResponse(200, null));
+        assertEquals(0, crawlerThread.unchangedCalls.size());
+        assertEquals(1, env.ruleManager.responses.size());
+        assertNull(crawlerThread.conditionalGetState);
+    }
+
+    @Test
+    public void test_processResponse_304OfConditionalGetUpdatesLikeAnUnchangedHead() {
+        final Map<String, Object> document = indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\"");
+        final CrawlEnvironment env = setUpCrawlEnvironment(document);
+        env.webConfig.setTimeToLive(60);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(200, null);
+
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue));
+        assertNotNull(crawlerThread.conditionalGetState);
+        final RequestData get = crawlerThread.createRequestData(urlQueue);
+        assertEquals("\"v1\"", get.getHeaders().get("If-None-Match"));
+
+        final ResponseData notModified = headResponse(304, null);
+        crawlerThread.processResponse(urlQueue, notModified);
+
+        assertEquals(1, crawlerThread.unchangedCalls.size());
+        assertNull(crawlerThread.conditionalGetState);
+        assertEquals(1, env.ruleManager.responses.size());
+        assertSame(notModified, env.ruleManager.responses.get(0));
+        assertEquals(304, notModified.getHttpStatusCode());
+        assertEquals(env.sessionId, notModified.getSessionId());
+        assertEquals(1, crawlerThread.storedChildUrls.size());
+        assertEquals("https://example.com/child.html", crawlerThread.storedChildUrls.get(0).iterator().next().getUrl());
+        assertEquals(List.of("expires"), env.indexingHelper.updatedFields);
+    }
+
+    @Test
+    public void test_isContentUpdated_unchangedHeadHandlesUnchangedDocument() {
+        final Map<String, Object> document = indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\"");
+        final CrawlEnvironment env = setUpCrawlEnvironment(document);
+        env.webConfig.setTimeToLive(60);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(200, new Date(java.time.Instant.parse(INDEXED_LAST_MODIFIED).toEpochMilli()));
+
+        final UrlQueue<?> urlQueue = urlQueue(PAGE_URL);
+        assertFalse(crawlerThread.isContentUpdated(env.client, urlQueue));
+
+        assertEquals(1, env.client.requests.size());
+        assertEquals(RequestData.Method.HEAD, env.client.requests.get(0).getMethod());
+        assertTrue(List.of(env.indexingHelper.fields).contains("etag"), List.of(env.indexingHelper.fields).toString());
+        assertEquals(1, crawlerThread.unchangedCalls.size());
+        assertSame(env.client.headResponse, crawlerThread.unchangedCalls.get(0)[3]);
+        assertEquals(1, env.ruleManager.responses.size());
+        assertEquals(304, env.client.headResponse.getHttpStatusCode());
+        assertEquals(1, crawlerThread.storedChildUrls.size());
+        assertEquals(List.of("expires"), env.indexingHelper.updatedFields);
+        assertNull(crawlerThread.conditionalGetState);
+    }
+
+    @Test
+    public void test_isContentUpdated_changedHeadIsAPlainGet() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\""));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(200, new Date(java.time.Instant.parse("2026-10-02T00:00:00Z").toEpochMilli()));
+
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        assertNull(crawlerThread.conditionalGetState);
+        assertEquals(0, crawlerThread.unchangedCalls.size());
+        assertTrue(crawlerThread.createRequestData(urlQueue(PAGE_URL)).getHeaders().isEmpty());
+    }
+
+    @Test
+    public void test_isContentUpdated_headWithoutLastModifiedPreparesConditionalGet() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\""));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(200, null);
+
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        assertEquals(1, env.client.requests.size());
+        final FessCrawlerThread.ConditionalGetState state = crawlerThread.conditionalGetState;
+        assertNotNull(state);
+        assertEquals(PAGE_URL, state.url());
+        assertEquals("\"v1\"", state.headers().ifNoneMatch());
+        assertEquals(INDEXED_LAST_MODIFIED_HTTP_DATE, state.headers().ifModifiedSince());
+        assertEquals(0, crawlerThread.unchangedCalls.size());
+    }
+
+    @Test
+    public void test_isContentUpdated_head405PreparesConditionalGet() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, null));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(405, new Date(0L));
+
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        final FessCrawlerThread.ConditionalGetState state = crawlerThread.conditionalGetState;
+        assertNotNull(state);
+        assertNull(state.headers().ifNoneMatch());
+        assertEquals(INDEXED_LAST_MODIFIED_HTTP_DATE, state.headers().ifModifiedSince());
+    }
+
+    @Test
+    public void test_isContentUpdated_noIndexedLastModifiedSendsNoHead() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, "\"v1\""));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        assertEquals(0, env.client.requests.size());
+        final FessCrawlerThread.ConditionalGetState state = crawlerThread.conditionalGetState;
+        assertNotNull(state);
+        assertEquals("\"v1\"", state.headers().ifNoneMatch());
+        assertNull(state.headers().ifModifiedSince());
+    }
+
+    @Test
+    public void test_isContentUpdated_nothingToValidateIsAPlainGet() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(null, null));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        assertEquals(0, env.client.requests.size());
+        assertNull(crawlerThread.conditionalGetState);
+    }
+
+    @Test
+    public void test_isContentUpdated_nonHttpUrlKeepsThePlainFlow() {
+        final String fileUrl = "file:/data/page.html";
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\""));
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        env.client.headResponse = headResponse(200, null);
+
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(fileUrl)));
+        assertNull(crawlerThread.conditionalGetState);
+
+        final CrawlEnvironment env2 = setUpCrawlEnvironment(indexedDocument(null, "\"v1\""));
+        env2.client.headResponse = headResponse(200, null);
+        assertTrue(env2.thread.isContentUpdated(env2.client, urlQueue(fileUrl)));
+        assertNull(env2.thread.conditionalGetState);
+    }
+
+    @Test
+    public void test_isContentUpdated_clearsAStaleState() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState(PAGE_URL, new HashMap<>(), "id1",
+                new FessCrawlerThread.ConditionalHeaders("\"v1\"", null));
+
+        // the document is gone from the index: a plain GET
+        assertTrue(crawlerThread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        assertNull(crawlerThread.conditionalGetState);
+        assertTrue(crawlerThread.createRequestData(urlQueue(PAGE_URL)).getHeaders().isEmpty());
+    }
+
+    @Test
+    public void test_finishCrawling_clearsTheStateWhenTheGetDidNotReachProcessResponse() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(null);
+        final RecordingCrawlerThread crawlerThread = env.thread;
+        crawlerThread.conditionalGetState = new FessCrawlerThread.ConditionalGetState(PAGE_URL, new HashMap<>(), "id1",
+                new FessCrawlerThread.ConditionalHeaders("\"v1\"", null));
+        final CrawlerContext crawlerContext = crawlerThread.crawlerContext;
+
+        // the GET threw or redirected: run() skips processResponse and goes to its finally block
+        crawlerThread.startCrawling();
+        assertEquals(1, crawlerContext.getActiveThreadCount());
+        crawlerThread.finishCrawling();
+
+        assertNull(crawlerThread.conditionalGetState);
+        assertEquals(0, crawlerContext.getActiveThreadCount());
+    }
+
+    private static Map<String, Object> indexedDocument(final String lastModified, final String etag) {
+        final Map<String, Object> document = new HashMap<>();
+        document.put("_id", "id1");
+        if (lastModified != null) {
+            document.put("last_modified", lastModified);
+        }
+        if (etag != null) {
+            document.put("etag", etag);
+        }
+        document.put("anchor", List.of("https://example.com/child.html"));
+        return document;
+    }
+
+    private static ResponseData headResponse(final int status, final Date lastModified) {
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl(PAGE_URL);
+        responseData.setHttpStatusCode(status);
+        responseData.setLastModified(lastModified);
+        return responseData;
+    }
+
+    private static UrlQueue<?> urlQueue(final String url) {
+        final UrlQueueImpl<Long> urlQueue = new UrlQueueImpl<>();
+        urlQueue.setUrl(url);
+        urlQueue.setMethod("GET");
+        urlQueue.setWeight(1.0f);
+        urlQueue.setDepth(0);
+        return urlQueue;
+    }
+
+    private static class CrawlEnvironment {
+        String sessionId;
+        WebConfig webConfig;
+        RecordingCrawlerThread thread;
+        RecordingClient client;
+        RecordingIndexingHelper indexingHelper;
+        RecordingRuleManager ruleManager;
+    }
+
+    private CrawlEnvironment setUpCrawlEnvironment(final Map<String, Object> document) {
+        // ComponentUtil caches these two, and the cache outlives ComponentUtil.register
+        clearCachedComponent("indexingHelper");
+        clearCachedComponent("crawlingConfigHelper");
+        final CrawlEnvironment env = new CrawlEnvironment();
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
+        ComponentUtil.register(new ProtocolHelper(), "protocolHelper");
+        ComponentUtil.register(new PermissionHelper(), "permissionHelper");
+        ComponentUtil.register(new SambaHelper(), "sambaHelper");
+        ComponentUtil.register(new SearchEngineClient(), "searchEngineClient");
+        env.indexingHelper = new RecordingIndexingHelper(document);
+        ComponentUtil.register(env.indexingHelper, "indexingHelper");
+
+        env.webConfig = new WebConfig();
+        env.webConfig.setId("1");
+        env.webConfig.setName("Site");
+        env.webConfig.setConfigParameter("");
+        env.sessionId = ComponentUtil.getCrawlingConfigHelper().store(UUID.randomUUID().toString(), env.webConfig);
+
+        final CrawlerContext crawlerContext = new CrawlerContext();
+        crawlerContext.setSessionId(env.sessionId);
+        env.ruleManager = new RecordingRuleManager();
+        crawlerContext.setRuleManager(env.ruleManager);
+        env.thread = new RecordingCrawlerThread();
+        env.thread.setCrawlerContext(crawlerContext);
+        env.client = new RecordingClient();
+        return env;
+    }
+
+    private static void clearCachedComponent(final String name) {
+        try {
+            final Field field = ComponentUtil.class.getDeclaredField(name);
+            field.setAccessible(true);
+            field.set(null, null);
+        } catch (final ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static class RecordingCrawlerThread extends FessCrawlerThread {
+        final List<Object[]> unchangedCalls = new ArrayList<>();
+        final List<Set<RequestData>> storedChildUrls = new ArrayList<>();
+        boolean stubUnchanged;
+
+        @Override
+        protected void handleUnchangedDocument(final UrlQueue<?> urlQueue, final Map<String, Object> document, final String id,
+                final ResponseData responseData) {
+            unchangedCalls.add(new Object[] { urlQueue, document, id, responseData });
+            if (!stubUnchanged) {
+                super.handleUnchangedDocument(urlQueue, document, id, responseData);
+            }
+        }
+
+        @Override
+        protected void storeChildUrlsToQueue(final UrlQueue<?> urlQueue, final Set<RequestData> childUrlSet) {
+            if (childUrlSet != null) {
+                storedChildUrls.add(childUrlSet);
+            }
+        }
+    }
+
+    private static class RecordingClient implements CrawlerClient {
+        final List<RequestData> requests = new ArrayList<>();
+        ResponseData headResponse;
+
+        @Override
+        public void setInitParameterMap(final Map<String, Object> params) {
+            // nothing
+        }
+
+        @Override
+        public ResponseData execute(final RequestData data) {
+            requests.add(data);
+            return headResponse;
+        }
+    }
+
+    private static class RecordingIndexingHelper extends IndexingHelper {
+        final Map<String, Object> document;
+        String[] fields;
+        final List<String> updatedFields = new ArrayList<>();
+
+        RecordingIndexingHelper(final Map<String, Object> document) {
+            this.document = document;
+        }
+
+        @Override
+        public Map<String, Object> getDocument(final SearchEngineClient searchEngineClient, final String id, final String[] fields) {
+            this.fields = fields;
+            return document;
+        }
+
+        @Override
+        public List<Map<String, Object>> getChildDocumentList(final SearchEngineClient searchEngineClient, final String id,
+                final String[] fields) {
+            return List.of();
+        }
+
+        @Override
+        public boolean updateDocument(final SearchEngineClient searchEngineClient, final String id, final String field,
+                final Object value) {
+            updatedFields.add(field);
+            return true;
+        }
+
+        @Override
+        public boolean deleteDocument(final SearchEngineClient searchEngineClient, final String id) {
+            return true;
+        }
+    }
+
+    private static class RecordingRuleManager implements RuleManager {
+        final List<ResponseData> responses = new ArrayList<>();
+
+        @Override
+        public Rule getRule(final ResponseData responseData) {
+            responses.add(responseData);
+            return null;
+        }
+
+        @Override
+        public void addRule(final Rule rule) {
+            // nothing
+        }
+
+        @Override
+        public void addRule(final int index, final Rule rule) {
+            // nothing
+        }
+
+        @Override
+        public boolean removeRule(final Rule rule) {
+            return false;
+        }
+
+        @Override
+        public boolean hasRule(final Rule rule) {
+            return false;
+        }
     }
 }
