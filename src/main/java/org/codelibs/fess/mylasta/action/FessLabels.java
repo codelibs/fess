@@ -2967,39 +2967,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: User Log */
     public static final String LABELS_searchlog_log_type_user_info = "{labels.searchlog_log_type_user_info}";
 
-    /** The key of the message: Keyword Count */
-    public static final String LABELS_searchlog_log_type_search_keyword = "{labels.searchlog_log_type_search_keyword}";
-
-    /** The key of the message: Zero Hit Count */
-    public static final String LABELS_searchlog_log_type_search_zerohit = "{labels.searchlog_log_type_search_zerohit}";
-
-    /** The key of the message: Zero Click Count */
-    public static final String LABELS_searchlog_log_type_search_zeroclick = "{labels.searchlog_log_type_search_zeroclick}";
-
-    /** The key of the message: Search Count/Hour */
-    public static final String LABELS_searchlog_log_type_search_count_hour = "{labels.searchlog_log_type_search_count_hour}";
-
-    /** The key of the message: Search Count/Day */
-    public static final String LABELS_searchlog_log_type_search_count_day = "{labels.searchlog_log_type_search_count_day}";
-
-    /** The key of the message: User Count/Hour */
-    public static final String LABELS_searchlog_log_type_search_user_hour = "{labels.searchlog_log_type_search_user_hour}";
-
-    /** The key of the message: User Count/Day */
-    public static final String LABELS_searchlog_log_type_search_user_day = "{labels.searchlog_log_type_search_user_day}";
-
-    /** The key of the message: Request Average Time/Hour */
-    public static final String LABELS_searchlog_log_type_search_reqtimeavg_hour = "{labels.searchlog_log_type_search_reqtimeavg_hour}";
-
-    /** The key of the message: Request Average Time/Day */
-    public static final String LABELS_searchlog_log_type_search_reqtimeavg_day = "{labels.searchlog_log_type_search_reqtimeavg_day}";
-
-    /** The key of the message: Click Count */
-    public static final String LABELS_searchlog_log_type_click_count = "{labels.searchlog_log_type_click_count}";
-
-    /** The key of the message: Favorite Count */
-    public static final String LABELS_searchlog_log_type_favorite_count = "{labels.searchlog_log_type_favorite_count}";
-
     /** The key of the message: Message */
     public static final String LABELS_searchlog_log_message = "{labels.searchlog_log_message}";
 
@@ -3041,6 +3008,228 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Access Type */
     public static final String LABELS_searchlog_accesstype = "{labels.searchlog_accesstype}";
+
+    /** The key of the message: Overview */
+    public static final String LABELS_searchlog_tab_overview = "{labels.searchlog_tab_overview}";
+
+    /** The key of the message: Queries */
+    public static final String LABELS_searchlog_tab_queries = "{labels.searchlog_tab_queries}";
+
+    /** The key of the message: Clicks */
+    public static final String LABELS_searchlog_tab_clicks = "{labels.searchlog_tab_clicks}";
+
+    /** The key of the message: Performance */
+    public static final String LABELS_searchlog_tab_performance = "{labels.searchlog_tab_performance}";
+
+    /** The key of the message: Audience */
+    public static final String LABELS_searchlog_tab_audience = "{labels.searchlog_tab_audience}";
+
+    /** The key of the message: Logs */
+    public static final String LABELS_searchlog_tab_logs = "{labels.searchlog_tab_logs}";
+
+    /** The key of the message: Period */
+    public static final String LABELS_searchlog_range = "{labels.searchlog_range}";
+
+    /** The key of the message: Today */
+    public static final String LABELS_searchlog_range_today = "{labels.searchlog_range_today}";
+
+    /** The key of the message: Yesterday */
+    public static final String LABELS_searchlog_range_yesterday = "{labels.searchlog_range_yesterday}";
+
+    /** The key of the message: Last 7 days */
+    public static final String LABELS_searchlog_range_7d = "{labels.searchlog_range_7d}";
+
+    /** The key of the message: Last 28 days */
+    public static final String LABELS_searchlog_range_28d = "{labels.searchlog_range_28d}";
+
+    /** The key of the message: Last 90 days */
+    public static final String LABELS_searchlog_range_90d = "{labels.searchlog_range_90d}";
+
+    /** The key of the message: Custom */
+    public static final String LABELS_searchlog_range_custom = "{labels.searchlog_range_custom}";
+
+    /** The key of the message: From */
+    public static final String LABELS_searchlog_range_from = "{labels.searchlog_range_from}";
+
+    /** The key of the message: To */
+    public static final String LABELS_searchlog_range_to = "{labels.searchlog_range_to}";
+
+    /** The key of the message: Compare to previous period */
+    public static final String LABELS_searchlog_compare = "{labels.searchlog_compare}";
+
+    /** The key of the message: All access types */
+    public static final String LABELS_searchlog_accesstype_all = "{labels.searchlog_accesstype_all}";
+
+    /** The key of the message: Apply */
+    public static final String LABELS_searchlog_apply = "{labels.searchlog_apply}";
+
+    /** The key of the message: Previous period */
+    public static final String LABELS_searchlog_previous_period = "{labels.searchlog_previous_period}";
+
+    /** The key of the message: Searches */
+    public static final String LABELS_searchlog_metric_searches = "{labels.searchlog_metric_searches}";
+
+    /** The key of the message: Users */
+    public static final String LABELS_searchlog_metric_users = "{labels.searchlog_metric_users}";
+
+    /** The key of the message: Zero-hit rate */
+    public static final String LABELS_searchlog_metric_zeroHitRate = "{labels.searchlog_metric_zeroHitRate}";
+
+    /** The key of the message: Click-through rate */
+    public static final String LABELS_searchlog_metric_ctr = "{labels.searchlog_metric_ctr}";
+
+    /** The key of the message: Avg. response time */
+    public static final String LABELS_searchlog_metric_avgResponseTime = "{labels.searchlog_metric_avgResponseTime}";
+
+    /** The key of the message: Clicks */
+    public static final String LABELS_searchlog_metric_clicks = "{labels.searchlog_metric_clicks}";
+
+    /** The key of the message: Avg. click position */
+    public static final String LABELS_searchlog_metric_avgRank = "{labels.searchlog_metric_avgRank}";
+
+    /** The key of the message: Next-page view rate */
+    public static final String LABELS_searchlog_metric_pagingRate = "{labels.searchlog_metric_pagingRate}";
+
+    /** The key of the message: Average */
+    public static final String LABELS_searchlog_metric_avg = "{labels.searchlog_metric_avg}";
+
+    /** The key of the message: Median (p50) */
+    public static final String LABELS_searchlog_metric_p50 = "{labels.searchlog_metric_p50}";
+
+    /** The key of the message: p95 */
+    public static final String LABELS_searchlog_metric_p95 = "{labels.searchlog_metric_p95}";
+
+    /** The key of the message: p99 */
+    public static final String LABELS_searchlog_metric_p99 = "{labels.searchlog_metric_p99}";
+
+    /** The key of the message: Avg. query time */
+    public static final String LABELS_searchlog_metric_avgQueryTime = "{labels.searchlog_metric_avgQueryTime}";
+
+    /** The key of the message: New users */
+    public static final String LABELS_searchlog_metric_newUsers = "{labels.searchlog_metric_newUsers}";
+
+    /** The key of the message: Returning users */
+    public static final String LABELS_searchlog_metric_returningUsers = "{labels.searchlog_metric_returningUsers}";
+
+    /** The key of the message: Avg. hits */
+    public static final String LABELS_searchlog_metric_avgHits = "{labels.searchlog_metric_avgHits}";
+
+    /** The key of the message: Last searched */
+    public static final String LABELS_searchlog_metric_lastSearchedAt = "{labels.searchlog_metric_lastSearchedAt}";
+
+    /** The key of the message: Trend */
+    public static final String LABELS_searchlog_chart_trend = "{labels.searchlog_chart_trend}";
+
+    /** The key of the message: Click position distribution */
+    public static final String LABELS_searchlog_chart_rankDistribution = "{labels.searchlog_chart_rankDistribution}";
+
+    /** The key of the message: Next-page view rate */
+    public static final String LABELS_searchlog_chart_pagingRate = "{labels.searchlog_chart_pagingRate}";
+
+    /** The key of the message: Response time */
+    public static final String LABELS_searchlog_chart_responseTime = "{labels.searchlog_chart_responseTime}";
+
+    /** The key of the message: Query time */
+    public static final String LABELS_searchlog_chart_queryTime = "{labels.searchlog_chart_queryTime}";
+
+    /** The key of the message: Response time distribution */
+    public static final String LABELS_searchlog_chart_responseTimeDistribution = "{labels.searchlog_chart_responseTimeDistribution}";
+
+    /** The key of the message: Users */
+    public static final String LABELS_searchlog_chart_users = "{labels.searchlog_chart_users}";
+
+    /** The key of the message: Access types */
+    public static final String LABELS_searchlog_chart_accessTypes = "{labels.searchlog_chart_accessTypes}";
+
+    /** The key of the message: Top queries */
+    public static final String LABELS_searchlog_table_topQueries = "{labels.searchlog_table_topQueries}";
+
+    /** The key of the message: Zero-hit queries */
+    public static final String LABELS_searchlog_table_zeroHitQueries = "{labels.searchlog_table_zeroHitQueries}";
+
+    /** The key of the message: Queries */
+    public static final String LABELS_searchlog_table_queries = "{labels.searchlog_table_queries}";
+
+    /** The key of the message: Zero-click queries */
+    public static final String LABELS_searchlog_table_zeroClickQueries = "{labels.searchlog_table_zeroClickQueries}";
+
+    /** The key of the message: Most clicked URLs */
+    public static final String LABELS_searchlog_table_clickedUrls = "{labels.searchlog_table_clickedUrls}";
+
+    /** The key of the message: Most favorited URLs */
+    public static final String LABELS_searchlog_table_favoriteUrls = "{labels.searchlog_table_favoriteUrls}";
+
+    /** The key of the message: Slowest queries */
+    public static final String LABELS_searchlog_table_slowQueries = "{labels.searchlog_table_slowQueries}";
+
+    /** The key of the message: User agents */
+    public static final String LABELS_searchlog_table_userAgents = "{labels.searchlog_table_userAgents}";
+
+    /** The key of the message: Referrers */
+    public static final String LABELS_searchlog_table_referers = "{labels.searchlog_table_referers}";
+
+    /** The key of the message: Languages */
+    public static final String LABELS_searchlog_table_languages = "{labels.searchlog_table_languages}";
+
+    /** The key of the message: Virtual hosts */
+    public static final String LABELS_searchlog_table_virtualHosts = "{labels.searchlog_table_virtualHosts}";
+
+    /** The key of the message: Searches by day and hour */
+    public static final String LABELS_searchlog_table_weekHour = "{labels.searchlog_table_weekHour}";
+
+    /** The key of the message: Query */
+    public static final String LABELS_searchlog_col_word = "{labels.searchlog_col_word}";
+
+    /** The key of the message: URL */
+    public static final String LABELS_searchlog_col_url = "{labels.searchlog_col_url}";
+
+    /** The key of the message: Mon */
+    public static final String LABELS_searchlog_dow_1 = "{labels.searchlog_dow_1}";
+
+    /** The key of the message: Tue */
+    public static final String LABELS_searchlog_dow_2 = "{labels.searchlog_dow_2}";
+
+    /** The key of the message: Wed */
+    public static final String LABELS_searchlog_dow_3 = "{labels.searchlog_dow_3}";
+
+    /** The key of the message: Thu */
+    public static final String LABELS_searchlog_dow_4 = "{labels.searchlog_dow_4}";
+
+    /** The key of the message: Fri */
+    public static final String LABELS_searchlog_dow_5 = "{labels.searchlog_dow_5}";
+
+    /** The key of the message: Sat */
+    public static final String LABELS_searchlog_dow_6 = "{labels.searchlog_dow_6}";
+
+    /** The key of the message: Sun */
+    public static final String LABELS_searchlog_dow_7 = "{labels.searchlog_dow_7}";
+
+    /** The key of the message: No data */
+    public static final String LABELS_searchlog_no_data = "{labels.searchlog_no_data}";
+
+    /** The key of the message: Search word */
+    public static final String LABELS_searchlog_searchword = "{labels.searchlog_searchword}";
+
+    /** The key of the message: Per-query click metrics include only clicks recorded since {0}. */
+    public static final String LABELS_searchlog_notice_click_since = "{labels.searchlog_notice_click_since}";
+
+    /** The key of the message: No clicks with query information have been recorded in this period. */
+    public static final String LABELS_searchlog_notice_no_click_data = "{labels.searchlog_notice_no_click_data}";
+
+    /** The key of the message: With an access type filter, clicks recorded before query information was stored are excluded. */
+    public static final String LABELS_searchlog_notice_accesstype_clicks = "{labels.searchlog_notice_accesstype_clicks}";
+
+    /** The key of the message: Search logging is disabled in General settings. */
+    public static final String LABELS_searchlog_notice_search_log_disabled = "{labels.searchlog_notice_search_log_disabled}";
+
+    /** The key of the message: User info logging is disabled, so users are not counted. */
+    public static final String LABELS_searchlog_notice_user_info_disabled = "{labels.searchlog_notice_user_info_disabled}";
+
+    /** The key of the message: The period was invalid or longer than 366 days, so the last 28 days are shown. */
+    public static final String LABELS_searchlog_notice_range_adjusted = "{labels.searchlog_notice_range_adjusted}";
+
+    /** The key of the message: Failed to load analytics data. See the log for details. */
+    public static final String LABELS_searchlog_notice_failed = "{labels.searchlog_notice_failed}";
 
     /** The key of the message: Maintenance */
     public static final String LABELS_maintenance_title_configuration = "{labels.maintenance_title_configuration}";
