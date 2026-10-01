@@ -410,6 +410,230 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setAccessType_Equal(String accessType) {
+        setAccessType_Term(accessType, null);
+    }
+
+    public void setAccessType_Equal(String accessType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setAccessType_Term(accessType, opLambda);
+    }
+
+    public void setAccessType_Term(String accessType) {
+        setAccessType_Term(accessType, null);
+    }
+
+    public void setAccessType_Term(String accessType, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_NotEqual(String accessType) {
+        setAccessType_NotTerm(accessType, null);
+    }
+
+    public void setAccessType_NotTerm(String accessType) {
+        setAccessType_NotTerm(accessType, null);
+    }
+
+    public void setAccessType_NotEqual(String accessType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setAccessType_NotTerm(accessType, opLambda);
+    }
+
+    public void setAccessType_NotTerm(String accessType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setAccessType_Term(accessType), opLambda);
+    }
+
+    public void setAccessType_Terms(Collection<String> accessTypeList) {
+        setAccessType_Terms(accessTypeList, null);
+    }
+
+    public void setAccessType_Terms(Collection<String> accessTypeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("accessType", accessTypeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_InScope(Collection<String> accessTypeList) {
+        setAccessType_Terms(accessTypeList, null);
+    }
+
+    public void setAccessType_InScope(Collection<String> accessTypeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setAccessType_Terms(accessTypeList, opLambda);
+    }
+
+    public void setAccessType_Match(String accessType) {
+        setAccessType_Match(accessType, null);
+    }
+
+    public void setAccessType_Match(String accessType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_MatchPhrase(String accessType) {
+        setAccessType_MatchPhrase(accessType, null);
+    }
+
+    public void setAccessType_MatchPhrase(String accessType, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_MatchPhrasePrefix(String accessType) {
+        setAccessType_MatchPhrasePrefix(accessType, null);
+    }
+
+    public void setAccessType_MatchPhrasePrefix(String accessType, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_Fuzzy(String accessType) {
+        setAccessType_Fuzzy(accessType, null);
+    }
+
+    public void setAccessType_Fuzzy(String accessType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_Prefix(String accessType) {
+        setAccessType_Prefix(accessType, null);
+    }
+
+    public void setAccessType_Prefix(String accessType, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_Wildcard(String accessType) {
+        setAccessType_Wildcard(accessType, null);
+    }
+
+    public void setAccessType_Wildcard(String accessType, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_Regexp(String accessType) {
+        setAccessType_Regexp(accessType, null);
+    }
+
+    public void setAccessType_Regexp(String accessType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_SpanTerm(String accessType) {
+        setAccessType_SpanTerm("accessType", null);
+    }
+
+    public void setAccessType_SpanTerm(String accessType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_GreaterThan(String accessType) {
+        setAccessType_GreaterThan(accessType, null);
+    }
+
+    public void setAccessType_GreaterThan(String accessType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = accessType;
+        RangeQueryBuilder builder = regRangeQ("accessType", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_LessThan(String accessType) {
+        setAccessType_LessThan(accessType, null);
+    }
+
+    public void setAccessType_LessThan(String accessType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = accessType;
+        RangeQueryBuilder builder = regRangeQ("accessType", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_GreaterEqual(String accessType) {
+        setAccessType_GreaterEqual(accessType, null);
+    }
+
+    public void setAccessType_GreaterEqual(String accessType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = accessType;
+        RangeQueryBuilder builder = regRangeQ("accessType", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_LessEqual(String accessType) {
+        setAccessType_LessEqual(accessType, null);
+    }
+
+    public void setAccessType_LessEqual(String accessType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = accessType;
+        RangeQueryBuilder builder = regRangeQ("accessType", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAccessType_Exists() {
+        setAccessType_Exists(null);
+    }
+
+    public void setAccessType_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("accessType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setAccessType_CommonTerms(String accessType) {
+        setAccessType_CommonTerms(accessType, null);
+    }
+
+    @Deprecated
+    public void setAccessType_CommonTerms(String accessType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_AccessType_Asc() {
+        regOBA("accessType");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_AccessType_Desc() {
+        regOBD("accessType");
+        return this;
+    }
+
     public void setDocId_Equal(String docId) {
         setDocId_Term(docId, null);
     }
@@ -1220,6 +1444,186 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setRank_Equal(Integer rank) {
+        setRank_Term(rank, null);
+    }
+
+    public void setRank_Equal(Integer rank, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRank_Term(rank, opLambda);
+    }
+
+    public void setRank_Term(Integer rank) {
+        setRank_Term(rank, null);
+    }
+
+    public void setRank_Term(Integer rank, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("rank", rank);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_NotEqual(Integer rank) {
+        setRank_NotTerm(rank, null);
+    }
+
+    public void setRank_NotTerm(Integer rank) {
+        setRank_NotTerm(rank, null);
+    }
+
+    public void setRank_NotEqual(Integer rank, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setRank_NotTerm(rank, opLambda);
+    }
+
+    public void setRank_NotTerm(Integer rank, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setRank_Term(rank), opLambda);
+    }
+
+    public void setRank_Terms(Collection<Integer> rankList) {
+        setRank_Terms(rankList, null);
+    }
+
+    public void setRank_Terms(Collection<Integer> rankList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("rank", rankList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_InScope(Collection<Integer> rankList) {
+        setRank_Terms(rankList, null);
+    }
+
+    public void setRank_InScope(Collection<Integer> rankList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setRank_Terms(rankList, opLambda);
+    }
+
+    public void setRank_Match(Integer rank) {
+        setRank_Match(rank, null);
+    }
+
+    public void setRank_Match(Integer rank, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("rank", rank);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_MatchPhrase(Integer rank) {
+        setRank_MatchPhrase(rank, null);
+    }
+
+    public void setRank_MatchPhrase(Integer rank, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("rank", rank);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_MatchPhrasePrefix(Integer rank) {
+        setRank_MatchPhrasePrefix(rank, null);
+    }
+
+    public void setRank_MatchPhrasePrefix(Integer rank, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("rank", rank);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_Fuzzy(Integer rank) {
+        setRank_Fuzzy(rank, null);
+    }
+
+    public void setRank_Fuzzy(Integer rank, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("rank", rank);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_GreaterThan(Integer rank) {
+        setRank_GreaterThan(rank, null);
+    }
+
+    public void setRank_GreaterThan(Integer rank, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = rank;
+        RangeQueryBuilder builder = regRangeQ("rank", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_LessThan(Integer rank) {
+        setRank_LessThan(rank, null);
+    }
+
+    public void setRank_LessThan(Integer rank, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = rank;
+        RangeQueryBuilder builder = regRangeQ("rank", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_GreaterEqual(Integer rank) {
+        setRank_GreaterEqual(rank, null);
+    }
+
+    public void setRank_GreaterEqual(Integer rank, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = rank;
+        RangeQueryBuilder builder = regRangeQ("rank", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_LessEqual(Integer rank) {
+        setRank_LessEqual(rank, null);
+    }
+
+    public void setRank_LessEqual(Integer rank, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = rank;
+        RangeQueryBuilder builder = regRangeQ("rank", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRank_Exists() {
+        setRank_Exists(null);
+    }
+
+    public void setRank_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("rank");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setRank_CommonTerms(Integer rank) {
+        setRank_CommonTerms(rank, null);
+    }
+
+    @Deprecated
+    public void setRank_CommonTerms(Integer rank, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("rank", rank);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_Rank_Asc() {
+        regOBA("rank");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_Rank_Desc() {
+        regOBD("rank");
+        return this;
+    }
+
     public void setRequestedAt_Equal(LocalDateTime requestedAt) {
         setRequestedAt_Term(requestedAt, null);
     }
@@ -1397,6 +1801,230 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
 
     public BsClickLogCQ addOrderBy_RequestedAt_Desc() {
         regOBD("requestedAt");
+        return this;
+    }
+
+    public void setSearchWord_Equal(String searchWord) {
+        setSearchWord_Term(searchWord, null);
+    }
+
+    public void setSearchWord_Equal(String searchWord, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSearchWord_Term(searchWord, opLambda);
+    }
+
+    public void setSearchWord_Term(String searchWord) {
+        setSearchWord_Term(searchWord, null);
+    }
+
+    public void setSearchWord_Term(String searchWord, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_NotEqual(String searchWord) {
+        setSearchWord_NotTerm(searchWord, null);
+    }
+
+    public void setSearchWord_NotTerm(String searchWord) {
+        setSearchWord_NotTerm(searchWord, null);
+    }
+
+    public void setSearchWord_NotEqual(String searchWord, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setSearchWord_NotTerm(searchWord, opLambda);
+    }
+
+    public void setSearchWord_NotTerm(String searchWord, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setSearchWord_Term(searchWord), opLambda);
+    }
+
+    public void setSearchWord_Terms(Collection<String> searchWordList) {
+        setSearchWord_Terms(searchWordList, null);
+    }
+
+    public void setSearchWord_Terms(Collection<String> searchWordList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("searchWord", searchWordList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_InScope(Collection<String> searchWordList) {
+        setSearchWord_Terms(searchWordList, null);
+    }
+
+    public void setSearchWord_InScope(Collection<String> searchWordList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setSearchWord_Terms(searchWordList, opLambda);
+    }
+
+    public void setSearchWord_Match(String searchWord) {
+        setSearchWord_Match(searchWord, null);
+    }
+
+    public void setSearchWord_Match(String searchWord, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_MatchPhrase(String searchWord) {
+        setSearchWord_MatchPhrase(searchWord, null);
+    }
+
+    public void setSearchWord_MatchPhrase(String searchWord, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_MatchPhrasePrefix(String searchWord) {
+        setSearchWord_MatchPhrasePrefix(searchWord, null);
+    }
+
+    public void setSearchWord_MatchPhrasePrefix(String searchWord, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_Fuzzy(String searchWord) {
+        setSearchWord_Fuzzy(searchWord, null);
+    }
+
+    public void setSearchWord_Fuzzy(String searchWord, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_Prefix(String searchWord) {
+        setSearchWord_Prefix(searchWord, null);
+    }
+
+    public void setSearchWord_Prefix(String searchWord, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_Wildcard(String searchWord) {
+        setSearchWord_Wildcard(searchWord, null);
+    }
+
+    public void setSearchWord_Wildcard(String searchWord, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_Regexp(String searchWord) {
+        setSearchWord_Regexp(searchWord, null);
+    }
+
+    public void setSearchWord_Regexp(String searchWord, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_SpanTerm(String searchWord) {
+        setSearchWord_SpanTerm("searchWord", null);
+    }
+
+    public void setSearchWord_SpanTerm(String searchWord, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_GreaterThan(String searchWord) {
+        setSearchWord_GreaterThan(searchWord, null);
+    }
+
+    public void setSearchWord_GreaterThan(String searchWord, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = searchWord;
+        RangeQueryBuilder builder = regRangeQ("searchWord", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_LessThan(String searchWord) {
+        setSearchWord_LessThan(searchWord, null);
+    }
+
+    public void setSearchWord_LessThan(String searchWord, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = searchWord;
+        RangeQueryBuilder builder = regRangeQ("searchWord", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_GreaterEqual(String searchWord) {
+        setSearchWord_GreaterEqual(searchWord, null);
+    }
+
+    public void setSearchWord_GreaterEqual(String searchWord, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = searchWord;
+        RangeQueryBuilder builder = regRangeQ("searchWord", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_LessEqual(String searchWord) {
+        setSearchWord_LessEqual(searchWord, null);
+    }
+
+    public void setSearchWord_LessEqual(String searchWord, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = searchWord;
+        RangeQueryBuilder builder = regRangeQ("searchWord", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSearchWord_Exists() {
+        setSearchWord_Exists(null);
+    }
+
+    public void setSearchWord_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("searchWord");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setSearchWord_CommonTerms(String searchWord) {
+        setSearchWord_CommonTerms(searchWord, null);
+    }
+
+    @Deprecated
+    public void setSearchWord_CommonTerms(String searchWord, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_SearchWord_Asc() {
+        regOBA("searchWord");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_SearchWord_Desc() {
+        regOBD("searchWord");
         return this;
     }
 

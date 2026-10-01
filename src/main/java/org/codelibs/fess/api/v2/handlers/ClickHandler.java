@@ -82,7 +82,7 @@ public class ClickHandler {
      * {@code index.max_result_window}; values above this (including ones that
      * overflow int) are rejected to limit analytics forgery (L-5).
      */
-    private static final int MAX_RANK = 10000;
+    private static final int MAX_RANK = SearchLogHelper.MAX_CLICK_RANK;
 
     /**
      * Default constructor. The handler is stateless and intended to be

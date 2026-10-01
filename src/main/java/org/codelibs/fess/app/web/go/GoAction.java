@@ -121,6 +121,7 @@ public class GoAction extends FessSearchAction {
             if (userSessionId != null) {
                 final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
                 final ClickLog clickLog = new ClickLog();
+                clickLog.setOrderOnPage(true);
                 clickLog.setUrlId((String) doc.get(fessConfig.getIndexFieldId()));
                 clickLog.setUrl(url);
                 clickLog.setRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());

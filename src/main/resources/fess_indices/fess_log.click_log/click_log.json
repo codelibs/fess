@@ -25,6 +25,15 @@
       "queryRequestedAt": {
         "type": "date",
         "format": "date_optional_time"
+      },
+      "searchWord": {
+        "type": "keyword"
+      },
+      "accessType": {
+        "type": "keyword"
+      },
+      "rank": {
+        "type": "integer"
       }
     }
 }

@@ -32,6 +32,7 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
+import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -108,6 +109,144 @@ public class SearchLogHelperTest extends UnitFessTestCase {
             // Expected in test environment
             assertTrue(true);
         }
+    }
+
+    @Test
+    public void test_enrichClickLog_goPathUsesOffset() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final SearchLog searchLog = new SearchLog();
+        searchLog.setSearchWord("fess");
+        searchLog.setAccessType("web");
+        searchLog.setQueryOffset(20);
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(2);
+        clickLog.setOrderOnPage(true);
+        helper.enrichClickLog(clickLog, searchLog);
+        assertEquals("fess", clickLog.getSearchWord());
+        assertEquals("web", clickLog.getAccessType());
+        assertEquals(Integer.valueOf(23), clickLog.getRank());
+    }
+
+    @Test
+    public void test_enrichClickLog_goPathWithoutOffset() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final SearchLog searchLog = new SearchLog();
+        searchLog.setSearchWord("fess");
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(0);
+        clickLog.setOrderOnPage(true);
+        helper.enrichClickLog(clickLog, searchLog);
+        assertEquals(Integer.valueOf(1), clickLog.getRank());
+    }
+
+    @Test
+    public void test_enrichClickLog_apiRankIsOneBased() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final SearchLog searchLog = new SearchLog();
+        searchLog.setSearchWord("fess");
+        searchLog.setAccessType("json");
+        searchLog.setQueryOffset(10);
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(3);
+        helper.enrichClickLog(clickLog, searchLog);
+        assertEquals("json", clickLog.getAccessType());
+        assertEquals(Integer.valueOf(3), clickLog.getRank());
+    }
+
+    @Test
+    public void test_enrichClickLog_apiRankZeroOrMissing() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final SearchLog searchLog = new SearchLog();
+        searchLog.setSearchWord("fess");
+        final ClickLog zero = new ClickLog();
+        zero.setOrder(0);
+        helper.enrichClickLog(zero, searchLog);
+        assertNull(zero.getRank(), "rank 0 from the API is not a position");
+        final ClickLog missing = new ClickLog();
+        helper.enrichClickLog(missing, searchLog);
+        assertNull(missing.getRank(), "no order, no rank");
+        assertEquals("fess", missing.getSearchWord());
+    }
+
+    @Test
+    public void test_enrichClickLog_negativeOrderIgnored() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(-1);
+        clickLog.setOrderOnPage(true);
+        helper.enrichClickLog(clickLog, new SearchLog());
+        assertNull(clickLog.getRank(), "negative order is ignored");
+    }
+
+    @Test
+    public void test_enrichClickLog_goPathHugeOrderIgnored() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(2_000_000_000);
+        clickLog.setOrderOnPage(true);
+        helper.enrichClickLog(clickLog, new SearchLog());
+        assertNull(clickLog.getRank(), "a forged order must not become a rank");
+        final ClickLog max = new ClickLog();
+        max.setOrder(Integer.MAX_VALUE);
+        max.setOrderOnPage(true);
+        final SearchLog withOffset = new SearchLog();
+        withOffset.setQueryOffset(Integer.MAX_VALUE);
+        helper.enrichClickLog(max, withOffset);
+        assertNull(max.getRank(), "an overflowing rank must not become negative");
+    }
+
+    @Test
+    public void test_enrichClickLog_goPathRankUpperBound() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final SearchLog searchLog = new SearchLog();
+        searchLog.setQueryOffset(9990);
+        final ClickLog atLimit = new ClickLog();
+        atLimit.setOrder(9);
+        atLimit.setOrderOnPage(true);
+        helper.enrichClickLog(atLimit, searchLog);
+        assertEquals(Integer.valueOf(SearchLogHelper.MAX_CLICK_RANK), atLimit.getRank());
+        final ClickLog overLimit = new ClickLog();
+        overLimit.setOrder(10);
+        overLimit.setOrderOnPage(true);
+        helper.enrichClickLog(overLimit, searchLog);
+        assertNull(overLimit.getRank(), "rank 10001 is above the limit");
+    }
+
+    @Test
+    public void test_enrichClickLog_apiRankUpperBound() {
+        final SearchLogHelper helper = new SearchLogHelper();
+        final ClickLog atLimit = new ClickLog();
+        atLimit.setOrder(SearchLogHelper.MAX_CLICK_RANK);
+        helper.enrichClickLog(atLimit, new SearchLog());
+        assertEquals(Integer.valueOf(SearchLogHelper.MAX_CLICK_RANK), atLimit.getRank());
+        final ClickLog overLimit = new ClickLog();
+        overLimit.setOrder(SearchLogHelper.MAX_CLICK_RANK + 1);
+        helper.enrichClickLog(overLimit, new SearchLog());
+        assertNull(overLimit.getRank(), "API rank 10001 is above the limit");
+    }
+
+    @Test
+    public void test_acceptClickLog_enrichesWhenSearchLogExists() {
+        final SearchLog searchLog = new SearchLog();
+        searchLog.setSearchWord("fess");
+        searchLog.setAccessType("web");
+        searchLog.setQueryOffset(10);
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(1);
+        clickLog.setOrderOnPage(true);
+        assertTrue(searchLogHelper.acceptClickLog(clickLog, OptionalEntity.of(searchLog)));
+        assertEquals("fess", clickLog.getSearchWord());
+        assertEquals("web", clickLog.getAccessType());
+        assertEquals(Integer.valueOf(12), clickLog.getRank());
+    }
+
+    @Test
+    public void test_acceptClickLog_rejectsWhenSearchLogMissing() {
+        final ClickLog clickLog = new ClickLog();
+        clickLog.setOrder(1);
+        assertFalse(searchLogHelper.acceptClickLog(clickLog, OptionalEntity.empty()));
+        assertNull(clickLog.getSearchWord());
+        assertNull(clickLog.getRank());
     }
 
     @Test

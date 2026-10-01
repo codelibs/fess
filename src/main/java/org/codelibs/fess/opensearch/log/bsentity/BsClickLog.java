@@ -40,6 +40,9 @@ public class BsClickLog extends EsAbstractEntity {
     /** urlId */
     protected String urlId;
 
+    /** accessType */
+    protected String accessType;
+
     /** docId */
     protected String docId;
 
@@ -52,8 +55,14 @@ public class BsClickLog extends EsAbstractEntity {
     /** queryRequestedAt */
     protected LocalDateTime queryRequestedAt;
 
+    /** rank */
+    protected Integer rank;
+
     /** requestedAt */
     protected LocalDateTime requestedAt;
+
+    /** searchWord */
+    protected String searchWord;
 
     /** url */
     protected String url;
@@ -85,6 +94,9 @@ public class BsClickLog extends EsAbstractEntity {
         if (urlId != null) {
             addFieldToSource(sourceMap, "urlId", urlId);
         }
+        if (accessType != null) {
+            addFieldToSource(sourceMap, "accessType", accessType);
+        }
         if (docId != null) {
             addFieldToSource(sourceMap, "docId", docId);
         }
@@ -97,8 +109,14 @@ public class BsClickLog extends EsAbstractEntity {
         if (queryRequestedAt != null) {
             addFieldToSource(sourceMap, "queryRequestedAt", queryRequestedAt);
         }
+        if (rank != null) {
+            addFieldToSource(sourceMap, "rank", rank);
+        }
         if (requestedAt != null) {
             addFieldToSource(sourceMap, "requestedAt", requestedAt);
+        }
+        if (searchWord != null) {
+            addFieldToSource(sourceMap, "searchWord", searchWord);
         }
         if (url != null) {
             addFieldToSource(sourceMap, "url", url);
@@ -120,11 +138,14 @@ public class BsClickLog extends EsAbstractEntity {
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(urlId);
+        sb.append(dm).append(accessType);
         sb.append(dm).append(docId);
         sb.append(dm).append(order);
         sb.append(dm).append(queryId);
         sb.append(dm).append(queryRequestedAt);
+        sb.append(dm).append(rank);
         sb.append(dm).append(requestedAt);
+        sb.append(dm).append(searchWord);
         sb.append(dm).append(url);
         sb.append(dm).append(userSessionId);
         if (sb.length() > dm.length()) {
@@ -145,6 +166,16 @@ public class BsClickLog extends EsAbstractEntity {
     public void setUrlId(String value) {
         registerModifiedProperty("urlId");
         this.urlId = value;
+    }
+
+    public String getAccessType() {
+        checkSpecifiedProperty("accessType");
+        return convertEmptyToNull(accessType);
+    }
+
+    public void setAccessType(String value) {
+        registerModifiedProperty("accessType");
+        this.accessType = value;
     }
 
     public String getDocId() {
@@ -187,6 +218,16 @@ public class BsClickLog extends EsAbstractEntity {
         this.queryRequestedAt = value;
     }
 
+    public Integer getRank() {
+        checkSpecifiedProperty("rank");
+        return rank;
+    }
+
+    public void setRank(Integer value) {
+        registerModifiedProperty("rank");
+        this.rank = value;
+    }
+
     public LocalDateTime getRequestedAt() {
         checkSpecifiedProperty("requestedAt");
         return requestedAt;
@@ -195,6 +236,16 @@ public class BsClickLog extends EsAbstractEntity {
     public void setRequestedAt(LocalDateTime value) {
         registerModifiedProperty("requestedAt");
         this.requestedAt = value;
+    }
+
+    public String getSearchWord() {
+        checkSpecifiedProperty("searchWord");
+        return convertEmptyToNull(searchWord);
+    }
+
+    public void setSearchWord(String value) {
+        registerModifiedProperty("searchWord");
+        this.searchWord = value;
     }
 
     public String getUrl() {
