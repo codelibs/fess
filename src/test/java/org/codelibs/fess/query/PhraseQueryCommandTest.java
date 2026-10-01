@@ -25,6 +25,7 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.junit.jupiter.api.Test;
 import org.codelibs.fesen.opensearch.index.query.MatchPhraseQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.PrefixQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 public class PhraseQueryCommandTest extends QueryTestBase {
@@ -156,6 +157,36 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Verify query was processed
         assertNotNull(result);
         assertTrue(result instanceof MatchPhraseQueryBuilder);
+    }
+
+    @Test
+    public void test_convertPhraseQuery_searchField_withSlop() {
+        PhraseQuery.Builder builder = new PhraseQuery.Builder();
+        builder.add(new Term("title", "hello"));
+        builder.add(new Term("title", "world"));
+        builder.setSlop(3);
+        PhraseQuery phraseQuery = builder.build();
+
+        QueryContext context = new QueryContext("test", false);
+        QueryBuilder result = queryCommand.convertPhraseQuery(context, phraseQuery, 1.0f);
+
+        assertTrue(result instanceof MatchPhraseQueryBuilder);
+        assertEquals("hello world", ((MatchPhraseQueryBuilder) result).value());
+        assertEquals(3, ((MatchPhraseQueryBuilder) result).slop());
+    }
+
+    @Test
+    public void test_convertPhraseQuery_singleCjkCharacter_withSlop() {
+        // a single CJK character becomes a prefix query, which has no slop
+        PhraseQuery.Builder builder = new PhraseQuery.Builder();
+        builder.add(new Term("title", "検"));
+        builder.setSlop(3);
+        PhraseQuery phraseQuery = builder.build();
+
+        QueryContext context = new QueryContext("test", false);
+        QueryBuilder result = queryCommand.convertPhraseQuery(context, phraseQuery, 1.0f);
+
+        assertTrue(result instanceof PrefixQueryBuilder);
     }
 
     @Test

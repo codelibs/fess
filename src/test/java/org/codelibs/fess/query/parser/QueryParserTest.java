@@ -69,6 +69,13 @@ public class QueryParserTest extends UnitFessTestCase {
         assertEquals(PhraseQuery.class, query.getClass());
         assertEquals("_default:fess", ((PhraseQuery) query).getTerms()[0].toString());
         assertEquals("_default:codelibs", ((PhraseQuery) query).getTerms()[1].toString());
+        assertEquals(0, ((PhraseQuery) query).getSlop());
+
+        query = queryParser.createDefaultFilterChain().parse("\"fess codelibs\"~5");
+        assertEquals(PhraseQuery.class, query.getClass());
+        assertEquals("_default:fess", ((PhraseQuery) query).getTerms()[0].toString());
+        assertEquals("_default:codelibs", ((PhraseQuery) query).getTerms()[1].toString());
+        assertEquals(5, ((PhraseQuery) query).getSlop());
 
         query = queryParser.createDefaultFilterChain().parse("fess codelibs");
         assertEquals(BooleanQuery.class, query.getClass());
