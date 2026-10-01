@@ -178,13 +178,7 @@ public class ErrorPageServlet extends HttpServlet {
      * @return 400, 403, 404, 429, 500 or 503
      */
     static int displayCode(final int status) {
-        return switch (status) {
-        case 400, 403, 404, 429, 500, 503 -> status;
-        // The SPA has no 401 page, and a browser reaching this point already failed the
-        // challenge; 403 is what it means to the visitor. The HTTP status stays 401.
-        case 401 -> HttpServletResponse.SC_FORBIDDEN;
-        default -> status < 500 ? HttpServletResponse.SC_BAD_REQUEST : HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-        };
+        return StaticThemeResponder.displayCode(status);
     }
 
     /**

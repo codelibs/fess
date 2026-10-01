@@ -139,6 +139,140 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_doFilter_servesTheActiveThemeUnderEverySpellingOfItsAssetPath() throws Exception {
+        // The container's default servlet resolves every one of these raw URIs to
+        // /themes/alpha/assets/app.js. Matched on the raw URI they fell through the filter to it,
+        // skipping the responder's denylist and its asset headers.
+        final String resolved = "/themes/alpha/assets/app.js";
+        for (final String raw : new String[] { "/themes//alpha/assets/app.js", "/themes/./alpha/assets/app.js",
+                "/x/../themes/alpha/assets/app.js", "/themes/../themes/alpha/assets/app.js", "/themes/alpha;x=1/assets/app.js",
+                "/themes/%61lpha/assets/app.js", "//themes/alpha/assets/app.js" }) {
+            final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
+            final StaticThemeFilter f = new StaticThemeFilter();
+            f.setThemeRegistry(new StubRegistry(staticTheme));
+            final StubResponder stub = new StubResponder();
+            f.setStaticThemeResponder(stub);
+            final StubChain chain = new StubChain();
+            f.doFilter(new StubRequest("GET", raw).withServletPath(resolved), new StubResponse(), chain);
+            assertTrue(stub.servedAsset, raw + " must be served by the responder");
+            assertEquals(raw, "assets/app.js", stub.lastAssetPath);
+            assertSame(staticTheme, stub.lastTheme, raw);
+            assertFalse(chain.called, raw + " must not reach the container");
+        }
+    }
+
+    @Test
+    public void test_doFilter_servesAssetUnderAContextPathOnTheResolvedPath() throws Exception {
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(new StubRegistry(staticTheme));
+        final StubResponder stub = new StubResponder();
+        f.setStaticThemeResponder(stub);
+        final StubChain chain = new StubChain();
+        f.doFilter(new StubRequest("GET", "/fess/themes//alpha/assets/app.js").withContextPath("/fess")
+                .withServletPath("/themes/alpha/assets/app.js"), new StubResponse(), chain);
+        assertTrue(stub.servedAsset);
+        assertEquals("assets/app.js", stub.lastAssetPath);
+        assertFalse(chain.called);
+    }
+
+    @Test
+    public void test_doFilter_servesUiPathOnTheResolvedPath() throws Exception {
+        // A path parameter or an encoded character does not make /search another route.
+        for (final String raw : new String[] { "/search;jsessionid=abc", "/%73earch", "/x/../search" }) {
+            final StaticThemeFilter f = new StaticThemeFilter();
+            f.setThemeRegistry(new StubRegistry(new Theme("t", Paths.get("/tmp/t"), null)));
+            final StubResponder stub = new StubResponder();
+            f.setStaticThemeResponder(stub);
+            final StubChain chain = new StubChain();
+            f.doFilter(new StubRequest("GET", raw).withServletPath("/search"), new StubResponse(), chain);
+            assertTrue(stub.servedIndex, raw);
+            assertEquals(raw, "/search", stub.lastRequestPath);
+            assertFalse(chain.called, raw);
+        }
+    }
+
+    @Test
+    public void test_doFilter_answersPrivateThemeFileWith404UnderEverySpelling() throws Exception {
+        // theme.yml, README.md, dotfiles, ... are refused whatever the spelling of the URI, the
+        // method, and whether the theme is the active one, an inactive one or there is none.
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
+        final String[][] cases = { //
+                { "/themes/alpha/theme.yml", "/themes/alpha/theme.yml" }, //
+                { "/themes//alpha/theme.yml", "/themes/alpha/theme.yml" }, //
+                { "/themes/./alpha/theme.yml", "/themes/alpha/theme.yml" }, //
+                { "/x/../themes/alpha/theme.yml", "/themes/alpha/theme.yml" }, //
+                { "/themes/../themes/alpha/README.md", "/themes/alpha/README.md" }, //
+                { "/themes/%61lpha/theme.yml", "/themes/alpha/theme.yml" }, //
+                { "/themes/alpha;x=1/theme.yml", "/themes/alpha/theme.yml" }, //
+                { "/themes/beta/theme.yml", "/themes/beta/theme.yml" }, //
+                { "/themes/beta/README.md", "/themes/beta/README.md" }, //
+                { "/themes/beta/CHANGELOG.md", "/themes/beta/CHANGELOG.md" }, //
+                { "/themes/beta/sub/LICENSE.txt", "/themes/beta/sub/LICENSE.txt" }, //
+                { "/themes/beta/.env", "/themes/beta/.env" }, //
+                { "/Themes/beta/Theme.YML", "/Themes/beta/Theme.YML" } };
+        for (final Theme active : new Theme[] { staticTheme, null }) {
+            for (final String method : new String[] { "GET", "HEAD", "POST" }) {
+                for (final String[] c : cases) {
+                    final StaticThemeFilter f = new StaticThemeFilter();
+                    f.setThemeRegistry(new StubRegistry(active));
+                    final StubResponder stub = new StubResponder();
+                    f.setStaticThemeResponder(stub);
+                    final StubResponse res = new StubResponse();
+                    final StubChain chain = new StubChain();
+                    f.doFilter(new StubRequest(method, c[0]).withServletPath(c[1]), res, chain);
+                    final String label = method + " " + c[0] + " active=" + (active == null ? null : active.getName());
+                    assertFalse(chain.called, label + " must not pass through to the container");
+                    assertFalse(stub.servedAsset, label);
+                    assertEquals(HttpServletResponse.SC_NOT_FOUND, res.errorStatus, label);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test_doFilter_privateFileCheckLeavesOtherPathsAlone() throws Exception {
+        // Negative control: the same file names outside /themes/, and ordinary files inside it,
+        // are not refused by this check.
+        final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
+        for (final String path : new String[] { "/docs/README.md", "/admin/theme.yml", "/themes/beta/assets/app.js", "/themes/beta/",
+                "/themes/beta" }) {
+            final StaticThemeFilter f = new StaticThemeFilter();
+            f.setThemeRegistry(new StubRegistry(staticTheme));
+            f.setStaticThemeResponder(new StubResponder());
+            final StubResponse res = new StubResponse();
+            final StubChain chain = new StubChain();
+            f.doFilter(new StubRequest("GET", path), res, chain);
+            assertTrue(chain.called, path + " must pass through");
+            assertEquals(0, res.errorStatus, path);
+        }
+    }
+
+    @Test
+    public void test_resolveRequestPath() {
+        assertEquals("/themes/t/x.js",
+                StaticThemeFilter.resolveRequestPath(new StubRequest("GET", "/themes//t/./x.js").withServletPath("/themes/t/x.js")));
+        assertEquals("/themes/t/x.js",
+                StaticThemeFilter.resolveRequestPath(new StubRequest("GET", "/fess/themes/t/x.js").withContextPath("/fess")));
+        // No servlet path from the container: the raw URI without the context path.
+        assertEquals("/themes/t/x.js", StaticThemeFilter
+                .resolveRequestPath(new StubRequest("GET", "/fess/themes/t/x.js").withContextPath("/fess").withServletPath("")));
+    }
+
+    @Test
+    public void test_isPrivateThemeFile() {
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/t/theme.yml"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/t/README.md"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/t/a/b/.env"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/THEMES/t/LICENSE"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/t/assets/app.js"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/t/"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/docs/README.md"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/theme.yml"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile(""));
+    }
+
+    @Test
     public void test_doFilter_passesThroughStaticFileOfInactiveTheme() throws Exception {
         // Only server-side pages are stopped; a plain file of a theme that is not active
         // still passes through to the container as before.
@@ -1117,7 +1251,11 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
 
         @Override
         public String getServletPath() {
-            return servletPath != null ? servletPath : uri;
+            if (servletPath != null) {
+                return servletPath;
+            }
+            // Like a container: the request path without the context path.
+            return !contextPath.isEmpty() && uri.startsWith(contextPath) ? uri.substring(contextPath.length()) : uri;
         }
 
         @Override
