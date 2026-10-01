@@ -1313,6 +1313,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10000 */
     String LOGGING_CLICK_MAX_QUEUE_SIZE = "logging.click.max.queue.size";
 
+    /** The key of the configuration. e.g. true */
+    String SEARCH_HISTORY_ENABLED = "search.history.enabled";
+
+    /** The key of the configuration. e.g. 10 */
+    String SEARCH_HISTORY_SIZE = "search.history.size";
+
     /** The key of the configuration. e.g. 10000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
 
@@ -6861,6 +6867,39 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getLoggingClickMaxQueueSizeAsInteger();
+
+    /**
+     * Get the value for the key 'search.history.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to record the search conditions of logged-in users for the search history.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSearchHistoryEnabled();
+
+    /**
+     * Is the property for the key 'search.history.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to record the search conditions of logged-in users for the search history.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSearchHistoryEnabled();
+
+    /**
+     * Get the value for the key 'search.history.size'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of search history entries returned per user.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSearchHistorySize();
+
+    /**
+     * Get the value for the key 'search.history.size' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of search history entries returned per user.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSearchHistorySizeAsInteger();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -12590,6 +12629,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE);
         }
 
+        public String getSearchHistoryEnabled() {
+            return get(FessConfig.SEARCH_HISTORY_ENABLED);
+        }
+
+        public boolean isSearchHistoryEnabled() {
+            return is(FessConfig.SEARCH_HISTORY_ENABLED);
+        }
+
+        public String getSearchHistorySize() {
+            return get(FessConfig.SEARCH_HISTORY_SIZE);
+        }
+
+        public Integer getSearchHistorySizeAsInteger() {
+            return getAsInteger(FessConfig.SEARCH_HISTORY_SIZE);
+        }
+
         public String getFormAdminMaxInputSize() {
             return get(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE);
         }
@@ -14676,6 +14731,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOGGING_SEARCH_USE_LOGFILE, "true");
             defaultMap.put(FessConfig.LOGGING_SEARCH_MAX_QUEUE_SIZE, "10000");
             defaultMap.put(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE, "10000");
+            defaultMap.put(FessConfig.SEARCH_HISTORY_ENABLED, "true");
+            defaultMap.put(FessConfig.SEARCH_HISTORY_SIZE, "10");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");

@@ -104,6 +104,10 @@ public class SearchLogBhv extends BsSearchLogBhv {
                     }
                 });
             }
+            final Object searchParamsObj = source.get("searchParams");
+            if (searchParamsObj instanceof final String searchParams) {
+                result.setSearchParams(searchParams);
+            }
             return result;
         } catch (final Exception e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
