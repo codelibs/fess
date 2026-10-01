@@ -281,6 +281,22 @@ public class QueryHelperTest extends UnitFessTestCase {
                 Map.of("title", List.of("QUERY1 QUERY2")), //
                 Set.of("QUERY1", "QUERY2"), //
                 buildQuery("title:\"QUERY1 QUERY2\""));
+
+        assertQueryContext(
+                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1QUERY2\",\"slop\":5,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1QUERY2\",\"slop\":5,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                Map.of("_default", List.of("QUERY1 QUERY2")), //
+                Set.of("QUERY1", "QUERY2"), //
+                buildQuery("\"QUERY1 QUERY2\"~5"));
+        assertQueryContext(buildQuery("\"QUERY1 QUERY2\"~5").getQueryBuilder().toString().replaceAll("\\s", ""),
+                buildQuery("aaa:\"QUERY1 QUERY2\"~5"));
+        assertQueryContext(buildQuery("\"QUERY1 QUERY2\"").getQueryBuilder().toString().replaceAll("\\s", ""),
+                buildQuery("\"QUERY1 QUERY2\"~"));
+
+        assertQueryContext(
+                "{\"function_score\":{\"query\":{\"match_phrase\":{\"title\":{\"query\":\"QUERY1QUERY2\",\"slop\":3,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                Map.of("title", List.of("QUERY1 QUERY2")), //
+                Set.of("QUERY1", "QUERY2"), //
+                buildQuery("title:\"QUERY1 QUERY2\"~3"));
     }
 
     @Test
@@ -624,6 +640,8 @@ public class QueryHelperTest extends UnitFessTestCase {
 
         final String json = toJson(queryHelper.buildHighlightQuery("\"QUERY1 QUERY2\" QUE* Q*RY title:QUERY3"));
         assertTrue(json.contains("{\"match_phrase\":{\"content\":{\"query\":\"QUERY1 QUERY2\""), json);
+        final String proximityJson = toJson(queryHelper.buildHighlightQuery("\"QUERY1 QUERY2\"~5"));
+        assertTrue(proximityJson.contains("{\"match_phrase\":{\"content\":{\"query\":\"QUERY1 QUERY2\",\"slop\":5,"), proximityJson);
         assertTrue(json.contains("{\"match_phrase_prefix\":{\"content\":{\"query\":\"que\""), json);
         assertTrue(json.contains("{\"wildcard\":{\"content\":{\"wildcard\":\"q*ry\""), json);
         assertFalse(json.contains("title"), json);

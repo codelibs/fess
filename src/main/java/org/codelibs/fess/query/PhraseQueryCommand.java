@@ -28,6 +28,7 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
+import org.codelibs.fesen.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 /**
@@ -95,21 +96,38 @@ public class PhraseQueryCommand extends QueryCommand {
     protected QueryBuilder convertPhraseQuery(final FessConfig fessConfig, final QueryContext context, final PhraseQuery phraseQuery,
             final float boost, final String field, final String[] texts) {
         final String text = String.join(" ", texts);
+        final int slop = phraseQuery.getSlop();
 
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
-            return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+            return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text, slop).boost(b * boost));
         }
 
         if (isSearchField(field)) {
             context.addFieldLog(field, text);
             stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
-            return buildMatchPhraseQuery(field, text);
+            return buildMatchPhraseQuery(field, text, slop);
         }
 
         context.addFieldLog(Constants.DEFAULT_FIELD, text);
-        return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
+        return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text, slop).boost(b * boost));
+    }
+
+    /**
+     * Builds a match phrase query that keeps the slop of a proximity search such as {@code "word1 word2"~N}.
+     *
+     * @param f the field name
+     * @param text the query text
+     * @param slop the number of positions the terms may be apart
+     * @return the query builder
+     */
+    protected QueryBuilder buildMatchPhraseQuery(final String f, final String text, final int slop) {
+        final QueryBuilder queryBuilder = buildMatchPhraseQuery(f, text);
+        if (slop > 0 && queryBuilder instanceof final MatchPhraseQueryBuilder matchPhraseQuery) {
+            matchPhraseQuery.slop(slop);
+        }
+        return queryBuilder;
     }
 
 }
