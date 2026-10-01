@@ -252,6 +252,8 @@ function attachHomeView() {
         return sel ? Array.from(sel.selectedOptions).map(o => o.value).filter(v => v !== "") : [];
       }
     });
+    // Recent searches of the logged-in user, shown in the same dropdown while the box is empty.
+    search.attachSearchHistory(input, homeSuggest);
   }
   // The home options Clear button is the shared drawer #searchOptionsClearButton,
   // wired in search.js attach(); no separate home clear handler is needed.

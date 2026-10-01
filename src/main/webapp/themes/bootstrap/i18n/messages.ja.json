@@ -3,6 +3,7 @@
   "search.button": "検索",
   "search.no_results": "結果がありません。",
   "search.popular_searches": "人気の検索",
+  "search_history.title": "最近の検索",
   "search.did_not_match": "検索キーワード「{0}」に一致する文書が見つかりませんでした。",
   "search.did_not_match_suggestion": "別のキーワードを試すか、キーワードを減らしてください。",
   "search.options": "オプション",

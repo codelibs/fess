@@ -3,6 +3,7 @@
   "search.button": "搜尋",
   "search.no_results": "無結果。",
   "search.popular_searches": "熱門搜尋",
+  "search_history.title": "最近搜尋",
   "search.did_not_match": "找不到與 {0} 相符的文件。",
   "search.did_not_match_suggestion": "請嘗試不同的關鍵字或減少關鍵字。",
   "search.options": "選項",

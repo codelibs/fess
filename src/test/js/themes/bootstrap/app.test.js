@@ -54,6 +54,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   refresh: vi.fn(),
   clearSearchState: vi.fn(),
   attachSuggest: vi.fn(),
+  attachSearchHistory: vi.fn(),
   disableSubmitBriefly: vi.fn(),
   renderPopularWords: vi.fn(),
   initSearchOptions: vi.fn(),
@@ -459,6 +460,21 @@ describe("home search form", () => {
     expect(qs.get("sort")).toBe("last_modified.desc");
     expect(qs.get("num")).toBe("20");
     expect(qs.getAll("fields.label")).toEqual(["lblA"]);
+  });
+
+  it("wires the suggest and the recent searches to the home box once", () => {
+    mountFullDom();
+    document.getElementById("home-search-form").insertAdjacentHTML("beforeend", '<ul id="home-suggest-dropdown"></ul>');
+    registerRoutes();
+    setLocation("/");
+    router.register.mock.calls[1][1]();
+    router.register.mock.calls[1][1](); // a second visit to the home view does not wire again
+
+    const input = document.getElementById("contentQuery");
+    const dropdown = document.getElementById("home-suggest-dropdown");
+    expect(search.attachSuggest).toHaveBeenCalledTimes(1);
+    expect(search.attachSearchHistory).toHaveBeenCalledTimes(1);
+    expect(search.attachSearchHistory).toHaveBeenCalledWith(input, dropdown);
   });
 });
 

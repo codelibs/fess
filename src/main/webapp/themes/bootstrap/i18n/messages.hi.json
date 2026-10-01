@@ -3,6 +3,7 @@
   "search.button": "खोजें",
   "search.no_results": "कोई परिणाम नहीं।",
   "search.popular_searches": "लोकप्रिय खोजें",
+  "search_history.title": "हाल की खोजें",
   "search.did_not_match": "आपकी खोज — {0} — किसी भी दस्तावेज़ से मेल नहीं खाती।",
   "search.did_not_match_suggestion": "अलग कीवर्ड या कम कीवर्ड आज़माएं।",
   "search.options": "विकल्प",

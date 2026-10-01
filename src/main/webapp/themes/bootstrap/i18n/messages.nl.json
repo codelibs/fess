@@ -3,6 +3,7 @@
   "search.button": "Zoeken",
   "search.no_results": "Geen resultaten.",
   "search.popular_searches": "Populaire zoekopdrachten",
+  "search_history.title": "Recente zoekopdrachten",
   "search.did_not_match": "Geen documenten gevonden die overeenkomen met {0}.",
   "search.did_not_match_suggestion": "Probeer andere of minder zoekwoorden.",
   "search.options": "Opties",
