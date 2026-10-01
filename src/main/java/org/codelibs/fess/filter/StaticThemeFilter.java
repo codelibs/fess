@@ -65,6 +65,12 @@ import jakarta.servlet.http.HttpServletResponse;
  * <ul>
  *   <li>A request for a JSP (or similar server-side page) under {@code /themes/} is answered
  *       with 404, whatever the method or active theme: a static theme contains plain files only.</li>
+ *   <li>So is a request for a file a theme keeps private ({@code theme.yml}, {@code README.md},
+ *       dotfiles, ... see {@link StaticThemeResponder#isBlockedFilename}) under {@code /themes/}:
+ *       whatever the method, and whether or not its theme is the active one.</li>
+ *   <li>Every decision is taken on the path the container resolves ({@link #resolveRequestPath}),
+ *       not on the raw request URI, so a spelling such as {@code /themes//t/x.js} or
+ *       {@code /a/../themes/t/x.js} is treated as the path it names.</li>
  *   <li>Requests other than GET and HEAD pass through unchanged.</li>
  *   <li>Requests that are neither a {@code /themes/...} asset nor an allowlisted UI path
  *       pass through unchanged (without even resolving the active theme).</li>
@@ -149,10 +155,18 @@ public class StaticThemeFilter implements Filter {
         }
         final HttpServletResponse res = (HttpServletResponse) response;
 
+        // The path as the container resolves it: percent-decoded, without path parameters, and
+        // with empty, "." and ".." segments resolved. The raw request URI is not what the
+        // container maps to a servlet or a file, so every decision below is taken on this path.
+        final String uri = resolveRequestPath(req);
+
         // A static theme is plain files. A JSP (or similar) page under /themes/ is never
         // part of one, so it is not handed to the servlet container, whatever the method or
-        // active theme. Checked on the container-decoded path, which is what it maps to a servlet.
-        if (isServerSideThemePage(req)) {
+        // active theme. The files a theme keeps private (theme.yml, README.md, dotfiles, ...) are
+        // refused the same way: StaticThemeResponder never serves them, and they must not
+        // be served by the container's default servlet either, which would otherwise answer
+        // for a theme that is not the active one.
+        if (isServerSideThemePage(req) || isPrivateThemeFile(uri)) {
             res.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -165,8 +179,6 @@ public class StaticThemeFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
-
-        final String uri = stripContextPath(req);
 
         // Allowlist: handle only theme assets and SPA-owned UI paths. Everything else is a
         // Fess route and passes through without even resolving the active theme.
@@ -334,6 +346,32 @@ public class StaticThemeFilter implements Filter {
         }
     }
 
+    /**
+     * Returns the request path the way the container resolves it, without the context path.
+     *
+     * <p>That is the servlet path plus the path info: percent-decoded, without path parameters
+     * ({@code ;jsessionid=...}), and with empty, {@code .} and {@code ..} segments resolved. It is
+     * the path the container's default servlet maps to a file, and so the only one the
+     * filter's checks can be made on: the raw request URI of {@code /themes//t/theme.yml},
+     * {@code /themes/./t/theme.yml}, {@code /themes/%74/theme.yml} or
+     * {@code /x/../themes/t/theme.yml} names {@code /themes/t/theme.yml} to the container while
+     * looking like some other path to a prefix match. Falls back to the raw URI when the
+     * container reports no servlet path.</p>
+     *
+     * @param req the request
+     * @return the resolved path, starting with {@code /} (empty only for a request without a URI)
+     */
+    static String resolveRequestPath(final HttpServletRequest req) {
+        final String path = containerPath(req);
+        return path.isEmpty() ? stripContextPath(req) : path;
+    }
+
+    private static String containerPath(final HttpServletRequest req) {
+        final String servletPath = req.getServletPath() == null ? "" : req.getServletPath();
+        final String pathInfo = req.getPathInfo() == null ? "" : req.getPathInfo();
+        return servletPath + pathInfo;
+    }
+
     private static String stripContextPath(final HttpServletRequest req) {
         final String ctx = req.getContextPath() == null ? "" : req.getContextPath();
         String uri = req.getRequestURI();
@@ -355,10 +393,24 @@ public class StaticThemeFilter implements Filter {
      * @return true when the request should not reach a servlet
      */
     static boolean isServerSideThemePage(final HttpServletRequest req) {
-        final String servletPath = req.getServletPath() == null ? "" : req.getServletPath();
-        final String pathInfo = req.getPathInfo() == null ? "" : req.getPathInfo();
-        final String path = servletPath + pathInfo;
+        final String path = containerPath(req);
         return path.toLowerCase(Locale.ROOT).startsWith("/themes/") && StaticThemeInstaller.isServerSidePage(path);
+    }
+
+    /**
+     * Returns whether a path under {@code /themes/} names a file that is never served: one that
+     * {@link StaticThemeResponder#isBlockedFilename} blocks. Only the last segment is looked at, as
+     * the responder does, and the prefix is matched case-insensitively for a file system that is.
+     *
+     * @param path the resolved request path, see {@link #resolveRequestPath}
+     * @return true when the request must be answered with 404 whatever theme it names
+     */
+    static boolean isPrivateThemeFile(final String path) {
+        if (!path.toLowerCase(Locale.ROOT).startsWith("/themes/")) {
+            return false;
+        }
+        final String filename = path.substring(path.lastIndexOf('/') + 1);
+        return !filename.isEmpty() && StaticThemeResponder.isBlockedFilename(filename);
     }
 
     private static boolean isThemeUiPath(final String uri) {

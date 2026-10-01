@@ -443,7 +443,7 @@ public class StaticThemeResponder {
      * @param filename the bare filename (not a path) to test
      * @return {@code true} if the file must not be served
      */
-    static boolean isBlockedFilename(final String filename) {
+    public static boolean isBlockedFilename(final String filename) {
         if (filename == null || filename.isEmpty() || filename.startsWith(".")) {
             return true;
         }
