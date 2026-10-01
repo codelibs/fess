@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.EmbeddingException;
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.codelibs.fesen.opensearch.action.search.SearchAction;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
+import org.codelibs.fesen.opensearch.index.query.IdsQueryBuilder;
 import org.codelibs.fesen.opensearch.index.seqno.SequenceNumbers;
 import org.codelibs.fesen.opensearch.search.builder.SearchSourceBuilder;
 
@@ -461,13 +464,16 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         // shape SearchEngineClient#store() produces for a real optimistic-concurrency
         // conflict (it wraps the thrown OpenSearchException, e.g. the real
         // org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException, as the cause).
+        // Every attempt conflicts, so the document is retried the bounded number of times and then left pending.
+        searchEngineClient.throwOnStoreAlways = true;
         searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
                 new VersionConflictEngineException("[content_ids]: version conflict, required seqNo [5], primary term [1], current [7]"));
 
         final boolean result = helper.processDocument("doc-1");
 
         assertFalse(result, "a version conflict must be treated as a skip, not propagated");
-        assertEquals("should attempt the store exactly once", 1, searchEngineClient.storeCallCount);
+        assertEquals("the first write and each bounded retry", 1 + ChunkVectorHelper.MAX_CONFLICT_RETRIES,
+                searchEngineClient.storeCallCount);
         assertNull(searchEngineClient.lastStoredDoc, "a version conflict must never be recorded as a persisted failure");
     }
 
@@ -486,6 +492,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         // message-substring branch of isVersionConflict on the CAUSE, not the outer
         // SearchEngineClientException frame (whose own message is never message-checked, since it
         // embeds arbitrary crawled document content -- see isVersionConflict's Javadoc).
+        searchEngineClient.throwOnStoreAlways = true;
         searchEngineClient.throwOnStore = new SearchEngineClientException("Failed to store: " + doc,
                 new RuntimeException(
                         "OpenSearch exception [type=version_conflict_engine_exception, reason=[content_ids]: version conflict, "
@@ -494,7 +501,8 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         final boolean result = helper.processDocument("doc-1");
 
         assertFalse(result, "a version conflict detected via the cause's message must be treated as a skip, not propagated");
-        assertEquals("should attempt the store exactly once", 1, searchEngineClient.storeCallCount);
+        assertEquals("the first write and each bounded retry", 1 + ChunkVectorHelper.MAX_CONFLICT_RETRIES,
+                searchEngineClient.storeCallCount);
         assertNull(searchEngineClient.lastStoredDoc, "a version conflict must never be recorded as a persisted failure");
     }
 
@@ -943,12 +951,13 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_processDocument_realConcurrentWrite_lostCasRaceDetectedAsVersionConflict() {
-        // The crown-jewel regression guard: a concurrent recrawl writes the same document WHILE we are
+        // The crown-jewel regression guard: a concurrent write hits the same document WHILE we are
         // embedding (onEmbed advances the tracked _seq_no from 7 to 8), so our store carrying the fetched
         // _seq_no=7 must lose a REAL CAS race and surface a genuine version-conflict-shaped exception --
-        // handled as a benign skip via isVersionConflict, not recorded as a failure. Against the unfixed
-        // fetchDocument this fails: the sentinel seq_no makes store() an unconditional overwrite that
-        // "succeeds", so the conflict is never detected (result would be true, lastStoredDoc non-null).
+        // handled as a benign conflict via isVersionConflict, not recorded as a failure, and retried on the
+        // version that won. Against the unfixed fetchDocument this fails: the sentinel seq_no makes store()
+        // an unconditional overwrite that "succeeds" at once, so the conflict is never detected (exactly
+        // one store, carrying the stale document).
         final Map<String, Object> source = new HashMap<>();
         source.put("content", "original content");
         final CasSearchEngineClient cas = new CasSearchEngineClient(7L, 3L, source);
@@ -959,9 +968,270 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
         final boolean result = helper.processDocument("doc-1");
 
-        assertFalse(result, "a real lost CAS race must be treated as a skip, not a success");
-        assertEquals("only the conflicting success-path store should have been attempted", 1, cas.storeCallCount);
-        assertNull(cas.lastStoredDoc, "the conflicting store must not persist, and a version conflict is not a recorded failure");
+        assertTrue(result, "a real lost CAS race must be retried on the version that won it");
+        assertEquals("the conflicting store, then its retry -- no failure-path write", 2, cas.storeCallCount);
+        assertNotNull(cas.lastStoredDoc, "the retry must persist");
+        assertEquals(Constants.DONE, cas.lastStoredDoc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+    }
+
+    // ===================================================================================
+    //                                                       Retry after a lost CAS race
+    //                                                       ===========================
+    // These use ConcurrentWriterClient, which lets a test play the other writer (a thumbnail update,
+    // a recrawl, another run) between the indexer's read of a document and its write.
+
+    @Test
+    public void test_processDocument_lostCasRace_retriesOnTheCurrentVersionWithoutEmbeddingAgain() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        // The thumbnail generator updates the document in place right after the indexer read it.
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerTouches(id, Map.of("thumbnail", "thumb-1"));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a");
+        helper.testVectors = List.of(new float[] { 1f });
+
+        final boolean result = helper.processDocument("doc-1");
+
+        assertTrue(result, "a write that lost the race to an unrelated update must be retried and stored");
+        assertEquals("one lost write and one retry", 2, client.storeCount);
+        assertEquals("the retry re-reads the document", 2, (int) client.fetchCounts.get("doc-1"));
+        assertEquals("the retry must not embed again", 1, helper.embedCalls.size());
+        assertEquals("the retry writes against the version it just read, not the stale one", List.of(5L, 6L),
+                client.seqNoPreconditions.get("doc-1"));
+        final Map<String, Object> stored = client.sources.get("doc-1");
+        assertEquals(Constants.DONE, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(List.of("chunk-a"), stored.get("content"));
+        assertNotNull(stored.get(Constants.CONTENT_CHUNK_VECTOR_FIELD), "vectors must be stored");
+        assertEquals("what the other writer changed must survive the retry", "thumb-1", stored.get("thumbnail"));
+        assertEquals("no write may skip the compare-and-set", 0, client.unconditionalStores);
+    }
+
+    @Test
+    public void test_processDocument_lostCasRaceKeepsRepeating_leavesPendingWithoutMarkingFailed() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        // A writer that is active for good: every read is followed by another update.
+        client.afterFetch = (id, n) -> client.writerTouches(id, Map.of("thumbnail", "thumb-" + n));
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a");
+        helper.testVectors = List.of(new float[] { 1f });
+
+        final boolean result = helper.processDocument("doc-1");
+
+        assertFalse(result, "a document that keeps changing must be left for the next run");
+        assertEquals("the first write and each bounded retry", 1 + ChunkVectorHelper.MAX_CONFLICT_RETRIES, client.storeCount);
+        assertEquals(1 + ChunkVectorHelper.MAX_CONFLICT_RETRIES, (int) client.fetchCounts.get("doc-1"));
+        assertEquals("giving up is not a failure of the document: nothing may be embedded again", 1, helper.embedCalls.size());
+        assertNull(client.sources.get("doc-1").get(Constants.CONTENT_CHUNK_STATUS_FIELD),
+                "the document must stay pending: no status, in particular not \"fail\"");
+        assertEquals("original content", client.sources.get("doc-1").get("content"));
+    }
+
+    @Test
+    public void test_processDocument_contentChangedDuringProcessing_isNotWrittenOver() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        // A recrawl replaces the content after the indexer read it: the vectors describe the old text.
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerTouches(id, Map.of("content", "recrawled content"));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a");
+        helper.testVectors = List.of(new float[] { 1f });
+
+        final boolean result = helper.processDocument("doc-1");
+
+        assertFalse(result, "vectors built from content the document no longer has must not be stored");
+        assertEquals("no second write", 1, client.storeCount);
+        assertEquals("recrawled content", client.sources.get("doc-1").get("content"));
+        assertNull(client.sources.get("doc-1").get(Constants.CONTENT_CHUNK_VECTOR_FIELD));
+        assertNull(client.sources.get("doc-1").get(Constants.CONTENT_CHUNK_STATUS_FIELD), "left pending, not marked failed");
+    }
+
+    @Test
+    public void test_processDocument_statusChangedDuringProcessing_isNotWrittenOver() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        // Another run (another node) finished the same document first.
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerTouches(id, Map.of(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a");
+        helper.testVectors = List.of(new float[] { 1f });
+
+        final boolean result = helper.processDocument("doc-1");
+
+        assertFalse(result);
+        assertEquals("no second write over the other run's result", 1, client.storeCount);
+        assertEquals(Constants.DONE, client.sources.get("doc-1").get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+    }
+
+    @Test
+    public void test_processDocument_deletedDuringProcessing_isSkipped() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerDeletes(id);
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a");
+        helper.testVectors = List.of(new float[] { 1f });
+
+        assertFalse(helper.processDocument("doc-1"), "a deleted document has nothing to write the vectors to");
+        assertEquals("no second write", 1, client.storeCount);
+        assertFalse(client.sources.containsKey("doc-1"), "the write must not bring a deleted document back");
+    }
+
+    @Test
+    public void test_processDocument_rereadFails_leavesPendingWithoutMarkingFailed() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerTouches(id, Map.of("thumbnail", "thumb-1"));
+            }
+        };
+        client.failFetch = (id, n) -> n >= 2;
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a");
+        helper.testVectors = List.of(new float[] { 1f });
+
+        assertFalse(helper.processDocument("doc-1"));
+        assertEquals("a failed read says nothing about the document, so nothing is written", 1, client.storeCount);
+        assertNull(client.sources.get("doc-1").get(Constants.CONTENT_CHUNK_STATUS_FIELD), "left pending, not marked failed");
+    }
+
+    @Test
+    public void test_processBatch_lostCasRaceOnOneDocument_retriesOnlyThatDocument() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.add("doc-B", "content-B");
+        client.afterFetch = (id, n) -> {
+            if ("doc-A".equals(id) && n == 1) {
+                client.writerTouches(id, Map.of("thumbnail", "thumb-A"));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunksByContent.put("content-A", List.of("a1"));
+        helper.testChunksByContent.put("content-B", List.of("b1"));
+        helper.testVectorsByChunk.put("a1", new float[] { 1f });
+        helper.testVectorsByChunk.put("b1", new float[] { 2f });
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-A", "doc-B"));
+
+        assertTrue(results.get("doc-A"), "the document that lost the race must be stored by its retry");
+        assertTrue(results.get("doc-B"), "its sibling is not affected");
+        assertEquals("one embedding call for the whole batch and none for the retry", 1, helper.embedCalls.size());
+        assertEquals(2, (int) client.fetchCounts.get("doc-A"));
+        assertEquals("the sibling is read once", 1, (int) client.fetchCounts.get("doc-B"));
+        assertEquals(List.of(5L, 6L), client.seqNoPreconditions.get("doc-A"));
+        assertEquals(List.of(5L), client.seqNoPreconditions.get("doc-B"));
+        assertEquals("thumb-A", client.sources.get("doc-A").get("thumbnail"));
+        assertEquals(Constants.DONE, client.sources.get("doc-A").get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.DONE, client.sources.get("doc-B").get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+    }
+
+    @Test
+    public void test_processBatch_chunkOnly_lostCasRace_retriesOnTheCurrentVersion() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-1", "original content");
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerTouches(id, Map.of("thumbnail", "thumb-1"));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        helper.testChunks = List.of("chunk-a", "chunk-b");
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-1"), false);
+
+        assertTrue(results.get("doc-1"));
+        assertEquals(2, client.storeCount);
+        assertEquals("chunk-only mode never embeds", 0, helper.embedCalls.size());
+        final Map<String, Object> stored = client.sources.get("doc-1");
+        assertEquals(Constants.CHUNKED, stored.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(List.of("chunk-a", "chunk-b"), stored.get("content"));
+        assertFalse(stored.containsKey(Constants.CONTENT_CHUNK_VECTOR_FIELD), "chunk-only mode writes no vector field");
+        assertEquals("thumb-1", stored.get("thumbnail"));
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_reportsDocumentsThatLostAWriteRace() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.add("doc-B", "content-B");
+        client.add("doc-C", "content-C");
+        client.afterFetch = (id, n) -> {
+            if (n == 1 && !"doc-C".equals(id)) {
+                client.writerTouches(id, Map.of("thumbnail", "thumb"));
+            }
+            // doc-B is recrawled with other content: it cannot be written and stays pending.
+            if (n == 1 && "doc-B".equals(id)) {
+                client.writerTouches(id, Map.of("content", "recrawled content-B"));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A", "doc-B", "doc-C");
+        runHelper.testVectorsByChunk.put("chunk", new float[] { 1f });
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testChunksByContent.put("content-B", List.of("chunk"));
+        runHelper.testChunksByContent.put("content-C", List.of("chunk"));
+
+        final String result = runHelper.executeChunkVectorProcessing();
+
+        assertEquals("Processed 3 documents. Succeeded: 2, Failed/Skipped: 1."
+                + " Concurrent updates: 2 document(s) were changed by another process before they could be written;"
+                + " 1 stored after a retry, 1 left pending for the next run.", result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_withoutConcurrentUpdates_summaryIsUnchanged() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testVectorsByChunk.put("chunk", new float[] { 1f });
+
+        assertEquals("Processed 1 documents. Succeeded: 1, Failed/Skipped: 0.", runHelper.executeChunkVectorProcessing());
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_concurrentUpdateCountsStartOverEachRun() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.afterFetch = (id, n) -> {
+            if (n == 1) {
+                client.writerTouches(id, Map.of("thumbnail", "thumb"));
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testVectorsByChunk.put("chunk", new float[] { 1f });
+        assertTrue(runHelper.executeChunkVectorProcessing().contains("Concurrent updates: 1 document(s)"));
+
+        // A second run on the same helper, nothing written concurrently this time.
+        client.afterFetch = (id, n) -> {};
+        client.sources.get("doc-A").remove(Constants.CONTENT_CHUNK_STATUS_FIELD);
+        client.sources.get("doc-A").remove(Constants.CONTENT_CHUNK_VECTOR_FIELD);
+        client.sources.get("doc-A").put("content", "content-A");
+
+        assertEquals("Processed 1 documents. Succeeded: 1, Failed/Skipped: 0.", runHelper.executeChunkVectorProcessing());
     }
 
     @Test
@@ -2101,6 +2371,141 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
             currentSeqNo++;
             lastStoredDoc = map;
             return true;
+        }
+    }
+
+    /**
+     * A fake that keeps several documents and lets a test play the other writer. It reproduces what
+     * {@link ChunkVectorHelper}'s read-modify-write relies on:
+     * <ul>
+     * <li>a read returns the document's {@code _source} with its current {@code _seq_no}/{@code _primary_term}
+     * (the "unassigned" sentinels when the search did not ask for them);</li>
+     * <li>{@link #store} behaves like {@link SearchEngineClient#store}: it strips the id and the sequence
+     * numbers from the map it is handed, makes the write conditional on them when they were present
+     * (an absent pair is an unconditional write, which {@link #unconditionalStores} counts), rejects a stale
+     * pair with a version-conflict-shaped exception, and advances the document's {@code _seq_no} on success.</li>
+     * </ul>
+     * {@link #afterFetch} runs after a read has been served, which is where the other writer strikes: a
+     * write from that read then carries a stale {@code _seq_no}.
+     */
+    private static final class ConcurrentWriterClient extends SearchEngineClient {
+        final Map<String, Map<String, Object>> sources = new HashMap<>();
+        final Map<String, Long> seqNos = new HashMap<>();
+        final Map<String, Integer> fetchCounts = new HashMap<>();
+        /** Per document, the {@code _seq_no} each store was conditional on, in call order. */
+        final Map<String, List<Long>> seqNoPreconditions = new HashMap<>();
+        int storeCount = 0;
+        int unconditionalStores = 0;
+        /** Called with the document id and its 1-based read number after each read has been served. */
+        BiConsumer<String, Integer> afterFetch = (id, n) -> {};
+        /** Makes a read throw when it returns true for the document id and its 1-based read number. */
+        BiPredicate<String, Integer> failFetch = (id, n) -> false;
+
+        void add(final String id, final String content) {
+            final Map<String, Object> source = new HashMap<>();
+            source.put("content", content);
+            sources.put(id, source);
+            seqNos.put(id, 5L);
+        }
+
+        /** Another writer changes fields of the document in place: {@code _seq_no} advances. */
+        void writerTouches(final String id, final Map<String, Object> changes) {
+            sources.get(id).putAll(changes);
+            seqNos.merge(id, 1L, Long::sum);
+        }
+
+        /** Another writer deletes the document. */
+        void writerDeletes(final String id) {
+            sources.remove(id);
+            seqNos.remove(id);
+        }
+
+        @Override
+        public OptionalEntity<Map<String, Object>> getDocument(final String index,
+                final org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition<SearchRequestBuilder> condition) {
+            final SearchRequestBuilder builder = new SearchRequestBuilder(this, SearchAction.INSTANCE);
+            condition.build(builder);
+            final SearchSourceBuilder sourceBuilder = builder.request().source();
+            final String id = ((IdsQueryBuilder) sourceBuilder.query()).ids().iterator().next();
+            final int fetchNumber = fetchCounts.merge(id, 1, Integer::sum);
+            if (failFetch.test(id, fetchNumber)) {
+                throw new RuntimeException("simulated read failure");
+            }
+            if (!sources.containsKey(id)) {
+                return OptionalEntity.empty();
+            }
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final Map<String, Object> doc = new HashMap<>(sources.get(id));
+            doc.put(fessConfig.getIndexFieldId(), id);
+            if (Boolean.TRUE.equals(sourceBuilder.seqNoAndPrimaryTerm())) {
+                doc.put(fessConfig.getIndexFieldSeqNo(), seqNos.get(id));
+                doc.put(fessConfig.getIndexFieldPrimaryTerm(), 1L);
+            } else {
+                doc.put(fessConfig.getIndexFieldSeqNo(), SequenceNumbers.UNASSIGNED_SEQ_NO);
+                doc.put(fessConfig.getIndexFieldPrimaryTerm(), SequenceNumbers.UNASSIGNED_PRIMARY_TERM);
+            }
+            afterFetch.accept(id, fetchNumber);
+            return OptionalEntity.of(doc);
+        }
+
+        @Override
+        public boolean store(final String index, final Object obj) {
+            storeCount++;
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> source = (Map<String, Object>) obj;
+            final String id = (String) source.remove(fessConfig.getIndexFieldId());
+            final Number seqNo = (Number) source.remove(fessConfig.getIndexFieldSeqNo());
+            source.remove(fessConfig.getIndexFieldPrimaryTerm());
+            final boolean unassigned = seqNo == null || seqNo.longValue() == SequenceNumbers.UNASSIGNED_SEQ_NO;
+            seqNoPreconditions.computeIfAbsent(id, k -> new ArrayList<>()).add(unassigned ? null : seqNo.longValue());
+            if (unassigned) {
+                unconditionalStores++;
+            } else if (!sources.containsKey(id) || seqNo.longValue() != seqNos.get(id)) {
+                throw new SearchEngineClientException("Failed to store: " + obj, new VersionConflictEngineException(
+                        "[_doc]: version conflict, required seqNo [" + seqNo + "], current [" + seqNos.get(id) + "]"));
+            }
+            sources.put(id, source);
+            seqNos.merge(id, 1L, Long::sum);
+            return true;
+        }
+    }
+
+    /**
+     * A helper that runs the whole {@link ChunkVectorHelper#executeChunkVectorProcessing()} loop over
+     * the real {@link ChunkVectorHelper#processBatch}, with only the run-mode gates and the pending
+     * scroll replaced.
+     */
+    private static final class RunHelper extends TestableChunkVectorHelper {
+        List<String> ids = List.of();
+
+        RunHelper() {
+            setTestEnabled(true);
+        }
+
+        @Override
+        protected boolean isEmbeddingConfigured() {
+            return true;
+        }
+
+        @Override
+        public boolean checkDimensionConsistency() {
+            return true;
+        }
+
+        @Override
+        public boolean checkVectorMappingReady() {
+            return true;
+        }
+
+        @Override
+        protected List<String> scrollPendingIds(final boolean embeddingActive) {
+            return ids;
+        }
+
+        @Override
+        protected int getConcurrency() {
+            return 1;
         }
     }
 
