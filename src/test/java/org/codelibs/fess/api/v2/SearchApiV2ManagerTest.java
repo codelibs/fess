@@ -593,6 +593,99 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         assertEquals("strict-origin-when-cross-origin", res.headers.get("Referrer-Policy"));
     }
 
+    @Test
+    public void test_process_undecodableParameter_returnsInvalidRequestInsteadOfInternalError() throws Exception {
+        // Tomcat throws InvalidParameterException from the first read of a parameter whose
+        // percent-encoding it cannot decode (?q=%ff). That is the caller's mistake: it must be
+        // answered as a 400 in the v2 envelope, not reach the generic catch as a 500.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final boolean[] handlerReached = { false };
+        m.searchHandler = new org.codelibs.fess.api.v2.handlers.SearchHandler() {
+            @Override
+            public void handle(final HttpServletRequest request, final HttpServletResponse response) {
+                handlerReached[0] = true;
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new UndecodableRequest("/api/v2/search", 400), res, new NopChain());
+
+        assertEquals(400, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"status\":1"), body);
+        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertFalse(body.contains("internal_error"), body);
+        assertFalse(handlerReached[0], "a request whose parameters cannot be read must not reach the handler");
+        // The envelope carries the same headers as every other v2 response.
+        assertEquals("no-store", res.headers.get("Cache-Control"));
+        assertEquals("strict-origin-when-cross-origin", res.headers.get("Referrer-Policy"));
+    }
+
+    @Test
+    public void test_process_undecodableParameter_isRejectedBeforeEveryLayerAndEndpoint() throws Exception {
+        // The probe sits ahead of the Origin, CSRF and login layers and of the endpoint switch, so
+        // it covers endpoints whose handler never catches anything itself.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        for (final String path : new String[] { "/api/v2/search", "/api/v2/suggest-words", "/api/v2/popular-words", "/api/v2/ui/config",
+                "/api/v2/health", "/api/v2/does-not-exist" }) {
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new UndecodableRequest(path, 400), res, new NopChain());
+            assertEquals(path, 400, res.status);
+            assertTrue(path + ": " + res.body(), res.body().contains("\"code\":\"invalid_request\""));
+        }
+    }
+
+    @Test
+    public void test_process_parametersTooLarge_returnsPayloadTooLarge() throws Exception {
+        // Tomcat reports an oversized form body through the same exception, with its own status.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new UndecodableRequest("/api/v2/search", 413), res, new NopChain());
+
+        assertEquals(413, res.status);
+        assertTrue(res.body(), res.body().contains("\"code\":\"payload_too_large\""));
+    }
+
+    @Test
+    public void test_process_otherIllegalStateFromParameters_isNotMistakenForInvalidParameter() throws Exception {
+        // Only Tomcat's InvalidParameterException is the caller's fault. Any other failure while
+        // reading parameters is ours and must not be dressed up as a client error.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        final StubRequest request = new StubRequest("/api/v2/does-not-exist") {
+            @Override
+            public Enumeration<String> getParameterNames() {
+                throw new IllegalStateException("not a decoding failure");
+            }
+        };
+        try {
+            m.process(request, res, new NopChain());
+            fail("an unrelated IllegalStateException must not be answered as a client error");
+        } catch (final IllegalStateException expected) {
+            assertEquals("not a decoding failure", expected.getMessage());
+        }
+        assertEquals(200, res.status);
+    }
+
+    /** A request whose parameters Tomcat refuses to decode, as {@code ?q=%ff} makes it. */
+    private static class UndecodableRequest extends StubRequest {
+        private final int errorCode;
+
+        UndecodableRequest(final String uri, final int errorCode) {
+            super(uri);
+            this.errorCode = errorCode;
+        }
+
+        @Override
+        public Enumeration<String> getParameterNames() {
+            throw new org.apache.tomcat.util.http.InvalidParameterException("Character decoding failed", errorCode);
+        }
+
+        @Override
+        public String getParameter(final String name) {
+            throw new org.apache.tomcat.util.http.InvalidParameterException("Character decoding failed", errorCode);
+        }
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override
