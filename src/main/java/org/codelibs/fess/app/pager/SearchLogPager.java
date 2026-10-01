@@ -25,7 +25,6 @@ import org.codelibs.fess.util.ComponentUtil;
  *
  * This class provides pagination functionality for various types of search logs
  * including search logs, click logs, favorite logs, and user information logs.
- * It also supports different aggregation types for analytics and reporting.
  */
 public class SearchLogPager implements Serializable {
 
@@ -35,44 +34,11 @@ public class SearchLogPager implements Serializable {
     /** Log type constant for search logs. */
     public static final String LOG_TYPE_SEARCH = "search";
 
-    /** Log type constant for hourly search count aggregation. */
-    public static final String LOG_TYPE_SEARCH_COUNT_HOUR = "search_count_hour_agg";
-
-    /** Log type constant for daily search count aggregation. */
-    public static final String LOG_TYPE_SEARCH_COUNT_DAY = "search_count_day_agg";
-
-    /** Log type constant for hourly unique user aggregation. */
-    public static final String LOG_TYPE_SEARCH_USER_HOUR = "search_user_hour_agg";
-
-    /** Log type constant for daily unique user aggregation. */
-    public static final String LOG_TYPE_SEARCH_USER_DAY = "search_user_day_agg";
-
-    /** Log type constant for hourly average request time aggregation. */
-    public static final String LOG_TYPE_SEARCH_REQTIMEAVG_HOUR = "search_reqtimeavg_hour_agg";
-
-    /** Log type constant for daily average request time aggregation. */
-    public static final String LOG_TYPE_SEARCH_REQTIMEAVG_DAY = "search_reqtimeavg_day_agg";
-
-    /** Log type constant for search keyword aggregation. */
-    public static final String LOG_TYPE_SEARCH_KEYWORD = "search_keyword_agg";
-
-    /** Log type constant for zero-hit search aggregation. */
-    public static final String LOG_TYPE_SEARCH_ZEROHIT = "search_zerohit_agg";
-
-    /** Log type constant for zero-click search aggregation. */
-    public static final String LOG_TYPE_SEARCH_ZEROCLICK = "search_zeroclick_agg";
-
     /** Log type constant for click logs. */
     public static final String LOG_TYPE_CLICK = "click";
 
-    /** Log type constant for click count aggregation. */
-    public static final String LOG_TYPE_CLICK_COUNT = "click_count_agg";
-
     /** Log type constant for favorite logs. */
     public static final String LOG_TYPE_FAVORITE = "favorite";
-
-    /** Log type constant for favorite count aggregation. */
-    public static final String LOG_TYPE_FAVORITE_COUNT = "favorite_count_agg";
 
     /** Log type constant for user information logs. */
     public static final String LOG_TYPE_USERINFO = "user_info";
@@ -119,6 +85,9 @@ public class SearchLogPager implements Serializable {
     /** Access type filter for search logs (web, json, gsa, admin, other). */
     public String accessType;
 
+    /** Search word filter for search logs. */
+    public String searchWord;
+
     /**
      * Default constructor for creating a new SearchLogPager instance.
      */
@@ -141,8 +110,28 @@ public class SearchLogPager implements Serializable {
         userSessionId = null;
         requestedTimeRange = null;
         accessType = null;
+        searchWord = null;
         logType = LOG_TYPE_SEARCH;
 
+    }
+
+    /**
+     * Normalizes a log type to one of the supported values.
+     *
+     * @param logType The requested log type (may be null or a legacy aggregate type)
+     * @return search, click, favorite or user_info; search for anything else
+     */
+    public static String normalizeLogType(final String logType) {
+        if (LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
+            return LOG_TYPE_CLICK;
+        }
+        if (LOG_TYPE_FAVORITE.equalsIgnoreCase(logType)) {
+            return LOG_TYPE_FAVORITE;
+        }
+        if (LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
+            return LOG_TYPE_USERINFO;
+        }
+        return LOG_TYPE_SEARCH;
     }
 
     /**

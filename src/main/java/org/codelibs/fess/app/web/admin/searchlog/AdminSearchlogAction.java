@@ -115,6 +115,7 @@ public class AdminSearchlogAction extends FessAdminAction {
         saveToken();
         searchLogPager.clear();
         copyBeanToBean(form, searchLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        searchLogPager.logType = SearchLogPager.normalizeLogType(searchLogPager.logType);
         searchLogPager.setPageSize(form.getPageSize());
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             searchPaging(data, form);
