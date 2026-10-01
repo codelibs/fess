@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -179,6 +180,20 @@ public class ChunkVectorHelper {
     private static final int MAX_CAUSE_CHAIN_DEPTH = 32;
 
     /**
+     * How many times a document whose write lost a compare-and-set race is re-read and written
+     * again before it is left pending for the next run. Each retry costs one read and one write and
+     * no embedding call, so the bound only has to cover a writer that is briefly active (a thumbnail
+     * update, a recrawl) and stops a document that keeps changing from holding the run.
+     */
+    protected static final int MAX_CONFLICT_RETRIES = 3;
+
+    /** Documents whose write lost a compare-and-set race at least once in the current run. */
+    private final AtomicInteger conflictRetried = new AtomicInteger();
+
+    /** Of {@link #conflictRetried}, the documents a retry then stored. */
+    private final AtomicInteger conflictRecovered = new AtomicInteger();
+
+    /**
      * Default constructor.
      */
     public ChunkVectorHelper() {
@@ -235,7 +250,8 @@ public class ChunkVectorHelper {
      * spend. When running multiple Fess nodes, pin this job to a single node via its scheduler
      * target setting.</p>
      *
-     * @return a summary result message (processed/succeeded/failed counts, or the skip reason)
+     * @return a summary result message (processed/succeeded/failed counts, followed by how many
+     *         documents lost a write race and were retried when any did; or the skip reason)
      */
     public String executeChunkVectorProcessing() {
         if (!isContentChunkerEnabled()) {
@@ -299,6 +315,9 @@ public class ChunkVectorHelper {
                     AbstractEmbeddingClient.EMBEDDING_NAME_PROPERTY, Constants.NONE, Constants.CHUNKED);
         }
 
+        conflictRetried.set(0);
+        conflictRecovered.set(0);
+
         // A scroll failure is a genuine run failure, not an intentional skip: let it propagate so
         // the ChunkVectorIndexer child process exits non-zero and the parent ChunkVectorJob
         // surfaces it as a JobProcessingException, instead of a healthy-looking summary string.
@@ -347,7 +366,16 @@ public class ChunkVectorHelper {
             executor.shutdown();
         }
 
-        return "Processed " + processed.get() + " documents. Succeeded: " + succeeded.get() + ", Failed/Skipped: " + failed.get() + ".";
+        final String summary =
+                "Processed " + processed.get() + " documents. Succeeded: " + succeeded.get() + ", Failed/Skipped: " + failed.get() + ".";
+        final int retried = conflictRetried.get();
+        if (retried == 0) {
+            return summary;
+        }
+        // Reported only when it happened, so a run nothing else wrote to reads as it always did.
+        final int recovered = conflictRecovered.get();
+        return summary + " Concurrent updates: " + retried + " document(s) were changed by another process before they could be written; "
+                + recovered + " stored after a retry, " + (retried - recovered) + " left pending for the next run.";
     }
 
     /**
@@ -972,12 +1000,16 @@ public class ChunkVectorHelper {
      * upgrade path {@link #processBatch(List, boolean)} uses
      * ({@link #extractExistingChunks}) -- never re-chunked and never joined.
      *
+     * <p>A write that loses the CAS race is not given up on at once: see
+     * {@link #storeWithConflictRetry}.</p>
+     *
      * @param id the OpenSearch document {@code _id}
      * @return true if the document was successfully processed, or a
      *         terminal failure was durably recorded (marked failed); false
      *         if the document was not found, had
      *         blank/unchunkable content, the document could not be fetched,
-     *         or a CAS write lost a race to a concurrent recrawl (or, on
+     *         or a CAS write kept losing races to a concurrent writer or the
+     *         document's content changed under it (or, on
      *         persistent write failure, could not even record the failure)
      */
     public boolean processDocument(final String id) {
@@ -1032,15 +1064,16 @@ public class ChunkVectorHelper {
                 vectorMap.put(VECTOR_SUBFIELD, vector);
                 vectorList.add(vectorMap);
             }
-            // Mutate a COPY, never the shared `doc` map read above -- if storeSafely() below
-            // throws (a genuine, non-conflict SearchEngineClientException; see its Javadoc),
-            // the outer catch falls into handleFailure(doc, ...), which must operate on a
-            // document whose content is still exactly as originally fetched. If these
-            // success-path fields were applied to `doc` itself, a document whose
-            // content_chunk_status never reached "done" could still end up with its `content`
-            // permanently overwritten by the chunk array (plus a premature content_chunk_vector)
-            // once handleFailure's own write succeeds.
-            final Map<String, Object> updatedDoc = new HashMap<>(doc);
+            // The fields are applied to a COPY of `doc`, never to the shared `doc` map read
+            // above (storeWithConflictRetry copies it) -- if the store below throws (a genuine,
+            // non-conflict SearchEngineClientException; see storeSafely's Javadoc), the outer
+            // catch falls into handleFailure(doc, ...), which must operate on a document whose
+            // content is still exactly as originally fetched. If these success-path fields were
+            // applied to `doc` itself, a document whose content_chunk_status never reached
+            // "done" could still end up with its `content` permanently overwritten by the chunk
+            // array (plus a premature content_chunk_vector) once handleFailure's own write
+            // succeeds.
+            final Map<String, Object> changes = new HashMap<>();
             // Stored as the native List<String> (not joined into one string): LengthChunker's
             // fixed-character-count splitting has no word-boundary awareness, so a separator
             // joined between chunks would frequently land mid-word. OpenSearch/Elasticsearch
@@ -1051,10 +1084,10 @@ public class ChunkVectorHelper {
             // not the extracted text's character count. Chunking does not change the fetched
             // resource's size, so summing chunk lengths here would corrupt a user-visible value and
             // re-order every sort:content_length query.
-            updatedDoc.put(fessConfig.getIndexFieldContent(), chunks);
-            updatedDoc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
-            updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
-            return storeSafely(searchEngineClient, fessConfig, updatedDoc, id);
+            changes.put(fessConfig.getIndexFieldContent(), chunks);
+            changes.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
+            changes.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
+            return storeWithConflictRetry(searchEngineClient, fessConfig, doc, changes, id);
         } catch (final Exception e) {
             logger.warn("[ChunkVector] Failed to process document. id={}", id, e);
             // handleFailure() performs its own CAS write via storeSafely(); if that write
@@ -1131,7 +1164,8 @@ public class ChunkVectorHelper {
      * embedding call per document. Each document's fetch is still performed individually (only
      * the embed step is batched), and each document's CAS write via {@link #storeSafely} remains
      * fully independent -- a version conflict or write failure for one document never affects the
-     * others in the batch.
+     * others in the batch. A document whose write loses the CAS race is re-read and written again
+     * without being embedded again ({@link #storeWithConflictRetry}).
      *
      * <p>Documents that are not found, have blank content, or produce zero chunks are skipped
      * (recorded {@code false}) exactly as {@link #processDocument(String)} does for a single
@@ -1355,21 +1389,22 @@ public class ChunkVectorHelper {
      * @param fessConfig the fess config
      * @param entry the batch entry (originally-fetched doc + its own chunk list)
      * @return true if the chunk-only write succeeded (or a terminal failure was durably
-     *         recorded); false if it lost a CAS race or even the failure write failed
+     *         recorded); false if it kept losing CAS races (see {@link #storeWithConflictRetry})
+     *         or even the failure write failed
      */
     private boolean storeChunkOnlyDocument(final SearchEngineClient searchEngineClient, final FessConfig fessConfig,
             final BatchEntry entry) {
         try {
-            final Map<String, Object> updatedDoc = new HashMap<>(entry.doc);
+            final Map<String, Object> changes = new HashMap<>();
             // content_length is deliberately NOT recomputed here: it holds the crawled resource's
             // BYTE size (AbstractFessFileTransformer / FessXpathTransformer write
             // responseData.getContentLength()) and is rendered as a file size by fe:formatFileSize,
             // not the extracted text's character count. Chunking does not change the fetched
             // resource's size, so summing chunk lengths here would corrupt a user-visible value and
             // re-order every sort:content_length query.
-            updatedDoc.put(fessConfig.getIndexFieldContent(), entry.chunks);
-            updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
-            return storeSafely(searchEngineClient, fessConfig, updatedDoc, entry.id);
+            changes.put(fessConfig.getIndexFieldContent(), entry.chunks);
+            changes.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.CHUNKED);
+            return storeWithConflictRetry(searchEngineClient, fessConfig, entry.doc, changes, entry.id);
         } catch (final Exception e) {
             logger.warn("[ChunkVector] Failed to store chunk-only document. id={}", entry.id, e);
             return recordFailure(searchEngineClient, fessConfig, entry, false, e);
@@ -1433,7 +1468,8 @@ public class ChunkVectorHelper {
      * @param fessConfig the fess config
      * @param entry the batch entry (originally-fetched doc + its own chunk list)
      * @param vectors this document's embedding vectors, in chunk order
-     * @return true if the CAS write succeeded; false if it lost a CAS race
+     * @return true if the CAS write succeeded; false if it kept losing CAS races (see
+     *         {@link #storeWithConflictRetry})
      */
     private boolean storeChunkedDocument(final SearchEngineClient searchEngineClient, final FessConfig fessConfig, final BatchEntry entry,
             final List<float[]> vectors) {
@@ -1444,19 +1480,20 @@ public class ChunkVectorHelper {
             vectorMap.put(VECTOR_SUBFIELD, vector);
             vectorList.add(vectorMap);
         }
-        // Mutate a COPY, never the shared entry.doc map -- see processDocument()'s identical rationale
-        // for why the failure path must operate on the original fetch.
-        final Map<String, Object> updatedDoc = new HashMap<>(entry.doc);
+        // The fields are applied to a COPY, never to the shared entry.doc map (storeWithConflictRetry
+        // copies it) -- see processDocument()'s identical rationale for why the failure path must
+        // operate on the original fetch.
+        final Map<String, Object> changes = new HashMap<>();
         // content_length is deliberately NOT recomputed here: it holds the crawled resource's
         // BYTE size (AbstractFessFileTransformer / FessXpathTransformer write
         // responseData.getContentLength()) and is rendered as a file size by fe:formatFileSize,
         // not the extracted text's character count. Chunking does not change the fetched
         // resource's size, so summing chunk lengths here would corrupt a user-visible value and
         // re-order every sort:content_length query.
-        updatedDoc.put(fessConfig.getIndexFieldContent(), entry.chunks);
-        updatedDoc.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
-        updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
-        return storeSafely(searchEngineClient, fessConfig, updatedDoc, entry.id);
+        changes.put(fessConfig.getIndexFieldContent(), entry.chunks);
+        changes.put(Constants.CONTENT_CHUNK_VECTOR_FIELD, vectorList);
+        changes.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.DONE);
+        return storeWithConflictRetry(searchEngineClient, fessConfig, entry.doc, changes, entry.id);
     }
 
     /**
@@ -1760,6 +1797,115 @@ public class ChunkVectorHelper {
             }
             return false;
         }
+    }
+
+    /**
+     * Writes {@code changes} onto the document read as {@code fetched}, and when that write loses
+     * the compare-and-set race to another writer, re-reads the document and writes the same
+     * changes onto what is there now, up to {@link #MAX_CONFLICT_RETRIES} times.
+     *
+     * <p>The write is conditional on the {@code _seq_no}/{@code _primary_term} of the version it was
+     * built from, which is what keeps it from overwriting a concurrent update. Between the read and
+     * the write lies the embedding call, long enough for another job to touch the document -- the
+     * thumbnail generator updates a document in place, a crawl replaces it -- and a document that
+     * lost that race used to stay without vectors until the next scheduled run, while the job still
+     * ended as a success.</p>
+     *
+     * <p>The chunks and vectors depend on the document's content and nothing else, so a retry
+     * reuses them instead of embedding again, provided the document still holds the content (and
+     * the same {@code content_chunk_status}) they were built from. The retry is built from the
+     * document as it is now, so what the other writer changed is kept, and it is conditional on
+     * the version just read, so a second writer is detected the same way as the first. A document
+     * whose content changed, that was deleted, or that cannot be re-read is not written: its
+     * vectors would describe content it no longer has, or there is nothing to write them to, and it
+     * stays pending for the next run, which chunks what is there then. A document that keeps
+     * changing is left pending after {@link #MAX_CONFLICT_RETRIES} retries.</p>
+     *
+     * <p>Only the writes that give a document its chunk fields retry. Marking a document skipped or
+     * failed ({@link #markSkipped}, {@link #handleFailure}) still treats a lost race as a skip: those
+     * documents have no vectors to lose, and the next run re-evaluates them.</p>
+     *
+     * @param searchEngineClient the search engine client
+     * @param fessConfig the fess config
+     * @param fetched the document map as it was read before chunking (carries
+     *            {@code _seq_no}/{@code _primary_term}); never modified
+     * @param changes the fields to set on the document: its chunk fields and status
+     * @param id the document ID
+     * @return true if the document was written, on the first attempt or on a retry; false if it
+     *         was left pending
+     * @throws SearchEngineClientException if a write failed for a reason other than a version conflict
+     */
+    protected boolean storeWithConflictRetry(final SearchEngineClient searchEngineClient, final FessConfig fessConfig,
+            final Map<String, Object> fetched, final Map<String, Object> changes, final String id) {
+        Map<String, Object> base = fetched;
+        for (int retries = 0;; retries++) {
+            // store() consumes the map it is given (it strips the id and the sequence numbers from
+            // it), so every attempt writes a copy and the document it was built from stays intact.
+            final Map<String, Object> updatedDoc = new HashMap<>(base);
+            updatedDoc.putAll(changes);
+            if (storeSafely(searchEngineClient, fessConfig, updatedDoc, id)) {
+                if (retries > 0) {
+                    conflictRecovered.incrementAndGet();
+                    if (logger.isInfoEnabled()) {
+                        logger.info("[ChunkVector] Stored after retrying a concurrent update. id={}, retries={}", id, retries);
+                    }
+                }
+                return true;
+            }
+            if (retries == 0) {
+                conflictRetried.incrementAndGet();
+            }
+            if (retries >= MAX_CONFLICT_RETRIES) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("[ChunkVector] Still changing after {} retries; leaving the document pending for the next run. id={}",
+                            MAX_CONFLICT_RETRIES, id);
+                }
+                return false;
+            }
+            base = rereadUnlessContentChanged(searchEngineClient, fessConfig, fetched, id);
+            if (base == null) {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Re-reads a document that lost a compare-and-set race, for {@link #storeWithConflictRetry}.
+     *
+     * @param searchEngineClient the search engine client
+     * @param fessConfig the fess config
+     * @param fetched the document as it was first read, which the chunks and vectors were built from
+     * @param id the document ID
+     * @return the document as it is now, with the {@code _seq_no}/{@code _primary_term} to write
+     *         against; null if it cannot be written to (it cannot be read, no longer exists, or no
+     *         longer holds the content and status the chunks were built from)
+     */
+    private Map<String, Object> rereadUnlessContentChanged(final SearchEngineClient searchEngineClient, final FessConfig fessConfig,
+            final Map<String, Object> fetched, final String id) {
+        final Map<String, Object> current;
+        try {
+            current = fetchDocument(searchEngineClient, fessConfig, id);
+        } catch (final Exception e) {
+            // Not routed into handleFailure: a read that failed says nothing about the document, and
+            // marking it failed would take it out of every later run.
+            logger.warn("[ChunkVector] Failed to re-read a document changed by a concurrent update, leaving it pending. id={}", id, e);
+            return null;
+        }
+        if (current == null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("[ChunkVector] Document no longer exists after a concurrent update, skipping. id={}", id);
+            }
+            return null;
+        }
+        final String contentField = fessConfig.getIndexFieldContent();
+        if (!Objects.equals(fetched.get(contentField), current.get(contentField))
+                || !Objects.equals(fetched.get(Constants.CONTENT_CHUNK_STATUS_FIELD), current.get(Constants.CONTENT_CHUNK_STATUS_FIELD))) {
+            if (logger.isInfoEnabled()) {
+                logger.info("[ChunkVector] Content or chunk status changed during processing, leaving the document pending. id={}", id);
+            }
+            return null;
+        }
+        return current;
     }
 
     /**
