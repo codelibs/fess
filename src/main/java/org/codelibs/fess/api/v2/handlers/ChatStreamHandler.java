@@ -36,6 +36,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
@@ -75,8 +76,12 @@ import jakarta.servlet.http.HttpServletResponse;
  *   <li>{@code event: error} — {@code {phase?, message, error_code}}</li>
  * </ul>
  *
+ * <p>A body {@code doc_id} scopes the chat to that one document
+ * ({@link ChatClient#streamChatAboutDocument}); the phases are then {@code fetch} (loading the document and, for a
+ * long one, summarizing its parts) and {@code answer}.</p>
+ *
  * <p>Error reporting <em>before</em> the LLM is invoked (method check, feature gate,
- * body parse, rate limit) uses {@link V2EnvelopeWriter#writeError} so the HTTP status
+ * body parse, rate limit, document lookup) uses {@link V2EnvelopeWriter#writeError} so the HTTP status
  * and {@code Content-Type: application/json} are correct. Only after all gates pass are
  * SSE headers set; subsequent LLM-level errors are reported via {@code event: error}
  * SSE events, consistent with v1 behaviour the static theme JS parser depends on.</p>
@@ -260,6 +265,21 @@ public class ChatStreamHandler {
             return;
         }
 
+        // A document chat needs a document the caller may see. This is a gate like the others: it
+        // runs before any SSE header is written so a missing document is a plain 404 JSON envelope.
+        final String docId = body.docId();
+        if (docId != null) {
+            try {
+                if (!documentExists(docId)) {
+                    ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+                    return;
+                }
+            } catch (final RuntimeException e) {
+                ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/chat/stream doc_id=" + docId);
+                return;
+            }
+        }
+
         // --- All gates passed: now commit to SSE framing. ---
         // Acquire the writer exactly once. The servlet container manages its lifecycle for
         // the duration of the request; using try-with-resources here would prematurely close
@@ -288,11 +308,15 @@ public class ChatStreamHandler {
             final ChatPhaseCallback phaseCallback = newPhaseCallback(writer, errorEmittedHolder, writeLock);
 
             final ChatResult result;
-            if (body.fields().isEmpty() && body.extraQueries().length == 0) {
-                result = ComponentUtil.getChatClient().streamChatEnhanced(body.sessionId(), body.message(), userId, phaseCallback);
+            final ChatClient chatClient = getChatClient();
+            if (docId != null) {
+                // fields and extra_queries are ignored: the answer comes from this one document only.
+                result = chatClient.streamChatAboutDocument(body.sessionId(), body.message(), userId, docId, phaseCallback);
+            } else if (body.fields().isEmpty() && body.extraQueries().length == 0) {
+                result = chatClient.streamChatEnhanced(body.sessionId(), body.message(), userId, phaseCallback);
             } else {
-                result = ComponentUtil.getChatClient()
-                        .streamChatEnhanced(body.sessionId(), body.message(), userId, body.fields(), body.extraQueries(), phaseCallback);
+                result = chatClient.streamChatEnhanced(body.sessionId(), body.message(), userId, body.fields(), body.extraQueries(),
+                        phaseCallback);
             }
 
             final List<ChatSource> sources = result.getMessage().getSources();
@@ -365,6 +389,27 @@ public class ChatStreamHandler {
         final String username = ComponentUtil.getSystemHelper().getUsername();
         return ComponentUtil.getChatApiHelper()
                 .resolveChatRateLimitKey(username, () -> ComponentUtil.getRateLimitHelper().getClientIp(req));
+    }
+
+    /**
+     * Checks that the document of a document chat exists and is visible to the caller. Exposed as a
+     * seam so unit tests can decide the outcome without a search engine.
+     *
+     * @param docId the validated document id
+     * @return true if the document exists and the caller may see it
+     */
+    protected boolean documentExists(final String docId) {
+        return ComponentUtil.getChatApiHelper().existsDocument(docId);
+    }
+
+    /**
+     * Resolves the RAG {@link ChatClient}. Exposed as a seam so unit tests can substitute a stub
+     * without registering into the DI container (same rationale as {@link #getUserId}).
+     *
+     * @return the chat client component (never null in production)
+     */
+    protected ChatClient getChatClient() {
+        return ComponentUtil.getChatClient();
     }
 
     /**
@@ -490,6 +535,21 @@ public class ChatStreamHandler {
     }
 
     /**
+     * Throws {@link ClientDisconnectedException} when the client has closed the connection.
+     * {@link PrintWriter#checkError()} flips to true once the underlying stream has failed.
+     *
+     * @param writer the SSE writer
+     */
+    protected void abortIfClientDisconnected(final PrintWriter writer) {
+        if (writer.checkError()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[v2/chat/stream] client disconnected; aborting emission");
+            }
+            throw new ClientDisconnectedException();
+        }
+    }
+
+    /**
      * Builds a {@link ChatPhaseCallback} that emits SSE events with snake_case keys.
      * The supplied {@code errorEmittedHolder} flag is set whenever onError is
      * invoked so the surrounding handler can avoid double-emitting an error
@@ -511,6 +571,10 @@ public class ChatStreamHandler {
 
             @Override
             public void onPhaseStart(final String phase, final String message, final String keywords) {
+                // A phase can start a long run of LLM calls without any chunk in between
+                // (e.g. the part summaries of a long document), so check for a closed
+                // client here as well as in onChunk.
+                abortIfClientDisconnected(writer);
                 final Map<String, Object> data = new HashMap<>();
                 data.put("phase", phase);
                 data.put("status", "start");
@@ -547,12 +611,7 @@ public class ChatStreamHandler {
                 // when the underlying stream has encountered an error (typically because
                 // the client closed the TCP connection mid-stream). Abort the emission
                 // loop early rather than keep generating tokens into a dead socket.
-                if (writer.checkError()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("[v2/chat/stream] client disconnected; aborting emission");
-                    }
-                    throw new ClientDisconnectedException();
-                }
+                abortIfClientDisconnected(writer);
                 if (content != null && !content.isEmpty()) {
                     emitSafely(writer, "chunk", Map.of("content", content), writeLock);
                 }

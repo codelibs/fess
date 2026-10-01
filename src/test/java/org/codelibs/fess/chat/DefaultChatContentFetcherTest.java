@@ -201,6 +201,57 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         assertEquals("content_chunker.chat.top_k", DefaultChatContentFetcher.CHAT_TOP_K_PROPERTY);
     }
 
+    // ===================================================================================
+    //                                                                  fetchWholeDocument
+    //                                                                  ==================
+
+    @Test
+    public void test_fetchWholeDocument_returnsTheFullTextUntruncated() {
+        final TestableFetcher f = new TestableFetcher();
+        f.fullContent = "x".repeat(10000); // far beyond the 3000 fulltext threshold
+
+        final java.util.Optional<Map<String, Object>> doc = f.fetchWholeDocument("a");
+
+        assertTrue(doc.isPresent());
+        assertEquals("x".repeat(10000), doc.get().get("content"));
+        assertEquals(List.of("a"), f.fullCalledWith);
+        assertTrue(f.highlightCalledWith.isEmpty(), "no highlight search for a whole-document fetch");
+    }
+
+    @Test
+    public void test_fetchWholeDocument_keepsAChunkedDocumentAsItsChunkList() {
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        final List<String> chunks = List.of("c".repeat(2000), "d".repeat(2000), "e".repeat(2000));
+        f.fullResult = List.of(chunkedDoc("a", chunks, null));
+
+        final Map<String, Object> doc = f.fetchWholeDocument("a").get();
+
+        assertEquals(chunks, doc.get("content"));
+        assertEquals(Constants.DONE, doc.get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+    }
+
+    @Test
+    public void test_fetchWholeDocument_missingDocumentIsEmpty() {
+        final TestableFetcher f = new TestableFetcher();
+        f.fullResult = List.of();
+
+        assertTrue(f.fetchWholeDocument("a").isEmpty());
+    }
+
+    @Test
+    public void test_fetchContent_stillBoundsAChunkedDocumentWhereTheWholeDocumentFetchDoesNot() {
+        // The contrast that motivates fetchWholeDocument: the regular path joins and truncates the chunks.
+        final TestableFetcher f = new TestableFetcher();
+        f.contentChunkerEnabledOverride = true;
+        f.fullResult = List.of(chunkedDoc("a", List.of("c".repeat(2000), "d".repeat(2000), "e".repeat(2000)), null));
+
+        final List<Map<String, Object>> docs = f.fetchContent(new ChatContentRequest(List.of("a"), List.of(), null));
+
+        assertEquals(1, docs.size());
+        assertEquals(3000, docs.get(0).get("content").toString().length());
+    }
+
     @Test
     public void test_decideStrategy_bySize() {
         final TestableFetcher f = new TestableFetcher();

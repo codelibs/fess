@@ -254,6 +254,52 @@ describe("buildResultCard", () => {
     expect(cache.getAttribute("href")).toMatch(/^cache\/\?docId=d3/);
   });
 
+  describe("Ask about this document link", () => {
+    const doc = { doc_id: "d 1", title: "Doc <One>", url: "https://e.com/1" };
+
+    it("is shown only when chat is enabled", () => {
+      api.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+      const on = buildResultCard(doc, "q", 1).querySelector("a.ask-document");
+      expect(on).not.toBeNull();
+      expect(on.textContent).toBe("result.ask_document");
+      expect(on.getAttribute("href")).toBe("chat?doc_id=d%201");
+      expect(on.getAttribute("aria-label")).toBe("result.ask_document - Doc <One>");
+
+      api.getConfig.mockReturnValue({ features: { rag_chat_enabled: false } });
+      expect(buildResultCard(doc, "q", 1).querySelector("a.ask-document")).toBeNull();
+      api.getConfig.mockReturnValue({ features: {} });
+      expect(buildResultCard(doc, "q", 1).querySelector("a.ask-document")).toBeNull();
+    });
+
+    it("is omitted for a result without a doc_id", () => {
+      api.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+      const li = buildResultCard({ title: "T", url: "https://e.com" }, "q", 1);
+      expect(li.querySelector("a.ask-document")).toBeNull();
+    });
+
+    it("a plain click navigates to /chat with the encoded doc_id and the title as state", () => {
+      api.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+      const a = buildResultCard(doc, "q", 1).querySelector("a.ask-document");
+      const ev = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+      a.dispatchEvent(ev);
+      expect(ev.defaultPrevented).toBe(true);
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith("chat?doc_id=d%201", { state: { docTitle: "Doc <One>" } });
+    });
+
+    it("leaves a modified click to the browser (new tab / window)", () => {
+      api.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+      const a = buildResultCard(doc, "q", 1).querySelector("a.ask-document");
+      document.body.appendChild(a);
+      // Observe at the document, then cancel there so jsdom does not attempt a page load.
+      let handledByLink = null;
+      document.addEventListener("click", e => { handledByLink = e.defaultPrevented; e.preventDefault(); }, { once: true });
+      a.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0, ctrlKey: true }));
+      expect(handledByLink).toBe(false);
+      expect(navigate).not.toHaveBeenCalled();
+    });
+  });
+
   it("shows the view count between the size and the cache link while search logging is on", () => {
     api.getConfig.mockReturnValue({ features: { search_log_enabled: true } });
     const li = buildResultCard(

@@ -2087,6 +2087,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5 */
     String RAG_CHAT_HISTORY_TITLES_MAX_COUNT = "rag.chat.history.titles.max.count";
 
+    /** The key of the configuration. e.g. 10 */
+    String RAG_CHAT_DOCUMENT_MAX_PARTS = "rag.chat.document.max.parts";
+
     /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
 
@@ -10066,6 +10069,29 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagChatHistoryTitlesMaxCountAsInteger();
 
     /**
+     * Get the value for the key 'rag.chat.document.max.parts'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: <br>
+     * Maximum number of parts a document is split into when chatting about a single document longer than the LLM context budget.<br>
+     * Each part is summarized separately and the summaries are combined into the answer; parts beyond this number are not used.<br>
+     * A request about such a document makes up to this many LLM calls plus one for the answer, on every turn.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatDocumentMaxParts();
+
+    /**
+     * Get the value for the key 'rag.chat.document.max.parts' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: <br>
+     * Maximum number of parts a document is split into when chatting about a single document longer than the LLM context budget.<br>
+     * Each part is summarized separately and the summaries are combined into the answer; parts beyond this number are not used.<br>
+     * A request about such a document makes up to this many LLM calls plus one for the answer, on every turn.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatDocumentMaxPartsAsInteger();
+
+    /**
      * Get the value for the key 'index.export.path'. <br>
      * The value is, e.g. /var/lib/fess/export <br>
      * comment: Index Export
@@ -14137,6 +14163,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT);
         }
 
+        public String getRagChatDocumentMaxParts() {
+            return get(FessConfig.RAG_CHAT_DOCUMENT_MAX_PARTS);
+        }
+
+        public Integer getRagChatDocumentMaxPartsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_DOCUMENT_MAX_PARTS);
+        }
+
         public String getIndexExportPath() {
             return get(FessConfig.INDEX_EXPORT_PATH);
         }
@@ -14949,6 +14983,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_ANSWER_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "5");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT, "smart_summary");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT, "5");
+            defaultMap.put(FessConfig.RAG_CHAT_DOCUMENT_MAX_PARTS, "10");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");

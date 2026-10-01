@@ -714,6 +714,15 @@ paths:
         Invalid values supplied in `fields.label` or `extra_queries` are
         dropped silently from the resolved request — they are not surfaced to
         the caller in the response envelope.
+
+        With `doc_id`, the answer is generated from that one document only
+        (`fields` and `extra_queries` are ignored) and `sources` holds just
+        that document. An unknown `doc_id`, or one the caller is not allowed
+        to see, returns `not_found` (HTTP 404). The client sends `doc_id` on
+        every turn of the conversation. A document longer than
+        `rag.chat.document.max.parts` parts is answered from its leading
+        parts only; this endpoint does not report that (the streaming
+        endpoint sends a `document_truncated` warning).
       operationId: chatV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -733,6 +742,7 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
@@ -772,6 +782,20 @@ paths:
         Invalid values supplied in `fields.label` or `extra_queries` are
         dropped silently from the resolved request — they are not surfaced to
         the caller in the response envelope or in any SSE event.
+
+        With `doc_id`, the answer is generated from that one document only
+        (`fields` and `extra_queries` are ignored). An unknown `doc_id`, or
+        one the caller is not allowed to see, returns `not_found` (HTTP 404)
+        as a JSON envelope before the stream starts. The `phase` events are
+        then `fetch` (loading the document; for a document longer than the
+        model context, once more per part while the parts are summarized) and
+        `answer`, followed by `sources` with the single document. For such a
+        long document, the `complete` event of the loading step carries
+        `parts` (the number of parts) and each part's `complete` event
+        carries `part` and `parts`. When the
+        document needs more parts than `rag.chat.document.max.parts`, a
+        `warning` event with `code` `document_truncated` reports that only the
+        leading part of the document was used.
       operationId: chatStreamV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -800,6 +824,7 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
@@ -1805,6 +1830,16 @@ components:
           type: string
           maxLength: 100
           pattern: '^[A-Za-z0-9._-]+$'
+        doc_id:
+          type: string
+          maxLength: 512
+          pattern: '^[A-Za-z0-9_-]+$'
+          description: |-
+            Chat about this one document: the answer is generated from its
+            content only, with no search. The caller must be allowed to see
+            the document; otherwise the request fails with `not_found`
+            (HTTP 404). `fields` and `extra_queries` are ignored. Absent or
+            blank means a normal chat over search results.
         fields:
           type: object
           description: Optional filter fields for the retrieval step.

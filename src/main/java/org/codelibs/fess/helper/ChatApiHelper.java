@@ -36,6 +36,7 @@ import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 /**
  * Shared utilities for v2 chat API handlers.
@@ -196,6 +197,7 @@ public class ChatApiHelper {
      * @throws ChatRequestBody.InvalidSessionIdException if {@code session_id} exceeds 100 characters or contains invalid characters
      * @throws ChatRequestBody.MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
      * @throws ChatRequestBody.TooManyValuesException if {@code extra_queries} or {@code fields.label} exceeds the count or per-element length limit
+     * @throws ChatRequestBody.InvalidRequestException if {@code doc_id} is not a valid document id
      * @throws IOException if validation reports an unrecoverable error
      */
     public ChatRequestBody parseRequestBody(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
@@ -215,7 +217,24 @@ public class ChatApiHelper {
         final Map<String, List<String>> warnings = new HashMap<>();
         final Map<String, String[]> fields = parseFieldFilters(raw, warnings);
         final String[] extraQueries = parseExtraQueries(raw, warnings);
-        return new ChatRequestBody(message, sessionId, fields, extraQueries, warnings);
+        final String docId = trimmedOrNull(raw.get("doc_id"));
+        if (docId != null && !ComponentUtil.getV2DocIdValidator().isValid(docId)) {
+            throw new ChatRequestBody.InvalidRequestException("invalid doc_id");
+        }
+        return new ChatRequestBody(message, sessionId, fields, extraQueries, docId, warnings);
+    }
+
+    /**
+     * Checks that a document exists and is visible to the caller. The lookup is filtered by the
+     * caller's roles, so a document the caller may not see is reported as missing.
+     *
+     * @param docId the validated document id
+     * @return true if the document exists and the caller may see it
+     */
+    public boolean existsDocument(final String docId) {
+        return ComponentUtil.getSearchHelper()
+                .getDocumentByDocId(docId, new String[] { ComponentUtil.getFessConfig().getIndexFieldDocId() }, OptionalThing.empty())
+                .isPresent();
     }
 
     /**

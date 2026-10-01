@@ -15,8 +15,10 @@
  */
 package org.codelibs.fess.chat;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Resolves the content of relevant documents for the LLM answer context.
@@ -37,4 +39,20 @@ public interface ChatContentFetcher {
      *         each with the {@code content} field set to the text to send to the LLM
      */
     List<Map<String, Object>> fetchContent(ChatContentRequest request);
+
+    /**
+     * Fetches the complete content of one document, for chatting about that document alone. Unlike
+     * {@link #fetchContent}, nothing is selected by query and the content is not truncated: the
+     * {@code content} field is the list of chunk texts for a chunked document and the whole text
+     * otherwise.
+     *
+     * <p>The default implementation resolves the document through {@link #fetchContent} without a
+     * query; override it when that applies a length limit.</p>
+     *
+     * @param docId the document id
+     * @return the document map, or empty if the document does not exist or is not visible to the caller
+     */
+    default Optional<Map<String, Object>> fetchWholeDocument(final String docId) {
+        return fetchContent(new ChatContentRequest(List.of(docId), Collections.emptyList(), null)).stream().findFirst();
+    }
 }

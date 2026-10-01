@@ -165,6 +165,26 @@ public interface LlmClient {
             LlmStreamCallback callback);
 
     /**
+     * Summarizes one part of a document that is too long to be sent to the LLM in a single request.
+     * The call is synchronous (non-streaming); the caller combines the part summaries and asks for
+     * the final answer with {@link #generateSummaryResponse}.
+     *
+     * @param userMessage the user's request the summary has to serve
+     * @param title the document title (may be null)
+     * @param url the document URL (may be null)
+     * @param partText the text of this part; it must fit {@link #getSummaryContextMaxChars()}
+     * @param partIndex the 1-based index of this part
+     * @param partCount the total number of parts
+     * @param maxChars the length, in characters, the summary is asked to stay within
+     * @return the summary of this part
+     * @throws LlmException if the LLM request fails
+     */
+    default String summarizeDocumentPart(final String userMessage, final String title, final String url, final String partText,
+            final int partIndex, final int partCount, final int maxChars) {
+        throw new LlmException("summarizeDocumentPart is not supported by " + getName());
+    }
+
+    /**
      * Generates an FAQ answer using document content (streaming).
      * Uses a prompt optimized for direct, concise FAQ-style answers.
      *
@@ -184,6 +204,16 @@ public interface LlmClient {
      * @param callback the streaming callback
      */
     void generateDirectAnswer(String userMessage, List<LlmMessage> history, LlmStreamCallback callback);
+
+    /**
+     * Gets the maximum number of characters of document text that
+     * {@link #generateSummaryResponse} places into one request. Longer documents are cut off there.
+     *
+     * @return the maximum characters; {@link Integer#MAX_VALUE} when the client declares no limit
+     */
+    default int getSummaryContextMaxChars() {
+        return Integer.MAX_VALUE;
+    }
 
     /**
      * Gets the maximum characters for assistant message in history.

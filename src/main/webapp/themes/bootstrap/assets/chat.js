@@ -24,6 +24,13 @@ let sessionId = null;
 /** Whether the standalone view has been mounted at least once. */
 let standaloneMounted = false;
 
+/**
+ * Set by the mounted standalone view: applies the document context ({ id, title }) read
+ * from the current location, so a re-entry on /chat with another document (or none)
+ * switches the conversation instead of keeping the one that was built on first mount.
+ */
+let applyDocumentContext = null;
+
 // ---------------------------------------------------------------------------
 // Utility helpers
 // ---------------------------------------------------------------------------
@@ -743,6 +750,9 @@ function submitQuestion(question, uiRefs) {
   if (!question) return;
 
   const { log, phaseStrip, statusLozenge, errorBanner, inputEl, submitEl, emptyState, getFilters, progressMessageEl } = uiRefs;
+  // Document mode ("Ask about this document"): the server is stateless about it, so the
+  // doc_id goes out on every turn.
+  const docId = uiRefs.getDocId ? uiRefs.getDocId() : "";
 
   // Hide welcome state
   if (emptyState) emptyState.hidden = true;
@@ -767,16 +777,26 @@ function submitQuestion(question, uiRefs) {
     currentStream = null;
   }
 
-  // Build request body per v2 contract: message / session_id / fields.label / extra_queries
-  const filters = getFilters ? getFilters() : { fields: [], extraQ: [] };
+  // Build request body per v2 contract: message / session_id / fields.label / extra_queries,
+  // or message / session_id / doc_id in document mode (the server ignores the filters there,
+  // so they are not sent).
   const body = { message: question };
   if (sessionId) body.session_id = sessionId;
-  if (filters.fields.length > 0) body.fields = { label: filters.fields.slice() };
-  if (filters.extraQ.length > 0) body.extra_queries = filters.extraQ.slice();
+  if (docId) {
+    body.doc_id = docId;
+  } else {
+    const filters = getFilters ? getFilters() : { fields: [], extraQ: [] };
+    if (filters.fields.length > 0) body.fields = { label: filters.fields.slice() };
+    if (filters.extraQ.length > 0) body.extra_queries = filters.extraQ.slice();
+  }
 
   let mdBuffer = "";
   let deltaCleared = false;
   let activeBubble = assistantBubbleCtx;
+  // A long document is summarized part by part in the fetch phase. The fetch
+  // completions report the part count (`parts`) and the part just finished (`part`).
+  let docParts = 0;
+  let docPartsDone = 0;
 
   function onEvent({ type, data }) {
     if (type === "phase") {
@@ -785,6 +805,10 @@ function submitQuestion(question, uiRefs) {
       const hitCount = data && data.hit_count;
       if (phase) {
         if (status === "complete") {
+          if (phase === "fetch" && data && Number(data.parts) > 0) {
+            docParts = Number(data.parts);
+            docPartsDone = Number(data.part) || 0;
+          }
           phaseStrip.complete(phase, hitCount);
         } else {
           phaseStrip.advanceTo(phase);
@@ -794,9 +818,15 @@ function submitQuestion(question, uiRefs) {
             progressMessageEl.classList.remove("d-none");
             // #6 (parity js/chat.js:496-500): only substitute {0} when the server sent
             // data.keywords (search phase). Other phases render their label as-is.
-            progressMessageEl.textContent = (data && data.keywords)
-              ? t("labels.chat_phase_" + phase, [data.keywords])
-              : t("labels.chat_phase_" + phase);
+            // A long document is read in several steps; show which part is being summarized
+            // instead of repeating the label.
+            if (docId && phase === "fetch" && docParts > 0 && docPartsDone < docParts) {
+              progressMessageEl.textContent = t("labels.chat_phase_fetch_part", [docPartsDone + 1, docParts]);
+            } else {
+              progressMessageEl.textContent = (data && data.keywords)
+                ? t("labels.chat_phase_" + phase, [data.keywords])
+                : t("labels.chat_phase_" + phase);
+            }
           }
         }
       }
@@ -817,7 +847,14 @@ function submitQuestion(question, uiRefs) {
 
     if (type === "sources") {
       const sources = data && (data.sources || data);
-      if (Array.isArray(sources)) activeBubble.appendSources(sources);
+      if (Array.isArray(sources)) {
+        activeBubble.appendSources(sources);
+        // Reload / shared link: no title came with the navigation, so take the one the
+        // server reports for the document.
+        if (docId && uiRefs.onDocumentTitle && sources[0] && typeof sources[0].title === "string") {
+          uiRefs.onDocumentTitle(sources[0].title);
+        }
+      }
       return;
     }
 
@@ -894,6 +931,12 @@ function submitQuestion(question, uiRefs) {
       const code = data && data.code;
       if (code === "reasoning_token_exhausted" || code === "token_exhausted") {
         activeBubble.setStatusLine(t("labels.chat_warning_token_exhausted"));
+      } else if (docId && /trunc/i.test(String(code || ""))) {
+        // Document mode: only the leading part of a very long document was used.
+        activeBubble.setStatusLine(t("labels.chat_warning_document_truncated"));
+      } else {
+        // Any other warning is shown too rather than dropped silently.
+        activeBubble.setStatusLine(t("labels.chat_warning_generic"));
       }
       return;
     }
@@ -921,7 +964,16 @@ function submitQuestion(question, uiRefs) {
     if (inputEl) inputEl.disabled = false;
     if (submitEl) submitEl.disabled = false;
     statusLozenge.setStatus("error");
-    const msg = (err && err.name === "NetworkError") ? t("error.network") : t("error.server");
+    let msg;
+    if (err && err.name === "NetworkError") {
+      msg = t("error.network");
+    } else if (docId && err && err.httpStatus === 404) {
+      // Document mode: the server answers 404 before streaming when the document is gone
+      // or the user may not see it.
+      msg = t("labels.chat_document_unavailable");
+    } else {
+      msg = t("error.server");
+    }
     errorBanner.show(msg);
     // #D (parity js/chat.js:646-651): remove the assistant bubble, show banner only.
     if (activeBubble && activeBubble.wrap) activeBubble.wrap.remove();
@@ -1077,6 +1129,20 @@ export function attach() {
 // ---------------------------------------------------------------------------
 
 /**
+ * The document the chat route is asked to be about: `doc_id` in the query string (so a
+ * reload or back/forward keeps it) and the display title the result card left in the
+ * history state. The title is optional and only ever rendered as text.
+ *
+ * @returns {{ id: string, title: string }}
+ */
+function readDocumentContext() {
+  const id = (new URLSearchParams(location.search).get("doc_id") || "").trim();
+  const st = history.state;
+  const title = id && st && typeof st.docTitle === "string" ? st.docTitle : "";
+  return { id, title };
+}
+
+/**
  * Mount or re-show the standalone chat UI in #chat-view.
  * Lazy-mounts on first call; subsequent calls re-show without rebuilding.
  */
@@ -1097,7 +1163,12 @@ export function attachStandalone() {
 
   container.removeAttribute("hidden");
 
-  if (standaloneMounted) return; // already built — just re-show
+  const documentContext = readDocumentContext();
+  if (standaloneMounted) {
+    // Already built — just re-show, switching the conversation if the document changed.
+    if (applyDocumentContext) applyDocumentContext(documentContext);
+    return;
+  }
   standaloneMounted = true;
 
   const cfg = api.getConfig();
@@ -1207,6 +1278,25 @@ export function attachStandalone() {
 
   let lastQuestion = "";
 
+  // Document mode state: set while the conversation is about one search result.
+  let docId = "";
+  let docTitle = "";
+
+  // "Asking about: <title>" banner with a clear control (hidden outside document mode).
+  const docBanner = el("div", {
+    className: "chat-doc-banner alert alert-info d-none align-items-center py-1 px-2 mb-2",
+    attrs: { role: "status" }
+  });
+  docBanner.appendChild(el("i", { className: "fa fa-file-text-o me-2", attrs: { "aria-hidden": "true" } }));
+  const docBannerText = el("span", { className: "flex-grow-1 text-truncate" });
+  docBanner.appendChild(docBannerText);
+  const docClearBtn = el("button", {
+    className: "btn-close ms-2",
+    attrs: { type: "button", "aria-label": t("labels.chat_document_clear") }
+  });
+  docBanner.appendChild(docClearBtn);
+  cardFooter.appendChild(docBanner);
+
   const { banner: errorBannerEl, show: showError, hide: hideError } = buildErrorBanner(() => {
     if (lastQuestion) doSubmit(lastQuestion);
   });
@@ -1267,8 +1357,33 @@ export function attachStandalone() {
     submitEl: sendBtn,
     emptyState,
     getFilters,
-    progressMessageEl
+    progressMessageEl,
+    getDocId: () => docId,
+    onDocumentTitle: title => {
+      if (docId && !docTitle && title) {
+        docTitle = title;
+        renderDocBanner();
+      }
+    }
   };
+
+  // Show or hide the document banner (title as text only) and the label filters, which
+  // the server ignores in document mode.
+  function renderDocBanner() {
+    const active = !!docId;
+    if (active) {
+      const text = t("labels.chat_document_banner", { title: docTitle || t("labels.chat_document_untitled") });
+      docBannerText.textContent = text;
+      docBanner.setAttribute("title", text);
+    } else {
+      docBannerText.textContent = "";
+      docBanner.removeAttribute("title");
+    }
+    docBanner.classList.toggle("d-none", !active);
+    docBanner.classList.toggle("d-flex", active);
+    filterToggleBtn.classList.toggle("d-none", active);
+    filterPanel.classList.toggle("d-none", active);
+  }
 
   function doSubmit(q) {
     if (!q) return;
@@ -1329,22 +1444,26 @@ export function attachStandalone() {
     }
   });
 
-  // New Chat (E.7)
-  newChatBtn.addEventListener("click", async () => {
+  /**
+   * Start a fresh conversation: drop the session and the messages (E.7). The server session
+   * is deleted in the background; the UI and the session id are reset immediately so a
+   * question asked right away cannot join the old session.
+   */
+  function resetConversation() {
     if (currentStream) {
       try { currentStream.abort(); } catch { /* ignore */ }
       currentStream = null;
     }
-    // DELETE session
-    if (sessionId) {
+    const oldSessionId = sessionId;
+    sessionId = null;
+    if (oldSessionId) {
       try {
-        await fetch("api/v2/chat/sessions/" + encodeURIComponent(sessionId), {
+        Promise.resolve(fetch("api/v2/chat/sessions/" + encodeURIComponent(oldSessionId), {
           method: "DELETE",
           credentials: "same-origin",
           headers: { "X-Fess-CSRF-Token": api.getCsrfToken() || "" }
-        });
-      } catch { /* ignore network errors */ }
-      sessionId = null;
+        })).catch(() => { /* ignore network errors */ });
+      } catch { /* ignore */ }
     }
     // Reset UI
     while (chatMessages.firstChild) chatMessages.removeChild(chatMessages.firstChild);
@@ -1363,7 +1482,47 @@ export function attachStandalone() {
     // D5b: clear warning/danger; D5c: reset height
     charCountSpan.classList.remove("warning", "danger");
     textarea.style.height = "auto";
+  }
+
+  /** New chat / banner clear: a fresh session in normal chat, without any document. */
+  function startNewChat() {
+    resetConversation();
+    if (docId) {
+      docId = "";
+      docTitle = "";
+      renderDocBanner();
+      // Drop doc_id from the address so a reload or back/forward stays in normal chat.
+      const url = new URL(location.href);
+      if (url.searchParams.has("doc_id")) {
+        url.searchParams.delete("doc_id");
+        history.replaceState(null, "", url.pathname + url.search + url.hash);
+      }
+    }
+  }
+
+  newChatBtn.addEventListener("click", startNewChat);
+  docClearBtn.addEventListener("click", () => {
+    startNewChat();
+    textarea.focus();
   });
+
+  // Route (re-)entry: follow the document named by the location, starting a fresh
+  // conversation whenever it differs from the one the view is currently in.
+  applyDocumentContext = ctx => {
+    if (ctx.id === docId) {
+      if (docId && ctx.title && !docTitle) {
+        docTitle = ctx.title;
+        renderDocBanner();
+      }
+      return;
+    }
+    resetConversation();
+    docId = ctx.id;
+    docTitle = ctx.title;
+    renderDocBanner();
+    textarea.focus();
+  };
+  applyDocumentContext(documentContext);
 
   // #C (parity js/chat.js:544,657): hide the progress strip once the stream
   // completes (ready) or errors, mirroring hideProgressIndicator().

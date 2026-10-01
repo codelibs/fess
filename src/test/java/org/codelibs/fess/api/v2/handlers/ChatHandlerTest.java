@@ -345,6 +345,133 @@ public class ChatHandlerTest extends UnitFessTestCase {
         }
     }
 
+    // ── doc_id: chat about a single document ─────────────────────────────────────
+
+    /** A handler with the user, rate-limit, document-lookup and chat client seams pinned. */
+    private static ChatHandler docChatHandler(final ChatClient client, final boolean documentExists, final List<String> lookedUp) {
+        return new ChatHandler() {
+            @Override
+            protected String getUserId(final HttpServletRequest req) {
+                return "doc-user";
+            }
+
+            @Override
+            protected String getRateLimitKey(final HttpServletRequest req) {
+                return "u:doc-user";
+            }
+
+            @Override
+            protected boolean documentExists(final String docId) {
+                lookedUp.add(docId);
+                return documentExists;
+            }
+
+            @Override
+            protected ChatClient getChatClient() {
+                return client;
+            }
+        };
+    }
+
+    /** A client that fails the test if the normal (search-based) chat is used. */
+    private static ChatClient failingNormalChatClient(final List<String> documentChatCalls, final ChatResult result) {
+        return new ChatClient() {
+            @Override
+            public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
+                throw new AssertionError("search-based chat must not be used with doc_id");
+            }
+
+            @Override
+            public ChatResult chat(final String sessionId, final String userMessage, final String userId,
+                    final Map<String, String[]> fields, final String[] extraQueries) {
+                throw new AssertionError("search-based chat must not be used with doc_id");
+            }
+
+            @Override
+            public ChatResult chatAboutDocument(final String sessionId, final String userMessage, final String userId, final String docId) {
+                documentChatCalls.add(sessionId + "|" + userMessage + "|" + userId + "|" + docId);
+                return result;
+            }
+        };
+    }
+
+    @Test
+    public void test_docId_invalidReturns400() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\",\"doc_id\":\"bad id!\"}"), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("invalid doc_id"), res.body());
+    }
+
+    @Test
+    public void test_docId_notFoundReturns404WithoutCallingChatClient() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final List<String> lookedUp = new java.util.ArrayList<>();
+        final List<String> calls = new java.util.ArrayList<>();
+        final CapturingResponse res = new CapturingResponse();
+        docChatHandler(failingNormalChatClient(calls, null), false, lookedUp)
+                .handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\",\"doc_id\":\"doc-1\"}"), res);
+        assertEquals(404, res.status);
+        assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+        assertTrue(res.body().contains("doc not found: doc-1"), res.body());
+        assertEquals(List.of("doc-1"), lookedUp);
+        assertTrue(calls.isEmpty(), "the chat client must not be called for a missing document");
+    }
+
+    @Test
+    public void test_docId_dispatchesToDocumentChatAndIgnoresFilters() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final ChatSource source = new ChatSource();
+        source.setIndex(1);
+        source.setTitle("Doc Title");
+        source.setDocId("doc-1");
+        final ChatMessage assistant = new ChatMessage("assistant", "about the doc");
+        assistant.setSources(List.of(source));
+        final ChatResult result = new ChatResult("sess-9", assistant, Collections.emptyList());
+        final List<String> lookedUp = new java.util.ArrayList<>();
+        final List<String> calls = new java.util.ArrayList<>();
+        final CapturingResponse res = new CapturingResponse();
+        docChatHandler(failingNormalChatClient(calls, result), true, lookedUp).handle(new StubRequest("POST", "/api/v2/chat")
+                .withJsonBody("{\"message\":\"summarize\",\"session_id\":\"s1\",\"doc_id\":\"doc-1\"}"), res);
+        assertEquals(200, res.status);
+        assertEquals(List.of("s1|summarize|doc-user|doc-1"), calls);
+        final String body = res.body();
+        assertTrue(body.contains("\"session_id\":\"sess-9\""), body);
+        assertTrue(body.contains("\"content\":\"about the doc\""), body);
+        assertTrue(body.contains("\"doc_id\":\"doc-1\""), body);
+    }
+
+    @Test
+    public void test_withoutDocId_usesNormalChatAndSkipsLookup() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final ChatResult result = new ChatResult("sess-1", new ChatMessage("assistant", "normal answer"), Collections.emptyList());
+        final List<String> lookedUp = new java.util.ArrayList<>();
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
+                return result;
+            }
+
+            @Override
+            public ChatResult chatAboutDocument(final String sessionId, final String userMessage, final String userId, final String docId) {
+                throw new AssertionError("document chat must not be used without doc_id");
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        docChatHandler(client, false, lookedUp).handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+        assertEquals(200, res.status);
+        assertTrue(res.body().contains("\"content\":\"normal answer\""), res.body());
+        assertTrue(lookedUp.isEmpty(), "no document lookup without doc_id");
+    }
+
     /** Enables RAG chat by registering a fess-config subclass that returns true. */
     private static void enableRagChat() {
         ComponentUtil.setFessConfig(new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {

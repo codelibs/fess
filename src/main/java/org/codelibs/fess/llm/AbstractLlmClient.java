@@ -1264,17 +1264,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             final String content = getStringValue(doc, "content");
             final String url = (String) doc.get("url");
 
-            final StringBuilder docEntry = new StringBuilder();
-            docEntry.append("=== Document ===\n");
-            if (title != null) {
-                docEntry.append("Title: ").append(sanitizeDocumentContent(title)).append("\n");
-            }
-            if (url != null) {
-                docEntry.append("URL: ").append(sanitizeDocumentContent(url)).append("\n");
-            }
-            if (StringUtil.isNotBlank(content)) {
-                docEntry.append("Content:\n").append(sanitizeDocumentContent(stripHtmlTags(content))).append("\n\n");
-            }
+            final StringBuilder docEntry = buildSummaryDocumentEntry(title, url, content);
 
             if (totalChars + docEntry.length() > maxChars) {
                 final int remaining = maxChars - totalChars - CONTEXT_TRUNCATION_BUFFER;
@@ -1309,6 +1299,43 @@ public abstract class AbstractLlmClient implements LlmClient {
         request.setStream(true);
 
         streamChatWithConcurrencyControl(request, callback);
+    }
+
+    @Override
+    public String summarizeDocumentPart(final String userMessage, final String title, final String url, final String partText,
+            final int partIndex, final int partCount, final int maxChars) {
+        final long startTime = System.currentTimeMillis();
+        final String documentContent = buildSummaryDocumentEntry(title, url, partText).toString();
+        final String resolvedPrompt = resolveLanguageInstruction(
+                getSummarySystemPrompt().replace("{{systemPrompt}}", getSystemPrompt()).replace("{{documentContent}}", documentContent));
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] summarizeDocumentPart. resolvedPrompt={}, userMessage={}, part={}/{}", resolvedPrompt, userMessage,
+                    partIndex, partCount);
+        }
+
+        final LlmChatRequest request = new LlmChatRequest();
+        request.addSystemMessage(resolvedPrompt);
+        request.addUserMessage("The document provided is too long to read at once; its content is part " + partIndex + " of " + partCount
+                + " of the whole document. Summarize this part concisely, preserving facts, figures, names and any details relevant to the request below."
+                + " Keep the summary within " + maxChars + " characters. Output only the summary of this part.\n\nRequest:\n"
+                + wrapUserInput(userMessage));
+        applyPromptTypeParams(request, "summary");
+
+        final LlmChatResponse response = chatWithConcurrencyControl(request);
+        if (isTruncatedFinish(response.getFinishReason())) {
+            logger.warn("[RAG:ANSWER] Part summary truncated by output token limit. part={}/{}, finishReason={}", partIndex, partCount,
+                    response.getFinishReason());
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] summarizeDocumentPart completed. part={}/{}, summaryLength={}, elapsedTime={}ms", partIndex,
+                    partCount, response.getContent() != null ? response.getContent().length() : 0, System.currentTimeMillis() - startTime);
+        }
+        return response.getContent() != null ? response.getContent() : StringUtil.EMPTY;
+    }
+
+    @Override
+    public int getSummaryContextMaxChars() {
+        return getContextMaxChars("summary");
     }
 
     @Override
@@ -1359,6 +1386,30 @@ public abstract class AbstractLlmClient implements LlmClient {
     }
 
     // --- Prompt building methods ---
+
+    /**
+     * Builds the document block of a summary prompt: header, title, URL and the content with
+     * markup tags stripped and delimiter-like sequences escaped.
+     *
+     * @param title the document title (may be null)
+     * @param url the document URL (may be null)
+     * @param content the document content (may be blank)
+     * @return the document block
+     */
+    protected StringBuilder buildSummaryDocumentEntry(final String title, final String url, final String content) {
+        final StringBuilder docEntry = new StringBuilder();
+        docEntry.append("=== Document ===\n");
+        if (title != null) {
+            docEntry.append("Title: ").append(sanitizeDocumentContent(title)).append("\n");
+        }
+        if (url != null) {
+            docEntry.append("URL: ").append(sanitizeDocumentContent(url)).append("\n");
+        }
+        if (StringUtil.isNotBlank(content)) {
+            docEntry.append("Content:\n").append(sanitizeDocumentContent(stripHtmlTags(content))).append("\n\n");
+        }
+        return docEntry;
+    }
 
     /**
      * Wraps user input with delimiters, escaping any closing tags in the content.

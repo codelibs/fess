@@ -139,6 +139,15 @@ describe("navigate", () => {
     expect(location.pathname).toBe("/rep");
     expect(seen).toBe("/rep");
   });
+
+  it("stores opts.state as the history entry state (push and replace)", () => {
+    r.register(() => true, () => {});
+    r.navigate("/chat?doc_id=d1", { state: { docTitle: "T" } });
+    expect(history.state).toEqual({ docTitle: "T" });
+    expect(location.search).toBe("?doc_id=d1");
+    r.navigate("/chat?doc_id=d1", { replace: true, state: { docTitle: "U" } });
+    expect(history.state).toEqual({ docTitle: "U" });
+  });
 });
 
 describe("attach", () => {

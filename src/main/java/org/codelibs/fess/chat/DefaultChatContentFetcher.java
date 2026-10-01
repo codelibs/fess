@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -131,6 +132,19 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
             }
         }
         return ordered;
+    }
+
+    /**
+     * Fetches the complete document through the same field list as {@link #fetchFullContent}, leaving
+     * a chunked document's {@code content} as its list of chunk texts and applying neither chunk
+     * selection nor the {@code rag.chat.content.fulltext.max.length} truncation.
+     *
+     * @param docId the document id
+     * @return the document map, or empty if it does not exist, is not visible to the caller, or could not be fetched
+     */
+    @Override
+    public Optional<Map<String, Object>> fetchWholeDocument(final String docId) {
+        return fetchFullContent(List.of(docId)).stream().findFirst();
     }
 
     /**

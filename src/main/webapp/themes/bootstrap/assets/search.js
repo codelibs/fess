@@ -350,6 +350,29 @@ function buildResultCard(d, queryId, order) {
     info.appendChild(simLink);
   }
 
+  // "Ask about this document" (theme extra): opens the chat page restricted to this one
+  // result. Shown only while chat is on (the same features.rag_chat_enabled flag that
+  // reveals the chat nav link). The href keeps middle-click / "open in new tab" working;
+  // a plain click navigates in-app and hands the title over in the history state (it is
+  // display-only, so it travels there rather than in a URL anyone could craft).
+  if (features.rag_chat_enabled && d.doc_id) {
+    appendNbspSpacer();
+    const askHref = "chat?doc_id=" + encodeURIComponent(d.doc_id);
+    const askLink = el("a", {
+      className: "ask-document d-print-none",
+      attrs: { href: askHref }
+    });
+    askLink.appendChild(el("i", { className: "fa fa-robot me-1", attrs: { "aria-hidden": "true" } }));
+    askLink.appendChild(document.createTextNode(t("result.ask_document")));
+    askLink.setAttribute("aria-label", t("result.ask_document") + " - " + plainTitle(d));
+    askLink.addEventListener("click", ev => {
+      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      ev.preventDefault();
+      navigate(askHref, { state: { docTitle: plainTitle(d) } });
+    });
+    info.appendChild(askLink);
+  }
+
   // favorite button (theme extra; same .info row). Config flag is features.user_favorite
   // (searchResults.jsp favoriteSupport / FessConfig.isUserFavorite), not features.favorite.
   // The star + favorite count are shown to EVERYONE (guests included) when the feature is on

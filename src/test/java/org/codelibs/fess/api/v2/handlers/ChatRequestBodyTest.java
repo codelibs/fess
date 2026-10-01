@@ -101,4 +101,43 @@ public class ChatRequestBodyTest extends UnitFessTestCase {
         final Map<String, List<String>> warnings = body.getWarnings();
         assertThrows(UnsupportedOperationException.class, () -> warnings.put("new", List.of()), "warnings map must be unmodifiable");
     }
+
+    // ── doc_id: chat about a single document ─────────────────────────────────────
+
+    @Test
+    public void test_docId_parsedAndTrimmed() throws Exception {
+        final ChatRequestBody body = chatApiHelper.parseRequestBody(Map.of("message", "hi", "doc_id", "  abc-123_X  "), 4000);
+        assertEquals("abc-123_X", body.docId());
+    }
+
+    @Test
+    public void test_docId_absentOrBlankIsNull() throws Exception {
+        assertNull(chatApiHelper.parseRequestBody(Map.of("message", "hi"), 4000).docId());
+        assertNull(chatApiHelper.parseRequestBody(Map.of("message", "hi", "doc_id", "   "), 4000).docId());
+    }
+
+    @Test
+    public void test_docId_invalidThrowsInvalidRequest() {
+        for (final String invalid : List.of("a b", "a/b", "../x", "x\"y", "a".repeat(513))) {
+            final ChatRequestBody.InvalidRequestException e = assertThrows(ChatRequestBody.InvalidRequestException.class,
+                    () -> chatApiHelper.parseRequestBody(Map.of("message", "hi", "doc_id", invalid), 4000), invalid);
+            assertEquals("invalid doc_id", e.getMessage());
+        }
+    }
+
+    @Test
+    public void test_docId_keepsFieldsAndExtraQueriesParsing() throws Exception {
+        // doc_id does not change how the other fields are parsed; the handlers ignore them.
+        final ChatRequestBody body = chatApiHelper.parseRequestBody(Map.of("message", "hi", "doc_id", "d1", "session_id", "s1"), 4000);
+        assertEquals("d1", body.docId());
+        assertEquals("s1", body.sessionId());
+        assertTrue(body.fields().isEmpty());
+        assertEquals(0, body.extraQueries().length);
+    }
+
+    @Test
+    public void test_legacyConstructorHasNoDocId() {
+        final ChatRequestBody body = new ChatRequestBody("m", null, Map.of(), new String[0], Map.of());
+        assertNull(body.docId());
+    }
 }

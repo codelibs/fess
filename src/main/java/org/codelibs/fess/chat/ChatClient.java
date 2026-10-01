@@ -68,6 +68,15 @@ public class ChatClient {
 
     private static final Logger logger = LogManager.getLogger(ChatClient.class);
 
+    /** Smallest part size, in characters, a long document is split into. */
+    protected static final int MIN_DOCUMENT_PART_CHARS = 256;
+
+    /** Characters reserved in the summary context budget for the document header, labels and escaping. */
+    protected static final int DOCUMENT_PROMPT_OVERHEAD_CHARS = 128;
+
+    /** Characters reserved per part summary for its {@code Part i/N:} header and separator. */
+    protected static final int PART_SUMMARY_HEADER_CHARS = 16;
+
     /** The session manager for managing chat sessions. */
     @Resource
     protected ChatSessionManager chatSessionManager;
@@ -527,24 +536,10 @@ public class ChatClient {
                 }
             }
 
-            // Phase 6: Render markdown to safe HTML
-            final long renderStartTime = System.currentTimeMillis();
-            final String htmlContent = renderMarkdownToHtml(fullResponse.toString());
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Markdown rendering completed. markdownLength={}, htmlLength={}, renderElapsedTime={}ms",
-                        fullResponse.length(), htmlContent.length(), System.currentTimeMillis() - renderStartTime);
-            }
-
-            // Create and save assistant message (user message was already added at the start)
-            final ChatMessage assistantMessage = ChatMessage.assistantMessage(fullResponse.toString());
-            assistantMessage.setHtmlContent(htmlContent);
-
-            for (final Map<String, Object> element : sources) {
-                populateUrlLink(element);
-            }
-            addSourcesToMessage(assistantMessage, sources, contextPath, searchQueryId, searchRequestedTime);
-
-            assistantMessage.setSearchQuery(finalSearchQuery);
+            // Phase 6: Render markdown to safe HTML and save the assistant message
+            // (user message was already added at the start)
+            final ChatMessage assistantMessage =
+                    createAssistantMessage(fullResponse, sources, contextPath, searchQueryId, searchRequestedTime, finalSearchQuery);
             session.addMessage(assistantMessage);
 
             logger.info(
@@ -567,6 +562,245 @@ public class ChatClient {
         } finally {
             session.trimHistory(getMaxHistoryMessages());
         }
+    }
+
+    /**
+     * Performs a chat request about a single document, returning the whole answer at once.
+     * Intent detection, search and relevance evaluation are skipped: the answer is generated
+     * from the content of the document identified by {@code docId} only.
+     *
+     * @param sessionId the session ID (can be null for new sessions)
+     * @param userMessage the user's message
+     * @param userId the user ID (can be null for anonymous users)
+     * @param docId the document ID to chat about
+     * @return the chat result with session info and the document as the only source
+     */
+    public ChatResult chatAboutDocument(final String sessionId, final String userMessage, final String userId, final String docId) {
+        return streamChatAboutDocument(sessionId, userMessage, userId, docId, ChatPhaseCallback.noOp());
+    }
+
+    /**
+     * Performs a streaming chat request about a single document.
+     *
+     * <p>The complete content of the document is fetched (no query-driven chunk selection and no
+     * {@code rag.chat.content.fulltext.max.length} truncation). When it fits the summary context budget
+     * of the LLM client, the answer is streamed from it directly. Otherwise the document is split into
+     * parts, every part is summarized with a separate non-streaming LLM call, and the answer is streamed
+     * from the combined part summaries. At most {@code rag.chat.document.max.parts} parts are used; when
+     * the document needs more, a {@code document_truncated} warning is reported and only its leading
+     * part is used.</p>
+     *
+     * <p>Phases reported: {@code fetch} (loading the document, then once per part while a long document
+     * is summarized) and {@code answer}.</p>
+     *
+     * @param sessionId the session ID (can be null for new sessions)
+     * @param userMessage the user's message
+     * @param userId the user ID (can be null for anonymous users)
+     * @param docId the document ID to chat about
+     * @param callback the callback to receive phase notifications and streaming chunks
+     * @return the chat result with session info and the document as the only source
+     */
+    public ChatResult streamChatAboutDocument(final String sessionId, final String userMessage, final String userId, final String docId,
+            final ChatPhaseCallback callback) {
+        final long startTime = System.currentTimeMillis();
+        // Capture context path early before request context may become unavailable during SSE processing
+        final String contextPath = resolveContextPath();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG] Starting document chat request. sessionId={}, userId={}, docId={}, userMessage={}", sessionId, userId,
+                    docId, userMessage);
+        }
+
+        final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
+        final List<LlmMessage> historyForAnswer = extractHistoryForAnswer(session);
+        // Add user message immediately for session integrity under concurrent access
+        session.addMessage(ChatMessage.userMessage(userMessage));
+        final StringBuilder fullResponse = new StringBuilder();
+
+        try {
+            long phaseStartTime = System.currentTimeMillis();
+            callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
+            final Map<String, Object> doc = fetchWholeDocument(docId);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Document fetched. docId={}, elapsedTime={}ms", docId, System.currentTimeMillis() - phaseStartTime);
+            }
+            // The source is a copy: the answer context below may replace the content of doc.
+            final Map<String, Object> sourceDoc = new HashMap<>(doc);
+            // Completes the fetch phase started above.
+            final List<Map<String, Object>> answerDocs = buildDocumentAnswerContext(userMessage, doc, callback);
+
+            phaseStartTime = System.currentTimeMillis();
+            callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
+            final LlmStreamCallback answerCallback =
+                    new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, (chunk, done) -> {
+                        fullResponse.append(chunk);
+                        callback.onChunk(chunk, done);
+                    });
+            llmClientManager.generateSummaryResponse(userMessage, answerDocs, historyForAnswer, answerCallback);
+            callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                        fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+            }
+
+            // go_url needs a search query id; a document chat has none.
+            final List<Map<String, Object>> sources = new ArrayList<>(Collections.singletonList(sourceDoc));
+            final ChatMessage assistantMessage = createAssistantMessage(fullResponse, sources, contextPath, null, 0L, null);
+            session.addMessage(assistantMessage);
+
+            logger.info("[RAG] Document chat completed. sessionId={}, userId={}, docId={}, responseLength={}, elapsedTime={}ms",
+                    session.getSessionId(), userId, docId, fullResponse.length(), System.currentTimeMillis() - startTime);
+
+            return new ChatResult(session.getSessionId(), assistantMessage, sources);
+        } catch (final LlmException e) {
+            logger.warn("[RAG] LLM error during document chat. sessionId={}, docId={}, errorCode={}, error={}, elapsedTime={}ms",
+                    session.getSessionId(), docId, e.getErrorCode(), e.getMessage(), System.currentTimeMillis() - startTime, e);
+            callback.onError("llm", e.getErrorCode());
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("[RAG] Unexpected error during document chat. sessionId={}, docId={}, error={}, elapsedTime={}ms",
+                    session.getSessionId(), docId, e.getMessage(), System.currentTimeMillis() - startTime, e);
+            callback.onError("unknown", LlmException.ERROR_UNKNOWN);
+            throw e;
+        } finally {
+            session.trimHistory(getMaxHistoryMessages());
+        }
+    }
+
+    /**
+     * Fetches the complete content of a document for a document chat, through the same field set as
+     * {@link ChatContentFetcher} uses but without any query-driven selection or truncation. The
+     * lookup is role-filtered, so a document the caller may not see is reported as missing.
+     *
+     * @param docId the document ID
+     * @return the document map; {@code content} is a list of chunk texts for a chunked document and
+     *         a string otherwise
+     * @throws IllegalStateException if the document could not be fetched
+     */
+    protected Map<String, Object> fetchWholeDocument(final String docId) {
+        return ComponentUtil.getChatContentFetcher()
+                .fetchWholeDocument(docId)
+                .orElseThrow(() -> new IllegalStateException("Document not found. docId=" + docId));
+    }
+
+    /**
+     * Builds the document list the final answer is generated from. A document that fits the summary
+     * context budget of the LLM client is passed on as it is. A longer one is split into parts,
+     * every part is summarized by its own LLM call (reported as one {@code fetch} phase per part), and the
+     * combined summaries stand in for its content.
+     *
+     * <p>Completes the {@code fetch} phase the caller started for loading the document. For a long
+     * document that completion carries {@code parts} (the number of parts to summarize), and each part's
+     * completion carries {@code part} and {@code parts}, so that a client can show its own localized
+     * progress.</p>
+     *
+     * @param userMessage the user's message the part summaries have to serve
+     * @param doc the fetched document
+     * @param callback the callback to receive progress and warning notifications
+     * @return the documents to generate the answer from
+     */
+    protected List<Map<String, Object>> buildDocumentAnswerContext(final String userMessage, final Map<String, Object> doc,
+            final ChatPhaseCallback callback) {
+        final String title = doc.get("title") != null ? doc.get("title").toString() : null;
+        final String url = doc.get("url") != null ? doc.get("url").toString() : null;
+        final Object content = doc.get("content");
+        final List<String> chunks = content instanceof final List<?> list ? list.stream().map(String::valueOf).toList() : null;
+        final String text =
+                chunks != null ? String.join(DocumentPartSplitter.CHUNK_SEPARATOR, chunks) : content != null ? content.toString() : "";
+
+        final int partBudget = Math.max(MIN_DOCUMENT_PART_CHARS, llmClientManager.getSummaryContextMaxChars()
+                - (title != null ? title.length() : 0) - (url != null ? url.length() : 0) - DOCUMENT_PROMPT_OVERHEAD_CHARS);
+        if (text.length() <= partBudget) {
+            callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
+            return Collections.singletonList(doc);
+        }
+
+        List<String> parts =
+                chunks != null ? DocumentPartSplitter.splitChunks(chunks, partBudget) : DocumentPartSplitter.splitText(text, partBudget);
+        if (parts.isEmpty()) {
+            // Nothing but whitespace: there is nothing to summarize.
+            callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
+            return Collections.singletonList(doc);
+        }
+        final int maxParts = getDocumentMaxParts();
+        if (parts.size() > maxParts) {
+            logger.warn("[RAG] Document is longer than the part limit; using the leading parts only. docId={}, parts={}, maxParts={}",
+                    doc.get("doc_id"), parts.size(), maxParts);
+            callback.onWarning(ChatPhaseCallback.PHASE_FETCH, "document_truncated", "only the leading part of the document was used");
+            parts = parts.subList(0, maxParts);
+        }
+
+        final int partCount = parts.size();
+        callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH, Map.of("parts", partCount));
+        // The combined summaries must fit the budget as well, or generateSummaryResponse would cut off the last ones.
+        final int summaryMaxChars = Math.max(1, partBudget / partCount - PART_SUMMARY_HEADER_CHARS);
+        final StringBuilder combined = new StringBuilder();
+        for (int i = 0; i < partCount; i++) {
+            final long partStartTime = System.currentTimeMillis();
+            callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Summarizing document part " + (i + 1) + " of " + partCount + "...");
+            String summary =
+                    llmClientManager.summarizeDocumentPart(userMessage, title, url, parts.get(i), i + 1, partCount, summaryMaxChars);
+            if (summary == null) {
+                summary = "";
+            }
+            callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH, Map.of("part", i + 1, "parts", partCount));
+            if (summary.length() > summaryMaxChars) {
+                summary = summary.substring(0, summaryMaxChars) + "...";
+            }
+            if (combined.length() > 0) {
+                combined.append("\n\n");
+            }
+            combined.append("Part ").append(i + 1).append('/').append(partCount).append(":\n").append(summary);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Document part summarized. docId={}, part={}/{}, partLength={}, summaryLength={}, elapsedTime={}ms",
+                        doc.get("doc_id"), i + 1, partCount, parts.get(i).length(), summary.length(),
+                        System.currentTimeMillis() - partStartTime);
+            }
+        }
+
+        final Map<String, Object> reduced = new HashMap<>(doc);
+        reduced.put("content", combined.toString());
+        return Collections.singletonList(reduced);
+    }
+
+    /**
+     * Gets the maximum number of parts a long document is split into for a document chat.
+     *
+     * @return the maximum number of parts (at least 1)
+     */
+    protected int getDocumentMaxParts() {
+        return Math.max(1, ComponentUtil.getFessConfig().getRagChatDocumentMaxPartsAsInteger());
+    }
+
+    /**
+     * Renders the streamed answer to HTML and builds the assistant message with its sources.
+     *
+     * @param fullResponse the complete markdown answer
+     * @param sources the source documents
+     * @param contextPath the application context path
+     * @param queryId the query ID of the search the sources came from (null if there was none)
+     * @param requestedTime the requested time of that search
+     * @param searchQuery the final search query (null if there was none)
+     * @return the assistant message, not yet added to a session
+     */
+    protected ChatMessage createAssistantMessage(final StringBuilder fullResponse, final List<Map<String, Object>> sources,
+            final String contextPath, final String queryId, final long requestedTime, final String searchQuery) {
+        final long renderStartTime = System.currentTimeMillis();
+        final String htmlContent = renderMarkdownToHtml(fullResponse.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG] Markdown rendering completed. markdownLength={}, htmlLength={}, renderElapsedTime={}ms",
+                    fullResponse.length(), htmlContent.length(), System.currentTimeMillis() - renderStartTime);
+        }
+
+        final ChatMessage assistantMessage = ChatMessage.assistantMessage(fullResponse.toString());
+        assistantMessage.setHtmlContent(htmlContent);
+
+        for (final Map<String, Object> element : sources) {
+            populateUrlLink(element);
+        }
+        addSourcesToMessage(assistantMessage, sources, contextPath, queryId, requestedTime);
+
+        assistantMessage.setSearchQuery(searchQuery);
+        return assistantMessage;
     }
 
     /**
