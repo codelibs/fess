@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.crawler.interval;
 
+import org.codelibs.fess.crawler.interval.impl.HostIntervalController;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -42,6 +43,17 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     public void test_constructor() {
         FessIntervalController controller = new FessIntervalController();
         assertNotNull(controller);
+    }
+
+    /**
+     * Test that FessIntervalController inherits the per-host waiting of HostIntervalController
+     * (robots.txt Crawl-delay and 429/503 backoff) while keeping the fixed per-host delay at 0.
+     */
+    @Test
+    public void test_hostIntervalController() {
+        final Object controller = new FessIntervalController();
+        assertTrue(controller instanceof HostIntervalController);
+        assertEquals(0L, ((FessIntervalController) controller).getDelayMillisBeforeProcessing());
     }
 
     /**

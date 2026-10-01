@@ -76,6 +76,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.XPath;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.codelibs.nekohtml.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -580,6 +581,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         } else {
             // timestamp
             putResultDataBody(dataMap, fessConfig.getIndexFieldTimestamp(), now);
+        }
+        // etag
+        final String etag = DocumentUtil.getHeaderValue(responseData, "ETag");
+        if (etag != null) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldEtag(), etag);
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);

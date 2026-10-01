@@ -328,6 +328,37 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertNull(dataMap.get("important_content"));
     }
 
+    private Map<String, Object> transformPageWithHeaders(final Map<String, Object> headers) throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        final ResponseData responseData = createHtmlResponseData(sessionId, "http://example.com/",
+                "<html><head><title>Test Page</title></head><body><p>Hello</p></body></html>");
+        headers.forEach(responseData::addMetaData);
+        final ResultData resultData = transformer.transform(responseData);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> dataMap = (Map<String, Object>) resultData.getRawData();
+        return dataMap;
+    }
+
+    @Test
+    public void test_transform_storesEtagVerbatim() throws Exception {
+        final Map<String, Object> dataMap = transformPageWithHeaders(Map.of("ETag", "W/\"abc\""));
+        assertEquals("W/\"abc\"", dataMap.get("etag"));
+    }
+
+    @Test
+    public void test_transform_storesEtagFromLowerCaseHeader() throws Exception {
+        final Map<String, Object> dataMap = transformPageWithHeaders(Map.of("etag", "\"v1\""));
+        assertEquals("\"v1\"", dataMap.get("etag"));
+    }
+
+    @Test
+    public void test_transform_noEtagHeader_noEtagField() throws Exception {
+        final Map<String, Object> dataMap = transformPageWithHeaders(Map.of("Content-Type", "text/html"));
+        assertFalse(dataMap.containsKey("etag"), "etag must not be stored: " + dataMap.get("etag"));
+    }
+
     @Test
     public void test_pruneNode() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";

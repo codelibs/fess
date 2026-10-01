@@ -60,6 +60,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 
 /**
  * The abstract transformer for Fess.
@@ -326,6 +327,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         } else {
             // timestamp
             putResultDataBody(dataMap, fessConfig.getIndexFieldTimestamp(), now);
+        }
+        // etag
+        final String etag = DocumentUtil.getHeaderValue(responseData, "ETag");
+        if (etag != null) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldEtag(), etag);
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);

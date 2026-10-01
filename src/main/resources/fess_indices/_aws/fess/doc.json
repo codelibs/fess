@@ -570,6 +570,11 @@
         "type": "date",
         "format": "date_optional_time"
       },
+      "etag": {
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+      },
       "location": {
         "type": "geo_point"
       },

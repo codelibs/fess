@@ -16,19 +16,35 @@
 package org.codelibs.fess.crawler.transformer;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.ClassUtil;
+import org.codelibs.core.lang.FieldUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.exception.MaxLengthExceededException;
 import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.helper.CrawlingConfigHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.DocumentHelper;
+import org.codelibs.fess.helper.FileTypeHelper;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.LanguageHelper;
+import org.codelibs.fess.helper.LabelTypeHelper.LabelTypePattern;
+import org.codelibs.fess.helper.PathMappingHelper;
+import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -238,6 +254,68 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         } finally {
             capture.detach();
         }
+    }
+
+    private Map<String, Object> generateDataWithHeaders(final Map<String, Object> headers) {
+        ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
+        ComponentUtil.register(new PathMappingHelper(), "pathMappingHelper");
+        ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.register(new FileTypeHelper(), "fileTypeHelper");
+        ComponentUtil.register(new DocumentHelper(), "documentHelper");
+        final LabelTypeHelper labelTypeHelper = new LabelTypeHelper();
+        final Field patternList = ClassUtil.getDeclaredField(LabelTypeHelper.class, "labelTypePatternList");
+        patternList.setAccessible(true);
+        FieldUtil.set(patternList, labelTypeHelper, new ArrayList<LabelTypePattern>());
+        ComponentUtil.register(labelTypeHelper, "labelTypeHelper");
+        ComponentUtil.register(new ProtocolHelper(), "protocolHelper");
+        ComponentUtil.register(new LanguageHelper() {
+            @Override
+            public String detectLanguage(final String content) {
+                return null;
+            }
+        }, "languageHelper");
+        final FileConfig fileConfig = new FileConfig();
+        fileConfig.setId("1");
+        final String sessionId = ComponentUtil.getCrawlingConfigHelper().store("test", fileConfig);
+
+        final TestableAbstractFessFileTransformer extracting = new TestableAbstractFessFileTransformer() {
+            @Override
+            protected Extractor getExtractor(final ResponseData responseData) {
+                return (in, params) -> new ExtractData("body text");
+            }
+
+            @Override
+            protected List<String> getRoleTypes(final ResponseData responseData) {
+                return new ArrayList<>();
+            }
+        };
+        extracting.fessConfig = ComponentUtil.getFessConfig();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/doc.pdf");
+        responseData.setMimeType("application/pdf");
+        responseData.setCharSet("UTF-8");
+        responseData.setContentLength(9L);
+        responseData.setSessionId(sessionId);
+        responseData.setResponseBody("body text".getBytes());
+        headers.forEach(responseData::addMetaData);
+        return extracting.generateData(responseData);
+    }
+
+    @Test
+    public void test_generateData_storesEtagVerbatim() {
+        assertEquals("W/\"abc\"", generateDataWithHeaders(Map.of("ETag", "W/\"abc\"")).get("etag"));
+    }
+
+    @Test
+    public void test_generateData_storesEtagFromLowerCaseHeader() {
+        assertEquals("\"v1\"", generateDataWithHeaders(Map.of("etag", "\"v1\"")).get("etag"));
+    }
+
+    @Test
+    public void test_generateData_noEtagHeader_noEtagField() {
+        assertFalse(generateDataWithHeaders(Map.of()).containsKey("etag"));
     }
 
     private static class TestableAbstractFessFileTransformer extends AbstractFessFileTransformer {

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -368,5 +369,34 @@ public class DocumentUtilTest extends UnitFessTestCase {
         // [ ] and % pass through; space would be encoded but %20 stays as-is (% is URL char)
         String result = DocumentUtil.encodeUrl("file:///data/[logs]/file%20name.txt");
         assertEquals("file:///data/[logs]/file%20name.txt", result);
+    }
+
+    @Test
+    public void test_getHeaderValue_isCaseInsensitive() {
+        for (final String key : new String[] { "ETag", "Etag", "etag", "ETAG" }) {
+            final ResponseData responseData = new ResponseData();
+            responseData.addMetaData(key, "W/\"abc\"");
+            assertEquals(key, "W/\"abc\"", DocumentUtil.getHeaderValue(responseData, "ETag"));
+            assertEquals(key, "W/\"abc\"", DocumentUtil.getHeaderValue(responseData, "etag"));
+        }
+    }
+
+    @Test
+    public void test_getHeaderValue_absent() {
+        final ResponseData responseData = new ResponseData();
+        assertNull(DocumentUtil.getHeaderValue(responseData, "ETag"));
+        responseData.addMetaData("Content-Type", "text/html");
+        assertNull(DocumentUtil.getHeaderValue(responseData, "ETag"));
+        assertNull(DocumentUtil.getHeaderValue(null, "ETag"));
+        assertNull(DocumentUtil.getHeaderValue(responseData, null));
+    }
+
+    @Test
+    public void test_getHeaderValue_valueIsConvertedToString() {
+        final ResponseData responseData = new ResponseData();
+        responseData.addMetaData("Content-Length", Integer.valueOf(42));
+        responseData.addMetaData("X-Null", null);
+        assertEquals("42", DocumentUtil.getHeaderValue(responseData, "content-length"));
+        assertNull(DocumentUtil.getHeaderValue(responseData, "x-null"));
     }
 }
