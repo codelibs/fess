@@ -17,17 +17,22 @@ package org.codelibs.fess.crawler.interval;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.crawler.interval.impl.DefaultIntervalController;
+import org.codelibs.fess.crawler.interval.impl.HostIntervalController;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
- * FessIntervalController extends DefaultIntervalController to provide
+ * FessIntervalController extends HostIntervalController to provide
  * Fess-specific interval control functionality for web crawling operations.
  * This controller manages delays and timing for various crawling states
  * including processing delays, queue waiting times, and new URL discovery.
+ * It inherits the per-host waiting of HostIntervalController, which honors the
+ * robots.txt Crawl-delay and the per-host backoff after 429/503 responses.
+ * The fixed per-host delay before processing stays at 0; the interval of the
+ * crawl configuration is applied as the wait for a new URL
+ * (delayMillisForWaitingNewUrl), not as a delay after processing.
  */
-public class FessIntervalController extends DefaultIntervalController {
+public class FessIntervalController extends HostIntervalController {
 
     private static final Logger logger = LogManager.getLogger(FessIntervalController.class);
 
