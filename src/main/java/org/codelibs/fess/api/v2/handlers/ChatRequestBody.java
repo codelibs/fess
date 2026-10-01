@@ -25,7 +25,8 @@ import java.util.Map;
  * {@link ChatStreamHandler}.
  *
  * <p>The v2 body shape uses snake_case keys: {@code session_id}, {@code message},
- * {@code extra_queries}. Label filters are passed as a nested object:
+ * {@code extra_queries}, and the optional {@code doc_id} that scopes the chat to one document
+ * (when present, {@code fields} and {@code extra_queries} are ignored). Label filters are passed as a nested object:
  * {@code "fields": {"label": "value"}} (string or array). The legacy dotted-key
  * {@code "fields.label"} is also accepted for backward compatibility during
  * transition. Session clearing has been moved to the dedicated DELETE endpoint
@@ -54,6 +55,7 @@ public final class ChatRequestBody {
     private final String sessionId;
     private final Map<String, String[]> fields;
     private final String[] extraQueries;
+    private final String docId;
 
     /**
      * MJ-29: Tracks values that were supplied by the caller but rejected by the
@@ -78,10 +80,26 @@ public final class ChatRequestBody {
      */
     public ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
             final Map<String, List<String>> warnings) {
+        this(message, sessionId, fields, extraQueries, null, warnings);
+    }
+
+    /**
+     * Creates a parsed chat request body for a chat that may be scoped to a single document.
+     *
+     * @param message the trimmed {@code message} value, or {@code null} when omitted or blank
+     * @param sessionId the trimmed {@code session_id} value, or {@code null} for a fresh session
+     * @param fields the validated label-filter map; never {@code null}
+     * @param extraQueries the validated {@code extra_queries} array; never {@code null}
+     * @param docId the validated {@code doc_id} value, or {@code null} when omitted or blank
+     * @param warnings the map of rejected field values tracked for diagnostics; never {@code null}
+     */
+    public ChatRequestBody(final String message, final String sessionId, final Map<String, String[]> fields, final String[] extraQueries,
+            final String docId, final Map<String, List<String>> warnings) {
         this.message = message;
         this.sessionId = sessionId;
         this.fields = fields;
         this.extraQueries = extraQueries;
+        this.docId = docId;
         this.warnings = warnings;
     }
 
@@ -119,6 +137,15 @@ public final class ChatRequestBody {
      */
     public String[] extraQueries() {
         return extraQueries;
+    }
+
+    /**
+     * Returns the validated {@code doc_id} value supplied by the caller.
+     *
+     * @return the id of the one document to chat about, or {@code null} for a normal chat
+     */
+    public String docId() {
+        return docId;
     }
 
     /**

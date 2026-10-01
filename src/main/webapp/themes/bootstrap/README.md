@@ -90,6 +90,17 @@ The function returns an `AbortController`. Call `.abort()` to cancel
 the fetch before the server sends a final `done` event (e.g. on user
 navigation or a new submission).
 
+### Asking about one document
+
+When chat is enabled, every result card carries an "Ask about this document" link. It opens
+`chat?doc_id=<id>`, a fresh conversation about that single document: the chat page shows an
+"Asking about: <title>" banner above the input, and `chat.js` sends `doc_id` (and no label
+filters or `extra_queries`) with every turn, because the server keeps no document state between
+requests. Clearing the banner or starting a new chat returns to normal chat. The title travels in
+the history state (`router.navigate(path, { state })`), not in the URL, so a link cannot set it;
+after a reload the banner falls back to the title of the first source. An unknown or forbidden
+document answers HTTP 404 before the stream starts and is reported as "not available".
+
 ## Context path
 
 Fess 15.9 and later insert `<base href="{context path}/">` right after `<head>` when they

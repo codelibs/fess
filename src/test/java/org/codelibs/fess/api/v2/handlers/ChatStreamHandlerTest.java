@@ -22,9 +22,16 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.chat.ChatClient;
+import org.codelibs.fess.chat.ChatClient.ChatResult;
+import org.codelibs.fess.chat.ChatPhaseCallback;
+import org.codelibs.fess.entity.ChatMessage;
+import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -268,6 +275,153 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
             ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
         }
+    }
+
+    // ── doc_id: chat about a single document ─────────────────────────────────────
+
+    /** A stream handler with the user, rate-limit, SSE header, document-lookup and chat client seams pinned. */
+    private static ChatStreamHandler docStreamHandler(final ChatClient client, final boolean documentExists, final List<String> lookedUp) {
+        return new ChatStreamHandler() {
+            @Override
+            protected String getUserId(final HttpServletRequest req) {
+                return "doc-user";
+            }
+
+            @Override
+            protected String getRateLimitKey(final HttpServletRequest req) {
+                return "u:doc-user";
+            }
+
+            @Override
+            protected void setSseHeaders(final HttpServletResponse res) {
+                res.setContentType("text/event-stream");
+            }
+
+            @Override
+            protected boolean documentExists(final String docId) {
+                lookedUp.add(docId);
+                return documentExists;
+            }
+
+            @Override
+            protected ChatClient getChatClient() {
+                return client;
+            }
+        };
+    }
+
+    @Test
+    public void test_docId_invalidReturns400BeforeStream() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        new ChatStreamHandler()
+                .handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\",\"doc_id\":\"bad id!\"}"), res);
+        assertEquals(400, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("invalid doc_id"), res.body());
+    }
+
+    @Test
+    public void test_docId_notFoundReturns404JsonEnvelopeWithoutSseHeaders() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final List<String> lookedUp = new ArrayList<>();
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult streamChatAboutDocument(final String sessionId, final String userMessage, final String userId,
+                    final String docId, final ChatPhaseCallback callback) {
+                throw new AssertionError("the chat client must not be called for a missing document");
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        docStreamHandler(client, false, lookedUp)
+                .handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\",\"doc_id\":\"doc-1\"}"), res);
+        assertEquals(404, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+        assertTrue(res.body().contains("doc not found: doc-1"), res.body());
+        assertFalse(res.body().contains("event:"), res.body());
+        assertEquals(List.of("doc-1"), lookedUp);
+    }
+
+    @Test
+    public void test_docId_dispatchesToDocumentChatAndStreamsEvents() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final List<String> calls = new ArrayList<>();
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult streamChatEnhanced(final String sessionId, final String userMessage, final String userId,
+                    final Map<String, String[]> fields, final String[] extraQueries, final ChatPhaseCallback callback) {
+                throw new AssertionError("search-based chat must not be used with doc_id");
+            }
+
+            @Override
+            public ChatResult streamChatAboutDocument(final String sessionId, final String userMessage, final String userId,
+                    final String docId, final ChatPhaseCallback callback) {
+                calls.add(sessionId + "|" + userMessage + "|" + userId + "|" + docId);
+                callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
+                callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
+                callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
+                callback.onChunk("the summary", true);
+                callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                final ChatSource source = new ChatSource();
+                source.setIndex(1);
+                source.setDocId(docId);
+                source.setTitle("Doc Title");
+                final ChatMessage assistant = new ChatMessage("assistant", "the summary");
+                assistant.setSources(List.of(source));
+                assistant.setHtmlContent("<p>the summary</p>");
+                return new ChatResult("sess-9", assistant, java.util.Collections.emptyList());
+            }
+        };
+        final List<String> lookedUp = new ArrayList<>();
+        final CapturingResponse res = new CapturingResponse();
+        docStreamHandler(client, true, lookedUp).handle(new StubRequest("POST", "/api/v2/chat/stream")
+                .withJsonBody("{\"message\":\"summarize\",\"session_id\":\"s1\",\"doc_id\":\"doc-1\"}"), res);
+        assertEquals(List.of("s1|summarize|doc-user|doc-1"), calls);
+        final String body = res.body();
+        assertEquals("text/event-stream", contentTypeMimeOnly(res));
+        assertTrue(body.contains("event: phase\ndata: {"), body);
+        assertTrue(body.contains("\"phase\":\"fetch\""), body);
+        assertTrue(body.contains("\"phase\":\"answer\""), body);
+        assertTrue(body.contains("event: chunk\ndata: {\"content\":\"the summary\"}"), body);
+        assertTrue(body.contains("event: sources\ndata: {"), body);
+        assertTrue(body.contains("\"doc_id\":\"doc-1\""), body);
+        assertTrue(body.contains("event: done\ndata: {"), body);
+        assertTrue(body.indexOf("event: sources") < body.indexOf("event: done"), body);
+    }
+
+    @Test
+    public void test_withoutDocId_usesNormalStreamAndSkipsLookup() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final List<String> calls = new ArrayList<>();
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult streamChatEnhanced(final String sessionId, final String userMessage, final String userId,
+                    final ChatPhaseCallback callback) {
+                calls.add(userMessage);
+                return new ChatResult("sess-1", new ChatMessage("assistant", "normal"), java.util.Collections.emptyList());
+            }
+
+            @Override
+            public ChatResult streamChatAboutDocument(final String sessionId, final String userMessage, final String userId,
+                    final String docId, final ChatPhaseCallback callback) {
+                throw new AssertionError("document chat must not be used without doc_id");
+            }
+        };
+        final List<String> lookedUp = new ArrayList<>();
+        final CapturingResponse res = new CapturingResponse();
+        docStreamHandler(client, false, lookedUp)
+                .handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
+        assertEquals(List.of("hi"), calls);
+        assertTrue(res.body().contains("event: done"), res.body());
+        assertTrue(lookedUp.isEmpty(), "no document lookup without doc_id");
     }
 
     // ── SSE event snake_case key verification ─────────────────────────────────
@@ -752,6 +906,32 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
                 "handler must stop emitting after disconnect; emitted " + emittedBeforeDisconnect + " of 10 tokens");
         // The error event must NOT have been emitted to the dead socket.
         assertFalse(errorEmittedHolder[0], "errorEmittedHolder must remain false on disconnect (no error SSE to dead socket)");
+    }
+
+    @Test
+    public void test_phaseStart_exitsOnClientDisconnect() {
+        // A phase can start a run of LLM calls without any chunk in between (the part
+        // summaries of a long document), so a phase start must notice a closed client too.
+        final java.io.StringWriter sw = new java.io.StringWriter();
+        final PrintWriter disconnectedWriter = new PrintWriter(sw) {
+            @Override
+            public boolean checkError() {
+                return true;
+            }
+        };
+        final boolean[] errorEmittedHolder = { false };
+        final org.codelibs.fess.chat.ChatPhaseCallback cb =
+                new ChatStreamHandler().newPhaseCallback(disconnectedWriter, errorEmittedHolder, new Object());
+
+        boolean disconnectDetected = false;
+        try {
+            cb.onPhaseStart("fetch", "Summarizing document part 2 of 5...");
+        } catch (final ChatStreamHandler.ClientDisconnectedException cde) {
+            disconnectDetected = true;
+        }
+
+        assertTrue(disconnectDetected, "ClientDisconnectedException must be thrown when checkError() returns true");
+        assertFalse(sw.toString().contains("event: phase"), sw.toString());
     }
 
     @Test

@@ -52,16 +52,21 @@ export function currentPath() {
  * Dispatches the matching handler immediately. A relative path ("search?q=x", "./")
  * resolves against the application root.
  *
+ * opts.state is stored as the history entry's state, so a view can read data that does
+ * not belong in the URL (e.g. a display title) and still get it back after a reload or
+ * back/forward. It cannot be set by a crafted link.
+ *
  * @param {string} path
- * @param {{ replace?: boolean }} [opts]
+ * @param {{ replace?: boolean, state?: object }} [opts]
  */
 export function navigate(path, opts = {}) {
   const url = new URL(path, rootUrl());
   const target = url.pathname + url.search + url.hash;
+  const state = opts.state === undefined ? null : opts.state;
   if (opts.replace) {
-    history.replaceState(null, "", target);
+    history.replaceState(state, "", target);
   } else {
-    history.pushState(null, "", target);
+    history.pushState(state, "", target);
   }
   dispatch();
 }

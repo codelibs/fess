@@ -13,9 +13,14 @@
 // returns the key unchanged, so assertions match exact i18n keys.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { resetDom, mountBody } from "../../helpers/dom.js";
+import { jsonResponse } from "../../helpers/net.js";
 
 const CHAT_PATH = "../../../../main/webapp/themes/bootstrap/assets/chat.js";
+const I18N_PATH = "../../../../main/webapp/themes/bootstrap/assets/i18n.js";
 
 // Controllable stand-in for the /api/v2 client. chat.js only reads
 // api.getConfig(), api.sseStream() and api.getCsrfToken().
@@ -538,5 +543,287 @@ describe("attachInline / attachStandalone submit", () => {
     expect(alert).not.toBeNull();
     expect(alert.textContent).toBe("chat.disabled");
     expect(document.getElementById("standalone-chat-input")).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Document mode ("Ask about this document")
+// ---------------------------------------------------------------------------
+
+describe("attachStandalone document mode", () => {
+  // Document mode renders real sentences, so these tests load the shipped English bundle.
+  // fileURLToPath gets the URL as a string: under jsdom the global URL is a foreign class.
+  const en = JSON.parse(readFileSync(resolve(dirname(fileURLToPath(import.meta.url)),
+    "../../../../main/webapp/themes/bootstrap/i18n/messages.en.json"), "utf-8"));
+  const enterKey = () => new KeyboardEvent("keydown", { key: "Enter", bubbles: true });
+  const CFG = {
+    features: { rag_chat_enabled: true },
+    label_options: [{ value: "lblA", name: "A" }],
+    facet_views: [{ title: "T", queries: [{ label: "R", value: "exq1" }] }],
+  };
+
+  /** Point the location at /chat?doc_id=… with an optional title in the history state. */
+  function openDocumentRoute(docId, title) {
+    const qs = docId ? "?doc_id=" + encodeURIComponent(docId) : "";
+    history.replaceState(title ? { docTitle: title } : null, "", "/chat" + qs);
+  }
+
+  async function mount(docId, title) {
+    vi.resetModules();
+    apiMock.getConfig.mockReturnValue(CFG);
+    openDocumentRoute(docId, title);
+    const i18n = await import(I18N_PATH);
+    await i18n.init("en");
+    fetch.mockClear();
+    const chat = await import(CHAT_PATH);
+    mountBody('<div id="chat-view" hidden></div>');
+    chat.attachStandalone();
+    return chat;
+  }
+
+  const input = () => document.getElementById("standalone-chat-input");
+  const banner = () => document.querySelector(".chat-doc-banner");
+  const isShown = (e) => !e.classList.contains("d-none");
+  const ask = (q) => {
+    input().value = q;
+    input().dispatchEvent(enterKey());
+  };
+  const lastCall = () => apiMock.sseStream.mock.calls[apiMock.sseStream.mock.calls.length - 1];
+  const emit = (event) => lastCall()[2](event);
+  const fail = (err) => lastCall()[3](err);
+  const errorText = () => document.querySelector(".chat-error-banner span.flex-grow-1").textContent;
+  const clickClear = () => banner().querySelector("button.btn-close").dispatchEvent(new Event("click"));
+
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn(async (url) =>
+      String(url).includes("/i18n/messages.") ? jsonResponse(en) : { ok: true }));
+  });
+  afterEach(() => {
+    history.replaceState(null, "", "/");
+  });
+
+  it("shows no banner and keeps the filters in normal chat", async () => {
+    await mount("", "");
+    expect(isShown(banner())).toBe(false);
+    expect(document.querySelector('[data-bs-toggle="collapse"]').classList.contains("d-none")).toBe(false);
+  });
+
+  it("shows the banner with the title (as text, never HTML) and hides the filter controls", async () => {
+    await mount("d1", "<img src=x onerror=alert(1)> Doc");
+    expect(isShown(banner())).toBe(true);
+    expect(banner().textContent).toBe("Asking about: <img src=x onerror=alert(1)> Doc");
+    expect(banner().querySelector("img")).toBeNull();
+    expect(document.querySelector('[data-bs-toggle="collapse"]').classList.contains("d-none")).toBe(true);
+    expect(document.querySelector(".chat-filter-panel").classList.contains("d-none")).toBe(true);
+  });
+
+  it("falls back to a generic label and adopts the title of the first source", async () => {
+    await mount("d1", "");
+    expect(banner().textContent).toBe("Asking about: this document");
+    ask("summarise");
+    emit({ type: "sources", data: { sources: [{ title: "Server Title <b>", url: "https://e/1" }] } });
+    expect(banner().textContent).toBe("Asking about: Server Title <b>");
+    expect(banner().querySelector("b")).toBeNull();
+    expect(banner().getAttribute("title")).toBe("Asking about: Server Title <b>");
+  });
+
+  it("keeps a title from the navigation over the one in a later source", async () => {
+    await mount("d1", "From results");
+    ask("q");
+    emit({ type: "sources", data: { sources: [{ title: "Other", url: "https://e/1" }] } });
+    expect(banner().textContent).toBe("Asking about: From results");
+  });
+
+  it("sends doc_id on every turn and never the label filters or extra_queries", async () => {
+    await mount("doc-1", "My Doc");
+    // Even a filter ticked before entering document mode must not leak into the request.
+    document.querySelector('input[data-filter-type="label"]').checked = true;
+    document.querySelector('input[data-filter-type="ex_q"]').checked = true;
+
+    ask("first");
+    expect(apiMock.sseStream).toHaveBeenCalledTimes(1);
+    expect(lastCall()[0]).toBe("/chat/stream");
+    expect(lastCall()[1]).toEqual({ message: "first", doc_id: "doc-1" });
+    emit({ type: "done", data: { session_id: "sess-1" } });
+
+    ask("second");
+    expect(apiMock.sseStream).toHaveBeenCalledTimes(2);
+    expect(lastCall()[1]).toEqual({ message: "second", session_id: "sess-1", doc_id: "doc-1" });
+  });
+
+  it("sends the filters (and no doc_id) in normal chat", async () => {
+    await mount("", "");
+    document.querySelector('input[data-filter-type="label"]').checked = true;
+    ask("q");
+    expect(lastCall()[1]).toEqual({ message: "q", fields: { label: ["lblA"] } });
+  });
+
+  it("clearing the banner returns to normal chat: new session, no doc_id, URL cleaned", async () => {
+    await mount("doc-1", "My Doc");
+    ask("first");
+    emit({ type: "done", data: { session_id: "sess-1" } });
+
+    clickClear();
+
+    expect(isShown(banner())).toBe(false);
+    expect(location.search).toBe("");
+    expect(history.state).toBeNull();
+    expect(document.querySelector('[data-bs-toggle="collapse"]').classList.contains("d-none")).toBe(false);
+    // The old server session is deleted and the log is back to the welcome state.
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch.mock.calls[0][0]).toBe("api/v2/chat/sessions/sess-1");
+    expect(fetch.mock.calls[0][1].method).toBe("DELETE");
+    expect(document.querySelector(".chat-msg-wrap")).toBeNull();
+
+    ask("plain question");
+    expect(lastCall()[1]).toEqual({ message: "plain question" });
+  });
+
+  it("New chat also leaves document mode", async () => {
+    await mount("doc-1", "My Doc");
+    ask("first");
+    emit({ type: "done", data: { session_id: "sess-1" } });
+
+    const newChat = [...document.querySelectorAll(".card-header button")]
+      .find((b) => b.textContent.includes(en["labels.chat_new_chat"]));
+    newChat.dispatchEvent(new Event("click"));
+
+    expect(isShown(banner())).toBe(false);
+    expect(location.search).toBe("");
+    ask("again");
+    expect(lastCall()[1]).toEqual({ message: "again" });
+  });
+
+  it("a 404 before streaming shows the document-unavailable message", async () => {
+    const { ApiError } = await vi.importActual("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    await mount("gone", "Gone");
+    ask("hello");
+    fail(new ApiError("NOT_FOUND", "Document not found", 404));
+    expect(errorText()).toBe("This document is not available or you do not have access to it.");
+    // Input is usable again so the user can clear the banner and carry on.
+    expect(input().disabled).toBe(false);
+  });
+
+  it("other failures in document mode keep the generic messages", async () => {
+    const { ApiError, NetworkError } = await vi.importActual("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    await mount("d1", "T");
+    ask("a");
+    fail(new ApiError("INTERNAL", "boom", 500));
+    expect(errorText()).toBe(en["error.server"]);
+    ask("b");
+    fail(new NetworkError(new Error("offline")));
+    expect(errorText()).toBe(en["error.network"]);
+  });
+
+  it("a 404 in normal chat stays the generic server error", async () => {
+    const { ApiError } = await vi.importActual("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    await mount("", "");
+    ask("hello");
+    fail(new ApiError("NOT_FOUND", "nope", 404));
+    expect(errorText()).toBe(en["error.server"]);
+  });
+
+  it("shows localized part progress while a long document is summarized", async () => {
+    await mount("d1", "T");
+    ask("q");
+    const progress = () => document.getElementById("chat-progress-message").textContent;
+    emit({ type: "phase", data: { phase: "fetch", status: "start", message: "Retrieving document content..." } });
+    expect(progress()).toBe(en["labels.chat_phase_fetch"]);
+    emit({ type: "phase", data: { phase: "fetch", status: "complete", parts: 3 } });
+    emit({ type: "phase", data: { phase: "fetch", status: "start", message: "Summarizing document part 1 of 3..." } });
+    expect(progress()).toBe(en["labels.chat_phase_fetch_part"].replace("{0}", "1").replace("{1}", "3"));
+    emit({ type: "phase", data: { phase: "fetch", status: "complete", part: 1, parts: 3 } });
+    emit({ type: "phase", data: { phase: "fetch", status: "start", message: "Summarizing document part 2 of 3..." } });
+    expect(progress()).toBe(en["labels.chat_phase_fetch_part"].replace("{0}", "2").replace("{1}", "3"));
+    emit({ type: "phase", data: { phase: "answer", status: "start" } });
+    expect(progress()).toBe(en["labels.chat_phase_answer"]);
+  });
+
+  it("ignores the server's English phase message for a short document", async () => {
+    await mount("d1", "T");
+    ask("q");
+    emit({ type: "phase", data: { phase: "fetch", status: "start", message: "Retrieving document content..." } });
+    emit({ type: "phase", data: { phase: "fetch", status: "complete" } });
+    emit({ type: "phase", data: { phase: "fetch", status: "start", message: "Something else" } });
+    expect(document.getElementById("chat-progress-message").textContent).toBe(en["labels.chat_phase_fetch"]);
+  });
+
+  it("shows warnings: truncation in document mode, a generic note otherwise", async () => {
+    await mount("d1", "T");
+    ask("q");
+    emit({ type: "warning", data: { phase: "fetch", code: "document_truncated" } });
+    const status = () => document.querySelector(".chat-status-line");
+    expect(status().textContent).toBe(en["labels.chat_warning_document_truncated"]);
+    expect(status().classList.contains("d-none")).toBe(false);
+    emit({ type: "warning", data: { phase: "answer", code: "something_new" } });
+    expect(status().textContent).toBe(en["labels.chat_warning_generic"]);
+    emit({ type: "warning", data: { phase: "intent", code: "token_exhausted" } });
+    expect(status().textContent).toBe(en["labels.chat_warning_token_exhausted"]);
+  });
+
+  it("shows the generic warning in normal chat too instead of dropping it", async () => {
+    await mount("", "");
+    ask("q");
+    emit({ type: "warning", data: { phase: "answer", code: "document_truncated" } });
+    expect(document.querySelector(".chat-status-line").textContent).toBe(en["labels.chat_warning_generic"]);
+  });
+
+  describe("re-entering the chat route", () => {
+    it("with a different document starts a fresh conversation for it", async () => {
+      const chat = await mount("doc-A", "A");
+      ask("about A");
+      emit({ type: "done", data: { session_id: "sess-A" } });
+      expect(document.querySelector(".chat-msg-wrap")).not.toBeNull();
+
+      openDocumentRoute("doc-B", "B");
+      chat.attachStandalone();
+
+      expect(document.querySelector(".chat-msg-wrap")).toBeNull();
+      expect(fetch.mock.calls[0][0]).toBe("api/v2/chat/sessions/sess-A");
+      expect(isShown(banner())).toBe(true);
+      expect(banner().textContent).toBe("Asking about: B");
+      ask("about B");
+      expect(lastCall()[1]).toEqual({ message: "about B", doc_id: "doc-B" });
+    });
+
+    it("from normal chat into a document starts fresh in document mode", async () => {
+      const chat = await mount("", "");
+      ask("general");
+      emit({ type: "done", data: { session_id: "sess-N" } });
+
+      openDocumentRoute("doc-A", "A");
+      chat.attachStandalone();
+
+      expect(fetch.mock.calls[0][0]).toBe("api/v2/chat/sessions/sess-N");
+      ask("about A");
+      expect(lastCall()[1]).toEqual({ message: "about A", doc_id: "doc-A" });
+    });
+
+    it("from a document to the plain chat route returns to normal chat", async () => {
+      const chat = await mount("doc-A", "A");
+      ask("about A");
+      emit({ type: "done", data: { session_id: "sess-A" } });
+
+      openDocumentRoute("", "");
+      chat.attachStandalone();
+
+      expect(isShown(banner())).toBe(false);
+      ask("general");
+      expect(lastCall()[1]).toEqual({ message: "general" });
+    });
+
+    it("with the same document keeps the conversation", async () => {
+      const chat = await mount("doc-A", "A");
+      ask("about A");
+      emit({ type: "done", data: { session_id: "sess-A" } });
+
+      openDocumentRoute("doc-A", "A");
+      chat.attachStandalone();
+
+      expect(fetch).not.toHaveBeenCalled();
+      expect(document.querySelector(".chat-msg-wrap")).not.toBeNull();
+      ask("more");
+      expect(lastCall()[1]).toEqual({ message: "more", session_id: "sess-A", doc_id: "doc-A" });
+    });
   });
 });

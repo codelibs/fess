@@ -354,6 +354,35 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 () -> chatApiHelper.parseRequestBody(raw, 4000), "session_id with space/exclamation must throw InvalidSessionIdException");
     }
 
+    // ── parseRequestBody: doc_id validation ───────────────────────────────────
+
+    @Test
+    public void test_parseRequestBody_docIdValid_ok() throws Exception {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        raw.put("doc_id", " doc_1-A ");
+        assertEquals("doc_1-A", chatApiHelper.parseRequestBody(raw, 4000).docId());
+    }
+
+    @Test
+    public void test_parseRequestBody_docIdBlank_isNull() throws Exception {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        raw.put("doc_id", "  ");
+        assertNull(chatApiHelper.parseRequestBody(raw, 4000).docId());
+    }
+
+    @Test
+    public void test_parseRequestBody_docIdInvalid_throwsInvalidDocId() {
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put("message", "hello");
+        raw.put("doc_id", "bad id!");
+        final org.codelibs.fess.api.v2.handlers.ChatRequestBody.InvalidRequestException e =
+                Assertions.assertThrows(org.codelibs.fess.api.v2.handlers.ChatRequestBody.InvalidRequestException.class,
+                        () -> chatApiHelper.parseRequestBody(raw, 4000));
+        assertEquals("invalid doc_id", e.getMessage());
+    }
+
     @Test
     public void test_parseRequestBody_sessionIdNull_ok() throws Exception {
         final Map<String, Object> raw = new HashMap<>();

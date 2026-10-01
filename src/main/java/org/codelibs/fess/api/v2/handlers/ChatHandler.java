@@ -38,7 +38,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * Handles {@code POST /api/v2/chat} — non-streaming RAG chat.
  *
  * <p>Thin adapter: parses the v2 JSON body, validates the message length, then
- * delegates to {@link org.codelibs.fess.chat.ChatClient#chat}. The response is
+ * delegates to {@link org.codelibs.fess.chat.ChatClient#chat}, or to
+ * {@link org.codelibs.fess.chat.ChatClient#chatAboutDocument} when the body carries a {@code doc_id}
+ * (answering from that one document; {@code 404 not_found} when it is missing or not visible). The response is
  * wrapped in the v2 envelope as
  * {@code {response: {status:0, session_id, content, sources}}}.</p>
  *
@@ -147,13 +149,30 @@ public class ChatHandler {
             return;
         }
 
+        // A document chat needs a document the caller may see; check before any model work starts.
+        final String docId = body.docId();
+        if (docId != null) {
+            try {
+                if (!documentExists(docId)) {
+                    ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+                    return;
+                }
+            } catch (final RuntimeException e) {
+                ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/chat doc_id=" + docId);
+                return;
+            }
+        }
+
         // Tag the request for the search-log access-type column, same as v1.
         req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));
 
         try {
             final ChatResult result;
             final ChatClient chatClient = getChatClient();
-            if (body.fields().isEmpty() && body.extraQueries().length == 0) {
+            if (docId != null) {
+                // fields and extra_queries are ignored: the answer comes from this one document only.
+                result = chatClient.chatAboutDocument(body.sessionId(), body.message(), userId, docId);
+            } else if (body.fields().isEmpty() && body.extraQueries().length == 0) {
                 result = chatClient.chat(body.sessionId(), body.message(), userId);
             } else {
                 result = chatClient.chat(body.sessionId(), body.message(), userId, body.fields(), body.extraQueries());
@@ -200,6 +219,17 @@ public class ChatHandler {
         final String username = ComponentUtil.getSystemHelper().getUsername();
         return ComponentUtil.getChatApiHelper()
                 .resolveChatRateLimitKey(username, () -> ComponentUtil.getRateLimitHelper().getClientIp(req));
+    }
+
+    /**
+     * Checks that the document of a document chat exists and is visible to the caller. Exposed as a
+     * seam so unit tests can decide the outcome without a search engine.
+     *
+     * @param docId the validated document id
+     * @return true if the document exists and the caller may see it
+     */
+    protected boolean documentExists(final String docId) {
+        return ComponentUtil.getChatApiHelper().existsDocument(docId);
     }
 
     /**

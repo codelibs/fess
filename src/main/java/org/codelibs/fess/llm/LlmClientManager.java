@@ -397,6 +397,38 @@ public class LlmClientManager {
     }
 
     /**
+     * Summarizes one part of a document that is too long for a single request.
+     *
+     * @param userMessage the user's request the summary has to serve
+     * @param title the document title (may be null)
+     * @param url the document URL (may be null)
+     * @param partText the text of this part
+     * @param partIndex the 1-based index of this part
+     * @param partCount the total number of parts
+     * @param maxChars the length, in characters, the summary is asked to stay within
+     * @return the summary of this part
+     * @throws LlmException if LLM is not available or the request fails
+     */
+    public String summarizeDocumentPart(final String userMessage, final String title, final String url, final String partText,
+            final int partIndex, final int partCount, final int maxChars) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] Delegating summarizeDocumentPart. llmType={}, part={}/{}", getLlmType(), partIndex, partCount);
+        }
+        return getAvailableClient().summarizeDocumentPart(userMessage, title, url, partText, partIndex, partCount, maxChars);
+    }
+
+    /**
+     * Gets the maximum number of characters of document text the configured LLM client accepts in
+     * one summary request.
+     *
+     * @return the maximum characters
+     * @throws LlmException if LLM is not available
+     */
+    public int getSummaryContextMaxChars() {
+        return getAvailableClient().getSummaryContextMaxChars();
+    }
+
+    /**
      * Generates an FAQ answer using document content (streaming).
      *
      * @param userMessage the user's message
