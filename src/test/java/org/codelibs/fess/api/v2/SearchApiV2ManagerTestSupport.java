@@ -33,6 +33,7 @@ import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.PopularWordsHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
+import org.codelibs.fess.api.v2.handlers.SearchHistoryHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
 import org.codelibs.fess.api.v2.handlers.TargetOriginResolver;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
@@ -80,6 +81,7 @@ final class SearchApiV2ManagerTestSupport {
         m.favoriteGetHandler = new FavoriteGetHandler();
         m.favoritePostHandler = new FavoritePostHandler();
         m.favoritesListHandler = new FavoritesListHandler();
+        m.searchHistoryHandler = new SearchHistoryHandler();
         m.meHandler = new MeHandler();
         m.logoutHandler = new LogoutHandler();
         m.passwordChangeHandler = new PasswordChangeHandler();
