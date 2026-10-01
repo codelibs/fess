@@ -36,6 +36,16 @@ public class LoginRequirementTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_searchExportIsGated() {
+        assertTrue(requirement.requiresLogin("/documents/export"));
+    }
+
+    @Test
+    public void test_searchExportAcceptsAccessToken() {
+        assertTrue(requirement.acceptsAccessToken("/documents/export"));
+    }
+
+    @Test
     public void test_indexDerivedEndpointsAreGated() {
         assertTrue(requirement.requiresLogin("/labels"));
         assertTrue(requirement.requiresLogin("/popular-words"));

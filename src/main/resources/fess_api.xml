@@ -21,6 +21,7 @@
 	<!-- v2 request handlers, injected into searchApiV2Manager by field name. -->
 	<component name="searchHandler" class="org.codelibs.fess.api.v2.handlers.SearchHandler"/>
 	<component name="scrollSearchHandler" class="org.codelibs.fess.api.v2.handlers.ScrollSearchHandler"/>
+	<component name="exportSearchHandler" class="org.codelibs.fess.api.v2.handlers.ExportSearchHandler"/>
 	<component name="favoriteGetHandler" class="org.codelibs.fess.api.v2.handlers.FavoriteGetHandler"/>
 	<component name="favoritePostHandler" class="org.codelibs.fess.api.v2.handlers.FavoritePostHandler"/>
 	<component name="favoritesListHandler" class="org.codelibs.fess.api.v2.handlers.FavoritesListHandler"/>

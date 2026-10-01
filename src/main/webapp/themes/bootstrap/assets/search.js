@@ -598,6 +598,27 @@ function renderOptionsBar() {
   }
 }
 
+/**
+ * Show the export menu (CSV / JSON) when the server offers it, or hide it. Each link carries the
+ * current search without paging or facets: the export is the whole result set, up to the server cap.
+ */
+function renderExportMenu(show) {
+  const wrap = document.getElementById("results-export");
+  if (!wrap) return;
+  const cfg = api.getConfig() || {};
+  if (!show || !(cfg.features && cfg.features.search_export)) {
+    wrap.classList.add("d-none");
+    return;
+  }
+  const params = buildSearchParams();
+  for (const name of ["start", "num", "offset", "facet.field", "facet.query"]) delete params[name];
+  for (const format of ["csv", "json"]) {
+    const link = document.getElementById("export-" + format);
+    if (link) link.setAttribute("href", api.url("/documents/export", { ...params, format }));
+  }
+  wrap.classList.remove("d-none");
+}
+
 function renderResults(env) {
   const list = document.getElementById("results");
   const meta = document.getElementById("results-meta");
@@ -620,9 +641,11 @@ function renderResults(env) {
     // against the async loadRelated and wipe its output (parity-r3 A2).
     const rpw = document.getElementById("results-popular-words");
     if (rpw) rpw.classList.add("d-none");
+    renderExportMenu(false);
     return;
   }
   empty.classList.add("d-none");
+  renderExportMenu(true);
   // C.1: populate the result-status banner
   renderResultsStatus(env);
   // Load popular words for the results header slot (JSP parity: #1).
@@ -705,6 +728,56 @@ function syncUrlParams(push) {
   if (push) history.pushState(null, "", url); else history.replaceState(null, "", url);
 }
 
+/**
+ * The /search query parameters for the current state: the query, paging, sort, language, filters
+ * and the facets the sidebar renders. Shared by runSearch and the export links.
+ */
+function buildSearchParams() {
+  const params = { q: state.q, start: state.start, num: state.num };
+  if (state.sort) params.sort = state.sort;
+  // state.lang is string[] — send as repeated lang= params (empty array → omit).
+  if (Array.isArray(state.lang) && state.lang.length > 0) {
+    params.lang = state.lang;
+  }
+  if (state.sdh) params.sdh = state.sdh;
+  for (const [name, values] of Object.entries(state.as)) params["as." + name] = values;
+  // Explicit field filters (state.fields: the URL, the label dropdown, the default labels)
+  // become one deduplicated fields.* param per field; the API ORs the values of a field.
+  // Facet selections (state.facets) are sent as ex_q clauses instead, which AND: facet
+  // counts are computed within the current filters, so a facet click must narrow the
+  // search (JSP parity: searchResults.jsp facet links add ex_q=label:<value>). Merging
+  // them into fields.* would widen the search to "default label OR clicked label".
+  const fieldSets = {};
+  for (const [field, values] of Object.entries(state.fields)) {
+    if (Array.isArray(values)) {
+      values.forEach(v => { (fieldSets[field] = fieldSets[field] || new Set()).add(v); });
+    }
+  }
+  for (const [field, valueSet] of Object.entries(fieldSets)) {
+    valueSet.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
+  }
+  // Facet selections, facet query views (SRCH-4) and the URL's other ex_q clauses
+  // (ADV-2, e.g. an advanced-search time range).
+  const exQ = exQClauses();
+  if (exQ.length > 0) params["ex_q"] = exQ;
+  // GEO-1: emit geo params when all three are present
+  if (state.geo && state.geo.lat !== "" && state.geo.lon !== "" && state.geo.distance !== "") {
+    params["geo.location.point"] = state.geo.lat + "," + state.geo.lon;
+    params["geo.location.distance"] = state.geo.distance;
+  }
+  // Request the same facets the JSP sidebar renders: the "label" field facet plus
+  // every configured facet-query view (timestamp / size / filetype ranges). Without
+  // these the API returns no facet data, so the query-view groups render empty and
+  // the sidebar is effectively dead (JSP parity: query.facet.fields + .queries).
+  const cfgFacet = api.getConfig() || {};
+  params["facet.field"] = ["label"];
+  const facetQueryValues = [];
+  (cfgFacet.facet_views || []).forEach(v =>
+    (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.push(qy.value); }));
+  if (facetQueryValues.length > 0) params["facet.query"] = facetQueryValues;
+  return params;
+}
+
 async function runSearch() {
   syncUrlParams(false);
   // Cancel any in-flight request before issuing a new one.
@@ -723,48 +796,7 @@ async function runSearch() {
   if (prevErr) prevErr.classList.add("d-none");
   showSearchLoading(true);
   try {
-    const params = { q: state.q, start: state.start, num: state.num };
-    if (state.sort) params.sort = state.sort;
-    // state.lang is string[] — send as repeated lang= params (empty array → omit).
-    if (Array.isArray(state.lang) && state.lang.length > 0) {
-      params.lang = state.lang;
-    }
-    if (state.sdh) params.sdh = state.sdh;
-    for (const [name, values] of Object.entries(state.as)) params["as." + name] = values;
-    // Explicit field filters (state.fields: the URL, the label dropdown, the default labels)
-    // become one deduplicated fields.* param per field; the API ORs the values of a field.
-    // Facet selections (state.facets) are sent as ex_q clauses instead, which AND: facet
-    // counts are computed within the current filters, so a facet click must narrow the
-    // search (JSP parity: searchResults.jsp facet links add ex_q=label:<value>). Merging
-    // them into fields.* would widen the search to "default label OR clicked label".
-    const fieldSets = {};
-    for (const [field, values] of Object.entries(state.fields)) {
-      if (Array.isArray(values)) {
-        values.forEach(v => { (fieldSets[field] = fieldSets[field] || new Set()).add(v); });
-      }
-    }
-    for (const [field, valueSet] of Object.entries(fieldSets)) {
-      valueSet.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
-    }
-    // Facet selections, facet query views (SRCH-4) and the URL's other ex_q clauses
-    // (ADV-2, e.g. an advanced-search time range).
-    const exQ = exQClauses();
-    if (exQ.length > 0) params["ex_q"] = exQ;
-    // GEO-1: emit geo params when all three are present
-    if (state.geo && state.geo.lat !== "" && state.geo.lon !== "" && state.geo.distance !== "") {
-      params["geo.location.point"] = state.geo.lat + "," + state.geo.lon;
-      params["geo.location.distance"] = state.geo.distance;
-    }
-    // Request the same facets the JSP sidebar renders: the "label" field facet plus
-    // every configured facet-query view (timestamp / size / filetype ranges). Without
-    // these the API returns no facet data, so the query-view groups render empty and
-    // the sidebar is effectively dead (JSP parity: query.facet.fields + .queries).
-    const cfgFacet = api.getConfig() || {};
-    params["facet.field"] = ["label"];
-    const facetQueryValues = [];
-    (cfgFacet.facet_views || []).forEach(v =>
-      (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.push(qy.value); }));
-    if (facetQueryValues.length > 0) params["facet.query"] = facetQueryValues;
+    const params = buildSearchParams();
     const env = await api.get("/search", params, { signal });
     // A search request rewriter on the server (e.g. a bang such as "!g") sent this search elsewhere.
     // replace() keeps the redirecting search out of the history, so Back does not bounce.

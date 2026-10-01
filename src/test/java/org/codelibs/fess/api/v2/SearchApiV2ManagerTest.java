@@ -194,6 +194,18 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_documentsExportDispatchesToExportHandler() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/export"), res, new NopChain());
+        // The export handler answers a disabled feature with "search export is not available";
+        // the unknown-action arm of the manager would say "unknown action on document" instead.
+        final String body = res.body();
+        assertEquals(400, res.status);
+        assertTrue(body.contains("search export is not available"), body);
+    }
+
+    @Test
     public void test_process_documentsFavoriteDispatchesToFavoriteHandler() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();

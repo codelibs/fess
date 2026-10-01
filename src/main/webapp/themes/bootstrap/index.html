@@ -204,6 +204,18 @@
             <p id="results-status" aria-live="polite" aria-atomic="true"></p>
             <div id="results-popular-words" class="d-none text-muted small" aria-live="polite"></div>
           </div>
+          <!-- Export menu: shown by search.js when features.search_export is on. -->
+          <div class="col-auto d-none" id="results-export">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-download" aria-hidden="true"></i> <span data-i18n="search.export">Export</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" id="export-csv" href="#" download data-i18n="search.export_csv">CSV</a></li>
+                <li><a class="dropdown-item" id="export-json" href="#" download data-i18n="search.export_json">JSON</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <!-- Mobile facet toggle (parity searchResults.jsp div.d-md-none.mb-2). -->

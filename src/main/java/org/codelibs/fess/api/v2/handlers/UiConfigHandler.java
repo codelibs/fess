@@ -390,6 +390,8 @@ public class UiConfigHandler {
             features.put("user_favorite", userFavoriteEnabled);
             // search_history: whether GET /api/v2/search-history serves the logged-in user's recent searches.
             features.put("search_history", cfg.isSearchHistoryEnabled() && searchLogEnabled);
+            // search_export: whether GET /api/v2/documents/export is available, so the theme shows the export links.
+            features.put("search_export", cfg.isApiSearchExport());
             features.put("popular_word", cfg.isWebApiPopularWord());
             features.put("suggest_search_log", cfg.isSuggestSearchLog());
             features.put("suggest_documents", cfg.isSuggestDocuments());
