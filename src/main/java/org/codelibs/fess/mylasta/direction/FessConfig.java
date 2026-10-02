@@ -553,6 +553,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS = "crawler.document.file.default.exclude.search.patterns";
 
     /** The key of the configuration. e.g. true */
+    String CRAWLER_DOCUMENT_FILE_OWNER_ENABLED = "crawler.document.file.owner.enabled";
+
+    /** The key of the configuration. e.g. true */
+    String CRAWLER_DOCUMENT_FILE_LAST_MODIFIER_ENABLED = "crawler.document.file.last.modifier.enabled";
+
+    /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_CACHE_ENABLED = "crawler.document.cache.enabled";
 
     /** The key of the configuration. e.g. 2621440 */
@@ -683,6 +689,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. etag */
     String INDEX_FIELD_ETAG = "index.field.etag";
+
+    /** The key of the configuration. e.g. owner */
+    String INDEX_FIELD_OWNER = "index.field.owner";
+
+    /** The key of the configuration. e.g. last_modifier */
+    String INDEX_FIELD_last_modifier = "index.field.last_modifier";
 
     /** The key of the configuration. e.g. anchor */
     String INDEX_FIELD_ANCHOR = "index.field.anchor";
@@ -4110,6 +4122,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getCrawlerDocumentFileDefaultExcludeSearchPatternsAsInteger();
 
     /**
+     * Get the value for the key 'crawler.document.file.owner.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to index the owner of crawled files (SMB, local file system and FTP). The crawl config parameter config.owner.enabled overrides it.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileOwnerEnabled();
+
+    /**
+     * Is the property for the key 'crawler.document.file.owner.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to index the owner of crawled files (SMB, local file system and FTP). The crawl config parameter config.owner.enabled overrides it.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentFileOwnerEnabled();
+
+    /**
+     * Get the value for the key 'crawler.document.file.last.modifier.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to index the last modifier of crawled files, read from the document metadata and falling back to the file owner. The crawl config parameter config.last.modifier.enabled overrides it.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileLastModifierEnabled();
+
+    /**
+     * Is the property for the key 'crawler.document.file.last.modifier.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to index the last modifier of crawled files, read from the document metadata and falling back to the file owner. The crawl config parameter config.last.modifier.enabled overrides it.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentFileLastModifierEnabled();
+
+    /**
      * Get the value for the key 'crawler.document.cache.enabled'. <br>
      * The value is, e.g. true <br>
      * comment: Whether document cache is enabled.
@@ -4655,6 +4699,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldEtag();
+
+    /**
+     * Get the value for the key 'index.field.owner'. <br>
+     * The value is, e.g. owner <br>
+     * comment: Field name for the owner of the crawled file in the index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldOwner();
+
+    /**
+     * Get the value for the key 'index.field.last_modifier'. <br>
+     * The value is, e.g. last_modifier <br>
+     * comment: Field name for the last modifier of the crawled file in the index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldLastModifier();
 
     /**
      * Get the value for the key 'index.field.anchor'. <br>
@@ -11546,6 +11606,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS);
         }
 
+        public String getCrawlerDocumentFileOwnerEnabled() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_OWNER_ENABLED);
+        }
+
+        public boolean isCrawlerDocumentFileOwnerEnabled() {
+            return is(FessConfig.CRAWLER_DOCUMENT_FILE_OWNER_ENABLED);
+        }
+
+        public String getCrawlerDocumentFileLastModifierEnabled() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_LAST_MODIFIER_ENABLED);
+        }
+
+        public boolean isCrawlerDocumentFileLastModifierEnabled() {
+            return is(FessConfig.CRAWLER_DOCUMENT_FILE_LAST_MODIFIER_ENABLED);
+        }
+
         public String getCrawlerDocumentCacheEnabled() {
             return get(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLED);
         }
@@ -11808,6 +11884,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexFieldEtag() {
             return get(FessConfig.INDEX_FIELD_ETAG);
+        }
+
+        public String getIndexFieldOwner() {
+            return get(FessConfig.INDEX_FIELD_OWNER);
+        }
+
+        public String getIndexFieldLastModifier() {
+            return get(FessConfig.INDEX_FIELD_last_modifier);
         }
 
         public String getIndexFieldAnchor() {
@@ -14782,6 +14866,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_INDEX_PATTERNS, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_INCLUDE_SEARCH_PATTERNS, "");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_EXCLUDE_SEARCH_PATTERNS, "");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_OWNER_ENABLED, "true");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_FILE_LAST_MODIFIER_ENABLED, "true");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLED, "true");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_MAX_SIZE, "2621440");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_SUPPORTED_MIMETYPES, "text/html");
@@ -14826,6 +14912,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_has_cache, "has_cache");
             defaultMap.put(FessConfig.INDEX_FIELD_last_modified, "last_modified");
             defaultMap.put(FessConfig.INDEX_FIELD_ETAG, "etag");
+            defaultMap.put(FessConfig.INDEX_FIELD_OWNER, "owner");
+            defaultMap.put(FessConfig.INDEX_FIELD_last_modifier, "last_modifier");
             defaultMap.put(FessConfig.INDEX_FIELD_ANCHOR, "anchor");
             defaultMap.put(FessConfig.INDEX_FIELD_SEGMENT, "segment");
             defaultMap.put(FessConfig.INDEX_FIELD_ROLE, "role");

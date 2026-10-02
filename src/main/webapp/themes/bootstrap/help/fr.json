@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Recherche par champ",
-      "html": "<p>Vous pouvez rechercher dans n'importe quel champ en saisissant le nom du champ suivi d'un deux-points <code>:</code> puis du terme recherché. Par exemple, pour trouver des documents contenant « Fess » dans le titre :</p><pre>title:Fess</pre><p>Les champs disponibles incluent <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> et <code>mimetype</code>. Ces champs sont personnalisables.</p>"
+      "html": "<p>Vous pouvez rechercher dans n'importe quel champ en saisissant le nom du champ suivi d'un deux-points <code>:</code> puis du terme recherché. Par exemple, pour trouver des documents contenant « Fess » dans le titre :</p><pre>title:Fess</pre><p>Les champs disponibles incluent <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> et <code>mimetype</code>. Ces champs sont personnalisables.</p>"
     },
     {
       "id": "sort",

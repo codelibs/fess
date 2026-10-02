@@ -577,6 +577,12 @@
         "index": false,
         "doc_values": false
       },
+      "owner": {
+        "type": "keyword"
+      },
+      "last_modifier": {
+        "type": "keyword"
+      },
       "location": {
         "type": "geo_point"
       },

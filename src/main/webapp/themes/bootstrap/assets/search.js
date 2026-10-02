@@ -295,7 +295,7 @@ function buildResultCard(d, queryId, order) {
   }));
   li.appendChild(more);
 
-  // --- div.info > date + (size) + (cache) + (similar) + (favorite) ---
+  // --- div.info > date + (size) + (owner) + (last modifier) + (cache) + (similar) + (favorite) ---
   const info = el("div", { className: "info" });
   const dateStr = formatDate(d.last_modified || d.created);
   if (dateStr) info.appendChild(document.createTextNode(dateStr + " "));
@@ -311,6 +311,19 @@ function buildResultCard(d, queryId, order) {
   if (sizeStr) {
     appendNbspSpacer();
     info.appendChild(document.createTextNode(sizeStr + " "));
+  }
+
+  // owner / last modifier (keyword fields; a multi-valued one may arrive as an array)
+  const metaStr = v => (Array.isArray(v) ? v.filter(x => x != null && x !== "").join(", ") : (v == null ? "" : String(v)));
+  const ownerStr = metaStr(d.owner);
+  if (ownerStr) {
+    appendNbspSpacer();
+    info.appendChild(document.createTextNode(t("result.owner", { name: ownerStr }) + " "));
+  }
+  const lastModifierStr = metaStr(d.last_modifier);
+  if (lastModifierStr) {
+    appendNbspSpacer();
+    info.appendChild(document.createTextNode(t("result.last_modifier", { name: lastModifierStr }) + " "));
   }
 
   // view count (JSP parity, searchResults.jsp: between the size and the cache link,

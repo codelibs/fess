@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Поиск по полям",
-      "html": "<p>Можно выполнять поиск по любому полю: введите имя поля, затем двоеточие <code>:</code> и искомый термин. Например, чтобы найти документы со словом «Fess» в заголовке:</p><pre>title:Fess</pre><p>Доступные поля включают <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> и <code>mimetype</code>. Их можно настроить.</p>"
+      "html": "<p>Можно выполнять поиск по любому полю: введите имя поля, затем двоеточие <code>:</code> и искомый термин. Например, чтобы найти документы со словом «Fess» в заголовке:</p><pre>title:Fess</pre><p>Доступные поля включают <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> и <code>mimetype</code>. Их можно настроить.</p>"
     },
     {
       "id": "sort",

@@ -1417,6 +1417,17 @@ components:
         mimetype: { type: string }
         filetype: { type: string }
         filename: { type: string }
+        owner:
+          type: string
+          description: |-
+            Account name of the file owner, taken from SMB, file system and
+            FTP crawls. Absent when the owner is unknown or its indexing is
+            disabled.
+        last_modifier:
+          type: string
+          description: |-
+            Last modifier from the document metadata (for example the last
+            author of an Office file), falling back to the file owner.
         content_length: { type: integer, format: int64 }
         last_modified: { type: string, format: date-time }
         timestamp: { type: string, format: date-time }

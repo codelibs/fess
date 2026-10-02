@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Zoeken op veld",
-      "html": "<p>U kunt in elk veld zoeken door de veldnaam te typen, gevolgd door een dubbele punt <code>:</code> en de term die u zoekt. Om bijvoorbeeld documenten te vinden met “Fess” in de titel:</p><pre>title:Fess</pre><p>Beschikbare velden zijn onder meer <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> en <code>mimetype</code>. Deze zijn aanpasbaar.</p>"
+      "html": "<p>U kunt in elk veld zoeken door de veldnaam te typen, gevolgd door een dubbele punt <code>:</code> en de term die u zoekt. Om bijvoorbeeld documenten te vinden met “Fess” in de titel:</p><pre>title:Fess</pre><p>Beschikbare velden zijn onder meer <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> en <code>mimetype</code>. Deze zijn aanpasbaar.</p>"
     },
     {
       "id": "sort",

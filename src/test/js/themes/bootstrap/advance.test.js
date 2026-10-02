@@ -24,6 +24,8 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
 
 import {
   quoteIfNeeded,
+  quoteFieldValue,
+  unquoteFieldValue,
   tokenize,
   compose,
   buildFiletypeOptions,
@@ -90,6 +92,23 @@ describe("compose", () => {
   it("empty parts → empty string", () => {
     expect(compose({})).toBe("");
   });
+
+  it("owner / last_modifier → quoted field terms after filetype", () => {
+    expect(compose({ owner: "alice" })).toBe('owner:"alice"');
+    expect(compose({ last_modifier: " Taro Yamada " })).toBe('last_modifier:"Taro Yamada"');
+    expect(compose({ all: "x", filetype: "word", owner: "CORP alice", last_modifier: "bob" }))
+      .toBe('x filetype:"word" owner:"CORP alice" last_modifier:"bob"');
+  });
+
+  it("owner / last_modifier escape inner double quotes and backslashes", () => {
+    // Actual characters: CORP\alice → owner:"CORP\\alice"; say "hi" → last_modifier:"say \"hi\""
+    expect(compose({ owner: "CORP\\alice" })).toBe('owner:"CORP\\\\alice"');
+    expect(compose({ last_modifier: 'say "hi"' })).toBe('last_modifier:"say \\"hi\\""');
+  });
+
+  it("whitespace-only owner / last_modifier → omitted", () => {
+    expect(compose({ owner: "  ", last_modifier: "" })).toBe("");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -117,6 +136,28 @@ describe("quoteIfNeeded", () => {
 });
 
 // ---------------------------------------------------------------------------
+// quoteFieldValue(s) / unquoteFieldValue(s)
+// ---------------------------------------------------------------------------
+
+describe("quoteFieldValue / unquoteFieldValue", () => {
+  it("quotes and escapes backslash before quote", () => {
+    expect(quoteFieldValue('a\\b "c"')).toBe('"a\\\\b \\"c\\""');
+  });
+
+  it("round-trips through unquoteFieldValue", () => {
+    for (const v of ["alice", "CORP alice", 'say "hi"', "CORP\\alice", "trailing\\"]) {
+      expect(unquoteFieldValue(quoteFieldValue(v))).toBe(v);
+    }
+  });
+
+  it("returns an unquoted value unchanged", () => {
+    expect(unquoteFieldValue("alice")).toBe("alice");
+    expect(unquoteFieldValue('"open')).toBe('"open');
+    expect(unquoteFieldValue("")).toBe("");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // tokenize(s)
 // ---------------------------------------------------------------------------
 
@@ -135,6 +176,13 @@ describe("tokenize", () => {
 
   it("returns an empty array for an empty string", () => {
     expect(tokenize("")).toEqual([]);
+  });
+
+  it("keeps a field:\"quoted value\" whole, including spaces and escaped quotes", () => {
+    expect(tokenize('a owner:"CORP alice" b')).toEqual(["a", 'owner:"CORP alice"', "b"]);
+    expect(tokenize('last_modifier:"say \\"hi\\" now" x'))
+      .toEqual(['last_modifier:"say \\"hi\\" now"', "x"]);
+    expect(tokenize('owner:"open ended')).toEqual(['owner:"open ended']);
   });
 });
 
@@ -234,5 +282,43 @@ describe("attach: submit builds the /search URL", () => {
     expect(p.get("keepme")).toBe("1");
     // advance-owned param removed
     expect(p.has("start")).toBe(false);
+  });
+
+  it("renders owner / last-modifier inputs and composes them into q", () => {
+    attach();
+    expect(document.querySelector('label[for="adv-owner"]').textContent).toBe("advance.owner");
+    expect(document.querySelector('label[for="adv-last-modifier"]').textContent).toBe("advance.last_modifier");
+
+    document.getElementById("adv-all").value = "report";
+    document.getElementById("adv-owner").value = "CORP alice";
+    document.getElementById("adv-last-modifier").value = 'Taro "T" Yamada';
+    document.getElementById("advance-form")
+      .dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+
+    const target = navigate.mock.calls[0][0];
+    const p = new URLSearchParams(target.slice(target.indexOf("?") + 1));
+    expect(p.get("q")).toBe('report owner:"CORP alice" last_modifier:"Taro \\"T\\" Yamada"');
+  });
+
+  it("re-populates owner / last-modifier from an existing q (round trip)", () => {
+    const q = 'report filetype:"word" owner:"CORP alice" last_modifier:"Taro \\"T\\" Yamada"';
+    setLocation("/advance?q=" + encodeURIComponent(q));
+    attach();
+    expect(document.getElementById("adv-owner").value).toBe("CORP alice");
+    expect(document.getElementById("adv-last-modifier").value).toBe('Taro "T" Yamada');
+    expect(document.getElementById("adv-all").value).toBe("report");
+
+    document.getElementById("advance-form")
+      .dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+    const target = navigate.mock.calls[0][0];
+    const p = new URLSearchParams(target.slice(target.indexOf("?") + 1));
+    expect(p.get("q")).toBe(q);
+  });
+
+  it("parses an unquoted owner:value and keeps a second owner term in all-words", () => {
+    setLocation("/advance?q=" + encodeURIComponent('owner:alice owner:"bob"'));
+    attach();
+    expect(document.getElementById("adv-owner").value).toBe("alice");
+    expect(document.getElementById("adv-all").value).toBe('owner:"bob"');
   });
 });

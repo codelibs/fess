@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Feldsuche",
-      "html": "<p>Sie können jedes Feld durchsuchen, indem Sie den Feldnamen gefolgt von einem Doppelpunkt <code>:</code> und dem gesuchten Begriff eingeben. Beispiel: Um Dokumente zu finden, die „Fess“ im Titel haben:</p><pre>title:Fess</pre><p>Zu den verfügbaren Feldern gehören <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> und <code>mimetype</code>. Diese sind anpassbar.</p>"
+      "html": "<p>Sie können jedes Feld durchsuchen, indem Sie den Feldnamen gefolgt von einem Doppelpunkt <code>:</code> und dem gesuchten Begriff eingeben. Beispiel: Um Dokumente zu finden, die „Fess“ im Titel haben:</p><pre>title:Fess</pre><p>Zu den verfügbaren Feldern gehören <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> und <code>mimetype</code>. Diese sind anpassbar.</p>"
     },
     {
       "id": "sort",

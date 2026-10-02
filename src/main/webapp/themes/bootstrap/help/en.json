@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Field Search",
-      "html": "<p>You can search any field by typing the field name followed by a colon <code>:</code> and then the term you are looking for. For example, to find documents with \"Fess\" in the title:</p><pre>title:Fess</pre><p>The available fields include <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, and <code>mimetype</code>. These are customizable.</p>"
+      "html": "<p>You can search any field by typing the field name followed by a colon <code>:</code> and then the term you are looking for. For example, to find documents with \"Fess\" in the title:</p><pre>title:Fess</pre><p>The available fields include <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code>, and <code>mimetype</code>. These are customizable.</p>"
     },
     {
       "id": "sort",

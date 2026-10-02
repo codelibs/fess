@@ -152,6 +152,8 @@ public interface CrawlingConfig {
             public static final String SCRIPT_TYPE = "script.type";
             public static final String HTML_CHILD_URL_RULES = "html.child.url.rules";
             public static final String CRAWL_ORDER = "crawl.order";
+            public static final String OWNER_ENABLED = "owner.enabled";
+            public static final String LAST_MODIFIER_ENABLED = "last.modifier.enabled";
         }
 
         // meta.*

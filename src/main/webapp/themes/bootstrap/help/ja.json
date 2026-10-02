@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "フィールド指定検索",
-      "html": "<p>フィールド名の後にコロン <code>:</code> を付け、検索語を指定することで任意のフィールドを検索できます。たとえば、タイトルに「Fess」を含むドキュメントを検索する場合:</p><pre>title:Fess</pre><p>標準で利用可能なフィールドは <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code>、<code>mimetype</code> です。設定で変更できます。</p>"
+      "html": "<p>フィールド名の後にコロン <code>:</code> を付け、検索語を指定することで任意のフィールドを検索できます。たとえば、タイトルに「Fess」を含むドキュメントを検索する場合:</p><pre>title:Fess</pre><p>標準で利用可能なフィールドは <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code>、<code>owner</code>、<code>last_modifier</code>、<code>mimetype</code> です。設定で変更できます。</p>"
     },
     {
       "id": "sort",

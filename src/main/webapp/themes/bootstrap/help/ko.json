@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "필드 지정 검색",
-      "html": "<p>필드 이름 뒤에 콜론 <code>:</code>을 붙여 지정한 필드에서 검색할 수 있습니다. 예를 들어, 문서의 title 필드에서 Fess가 포함된 문서를 검색하려면 다음과 같이 입력합니다.</p><pre>title:Fess</pre><p>기본으로 사용 가능한 필드는 <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>mimetype</code>입니다. 설정에서 변경할 수 있습니다.</p>"
+      "html": "<p>필드 이름 뒤에 콜론 <code>:</code>을 붙여 지정한 필드에서 검색할 수 있습니다. 예를 들어, 문서의 title 필드에서 Fess가 포함된 문서를 검색하려면 다음과 같이 입력합니다.</p><pre>title:Fess</pre><p>기본으로 사용 가능한 필드는 <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code>, <code>mimetype</code>입니다. 설정에서 변경할 수 있습니다.</p>"
     },
     {
       "id": "sort",

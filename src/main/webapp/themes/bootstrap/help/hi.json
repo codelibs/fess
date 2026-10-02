@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "फ़ील्ड खोज",
-      "html": "<p>फ़ील्ड का नाम, उसके बाद कोलन <code>:</code> और फिर खोजा जाने वाला शब्द टाइप करके आप किसी भी फ़ील्ड में खोज सकते हैं। उदाहरण के लिए, शीर्षक में \"Fess\" वाले दस्तावेज़ ढूँढने के लिए:</p><pre>title:Fess</pre><p>उपलब्ध फ़ील्ड में <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> और <code>mimetype</code> शामिल हैं। इन्हें अनुकूलित किया जा सकता है।</p>"
+      "html": "<p>फ़ील्ड का नाम, उसके बाद कोलन <code>:</code> और फिर खोजा जाने वाला शब्द टाइप करके आप किसी भी फ़ील्ड में खोज सकते हैं। उदाहरण के लिए, शीर्षक में \"Fess\" वाले दस्तावेज़ ढूँढने के लिए:</p><pre>title:Fess</pre><p>उपलब्ध फ़ील्ड में <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> और <code>mimetype</code> शामिल हैं। इन्हें अनुकूलित किया जा सकता है।</p>"
     },
     {
       "id": "sort",

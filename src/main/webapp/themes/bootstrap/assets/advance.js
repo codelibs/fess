@@ -107,8 +107,37 @@ export function quoteIfNeeded(s) {
 }
 
 /**
+ * Quote a value for a field:"value" term, escaping backslashes and double quotes.
+ *
+ * @param {string} s
+ * @returns {string}
+ */
+export function quoteFieldValue(s) {
+  return '"' + s.replaceAll(BACKSLASH, BACKSLASH + BACKSLASH).replaceAll('"', BACKSLASH + '"') + '"';
+}
+
+/**
+ * Reverse of quoteFieldValue(): strip the surrounding quotes and unescape.
+ * A value that is not quoted is returned unchanged.
+ *
+ * @param {string} s
+ * @returns {string}
+ */
+export function unquoteFieldValue(s) {
+  if (s.length < 2 || !s.startsWith('"') || !s.endsWith('"')) return s;
+  const inner = s.slice(1, -1);
+  let out = "";
+  for (let i = 0; i < inner.length; i++) {
+    if (inner[i] === BACKSLASH && i + 1 < inner.length) i++;
+    out += inner[i];
+  }
+  return out;
+}
+
+/**
  * Tokenize a string, treating "quoted phrases" as single tokens.
- * Unquoted whitespace-separated words are individual tokens.
+ * Unquoted whitespace-separated words are individual tokens; a quoted value
+ * attached to a word (owner:"CORP alice") stays part of that word's token.
  *
  * @param {string} s
  * @returns {string[]}
@@ -131,9 +160,19 @@ export function tokenize(s) {
       tokens.push(str.slice(i, j));
       i = j;
     } else {
-      // Unquoted word: consume until whitespace
+      // Unquoted word: consume until whitespace. A quoted part inside it
+      // (field:"two words") stays in the token, honouring backslash escapes.
       let j = i;
-      while (j < str.length && !/\s/.test(str[j])) j++;
+      while (j < str.length && !/\s/.test(str[j])) {
+        if (str[j] === '"') {
+          j++;
+          while (j < str.length && str[j] !== '"') {
+            if (str[j] === BACKSLASH) j++;
+            j++;
+          }
+        }
+        j++;
+      }
       tokens.push(str.slice(i, j));
       i = j;
     }
@@ -145,7 +184,8 @@ export function tokenize(s) {
  * Compose a Fess/OpenSearch query string from individual advanced-search parts.
  *
  * @param {{ all?:string, exact?:string, any?:string, none?:string,
- *            site?:string, filetype?:string, occt?:string }} parts
+ *            site?:string, filetype?:string, owner?:string,
+ *            last_modifier?:string, occt?:string }} parts
  * @returns {string}
  */
 export function compose(parts) {
@@ -185,6 +225,16 @@ export function compose(parts) {
     const ft = parts.filetype.trim();
     // Server (QueryStringBuilder:236-238) emits filetype:"<value>" with quotes.
     if (ft) out.push('filetype:"' + ft + '"');
+  }
+
+  if (parts.owner) {
+    const owner = parts.owner.trim();
+    if (owner) out.push("owner:" + quoteFieldValue(owner));
+  }
+
+  if (parts.last_modifier) {
+    const lastModifier = parts.last_modifier.trim();
+    if (lastModifier) out.push("last_modifier:" + quoteFieldValue(lastModifier));
   }
 
   let q = out.filter(Boolean).join(" ");
@@ -301,6 +351,8 @@ export function attach() {
   const fAny   = makeField("advance.any",   "adv-any");
   const fNone  = makeField("advance.none",  "adv-none");
   const fSite  = makeField("advance.site",  "adv-site");
+  const fOwner = makeField("advance.owner", "adv-owner");
+  const fLastModifier = makeField("advance.last_modifier", "adv-last-modifier");
 
   // File type select — options sourced from server config (filetype_options) with canonical fallback
   const filetypeOptDefs = buildFiletypeOptions(serverConfig);
@@ -441,6 +493,8 @@ export function attach() {
   // CAN recover unambiguously:
   //   site:<v>           → site field
   //   filetype:"<v>"     → filetype select
+  //   owner:"<v>"        → owner field (first one wins)
+  //   last_modifier:"<v>" → last-modifier field (first one wins)
   //   NOT <token>        → none-words field (space-joined)
   //   "quoted phrase"    → exact-phrase field (first quoted phrase found)
   //   allintitle:/allinurl: prefix → occt select
@@ -507,6 +561,8 @@ export function attach() {
     let exactPhrase = "";
     let siteVal = "";
     let filetypeVal = "";
+    let ownerVal = "";
+    let lastModifierVal = "";
     const bareTokens = [];
 
     for (const tok of tokens) {
@@ -521,6 +577,10 @@ export function attach() {
         let ftv = tok.slice("filetype:".length);
         if (ftv.startsWith('"') && ftv.endsWith('"')) ftv = ftv.slice(1, -1);
         filetypeVal = ftv;
+      } else if (tok.startsWith("owner:") && !ownerVal) {
+        ownerVal = unquoteFieldValue(tok.slice("owner:".length));
+      } else if (tok.startsWith("last_modifier:") && !lastModifierVal) {
+        lastModifierVal = unquoteFieldValue(tok.slice("last_modifier:".length));
       } else if (tok.startsWith('"') && tok.endsWith('"') && tok.length >= 2) {
         // Quoted phrase → exact-phrase (first one wins; subsequent go to bare)
         if (!exactPhrase) {
@@ -550,6 +610,8 @@ export function attach() {
       const opt = Array.from(fFiletype.input.options).find(o => o.value === filetypeVal);
       if (opt) fFiletype.input.value = filetypeVal;
     }
+    if (ownerVal) fOwner.input.value = ownerVal;
+    if (lastModifierVal) fLastModifier.input.value = lastModifierVal;
     if (exactPhrase) fExact.input.value = exactPhrase;
     if (notTokens.length > 0) fNone.input.value = notTokens.join(" ");
     // Dump remaining bare tokens into all-words (best effort)
@@ -558,7 +620,7 @@ export function attach() {
 
   // Append all fields in JSP order:
   // all, exact, any, none, num, sort, lang, label (if present),
-  // time, filetype, occt, site, then submit.
+  // time, filetype, occt, site, owner, last modifier, then submit.
   form.append(
     fAll.wrap,
     fExact.wrap,
@@ -574,6 +636,8 @@ export function attach() {
     fFiletype.wrap,
     fOcct.wrap,
     fSite.wrap,
+    fOwner.wrap,
+    fLastModifier.wrap,
   );
 
   // Submit button — centered to match JSP (row justify-content-center / col-auto)
@@ -621,6 +685,8 @@ export function attach() {
       none:     fNone.input.value,
       site:     fSite.input.value,
       filetype: fFiletype.input.value,
+      owner:    fOwner.input.value,
+      last_modifier: fLastModifier.input.value,
       occt:     fOcct.input.value,
     });
 

@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Wyszukiwanie w polach",
-      "html": "<p>Możesz przeszukać dowolne pole, wpisując nazwę pola, a po niej dwukropek <code>:</code> i szukany termin. Na przykład, aby znaleźć dokumenty zawierające „Fess” w tytule:</p><pre>title:Fess</pre><p>Dostępne pola to m.in. <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> i <code>mimetype</code>. Można je dostosować.</p>"
+      "html": "<p>Możesz przeszukać dowolne pole, wpisując nazwę pola, a po niej dwukropek <code>:</code> i szukany termin. Na przykład, aby znaleźć dokumenty zawierające „Fess” w tytule:</p><pre>title:Fess</pre><p>Dostępne pola to m.in. <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> i <code>mimetype</code>. Można je dostosować.</p>"
     },
     {
       "id": "sort",
