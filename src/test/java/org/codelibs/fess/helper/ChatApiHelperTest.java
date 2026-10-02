@@ -23,8 +23,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.chat.ChatClient.ChatResult;
+import org.codelibs.fess.entity.ChatMessage;
+import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.llm.ChatIntent;
+import org.codelibs.fess.llm.LlmChatResponse;
+import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -445,4 +454,130 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 () -> chatApiHelper.parseFieldFilters(raw, warnings), "1001-char label element must throw TooManyValuesException");
     }
 
+    // ── chat log ──────────────────────────────────────────────────────────────
+
+    @Test
+    public void test_createChatLog() {
+        final long requestedTime = 1_790_000_000_000L;
+        final ChatLog chatLog = chatApiHelper.createChatLog(ChatLog.ACCESS_TYPE_STREAM, true, "s1", "my-llm", requestedTime);
+        assertEquals(ChatLog.ACCESS_TYPE_STREAM, chatLog.getAccessType());
+        assertEquals(ChatLog.CHAT_TYPE_DOCUMENT, chatLog.getChatType());
+        assertEquals("s1", chatLog.getChatSessionId());
+        assertEquals("my-llm", chatLog.getLlmName());
+        assertEquals(java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(requestedTime), java.time.ZoneId.systemDefault()),
+                chatLog.getRequestedAt());
+        assertEquals(ChatLog.CHAT_TYPE_CHAT, chatApiHelper.createChatLog(ChatLog.ACCESS_TYPE_SYNC, false, null, "x", 0L).getChatType());
+    }
+
+    @Test
+    public void test_storeChatLog_success() {
+        final List<ChatLog> added = registerCapturingSearchLogHelper(true);
+        final ChatLog chatLog = chatApiHelper.createChatLog(ChatLog.ACCESS_TYPE_SYNC, false, null, "my-llm", 0L);
+        final LlmUsageCollector usage = new LlmUsageCollector();
+        final LlmChatResponse response = new LlmChatResponse("x");
+        response.setPromptTokens(7);
+        response.setCompletionTokens(3);
+        response.setModel("model-1");
+        usage.recordResponse(response);
+        usage.recordResponse(null);
+        usage.recordIntent(ChatIntent.SEARCH);
+        final ChatSource first = new ChatSource();
+        final ChatSource second = new ChatSource();
+        second.setGoUrl("/fess/go/?rt=1&docId=d%201&queryId=q%2B1&order=1");
+        final ChatMessage message = new ChatMessage("assistant", "the answer");
+        message.setSources(List.of(first, second));
+        chatApiHelper.storeChatLog(chatLog, ChatLog.STATUS_SUCCESS, null, 1234L, usage, new ChatResult("sess-new", message, List.of()));
+
+        assertEquals(1, added.size());
+        final ChatLog stored = added.get(0);
+        assertEquals(ChatLog.STATUS_SUCCESS, stored.getStatus());
+        assertNull(stored.getErrorCode());
+        assertEquals(Long.valueOf(1234L), stored.getResponseTime());
+        assertEquals(Integer.valueOf(2), stored.getLlmCalls());
+        assertEquals(Long.valueOf(7), stored.getPromptTokens());
+        assertEquals(Long.valueOf(3), stored.getCompletionTokens());
+        assertEquals(Long.valueOf(10), stored.getTotalTokens());
+        assertEquals("model-1", stored.getModel());
+        assertEquals("search", stored.getIntent());
+        assertEquals("sess-new", stored.getChatSessionId());
+        assertEquals(Integer.valueOf(2), stored.getSourceCount());
+        assertEquals("q+1", stored.getSearchQueryId());
+        assertFalse(stored.toSource().containsValue("the answer"));
+    }
+
+    @Test
+    public void test_storeChatLog_errorWithoutUsage() {
+        final List<ChatLog> added = registerCapturingSearchLogHelper(true);
+        final ChatLog chatLog = chatApiHelper.createChatLog(ChatLog.ACCESS_TYPE_SYNC, false, "s1", "my-llm", 0L);
+        chatApiHelper.storeChatLog(chatLog, ChatLog.STATUS_ERROR, new LlmException("x", LlmException.ERROR_TIMEOUT), 5L,
+                new LlmUsageCollector(), null);
+        final ChatLog stored = added.get(0);
+        assertEquals(ChatLog.STATUS_ERROR, stored.getStatus());
+        assertEquals(LlmException.ERROR_TIMEOUT, stored.getErrorCode());
+        assertEquals(Integer.valueOf(0), stored.getLlmCalls());
+        assertNull(stored.getTotalTokens());
+        assertNull(stored.getSourceCount());
+        assertEquals("s1", stored.getChatSessionId());
+        // the token fields are left out of the document when nothing was reported
+        assertFalse(stored.toSource().containsKey("totalTokens"));
+
+        final ChatLog other = chatApiHelper.createChatLog(ChatLog.ACCESS_TYPE_SYNC, false, null, "my-llm", 0L);
+        chatApiHelper.storeChatLog(other, ChatLog.STATUS_ERROR, new IllegalStateException("boom"), 5L, null, null);
+        assertEquals(LlmException.ERROR_UNKNOWN, added.get(1).getErrorCode());
+        assertNull(added.get(1).getLlmCalls());
+    }
+
+    @Test
+    public void test_storeChatLog_disabled() {
+        final List<ChatLog> added = registerCapturingSearchLogHelper(false);
+        chatApiHelper.storeChatLog(new ChatLog(), ChatLog.STATUS_SUCCESS, null, 1L, new LlmUsageCollector(), null);
+        assertTrue(added.isEmpty());
+    }
+
+    @Test
+    public void test_storeChatLog_neverThrows() {
+        ComponentUtil.setFessConfig(chatLogConfig(true));
+        ComponentUtil.register(new SearchLogHelper() {
+            @Override
+            public void addChatLog(final ChatLog chatLog) {
+                throw new IllegalStateException("queue failure");
+            }
+        }, "searchLogHelper");
+        chatApiHelper.storeChatLog(new ChatLog(), ChatLog.STATUS_SUCCESS, null, 1L, null, null);
+    }
+
+    @Test
+    public void test_extractSearchQueryId() {
+        assertNull(chatApiHelper.extractSearchQueryId(null));
+        assertNull(chatApiHelper.extractSearchQueryId(List.of()));
+        final ChatSource noQueryId = new ChatSource();
+        noQueryId.setGoUrl("/go/?rt=1&docId=abc&order=0");
+        assertNull(chatApiHelper.extractSearchQueryId(List.of(noQueryId)));
+        final ChatSource source = new ChatSource();
+        source.setGoUrl("/go/?queryId=abc123&order=0");
+        assertEquals("abc123", chatApiHelper.extractSearchQueryId(List.of(noQueryId, source)));
+    }
+
+    private static List<ChatLog> registerCapturingSearchLogHelper(final boolean enabled) {
+        ComponentUtil.setFessConfig(chatLogConfig(enabled));
+        final List<ChatLog> added = new ArrayList<>();
+        ComponentUtil.register(new SearchLogHelper() {
+            @Override
+            public void addChatLog(final ChatLog chatLog) {
+                added.add(chatLog);
+            }
+        }, "searchLogHelper");
+        return added;
+    }
+
+    private static FessConfig chatLogConfig(final boolean enabled) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isRagChatLogEnabled() {
+                return enabled;
+            }
+        };
+    }
 }

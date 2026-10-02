@@ -1,0 +1,88 @@
+{
+  "fess_log.chat_log" : {
+    "aliases" : { },
+    "mappings" : {
+      "chat_log" : {
+        "properties" : {
+          "accessType" : {
+            "type" : "keyword"
+          },
+          "chatSessionId" : {
+            "type" : "keyword"
+          },
+          "chatType" : {
+            "type" : "keyword"
+          },
+          "completionTokens" : {
+            "type" : "long"
+          },
+          "errorCode" : {
+            "type" : "keyword"
+          },
+          "intent" : {
+            "type" : "keyword"
+          },
+          "llmCalls" : {
+            "type" : "integer"
+          },
+          "llmName" : {
+            "type" : "keyword"
+          },
+          "model" : {
+            "type" : "keyword"
+          },
+          "promptTokens" : {
+            "type" : "long"
+          },
+          "requestedAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
+          },
+          "responseTime" : {
+            "type" : "long"
+          },
+          "roles" : {
+            "type" : "keyword"
+          },
+          "searchQueryId" : {
+            "type" : "keyword"
+          },
+          "sourceCount" : {
+            "type" : "integer"
+          },
+          "status" : {
+            "type" : "keyword"
+          },
+          "totalTokens" : {
+            "type" : "long"
+          },
+          "user" : {
+            "type" : "keyword"
+          },
+          "userSessionId" : {
+            "type" : "keyword"
+          },
+          "virtualHost" : {
+            "type" : "keyword"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "dbflute" : {
+          "chat_log" : {
+            "properties" : {
+              "roles" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "provided_name" : "fess_log.chat_log"
+      }
+    }
+  }
+}

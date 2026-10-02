@@ -9,6 +9,7 @@
 	<component name="behaviorCommandInvoker" class="org.dbflute.bhv.core.BehaviorCommandInvoker"/>
 
 	<!-- The components of Behavior. -->
+	<component name="chatLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.ChatLogBhv"/>
 	<component name="clickLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv"/>
 	<component name="favoriteLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv"/>
 	<component name="searchLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv"/>

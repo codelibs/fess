@@ -71,4 +71,18 @@ public interface LlmStreamCallback {
     default void onWarning(final String code, final String detail) {
         // Default implementation does nothing
     }
+
+    /**
+     * Called with the token usage of the streamed call.
+     *
+     * <p>An LLM client calls this once per streaming call, at the end of the stream, with the totals
+     * for the whole call, and only when the provider reports them; a client that does not call it
+     * still has its call counted, just without token counts. It may be called from a thread other
+     * than the one that started the stream.</p>
+     *
+     * @param usage the token usage of the call (never null)
+     */
+    default void onUsage(final LlmUsage usage) {
+        // Default implementation does nothing
+    }
 }

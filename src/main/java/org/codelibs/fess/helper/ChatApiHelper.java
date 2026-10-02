@@ -16,6 +16,11 @@
 package org.codelibs.fess.helper;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,16 +30,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.handlers.ChatRequestBody;
+import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
@@ -58,6 +68,9 @@ public class ChatApiHelper {
     private static final Logger logger = LogManager.getLogger(ChatApiHelper.class);
 
     private static final Pattern SESSION_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._-]+$");
+
+    /** Matches the query ID parameter of a go URL. */
+    private static final Pattern QUERY_ID_PATTERN = Pattern.compile("[?&]queryId=([^&#]+)");
 
     /**
      * Default constructor for ChatApiHelper.
@@ -406,6 +419,96 @@ public class ChatApiHelper {
         } catch (final NumberFormatException e) {
             return 4000;
         }
+    }
+
+    /**
+     * Creates the chat log of a chat request that is about to call the chat client. Only the
+     * metadata of the request is recorded, never the question or the answer.
+     *
+     * @param accessType {@link ChatLog#ACCESS_TYPE_SYNC} or {@link ChatLog#ACCESS_TYPE_STREAM}
+     * @param documentChat true for a chat about one document
+     * @param sessionId the chat session ID of the request (null for a new session)
+     * @param llmName the name of the configured LLM ({@code rag.llm.name})
+     * @param requestedTime the time the chat client is called, in epoch milliseconds
+     * @return the chat log with the request time set
+     */
+    public ChatLog createChatLog(final String accessType, final boolean documentChat, final String sessionId, final String llmName,
+            final long requestedTime) {
+        final ChatLog chatLog = new ChatLog();
+        chatLog.setRequestedAt(LocalDateTime.ofInstant(Instant.ofEpochMilli(requestedTime), ZoneId.systemDefault()));
+        chatLog.setAccessType(accessType);
+        chatLog.setChatType(documentChat ? ChatLog.CHAT_TYPE_DOCUMENT : ChatLog.CHAT_TYPE_CHAT);
+        chatLog.setChatSessionId(sessionId);
+        chatLog.setLlmName(llmName);
+        return chatLog;
+    }
+
+    /**
+     * Completes a chat log with the outcome of the request and the LLM usage, and queues it for
+     * storing. Does nothing when {@code rag.chat.log.enabled} is false. Never throws: a failure is
+     * only logged, so recording the usage cannot break a chat response. Must be called on the
+     * request thread, which resolves the user.
+     *
+     * @param chatLog the chat log created by {@link #createChatLog(String, boolean, String, String, long)}
+     * @param status {@link ChatLog#STATUS_SUCCESS}, {@link ChatLog#STATUS_ERROR} or {@link ChatLog#STATUS_CANCELLED}
+     * @param error the failure of the request (null unless it failed)
+     * @param responseTime the time the request took, in milliseconds
+     * @param usage the LLM usage collected for the request (may be null)
+     * @param result the chat result (null unless the request succeeded)
+     */
+    public void storeChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
+            final LlmUsageCollector usage, final ChatResult result) {
+        try {
+            if (!ComponentUtil.getFessConfig().isRagChatLogEnabled()) {
+                return;
+            }
+            chatLog.setStatus(status);
+            if (error != null) {
+                chatLog.setErrorCode(error instanceof final LlmException e ? e.getErrorCode() : LlmException.ERROR_UNKNOWN);
+            }
+            chatLog.setResponseTime(responseTime);
+            if (usage != null) {
+                chatLog.setLlmCalls(usage.getLlmCalls());
+                chatLog.setPromptTokens(usage.getPromptTokens());
+                chatLog.setCompletionTokens(usage.getCompletionTokens());
+                chatLog.setTotalTokens(usage.getTotalTokens());
+                chatLog.setModel(usage.getModel());
+                chatLog.setIntent(usage.getIntent());
+            }
+            if (result != null) {
+                chatLog.setChatSessionId(result.getSessionId());
+                final List<ChatSource> sources = result.getMessage() != null ? result.getMessage().getSources() : null;
+                chatLog.setSourceCount(sources != null ? sources.size() : 0);
+                chatLog.setSearchQueryId(extractSearchQueryId(sources));
+            }
+            ComponentUtil.getSearchLogHelper().addChatLog(chatLog);
+        } catch (final Exception e) {
+            logger.warn("Failed to record the chat log. chatSessionId={}, status={}", chatLog.getChatSessionId(), status, e);
+        }
+    }
+
+    /**
+     * Extracts the ID of the search the sources of an answer came from, which is the query ID of
+     * the search log entry of that search. The sources carry it in their go URLs.
+     *
+     * @param sources the sources of the answer (may be null)
+     * @return the query ID, or null if no source has one
+     */
+    public String extractSearchQueryId(final List<ChatSource> sources) {
+        if (sources == null) {
+            return null;
+        }
+        for (final ChatSource source : sources) {
+            final String goUrl = source != null ? source.getGoUrl() : null;
+            if (goUrl == null) {
+                continue;
+            }
+            final Matcher matcher = QUERY_ID_PATTERN.matcher(goUrl);
+            if (matcher.find()) {
+                return URLDecoder.decode(matcher.group(1), StandardCharsets.UTF_8);
+            }
+        }
+        return null;
     }
 
 }

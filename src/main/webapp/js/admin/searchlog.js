@@ -11,6 +11,7 @@
     zeroHitRate : "percent",
     ctr : "percent",
     pagingRate : "percent",
+    errorRate : "percent",
     avgResponseTime : "ms"
   };
 

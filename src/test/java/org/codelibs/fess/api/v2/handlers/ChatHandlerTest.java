@@ -30,6 +30,10 @@ import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.llm.LlmChatResponse;
+import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmUsageCollector;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -470,6 +474,146 @@ public class ChatHandlerTest extends UnitFessTestCase {
         assertEquals(200, res.status);
         assertTrue(res.body().contains("\"content\":\"normal answer\""), res.body());
         assertTrue(lookedUp.isEmpty(), "no document lookup without doc_id");
+    }
+
+    @Test
+    public void test_chatLog_recordsSuccessWithUsage() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final ChatSource source = new ChatSource();
+        source.setIndex(1);
+        source.setDocId("doc-1");
+        source.setGoUrl("/go/?rt=1&docId=doc-1&queryId=q-1&order=0");
+        final ChatMessage assistant = new ChatMessage("assistant", "answer");
+        assistant.setSources(List.of(source));
+        final ChatResult result = new ChatResult("sess-new", assistant, Collections.emptyList());
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
+                // what AbstractLlmClient records for each LLM call on the request thread
+                final LlmChatResponse response = new LlmChatResponse("x");
+                response.setPromptTokens(10);
+                response.setCompletionTokens(5);
+                LlmUsageCollector.current().recordResponse(response);
+                LlmUsageCollector.current().recordResponse(new LlmChatResponse("y"));
+                return result;
+            }
+        };
+        final RecordingChatHandler handler = new RecordingChatHandler(client, false);
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\",\"session_id\":\"s1\"}"), res);
+
+        assertEquals(200, res.status);
+        assertEquals(1, handler.recorded.size());
+        final Object[] call = handler.recorded.get(0);
+        final ChatLog chatLog = (ChatLog) call[0];
+        assertEquals(ChatLog.STATUS_SUCCESS, call[1]);
+        assertNull(call[2]);
+        assertTrue(((Long) call[3]) >= 0L);
+        final LlmUsageCollector usage = (LlmUsageCollector) call[4];
+        assertEquals(2, usage.getLlmCalls());
+        assertEquals(Long.valueOf(15), usage.getTotalTokens());
+        assertSame(result, call[5]);
+        assertEquals(ChatLog.ACCESS_TYPE_SYNC, chatLog.getAccessType());
+        assertEquals(ChatLog.CHAT_TYPE_CHAT, chatLog.getChatType());
+        assertEquals("s1", chatLog.getChatSessionId());
+        assertNotNull(chatLog.getRequestedAt());
+        assertNotNull(chatLog.getLlmName());
+        assertNull(LlmUsageCollector.current(), "the collector must be unbound after the request");
+        // the question and the answer are never part of the chat log
+        assertFalse(chatLog.toSource().containsValue("hi"));
+        assertFalse(chatLog.toSource().containsValue("answer"));
+    }
+
+    @Test
+    public void test_chatLog_recordsError() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final LlmException failure = new LlmException("timed out", LlmException.ERROR_TIMEOUT);
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
+                LlmUsageCollector.current().recordCall();
+                throw failure;
+            }
+        };
+        final RecordingChatHandler handler = new RecordingChatHandler(client, false);
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+
+        assertEquals(500, res.status);
+        assertEquals(1, handler.recorded.size());
+        final Object[] call = handler.recorded.get(0);
+        assertEquals(ChatLog.STATUS_ERROR, call[1]);
+        assertSame(failure, call[2]);
+        assertEquals(1, ((LlmUsageCollector) call[4]).getLlmCalls());
+        assertNull(call[5]);
+        assertNull(((ChatLog) call[0]).getChatSessionId());
+        assertNull(LlmUsageCollector.current());
+    }
+
+    @Test
+    public void test_chatLog_documentChat() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final ChatResult result = new ChatResult("sess-9", new ChatMessage("assistant", "about the doc"), Collections.emptyList());
+        final RecordingChatHandler handler = new RecordingChatHandler(failingNormalChatClient(new java.util.ArrayList<>(), result), true);
+        handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"summarize\",\"doc_id\":\"doc-1\"}"),
+                new CapturingResponse());
+        assertEquals(1, handler.recorded.size());
+        assertEquals(ChatLog.STATUS_SUCCESS, handler.recorded.get(0)[1]);
+        assertEquals(ChatLog.CHAT_TYPE_DOCUMENT, ((ChatLog) handler.recorded.get(0)[0]).getChatType());
+    }
+
+    @Test
+    public void test_chatLog_notRecordedForRejectedRequest() throws Exception {
+        // the gates run before the chat client: nothing reaches the LLM, so nothing is recorded
+        enableRagChat();
+        final RecordingChatHandler handler = new RecordingChatHandler(null, false);
+        handler.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\",\"doc_id\":\"doc-1\"}"),
+                new CapturingResponse());
+        assertTrue(handler.recorded.isEmpty());
+    }
+
+    /** A handler that captures what it records in the chat log instead of storing it. */
+    private static class RecordingChatHandler extends ChatHandler {
+        final List<Object[]> recorded = new java.util.ArrayList<>();
+        private final ChatClient client;
+        private final boolean documentExists;
+
+        RecordingChatHandler(final ChatClient client, final boolean documentExists) {
+            this.client = client;
+            this.documentExists = documentExists;
+        }
+
+        @Override
+        protected String getUserId(final HttpServletRequest req) {
+            return "log-user";
+        }
+
+        @Override
+        protected String getRateLimitKey(final HttpServletRequest req) {
+            return "u:log-user";
+        }
+
+        @Override
+        protected boolean documentExists(final String docId) {
+            return documentExists;
+        }
+
+        @Override
+        protected ChatClient getChatClient() {
+            return client;
+        }
+
+        @Override
+        protected void recordChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
+                final LlmUsageCollector usage, final ChatResult result) {
+            recorded.add(new Object[] { chatLog, status, error, responseTime, usage, result });
+        }
     }
 
     /** Enables RAG chat by registering a fess-config subclass that returns true. */

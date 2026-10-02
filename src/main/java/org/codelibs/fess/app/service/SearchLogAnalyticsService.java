@@ -361,7 +361,14 @@ public class SearchLogAnalyticsService {
         csvWriter.flush();
     }
 
-    private static void writeKpis(final CsvWriter csvWriter, final AnalyticsReport report) throws IOException {
+    /**
+     * Writes the KPIs of a report as metric, unit, value, previous and change.
+     *
+     * @param csvWriter the CSV writer
+     * @param report the report
+     * @throws IOException if writing fails
+     */
+    static void writeKpis(final CsvWriter csvWriter, final AnalyticsReport report) throws IOException {
         csvWriter.writeValues(KPI_COLUMNS);
         for (final Kpi kpi : report.getKpis()) {
             writeRow(csvWriter, kpi.getKey(), kpi.getUnit(), kpi.getValue(), kpi.getPrevious(), kpi.getChange());
@@ -388,7 +395,14 @@ public class SearchLogAnalyticsService {
         }
     }
 
-    private static void writeChart(final CsvWriter csvWriter, final Chart chart) throws IOException {
+    /**
+     * Writes a chart as x, one column per series and {@code <key>_previous} for a series with a comparison period.
+     *
+     * @param csvWriter the CSV writer
+     * @param chart the chart
+     * @throws IOException if writing fails
+     */
+    static void writeChart(final CsvWriter csvWriter, final Chart chart) throws IOException {
         final List<String> header = new ArrayList<>();
         header.add("x");
         for (final Series series : chart.getSeries()) {
@@ -415,8 +429,15 @@ public class SearchLogAnalyticsService {
         return values != null && index < values.size() ? values.get(index) : null;
     }
 
-    private static void writeTable(final CsvWriter csvWriter, final List<String> columns, final List<Map<String, Object>> rows)
-            throws IOException {
+    /**
+     * Writes a table as the given columns.
+     *
+     * @param csvWriter the CSV writer
+     * @param columns the columns
+     * @param rows the rows (null writes the header only)
+     * @throws IOException if writing fails
+     */
+    static void writeTable(final CsvWriter csvWriter, final List<String> columns, final List<Map<String, Object>> rows) throws IOException {
         csvWriter.writeValues(columns);
         if (rows == null) {
             return;
@@ -962,7 +983,14 @@ public class SearchLogAnalyticsService {
         return result.getAggregations();
     }
 
-    private static void applyInterval(final DateHistogramAggregationBuilder op, final Interval interval, final ZoneId zone) {
+    /**
+     * Sets the bucket interval and the time zone of a date histogram; empty buckets are kept.
+     *
+     * @param op the date histogram
+     * @param interval the interval
+     * @param zone the time zone
+     */
+    static void applyInterval(final DateHistogramAggregationBuilder op, final Interval interval, final ZoneId zone) {
         op.calendarInterval(interval == Interval.HOUR ? DateHistogramInterval.HOUR : DateHistogramInterval.DAY);
         op.timeZone(zone);
         op.minDocCount(0);
@@ -982,7 +1010,14 @@ public class SearchLogAnalyticsService {
         }
     }
 
-    private static List<Number> alignTo(final List<Number> values, final int size) {
+    /**
+     * Pads or cuts values to a size with nulls.
+     *
+     * @param values the values (may be null)
+     * @param size the size
+     * @return the values of the size
+     */
+    static List<Number> alignTo(final List<Number> values, final int size) {
         return alignTo(values, size, null);
     }
 

@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.searchlog;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -30,6 +31,16 @@ public class AdminSearchlogActionTest extends UnitFessTestCase {
         assertFalse(AdminSearchlogAction.isValidTab("logs"));
         assertFalse(AdminSearchlogAction.isValidTab("../x"));
         assertFalse(AdminSearchlogAction.isValidTab(null));
+    }
+
+    @Test
+    public void test_chatTab() {
+        assertTrue(AdminSearchlogAction.isValidTab("chat"));
+        assertTrue(AdminSearchlogAction.isChatTab("chat"));
+        assertFalse(AdminSearchlogAction.isChatTab("overview"));
+        assertFalse(AdminSearchlogAction.isChatTab(null));
+        // the AI chat tab comes after the search log tabs
+        assertEquals(List.of("overview", "queries", "clicks", "performance", "audience", "chat"), AdminSearchlogAction.TABS);
     }
 
     @Test

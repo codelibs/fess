@@ -1325,7 +1325,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
-    /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
+    /** The key of the configuration. e.g. chat_log.ndjson,click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
     String INDEX_BACKUP_LOG_TARGETS = "index.backup.log.targets";
 
     /** The key of the configuration. e.g. 60000 */
@@ -1348,6 +1348,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 10000 */
     String LOGGING_CLICK_MAX_QUEUE_SIZE = "logging.click.max.queue.size";
+
+    /** The key of the configuration. e.g. 10000 */
+    String LOGGING_CHAT_MAX_QUEUE_SIZE = "logging.chat.max.queue.size";
 
     /** The key of the configuration. e.g. true */
     String SEARCH_HISTORY_ENABLED = "search.history.enabled";
@@ -2089,6 +2092,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. false */
     String RAG_CHAT_ENABLED = "rag.chat.enabled";
+
+    /** The key of the configuration. e.g. true */
+    String RAG_CHAT_LOG_ENABLED = "rag.chat.log.enabled";
 
     /** The key of the configuration. e.g. 5 */
     String RAG_CHAT_CONTEXT_MAX_DOCUMENTS = "rag.chat.context.max.documents";
@@ -6972,7 +6978,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.backup.log.targets'. <br>
-     * The value is, e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson <br>
+     * The value is, e.g. chat_log.ndjson,click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson <br>
      * comment: Target log files for index backup.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -7076,6 +7082,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getLoggingClickMaxQueueSizeAsInteger();
+
+    /**
+     * Get the value for the key 'logging.chat.max.queue.size'. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum queue size for chat usage logging.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLoggingChatMaxQueueSize();
+
+    /**
+     * Get the value for the key 'logging.chat.max.queue.size' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum queue size for chat usage logging.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLoggingChatMaxQueueSizeAsInteger();
 
     /**
      * Get the value for the key 'search.history.enabled'. <br>
@@ -10110,6 +10133,26 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isRagChatEnabled();
 
     /**
+     * Get the value for the key 'rag.chat.log.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: <br>
+     * Whether to record the usage of each RAG chat request (user, time, LLM calls and tokens) in the chat log.<br>
+     * The question and the answer are never recorded.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatLogEnabled();
+
+    /**
+     * Is the property for the key 'rag.chat.log.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: <br>
+     * Whether to record the usage of each RAG chat request (user, time, LLM calls and tokens) in the chat log.<br>
+     * The question and the answer are never recorded.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isRagChatLogEnabled();
+
+    /**
      * Get the value for the key 'rag.chat.context.max.documents'. <br>
      * The value is, e.g. 5 <br>
      * comment: Chat generation settings.
@@ -12966,6 +13009,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE);
         }
 
+        public String getLoggingChatMaxQueueSize() {
+            return get(FessConfig.LOGGING_CHAT_MAX_QUEUE_SIZE);
+        }
+
+        public Integer getLoggingChatMaxQueueSizeAsInteger() {
+            return getAsInteger(FessConfig.LOGGING_CHAT_MAX_QUEUE_SIZE);
+        }
+
         public String getSearchHistoryEnabled() {
             return get(FessConfig.SEARCH_HISTORY_ENABLED);
         }
@@ -14426,6 +14477,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.RAG_CHAT_ENABLED);
         }
 
+        public String getRagChatLogEnabled() {
+            return get(FessConfig.RAG_CHAT_LOG_ENABLED);
+        }
+
+        public boolean isRagChatLogEnabled() {
+            return is(FessConfig.RAG_CHAT_LOG_ENABLED);
+        }
+
         public String getRagChatContextMaxDocuments() {
             return get(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS);
         }
@@ -15087,7 +15146,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS,
                     "fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json");
-            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
+            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS,
+                    "chat_log.ndjson,click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT, "60000");
             defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
@@ -15096,6 +15156,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOGGING_SEARCH_USE_LOGFILE, "true");
             defaultMap.put(FessConfig.LOGGING_SEARCH_MAX_QUEUE_SIZE, "10000");
             defaultMap.put(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE, "10000");
+            defaultMap.put(FessConfig.LOGGING_CHAT_MAX_QUEUE_SIZE, "10000");
             defaultMap.put(FessConfig.SEARCH_HISTORY_ENABLED, "true");
             defaultMap.put(FessConfig.SEARCH_HISTORY_SIZE, "10");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
@@ -15343,6 +15404,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
             defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
+            defaultMap.put(FessConfig.RAG_CHAT_LOG_ENABLED, "true");
             defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS, "5");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_TIMEOUT_MINUTES, "30");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_MAX_SIZE, "10000");

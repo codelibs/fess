@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.NDJSON_EXTENTION;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.assertBackupIndexReadable;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getBackupItems;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getChatLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getClickLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getDocJsonPath;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFavoriteLogNdjsonWriteCall;
@@ -154,6 +155,8 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                 return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
             case "favorite_log":
                 return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
+            case "chat_log":
+                return writeNdjsonResponse(id, getChatLogNdjsonWriteCall());
             case null:
             default:
                 break;

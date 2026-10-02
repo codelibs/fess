@@ -55,18 +55,24 @@ ${fe:html(true)}
                     <input type="date" id="searchlog-to" name="to" value="${f:h(cond.to)}"
                            class="form-control form-control-sm">
                 </div>
-                <label for="searchlog-accesstype" class="sr-only"><la:message key="labels.searchlog_accesstype"/></label>
-                <select id="searchlog-accesstype" name="accessType" class="form-control form-control-sm mr-2">
-                    <option value=""><la:message key="labels.searchlog_accesstype_all"/></option>
-                    <c:set var="accessTypeListed" value="${false}"/>
-                    <c:forEach var="a" items="${accessTypeItems}">
-                        <c:if test="${cond.accessType == a}"><c:set var="accessTypeListed" value="${true}"/></c:if>
-                        <option value="${f:h(a)}" ${cond.accessType == a ? 'selected' : ''}>${f:h(a)}</option>
-                    </c:forEach>
-                    <c:if test="${not empty cond.accessType and not accessTypeListed}">
-                        <option value="${f:h(cond.accessType)}" selected>${f:h(cond.accessType)}</option>
-                    </c:if>
-                </select>
+                <c:if test="${tab == 'chat'}">
+                    <%-- the access type filter does not apply to chat logs; keep it for the other tabs --%>
+                    <c:if test="${not empty cond.accessType}"><input type="hidden" name="accessType" value="${f:h(cond.accessType)}"></c:if>
+                </c:if>
+                <c:if test="${tab != 'chat'}">
+                    <label for="searchlog-accesstype" class="sr-only"><la:message key="labels.searchlog_accesstype"/></label>
+                    <select id="searchlog-accesstype" name="accessType" class="form-control form-control-sm mr-2">
+                        <option value=""><la:message key="labels.searchlog_accesstype_all"/></option>
+                        <c:set var="accessTypeListed" value="${false}"/>
+                        <c:forEach var="a" items="${accessTypeItems}">
+                            <c:if test="${cond.accessType == a}"><c:set var="accessTypeListed" value="${true}"/></c:if>
+                            <option value="${f:h(a)}" ${cond.accessType == a ? 'selected' : ''}>${f:h(a)}</option>
+                        </c:forEach>
+                        <c:if test="${not empty cond.accessType and not accessTypeListed}">
+                            <option value="${f:h(cond.accessType)}" selected>${f:h(cond.accessType)}</option>
+                        </c:if>
+                    </select>
+                </c:if>
                 <label for="searchlog-size" class="mr-2"><la:message key="labels.searchlog_size"/></label>
                 <select id="searchlog-size" name="size" class="form-control form-control-sm mr-2">
                     <option value="">-</option>
@@ -97,12 +103,12 @@ ${fe:html(true)}
             <%-- Link from a query word to the raw search logs of the period --%>
             <c:set var="searchWordLink" scope="request"
                    value="${fe:url('/admin/searchlog/search')}?logType=search&amp;requestedTimeRange=${f:u(cond.from += ' 00:00 - ' += cond.to += ' 23:59')}${empty cond.accessType ? '' : '&amp;accessType='}${f:u(cond.accessType)}&amp;searchWord="/>
-            <%-- KPI cards (overview and clicks) --%>
+            <%-- KPI cards (overview, clicks and chat) --%>
             <c:if test="${not empty report.kpis}">
                 <div class="row">
                     <c:forEach var="k" items="${report.kpis}">
                         <c:set var="riseIsBad"
-                               value="${k.key == 'zeroHitRate' or k.key == 'avgResponseTime' or k.key == 'avgRank'}"/>
+                               value="${k.key == 'zeroHitRate' or k.key == 'avgResponseTime' or k.key == 'avgRank' or k.key == 'errorRate'}"/>
                         <div class="col-lg col-md-4 col-sm-6">
                             <div class="card searchlog-kpi">
                                 <div class="card-body">
@@ -129,7 +135,7 @@ ${fe:html(true)}
                                                               minFractionDigits="1"/>${k.pointChange ? ' pt' : '%'}
                                         </div>
                                     </c:if>
-                                    <c:if test="${tab == 'overview' and not empty report.charts['trend'].x and not report.charts['trend']['empty']}">
+                                    <c:if test="${(tab == 'overview' or tab == 'chat') and not empty report.charts['trend'].x and not report.charts['trend']['empty']}">
                                         <div class="searchlog-sparkline" data-chart="trend" data-series="${f:h(k.key)}"></div>
                                     </c:if>
                                 </div>
@@ -150,6 +156,9 @@ ${fe:html(true)}
                 </c:when>
                 <c:when test="${tab == 'audience'}">
                     <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_audience.jsp"/>
+                </c:when>
+                <c:when test="${tab == 'chat'}">
+                    <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_chat.jsp"/>
                 </c:when>
                 <c:otherwise>
                     <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_overview.jsp"/>

@@ -18,10 +18,11 @@ package org.codelibs.fess.chat;
 import java.util.Objects;
 
 import org.codelibs.fess.llm.LlmStreamCallback;
+import org.codelibs.fess.llm.LlmUsage;
 
 /**
  * Bridges {@link LlmStreamCallback} events from the LLM layer to a phase-aware
- * {@link ChatPhaseCallback}. Forwards onChunk/onError to an inner LlmStreamCallback
+ * {@link ChatPhaseCallback}. Forwards onChunk/onError/onUsage to an inner LlmStreamCallback
  * and forwards onRetry/onWaiting/onWarning to the phase callback together with
  * the phase name supplied at construction.
  */
@@ -32,12 +33,12 @@ public class PhaseAwareStreamCallback implements LlmStreamCallback {
     private final LlmStreamCallback inner;
 
     /**
-     * Creates a callback that forwards chunk/error events to {@code inner} and
+     * Creates a callback that forwards chunk/error/usage events to {@code inner} and
      * retry/waiting/warning events to {@code phaseCallback} tagged with {@code phase}.
      *
      * @param phase the phase name to attach to phase callback events
      * @param phaseCallback the phase callback to forward retry/waiting/warning events to (may be null)
-     * @param inner the LlmStreamCallback to forward chunk/error events to (never null)
+     * @param inner the LlmStreamCallback to forward chunk/error/usage events to (never null)
      */
     public PhaseAwareStreamCallback(final String phase, final ChatPhaseCallback phaseCallback, final LlmStreamCallback inner) {
         this.phase = phase;
@@ -69,5 +70,10 @@ public class PhaseAwareStreamCallback implements LlmStreamCallback {
     @Override
     public void onWarning(final String code, final String detail) {
         phaseCallback.onWarning(phase, code, detail);
+    }
+
+    @Override
+    public void onUsage(final LlmUsage usage) {
+        inner.onUsage(usage);
     }
 }

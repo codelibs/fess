@@ -244,7 +244,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating detectIntent. llmType={}", getLlmType());
         }
-        return getAvailableClient().detectIntent(userMessage);
+        return recordIntent(getAvailableClient().detectIntent(userMessage));
     }
 
     /**
@@ -260,7 +260,21 @@ public class LlmClientManager {
             logger.debug("[LLM] Delegating detectIntent with history. llmType={}, historySize={}", getLlmType(),
                     history != null ? history.size() : 0);
         }
-        return getAvailableClient().detectIntent(userMessage, history);
+        return recordIntent(getAvailableClient().detectIntent(userMessage, history));
+    }
+
+    /**
+     * Records the detected intent in the {@link LlmUsageCollector} bound to the current thread, if any.
+     *
+     * @param result the intent detection result (may be null)
+     * @return the given result
+     */
+    protected IntentDetectionResult recordIntent(final IntentDetectionResult result) {
+        final LlmUsageCollector usageCollector = LlmUsageCollector.current();
+        if (usageCollector != null && result != null) {
+            usageCollector.recordIntent(result.getIntent());
+        }
+        return result;
     }
 
     /**

@@ -30,10 +30,14 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
     private PurgeLogJob purgeLogJob;
 
+    /** The days passed to deleteChatLogBefore, or -1 when it was not called. */
+    private final int[] chatLogDeletedDays = { -1 };
+
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         purgeLogJob = new PurgeLogJob();
+        chatLogDeletedDays[0] = -1;
     }
 
     // Test all services execute successfully
@@ -65,6 +69,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         };
 
         SearchLogService searchLogService = new SearchLogService() {
+            @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
@@ -158,6 +167,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         assertEquals(30, searchLogDeletedDays[0]);
         assertEquals(30, clickLogDeletedDays[0]);
         assertEquals(30, favoriteLogDeletedDays[0]);
+        assertEquals(30, chatLogDeletedDays[0]);
         assertEquals(14, jobLogDeletedDays[0]);
         assertEquals(7, userInfoDeletedDays[0]);
 
@@ -186,6 +196,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         };
 
         SearchLogService searchLogService = new SearchLogService() {
+            @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
@@ -271,6 +286,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         assertTrue(result.contains("Skipped to purge search logs"));
         assertTrue(result.contains("Skipped to purge click logs"));
         assertTrue(result.contains("Skipped to purge favorite logs"));
+        assertTrue(result.contains("Skipped to purge chat logs"));
+        assertEquals(-1, chatLogDeletedDays[0]);
         assertTrue(result.contains("Skipped to purge job logs"));
         assertTrue(result.contains("Skipped to purge user info logs"));
     }
@@ -295,6 +312,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         };
 
         SearchLogService searchLogService = new SearchLogService() {
+            @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
@@ -404,6 +426,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         SearchLogService searchLogService = new SearchLogService() {
             @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
+            @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
                 searchLogDeletedDays[0] = days;
@@ -490,6 +517,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         assertEquals(0, searchLogDeletedDays[0]);
         assertEquals(0, clickLogDeletedDays[0]);
         assertEquals(0, favoriteLogDeletedDays[0]);
+        assertEquals(0, chatLogDeletedDays[0]);
         assertEquals(0, jobLogDeletedDays[0]);
         assertEquals(0, userInfoDeletedDays[0]);
 
@@ -517,6 +545,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         };
 
         SearchLogService searchLogService = new SearchLogService() {
+            @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
             @Override
             public void deleteBefore(int days) {
                 throw new RuntimeException("Search error");
@@ -621,6 +654,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         };
 
         SearchLogService searchLogService = new SearchLogService() {
+            @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
@@ -739,6 +777,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         SearchLogService searchLogService = new SearchLogService() {
             @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
+            @Override
             public void deleteBefore(int days) {
                 throw new RuntimeException("Search log deletion failed");
             }
@@ -840,6 +883,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         };
 
         SearchLogService searchLogService = new SearchLogService() {
+            @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
@@ -943,6 +991,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         SearchLogService searchLogService = new SearchLogService() {
             @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
+            @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
             }
@@ -1045,6 +1098,11 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         SearchLogService searchLogService = new SearchLogService() {
             @Override
+            public void deleteChatLogBefore(int days) {
+                chatLogDeletedDays[0] = days;
+            }
+
+            @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
             }
@@ -1124,6 +1182,64 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         // Assert error message in result
         assertTrue(result.contains("Status update failed"));
+    }
+
+    // A failure to purge chat logs is reported and does not stop the other purges
+    @Test
+    public void test_execute_chatLogException() {
+        final boolean[] deleteFavoriteLogCalled = { false };
+        final boolean[] deleteJobLogCalled = { false };
+        final boolean[] deleteUserInfoCalled = { false };
+
+        ComponentUtil.register(new CrawlingInfoService() {
+            @Override
+            public void deleteBefore(long time) {
+            }
+        }, CrawlingInfoService.class.getCanonicalName());
+        ComponentUtil.register(new SearchLogService() {
+            @Override
+            public void deleteBefore(int days) {
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteChatLogBefore(int days) {
+                throw new RuntimeException("Chat error");
+            }
+        }, SearchLogService.class.getCanonicalName());
+        ComponentUtil.register(new JobLogService() {
+            @Override
+            public void deleteBefore(int days) {
+                deleteJobLogCalled[0] = true;
+            }
+
+            @Override
+            public void updateStatus() {
+            }
+        }, JobLogService.class.getCanonicalName());
+        ComponentUtil.register(new UserInfoService() {
+            @Override
+            public void deleteBefore(int days) {
+                deleteUserInfoCalled[0] = true;
+            }
+        }, UserInfoService.class.getCanonicalName());
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.setFessConfig(new TestFessConfig());
+
+        final String result = purgeLogJob.execute();
+
+        assertTrue(deleteFavoriteLogCalled[0]);
+        assertTrue(deleteJobLogCalled[0]);
+        assertTrue(deleteUserInfoCalled[0]);
+        assertEquals("Chat error\n", result);
     }
 
     // Test configuration class extending FessConfig.SimpleImpl

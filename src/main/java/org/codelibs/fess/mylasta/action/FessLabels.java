@@ -3234,6 +3234,54 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Download CSV */
     public static final String LABELS_searchlog_download_csv = "{labels.searchlog_download_csv}";
 
+    /** The key of the message: AI Chat */
+    public static final String LABELS_searchlog_tab_chat = "{labels.searchlog_tab_chat}";
+
+    /** The key of the message: Requests */
+    public static final String LABELS_searchlog_metric_requests = "{labels.searchlog_metric_requests}";
+
+    /** The key of the message: Total tokens */
+    public static final String LABELS_searchlog_metric_totalTokens = "{labels.searchlog_metric_totalTokens}";
+
+    /** The key of the message: Prompt tokens */
+    public static final String LABELS_searchlog_metric_promptTokens = "{labels.searchlog_metric_promptTokens}";
+
+    /** The key of the message: Completion tokens */
+    public static final String LABELS_searchlog_metric_completionTokens = "{labels.searchlog_metric_completionTokens}";
+
+    /** The key of the message: LLM calls */
+    public static final String LABELS_searchlog_metric_llmCalls = "{labels.searchlog_metric_llmCalls}";
+
+    /** The key of the message: Error rate */
+    public static final String LABELS_searchlog_metric_errorRate = "{labels.searchlog_metric_errorRate}";
+
+    /** The key of the message: Top users */
+    public static final String LABELS_searchlog_table_chatUsers = "{labels.searchlog_table_chatUsers}";
+
+    /** The key of the message: Requests by intent */
+    public static final String LABELS_searchlog_table_chatIntents = "{labels.searchlog_table_chatIntents}";
+
+    /** The key of the message: Requests by model */
+    public static final String LABELS_searchlog_table_chatModels = "{labels.searchlog_table_chatModels}";
+
+    /** The key of the message: User */
+    public static final String LABELS_searchlog_col_user = "{labels.searchlog_col_user}";
+
+    /** The key of the message: Intent */
+    public static final String LABELS_searchlog_col_intent = "{labels.searchlog_col_intent}";
+
+    /** The key of the message: Model */
+    public static final String LABELS_searchlog_col_model = "{labels.searchlog_col_model}";
+
+    /** The key of the message: Guests (not signed in) */
+    public static final String LABELS_searchlog_chat_guest = "{labels.searchlog_chat_guest}";
+
+    /** The key of the message: Token counts are recorded only when the LLM plugin reports them, so they may be missing or partial. */
+    public static final String LABELS_searchlog_notice_chat_tokens = "{labels.searchlog_notice_chat_tokens}";
+
+    /** The key of the message: Chat usage logging is disabled (rag.chat.log.enabled), so new chat requests are not recorded. */
+    public static final String LABELS_searchlog_notice_chat_log_disabled = "{labels.searchlog_notice_chat_log_disabled}";
+
     /** The key of the message: Maintenance */
     public static final String LABELS_maintenance_title_configuration = "{labels.maintenance_title_configuration}";
 

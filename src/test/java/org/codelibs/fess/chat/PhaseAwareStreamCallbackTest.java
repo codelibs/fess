@@ -18,6 +18,8 @@ package org.codelibs.fess.chat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codelibs.fess.llm.LlmStreamCallback;
+import org.codelibs.fess.llm.LlmUsage;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
@@ -114,5 +116,27 @@ public class PhaseAwareStreamCallbackTest extends UnitFessTestCase {
         cb.onRetry("op", 1, 3, 1000L, new RuntimeException());
         cb.onWaiting("concurrency_limit", 0L, 30000L);
         cb.onWarning("code", "detail");
+    }
+
+    @Test
+    public void test_forwardsUsageToInner() {
+        final List<LlmUsage> usages = new ArrayList<>();
+        final PhaseAwareStreamCallback cb =
+                new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, ChatPhaseCallback.noOp(), new LlmStreamCallback() {
+                    @Override
+                    public void onChunk(final String chunk, final boolean done) {
+                    }
+
+                    @Override
+                    public void onUsage(final LlmUsage usage) {
+                        usages.add(usage);
+                    }
+                });
+        final LlmUsage usage = new LlmUsage(1, 2, 3, "m");
+        cb.onUsage(usage);
+        assertEquals(1, usages.size());
+        assertSame(usage, usages.get(0));
+        // the default implementation of an inner callback ignores it
+        new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, null, (chunk, done) -> {}).onUsage(usage);
     }
 }
