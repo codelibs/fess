@@ -17,14 +17,20 @@ package org.codelibs.fess.app.web.base;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -33,6 +39,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -49,6 +56,8 @@ import jakarta.servlet.ServletContext;
  *
  */
 public abstract class FessAdminAction extends FessBaseAction {
+
+    private static final Logger logger = LogManager.getLogger(FessAdminAction.class);
 
     /** Constant suffix for view names. */
     public static final String VIEW = "-view";
@@ -101,6 +110,49 @@ public abstract class FessAdminAction extends FessBaseAction {
      * @return The action role.
      */
     protected abstract String getActionRole();
+
+    /**
+     * Streams a CSV file in the CSV encoding of the configuration, with a byte order mark for UTF-8 so
+     * that Excel reads it as UTF-8. The size is not known and not limited, so nothing is buffered
+     * beyond the writer. A failure to read the data is rethrown, so the browser gets an error instead
+     * of a file that looks complete; a failure to write means the client is gone and is only logged.
+     *
+     * @param fileName the name of the downloaded file
+     * @param writeCall writes the CSV
+     * @return the stream response
+     */
+    protected StreamResponse asCsvStream(final String fileName, final CsvWriteCall writeCall) {
+        final String encoding = fessConfig.getCsvFileEncoding();
+        return asStream(fileName).contentTypeOctetStream().stream(out -> {
+            // not closed: the container owns the response stream
+            final Writer writer = new BufferedWriter(new OutputStreamWriter(out.stream(), encoding));
+            try {
+                if (Constants.UTF_8.equalsIgnoreCase(encoding)) {
+                    writer.write('\uFEFF');
+                }
+                writeCall.write(writer);
+                writer.flush();
+            } catch (final IOException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to write {} to the response.", fileName, e);
+                }
+            }
+        });
+    }
+
+    /**
+     * Writes the content of a CSV download.
+     */
+    @FunctionalInterface
+    protected interface CsvWriteCall {
+        /**
+         * Writes the CSV.
+         *
+         * @param writer the writer of the response
+         * @throws IOException if writing fails
+         */
+        void write(Writer writer) throws IOException;
+    }
 
     /**
      * Writes data to the specified file path.

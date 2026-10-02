@@ -302,12 +302,17 @@ public class SearchLogService {
         if (StringUtil.isNotBlank(pager.searchWord)) {
             cb.query().setSearchWord_Term(pager.searchWord);
         }
+        if (SearchLogPager.HIT_COUNT_ZERO.equals(pager.hitCount)) {
+            cb.query().setHitCount_Equal(0L);
+        } else if (SearchLogPager.HIT_COUNT_NONZERO.equals(pager.hitCount)) {
+            cb.query().setHitCount_GreaterThan(0L);
+        }
         final LocalDateTime[] range = parseRequestedTimeRange(pager.requestedTimeRange);
         if (range[0] != null) {
             cb.query().setRequestedAt_GreaterEqual(range[0]);
         }
         if (range[1] != null) {
-            cb.query().setRequestedAt_LessEqual(range[1]);
+            cb.query().setRequestedAt_LessThan(endOfMinute(range[1]));
         }
     }
 
@@ -329,7 +334,7 @@ public class SearchLogService {
             cb.query().setCreatedAt_GreaterEqual(range[0]);
         }
         if (range[1] != null) {
-            cb.query().setCreatedAt_LessEqual(range[1]);
+            cb.query().setCreatedAt_LessThan(endOfMinute(range[1]));
         }
     }
 
@@ -348,7 +353,7 @@ public class SearchLogService {
             cb.query().setUpdatedAt_GreaterEqual(range[0]);
         }
         if (range[1] != null) {
-            cb.query().setUpdatedAt_LessEqual(range[1]);
+            cb.query().setUpdatedAt_LessThan(endOfMinute(range[1]));
         }
     }
 
@@ -370,7 +375,7 @@ public class SearchLogService {
             cb.query().setRequestedAt_GreaterEqual(range[0]);
         }
         if (range[1] != null) {
-            cb.query().setRequestedAt_LessEqual(range[1]);
+            cb.query().setRequestedAt_LessThan(endOfMinute(range[1]));
         }
     }
 
@@ -397,6 +402,17 @@ public class SearchLogService {
             }
         }
         return result;
+    }
+
+    /**
+     * Returns the exclusive upper bound for the end of a requested time range. The range is entered with minute
+     * precision, so its end covers the whole minute: "23:59" includes a log written at 23:59:30.
+     *
+     * @param end The end of the range in UTC
+     * @return The start of the following minute
+     */
+    protected LocalDateTime endOfMinute(final LocalDateTime end) {
+        return end.plusMinutes(1);
     }
 
     /**

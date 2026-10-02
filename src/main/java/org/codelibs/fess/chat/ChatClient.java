@@ -20,9 +20,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -76,6 +78,12 @@ public class ChatClient {
 
     /** Characters reserved per part summary for its {@code Part i/N:} header and separator. */
     protected static final int PART_SUMMARY_HEADER_CHARS = 16;
+
+    /** Query regeneration reason: the search returned no documents. */
+    protected static final String REASON_NO_RESULTS = "no_results";
+
+    /** Query regeneration reason: the search returned documents but none was judged relevant. */
+    protected static final String REASON_NO_RELEVANT_RESULTS = "no_relevant_results";
 
     /** The session manager for managing chat sessions. */
     @Resource
@@ -172,19 +180,25 @@ public class ChatClient {
             if (intentResult.getIntent() == ChatIntent.SUMMARY && StringUtil.isNotBlank(intentResult.getDocumentUrl())) {
                 searchResult = searchByUrl(intentResult.getDocumentUrl());
             } else {
-                final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                final Set<String> triedQueries = newTriedQueries(query);
                 searchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
                 finalSearchQuery = query;
 
-                // Fallback: regenerate query if no results
-                if (searchResult.getDocuments().isEmpty()) {
-                    logger.info("[RAG] Primary search returned 0 results, regenerating query. originalQuery={}", query);
-                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", historyForIntent);
-                    if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
-                        logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
-                        searchResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
-                        finalSearchQuery = newQuery;
+                // Refine the query while the search finds nothing, up to the regeneration limit.
+                // This path does not evaluate relevance, so only a search with no hits is retried.
+                final int maxRegenerations = getMaxQueryRegenerations();
+                int regenerations = 0;
+                while (searchResult.getDocuments().isEmpty() && regenerations < maxRegenerations) {
+                    regenerations++;
+                    logger.info("[RAG] Search returned 0 results, regenerating query. query={}, attempt={}", query, regenerations);
+                    final String newQuery = regenerateUntriedQuery(userMessage, query, REASON_NO_RESULTS, historyForIntent, triedQueries);
+                    if (newQuery == null) {
+                        break;
                     }
+                    searchResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
+                    query = newQuery;
+                    finalSearchQuery = newQuery;
                 }
             }
 
@@ -372,43 +386,85 @@ public class ChatClient {
                             fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
                 }
             } else {
-                // Phase 2: Search with query
-                final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
-                finalSearchQuery = query;
-                phaseStartTime = System.currentTimeMillis();
-                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
-                final ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
-                List<Map<String, Object>> searchResults = querySearchResult.getDocuments();
-                searchQueryId = querySearchResult.getQueryId();
-                searchRequestedTime = querySearchResult.getRequestedTime();
-                callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, Map.of("hitCount", searchResults.size()));
+                // Phase 2-3: Search, then evaluate the hits. While the search finds nothing or the
+                // model judges none of the hits relevant, the query is regenerated and the search and
+                // evaluation run again, up to the regeneration limit. Each round evaluates its own
+                // query's hits; a regenerated query that was already tried ends the loop.
+                //
+                // The model judges every hit from the passages the answer would be generated from --
+                // the fetcher's chunk-selected or highlighted content, the same answer context the
+                // non-streaming chat uses -- not from the search-result content_description. For a hit
+                // found only by the vector branch that description is the opening of the page, so a
+                // document whose answer sits in a later chunk was always judged irrelevant and the
+                // stream ended without sources.
+                String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                final Set<String> triedQueries = newTriedQueries(query);
+                final int maxRegenerations = getMaxQueryRegenerations();
+                int regenerations = 0;
+                List<Map<String, Object>> searchResults;
+                List<Map<String, Object>> candidateDocs = Collections.emptyList();
+                RelevanceEvaluationResult evalResult = RelevanceEvaluationResult.noRelevantResults();
+                String searchPhaseMessage = "Searching documents...";
+                while (true) {
+                    finalSearchQuery = query;
+                    phaseStartTime = System.currentTimeMillis();
+                    callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, searchPhaseMessage, query);
+                    final ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
+                    searchResults = querySearchResult.getDocuments();
+                    searchQueryId = querySearchResult.getQueryId();
+                    searchRequestedTime = querySearchResult.getRequestedTime();
+                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, Map.of("hitCount", searchResults.size()));
 
-                logger.info("[RAG] Search completed. query={}, resultCount={}, elapsedTime={}ms", query, searchResults.size(),
-                        System.currentTimeMillis() - phaseStartTime);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[RAG] Phase {} completed. query={}, resultCount={}, phaseElapsedTime={}ms",
-                            ChatPhaseCallback.PHASE_SEARCH, query, searchResults.size(), System.currentTimeMillis() - phaseStartTime);
-                }
-
-                // Fallback: regenerate query if no results
-                if (searchResults.isEmpty()) {
-                    logger.info("[RAG] Primary search returned 0 results, regenerating query. originalQuery={}", query);
-                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", historyForIntent);
-                    if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
-                        logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
-                        callback.onFallback(ChatPhaseCallback.PHASE_SEARCH, "no_results", query, newQuery);
-                        callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
-                        final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
-                        searchResults = fallbackResult.getDocuments();
-                        finalSearchQuery = newQuery;
-                        searchQueryId = fallbackResult.getQueryId();
-                        searchRequestedTime = fallbackResult.getRequestedTime();
-                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, Map.of("hitCount", searchResults.size()));
+                    logger.info("[RAG] Search completed. query={}, resultCount={}, elapsedTime={}ms", query, searchResults.size(),
+                            System.currentTimeMillis() - phaseStartTime);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[RAG] Phase {} completed. query={}, resultCount={}, phaseElapsedTime={}ms",
+                                ChatPhaseCallback.PHASE_SEARCH, query, searchResults.size(), System.currentTimeMillis() - phaseStartTime);
                     }
+
+                    final String failureReason;
+                    if (searchResults.isEmpty()) {
+                        candidateDocs = Collections.emptyList();
+                        evalResult = RelevanceEvaluationResult.noRelevantResults();
+                        failureReason = REASON_NO_RESULTS;
+                    } else {
+                        phaseStartTime = System.currentTimeMillis();
+                        callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
+                        candidateDocs = fetchContentForAnswer(searchResults, query);
+                        evalResult = llmClientManager.evaluateResults(userMessage, query, candidateDocs);
+                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("[RAG] Phase {} completed. hasRelevant={}, relevantDocIds={}, phaseElapsedTime={}ms",
+                                    ChatPhaseCallback.PHASE_EVALUATE, evalResult.isHasRelevantResults(), evalResult.getRelevantDocIds(),
+                                    System.currentTimeMillis() - phaseStartTime);
+                        }
+                        if (evalResult.isHasRelevantResults()) {
+                            break;
+                        }
+                        failureReason = REASON_NO_RELEVANT_RESULTS;
+                    }
+
+                    if (regenerations >= maxRegenerations) {
+                        if (maxRegenerations > 0) {
+                            logger.info("[RAG] Query regeneration limit reached. query={}, reason={}, regenerations={}", query,
+                                    failureReason, regenerations);
+                        }
+                        break;
+                    }
+                    regenerations++;
+                    logger.info("[RAG] Regenerating query. query={}, reason={}, attempt={}", query, failureReason, regenerations);
+                    final String newQuery = regenerateUntriedQuery(userMessage, query, failureReason, historyForIntent, triedQueries);
+                    if (newQuery == null) {
+                        break;
+                    }
+                    callback.onFallback(ChatPhaseCallback.PHASE_SEARCH, failureReason, query, newQuery);
+                    query = newQuery;
+                    searchPhaseMessage = "Searching with refined query...";
                 }
 
-                if (searchResults.isEmpty()) {
-                    // No results even after fallback - generate no-results response
+                if (!evalResult.isHasRelevantResults()) {
+                    // Nothing relevant was found, even after refining the query
                     phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                     final LlmStreamCallback rawNoResultsCallback = (chunk, done) -> {
@@ -424,114 +480,40 @@ public class ChatClient {
                                 fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
                     }
                 } else {
-                    // Phase 3: Evaluate results. The model judges every hit from the passages the answer
-                    // would be generated from -- the fetcher's chunk-selected or highlighted content, the
-                    // same answer context the non-streaming chat uses -- not from the search-result
-                    // content_description. For a hit found only by the vector branch that description is
-                    // the opening of the page, so a document whose answer sits in a later chunk was always
-                    // judged irrelevant and the stream ended without sources.
+                    // Phase 4: Narrow the content fetched for the evaluation down to the relevant documents
                     phaseStartTime = System.currentTimeMillis();
-                    callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
-                    List<Map<String, Object>> candidateDocs = fetchContentForAnswer(searchResults, query);
-                    RelevanceEvaluationResult evalResult = llmClientManager.evaluateResults(userMessage, query, candidateDocs);
-                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
+                    callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
+                    final List<Map<String, Object>> fullDocs = selectDocsByIds(candidateDocs, evalResult.getRelevantDocIds());
+                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
+                    // fullDocs stays the LLM context; the sources are resolved back to the
+                    // search-phase maps, which alone carry content_description/content_title.
+                    sources = resolveSourcesFromSearchResults(fullDocs, searchResults);
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("[RAG] Phase {} completed. hasRelevant={}, relevantDocIds={}, phaseElapsedTime={}ms",
-                                ChatPhaseCallback.PHASE_EVALUATE, evalResult.isHasRelevantResults(), evalResult.getRelevantDocIds(),
+                        logger.debug("[RAG] Phase {} completed. docIds={}, fetchedCount={}, phaseElapsedTime={}ms",
+                                ChatPhaseCallback.PHASE_FETCH, evalResult.getRelevantDocIds(), fullDocs.size(),
                                 System.currentTimeMillis() - phaseStartTime);
                     }
 
-                    // Fallback: regenerate query if no relevant results
-                    if (!evalResult.isHasRelevantResults()) {
-                        logger.info("[RAG] No relevant results in evaluation, regenerating query. originalQuery={}", query);
-                        final String newQuery =
-                                llmClientManager.regenerateQuery(userMessage, query, "no_relevant_results", historyForIntent);
-
-                        boolean fallbackSucceeded = false;
-                        if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
-                            callback.onFallback(ChatPhaseCallback.PHASE_SEARCH, "no_relevant_results", query, newQuery);
-                            callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
-                            final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
-                            final List<Map<String, Object>> fallbackSearchResults = fallbackResult.getDocuments();
-                            callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, Map.of("hitCount", fallbackSearchResults.size()));
-
-                            if (!fallbackSearchResults.isEmpty()) {
-                                // Re-evaluate fallback results
-                                callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
-                                final List<Map<String, Object>> fallbackCandidateDocs =
-                                        fetchContentForAnswer(fallbackSearchResults, newQuery);
-                                final RelevanceEvaluationResult fallbackEvalResult =
-                                        llmClientManager.evaluateResults(userMessage, newQuery, fallbackCandidateDocs);
-                                callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
-
-                                if (fallbackEvalResult.isHasRelevantResults()) {
-                                    searchResults = fallbackSearchResults;
-                                    candidateDocs = fallbackCandidateDocs;
-                                    searchQueryId = fallbackResult.getQueryId();
-                                    searchRequestedTime = fallbackResult.getRequestedTime();
-                                    evalResult = fallbackEvalResult;
-                                    finalSearchQuery = newQuery;
-                                    fallbackSucceeded = true;
-                                }
-                            }
-                        }
-
-                        if (!fallbackSucceeded) {
-                            // All fallbacks failed - generate no-results response
-                            phaseStartTime = System.currentTimeMillis();
-                            callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
-                            final LlmStreamCallback rawFallbackNoResultsCallback = (chunk, done) -> {
-                                fullResponse.append(chunk);
-                                callback.onChunk(chunk, done);
-                            };
-                            final LlmStreamCallback fallbackNoResultsCallback =
-                                    new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawFallbackNoResultsCallback);
-                            llmClientManager.generateNoResultsResponse(userMessage, historyForAnswer, fallbackNoResultsCallback);
-                            callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms",
-                                        ChatPhaseCallback.PHASE_ANSWER, fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
-                            }
-                        }
+                    // Phase 5: Generate answer
+                    phaseStartTime = System.currentTimeMillis();
+                    callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
+                    final LlmStreamCallback rawAnswerCallback = (chunk, done) -> {
+                        fullResponse.append(chunk);
+                        callback.onChunk(chunk, done);
+                    };
+                    final LlmStreamCallback answerCallback =
+                            new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawAnswerCallback);
+                    if (intentResult.getIntent() == ChatIntent.FAQ) {
+                        llmClientManager.generateFaqAnswerResponse(userMessage, fullDocs, historyForAnswer, answerCallback);
+                    } else {
+                        llmClientManager.streamGenerateAnswer(userMessage, fullDocs, historyForAnswer, answerCallback);
                     }
-
-                    if (evalResult.isHasRelevantResults()) {
-                        // Phase 4: Narrow the content fetched for the evaluation down to the relevant documents
-                        phaseStartTime = System.currentTimeMillis();
-                        callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
-                        final List<Map<String, Object>> fullDocs = selectDocsByIds(candidateDocs, evalResult.getRelevantDocIds());
-                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
-                        // fullDocs stays the LLM context; the sources are resolved back to the
-                        // search-phase maps, which alone carry content_description/content_title.
-                        sources = resolveSourcesFromSearchResults(fullDocs, searchResults);
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("[RAG] Phase {} completed. docIds={}, fetchedCount={}, phaseElapsedTime={}ms",
-                                    ChatPhaseCallback.PHASE_FETCH, evalResult.getRelevantDocIds(), fullDocs.size(),
-                                    System.currentTimeMillis() - phaseStartTime);
-                        }
-
-                        // Phase 5: Generate answer
-                        phaseStartTime = System.currentTimeMillis();
-                        callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
-                        final LlmStreamCallback rawAnswerCallback = (chunk, done) -> {
-                            fullResponse.append(chunk);
-                            callback.onChunk(chunk, done);
-                        };
-                        final LlmStreamCallback answerCallback =
-                                new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawAnswerCallback);
-                        if (intentResult.getIntent() == ChatIntent.FAQ) {
-                            llmClientManager.generateFaqAnswerResponse(userMessage, fullDocs, historyForAnswer, answerCallback);
-                        } else {
-                            llmClientManager.streamGenerateAnswer(userMessage, fullDocs, historyForAnswer, answerCallback);
-                        }
-                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("[RAG] Phase {} completed. responseLength={}, sourceCount={}, phaseElapsedTime={}ms",
-                                    ChatPhaseCallback.PHASE_ANSWER, fullResponse.length(), fullDocs.size(),
-                                    System.currentTimeMillis() - phaseStartTime);
-                        }
+                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[RAG] Phase {} completed. responseLength={}, sourceCount={}, phaseElapsedTime={}ms",
+                                ChatPhaseCallback.PHASE_ANSWER, fullResponse.length(), fullDocs.size(),
+                                System.currentTimeMillis() - phaseStartTime);
                     }
                 }
             }
@@ -769,6 +751,59 @@ public class ChatClient {
      */
     protected int getDocumentMaxParts() {
         return Math.max(1, ComponentUtil.getFessConfig().getRagChatDocumentMaxPartsAsInteger());
+    }
+
+    /**
+     * Returns how many times a chat request may regenerate its search query when the search finds
+     * nothing or nothing relevant, from {@code rag.chat.query.regeneration.max.count}.
+     *
+     * @return the maximum number of query regenerations; 0 disables regeneration
+     */
+    protected int getMaxQueryRegenerations() {
+        return Math.max(0, ComponentUtil.getFessConfig().getRagChatQueryRegenerationMaxCountAsInteger());
+    }
+
+    /**
+     * Creates the set of queries searched in one chat request, starting with the first query.
+     * Queries are compared trimmed, as {@link #regenerateUntriedQuery} trims the regenerated ones.
+     *
+     * @param query the first search query
+     * @return a mutable set holding the trimmed query
+     */
+    private static Set<String> newTriedQueries(final String query) {
+        final Set<String> triedQueries = new HashSet<>();
+        if (query != null) {
+            triedQueries.add(query.trim());
+        }
+        return triedQueries;
+    }
+
+    /**
+     * Asks the LLM for a new search query and accepts it only if it has not been tried in this request.
+     * Searching a query again would only repeat its result, so a repeated, blank or failed regeneration
+     * (the LLM client returns the failed query on error) ends the refinement.
+     *
+     * @param userMessage the user's message
+     * @param failedQuery the query whose search failed
+     * @param failureReason {@value #REASON_NO_RESULTS} or {@value #REASON_NO_RELEVANT_RESULTS}
+     * @param history the conversation history for the intent phase
+     * @param triedQueries the queries already searched in this request; the new query is added to it
+     * @return the new query, or null if there is no untried query to search
+     */
+    protected String regenerateUntriedQuery(final String userMessage, final String failedQuery, final String failureReason,
+            final List<LlmMessage> history, final Set<String> triedQueries) {
+        final String newQuery = llmClientManager.regenerateQuery(userMessage, failedQuery, failureReason, history);
+        if (StringUtil.isBlank(newQuery)) {
+            logger.info("[RAG] Query regeneration returned no query. failedQuery={}, reason={}", failedQuery, failureReason);
+            return null;
+        }
+        final String trimmedQuery = newQuery.trim();
+        if (!triedQueries.add(trimmedQuery)) {
+            logger.info("[RAG] Regenerated query was already searched. query={}, reason={}", trimmedQuery, failureReason);
+            return null;
+        }
+        logger.info("[RAG] Regenerated query. newQuery={}, reason={}", trimmedQuery, failureReason);
+        return trimmedQuery;
     }
 
     /**

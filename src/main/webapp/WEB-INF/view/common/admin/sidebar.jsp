@@ -292,7 +292,7 @@
 
 				</ul></li></c:if>
 
-			<c:if test="${fe:permission('admin-systeminfo-view') or fe:permission('admin-searchlog-view') or fe:permission('admin-joblog-view') or fe:permission('admin-crawlinginfo-view') or fe:permission('admin-log-view') or fe:permission('admin-failureurl-view') or fe:permission('admin-searchlist-view') or fe:permission('admin-backup-view') or fe:permission('admin-maintenance-view')}">
+			<c:if test="${fe:permission('admin-systeminfo-view') or fe:permission('admin-searchlog-view') or fe:permission('admin-joblog-view') or fe:permission('admin-crawlinginfo-view') or fe:permission('admin-log-view') or fe:permission('admin-failureurl-view') or fe:permission('admin-searchlist-view') or fe:permission('admin-docreport-view') or fe:permission('admin-backup-view') or fe:permission('admin-maintenance-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='log'}">menu-open</c:if>">
 				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='log'}">active</c:if>">
 					<i class='nav-icon fa fa-rss' aria-hidden="true"></i>
@@ -353,6 +353,14 @@
 						   class="nav-link <c:if test="${param.menuType=='searchList'}">active</c:if>" <c:if test="${param.menuType=='searchList'}">aria-current="page"</c:if>>
 							<i class='fa fa-th-list nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_search_list" /></p>
+						</a></li></c:if>
+
+					<c:if test="${fe:permission('admin-docreport-view')}">
+					<li class="nav-item">
+						<a href="${fe:url('/admin/docreport/')}"
+						   class="nav-link <c:if test="${param.menuType=='docReport'}">active</c:if>" <c:if test="${param.menuType=='docReport'}">aria-current="page"</c:if>>
+							<i class='fa fa-clone nav-icon' aria-hidden="true"></i>
+							<p><la:message key="labels.menu_doc_report" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-backup-view')}">

@@ -15,10 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.searchlog;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -50,7 +46,6 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
@@ -77,7 +72,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     private static final DateTimeFormatter FILE_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private static final String[] CONDITION_FIELDS =
-            { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize", "searchWord" };
+            { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize", "searchWord", "hitCount" };
 
     /** All analytics tabs in display order: the search log tabs, then the AI chat tab. */
     public static final List<String> TABS =
@@ -416,40 +411,6 @@ public class AdminSearchlogAction extends FessAdminAction {
         final int defaultSize = SearchLogAnalyticsService.TAB_OVERVIEW.equals(tab) ? 10 : 25;
         return AnalyticsCondition.create(form.range, form.from, form.to, form.compare, form.accessType, form.size, defaultSize,
                 Clock.systemDefaultZone());
-    }
-
-    /**
-     * Streams a CSV file in the CSV encoding of the configuration, with a byte order mark for UTF-8 so
-     * that Excel reads it as UTF-8. The size is not known and not limited, so nothing is buffered
-     * beyond the writer. A failure to read the logs is rethrown, so the browser gets an error instead
-     * of a file that looks complete; a failure to write means the client is gone and is only logged.
-     *
-     * @param fileName the name of the downloaded file
-     * @param writeCall writes the CSV
-     * @return the stream response
-     */
-    private StreamResponse asCsvStream(final String fileName, final CsvWriteCall writeCall) {
-        final String encoding = fessConfig.getCsvFileEncoding();
-        return asStream(fileName).contentTypeOctetStream().stream(out -> {
-            // not closed: the container owns the response stream
-            final Writer writer = new BufferedWriter(new OutputStreamWriter(out.stream(), encoding));
-            try {
-                if (Constants.UTF_8.equalsIgnoreCase(encoding)) {
-                    writer.write('\uFEFF');
-                }
-                writeCall.write(writer);
-                writer.flush();
-            } catch (final IOException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to write {} to the response.", fileName, e);
-                }
-            }
-        });
-    }
-
-    @FunctionalInterface
-    private interface CsvWriteCall {
-        void write(Writer writer) throws IOException;
     }
 
     private HtmlResponse asAnalyticsHtml(final String tab, final AnalyticsForm form) {

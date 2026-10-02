@@ -101,6 +101,19 @@ ${fe:html(true)}
                                                      styleClass="form-control"/>
                                         </div>
                                     </div>
+                                    <div class="form-group row">
+                                        <label for="hitCountSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
+                                                key="labels.searchlog_hitcount"/></label>
+                                        <div class="col-sm-4">
+                                            <la:select styleId="hitCountSearch" property="hitCount"
+                                                       styleClass="form-control">
+                                                <la:option value=""><la:message key="labels.searchlog_hitcount_all"/></la:option>
+                                                <la:option value="zero"><la:message key="labels.searchlog_hitcount_zero"/></la:option>
+                                                <la:option value="nonzero"><la:message
+                                                        key="labels.searchlog_hitcount_nonzero"/></la:option>
+                                            </la:select>
+                                        </div>
+                                    </div>
                                 </c:if>
                                 <div class="form-group row">
                                     <label for="requestedTimeRangeSearch" class="col-sm-2 text-sm-right col-form-label"><la:message
@@ -163,6 +176,10 @@ ${fe:html(true)}
                                                         key="labels.searchlog_requested_time"/></th>
                                                 <th><la:message
                                                         key="labels.searchlog_log_message"/></th>
+                                                <c:if test="${logType == 'search'}">
+                                                    <th class="text-right" style="width: 15%"><la:message
+                                                            key="labels.searchlog_hitcount"/></th>
+                                                </c:if>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -172,6 +189,9 @@ ${fe:html(true)}
                                                         data-href="${contextPath}/admin/searchlog/details/4/${f:u(logType)}/${f:u(data.id)}">
                                                     <td>${f:h(data.requestedAt)}</td>
                                                     <td>${f:h(data.logMessage)}</td>
+                                                    <c:if test="${logType == 'search'}">
+                                                        <td class="text-right"><fmt:formatNumber value="${data.hitCount}"/></td>
+                                                    </c:if>
                                                 </tr>
                                             </c:forEach>
                                             </tbody>

@@ -43,6 +43,12 @@ public class SearchLogPager implements Serializable {
     /** Log type constant for user information logs. */
     public static final String LOG_TYPE_USERINFO = "user_info";
 
+    /** Hit count filter that keeps the searches with no result. */
+    public static final String HIT_COUNT_ZERO = "zero";
+
+    /** Hit count filter that keeps the searches with at least one result. */
+    public static final String HIT_COUNT_NONZERO = "nonzero";
+
     /** Default page size for pagination. */
     public static final int DEFAULT_PAGE_SIZE = 20;
 
@@ -88,6 +94,9 @@ public class SearchLogPager implements Serializable {
     /** Search word filter for search logs. */
     public String searchWord;
 
+    /** Hit count filter for search logs (zero, nonzero, or blank for all). */
+    public String hitCount;
+
     /**
      * Default constructor for creating a new SearchLogPager instance.
      */
@@ -111,6 +120,7 @@ public class SearchLogPager implements Serializable {
         requestedTimeRange = null;
         accessType = null;
         searchWord = null;
+        hitCount = null;
         logType = LOG_TYPE_SEARCH;
 
     }
