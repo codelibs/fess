@@ -1577,6 +1577,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String SEARCHLOG_PROCESS_batch_size = "searchlog.process.batch_size";
 
+    /** The key of the configuration. e.g. 30 */
+    String related_query_GENERATE_DAYS = "related_query.generate.days";
+
+    /** The key of the configuration. e.g. 100 */
+    String related_query_GENERATE_TERM_SIZE = "related_query.generate.term.size";
+
+    /** The key of the configuration. e.g. 5 */
+    String related_query_GENERATE_QUERY_SIZE = "related_query.generate.query.size";
+
+    /** The key of the configuration. e.g. 3 */
+    String related_query_GENERATE_MIN_SESSIONS = "related_query.generate.min.sessions";
+
+    /** The key of the configuration. e.g. 10 */
+    String related_query_GENERATE_SESSION_INTERVAL = "related_query.generate.session.interval";
+
+    /** The key of the configuration. e.g. 1000 */
+    String related_query_GENERATE_SEED_LOG_SIZE = "related_query.generate.seed.log.size";
+
+    /** The key of the configuration. e.g. 200 */
+    String related_query_GENERATE_SEED_SESSION_SIZE = "related_query.generate.seed.session.size";
+
+    /** The key of the configuration. e.g. 2000 */
+    String related_query_GENERATE_LOG_FETCH_SIZE = "related_query.generate.log.fetch.size";
+
+    /** The key of the configuration. e.g. 2 */
+    String related_query_GENERATE_QUERY_MIN_LENGTH = "related_query.generate.query.min.length";
+
+    /** The key of the configuration. e.g. 50 */
+    String related_query_GENERATE_QUERY_MAX_LENGTH = "related_query.generate.query.max.length";
+
     /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_MIN_WIDTH = "thumbnail.html.image.min.width";
 
@@ -8237,6 +8267,176 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSearchlogProcessBatchSizeAsInteger();
 
     /**
+     * Get the value for the key 'related_query.generate.days'. <br>
+     * The value is, e.g. 30 <br>
+     * comment: Number of days of search logs read when generating related queries from search logs.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateDays();
+
+    /**
+     * Get the value for the key 'related_query.generate.days' as {@link Integer}. <br>
+     * The value is, e.g. 30 <br>
+     * comment: Number of days of search logs read when generating related queries from search logs.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateDaysAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.term.size'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of terms generated per virtual host.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateTermSize();
+
+    /**
+     * Get the value for the key 'related_query.generate.term.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of terms generated per virtual host.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateTermSizeAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.query.size'. <br>
+     * The value is, e.g. 5 <br>
+     * comment: Maximum number of related queries generated per term.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateQuerySize();
+
+    /**
+     * Get the value for the key 'related_query.generate.query.size' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * comment: Maximum number of related queries generated per term.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateQuerySizeAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.min.sessions'. <br>
+     * The value is, e.g. 3 <br>
+     * comment: Minimum number of distinct user sessions required for a term and for each of its related queries.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateMinSessions();
+
+    /**
+     * Get the value for the key 'related_query.generate.min.sessions' as {@link Integer}. <br>
+     * The value is, e.g. 3 <br>
+     * comment: Minimum number of distinct user sessions required for a term and for each of its related queries.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateMinSessionsAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.session.interval'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Interval (minutes) after a search within which a follow-up search of the same session counts as a refinement.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateSessionInterval();
+
+    /**
+     * Get the value for the key 'related_query.generate.session.interval' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Interval (minutes) after a search within which a follow-up search of the same session counts as a refinement.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateSessionIntervalAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.seed.log.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of search logs of a term read to find the sessions that searched it.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateSeedLogSize();
+
+    /**
+     * Get the value for the key 'related_query.generate.seed.log.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of search logs of a term read to find the sessions that searched it.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateSeedLogSizeAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.seed.session.size'. <br>
+     * The value is, e.g. 200 <br>
+     * comment: Maximum number of sessions per term whose follow-up searches are read.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateSeedSessionSize();
+
+    /**
+     * Get the value for the key 'related_query.generate.seed.session.size' as {@link Integer}. <br>
+     * The value is, e.g. 200 <br>
+     * comment: Maximum number of sessions per term whose follow-up searches are read.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateSeedSessionSizeAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.log.fetch.size'. <br>
+     * The value is, e.g. 2000 <br>
+     * comment: Maximum number of follow-up search logs read per term.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateLogFetchSize();
+
+    /**
+     * Get the value for the key 'related_query.generate.log.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 2000 <br>
+     * comment: Maximum number of follow-up search logs read per term.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateLogFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.query.min.length'. <br>
+     * The value is, e.g. 2 <br>
+     * comment: Minimum length (in characters) of a generated term or related query.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateQueryMinLength();
+
+    /**
+     * Get the value for the key 'related_query.generate.query.min.length' as {@link Integer}. <br>
+     * The value is, e.g. 2 <br>
+     * comment: Minimum length (in characters) of a generated term or related query.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateQueryMinLengthAsInteger();
+
+    /**
+     * Get the value for the key 'related_query.generate.query.max.length'. <br>
+     * The value is, e.g. 50 <br>
+     * comment: Maximum length (in characters) of a generated term or related query.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRelatedQueryGenerateQueryMaxLength();
+
+    /**
+     * Get the value for the key 'related_query.generate.query.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * comment: Maximum length (in characters) of a generated term or related query.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRelatedQueryGenerateQueryMaxLengthAsInteger();
+
+    /**
      * Get the value for the key 'thumbnail.html.image.min.width'. <br>
      * The value is, e.g. 100 <br>
      * comment: Minimum width for HTML images in thumbnails.
@@ -13510,6 +13710,86 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.SEARCHLOG_PROCESS_batch_size);
         }
 
+        public String getRelatedQueryGenerateDays() {
+            return get(FessConfig.related_query_GENERATE_DAYS);
+        }
+
+        public Integer getRelatedQueryGenerateDaysAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_DAYS);
+        }
+
+        public String getRelatedQueryGenerateTermSize() {
+            return get(FessConfig.related_query_GENERATE_TERM_SIZE);
+        }
+
+        public Integer getRelatedQueryGenerateTermSizeAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_TERM_SIZE);
+        }
+
+        public String getRelatedQueryGenerateQuerySize() {
+            return get(FessConfig.related_query_GENERATE_QUERY_SIZE);
+        }
+
+        public Integer getRelatedQueryGenerateQuerySizeAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_QUERY_SIZE);
+        }
+
+        public String getRelatedQueryGenerateMinSessions() {
+            return get(FessConfig.related_query_GENERATE_MIN_SESSIONS);
+        }
+
+        public Integer getRelatedQueryGenerateMinSessionsAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_MIN_SESSIONS);
+        }
+
+        public String getRelatedQueryGenerateSessionInterval() {
+            return get(FessConfig.related_query_GENERATE_SESSION_INTERVAL);
+        }
+
+        public Integer getRelatedQueryGenerateSessionIntervalAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_SESSION_INTERVAL);
+        }
+
+        public String getRelatedQueryGenerateSeedLogSize() {
+            return get(FessConfig.related_query_GENERATE_SEED_LOG_SIZE);
+        }
+
+        public Integer getRelatedQueryGenerateSeedLogSizeAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_SEED_LOG_SIZE);
+        }
+
+        public String getRelatedQueryGenerateSeedSessionSize() {
+            return get(FessConfig.related_query_GENERATE_SEED_SESSION_SIZE);
+        }
+
+        public Integer getRelatedQueryGenerateSeedSessionSizeAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_SEED_SESSION_SIZE);
+        }
+
+        public String getRelatedQueryGenerateLogFetchSize() {
+            return get(FessConfig.related_query_GENERATE_LOG_FETCH_SIZE);
+        }
+
+        public Integer getRelatedQueryGenerateLogFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_LOG_FETCH_SIZE);
+        }
+
+        public String getRelatedQueryGenerateQueryMinLength() {
+            return get(FessConfig.related_query_GENERATE_QUERY_MIN_LENGTH);
+        }
+
+        public Integer getRelatedQueryGenerateQueryMinLengthAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_QUERY_MIN_LENGTH);
+        }
+
+        public String getRelatedQueryGenerateQueryMaxLength() {
+            return get(FessConfig.related_query_GENERATE_QUERY_MAX_LENGTH);
+        }
+
+        public Integer getRelatedQueryGenerateQueryMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.related_query_GENERATE_QUERY_MAX_LENGTH);
+        }
+
         public String getThumbnailHtmlImageMinWidth() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH);
         }
@@ -15171,6 +15451,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SEARCHLOG_AGG_SHARD_SIZE, "-1");
             defaultMap.put(FessConfig.SEARCHLOG_REQUEST_HEADERS, "");
             defaultMap.put(FessConfig.SEARCHLOG_PROCESS_batch_size, "100");
+            defaultMap.put(FessConfig.related_query_GENERATE_DAYS, "30");
+            defaultMap.put(FessConfig.related_query_GENERATE_TERM_SIZE, "100");
+            defaultMap.put(FessConfig.related_query_GENERATE_QUERY_SIZE, "5");
+            defaultMap.put(FessConfig.related_query_GENERATE_MIN_SESSIONS, "3");
+            defaultMap.put(FessConfig.related_query_GENERATE_SESSION_INTERVAL, "10");
+            defaultMap.put(FessConfig.related_query_GENERATE_SEED_LOG_SIZE, "1000");
+            defaultMap.put(FessConfig.related_query_GENERATE_SEED_SESSION_SIZE, "200");
+            defaultMap.put(FessConfig.related_query_GENERATE_LOG_FETCH_SIZE, "2000");
+            defaultMap.put(FessConfig.related_query_GENERATE_QUERY_MIN_LENGTH, "2");
+            defaultMap.put(FessConfig.related_query_GENERATE_QUERY_MAX_LENGTH, "50");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO, "3.0");

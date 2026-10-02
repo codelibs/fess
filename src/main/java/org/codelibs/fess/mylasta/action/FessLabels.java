@@ -2460,6 +2460,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Related Query */
     public static final String LABELS_related_query_title_details = "{labels.related_query_title_details}";
 
+    /** The key of the message: Generate from Search Logs */
+    public static final String LABELS_related_query_generate = "{labels.related_query_generate}";
+
+    /** The key of the message: Creates related queries from the query refinements found in recent search logs. Terms that already have related queries are not changed. */
+    public static final String LABELS_related_query_generate_confirmation = "{labels.related_query_generate_confirmation}";
+
     /** The key of the message: Create */
     public static final String LABELS_crud_button_create = "{labels.crud_button_create}";
 

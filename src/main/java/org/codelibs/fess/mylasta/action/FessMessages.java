@@ -482,6 +482,15 @@ public class FessMessages extends FessLabels {
     /** The key of the message: This theme requires a newer version of Fess than this server. */
     public static final String ERRORS_theme_incompatible_fess_version = "{errors.theme_incompatible_fess_version}";
 
+    /** The key of the message: Failed to generate related queries: {0} */
+    public static final String ERRORS_failed_to_generate_related_query = "{errors.failed_to_generate_related_query}";
+
+    /** The key of the message: Related queries cannot be generated because the search log or user info is disabled. */
+    public static final String ERRORS_related_query_generation_disabled = "{errors.related_query_generation_disabled}";
+
+    /** The key of the message: Related queries are already being generated. */
+    public static final String ERRORS_related_query_generation_in_progress = "{errors.related_query_generation_in_progress}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -628,6 +637,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Theme registry reloaded */
     public static final String SUCCESS_reload_theme = "{success.reload_theme}";
+
+    /** The key of the message: Generated {0} related queries ({1} existing terms skipped). */
+    public static final String SUCCESS_related_query_generated = "{success.related_query_generated}";
 
     /** The key of the message: Created the data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -2839,6 +2851,49 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_generate_related_query' with parameters.
+     * <pre>
+     * message: Failed to generate related queries: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToGenerateRelatedQuery(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_generate_related_query, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.related_query_generation_disabled' with parameters.
+     * <pre>
+     * message: Related queries cannot be generated because the search log or user info is disabled.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsRelatedQueryGenerationDisabled(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_related_query_generation_disabled));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.related_query_generation_in_progress' with parameters.
+     * <pre>
+     * message: Related queries are already being generated.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsRelatedQueryGenerationInProgress(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_related_query_generation_in_progress));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.property_required' with parameters.
      * <pre>
      * message: {0} is required.
@@ -3545,6 +3600,22 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessReloadTheme(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_reload_theme));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.related_query_generated' with parameters.
+     * <pre>
+     * message: Generated {0} related queries ({1} existing terms skipped).
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessRelatedQueryGenerated(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_related_query_generated, arg0, arg1));
         return this;
     }
 

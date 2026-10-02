@@ -28,6 +28,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.RelatedQueryPager;
+import org.codelibs.fess.app.service.RelatedQueryGenerationService;
+import org.codelibs.fess.app.service.RelatedQueryGenerationService.GenerationResult;
 import org.codelibs.fess.app.service.RelatedQueryService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -68,6 +70,8 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     private RelatedQueryService relatedQueryService;
     @Resource
     private RelatedQueryPager relatedQueryPager;
+    @Resource
+    private RelatedQueryGenerationService relatedQueryGenerationService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -112,6 +116,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         }).orElse(() -> {
             relatedQueryPager.setCurrentPageNumber(0);
         });
+        saveToken();
         return asHtml(path_AdminRelatedquery_AdminRelatedqueryJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -127,6 +132,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, relatedQueryPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        saveToken();
         return asHtml(path_AdminRelatedquery_AdminRelatedqueryJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -142,6 +148,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
         relatedQueryPager.clear();
+        saveToken();
         return asHtml(path_AdminRelatedquery_AdminRelatedqueryJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -331,6 +338,43 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    // -----------------------------------------------------
+    //                                              Generate
+    //                                              --------
+    /**
+     * Generates related queries from the query refinements in recent search logs.
+     * Terms that already have related queries are not changed.
+     *
+     * @return HTML response redirecting to the list page after generation
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse generate() {
+        verifyToken(this::asListHtml);
+        GenerationResult result = null;
+        try {
+            result = relatedQueryGenerationService.generate(systemHelper.getUsername());
+        } catch (final Exception e) {
+            logger.warn("Failed to generate related queries.", e);
+            throwValidationError(messages -> messages.addErrorsFailedToGenerateRelatedQuery(GLOBAL, buildThrowableMessage(e)),
+                    this::asListHtml);
+        }
+        switch (result.status()) {
+        case DISABLED:
+            throwValidationError(messages -> messages.addErrorsRelatedQueryGenerationDisabled(GLOBAL), this::asListHtml);
+            break;
+        case IN_PROGRESS:
+            throwValidationError(messages -> messages.addErrorsRelatedQueryGenerationInProgress(GLOBAL), this::asListHtml);
+            break;
+        default:
+            break;
+        }
+        final String created = String.valueOf(result.created());
+        final String skipped = String.valueOf(result.skipped());
+        saveInfo(messages -> messages.addSuccessRelatedQueryGenerated(GLOBAL, created, skipped));
+        return redirect(getClass());
+    }
+
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
@@ -381,6 +425,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     //                                                                           =========
 
     private HtmlResponse asListHtml() {
+        saveToken();
         return asHtml(path_AdminRelatedquery_AdminRelatedqueryJsp).renderWith(data -> {
             RenderDataUtil.register(data, "relatedQueryItems", relatedQueryService.getRelatedQueryList(relatedQueryPager));
         }).useForm(SearchForm.class, setup -> {
