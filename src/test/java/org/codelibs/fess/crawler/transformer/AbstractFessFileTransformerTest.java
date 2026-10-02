@@ -17,6 +17,8 @@ package org.codelibs.fess.crawler.transformer;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,7 +29,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ClassUtil;
 import org.codelibs.core.lang.FieldUtil;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.client.fs.FileSystemClient;
+import org.codelibs.fess.crawler.client.ftp.FtpClient;
+import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
@@ -257,6 +263,11 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
     }
 
     private Map<String, Object> generateDataWithHeaders(final Map<String, Object> headers) {
+        return generateDataWith(headers, null, Map.of(), null);
+    }
+
+    private Map<String, Object> generateDataWith(final Map<String, Object> headers, final String configParameter,
+            final Map<String, String[]> extractedMetadata, final FessConfig fessConfig) {
         ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
         ComponentUtil.register(new PathMappingHelper(), "pathMappingHelper");
         ComponentUtil.register(new CrawlingConfigHelper(), "crawlingConfigHelper");
@@ -277,12 +288,17 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         }, "languageHelper");
         final FileConfig fileConfig = new FileConfig();
         fileConfig.setId("1");
+        fileConfig.setConfigParameter(configParameter);
         final String sessionId = ComponentUtil.getCrawlingConfigHelper().store("test", fileConfig);
 
         final TestableAbstractFessFileTransformer extracting = new TestableAbstractFessFileTransformer() {
             @Override
             protected Extractor getExtractor(final ResponseData responseData) {
-                return (in, params) -> new ExtractData("body text");
+                return (in, params) -> {
+                    final ExtractData extractData = new ExtractData("body text");
+                    extractedMetadata.forEach(extractData::putValues);
+                    return extractData;
+                };
             }
 
             @Override
@@ -290,7 +306,7 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
                 return new ArrayList<>();
             }
         };
-        extracting.fessConfig = ComponentUtil.getFessConfig();
+        extracting.fessConfig = fessConfig != null ? fessConfig : ComponentUtil.getFessConfig();
 
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/doc.pdf");
@@ -316,6 +332,167 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
     @Test
     public void test_generateData_noEtagHeader_noEtagField() {
         assertFalse(generateDataWithHeaders(Map.of()).containsKey("etag"));
+    }
+
+    @Test
+    public void test_generateData_smbOwner_indexesAccountName() {
+        final Map<String, Object> dataMap =
+                generateDataWith(Map.of(SmbClient.SMB_OWNER_ATTRIBUTES, new String[] { "alice", "CORP" }), null, Map.of(), null);
+        assertEquals("alice", dataMap.get("owner"));
+        // no last author in the document metadata, so the owner is the fallback
+        assertEquals("alice", dataMap.get("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_smb1Owner_indexesAccountName() {
+        final Map<String, Object> dataMap = generateDataWith(
+                Map.of(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_OWNER_ATTRIBUTES, new String[] { "bob", "CORP" }), null,
+                Map.of(), null);
+        assertEquals("bob", dataMap.get("owner"));
+    }
+
+    @Test
+    public void test_generateData_fileOwner_removesDomainPrefix() {
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "CORP\\carol"), null, Map.of(), null);
+        assertEquals("carol", dataMap.get("owner"));
+    }
+
+    @Test
+    public void test_generateData_posixFileOwner() {
+        assertEquals("dave", generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"), null, Map.of(), null).get("owner"));
+    }
+
+    @Test
+    public void test_generateData_ftpOwner() {
+        assertEquals("erin", generateDataWith(Map.of(FtpClient.FTP_FILE_USER, "erin"), null, Map.of(), null).get("owner"));
+    }
+
+    @Test
+    public void test_generateData_blankOwner_noOwnerField() {
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, " "), null, Map.of(), null);
+        assertFalse(dataMap.containsKey("owner"));
+        assertFalse(dataMap.containsKey("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_noOwnerMetadata_noOwnerFields() {
+        final Map<String, Object> dataMap = generateDataWithHeaders(Map.of());
+        assertFalse(dataMap.containsKey("owner"));
+        assertFalse(dataMap.containsKey("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_lastAuthorMetadata_isLastModifier() {
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"), null,
+                Map.of("meta:last-author", new String[] { "", " Taro Yamada " }), null);
+        assertEquals("dave", dataMap.get("owner"));
+        assertEquals("Taro Yamada", dataMap.get("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_lastAuthorMetadata_withoutOwner() {
+        final Map<String, Object> dataMap =
+                generateDataWith(Map.of(), null, Map.of("meta:last-author", new String[] { "Taro Yamada" }), null);
+        assertFalse(dataMap.containsKey("owner"));
+        assertEquals("Taro Yamada", dataMap.get("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_ownerDisabledByConfigParameter() {
+        final Map<String, Object> dataMap =
+                generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"), "config.owner.enabled=false", Map.of(), null);
+        assertFalse(dataMap.containsKey("owner"));
+        // a disabled owner is not used as the fallback either
+        assertFalse(dataMap.containsKey("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_ownerDisabled_lastAuthorStillIndexed() {
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"), "config.owner.enabled=false",
+                Map.of("meta:last-author", new String[] { "Taro Yamada" }), null);
+        assertFalse(dataMap.containsKey("owner"));
+        assertEquals("Taro Yamada", dataMap.get("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_lastModifierDisabledByConfigParameter() {
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"),
+                "config.last.modifier.enabled=false", Map.of("meta:last-author", new String[] { "Taro Yamada" }), null);
+        assertEquals("dave", dataMap.get("owner"));
+        assertFalse(dataMap.containsKey("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_disabledByFessConfig() {
+        final FessConfig fessConfig = createFessConfig(false, false, Map.of());
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"), null,
+                Map.of("meta:last-author", new String[] { "Taro Yamada" }), fessConfig);
+        assertFalse(dataMap.containsKey("owner"));
+        assertFalse(dataMap.containsKey("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_configParameterOverridesFessConfig() {
+        final FessConfig fessConfig = createFessConfig(false, false, Map.of());
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"),
+                "config.owner.enabled=true\nconfig.last.modifier.enabled=true", Map.of(), fessConfig);
+        assertEquals("dave", dataMap.get("owner"));
+        assertEquals("dave", dataMap.get("last_modifier"));
+    }
+
+    @Test
+    public void test_generateData_mappedMetadataIsKept() {
+        final FessConfig fessConfig =
+                createFessConfig(true, true, Map.of("dc:creator", new Tuple3<>("owner", Constants.MAPPING_TYPE_STRING, null),
+                        "custom:modifier", new Tuple3<>("last_modifier", Constants.MAPPING_TYPE_STRING, null)));
+        final Map<String, Object> dataMap = generateDataWith(Map.of(FileSystemClient.FS_FILE_USER, "dave"), null,
+                Map.of("dc:creator", new String[] { "Hanako" }, "custom:modifier", new String[] { "Jiro" }), fessConfig);
+        assertEquals("Hanako", dataMap.get("owner"));
+        assertEquals("Jiro", dataMap.get("last_modifier"));
+    }
+
+    private static FessConfig createFessConfig(final boolean ownerEnabled, final boolean lastModifierEnabled,
+            final Map<String, Tuple3<String, String, String>> metadataNameMappings) {
+        // Delegate every call to the real configuration except the ones under test.
+        final FessConfig real = ComponentUtil.getFessConfig();
+        return (FessConfig) Proxy.newProxyInstance(FessConfig.class.getClassLoader(), new Class<?>[] { FessConfig.class },
+                (proxy, method, args) -> {
+                    switch (method.getName()) {
+                    case "isCrawlerDocumentFileOwnerEnabled":
+                        return ownerEnabled;
+                    case "isCrawlerDocumentFileLastModifierEnabled":
+                        return lastModifierEnabled;
+                    case "getCrawlerMetadataNameMapping":
+                        return metadataNameMappings.get(args[0]);
+                    default:
+                        try {
+                            return method.invoke(real, args);
+                        } catch (final InvocationTargetException e) {
+                            throw e.getCause();
+                        }
+                    }
+                });
+    }
+
+    @Test
+    public void test_normalizeOwner() {
+        final TestableAbstractFessFileTransformer transformer = new TestableAbstractFessFileTransformer();
+        assertNull(transformer.normalizeOwner(null));
+        assertNull(transformer.normalizeOwner(""));
+        assertNull(transformer.normalizeOwner("CORP\\"));
+        assertEquals("alice", transformer.normalizeOwner(" alice "));
+        assertEquals("alice", transformer.normalizeOwner("CORP\\alice"));
+        assertEquals("1000", transformer.normalizeOwner("1000"));
+    }
+
+    @Test
+    public void test_isConfigEnabled() {
+        final TestableAbstractFessFileTransformer transformer = new TestableAbstractFessFileTransformer();
+        assertTrue(transformer.isConfigEnabled(null, "owner.enabled", true));
+        assertFalse(transformer.isConfigEnabled(Map.of(), "owner.enabled", false));
+        assertFalse(transformer.isConfigEnabled(Map.of("owner.enabled", "false"), "owner.enabled", true));
+        assertTrue(transformer.isConfigEnabled(Map.of("owner.enabled", " TRUE "), "owner.enabled", false));
+        assertTrue(transformer.isConfigEnabled(Map.of("owner.enabled", " "), "owner.enabled", true));
     }
 
     private static class TestableAbstractFessFileTransformer extends AbstractFessFileTransformer {

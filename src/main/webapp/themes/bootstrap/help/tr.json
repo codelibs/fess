@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Alan Araması",
-      "html": "<p>Alan adını, ardından iki nokta üst üste <code>:</code> ve aradığınız terimi yazarak herhangi bir alanda arama yapabilirsiniz. Örneğin, başlığında \"Fess\" geçen belgeleri bulmak için:</p><pre>title:Fess</pre><p>Kullanılabilir alanlar arasında <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> ve <code>mimetype</code> bulunur. Bunlar özelleştirilebilir.</p>"
+      "html": "<p>Alan adını, ardından iki nokta üst üste <code>:</code> ve aradığınız terimi yazarak herhangi bir alanda arama yapabilirsiniz. Örneğin, başlığında \"Fess\" geçen belgeleri bulmak için:</p><pre>title:Fess</pre><p>Kullanılabilir alanlar arasında <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> ve <code>mimetype</code> bulunur. Bunlar özelleştirilebilir.</p>"
     },
     {
       "id": "sort",

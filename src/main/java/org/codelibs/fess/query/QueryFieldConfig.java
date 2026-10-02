@@ -134,6 +134,8 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
                     fessConfig.getIndexFieldFilename(), //
+                    fessConfig.getIndexFieldOwner(), //
+                    fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
@@ -159,6 +161,8 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
                     fessConfig.getIndexFieldFilename(), //
+                    fessConfig.getIndexFieldOwner(), //
+                    fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
@@ -213,6 +217,8 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
                     fessConfig.getIndexFieldFilename(), //
+                    fessConfig.getIndexFieldOwner(), //
+                    fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldSegment(), //
                     fessConfig.getIndexFieldAnchor(), //
@@ -234,6 +240,8 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldOwner(), //
+                    fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldSegment());
             // Initialize Set for O(1) lookup performance
@@ -272,6 +280,8 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
                     fessConfig.getIndexFieldFilename(), //
+                    fessConfig.getIndexFieldOwner(), //
+                    fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
@@ -302,7 +312,9 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldLang(), //
                     fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldOwner(), //
                     fessConfig.getIndexFieldParentId(), //
                     fessConfig.getIndexFieldPrimaryTerm(), //
                     fessConfig.getIndexFieldRole(), //

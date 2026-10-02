@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "欄位搜尋",
-      "html": "<p>輸入欄位名稱，接著輸入冒號 <code>:</code>，再輸入要搜尋的詞，即可搜尋任何欄位。例如，要找出標題中含有「Fess」的文件：</p><pre>title:Fess</pre><p>可用的欄位包括 <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code> 和 <code>mimetype</code>。這些欄位可以自訂。</p>"
+      "html": "<p>輸入欄位名稱，接著輸入冒號 <code>:</code>，再輸入要搜尋的詞，即可搜尋任何欄位。例如，要找出標題中含有「Fess」的文件：</p><pre>title:Fess</pre><p>可用的欄位包括 <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code>、<code>owner</code>、<code>last_modifier</code> 和 <code>mimetype</code>。這些欄位可以自訂。</p>"
     },
     {
       "id": "sort",

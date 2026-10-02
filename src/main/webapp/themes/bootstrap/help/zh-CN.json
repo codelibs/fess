@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "字段搜索",
-      "html": "<p>可以通过输入字段名称后跟冒号 <code>:</code> 再加上要查找的词来搜索任意字段。例如，要查找标题中包含 “Fess” 的文档：</p><pre>title:Fess</pre><p>可用字段包括 <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code> 和 <code>mimetype</code>。这些字段可自定义配置。</p>"
+      "html": "<p>可以通过输入字段名称后跟冒号 <code>:</code> 再加上要查找的词来搜索任意字段。例如，要查找标题中包含 “Fess” 的文档：</p><pre>title:Fess</pre><p>可用字段包括 <code>url</code>、<code>host</code>、<code>site</code>、<code>title</code>、<code>content</code>、<code>content_length</code>、<code>last_modified</code>、<code>owner</code>、<code>last_modifier</code> 和 <code>mimetype</code>。这些字段可自定义配置。</p>"
     },
     {
       "id": "sort",

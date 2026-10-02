@@ -33,6 +33,9 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.client.fs.FileSystemClient;
+import org.codelibs.fess.crawler.client.ftp.FtpClient;
+import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.AccessResultData;
 import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.entity.ResponseData;
@@ -78,6 +81,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     private static final Pattern CACHE_WHITESPACE_PATTERN = Pattern.compile("[ \\t\\x0B\\f]+");
 
     private static final Pattern TRAILING_SLASHES_PATTERN = Pattern.compile("/+$");
+
+    /** The extracted metadata name holding the last author of a document (Tika's Office.LAST_AUTHOR). */
+    protected static final String LAST_AUTHOR_METADATA_NAME = "meta:last-author";
 
     private static final Pattern SMB_SCHEME_PREFIX_PATTERN = Pattern.compile("^smb.?:/+");
 
@@ -333,6 +339,22 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         if (etag != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldEtag(), etag);
         }
+        // owner and last_modifier: a value already mapped from the document metadata is kept
+        final Map<String, String> configParamMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        final String owner = isConfigEnabled(configParamMap, Config.OWNER_ENABLED, fessConfig.isCrawlerDocumentFileOwnerEnabled())
+                ? getOwner(responseData)
+                : null;
+        if (owner != null && !dataMap.containsKey(fessConfig.getIndexFieldOwner())) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldOwner(), owner);
+        }
+        if (isConfigEnabled(configParamMap, Config.LAST_MODIFIER_ENABLED, fessConfig.isCrawlerDocumentFileLastModifierEnabled())
+                && !dataMap.containsKey(fessConfig.getIndexFieldLastModifier())) {
+            // the file owner is the fallback only when it may be indexed, so disabling the owner never leaks it here
+            final String lastModifier = getLastModifier(metaDataMap, owner);
+            if (lastModifier != null) {
+                putResultDataBody(dataMap, fessConfig.getIndexFieldLastModifier(), lastModifier);
+            }
+        }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
@@ -421,6 +443,82 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
 
         return responseData.getLastModified();
+    }
+
+    /**
+     * Check whether a feature is enabled, preferring the crawl config parameter over the default.
+     * @param configParamMap The config.* parameters of the crawl config (may be null).
+     * @param key The parameter key without the config. prefix.
+     * @param defaultValue The value used when the parameter is not set.
+     * @return true if the feature is enabled.
+     */
+    protected boolean isConfigEnabled(final Map<String, String> configParamMap, final String key, final boolean defaultValue) {
+        if (configParamMap != null) {
+            final String value = configParamMap.get(key);
+            if (StringUtil.isNotBlank(value)) {
+                return Boolean.parseBoolean(value.trim());
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Get the owner of the crawled file from the metadata set by the SMB, file system and FTP clients.
+     * @param responseData The response data.
+     * @return The account name of the owner, or null if it is not available.
+     */
+    protected String getOwner(final ResponseData responseData) {
+        final Map<String, Object> metaDataMap = responseData.getMetaDataMap();
+        if (metaDataMap == null) {
+            return null;
+        }
+        Object value = metaDataMap.get(SmbClient.SMB_OWNER_ATTRIBUTES);
+        if (value == null) {
+            value = metaDataMap.get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_OWNER_ATTRIBUTES);
+        }
+        if (value instanceof final String[] ownerAttributes) {
+            // { account name, domain name }
+            return ownerAttributes.length > 0 ? normalizeOwner(ownerAttributes[0]) : null;
+        }
+        value = metaDataMap.get(FileSystemClient.FS_FILE_USER);
+        if (value == null) {
+            value = metaDataMap.get(FtpClient.FTP_FILE_USER);
+        }
+        return value != null ? normalizeOwner(value.toString()) : null;
+    }
+
+    /**
+     * Normalize an owner name to its account name, removing a "DOMAIN\" prefix.
+     * @param owner The owner name.
+     * @return The account name, or null if it is blank.
+     */
+    protected String normalizeOwner(final String owner) {
+        if (StringUtil.isBlank(owner)) {
+            return null;
+        }
+        String name = owner.trim();
+        final int pos = name.lastIndexOf('\\');
+        if (pos >= 0) {
+            name = name.substring(pos + 1).trim();
+        }
+        return StringUtil.isNotBlank(name) ? name : null;
+    }
+
+    /**
+     * Get the last modifier from the extracted document metadata, falling back to the owner.
+     * @param metaDataMap The extracted metadata.
+     * @param owner The owner of the file (may be null).
+     * @return The last modifier, or null if it is not available.
+     */
+    protected String getLastModifier(final Map<String, Object> metaDataMap, final String owner) {
+        if (metaDataMap.get(LAST_AUTHOR_METADATA_NAME) instanceof final String[] values) {
+            for (final String value : values) {
+                if (StringUtil.isNotBlank(value)) {
+                    return value.trim();
+                }
+            }
+        }
+        return owner;
     }
 
     /**

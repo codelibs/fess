@@ -189,6 +189,16 @@ public class TermQueryCommandTest extends QueryTestBase {
             }
 
             @Override
+            public String getIndexFieldOwner() {
+                return baseConfig.getIndexFieldOwner();
+            }
+
+            @Override
+            public String getIndexFieldLastModifier() {
+                return baseConfig.getIndexFieldLastModifier();
+            }
+
+            @Override
             public String getIndexFieldCreated() {
                 return baseConfig.getIndexFieldCreated();
             }

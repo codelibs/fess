@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Pencarian Bidang",
-      "html": "<p>Anda dapat mencari di bidang apa pun dengan mengetik nama bidang diikuti titik dua <code>:</code> lalu istilah yang Anda cari. Misalnya, untuk menemukan dokumen dengan \"Fess\" di judulnya:</p><pre>title:Fess</pre><p>Bidang yang tersedia antara lain <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, dan <code>mimetype</code>. Bidang-bidang ini dapat disesuaikan.</p>"
+      "html": "<p>Anda dapat mencari di bidang apa pun dengan mengetik nama bidang diikuti titik dua <code>:</code> lalu istilah yang Anda cari. Misalnya, untuk menemukan dokumen dengan \"Fess\" di judulnya:</p><pre>title:Fess</pre><p>Bidang yang tersedia antara lain <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code>, dan <code>mimetype</code>. Bidang-bidang ini dapat disesuaikan.</p>"
     },
     {
       "id": "sort",

@@ -33,7 +33,7 @@
     {
       "id": "field",
       "title": "Ricerca per campo",
-      "html": "<p>È possibile cercare in qualsiasi campo digitando il nome del campo seguito da due punti <code>:</code> e poi dal termine cercato. Ad esempio, per trovare i documenti con «Fess» nel titolo:</p><pre>title:Fess</pre><p>I campi disponibili includono <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code> e <code>mimetype</code>. Sono personalizzabili.</p>"
+      "html": "<p>È possibile cercare in qualsiasi campo digitando il nome del campo seguito da due punti <code>:</code> e poi dal termine cercato. Ad esempio, per trovare i documenti con «Fess» nel titolo:</p><pre>title:Fess</pre><p>I campi disponibili includono <code>url</code>, <code>host</code>, <code>site</code>, <code>title</code>, <code>content</code>, <code>content_length</code>, <code>last_modified</code>, <code>owner</code>, <code>last_modifier</code> e <code>mimetype</code>. Sono personalizzabili.</p>"
     },
     {
       "id": "sort",

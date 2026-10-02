@@ -6,6 +6,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { resetDom, mountBody, setLocation } from "../../helpers/dom.js";
+import { installFetch, jsonResponse } from "../../helpers/net.js";
 
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
   getConfig: vi.fn(() => null),
@@ -329,6 +330,39 @@ describe("buildResultCard", () => {
     api.getConfig.mockReturnValue({ features: { search_log_enabled: true } });
     expect(infoText({ doc_id: "b", click_count: 0 })).not.toContain("result.click_count");
     expect(infoText({ doc_id: "c" })).not.toContain("result.click_count");
+  });
+
+  it("shows owner and last modifier after the size and before the cache link", () => {
+    api.getConfig.mockReturnValue({ features: {} });
+    const li = buildResultCard(
+      { doc_id: "d8", title: "T", url: "https://e.com", content_length: 2048, owner: "alice", last_modifier: "Taro Yamada", has_cache: "true" }, "q", 1);
+    const text = li.querySelector(".info").textContent;
+    const size = text.indexOf(formatFileSize(2048));
+    const owner = text.indexOf("result.owner");
+    const modifier = text.indexOf("result.last_modifier");
+    const cache = text.indexOf("result.cache");
+    expect(size).toBeGreaterThanOrEqual(0);
+    expect(owner).toBeGreaterThan(size);
+    expect(modifier).toBeGreaterThan(owner);
+    expect(cache).toBeGreaterThan(modifier);
+  });
+
+  it("omits owner / last modifier when missing or empty", () => {
+    api.getConfig.mockReturnValue({ features: {} });
+    for (const extra of [{}, { owner: "", last_modifier: null }, { owner: [], last_modifier: [""] }]) {
+      const text = buildResultCard({ doc_id: "d9", title: "T", url: "https://e.com", ...extra }, "q", 1)
+        .querySelector(".info").textContent;
+      expect(text).not.toContain("result.owner");
+      expect(text).not.toContain("result.last_modifier");
+    }
+  });
+
+  it("renders a markup-looking owner as text, never as an element", () => {
+    api.getConfig.mockReturnValue({ features: {} });
+    const info = buildResultCard(
+      { doc_id: "d10", title: "T", url: "https://e.com", owner: "<b>x</b>" }, "q", 1).querySelector(".info");
+    expect(info.textContent).toContain("result.owner");
+    expect(info.querySelector("b")).toBeNull();
   });
 
   it("renders a similar link only when similar_docs_count > 1", () => {
@@ -1957,5 +1991,28 @@ describe("runFromUrl — legacy JSP parameters", () => {
     await settle();
     expect(Object.keys(searchParams())).not.toContain("sdh");
     expect(Object.keys(searchParams()).filter((k) => k.startsWith("as."))).toEqual([]);
+  });
+});
+
+// Kept last: vi.resetModules() below must not disturb the statically imported suites above.
+describe("buildResultCard — owner / last modifier values", () => {
+  it("interpolates the value and joins an array with \", \"", async () => {
+    vi.resetModules(); // fresh, seedable i18n singleton (api/router stay mocked via vi.mock)
+    const i18n = await import("../../../../main/webapp/themes/bootstrap/assets/i18n.js");
+    installFetch(async () => jsonResponse({
+      "result.owner": "Owner: {name}",
+      "result.last_modifier": "Last modified by: {name}",
+    }));
+    Object.defineProperty(navigator, "language", { value: "en", configurable: true });
+    await i18n.init();
+    const fresh = await import("../../../../main/webapp/themes/bootstrap/assets/search.js");
+
+    const text = fresh.buildResultCard(
+      { doc_id: "d1", title: "T", url: "https://e.com", owner: "CORP alice", last_modifier: ["Taro Yamada", "<b>bob</b>"] }, "q", 1)
+      .querySelector(".info").textContent;
+    expect(text).toContain("Owner: CORP alice");
+    expect(text).toContain("Last modified by: Taro Yamada, <b>bob</b>");
+
+    vi.unstubAllGlobals();
   });
 });

@@ -154,6 +154,16 @@ public abstract class QueryTestBase extends UnitFessTestCase {
             }
 
             @Override
+            public String getIndexFieldOwner() {
+                return "owner";
+            }
+
+            @Override
+            public String getIndexFieldLastModifier() {
+                return "last_modifier";
+            }
+
+            @Override
             public String getIndexFieldCreated() {
                 return "created";
             }
