@@ -113,6 +113,52 @@ ${fe:html(true)}
                                     <script>location.href = "${contextPath}/admin/relatedquery/list/${pager.allPageCount}";</script>
                                 </c:if>
                             </c:if>
+                            <c:if test="${editable}">
+                                <div class="row">
+                                    <la:form action="/admin/relatedquery/">
+                                        <div class="col-sm-12 center">
+                                            <button type="button" class="btn btn-primary"
+                                                    data-toggle="modal" data-target="#confirmToGenerate">
+                                                <i class="fa fa-magic" aria-hidden="true"></i>
+                                                <la:message key="labels.related_query_generate"/>
+                                            </button>
+                                        </div>
+                                        <div class="modal fade" id="confirmToGenerate"
+                                             tabindex="-1" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title">
+                                                            <la:message key="labels.related_query_generate"/>
+                                                        </h4>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
+                                                            <span aria-hidden="true">×</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>
+                                                            <la:message key="labels.related_query_generate_confirmation"/>
+                                                        </p>
+                                                    </div>
+                                                    <div class="modal-footer justify-content-between">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-dismiss="modal">
+                                                            <la:message key="labels.crud_button_cancel"/>
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary"
+                                                                name="generate"
+                                                                value="<la:message key="labels.related_query_generate" />">
+                                                            <i class="fa fa-magic" aria-hidden="true"></i>
+                                                            <la:message key="labels.related_query_generate"/>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </la:form>
+                                </div>
+                            </c:if>
                         </div>
                     </div>
                 </div>
