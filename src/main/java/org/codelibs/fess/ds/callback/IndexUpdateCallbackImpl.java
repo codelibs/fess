@@ -133,7 +133,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         if (fessConfig.isUserTagEnabled()) {
-            ComponentUtil.getTagHelper().addTagFields(dataMap);
+            // the tags are users' and come only from the label types of the kind tag
+            final Set<String> tagSet = ComponentUtil.getLabelTypeHelper().getMatchedTagValueSet(url);
+            if (tagSet.isEmpty()) {
+                dataMap.remove(fessConfig.getIndexFieldTag());
+            } else {
+                dataMap.put(fessConfig.getIndexFieldTag(), tagSet.toArray(new String[tagSet.size()]));
+            }
         }
 
         final Set<String> matchedLabelSet = ComponentUtil.getLabelTypeHelper().getMatchedLabelValueSet(url);

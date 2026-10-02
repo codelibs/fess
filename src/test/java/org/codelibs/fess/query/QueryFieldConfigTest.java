@@ -173,19 +173,8 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
             }
 
             @Override
-
             public String getIndexFieldTag() {
-
                 return "tag";
-
-            }
-
-            @Override
-
-            public String getIndexFieldTagCount() {
-
-                return "tag_count";
-
             }
 
             @Override
@@ -1043,7 +1032,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
      * <p>The expected field names are resolved from the same {@link FessConfig} the
      * {@code QueryFieldConfig} was booted with, rather than hard-coded, so the test pins the
      * <em>logical</em> allowlist (which fields are emitted) independently of deployment-specific
-     * index field naming (for example {@code _id} vs {@code id}). The 29 logical fields match
+     * index field naming (for example {@code _id} vs {@code id}). The 28 logical fields match
      * the v2 search hit contract enumerated in openapi-user.yaml's {@code SearchHit} schema.
      * {@code _id} / {@code similar_docs_count} / {@code similar_docs_hash} are allowlist members
      * deterministically (independent of runtime hit content), so they are asserted unconditionally.
@@ -1055,7 +1044,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertNotNull(config.apiResponseFieldSet, "apiResponseFieldSet must not be null after init");
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        // The 29 logical fields the v2 SearchHit contract enumerates, resolved from FessConfig.
+        // The 28 logical fields the v2 SearchHit contract enumerates, resolved from FessConfig.
         final String collapseName = fessConfig.getQueryCollapseInnerHitsName();
         final String[] allowedFields = { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(),
                 fessConfig.getResponseFieldContentDescription(), fessConfig.getResponseFieldContentTitle(), fessConfig.getIndexFieldSite(),
@@ -1065,8 +1054,8 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
                 fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldCreated(),
                 QueryFieldConfig.SCORE_FIELD, fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldDocId(),
                 fessConfig.getIndexFieldId(), fessConfig.getIndexFieldThumbnail(), fessConfig.getIndexFieldHasCache(),
-                fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldTagCount(),
-                collapseName + "_count", collapseName + "_hash" };
+                fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(), collapseName + "_count",
+                collapseName + "_hash" };
         for (final String field : allowedFields) {
             assertTrue(config.isApiResponseField(field),
                     "expected allowlisted API response field '" + field + "'; actual set: " + config.apiResponseFieldSet);
@@ -1082,24 +1071,16 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         final QueryFieldConfig config = ComponentUtil.getQueryFieldConfig();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String tag = fessConfig.getIndexFieldTag();
-        final String tagCount = fessConfig.getIndexFieldTagCount();
 
-        // tag:"general:x", fields.tag=general:x and facet.field=tag work
+        // tag:<value>, fields.tag=<value> and facet.field=tag work
         assertTrue(config.searchFieldSet.contains(tag));
         assertTrue(config.isFacetField(tag));
         assertTrue(config.notAnalyzedFieldSet.contains(tag));
         assertTrue(Arrays.asList(config.getResponseFields()).contains(tag));
-        // the raw tag values include label types the caller cannot see: the search handler returns
+        // the raw tag values include tags the caller cannot see: the search handler returns
         // the visible ones as "tags", so the field itself is never an API response field
         assertFalse(config.isApiResponseField(tag));
         assertFalse(Arrays.asList(config.getScrollResponseFields()).contains(tag));
-
-        assertTrue(config.searchFieldSet.contains(tagCount));
-        assertTrue(config.isSortField(tagCount));
-        assertTrue(config.notAnalyzedFieldSet.contains(tagCount));
-        assertTrue(config.isApiResponseField(tagCount));
-        assertTrue(Arrays.asList(config.getResponseFields()).contains(tagCount));
-        assertTrue(Arrays.asList(config.getScrollResponseFields()).contains(tagCount));
     }
 
     @Test

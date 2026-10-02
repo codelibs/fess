@@ -30,7 +30,10 @@ public class LabelType extends BsLabelType {
     /** The kind of a label that the crawler assigns to documents by the included and excluded paths. */
     public static final String KIND_LABEL = "label";
 
-    /** The kind of a label that defines the tags which the users in its permissions can see and add to documents. */
+    /**
+     * The kind of a label that is a tag users add from the search screen: its name is the tag name, its included paths
+     * list the tagged URLs (matched exactly) and its permissions list who can see it, including the users who added it.
+     */
     public static final String KIND_TAG = "tag";
 
     private Locale locale;

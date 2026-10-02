@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -31,7 +31,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.LabelTypeHelper.LabelTypeItem;
 import org.codelibs.fess.helper.TagHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -51,9 +53,11 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * Unit tests for {@link DocumentTagsHandler}.
  *
- * <p>The tag log and the document index are replaced by {@link FakeTagHelper}, which keeps the tags in memory and
- * records every write, while the name rules ({@code normalizeName}, {@code toValue}, {@code isVisible},
- * {@code toTagItems}) stay the real ones. The handler's own seams supply the caller, the visible tag types and the
+ * <p>The label types of the kind tag are kept in memory by {@link FakeTagHelper}, which replaces the writes
+ * ({@code addTag}, {@code removeTag}) and the index updates ({@code addTagToDocuments},
+ * {@code removeTagFromDocuments}) and records every call, while the name and permission rules
+ * ({@code normalizeName}, {@code toValue}, {@code toUserPermission}, {@code isMine}) stay the real ones. The handler's
+ * seams supply the caller, the tags the caller can see (those whose permissions meet the caller's) and the
  * document.</p>
  */
 public class DocumentTagsHandlerTest extends UnitFessTestCase {
@@ -61,6 +65,8 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     private static final String DOC_ID = "doc1";
 
     private static final String URL = "http://example.com/page.html";
+
+    private static final String OTHER_URL = "http://example.com/other.html";
 
     private static final String PATH = "/api/v2/documents/" + DOC_ID + "/tags";
 
@@ -91,17 +97,18 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
             Assertions.assertEquals("method_not_allowed", errorCode(res), method);
             Assertions.assertEquals("GET, POST, DELETE", res.headers.get("Allow"), method);
             Assertions.assertEquals(0, handler.documentLookups, method);
+            Assertions.assertEquals(0, handler.tagListLookups, method);
         }
-        assertTrue(tagHelper.calls.isEmpty(), tagHelper.calls.toString());
+        Assertions.assertEquals(List.of(), tagHelper.calls);
     }
 
     @Test
     public void test_methodIsCaseInsensitive() throws Exception {
-        tagHelper.countMap.put("dept:a", 1L);
+        tagHelper.put("a", List.of(URL), "1alice");
         final Response res = new Response();
-        new StubHandler().handle(request("get"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("get"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(1, tags(res).size(), res.body());
+        Assertions.assertEquals(List.of(tag("a", true)), tags(res));
     }
 
     // ===================================================================================
@@ -119,76 +126,76 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
             Assertions.assertEquals("invalid doc_id", errorMessage(res));
             Assertions.assertEquals(0, handler.documentLookups);
         }
-        assertTrue(tagHelper.calls.isEmpty(), tagHelper.calls.toString());
+        Assertions.assertEquals(List.of(), tagHelper.calls);
     }
 
     @Test
     public void test_featureDisabled_returns400ForEveryMethod() throws Exception {
         tagHelper.enabled = false;
+        final String value = tagHelper.put("x", List.of(URL), "1alice").getValue();
         for (final String method : new String[] { "GET", "POST", "DELETE" }) {
             final StubHandler handler = new StubHandler().user("alice");
             final Response res = new Response();
-            handler.handle(request(method).json("{\"type\":\"dept\",\"name\":\"x\"}").param("value", "dept:x"), res.proxy(), DOC_ID);
+            handler.handle(request(method).json("{\"name\":\"x\"}").param("value", value), res.proxy(), DOC_ID);
             Assertions.assertEquals(400, res.status, method);
             Assertions.assertEquals("invalid_request", errorCode(res), method);
             Assertions.assertEquals("tag feature is not available", errorMessage(res), method);
             Assertions.assertEquals(0, handler.documentLookups, method);
+            Assertions.assertEquals(0, handler.tagListLookups, method);
         }
-        assertTrue(tagHelper.calls.isEmpty(), tagHelper.calls.toString());
+        Assertions.assertEquals(List.of(), tagHelper.calls);
     }
 
     @Test
     public void test_anonymousWrites_return401() throws Exception {
+        final String value = tagHelper.put("x", List.of(URL), "Rguest").getValue();
         for (final String user : new String[] { null, "", " " }) {
             for (final String method : new String[] { "POST", "DELETE" }) {
-                final StubHandler handler = new StubHandler().user(user);
+                final StubHandler handler = new StubHandler().user(user).permissions("Rguest");
                 final Response res = new Response();
-                handler.handle(request(method).json("{\"type\":\"dept\",\"name\":\"x\"}").param("value", "dept:x"), res.proxy(), DOC_ID);
+                handler.handle(request(method).json("{\"name\":\"x\"}").param("value", value), res.proxy(), DOC_ID);
                 Assertions.assertEquals(401, res.status, method + " user=" + user);
                 Assertions.assertEquals("auth_required", errorCode(res));
                 Assertions.assertEquals("login required", errorMessage(res));
                 Assertions.assertEquals(0, handler.documentLookups);
             }
         }
-        assertTrue(tagHelper.calls.isEmpty(), tagHelper.calls.toString());
+        Assertions.assertEquals(List.of(), tagHelper.calls);
     }
 
     @Test
-    public void test_anonymousGet_listsTagsWithoutWriteFlags() throws Exception {
-        tagHelper.countMap.put("dept:a", 2L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("dept:a")));
+    public void test_anonymousGet_listsVisibleTagsAndIsNotAddable() throws Exception {
+        tagHelper.put("public", List.of(URL), "1alice", "Rguest");
+        tagHelper.put("private", List.of(URL), "1alice");
         final Response res = new Response();
-        new StubHandler().handle(request("GET"), res.proxy(), DOC_ID);
+        new StubHandler().permissions("Rguest").handle(request("GET"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
         final Map<String, Object> payload = payload(res);
         Assertions.assertEquals(DOC_ID, payload.get("doc_id"));
         Assertions.assertEquals(Boolean.FALSE, payload.get("addable"));
         assertFalse(payload.containsKey("added"));
         assertFalse(payload.containsKey("removed"));
-        final List<Map<String, Object>> tags = tags(res);
-        Assertions.assertEquals(1, tags.size());
-        Assertions.assertEquals(tag("dept:a", "dept", "a", 2, false, false), tags.get(0));
-        // No user, so nobody's own tags are looked up.
-        assertFalse(tagHelper.calls.stream().anyMatch(c -> c.startsWith("getUserTagSet")), tagHelper.calls.toString());
+        // Nobody is logged in, so no tag is the caller's.
+        Assertions.assertEquals(List.of(tag("public", false)), tags(res));
+        Assertions.assertEquals(List.of(), tagHelper.calls);
     }
 
     @Test
     public void test_documentNotVisible_returns404() throws Exception {
+        final String value = tagHelper.put("x", List.of(URL), "1alice").getValue();
         for (final String method : new String[] { "GET", "POST", "DELETE" }) {
             final StubHandler handler = new StubHandler().user("alice");
             handler.doc = null;
             final Response res = new Response();
-            handler.handle(request(method).json("{\"type\":\"dept\",\"name\":\"x\"}").param("value", "dept:x"), res.proxy(), DOC_ID);
+            handler.handle(request(method).json("{\"name\":\"x\"}").param("value", value), res.proxy(), DOC_ID);
             Assertions.assertEquals(404, res.status, method);
             Assertions.assertEquals("not_found", errorCode(res));
             Assertions.assertEquals("doc not found: " + DOC_ID, errorMessage(res));
             // The document is fetched through the caller's roles, asking only for its URL.
             Assertions.assertEquals(DOC_ID, handler.lastDocId);
             Assertions.assertEquals(List.of("url"), List.of(handler.lastFields));
-            assertTrue(handler.lastUser.isPresent());
         }
-        assertFalse(tagHelper.calls.stream().anyMatch(c -> c.startsWith("addTag") || c.startsWith("removeTag")),
-                tagHelper.calls.toString());
+        Assertions.assertEquals(List.of(), tagHelper.calls);
     }
 
     @Test
@@ -203,9 +210,10 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_unexpectedFailure_returnsFixedInternalError() throws Exception {
-        tagHelper.countFailure = new IllegalStateException("secret backend detail");
+        final StubHandler handler = new StubHandler().user("alice");
+        handler.tagListFailure = new IllegalStateException("secret backend detail");
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("GET"), res.proxy(), DOC_ID);
+        handler.handle(request("GET"), res.proxy(), DOC_ID);
         Assertions.assertEquals(500, res.status, res.body());
         Assertions.assertEquals("internal_error", errorCode(res));
         assertFalse(res.body().contains("secret backend detail"), res.body());
@@ -216,47 +224,24 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     //                                                                              ====
 
     @Test
-    public void test_post_invalidType_returns400() throws Exception {
-        for (final String body : new String[] { "{\"type\":\"secret\",\"name\":\"x\"}", "{\"name\":\"x\"}", "{\"type\":42,\"name\":\"x\"}",
-                "{\"type\":null,\"name\":\"x\"}", "{\"type\":\"\",\"name\":\"x\"}", "{}", "" }) {
+    public void test_post_invalidName_returns400() throws Exception {
+        fessConfig.nameMaxLength = 10;
+        final String[] names = { "\"\"", "\"   \"", "\"\\t\\n\"", "\"abcdefghijk\"", "\"a\\u0001b\"", "\"a\\u007fb\"", "\"a\\u200bb\"",
+                "\"a\\u202eb\"", "42", "null", "true", "[\"x\"]", "{\"x\":\"y\"}" };
+        for (final String name : names) {
+            final Response res = new Response();
+            new StubHandler().user("alice").handle(request("POST").json("{\"name\":" + name + "}"), res.proxy(), DOC_ID);
+            Assertions.assertEquals(400, res.status, name + " -> " + res.body());
+            Assertions.assertEquals("invalid_request", errorCode(res), name);
+            Assertions.assertEquals("invalid tag name: enter 1 to 10 characters", errorMessage(res), name);
+        }
+        // A missing name and an empty body are rejected the same way.
+        for (final String body : new String[] { "{}", "{\"type\":\"dept\"}", "" }) {
             final Response res = new Response();
             new StubHandler().user("alice").handle(request("POST").json(body), res.proxy(), DOC_ID);
             Assertions.assertEquals(400, res.status, body + " -> " + res.body());
-            Assertions.assertEquals("invalid_request", errorCode(res), body);
-            Assertions.assertEquals("invalid tag type", errorMessage(res), body);
+            Assertions.assertEquals("invalid tag name: enter 1 to 10 characters", errorMessage(res), body);
         }
-        assertNoWrites();
-    }
-
-    @Test
-    public void test_post_typeNotVisibleToTheCaller_returns400() throws Exception {
-        // The type exists for someone else, but this caller's visible set is empty.
-        final StubHandler handler = new StubHandler().user("alice");
-        handler.typeSet = Collections.emptySet();
-        final Response res = new Response();
-        handler.handle(request("POST").json("{\"type\":\"dept\",\"name\":\"x\"}"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(400, res.status, res.body());
-        Assertions.assertEquals("invalid tag type", errorMessage(res));
-        assertNoWrites();
-    }
-
-    @Test
-    public void test_post_invalidName_returns400() throws Exception {
-        fessConfig.nameMaxLength = 10;
-        final String[] names = { "\"\"", "\"   \"", "\"\\t\\n\"", "\"abcdefghijk\"", "\"a\\\"b\"", "\"a\\\\b\"", "\"a\\u0001b\"",
-                "\"a\\u007fb\"", "\"＂quoted＂\"", "42", "null", "[\"x\"]" };
-        for (final String name : names) {
-            final Response res = new Response();
-            new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":" + name + "}"), res.proxy(), DOC_ID);
-            Assertions.assertEquals(400, res.status, name + " -> " + res.body());
-            Assertions.assertEquals("invalid_request", errorCode(res), name);
-            Assertions.assertEquals("invalid tag name: enter 1 to 10 characters without \" or \\", errorMessage(res), name);
-        }
-        // A missing name is rejected the same way.
-        final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\"}"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(400, res.status, res.body());
-        assertTrue(errorMessage(res).startsWith("invalid tag name"), res.body());
         assertNoWrites();
     }
 
@@ -265,150 +250,131 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         fessConfig.nameMaxLength = 10;
         // Ten full-width letters are ten characters after NFKC; the length is counted after normalization.
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"ＡＢＣＤＥＦＧＨＩＪ\"}"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"ＡＢＣＤＥＦＧＨＩＪ\"}"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals("addTag(alice," + URL + "," + DOC_ID + ",dept:ABCDEFGHIJ)", tagHelper.writes().get(0));
+        Assertions.assertEquals("addTag(alice," + URL + ",ABCDEFGHIJ)", tagHelper.writes().get(0));
+    }
+
+    @Test
+    public void test_post_quotesAndBackslashesAreAllowed() throws Exception {
+        final Response res = new Response();
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"a\\\"b\\\\c\"}"), res.proxy(), DOC_ID);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals("addTag(alice," + URL + ",a\"b\\c)", tagHelper.writes().get(0));
+        Assertions.assertEquals(List.of(tag("a\"b\\c", true)), tags(res));
     }
 
     @Test
     public void test_post_normalizesNameAndAddsTag() throws Exception {
-        tagHelper.countMap.put("project:p", 4L);
+        tagHelper.put("existing", List.of(URL), "1bob", "2dev");
         final Response res = new Response();
         new StubHandler().user("alice")
-                .handle(request("POST").json("{\"type\":\"dept\",\"name\":\"  ＡＢＣ \\t def  \"}"), res.proxy(), DOC_ID);
+                .permissions("2dev")
+                .handle(request("POST").json("{\"name\":\"  ＡＢＣ \\t def  \"}"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(List.of("addTag(alice," + URL + "," + DOC_ID + ",dept:ABC def)", "updateDocuments(" + URL + ")"),
+        final String value = tagHelper.toValue("ABC def");
+        Assertions.assertEquals(List.of("addTag(alice," + URL + ",ABC def)", "addTagToDocuments(" + URL + "," + value + ")"),
                 tagHelper.writes());
         final Map<String, Object> payload = payload(res);
         Assertions.assertEquals(DOC_ID, payload.get("doc_id"));
         Assertions.assertEquals(Boolean.TRUE, payload.get("added"));
         Assertions.assertEquals(Boolean.TRUE, payload.get("addable"));
-        final List<Map<String, Object>> tags = tags(res);
-        Assertions.assertEquals(2, tags.size(), res.body());
-        assertTrue(tags.contains(tag("project:p", "project", "p", 4, false, false)), res.body());
-        assertTrue(tags.contains(tag("dept:ABC def", "dept", "ABC def", 1, true, true)), res.body());
+        // The response lists the tags after the change.
+        Assertions.assertEquals(List.of(tag("existing", false), tag("ABC def", true)), tags(res));
+        // A new tag is a label type of the kind tag that only its creator can see.
+        final LabelTypeItem created = tagHelper.find(value);
+        Assertions.assertEquals("ABC def", created.getLabel());
+        Assertions.assertEquals(List.of("1alice"), List.of(created.getPermissions()));
+        Assertions.assertEquals(Set.of(URL), created.getUrlSet());
     }
 
     @Test
-    public void test_post_sameTagOfAnotherUser_isCountedOnce() throws Exception {
-        tagHelper.countMap.put("dept:x", 3L);
+    public void test_post_tagOfAnotherUser_addsTheCaller() throws Exception {
+        // bob shared the tag with the dev group, so alice can see it and add it to the document too.
+        tagHelper.put("shared", List.of(OTHER_URL), "1bob", "2dev");
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"x\"}"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").permissions("2dev").handle(request("POST").json("{\"name\":\"shared\"}"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(List.of(tag("dept:x", "dept", "x", 4, true, true)), tags(res));
+        Assertions.assertEquals(Boolean.TRUE, payload(res).get("added"));
+        Assertions.assertEquals(List.of(tag("shared", true)), tags(res));
+        Assertions.assertEquals(
+                List.of("addTag(alice," + URL + ",shared)", "addTagToDocuments(" + URL + "," + tagHelper.toValue("shared") + ")"),
+                tagHelper.writes());
     }
 
     @Test
-    public void test_post_duplicate_returnsAddedFalseWithoutWriting() throws Exception {
-        tagHelper.countMap.put("dept:x", 1L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("dept:x")));
+    public void test_post_alreadyAdded_returnsAddedFalseWithoutUpdatingDocuments() throws Exception {
+        tagHelper.put("x", List.of(URL), "1alice");
         final Response res = new Response();
         // "ｘ" normalizes to the "x" the user already added.
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\" ｘ \"}"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\" ｘ \"}"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
         Assertions.assertEquals(Boolean.FALSE, payload(res).get("added"));
-        assertNoWrites();
-        Assertions.assertEquals(List.of(tag("dept:x", "dept", "x", 1, true, true)), tags(res));
+        Assertions.assertEquals(List.of("addTag(alice," + URL + ",x)"), tagHelper.writes());
+        Assertions.assertEquals(List.of(tag("x", true)), tags(res));
     }
 
     @Test
-    public void test_post_duplicateIsAcceptedEvenAtTheLimits() throws Exception {
-        // Re-adding a tag the user already has is a no-op, not a limit violation.
-        fessConfig.maxPerDocument = 1;
-        fessConfig.maxDocumentTags = 1;
-        tagHelper.countMap.put("dept:x", 1L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("dept:x")));
-        final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"x\"}"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(Boolean.FALSE, payload(res).get("added"));
-    }
-
-    @Test
-    public void test_post_perUserLimit_returns400() throws Exception {
-        fessConfig.maxPerDocument = 2;
-        tagHelper.countMap.put("dept:a", 1L);
-        tagHelper.countMap.put("dept:b", 1L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("dept:a", "dept:b")));
-        final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"c\"}"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(400, res.status, res.body());
-        Assertions.assertEquals("invalid_request", errorCode(res));
-        Assertions.assertEquals("too many tags: one user can add up to 2 tags to a document", errorMessage(res));
-        assertNoWrites();
-
-        // Another user with fewer tags is not affected.
-        final Response bob = new Response();
-        new StubHandler().user("bob").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"c\"}"), bob.proxy(), DOC_ID);
-        Assertions.assertEquals(200, bob.status, bob.body());
-    }
-
-    @Test
-    public void test_perDocumentLimit_returns400ForANewTag() throws Exception {
+    public void test_post_tooManyTags_returns400() throws Exception {
         fessConfig.maxDocumentTags = 2;
-        tagHelper.countMap.put("dept:a", 1L);
-        tagHelper.countMap.put("project:b", 1L);
+        tagHelper.addResult = TagHelper.AddResult.TOO_MANY_TAGS;
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"c\"}"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"c\"}"), res.proxy(), DOC_ID);
         Assertions.assertEquals(400, res.status, res.body());
         Assertions.assertEquals("invalid_request", errorCode(res));
         Assertions.assertEquals("too many tags: a document can have up to 2 tags", errorMessage(res));
-        assertNoWrites();
+        Assertions.assertEquals(List.of("addTag(alice," + URL + ",c)"), tagHelper.writes());
     }
 
     @Test
-    public void test_perDocumentLimit_allowsAnExistingTag() throws Exception {
-        // The limit counts distinct tags, so adding one another user already added does not grow the set.
-        fessConfig.maxDocumentTags = 2;
-        tagHelper.countMap.put("dept:a", 1L);
-        tagHelper.countMap.put("project:b", 1L);
+    public void test_post_tooManyLabels_returns400() throws Exception {
+        tagHelper.addResult = TagHelper.AddResult.TOO_MANY_LABELS;
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"a\"}"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(Boolean.TRUE, payload(res).get("added"));
-        assertTrue(tags(res).contains(tag("dept:a", "dept", "a", 2, true, true)), res.body());
-    }
-
-    @Test
-    public void test_post_addTagReportsExisting_skipsDocumentUpdate() throws Exception {
-        // addTag answers false when a concurrent request recorded the same tag first.
-        tagHelper.addResult = false;
-        final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"x\"}"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(Boolean.FALSE, payload(res).get("added"));
-        Assertions.assertEquals(List.of("addTag(alice," + URL + "," + DOC_ID + ",dept:x)"), tagHelper.writes());
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"c\"}"), res.proxy(), DOC_ID);
+        Assertions.assertEquals(400, res.status, res.body());
+        Assertions.assertEquals("invalid_request", errorCode(res));
+        Assertions.assertEquals("no more tags can be created: the number of labels reached page.labeltype.max.fetch.size",
+                errorMessage(res));
+        Assertions.assertEquals(List.of("addTag(alice," + URL + ",c)"), tagHelper.writes());
     }
 
     @Test
     public void test_post_documentUpdateFailure_isSwallowed() throws Exception {
         tagHelper.updateFailure = new IllegalStateException("index unavailable");
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":\"dept\",\"name\":\"x\"}"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"x\"}"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
         Assertions.assertEquals(Boolean.TRUE, payload(res).get("added"));
-        Assertions.assertEquals(List.of("addTag(alice," + URL + "," + DOC_ID + ",dept:x)", "updateDocuments(" + URL + ")"),
+        Assertions.assertEquals(List.of("addTag(alice," + URL + ",x)", "addTagToDocuments(" + URL + "," + tagHelper.toValue("x") + ")"),
                 tagHelper.writes());
-        // The counts fall back to the tag log, which already has the new tag.
-        Assertions.assertEquals(List.of(tag("dept:x", "dept", "x", 1, true, true)), tags(res));
+        // The label type is stored, so the tag is listed; the crawler or the label updater fixes the index later.
+        Assertions.assertEquals(List.of(tag("x", true)), tags(res));
+    }
+
+    @Test
+    public void test_post_addTagFailure_returnsInternalError() throws Exception {
+        tagHelper.addFailure = new IllegalStateException("store failed");
+        final Response res = new Response();
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"x\"}"), res.proxy(), DOC_ID);
+        Assertions.assertEquals(500, res.status, res.body());
+        Assertions.assertEquals("internal_error", errorCode(res));
+        Assertions.assertEquals(List.of("addTag(alice," + URL + ",x)"), tagHelper.writes());
     }
 
     @Test
     public void test_post_bodyErrors() throws Exception {
         final Response wrongType = new Response();
-        new StubHandler().user("alice")
-                .handle(request("POST").body("text/plain", "{\"type\":\"dept\",\"name\":\"x\"}"), wrongType.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").body("text/plain", "{\"name\":\"x\"}"), wrongType.proxy(), DOC_ID);
         Assertions.assertEquals(415, wrongType.status, wrongType.body());
         Assertions.assertEquals("unsupported_media_type", errorCode(wrongType));
 
         final Response malformed = new Response();
-        new StubHandler().user("alice").handle(request("POST").json("{\"type\":"), malformed.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":"), malformed.proxy(), DOC_ID);
         Assertions.assertEquals(400, malformed.status, malformed.body());
         Assertions.assertEquals("invalid_request", errorCode(malformed));
 
         final Response tooLarge = new Response();
-        new StubHandler().user("alice")
-                .handle(request("POST").json("{\"type\":\"dept\",\"name\":\"" + "x".repeat(2100) + "\"}"), tooLarge.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("POST").json("{\"name\":\"" + "x".repeat(2100) + "\"}"), tooLarge.proxy(), DOC_ID);
         Assertions.assertEquals(413, tooLarge.status, tooLarge.body());
         Assertions.assertEquals("payload_too_large", errorCode(tooLarge));
         assertNoWrites();
@@ -419,52 +385,65 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     //                                                                            ======
 
     @Test
-    public void test_delete_ownTag() throws Exception {
-        tagHelper.countMap.put("dept:x", 2L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("dept:x")));
-        tagHelper.userTags.put("bob", new LinkedHashSet<>(List.of("dept:x")));
+    public void test_delete_ownTagSharedWithOthers_keepsTheLabelType() throws Exception {
+        final String value = tagHelper.put("x", List.of(URL), "1alice", "1bob").getValue();
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("DELETE").param("value", "dept:x"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("DELETE").param("value", value), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(List.of("removeTag(alice," + URL + ",dept:x)", "updateDocuments(" + URL + ")"), tagHelper.writes());
+        // removeTag answered false (bob is left), so the indexed documents keep the value.
+        Assertions.assertEquals(List.of("removeTag(alice," + value + ")"), tagHelper.writes());
         final Map<String, Object> payload = payload(res);
-        Assertions.assertEquals(1, payload.get("removed"));
-        Assertions.assertEquals(List.of(tag("dept:x", "dept", "x", 1, false, false)), tags(res));
-    }
-
-    @Test
-    public void test_delete_nothingRemoved_skipsDocumentUpdate() throws Exception {
-        tagHelper.countMap.put("dept:x", 1L);
-        tagHelper.userTags.put("bob", new LinkedHashSet<>(List.of("dept:x")));
-        final Response res = new Response();
-        new StubHandler().user("alice").handle(request("DELETE").param("value", "dept:x"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(0, payload(res).get("removed"));
-        Assertions.assertEquals(List.of("removeTag(alice," + URL + ",dept:x)"), tagHelper.writes());
-        Assertions.assertEquals(List.of(tag("dept:x", "dept", "x", 1, false, false)), tags(res));
-    }
-
-    @Test
-    public void test_delete_byAdministrator_removesEveryUsersTag() throws Exception {
-        tagHelper.countMap.put("dept:x", 2L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("dept:x")));
-        tagHelper.userTags.put("bob", new LinkedHashSet<>(List.of("dept:x")));
-        final StubHandler handler = new StubHandler().user("admin");
-        handler.administrator = Boolean.TRUE;
-        final Response res = new Response();
-        handler.handle(request("DELETE").param("value", "dept:x"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(List.of("removeTag(null," + URL + ",dept:x)", "updateDocuments(" + URL + ")"), tagHelper.writes());
-        Assertions.assertEquals(2, payload(res).get("removed"));
+        Assertions.assertEquals(Boolean.TRUE, payload.get("removed"));
+        Assertions.assertEquals(Boolean.TRUE, payload.get("addable"));
+        // alice can no longer see the tag.
         Assertions.assertEquals(List.of(), tags(res));
+        Assertions.assertEquals(List.of("1bob"), List.of(tagHelper.find(value).getPermissions()));
+    }
+
+    @Test
+    public void test_delete_lastPermission_removesTheValueFromDocuments() throws Exception {
+        final String value = tagHelper.put("x", List.of(URL, OTHER_URL), "1alice").getValue();
+        final Response res = new Response();
+        new StubHandler().user("alice").handle(request("DELETE").param("value", value), res.proxy(), DOC_ID);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(List.of("removeTag(alice," + value + ")", "removeTagFromDocuments(" + value + ")"), tagHelper.writes());
+        Assertions.assertEquals(Boolean.TRUE, payload(res).get("removed"));
+        Assertions.assertEquals(List.of(), tags(res));
+        Assertions.assertNull(tagHelper.find(value));
+    }
+
+    @Test
+    public void test_delete_documentUpdateFailure_isSwallowed() throws Exception {
+        final String value = tagHelper.put("x", List.of(URL), "1alice").getValue();
+        tagHelper.updateFailure = new IllegalStateException("index unavailable");
+        final Response res = new Response();
+        new StubHandler().user("alice").handle(request("DELETE").param("value", value), res.proxy(), DOC_ID);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(Boolean.TRUE, payload(res).get("removed"));
+        Assertions.assertEquals(List.of("removeTag(alice," + value + ")", "removeTagFromDocuments(" + value + ")"), tagHelper.writes());
+    }
+
+    @Test
+    public void test_delete_visibleTagOfOthers_returns403() throws Exception {
+        // alice sees the tag through the dev group but is not in its permissions herself.
+        final String value = tagHelper.put("x", List.of(URL), "1bob", "2dev").getValue();
+        final Response res = new Response();
+        new StubHandler().user("alice").permissions("2dev").handle(request("DELETE").param("value", value), res.proxy(), DOC_ID);
+        Assertions.assertEquals(403, res.status, res.body());
+        Assertions.assertEquals("forbidden", errorCode(res));
+        Assertions.assertEquals("the tag was not added by the user", errorMessage(res));
+        assertNoWrites();
+        Assertions.assertEquals(List.of("1bob", "2dev"), List.of(tagHelper.find(value).getPermissions()));
     }
 
     @Test
     public void test_delete_invalidValue_returns400() throws Exception {
-        final String[] values = { null, "", "dept", "dept:", ":x", "secret:x", "de pt:x", "dept-x" };
+        tagHelper.put("mine", List.of(URL), "1alice");
+        // A tag that exists but that alice cannot see is not revealed: it is answered like an unknown value.
+        final String hidden = tagHelper.put("hidden", List.of(URL), "1bob").getValue();
+        final String[] values = { null, "", " ", "unknown", tagHelper.toValue("nothing"), hidden, "mine" };
         for (final String value : values) {
             final StubHandler handler = new StubHandler().user("alice");
-            handler.administrator = Boolean.TRUE;
             final Response res = new Response();
             final StubRequest req = request("DELETE");
             if (value != null) {
@@ -478,82 +457,61 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         assertNoWrites();
     }
 
+    @Test
+    public void test_delete_ownTagOnAnotherDocument_isAllowed() throws Exception {
+        // The value only has to be a tag the caller can see; the handler does not require it on this document.
+        final String value = tagHelper.put("x", List.of(OTHER_URL), "1alice").getValue();
+        final Response res = new Response();
+        new StubHandler().user("alice").handle(request("DELETE").param("value", value), res.proxy(), DOC_ID);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(List.of("removeTag(alice," + value + ")", "removeTagFromDocuments(" + value + ")"), tagHelper.writes());
+    }
+
     // ===================================================================================
     //                                                                               GET
     //                                                                               ===
 
     @Test
-    public void test_get_listsOnlyVisibleTypes() throws Exception {
-        tagHelper.countMap.put("secret:hidden", 9L);
-        tagHelper.countMap.put("dept:a", 3L);
-        tagHelper.countMap.put("not a tag", 7L);
-        tagHelper.countMap.put("project:b", 1L);
-        tagHelper.userTags.put("alice", new LinkedHashSet<>(List.of("project:b", "secret:hidden")));
+    public void test_get_listsVisibleTagsOfTheUrlAndMarksMine() throws Exception {
+        tagHelper.put("own", List.of(OTHER_URL, URL), "1alice");
+        tagHelper.put("group", List.of(URL), "1bob", "2dev");
+        tagHelper.put("own elsewhere", List.of(OTHER_URL), "1alice");
+        tagHelper.put("hidden", List.of(URL), "1carol");
+        tagHelper.put("shared", List.of(URL), "1bob", "1alice", "2dev");
+        // A URL that only starts with the document URL does not match.
+        tagHelper.put("prefix", List.of(URL + "?x=1"), "1alice");
         final Response res = new Response();
-        new StubHandler().user("alice").handle(request("GET"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").permissions("2dev").handle(request("GET"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
         Assertions.assertEquals(Boolean.TRUE, payload(res).get("addable"));
-        Assertions.assertEquals(List.of(tag("dept:a", "dept", "a", 3, false, false), tag("project:b", "project", "b", 1, true, true)),
-                tags(res));
-        assertFalse(res.body().contains("secret"), res.body());
+        Assertions.assertEquals(List.of(tag("own", true), tag("group", false), tag("shared", true)), tags(res));
+        assertFalse(res.body().contains("hidden"), res.body());
         assertNoWrites();
     }
 
     @Test
-    public void test_get_administrator_canRemoveEveryTag() throws Exception {
-        tagHelper.countMap.put("dept:a", 3L);
-        tagHelper.countMap.put("project:b", 1L);
-        final StubHandler handler = new StubHandler().user("admin");
-        handler.administrator = Boolean.TRUE;
+    public void test_get_noTags_returnsAnEmptyList() throws Exception {
         final Response res = new Response();
-        handler.handle(request("GET"), res.proxy(), DOC_ID);
+        new StubHandler().user("alice").handle(request("GET"), res.proxy(), DOC_ID);
         Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(List.of(tag("dept:a", "dept", "a", 3, false, true), tag("project:b", "project", "b", 1, false, true)),
-                tags(res));
-    }
-
-    @Test
-    public void test_get_noVisibleType_isNotAddable() throws Exception {
-        tagHelper.countMap.put("dept:a", 3L);
-        final StubHandler handler = new StubHandler().user("alice");
-        handler.typeSet = Collections.emptySet();
-        final Response res = new Response();
-        handler.handle(request("GET"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals(Boolean.FALSE, payload(res).get("addable"));
+        Assertions.assertEquals(Boolean.TRUE, payload(res).get("addable"));
         Assertions.assertEquals(List.of(), tags(res));
     }
 
-    // ===================================================================================
-    //                                                                    Administrator
-    //                                                                    =============
-
     @Test
-    public void test_isTagAdministrator_adminAndLabelTypeRoles() {
-        final DocumentTagsHandler handler = new DocumentTagsHandler();
-        assertFalse(handler.isTagAdministrator(OptionalThing.empty()));
-        assertFalse(handler.isTagAdministrator(OptionalThing.of(new FessUserBean(new StubFessUser("u", "user")))));
-        assertTrue(handler.isTagAdministrator(OptionalThing.of(new FessUserBean(new StubFessUser("a", "admin")))));
-        assertTrue(handler.isTagAdministrator(OptionalThing.of(new FessUserBean(new StubFessUser("l", "user", "admin-labeltype")))));
-        // A view-only label role cannot moderate.
-        assertFalse(handler.isTagAdministrator(OptionalThing.of(new FessUserBean(new StubFessUser("v", "admin-labeltype-view")))));
-    }
-
-    @Test
-    public void test_delete_byLabelTypeAdministratorThroughTheRealRoleCheck() throws Exception {
-        tagHelper.countMap.put("dept:x", 1L);
-        final StubHandler handler = new StubHandler();
-        handler.user = OptionalThing.of(new FessUserBean(new StubFessUser("mod", "admin-labeltype")));
+    public void test_get_payloadShape() throws Exception {
+        final String value = tagHelper.put("x", List.of(URL), "1alice").getValue();
         final Response res = new Response();
-        handler.handle(request("DELETE").param("value", "dept:x"), res.proxy(), DOC_ID);
-        Assertions.assertEquals(200, res.status, res.body());
-        Assertions.assertEquals("removeTag(null," + URL + ",dept:x)", tagHelper.writes().get(0));
-
-        tagHelper.calls.clear();
-        final StubHandler plain = new StubHandler();
-        plain.user = OptionalThing.of(new FessUserBean(new StubFessUser("carol", "user")));
-        plain.handle(request("DELETE").param("value", "dept:x"), new Response().proxy(), DOC_ID);
-        Assertions.assertEquals("removeTag(carol," + URL + ",dept:x)", tagHelper.writes().get(0));
+        new StubHandler().user("alice").handle(request("GET"), res.proxy(), DOC_ID);
+        final Map<String, Object> payload = payload(res);
+        Assertions.assertEquals(List.of("doc_id", "addable", "tags"),
+                payload.keySet().stream().filter(k -> List.of("doc_id", "addable", "tags", "added", "removed").contains(k)).toList());
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> first = ((List<Map<String, Object>>) payload.get("tags")).get(0);
+        Assertions.assertEquals(List.of("value", "name", "mine"), List.copyOf(first.keySet()));
+        // The value is the SHA-256 of the name in hex.
+        Assertions.assertEquals(64, value.length());
+        Assertions.assertEquals(value, first.get("value"));
     }
 
     // ===================================================================================
@@ -564,15 +522,12 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         Assertions.assertEquals(List.of(), tagHelper.writes());
     }
 
-    private static Map<String, Object> tag(final String value, final String type, final String name, final long count, final boolean mine,
-            final boolean removable) {
+    /** The JSON of a tag: its value is derived from its name. */
+    private Map<String, Object> tag(final String name, final boolean mine) {
         final Map<String, Object> map = new LinkedHashMap<>();
-        map.put("value", value);
-        map.put("type", type);
+        map.put("value", tagHelper.toValue(name));
         map.put("name", name);
-        map.put("count", count);
         map.put("mine", mine);
-        map.put("removable", removable);
         return map;
     }
 
@@ -592,10 +547,7 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     private static List<Map<String, Object>> tags(final Response res) {
         final List<Map<String, Object>> tags = new ArrayList<>();
         for (final Object item : (List<Object>) payload(res).get("tags")) {
-            final Map<String, Object> map = new LinkedHashMap<>((Map<String, Object>) item);
-            // JSON numbers come back as Integer; compare counts as long.
-            map.computeIfPresent("count", (k, v) -> ((Number) v).longValue());
-            tags.add(map);
+            tags.add(new LinkedHashMap<>((Map<String, Object>) item));
         }
         return tags;
     }
@@ -614,19 +566,27 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         return new StubRequest(method);
     }
 
-    /** A handler whose caller, visible tag types and document are set by the test. */
-    private static class StubHandler extends DocumentTagsHandler {
+    /**
+     * A handler whose caller and document are set by the test. The visible tags are those of {@link FakeTagHelper}
+     * whose permissions include the caller's user permission or one of the extra permissions (a group or a role).
+     */
+    private class StubHandler extends DocumentTagsHandler {
         OptionalThing<FessUserBean> user = OptionalThing.empty();
-        Set<String> typeSet = new LinkedHashSet<>(List.of("dept", "project"));
+        final Set<String> extraPermissions = new LinkedHashSet<>();
         Map<String, Object> doc = new HashMap<>(Map.of("url", URL));
-        Boolean administrator;
+        RuntimeException tagListFailure;
         int documentLookups;
+        int tagListLookups;
         String lastDocId;
         String[] lastFields;
-        OptionalThing<FessUserBean> lastUser;
 
         StubHandler user(final String name) {
-            user = name == null ? OptionalThing.empty() : OptionalThing.of(new FessUserBean(new StubFessUser(name, "user")));
+            user = name == null ? OptionalThing.empty() : OptionalThing.of(new FessUserBean(new StubFessUser(name)));
+            return this;
+        }
+
+        StubHandler permissions(final String... permissions) {
+            extraPermissions.addAll(Arrays.asList(permissions));
             return this;
         }
 
@@ -635,47 +595,66 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
-        protected Map<String, Object> getDocument(final String docId, final String[] fields, final OptionalThing<FessUserBean> userBean) {
+        protected Map<String, Object> getDocument(final String docId, final String[] fields) {
             documentLookups++;
             lastDocId = docId;
             lastFields = fields;
-            lastUser = userBean;
             return doc;
         }
 
         @Override
-        protected Set<String> getTagTypeValueSet(final HttpServletRequest req) {
-            return typeSet;
+        protected List<LabelTypeItem> getTagItemList(final HttpServletRequest req) {
+            tagListLookups++;
+            if (tagListFailure != null) {
+                throw tagListFailure;
+            }
+            final Set<String> callerPermissions = new LinkedHashSet<>(extraPermissions);
+            final String userId = user.map(FessUserBean::getUserId).orElse(null);
+            if (StringUtil.isNotBlank(userId)) {
+                callerPermissions.add(tagHelper.toUserPermission(userId));
+            }
+            return tagHelper.store.stream()
+                    .filter(item -> Arrays.stream(item.getPermissions()).anyMatch(callerPermissions::contains))
+                    .toList();
         }
 
         @Override
         protected OptionalThing<FessUserBean> getUserBean() {
             return user;
         }
-
-        @Override
-        protected boolean isTagAdministrator(final OptionalThing<FessUserBean> userBean) {
-            return administrator == null ? super.isTagAdministrator(userBean) : administrator;
-        }
     }
 
     /**
-     * Keeps the tag log in memory. The tag rules (name normalization, value parsing, visibility) are the real ones;
-     * only the storage methods are replaced, and each call is recorded.
+     * Keeps the label types of the kind tag in memory. The writes and the index updates are replaced and recorded;
+     * the name and permission rules are the real ones.
      */
     private static class FakeTagHelper extends TagHelper {
         boolean enabled = true;
-        boolean addResult = true;
+        /** When set, addTag answers this without changing the store. */
+        TagHelper.AddResult addResult;
+        RuntimeException addFailure;
         RuntimeException updateFailure;
-        RuntimeException countFailure;
-        final Map<String, Long> countMap = new LinkedHashMap<>();
-        final Map<String, Set<String>> userTags = new HashMap<>();
+        final List<LabelTypeItem> store = new ArrayList<>();
         final List<String> calls = new ArrayList<>();
 
+        /** Stores a tag of the name that tags the URLs and that the permissions can see. */
+        LabelTypeItem put(final String name, final List<String> urls, final String... permissions) {
+            final LabelTypeItem item = new LabelTypeItem();
+            item.setValue(toValue(name));
+            item.setLabel(name);
+            item.setTag(true);
+            item.setPermissions(permissions);
+            item.setUrlSet(new LinkedHashSet<>(urls));
+            store.add(item);
+            return item;
+        }
+
+        LabelTypeItem find(final String value) {
+            return store.stream().filter(i -> i.getValue().equals(value)).findFirst().orElse(null);
+        }
+
         List<String> writes() {
-            return calls.stream()
-                    .filter(c -> c.startsWith("addTag") || c.startsWith("removeTag") || c.startsWith("updateDocuments"))
-                    .toList();
+            return calls.stream().filter(c -> c.startsWith("addTag") || c.startsWith("removeTag")).toList();
         }
 
         @Override
@@ -684,58 +663,67 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
-        public Map<String, Long> getTagCountMap(final String url) {
-            calls.add("getTagCountMap(" + url + ")");
-            if (countFailure != null) {
-                throw countFailure;
+        public synchronized AddResult addTag(final String userId, final String url, final String name) {
+            calls.add("addTag(" + userId + "," + url + "," + name + ")");
+            if (addFailure != null) {
+                throw addFailure;
             }
-            return new LinkedHashMap<>(countMap);
+            if (addResult != null) {
+                return addResult;
+            }
+            final String permission = toUserPermission(userId);
+            final LabelTypeItem item = find(toValue(name));
+            if (item == null) {
+                put(name, List.of(url), permission);
+                return AddResult.ADDED;
+            }
+            final List<String> permissions = new ArrayList<>(Arrays.asList(item.getPermissions()));
+            if (item.getUrlSet().contains(url) && permissions.contains(permission)) {
+                return AddResult.ALREADY_ADDED;
+            }
+            final Set<String> urlSet = new LinkedHashSet<>(item.getUrlSet());
+            urlSet.add(url);
+            item.setUrlSet(urlSet);
+            if (!permissions.contains(permission)) {
+                permissions.add(permission);
+            }
+            item.setPermissions(permissions.toArray(new String[0]));
+            return AddResult.ADDED;
         }
 
         @Override
-        public Set<String> getUserTagSet(final String user, final String url) {
-            calls.add("getUserTagSet(" + user + "," + url + ")");
-            return new LinkedHashSet<>(userTags.getOrDefault(user, Collections.emptySet()));
-        }
-
-        @Override
-        public boolean addTag(final String user, final String url, final String docId, final String value) {
-            calls.add("addTag(" + user + "," + url + "," + docId + "," + value + ")");
-            if (!addResult) {
+        public synchronized boolean removeTag(final String userId, final String value) {
+            calls.add("removeTag(" + userId + "," + value + ")");
+            final LabelTypeItem item = find(value);
+            if (item == null) {
                 return false;
             }
-            userTags.computeIfAbsent(user, k -> new LinkedHashSet<>()).add(value);
-            countMap.merge(value, 1L, Long::sum);
-            return true;
+            final List<String> permissions = new ArrayList<>(Arrays.asList(item.getPermissions()));
+            if (!permissions.remove(toUserPermission(userId))) {
+                return false;
+            }
+            if (permissions.isEmpty()) {
+                store.remove(item);
+                return true;
+            }
+            item.setPermissions(permissions.toArray(new String[0]));
+            return false;
         }
 
         @Override
-        public int removeTag(final String user, final String url, final String value) {
-            calls.add("removeTag(" + user + "," + url + "," + value + ")");
-            int removed = 0;
-            for (final Map.Entry<String, Set<String>> entry : userTags.entrySet()) {
-                if ((user == null || user.equals(entry.getKey())) && entry.getValue().remove(value)) {
-                    removed++;
-                }
-            }
-            if (removed > 0) {
-                final long left = countMap.getOrDefault(value, 0L) - removed;
-                if (left > 0) {
-                    countMap.put(value, left);
-                } else {
-                    countMap.remove(value);
-                }
-            }
-            return removed;
-        }
-
-        @Override
-        public Map<String, Long> updateDocuments(final String url) {
-            calls.add("updateDocuments(" + url + ")");
+        public void addTagToDocuments(final String url, final String value) {
+            calls.add("addTagToDocuments(" + url + "," + value + ")");
             if (updateFailure != null) {
                 throw updateFailure;
             }
-            return new LinkedHashMap<>(countMap);
+        }
+
+        @Override
+        public void removeTagFromDocuments(final String value) {
+            calls.add("removeTagFromDocuments(" + value + ")");
+            if (updateFailure != null) {
+                throw updateFailure;
+            }
         }
     }
 
@@ -743,7 +731,6 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     private static class TagFessConfig extends FessConfig.SimpleImpl {
         private static final long serialVersionUID = 1L;
         int nameMaxLength = 50;
-        int maxPerDocument = 10;
         int maxDocumentTags = 100;
 
         @Override
@@ -757,35 +744,28 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
-        public Integer getUserTagMaxPerDocumentAsInteger() {
-            return maxPerDocument;
+        public Integer getUserTagMaxDocumentTagsAsInteger() {
+            return maxDocumentTags;
         }
 
         @Override
-        public Integer getUserTagMaxDocumentTagsAsInteger() {
-            return maxDocumentTags;
+        public String getRoleSearchUserPrefix() {
+            return "1";
         }
 
         @Override
         public String getIndexFieldUrl() {
             return "url";
         }
-
-        @Override
-        public String[] getAuthenticationAdminRolesAsArray() {
-            return new String[] { "admin" };
-        }
     }
 
-    /** Minimal {@link FessUser} with a name and roles. */
+    /** Minimal {@link FessUser} with a name. */
     private static class StubFessUser implements FessUser {
         private static final long serialVersionUID = 1L;
         private final String name;
-        private final String[] roles;
 
-        StubFessUser(final String name, final String... roles) {
+        StubFessUser(final String name) {
             this.name = name;
-            this.roles = roles;
         }
 
         @Override
@@ -795,7 +775,7 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
 
         @Override
         public String[] getRoleNames() {
-            return roles;
+            return new String[0];
         }
 
         @Override

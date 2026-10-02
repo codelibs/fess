@@ -348,25 +348,6 @@ public class UiConfigHandler {
                 // LabelTypeHelper not wired — return empty list.
             }
 
-            // tag_types: the label types of the kind "tag" whose tags the user can see (and add, when
-            // logged in). Built only while user tags are enabled.
-            final boolean userTagEnabled = cfg.isUserTagEnabled();
-            final List<Map<String, Object>> tagTypes = new ArrayList<>();
-            if (userTagEnabled) {
-                try {
-                    final Locale requestLocale = req.getLocale() == null ? Locale.ROOT : req.getLocale();
-                    for (final Map<String, String> item : ComponentUtil.getLabelTypeHelper()
-                            .getTagTypeItemList(SearchRequestType.JSON, requestLocale)) {
-                        final Map<String, Object> entry = new LinkedHashMap<>();
-                        entry.put("value", item.get(Constants.ITEM_VALUE));
-                        entry.put("name", item.get(Constants.ITEM_LABEL));
-                        tagTypes.add(entry);
-                    }
-                } catch (final Exception ignored) {
-                    // LabelTypeHelper not wired — return empty list.
-                }
-            }
-
             // eol_link / installation_link — surfaced as resolved URLs. Derivation mirrors
             // SystemHelper's own installation/EOL link resolution (also used to register
             // eolLink for the admin screens via setupAdminHtmlData): the installation link
@@ -412,7 +393,7 @@ public class UiConfigHandler {
             // search_export: whether GET /api/v2/documents/export is available, so the theme shows the export links.
             features.put("search_export", cfg.isApiSearchExport());
             // user_tag: whether users can see and add tags (GET/POST/DELETE /api/v2/documents/{doc_id}/tags).
-            features.put("user_tag", userTagEnabled);
+            features.put("user_tag", cfg.isUserTagEnabled());
             features.put("popular_word", cfg.isWebApiPopularWord());
             features.put("suggest_search_log", cfg.isSuggestSearchLog());
             features.put("suggest_documents", cfg.isSuggestDocuments());
@@ -543,9 +524,6 @@ public class UiConfigHandler {
             payload.put("num_options", numOptions);
             payload.put("lang_options", langOptions);
             payload.put("label_options", labelOptions);
-            if (userTagEnabled) {
-                payload.put("tag_types", tagTypes);
-            }
             payload.put("notifications", notifications);
             payload.put("facet_views", facetViews);
             payload.put("filetype_options", buildFiletypeOptions());

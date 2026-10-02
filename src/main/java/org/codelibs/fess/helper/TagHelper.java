@@ -20,10 +20,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HexFormat;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,38 +31,44 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.opensearch.log.allcommon.EsPagingResultBean;
-import org.codelibs.fess.opensearch.log.exbhv.TagLogBhv;
-import org.codelibs.fess.opensearch.log.exentity.TagLog;
+import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.script.Script;
 import org.codelibs.fesen.opensearch.script.ScriptType;
-import org.codelibs.fesen.opensearch.search.aggregations.Aggregation;
-import org.codelibs.fesen.opensearch.search.aggregations.Aggregations;
-import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
 
 /**
  * Helper for the tags that users add to documents.
  *
- * <p>A tag belongs to a label type of the kind {@code tag}, and its value is
- * {@code <label type value>:<tag name>}. The label type decides who can see and add its tags. One record in the
- * tag log is one tag that one user added to the documents of one URL; the log is the source of truth. The
- * {@code tag} and {@code tag_count} fields of the documents are rebuilt from it when a document is indexed and
- * when a tag is added or removed, so that tags survive a re-crawl.</p>
+ * <p>A tag is a label type of the kind {@code tag}: its name is the tag name, its value is derived from the name, its
+ * included paths list the tagged URLs (one per line, matched exactly) and its permissions list who can see it. A user
+ * who adds a tag is added to its permissions, and a user in its permissions can remove it from themselves; the label
+ * type is deleted when no permission is left. Administrators manage tags on the label admin screen like any label.</p>
+ *
+ * <p>The values of the tags of a URL are indexed in the {@code tag} field, by the crawler from the label types and
+ * immediately by an update of the indexed documents when a user adds or removes a tag.</p>
  */
 public class TagHelper {
     private static final Logger logger = LogManager.getLogger(TagHelper.class);
 
-    /** The separator between the label type value and the tag name. */
-    public static final String SEPARATOR = ":";
-
-    private static final String TAGS_AGGREGATION = "tags";
-
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
-    private static final Pattern TYPE_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
+    /** The number of attempts to store a tag that another request changed at the same time. */
+    private static final int MAX_STORE_ATTEMPTS = 3;
+
+    /** The result of adding a tag. */
+    public enum AddResult {
+        /** The URL was tagged or the user was added to the tag. */
+        ADDED,
+        /** The user had already tagged the URL. */
+        ALREADY_ADDED,
+        /** The document has the maximum number of tags. */
+        TOO_MANY_TAGS,
+        /** No more label types can be loaded. */
+        TOO_MANY_LABELS
+    }
 
     /**
      * Default constructor.
@@ -74,7 +78,7 @@ public class TagHelper {
     }
 
     /**
-     * Returns whether users can add tags.
+     * Returns whether users can tag documents.
      *
      * @return true if {@code user.tag.enabled} is true
      */
@@ -83,45 +87,19 @@ public class TagHelper {
     }
 
     /**
-     * Builds a tag value from a label type value and a tag name.
+     * Returns the label type value of a tag name: the SHA-256 of the name in hex. It satisfies the label value rule
+     * ({@code [a-zA-Z0-9_]}, at most 100 characters) for any name, and the same name always gets the same value.
      *
-     * @param type the label type value
      * @param name the normalized tag name
      * @return the tag value
      */
-    public String toValue(final String type, final String name) {
-        return type + SEPARATOR + name;
-    }
-
-    /**
-     * Returns the label type value of a tag value.
-     *
-     * @param value the tag value
-     * @return the label type value, or null if the value is not a tag value
-     */
-    public String getType(final String value) {
-        if (value == null) {
-            return null;
+    public String toValue(final String name) {
+        try {
+            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(digest.digest(name.getBytes(StandardCharsets.UTF_8)));
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available.", e);
         }
-        final int pos = value.indexOf(SEPARATOR);
-        if (pos <= 0 || pos == value.length() - 1) {
-            return null;
-        }
-        final String type = value.substring(0, pos);
-        return TYPE_PATTERN.matcher(type).matches() ? type : null;
-    }
-
-    /**
-     * Returns the tag name of a tag value.
-     *
-     * @param value the tag value
-     * @return the tag name, or null if the value is not a tag value
-     */
-    public String getName(final String value) {
-        if (getType(value) == null) {
-            return null;
-        }
-        return value.substring(value.indexOf(SEPARATOR) + 1);
     }
 
     /**
@@ -129,8 +107,8 @@ public class TagHelper {
      * and the name is trimmed.
      *
      * @param name the entered name
-     * @return the normalized name, or null if the name is blank, too long, or has a double quote, a backslash, a
-     *         control character or a format character such as a zero-width space or a bidirectional override
+     * @return the normalized name, or null if the name is blank, too long, or has a control character or a format
+     *         character such as a zero-width space or a bidirectional override
      */
     public String normalizeName(final String name) {
         if (name == null) {
@@ -142,8 +120,7 @@ public class TagHelper {
         }
         for (int i = 0; i < normalized.length(); i++) {
             final char c = normalized.charAt(i);
-            // a double quote or a backslash would break the quoted field query that a tag filter builds
-            if (c == '"' || c == '\\' || Character.isISOControl(c) || Character.getType(c) == Character.FORMAT) {
+            if (Character.isISOControl(c) || Character.getType(c) == Character.FORMAT) {
                 return null;
             }
         }
@@ -160,235 +137,220 @@ public class TagHelper {
     }
 
     /**
-     * Returns whether a tag value belongs to one of the given label types.
+     * Returns the permission value of a user, such as {@code 1alice}.
      *
-     * @param value the tag value
-     * @param typeSet the label type values that the user can see
-     * @return true if the user can see the tag
+     * @param userId the user name
+     * @return the encoded permission
      */
-    public boolean isVisible(final String value, final Set<String> typeSet) {
-        final String type = getType(value);
-        return type != null && typeSet.contains(type);
+    public String toUserPermission(final String userId) {
+        return ComponentUtil.getFessConfig().getRoleSearchUserPrefix() + userId;
     }
 
     /**
-     * Converts tag values into maps with the value, the label type value and the tag name. Values whose label type
-     * is not in the given set are left out.
+     * Tags the documents of a URL for a user. When a tag of the name exists, the URL is added to its included paths
+     * and the user to its permissions; otherwise a tag is created that only the user can see.
      *
-     * @param values the tag values
-     * @param typeSet the label type values that the user can see
-     * @return a list of maps with {@code value}, {@code type} and {@code name}
+     * @param userId the user name
+     * @param url the URL of the document
+     * @param name the normalized tag name
+     * @return the result
      */
-    public List<Map<String, Object>> toTagItems(final Collection<String> values, final Set<String> typeSet) {
-        final List<Map<String, Object>> list = new ArrayList<>();
-        if (values == null) {
-            return list;
-        }
-        for (final String value : new LinkedHashSet<>(values)) {
-            if (isVisible(value, typeSet)) {
-                final Map<String, Object> item = new LinkedHashMap<>();
-                item.put("value", value);
-                item.put("type", getType(value));
-                item.put("name", getName(value));
-                list.add(item);
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Returns the number of users that added each tag to the documents of a URL, most frequent first.
-     *
-     * @param url the URL
-     * @return a map of the tag value to its number of records
-     */
-    public Map<String, Long> getTagCountMap(final String url) {
-        final Map<String, Long> countMap = new LinkedHashMap<>();
-        if (StringUtil.isBlank(url)) {
-            return countMap;
-        }
-        final int size = ComponentUtil.getFessConfig().getUserTagMaxDocumentTagsAsInteger();
-        final EsPagingResultBean<TagLog> result = (EsPagingResultBean<TagLog>) getTagLogBhv().selectPage(cb -> {
-            cb.fetchFirst(0);
-            cb.query().setUrl_Term(url);
-            cb.aggregation().setTag_Terms(TAGS_AGGREGATION, op -> op.size(size), null);
-        });
-        final Aggregations aggregations = result.getAggregations();
-        if (aggregations != null) {
-            final Aggregation aggregation = aggregations.get(TAGS_AGGREGATION);
-            if (aggregation instanceof final Terms terms) {
-                for (final Terms.Bucket bucket : terms.getBuckets()) {
-                    countMap.put(bucket.getKeyAsString(), bucket.getDocCount());
+    public synchronized AddResult addTag(final String userId, final String url, final String name) {
+        final String value = toValue(name);
+        final String permission = toUserPermission(userId);
+        final LabelTypeService labelTypeService = getLabelTypeService();
+        for (int attempt = 1;; attempt++) {
+            final LabelType labelType = labelTypeService.getLabelTypeByValue(value).orElse(null);
+            final AddResult result;
+            final LabelType entity;
+            if (labelType == null) {
+                if (labelTypeService.getLabelTypeList().size() >= ComponentUtil.getFessConfig().getPageLabeltypeMaxFetchSizeAsInteger()) {
+                    return AddResult.TOO_MANY_LABELS;
                 }
+                if (countTags(url) >= getMaxDocumentTags()) {
+                    return AddResult.TOO_MANY_TAGS;
+                }
+                entity = createTag(userId, url, name, value, permission);
+                result = AddResult.ADDED;
+            } else {
+                if (!labelType.isTagKind()) {
+                    throw new IllegalStateException("The value of a tag is used by a label: " + value);
+                }
+                final Set<String> urlSet = LabelTypeHelper.toUrlSet(labelType.getIncludedPaths());
+                final List<String> permissions = toList(labelType.getPermissions());
+                if (urlSet.contains(url) && permissions.contains(permission)) {
+                    return AddResult.ALREADY_ADDED;
+                }
+                if (!urlSet.contains(url) && countTags(url) >= getMaxDocumentTags()) {
+                    return AddResult.TOO_MANY_TAGS;
+                }
+                urlSet.add(url);
+                if (!permissions.contains(permission)) {
+                    permissions.add(permission);
+                }
+                labelType.setIncludedPaths(String.join("\n", urlSet));
+                labelType.setPermissions(permissions.toArray(new String[permissions.size()]));
+                labelType.setUpdatedBy(userId);
+                labelType.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+                entity = labelType;
+                result = AddResult.ADDED;
+            }
+            try {
+                labelTypeService.store(entity);
+                return result;
+            } catch (final RuntimeException e) {
+                // another request changed the same tag; read it again
+                if (attempt >= MAX_STORE_ATTEMPTS) {
+                    throw e;
+                }
+                logger.debug("Retrying to store the tag: value={}, attempt={}", value, attempt, e);
             }
         }
-        return countMap;
     }
 
     /**
-     * Returns the tag values that a user added to the documents of a URL.
+     * Removes a user from the permissions of a tag. The tag is deleted when no permission, of a user, a group or a
+     * role, is left.
      *
-     * @param user the user name
-     * @param url the URL
-     * @return the tag values
-     */
-    public Set<String> getUserTagSet(final String user, final String url) {
-        final Set<String> tagSet = new LinkedHashSet<>();
-        if (StringUtil.isBlank(user) || StringUtil.isBlank(url)) {
-            return tagSet;
-        }
-        getTagLogBhv().selectList(cb -> {
-            cb.query().setUser_Term(user);
-            cb.query().setUrl_Term(url);
-            cb.query().addOrderBy_CreatedAt_Asc();
-            cb.fetchFirst(ComponentUtil.getFessConfig().getUserTagMaxPerDocumentAsInteger());
-        }).forEach(log -> tagSet.add(log.getTag()));
-        return tagSet;
-    }
-
-    /**
-     * Records a tag that a user added to the documents of a URL. The record ID is derived from the user, the URL and
-     * the tag, so adding the same tag twice keeps one record.
-     *
-     * @param user the user name
-     * @param url the URL
-     * @param docId the document ID that the user tagged
+     * @param userId the user name
      * @param value the tag value
-     * @return true if the tag was added, false if the user had already added it
+     * @return true if the tag was deleted, false if it was kept for its other permissions
      */
-    public boolean addTag(final String user, final String url, final String docId, final String value) {
-        final TagLogBhv tagLogBhv = getTagLogBhv();
-        final String id = createId(user, url, value);
-        if (tagLogBhv.selectByPK(id).isPresent()) {
-            return false;
+    public synchronized boolean removeTag(final String userId, final String value) {
+        final String permission = toUserPermission(userId);
+        final LabelTypeService labelTypeService = getLabelTypeService();
+        for (int attempt = 1;; attempt++) {
+            final LabelType labelType = labelTypeService.getLabelTypeByValue(value).orElse(null);
+            if (labelType == null || !labelType.isTagKind()) {
+                return false;
+            }
+            final List<String> permissions = toList(labelType.getPermissions());
+            if (!permissions.remove(permission)) {
+                return false;
+            }
+            try {
+                if (permissions.isEmpty()) {
+                    labelTypeService.delete(labelType);
+                    return true;
+                }
+                labelType.setPermissions(permissions.toArray(new String[permissions.size()]));
+                labelType.setUpdatedBy(userId);
+                labelType.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+                labelTypeService.store(labelType);
+                return false;
+            } catch (final RuntimeException e) {
+                if (attempt >= MAX_STORE_ATTEMPTS) {
+                    throw e;
+                }
+                logger.debug("Retrying to remove the user from the tag: value={}, attempt={}", value, attempt, e);
+            }
         }
-        final TagLog tagLog = new TagLog();
-        tagLog.setId(id);
-        tagLog.setUser(user);
-        tagLog.setUrl(url);
-        tagLog.setDocId(docId);
-        tagLog.setTag(value);
-        tagLog.setCreatedAt(ComponentUtil.getSystemHelper().getCurrentTimeAsLocalDateTime());
-        tagLogBhv.insertOrUpdate(tagLog);
-        tagLogBhv.refresh();
-        return true;
     }
 
     /**
-     * Removes the records of a tag from the documents of a URL.
+     * Returns whether a user is in the permissions of a tag.
      *
-     * @param user the user whose record is removed, or null to remove the records of all users
+     * @param item the tag
+     * @param userId the user name, or null for an anonymous user
+     * @return true if the user added the tag
+     */
+    public boolean isMine(final LabelTypeHelper.LabelTypeItem item, final String userId) {
+        return StringUtil.isNotBlank(userId) && toList(item.getPermissions()).contains(toUserPermission(userId));
+    }
+
+    /**
+     * Adds a tag value to the {@code tag} field of every indexed document of a URL.
+     *
      * @param url the URL
      * @param value the tag value
-     * @return the number of removed records
      */
-    public int removeTag(final String user, final String url, final String value) {
-        final TagLogBhv tagLogBhv = getTagLogBhv();
-        final int count = tagLogBhv.queryDelete(cb -> {
-            cb.query().setUrl_Term(url);
-            cb.query().setTag_Term(value);
-            if (user != null) {
-                cb.query().setUser_Term(user);
-            }
-        });
-        tagLogBhv.refresh();
-        return count;
+    public void addTagToDocuments(final String url, final String value) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String field = fessConfig.getIndexFieldTag();
+        updateDocuments(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url),
+                "if (ctx._source." + field + " == null) { ctx._source." + field + " = []; } else if (!(ctx._source." + field
+                        + " instanceof List)) { ctx._source." + field + " = [ctx._source." + field + "]; } if (!ctx._source." + field
+                        + ".contains(params.value)) { ctx._source." + field + ".add(params.value); }",
+                value);
     }
 
     /**
-     * Puts the tags of the URL of a document into the {@code tag} and {@code tag_count} fields of the document.
-     * The tags come only from the tag log; a {@code tag} value that a crawler or a data store set is replaced.
+     * Removes a tag value from the {@code tag} field of every indexed document.
      *
-     * @param doc the document to be indexed
+     * @param value the tag value
      */
-    public void addTagFields(final Map<String, Object> doc) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Object url = doc.get(fessConfig.getIndexFieldUrl());
-        if (url == null) {
-            return;
-        }
-        try {
-            final Map<String, Long> countMap = getTagCountMap(url.toString());
-            putTagFields(doc, countMap);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Tags: tags={}, url={}", countMap, url);
-            }
-        } catch (final Exception e) {
-            logger.warn("Failed to load the tags: url={}", url, e);
-        }
+    public void removeTagFromDocuments(final String value) {
+        final String field = ComponentUtil.getFessConfig().getIndexFieldTag();
+        updateDocuments(QueryBuilders.termQuery(field, value),
+                "if (ctx._source." + field + " instanceof List) { ctx._source." + field
+                        + ".removeIf(v -> v == params.value); } else if (ctx._source." + field + " == params.value) { ctx._source.remove('"
+                        + field + "'); }",
+                value);
     }
 
-    /**
-     * Puts the given tags into the {@code tag} and {@code tag_count} fields of a document.
-     *
-     * @param doc the document
-     * @param countMap a map of the tag value to its number of records
-     */
-    protected void putTagFields(final Map<String, Object> doc, final Map<String, Long> countMap) {
+    private void updateDocuments(final org.codelibs.fesen.opensearch.index.query.QueryBuilder query, final String code,
+            final String value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (countMap.isEmpty()) {
-            doc.remove(fessConfig.getIndexFieldTag());
-        } else {
-            doc.put(fessConfig.getIndexFieldTag(), countMap.keySet().toArray(new String[countMap.size()]));
-        }
-        doc.put(fessConfig.getIndexFieldTagCount(), sum(countMap));
-    }
-
-    /**
-     * Rebuilds the {@code tag} and {@code tag_count} fields of every indexed document of a URL from the tag log.
-     * A URL can have several documents, for example one per crawl config or set of roles.
-     *
-     * @param url the URL
-     * @return a map of the tag value to its number of records after the update
-     */
-    public Map<String, Long> updateDocuments(final String url) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Map<String, Long> countMap = getTagCountMap(url);
-        final Map<String, Object> params = new HashMap<>();
-        params.put("tags", new ArrayList<>(countMap.keySet()));
-        params.put("count", sum(countMap));
-        final Script script = new Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG, "ctx._source." + fessConfig.getIndexFieldTag()
-                + "=params.tags;ctx._source." + fessConfig.getIndexFieldTagCount() + "=params.count", params);
+        final Script script = new Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG, code, Map.of("value", value));
         final long updated = ComponentUtil.getSearchEngineClient()
                 .updateByQuery(fessConfig.getIndexDocumentUpdateIndex(),
-                        option -> option.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url))
-                                .setFetchSource(new String[] { fessConfig.getIndexFieldUrl() }, null),
+                        option -> option.setQuery(query).setFetchSource(new String[] { fessConfig.getIndexFieldUrl() }, null),
                         (builder, hit) -> builder.setScript(script));
         if (logger.isDebugEnabled()) {
-            logger.debug("Updated the tags of documents: url={}, documents={}, tags={}", url, updated, countMap);
-        }
-        return countMap;
-    }
-
-    /**
-     * Creates the ID of a tag log record.
-     *
-     * @param user the user name
-     * @param url the URL
-     * @param value the tag value
-     * @return a SHA-256 hex string
-     */
-    protected String createId(final String user, final String url, final String value) {
-        try {
-            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            // NUL never appears in a user name, a URL or a tag value, so the joined string is unambiguous
-            final byte[] hash = digest.digest((user + '\0' + url + '\0' + value).getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available.", e);
+            logger.debug("Updated the tag of documents: value={}, documents={}", value, updated);
         }
     }
 
-    private static long sum(final Map<String, Long> countMap) {
-        return countMap.values().stream().mapToLong(Long::longValue).sum();
+    /**
+     * Creates a tag that only its creator can see.
+     */
+    protected LabelType createTag(final String userId, final String url, final String name, final String value, final String permission) {
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        final LabelType labelType = new LabelType();
+        labelType.setName(name);
+        labelType.setValue(value);
+        labelType.setKind(LabelType.KIND_TAG);
+        labelType.setIncludedPaths(url);
+        labelType.setPermissions(new String[] { permission });
+        // a label with a virtual host is shown only on that host, and one without only when no virtual host matches
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        labelType.setVirtualHost(StringUtil.isBlank(virtualHostKey) ? StringUtil.EMPTY : virtualHostKey);
+        labelType.setSortOrder(0);
+        labelType.setCreatedBy(userId);
+        labelType.setCreatedTime(now);
+        labelType.setUpdatedBy(userId);
+        labelType.setUpdatedTime(now);
+        return labelType;
     }
 
     /**
-     * Returns the behavior of the tag log.
-     *
-     * @return the tag log behavior
+     * Returns the number of tags of a URL.
      */
-    protected TagLogBhv getTagLogBhv() {
-        return ComponentUtil.getComponent(TagLogBhv.class);
+    protected int countTags(final String url) {
+        return ComponentUtil.getLabelTypeHelper().getMatchedTagValueSet(url).size();
+    }
+
+    /**
+     * Returns the maximum number of tags on one document.
+     */
+    protected int getMaxDocumentTags() {
+        return ComponentUtil.getFessConfig().getUserTagMaxDocumentTagsAsInteger();
+    }
+
+    /**
+     * Returns the label type service.
+     *
+     * @return the service
+     */
+    protected LabelTypeService getLabelTypeService() {
+        return ComponentUtil.getComponent(LabelTypeService.class);
+    }
+
+    private static List<String> toList(final String[] values) {
+        final List<String> list = new ArrayList<>();
+        if (values != null) {
+            Collections.addAll(list, values);
+        }
+        return new ArrayList<>(new LinkedHashSet<>(list));
     }
 }

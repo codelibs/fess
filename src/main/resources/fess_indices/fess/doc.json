@@ -601,9 +601,6 @@
       "tag": {
         "type": "keyword"
       },
-      "tag_count": {
-        "type": "long"
-      },
       "virtual_host": {
         "type": "keyword"
       },

@@ -58,9 +58,6 @@ import org.codelibs.fesen.opensearch.index.query.WithFieldName;
 import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.codelibs.fesen.opensearch.index.query.functionscore.ScriptScoreFunctionBuilder;
-import org.codelibs.fesen.opensearch.script.Script;
-import org.codelibs.fesen.opensearch.script.ScriptType;
 import org.codelibs.fesen.opensearch.search.rescore.RescorerBuilder;
 import org.codelibs.fesen.opensearch.search.sort.SortBuilder;
 import org.codelibs.fesen.opensearch.search.sort.SortBuilders;
@@ -86,11 +83,6 @@ public class QueryHelper {
 
     /** Logger for this class */
     private static final Logger logger = LogManager.getLogger(QueryHelper.class);
-
-    /** The score function of the user tag boost. A document without the field, or an index without it, gets 1. */
-    protected static final String TAG_COUNT_BOOST_SCRIPT =
-            "if (!doc.containsKey(params.field) || doc[params.field].size() == 0) { return 1; }"
-                    + " return 1 + params.weight * Math.log1p(doc[params.field].value);";
 
     /** Constant used to indicate that query-based preference should be used for search routing */
     protected static final String PREFERENCE_QUERY = "_query";
@@ -269,42 +261,17 @@ public class QueryHelper {
 
     /**
      * Builds boost query functions to modify document scoring based on various factors.
-     * This method adds field value factors, key matching boosts, the user tag boost, and custom boost functions.
+     * This method adds field value factors, key matching boosts, and custom boost functions.
      *
      * @param queryContext the query context to add boost functions to
      */
     protected void buildBoostQuery(final QueryContext queryContext) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         queryContext.addFunctionScore(list -> {
-            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(fessConfig.getIndexFieldBoost())));
+            list.add(new FilterFunctionBuilder(
+                    ScoreFunctionBuilders.fieldValueFactorFunction(ComponentUtil.getFessConfig().getIndexFieldBoost())));
             ComponentUtil.getKeyMatchHelper().buildQuery(queryContext.getDefaultKeyword(), list);
-            final float tagCountWeight = getTagCountBoostWeight(fessConfig);
-            if (tagCountWeight > 0) {
-                // 1 + weight * ln(1 + tag_count): the score of an untagged document does not change
-                list.add(new FilterFunctionBuilder(new ScriptScoreFunctionBuilder(new Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG,
-                        TAG_COUNT_BOOST_SCRIPT, Map.of("field", fessConfig.getIndexFieldTagCount(), "weight", tagCountWeight)))));
-            }
             list.addAll(boostFunctionList);
         });
-    }
-
-    /**
-     * Returns the weight of the number of user tags in the ranking.
-     *
-     * @param fessConfig the Fess configuration
-     * @return the weight, or 0 when user tags are disabled or the weight is not a positive number
-     */
-    protected float getTagCountBoostWeight(final FessConfig fessConfig) {
-        if (!fessConfig.isUserTagEnabled()) {
-            return 0;
-        }
-        try {
-            final float weight = fessConfig.getQueryBoostTagCountAsDecimal().floatValue();
-            return Float.isFinite(weight) && weight > 0 ? weight : 0;
-        } catch (final NumberFormatException e) {
-            logger.warn("Invalid query.boost.tag.count: {}", fessConfig.getQueryBoostTagCount());
-            return 0;
-        }
     }
 
     /**

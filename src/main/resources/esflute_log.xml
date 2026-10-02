@@ -12,6 +12,5 @@
 	<component name="clickLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv"/>
 	<component name="favoriteLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv"/>
 	<component name="searchLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv"/>
-	<component name="tagLogBhv" class="org.codelibs.fess.opensearch.log.exbhv.TagLogBhv"/>
 	<component name="userInfoBhv" class="org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv"/>
 </components>

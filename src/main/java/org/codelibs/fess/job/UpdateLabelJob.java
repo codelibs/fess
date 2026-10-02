@@ -52,7 +52,8 @@ public class UpdateLabelJob {
 
     /**
      * Executes the label update job.
-     * Processes documents in the search index and updates their label fields.
+     * Processes documents in the search index and updates their label fields, and their tag fields while user tags
+     * are enabled.
      *
      * @return execution result message
      */
@@ -76,8 +77,22 @@ public class UpdateLabelJob {
                     final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                     if (StringUtil.isNotBlank(url)) {
                         final Set<String> labelSet = labelTypeHelper.getMatchedLabelValueSet(url);
-                        final Script script = languageHelper.createScript(doc, "ctx._source." + fessConfig.getIndexFieldLabel()
-                                + "=new String[]{" + labelSet.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + "}");
+                        final StringBuilder code = new StringBuilder();
+                        code.append("ctx._source.")
+                                .append(fessConfig.getIndexFieldLabel())
+                                .append("=new String[]{")
+                                .append(labelSet.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")))
+                                .append('}');
+                        if (fessConfig.isUserTagEnabled()) {
+                            // tags are label types of the kind tag, whose values are [a-zA-Z0-9_] like any label value
+                            final Set<String> tagSet = labelTypeHelper.getMatchedTagValueSet(url);
+                            code.append(";ctx._source.")
+                                    .append(fessConfig.getIndexFieldTag())
+                                    .append("=new String[]{")
+                                    .append(tagSet.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")))
+                                    .append('}');
+                        }
+                        final Script script = languageHelper.createScript(doc, code.toString());
                         return builder.setScript(script);
                     }
                 } catch (final Exception e) {

@@ -116,11 +116,11 @@ describe("post", () => {
 describe("del", () => {
   it("sends DELETE with the query string and the CSRF header, and unwraps the envelope", async () => {
     api.setCsrfToken("tok-9");
-    const fetchMock = installFetch(async () => envelope({ status: 0, removed: 1 }));
-    const env = await api.del("/documents/d1/tags", { value: "general:a b&c" });
-    expect(env.removed).toBe(1);
+    const fetchMock = installFetch(async () => envelope({ status: 0, removed: true }));
+    const env = await api.del("/documents/d1/tags", { value: "a1 b&c=d" });
+    expect(env.removed).toBe(true);
     const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toBe("api/v2/documents/d1/tags?value=general%3Aa+b%26c");
+    expect(url).toBe("api/v2/documents/d1/tags?value=a1+b%26c%3Dd");
     expect(opts.method).toBe("DELETE");
     expect(opts.credentials).toBe("same-origin");
     expect(opts.headers["X-Fess-CSRF-Token"]).toBe("tok-9");

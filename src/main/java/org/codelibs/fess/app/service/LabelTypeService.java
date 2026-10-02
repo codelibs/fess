@@ -126,6 +126,20 @@ public class LabelTypeService extends FessAppService {
     }
 
     /**
+     * Get the label type of a value.
+     *
+     * @param value The value of the label type.
+     * @return The label type, or empty if no label type has the value.
+     */
+    public OptionalEntity<LabelType> getLabelTypeByValue(final String value) {
+        return labelTypeBhv.selectList(cb -> {
+            cb.query().setValue_Term(value);
+            cb.query().addOrderBy_CreatedTime_Asc();
+            cb.fetchFirst(1);
+        }).stream().findFirst().map(OptionalEntity::of).orElseGet(OptionalEntity::empty);
+    }
+
+    /**
      * Store a label type.
      *
      * @param labelType The label type to store.

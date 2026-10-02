@@ -290,7 +290,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
 
     // Helper method to create test data
     @Test
-    public void test_tagKind_listedOnlyAsTagType() {
+    public void test_tagKind_listedOnlyAsTag() {
         ComponentUtil.register(new RoleQueryHelper() {
             @Override
             public Set<String> build(SearchRequestType searchRequestType) {
@@ -305,28 +305,43 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         final List<Map<String, String>> labels = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON, Locale.ROOT);
         assertEquals(List.of("lbl", "plain"), labels.stream().map(m -> m.get("value")).toList());
 
-        final List<Map<String, String>> tagTypes = labelTypeHelper.getTagTypeItemList(SearchRequestType.JSON, Locale.ROOT);
-        assertEquals(1, tagTypes.size());
-        assertEquals("general", tagTypes.get(0).get("value"));
-        assertEquals("general name", tagTypes.get(0).get("label"));
-        assertEquals(Set.of("general"), labelTypeHelper.getTagTypeValueSet(SearchRequestType.JSON, Locale.ROOT));
+        final List<LabelTypeHelper.LabelTypeItem> tags = labelTypeHelper.getTagItemList(SearchRequestType.JSON, Locale.ROOT);
+        assertEquals(1, tags.size());
+        assertEquals("general", tags.get(0).getValue());
+        assertEquals("general name", tags.get(0).getLabel());
+        assertEquals(Set.of("general"), labelTypeHelper.getTagValueSet(SearchRequestType.JSON, Locale.ROOT));
     }
 
     @Test
     public void test_tagKind_noRoles() {
         labelTypeHelper.refresh(List.of(createLabelType("general", LabelType.KIND_TAG, "Rguest")));
-        assertTrue(labelTypeHelper.getTagTypeValueSet(SearchRequestType.JSON, Locale.ROOT).isEmpty());
+        assertTrue(labelTypeHelper.getTagValueSet(SearchRequestType.JSON, Locale.ROOT).isEmpty());
     }
 
     @Test
-    public void test_tagKind_notAssignedByPaths() {
+    public void test_tagKind_matchesExactUrls() {
         final LabelType label = createLabelType("lbl", null, "Rguest");
         label.setIncludedPaths("http://example.com/.*");
-        final LabelType tag = createLabelType("general", LabelType.KIND_TAG, "Rguest");
-        tag.setIncludedPaths("http://example.com/.*");
-        labelTypeHelper.refresh(List.of(label, tag));
+        final LabelType tag1 = createLabelType("tag1", LabelType.KIND_TAG, "1alice");
+        tag1.setIncludedPaths("http://example.com/a.html\n http://example.com/b?x=1 \n\n");
+        final LabelType tag2 = createLabelType("tag2", LabelType.KIND_TAG, "1bob");
+        tag2.setIncludedPaths("http://example.com/.*");
+        labelTypeHelper.refresh(List.of(label, tag1, tag2));
 
+        // a tag is not a path pattern
         assertEquals(Set.of("lbl"), labelTypeHelper.getMatchedLabelValueSet("http://example.com/a.html"));
+        assertEquals(Set.of("tag1"), labelTypeHelper.getMatchedTagValueSet("http://example.com/a.html"));
+        assertEquals(Set.of("tag1"), labelTypeHelper.getMatchedTagValueSet("http://example.com/b?x=1"));
+        assertEquals(Set.of("tag2"), labelTypeHelper.getMatchedTagValueSet("http://example.com/.*"));
+        assertTrue(labelTypeHelper.getMatchedTagValueSet("http://example.com/bxx=1").isEmpty());
+        assertTrue(labelTypeHelper.getMatchedTagValueSet(null).isEmpty());
+    }
+
+    @Test
+    public void test_toUrlSet() {
+        assertEquals(List.of("http://a/", "http://b/"), List.copyOf(LabelTypeHelper.toUrlSet(" http://a/\n\nhttp://b/\nhttp://a/ ")));
+        assertTrue(LabelTypeHelper.toUrlSet(null).isEmpty());
+        assertTrue(LabelTypeHelper.toUrlSet(" ").isEmpty());
     }
 
     @Test

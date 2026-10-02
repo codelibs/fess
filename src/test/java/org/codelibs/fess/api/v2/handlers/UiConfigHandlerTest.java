@@ -616,91 +616,25 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_features_userTag_offByDefaultWithoutTagTypes() throws Exception {
-        final boolean[] asked = { false };
-        ComponentUtil.register(new LabelTypeHelper() {
-            @Override
-            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
-                    final java.util.Locale requestLocale) {
-                return java.util.List.of();
-            }
-
-            @Override
-            public java.util.List<Map<String, String>> getTagTypeItemList(final SearchRequestType searchRequestType,
-                    final java.util.Locale requestLocale) {
-                asked[0] = true;
-                return java.util.List.of(Map.of(Constants.ITEM_VALUE, "dept", Constants.ITEM_LABEL, "Department"));
-            }
-        }, "labelTypeHelper");
+    public void test_features_userTag_offByDefault() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
         assertEquals(200, res.status, res.body());
         assertTrue(res.body().contains("\"user_tag\":false"), res.body());
+        // The tags themselves are label types; the config does not list them.
         assertFalse(res.body().contains("\"tag_types\""), res.body());
-        assertFalse(asked[0], "the tag label types are not read while user tags are disabled");
     }
 
     @Test
-    public void test_features_userTag_onWithTagTypes() throws Exception {
+    public void test_features_userTag_onWhenEnabled() throws Exception {
         setUserTagEnabled(true);
-        final java.util.List<Object> requested = new java.util.ArrayList<>();
-        ComponentUtil.register(new LabelTypeHelper() {
-            @Override
-            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
-                    final java.util.Locale requestLocale) {
-                return java.util.List.of(Map.of(Constants.ITEM_VALUE, "news", Constants.ITEM_LABEL, "News"));
-            }
-
-            @Override
-            public java.util.List<Map<String, String>> getTagTypeItemList(final SearchRequestType searchRequestType,
-                    final java.util.Locale requestLocale) {
-                requested.add(searchRequestType);
-                requested.add(requestLocale);
-                final java.util.List<Map<String, String>> items = new java.util.ArrayList<>();
-                final Map<String, String> dept = new java.util.LinkedHashMap<>();
-                dept.put(Constants.ITEM_LABEL, "Department");
-                dept.put(Constants.ITEM_VALUE, "dept");
-                items.add(dept);
-                final Map<String, String> project = new java.util.LinkedHashMap<>();
-                project.put(Constants.ITEM_LABEL, "Project \"X\"");
-                project.put(Constants.ITEM_VALUE, "project");
-                items.add(project);
-                return items;
-            }
-        }, "labelTypeHelper");
         final CapturingResponse res = new CapturingResponse();
         new UiConfigHandler().handle(
                 new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()).withLocale(java.util.Locale.JAPANESE), res);
         assertEquals(200, res.status, res.body());
         final String body = res.body();
         assertTrue(body.contains("\"user_tag\":true"), body);
-        assertTrue(body.contains(
-                "\"tag_types\":[{\"value\":\"dept\",\"name\":\"Department\"}," + "{\"value\":\"project\",\"name\":\"Project \\\"X\\\"\"}]"),
-                body);
-        assertEquals(java.util.List.of(SearchRequestType.JSON, java.util.Locale.JAPANESE), requested);
-    }
-
-    @Test
-    public void test_features_userTag_tagTypesEmptyWhenTheHelperFails() throws Exception {
-        setUserTagEnabled(true);
-        ComponentUtil.register(new LabelTypeHelper() {
-            @Override
-            public java.util.List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType,
-                    final java.util.Locale requestLocale) {
-                return java.util.List.of();
-            }
-
-            @Override
-            public java.util.List<Map<String, String>> getTagTypeItemList(final SearchRequestType searchRequestType,
-                    final java.util.Locale requestLocale) {
-                throw new IllegalStateException("label types unavailable");
-            }
-        }, "labelTypeHelper");
-        final CapturingResponse res = new CapturingResponse();
-        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
-        assertEquals(200, res.status, res.body());
-        assertTrue(res.body().contains("\"user_tag\":true"), res.body());
-        assertTrue(res.body().contains("\"tag_types\":[]"), res.body());
+        assertFalse(body.contains("\"tag_types\""), body);
     }
 
     @Test

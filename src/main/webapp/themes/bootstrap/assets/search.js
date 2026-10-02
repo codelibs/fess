@@ -74,32 +74,39 @@ function el(tag, opts) {
 }
 
 // ─── Shared user tags (features.user_tag) ────────────────────────────────────
-// A tag value is "<type>:<name>": the type is a tag label value ([A-Za-z0-9_]+), so the
-// first ":" separates it from the free-text name. cfg.tag_types lists the types the user
-// may see (and, when logged in, add) as [{ value, name }].
+// A tag is a name. Its value is an opaque id that fields.tag filters by and the tag API takes
+// back; it is never parsed. Hits carry their tags as [{ value, name, mine }] (mine: the caller
+// holds the tag and may remove it from their tags), the "tag" facet as [{ value, count, label }].
 
 function userTagEnabled() {
   return !!(api.getConfig()?.features?.user_tag);
 }
 
-function tagTypes() {
-  const types = (api.getConfig() || {}).tag_types;
-  return Array.isArray(types) ? types : [];
+/** value -> name of the tags in the current response (hits, tag facet, editor answers), for the filter badges. */
+const tagNames = new Map();
+
+function rememberTagName(value, name) {
+  if (value && name) tagNames.set(String(value), String(name));
 }
 
-/** "General: proposal" for "general:proposal"; the raw value when its type is not a known one. */
-function tagFullText(value) {
-  const s = String(value == null ? "" : value);
-  const i = s.indexOf(":");
-  const type = i > 0 ? tagTypes().find(o => o.value === s.slice(0, i)) : null;
-  return type && i < s.length - 1 ? (type.name || type.value) + ": " + s.slice(i + 1) : s;
+/** Collect the tag names of a search response: the hits' tags and the tag facet's labels. */
+function collectTagNames(env) {
+  tagNames.clear();
+  if (!userTagEnabled() || !env) return;
+  (Array.isArray(env.data) ? env.data : []).forEach(d =>
+    (Array.isArray(d && d.tags) ? d.tags : []).forEach(tag => tag && rememberTagName(tag.value, tag.name)));
+  const field = (Array.isArray(env.facet_field) ? env.facet_field : []).find(f => f && f.name === "tag");
+  ((field && field.result) || []).forEach(r => r && rememberTagName(r.value, r.label));
 }
 
-/** The text of a tag on a card, in the editor and in the facet: its name, with the type when several types exist. */
+/** The text of a tag on a card and in the editor: its name, or its raw value without one. */
 function tagText(tag) {
-  if (tagTypes().length > 1) return tagFullText(tag.value);
-  const s = String(tag.value || "");
-  return tag.name || (s.indexOf(":") > 0 ? s.slice(s.indexOf(":") + 1) : s);
+  return String(tag.name || tag.value || "");
+}
+
+/** The name of a tag value for the active-filter badge; the raw value when the response does not name it. */
+function tagNameOf(value) {
+  return tagNames.get(String(value)) || String(value);
 }
 
 /** The /documents/{id}/tags path of a document. */
@@ -131,10 +138,11 @@ function renderTagChips(container, tags) {
   while (container.firstChild) container.removeChild(container.firstChild);
   (tags || []).forEach(tag => {
     if (!tag || !tag.value) return;
+    rememberTagName(tag.value, tag.name);
     const chip = el("button", {
       className: "badge rounded-pill tag-chip me-1",
       text: tagText(tag),
-      attrs: { type: "button", title: tagFullText(tag.value) }
+      attrs: { type: "button" }
     });
     chip.addEventListener("click", () => filterByTag(tag.value));
     container.appendChild(chip);
@@ -143,9 +151,10 @@ function renderTagChips(container, tags) {
 
 /**
  * The inline tag editor of a result card: lists the document's tags (GET /documents/{id}/tags)
- * with their counts and a remove button on the removable ones, and adds a tag with a type select
- * (only when several types exist), a name input and an Add button. Each answer re-renders the list
- * and hands the tags to onTags so the card's chips follow. Escape calls onClose.
+ * with a remove button on the user's own ones (mine; removing takes the tag out of the user's
+ * tags, it may stay visible to others), and adds a tag by name with an input and an Add button.
+ * Each answer re-renders the list and hands the tags to onTags so the card's chips follow.
+ * Escape calls onClose.
  *
  * @param {string} docId
  * @param {string} id - id of the editor element
@@ -153,7 +162,6 @@ function renderTagChips(container, tags) {
  * @returns {{ node: HTMLElement, load: function(): Promise<void>, focus: function() }}
  */
 function buildTagEditor(docId, id, handlers) {
-  const types = tagTypes();
   const node = el("div", {
     className: "tag-editor border rounded p-2 mt-1",
     attrs: { id, role: "group", "aria-label": t("tag.title") }
@@ -161,13 +169,6 @@ function buildTagEditor(docId, id, handlers) {
   const list = el("ul", { className: "list-unstyled d-flex flex-wrap gap-1 mb-2 tag-editor-list" });
   const empty = el("p", { className: "small text-body-secondary mb-2 tag-editor-empty d-none", text: t("tag.empty") });
   const form = el("form", { className: "d-flex flex-wrap align-items-center gap-1 tag-editor-form", attrs: { novalidate: "" } });
-  let select = null;
-  if (types.length > 1) {
-    form.appendChild(el("label", { className: "visually-hidden", text: t("tag.type"), attrs: { for: id + "-type" } }));
-    select = el("select", { className: "form-select form-select-sm w-auto", attrs: { id: id + "-type" } });
-    types.forEach(o => select.appendChild(el("option", { text: o.name || o.value, attrs: { value: o.value } })));
-    form.appendChild(select);
-  }
   form.appendChild(el("label", { className: "visually-hidden", text: t("tag.name"), attrs: { for: id + "-name" } }));
   const input = el("input", {
     className: "form-control form-control-sm w-auto",
@@ -221,8 +222,7 @@ function buildTagEditor(docId, id, handlers) {
       const text = tagText(tag);
       const li = el("li", { className: "badge rounded-pill tag-chip tag-editor-item d-inline-flex align-items-center gap-1" });
       li.appendChild(el("span", { text }));
-      if (tag.count != null) li.appendChild(el("span", { className: "tag-count", text: String(tag.count) }));
-      if (tag.removable) {
+      if (tag.mine === true) {
         const btn = el("button", {
           className: "btn-close tag-remove",
           attrs: { type: "button", "aria-label": t("tag.remove", { name: text }) }
@@ -244,12 +244,12 @@ function buildTagEditor(docId, id, handlers) {
   form.addEventListener("submit", async ev => {
     ev.preventDefault();
     const name = input.value.trim();
-    if (!name || busy || types.length === 0) return;
+    if (!name || busy) return;
     busy = true;
     addBtn.disabled = true;
     setError("");
     try {
-      apply(await api.post(tagsPath(docId), { type: select ? select.value : types[0].value, name }));
+      apply(await api.post(tagsPath(docId), { name }));
       input.value = "";
       input.focus();
     } catch (e) {
@@ -282,8 +282,8 @@ function buildTagEditor(docId, id, handlers) {
 }
 
 /**
- * The tag row of a result card: the document's tags as chips and, for a logged-in user who may
- * add tags, an "Add tag" toggle that opens the inline editor. Null when the feature is off or
+ * The tag row of a result card: the document's tags as chips and, for a logged-in user, an
+ * "Add tag" toggle that opens the inline editor. Null when the feature is off or
  * there is nothing to show.
  *
  * @param {Object} d    - result document
@@ -293,7 +293,7 @@ function buildTagEditor(docId, id, handlers) {
 function buildTagRow(d, idx0) {
   if (!userTagEnabled() || !d.doc_id) return null;
   const tags = Array.isArray(d.tags) ? d.tags : [];
-  const canAdd = api.isAuthenticated() && tagTypes().length > 0;
+  const canAdd = api.isAuthenticated();
   if (tags.length === 0 && !canAdd) return null;
   const row = el("div", { className: "tags" });
   const chips = el("span", { className: "tag-chips" });
@@ -1114,6 +1114,7 @@ async function runSearch() {
         warningEl.classList.add("d-none");
       }
     }
+    collectTagNames(env);
     renderResults(env);
     renderPagination(env);
     const labels = await loadLabels();
@@ -2109,15 +2110,15 @@ function renderFacets(env, labels) {
     }
   }
 
-  // 2. Shared user tags (features.user_tag) — values come already filtered to the visible tag
-  //    types. Unlike the label facet, a click filters through fields.tag (the API's tag
+  // 2. Shared user tags (features.user_tag) — values come already filtered to the tags the user
+  //    may see, each with its name as label (the value is an opaque id). Unlike the label facet, a click filters through fields.tag (the API's tag
   //    filter, ORing the selected tags); a selected tag stays listed so it can be cleared.
   const tagField = userTagEnabled() ? facetField.find(f => f.name === "tag") : null;
   if (tagField) {
     const selectedTags = state.fields.tag || [];
     const entries = (tagField.result || [])
       .filter(r => r && r.value && (Number(r.count) > 0 || selectedTags.includes(r.value)))
-      .map(r => ({ labelText: tagText({ value: r.value }), value: r.value, count: r.count }));
+      .map(r => ({ labelText: String(r.label || r.value), value: r.value, count: r.count }));
     if (entries.length > 0) {
       body.appendChild(buildFacetGroup(t("tag.title"), entries, "tag", "fields"));
     }
@@ -2211,8 +2212,8 @@ function renderActiveChips() {
 
   for (const [field, valueSet] of Object.entries(chipFieldSets)) {
     valueSet.forEach(v => chips.push({
-      // A tag reads as "<type name>: <tag name>" rather than "tag: <type>:<name>".
-      label: field === "tag" ? tagFullText(v) : field + ": " + v,
+      // A tag reads as its name rather than "tag: <opaque id>".
+      label: field === "tag" ? tagNameOf(v) : field + ": " + v,
       remove: () => {
         // Remove from whichever store(s) hold this value.
         if (state.facets[field]) {

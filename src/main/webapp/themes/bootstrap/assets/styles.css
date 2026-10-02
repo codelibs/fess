@@ -97,7 +97,6 @@ body { padding-top: 4.5rem; }
 .tag-chip { background: var(--bs-secondary-bg-subtle); color: var(--bs-secondary-text-emphasis); border: 1px solid var(--bs-secondary-border-subtle); font-weight: 400; }
 button.tag-chip { cursor: pointer; }
 button.tag-chip:hover { background: var(--bs-secondary-bg); }
-.tag-count { color: var(--bs-tertiary-color); }
 .tag-remove { width: .65em; height: .65em; margin: 0; padding: 0; background-size: .65em; flex-shrink: 0; }
 .tag-editor { flex-basis: 100%; max-width: 36rem; }
 /* Brand logo (D.1) */

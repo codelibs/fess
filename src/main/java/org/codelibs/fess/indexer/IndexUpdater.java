@@ -521,7 +521,7 @@ public class IndexUpdater extends Thread {
 
     /**
      * Updates a document with additional metadata and enhancements.
-     * Adds click counts, favorite counts, user tags, document boosting, and generates document ID.
+     * Adds click counts, favorite counts, document boosting, and generates document ID.
      * Also applies language-specific updates through the language helper.
      *
      * @param map the document data map to update with additional metadata
@@ -535,10 +535,6 @@ public class IndexUpdater extends Thread {
 
         if (fessConfig.getIndexerFavoriteCountEnabledAsBoolean()) {
             addFavoriteCountField(map);
-        }
-
-        if (fessConfig.isUserTagEnabled()) {
-            ComponentUtil.getTagHelper().addTagFields(map);
         }
 
         float documentBoost = 0.0f;

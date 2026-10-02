@@ -62,12 +62,10 @@ import org.codelibs.fess.opensearch.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
-import org.codelibs.fess.opensearch.log.exbhv.TagLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
-import org.codelibs.fess.opensearch.log.exentity.TagLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
@@ -423,8 +421,6 @@ public class AdminBackupAction extends FessAdminAction {
                     return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
                 case "favorite_log":
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
-                case "tag_log":
-                    return writeNdjsonResponse(id, getTagLogNdjsonWriteCall());
                 case null:
                 default:
                     break;
@@ -697,45 +693,6 @@ public class AdminBackupAction extends FessAdminAction {
                     appendJson("created-at", entity.getCreatedAt(), buf).append(',');
                     appendJson("query-id", entity.getQueryId(), buf).append(',');
                     appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
-                    appendJson("doc-id", entity.getDocId(), buf).append(',');
-                    appendJson("url", entity.getUrl(), buf);
-                    buf.append('}');
-                    buf.append('\n');
-                    try {
-                        writer.write(buf.toString());
-                    } catch (final IOException e) {
-                        throw new IORuntimeException(e);
-                    }
-                    if (!systemHelper.calibrateCpuLoad(timeout)) {
-                        breakCursor = true;
-                    }
-                }
-            });
-        };
-    }
-
-    /**
-     * Get the write call for tag log ndjson.
-     * @return The write call.
-     */
-    public static Consumer<Writer> getTagLogNdjsonWriteCall() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final long timeout = fessConfig.getIndexBackupLogLoadTimeoutAsInteger().longValue();
-        return writer -> {
-            final TagLogBhv bhv = ComponentUtil.getComponent(TagLogBhv.class);
-            bhv.selectCursor(cb -> {
-                cb.query().matchAll();
-                cb.query().addOrderBy_CreatedAt_Asc();
-            }, new LogEntityRowHandler<TagLog>() {
-                @Override
-                public void handle(final TagLog entity) {
-                    final StringBuilder buf = new StringBuilder();
-                    buf.append('{');
-                    appendJson("id", entity.getId(), buf).append(',');
-                    appendJson("created-at", entity.getCreatedAt(), buf).append(',');
-                    appendJson("user", entity.getUser(), buf).append(',');
-                    appendJson("tag", entity.getTag(), buf).append(',');
                     appendJson("doc-id", entity.getDocId(), buf).append(',');
                     appendJson("url", entity.getUrl(), buf);
                     buf.append('}');

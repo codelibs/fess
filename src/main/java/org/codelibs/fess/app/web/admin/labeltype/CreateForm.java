@@ -60,8 +60,8 @@ public class CreateForm {
     public String value;
 
     /**
-     * The kind of the label type: label (assigned to documents by the crawler) or tag (added to documents by users).
-     * A blank kind is a label.
+     * The kind of the label type: label (assigned to documents whose URL matches the paths) or tag (a tag that users
+     * add from the search screen; the included paths are the tagged URLs). A blank kind is a label.
      */
     @Size(max = 10)
     @Pattern(regexp = "^(label|tag)$")

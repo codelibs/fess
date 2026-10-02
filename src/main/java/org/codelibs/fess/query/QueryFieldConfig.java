@@ -144,7 +144,6 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldTag(), //
-                    fessConfig.getIndexFieldTagCount(), //
                     fessConfig.getIndexFieldConfigId(), //
                     fessConfig.getIndexFieldLang(), //
                     fessConfig.getIndexFieldHasCache());
@@ -172,7 +171,6 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldThumbnail(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
-                    fessConfig.getIndexFieldTagCount(), //
                     fessConfig.getIndexFieldConfigId(), //
                     fessConfig.getIndexFieldLang(), //
                     fessConfig.getIndexFieldHasCache());
@@ -228,7 +226,6 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldTag(), //
-                    fessConfig.getIndexFieldTagCount(), //
                     fessConfig.getIndexFieldLang());
             // Initialize Set for O(1) lookup performance
             searchFieldSet = new HashSet<>();
@@ -263,8 +260,7 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldLastModified(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldClickCount(), //
-                    fessConfig.getIndexFieldFavoriteCount(), //
-                    fessConfig.getIndexFieldTagCount());
+                    fessConfig.getIndexFieldFavoriteCount());
             // Initialize Set for O(1) lookup performance
             sortFieldSet = new HashSet<>();
             Collections.addAll(sortFieldSet, sortFields);
@@ -297,7 +293,6 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldHasCache(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
-                    fessConfig.getIndexFieldTagCount(), //
                     fessConfig.getQueryCollapseInnerHitsName() + "_count", //
                     fessConfig.getQueryCollapseInnerHitsName() + "_hash"));
         }
@@ -330,7 +325,6 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldSeqNo(), //
                     fessConfig.getIndexFieldSite(), //
                     fessConfig.getIndexFieldTag(), //
-                    fessConfig.getIndexFieldTagCount(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldVersion()));

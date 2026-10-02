@@ -128,11 +128,6 @@ public class QueryHelperTest extends UnitFessTestCase {
             }
 
             @Override
-            public boolean is(String propertyKey) {
-                return fessConfig.is(propertyKey);
-            }
-
-            @Override
             public String getQueryDefaultQueryType() {
                 return queryType;
             }
@@ -623,68 +618,6 @@ public class QueryHelperTest extends UnitFessTestCase {
         return queryHelper.build(SearchRequestType.SEARCH, query, context -> {
             context.skipRoleQuery();
         });
-    }
-
-    private void setUserTagBoost(final boolean enabled, final String weight) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            @Override
-            public String get(String propertyKey) {
-                return fessConfig.get(propertyKey);
-            }
-
-            @Override
-            public BigDecimal getAsDecimal(String propertyKey) {
-                return DfTypeUtil.toBigDecimal(get(propertyKey));
-            }
-
-            @Override
-            public Integer getAsInteger(String propertyKey) {
-                return DfTypeUtil.toInteger(get(propertyKey));
-            }
-
-            @Override
-            public boolean is(String propertyKey) {
-                return fessConfig.is(propertyKey);
-            }
-
-            @Override
-            public boolean isUserTagEnabled() {
-                return enabled;
-            }
-
-            @Override
-            public String getQueryBoostTagCount() {
-                return weight;
-            }
-
-            @Override
-            public BigDecimal getQueryBoostTagCountAsDecimal() {
-                return new BigDecimal(weight);
-            }
-        });
-    }
-
-    @Test
-    public void test_build_tagCountBoost() {
-        setUserTagBoost(true, "0.5");
-        final String query = buildQuery("QUERY").getQueryBuilder().toString();
-        assertTrue(query.contains("\"script_score\""), query);
-        assertTrue(query.contains("Math.log1p"), query);
-        assertTrue(query.contains("\"weight\" : 0.5"), query);
-        assertTrue(query.contains("\"field\" : \"tag_count\""), query);
-    }
-
-    @Test
-    public void test_build_tagCountBoost_disabled() {
-        setUserTagBoost(false, "0.5");
-        assertFalse(buildQuery("QUERY").getQueryBuilder().toString().contains("script_score"));
-
-        setUserTagBoost(true, "0.0");
-        assertFalse(buildQuery("QUERY").getQueryBuilder().toString().contains("script_score"));
-
-        setUserTagBoost(true, "-1");
-        assertFalse(buildQuery("QUERY").getQueryBuilder().toString().contains("script_score"));
     }
 
     // Additional test methods for improved coverage
