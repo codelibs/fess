@@ -63,7 +63,7 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
 
     private static final Pattern RULE_PATTERN = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$", Pattern.DOTALL);
 
-    private static final char COMBINING_VOICED_MARK = '゙';
+    private static final char COMBINING_VOICED_MARK = '\u3099';
 
     private static final String SMALL_KATAKANA = "ァィゥェォッャュョヮヵヶ";
 
@@ -89,13 +89,22 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
         assertSameOutput(map, "キツテ", "きって", "キッテ", "ｷｯﾃ");
         assertSameOutput(map, "イル", "ゐる", "ヰル", "いる");
         assertSameOutput(map, "エ", "ゑ", "ヱ", "え");
-        assertSameOutput(map, "バイオリン", "ヴァイオリン", "ゔぁいおりん", "ｳﾞｧｲｵﾘﾝ", "ヴァイオリン", "ゔぁいおりん");
+        assertSameOutput(map, "バイオリン", "ヴァイオリン", "ゔぁいおりん", "ｳﾞｧｲｵﾘﾝ", "ウ\u3099ァイオリン", "う\u3099ぁいおりん");
         assertSameOutput(map, "レビユー", "レヴュー", "ﾚｳﾞｭｰ", "れゔゅー", "レビュー");
         assertSameOutput(map, "ラブ", "ラヴ", "ﾗｳﾞ", "らゔ");
         assertSameOutput(map, "ケ", "ヶ", "ゖ");
         assertSameOutput(map, "カ", "ヵ", "ゕ");
         assertSameOutput(map, "ワ", "ヮ", "ゎ");
         assertSameOutput(map, "コヽロ", "こゝろ");
+        final String[] expected = { "バ", "ビ", "ブ", "ベ", "ボ", "ビヤ", "ビユ", "ビヨ" };
+        final String[][] spellings =
+                { { "ヴ", "ァィゥェォャュョ" }, { "ウ\u3099", "ァィゥェォャュョ" }, { "ゔ", "ぁぃぅぇぉゃゅょ" }, { "う\u3099", "ぁぃぅぇぉゃゅょ" }, { "ｳﾞ", "ｧｨｩｪｫｬｭｮ" } };
+        for (final String[] spelling : spellings) {
+            for (int i = 0; i < expected.length; i++) {
+                final String input = spelling[0] + spelling[1].charAt(i);
+                assertEquals(input + " (" + toCodePoints(input) + ")", expected[i], apply(map, input));
+            }
+        }
     }
 
     @Test
@@ -106,9 +115,9 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
         assertEquals("キャッシュ", apply(map, "ｷｬｯｼｭ"));
         assertEquals("いる", apply(map, "ゐる"));
 
-        assertSameOutput(map, "バイオリン", "ヴァイオリン", "ｳﾞｧｲｵﾘﾝ", "ヴァイオリン");
-        assertSameOutput(map, "ばいおりん", "ゔぁいおりん", "ゔぁいおりん");
-        assertSameOutput(map, "レビュー", "レヴュー", "ﾚｳﾞｭｰ", "レヴュー");
+        assertSameOutput(map, "バイオリン", "ヴァイオリン", "ｳﾞｧｲｵﾘﾝ", "ウ\u3099ァイオリン");
+        assertSameOutput(map, "ばいおりん", "ゔぁいおりん", "う\u3099ぁいおりん");
+        assertSameOutput(map, "レビュー", "レヴュー", "ﾚｳﾞｭｰ", "レウ\u3099ュー");
         assertSameOutput(map, "ラブ", "ラヴ", "ﾗｳﾞ");
         for (final String input : kanaInputs()) {
             final String output = apply(map, input);
@@ -129,17 +138,22 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_prolongedSoundMarkFilter_isTheFirstCharFilter() throws IOException {
+    public void test_prolongedSoundMarkFilter_isTheFirstCharFilterOfTheStandardAnalyzers() throws IOException {
         for (final String path : SETTINGS_JSON_PATHS) {
             final JsonNode analysis = readJson(path).path("settings").path("analysis");
             final JsonNode filter = analysis.path("char_filter").path(PROLONGED_SOUND_MARK_FILTER);
             assertEquals(path, "pattern_replace", filter.path("type").asText());
             assertEquals(path, "ー", filter.path("replacement").asText());
-            for (final String analyzer : new String[] { "japanese_analyzer", "standard_analyzer", "standard_search_analyzer" }) {
-                // it has to see the raw text: both mappings turn a full-width hyphen-minus into "-",
+            for (final String analyzer : new String[] { "standard_analyzer", "standard_search_analyzer" }) {
+                // it has to see the raw text: mapping.txt turns a full-width hyphen-minus into "-",
                 // which the filter leaves alone
                 assertEquals(path + " " + analyzer, PROLONGED_SOUND_MARK_FILTER,
                         analysis.path("analyzer").path(analyzer).path("char_filter").path(0).asText());
+            }
+            // a dash between two katakana words would join them into one unknown word for the
+            // morphological analyzer, so the *_ja fields do not use it
+            for (final JsonNode charFilter : analysis.path("analyzer").path("japanese_analyzer").path("char_filter")) {
+                assertFalse(path, PROLONGED_SOUND_MARK_FILTER.equals(charFilter.asText()));
             }
         }
     }
@@ -159,6 +173,9 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
             assertEquals("さーばー", replace(pattern, "さ―ば－"));
             assertEquals("ｻーﾊﾞー", replace(pattern, "ｻ―ﾊﾞ－"));
             assertEquals("サーービス", replace(pattern, "サ――ビス"));
+            assertEquals("サーーーーーバ", replace(pattern, "サ‐‐‐‐‐バ"));
+            assertEquals("ハ\u3099ー", replace(pattern, "ハ\u3099―"));
+            assertEquals("ㇰー", replace(pattern, "ㇰ―"));
             assertEquals("テストーケース", replace(pattern, "テスト－ケース"));
             // an ASCII hyphen-minus separates words more often than it stands for a long vowel
             assertEquals("サ-バ-", replace(pattern, "サ-バ-"));
@@ -168,6 +185,9 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
             assertEquals("A―B", replace(pattern, "A―B"));
             assertEquals("2026−10−02", replace(pattern, "2026−10−02"));
             assertEquals("ー", replace(pattern, "ー"));
+            // a middle dot or a spacing voiced mark is not kana
+            assertEquals("ジョン・−", replace(pattern, "ジョン・−"));
+            assertEquals("゛―", replace(pattern, "゛―"));
         }
     }
 
@@ -243,12 +263,13 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
     }
 
     private void addRule(final Map<String, String> rules, final String line) {
+        // parsed as the mapping char filter does: one key per rule, trimmed before it is unescaped
         final Matcher matcher = RULE_PATTERN.matcher(line);
         assertTrue(line, matcher.matches());
-        final String value = unescape(matcher.group(2).trim());
-        for (final String key : matcher.group(1).trim().split(",")) {
-            rules.put(unescape(key.trim()), value);
-        }
+        final String key = unescape(matcher.group(1).trim());
+        // the search engine refuses an index whose mapping has the same key twice
+        assertFalse("duplicate key: " + line, rules.containsKey(key));
+        rules.put(key, unescape(matcher.group(2).trim()));
     }
 
     private static String unescape(final String s) {

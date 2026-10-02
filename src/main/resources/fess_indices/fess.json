@@ -26,7 +26,7 @@
         },
         "prolonged_sound_mark_filter": {
           "type": "pattern_replace",
-          "pattern": "(?<=[\\p{InHiragana}\\p{InKatakana}\\uFF66-\\uFF9F][\\u2010-\\u2015\\u207B\\u208B\\u2212\\uFF0D]{0,3})[\\u2010-\\u2015\\u207B\\u208B\\u2212\\uFF0D]",
+          "pattern": "[\\u2010-\\u2015\\u207B\\u208B\\u2212\\uFF0D](?<=[\\u3041-\\u3096\\u3099\\u309A\\u309D\\u309E\\u30A1-\\u30FA\\u30FC-\\u30FE\\u31F0-\\u31FF\\uFF66-\\uFF9F][\\u2010-\\u2015\\u207B\\u208B\\u2212\\uFF0D]{1,8})",
           "replacement": "\u30FC"
         },
         "traditional_chinese_convert": {
@@ -949,7 +949,6 @@
         "japanese_analyzer": {
           "type": "custom",
           "char_filter": [
-            "prolonged_sound_mark_filter",
             "mapping_ja_filter",
             "fess_japanese_iteration_mark"
           ],
