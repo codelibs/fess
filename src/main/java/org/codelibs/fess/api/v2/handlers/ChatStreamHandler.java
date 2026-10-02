@@ -40,12 +40,14 @@ import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.helper.ChatApiHelper;
 import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -83,7 +85,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * long one, summarizing its parts) and {@code answer}.</p>
  *
  * <p>Error reporting <em>before</em> the LLM is invoked (method check, feature gate,
- * body parse, rate limit, document lookup) uses {@link V2EnvelopeWriter#writeError} so the HTTP status
+ * {@code rag.chat.permissions} gate, body parse, rate limit, document lookup) uses {@link V2EnvelopeWriter#writeError} so the HTTP status
  * and {@code Content-Type: application/json} are correct. Only after all gates pass are
  * SSE headers set; subsequent LLM-level errors are reported via {@code event: error}
  * SSE events, consistent with v1 behaviour the static theme JS parser depends on.</p>
@@ -214,6 +216,21 @@ public class ChatStreamHandler {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
+            return;
+        }
+        // rag.chat.permissions: decided before the body is read or the caller is throttled.
+        final OptionalThing<V2ErrorCode> accessError;
+        try {
+            accessError = getChatAccessError();
+        } catch (final RuntimeException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/chat/stream");
+            return;
+        }
+        if (accessError.isPresent()) {
+            final V2ErrorCode code = accessError.get();
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, code, code == V2ErrorCode.AUTH_REQUIRED ? "login required" : "chat is not permitted",
+                            Map.of("reason", ChatApiHelper.CHAT_NOT_PERMITTED_REASON));
             return;
         }
 
@@ -396,6 +413,16 @@ public class ChatStreamHandler {
     protected void recordChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
             final LlmUsageCollector usage, final ChatResult result) {
         ComponentUtil.getChatApiHelper().storeChatLog(chatLog, status, error, responseTime, usage, result);
+    }
+
+    /**
+     * Decides whether the current user may use the chat ({@code rag.chat.permissions}). Exposed as a
+     * seam so unit tests can decide the outcome without resolving the caller's roles.
+     *
+     * @return the error to answer, or empty when the current user may use the chat
+     */
+    protected OptionalThing<V2ErrorCode> getChatAccessError() {
+        return ComponentUtil.getChatApiHelper().getChatAccessError();
     }
 
     /**

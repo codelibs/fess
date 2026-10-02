@@ -35,7 +35,9 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.api.v2.handlers.ChatRequestBody;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
@@ -47,6 +49,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 /**
  * Shared utilities for v2 chat API handlers.
@@ -71,6 +75,13 @@ public class ChatApiHelper {
 
     /** Matches the query ID parameter of a go URL. */
     private static final Pattern QUERY_ID_PATTERN = Pattern.compile("[?&]queryId=([^&#]+)");
+
+    /**
+     * The {@code details.reason} of the error a v2 chat endpoint answers when
+     * {@code rag.chat.permissions} excludes the caller, so a client can tell it from other
+     * {@code 401}/{@code 403} answers such as a rejected CSRF token.
+     */
+    public static final String CHAT_NOT_PERMITTED_REASON = "chat_not_permitted";
 
     /**
      * Default constructor for ChatApiHelper.
@@ -246,8 +257,88 @@ public class ChatApiHelper {
      */
     public boolean existsDocument(final String docId) {
         return ComponentUtil.getSearchHelper()
-                .getDocumentByDocId(docId, new String[] { ComponentUtil.getFessConfig().getIndexFieldDocId() }, OptionalThing.empty())
+                .getDocumentByDocId(docId, new String[] { ComponentUtil.getFessConfig().getIndexFieldDocId() }, OptionalThing.empty(),
+                        getChatFilterQueries())
                 .isPresent();
+    }
+
+    /**
+     * Tells whether the current user may use the RAG chat.
+     *
+     * <p>{@code rag.chat.permissions} lists who may use it. When it is empty every user who can
+     * reach the chat may use it, as before the setting existed. Otherwise the user must hold at
+     * least one of the listed permissions among the roles {@code RoleQueryHelper} resolves for
+     * this request; those include the guest roles for an anonymous user, so {@code {role}guest}
+     * opens the chat to anonymous use.</p>
+     *
+     * @return true if the current user may use the chat
+     */
+    public boolean isChatPermitted() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (StringUtil.isBlank(fessConfig.getRagChatPermissions())) {
+            return true;
+        }
+        // A value whose entries are all unusable (e.g. a bare "{role}") permits nobody: a typo
+        // must not silently open a restricted chat to everyone.
+        final Set<String> permissionSet = fessConfig.getRagChatPermissionSet();
+        if (permissionSet.isEmpty()) {
+            return false;
+        }
+        final Set<String> roleSet = getCurrentUserRoles();
+        return roleSet != null && permissionSet.stream().anyMatch(roleSet::contains);
+    }
+
+    /**
+     * Decides the error the v2 chat endpoints answer when the current user may not use the chat.
+     *
+     * <p>An anonymous user gets {@link V2ErrorCode#AUTH_REQUIRED}, the answer of the
+     * {@code login.required} gate, so the single-page application asks for a login; a signed-in
+     * user who lacks the permission gets {@link V2ErrorCode#FORBIDDEN}.</p>
+     *
+     * @return the error to answer, or empty when the current user may use the chat
+     */
+    public OptionalThing<V2ErrorCode> getChatAccessError() {
+        if (isChatPermitted()) {
+            return OptionalThing.empty();
+        }
+        return OptionalThing.of(isLoggedIn() ? V2ErrorCode.FORBIDDEN : V2ErrorCode.AUTH_REQUIRED);
+    }
+
+    /**
+     * Builds the filter clauses every chat retrieval applies on top of the role filter.
+     *
+     * <p>When {@code rag.chat.labels} lists label values, the chat may only retrieve documents
+     * that carry at least one of them. The constraint is a query clause meant for a {@code bool}
+     * filter, not a query-string term, so no rewrite of the query string (such as the OR retry of
+     * {@code query.orsearch.min.hit.count}) can widen it.</p>
+     *
+     * @return the filter clauses; empty when the chat is not restricted
+     */
+    public List<QueryBuilder> getChatFilterQueries() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final List<String> labelValues = fessConfig.getRagChatLabelValueList();
+        if (labelValues.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return List.of(QueryBuilders.termsQuery(fessConfig.getIndexFieldLabel(), labelValues));
+    }
+
+    /**
+     * Resolves the roles of the current request. A seam so tests decide them without a request.
+     *
+     * @return the encoded roles of the current user
+     */
+    protected Set<String> getCurrentUserRoles() {
+        return ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON);
+    }
+
+    /**
+     * Tells whether a user is signed in. A seam so tests decide it without the login subsystem.
+     *
+     * @return true if a user is signed in
+     */
+    protected boolean isLoggedIn() {
+        return ComponentUtil.getFessLoginAssist().getSavedUserBean().isPresent();
     }
 
     /**

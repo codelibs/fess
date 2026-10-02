@@ -790,6 +790,11 @@ public class RankFusionProcessor implements AutoCloseable {
         }
 
         @Override
+        public List<QueryBuilder> getFilterQueries() {
+            return parent.getFilterQueries();
+        }
+
+        @Override
         public boolean hasConditionQuery() {
             return parent.hasConditionQuery();
         }

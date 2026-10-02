@@ -149,6 +149,10 @@ public interface FessProp {
 
     String DEFAULT_LABEL_VALUES = "defaultLabelValues";
 
+    String RAG_CHAT_PERMISSION_SET = "ragChatPermissionSet";
+
+    String RAG_CHAT_LABEL_VALUE_LIST = "ragChatLabelValueList";
+
     String VIRTUAL_HOST_VALUES = "virtualHostValues";
 
     String QUERY_LANGUAGE_MAPPING = "queryLanguageMapping";
@@ -715,6 +719,91 @@ public interface FessProp {
 
     default String getRagLlmName() {
         return getSystemProperty(Constants.RAG_LLM_NAME, "ollama");
+    }
+
+    /**
+     * Stores the permissions allowed to use the RAG chat ({@code rag.chat.permissions}), as a
+     * comma-separated list in the admin notation ({@code {role}name}, {@code {group}name},
+     * {@code {user}name}). An empty value lets every user who can reach the chat use it.
+     *
+     * @param value the comma-separated permissions
+     */
+    default void setRagChatPermissions(final String value) {
+        setSystemProperty(Constants.RAG_CHAT_PERMISSIONS, value);
+        propMap.remove(RAG_CHAT_PERMISSION_SET);
+    }
+
+    /**
+     * Returns the raw {@code rag.chat.permissions} value.
+     *
+     * @return the comma-separated permissions, empty when the chat is not restricted
+     */
+    default String getRagChatPermissions() {
+        return getSystemProperty(Constants.RAG_CHAT_PERMISSIONS, StringUtil.EMPTY);
+    }
+
+    /**
+     * Returns the encoded search roles allowed to use the RAG chat, parsed from
+     * {@code rag.chat.permissions} with {@link PermissionHelper#encode(String)} so they compare
+     * directly against the roles {@code RoleQueryHelper} resolves for a request.
+     *
+     * @return the encoded roles; empty when the chat is not restricted
+     */
+    default Set<String> getRagChatPermissionSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> permissionSet = (Set<String>) propMap.get(RAG_CHAT_PERMISSION_SET);
+        if (permissionSet == null) {
+            final String value = getRagChatPermissions();
+            if (StringUtil.isBlank(value)) {
+                permissionSet = Collections.emptySet();
+            } else {
+                final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                permissionSet = split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank)
+                        .map(s -> permissionHelper.encode(s))
+                        .filter(StringUtil::isNotBlank)
+                        .collect(Collectors.toUnmodifiableSet()));
+            }
+            propMap.put(RAG_CHAT_PERMISSION_SET, permissionSet);
+        }
+        return permissionSet;
+    }
+
+    /**
+     * Stores the label values the RAG chat may retrieve documents from ({@code rag.chat.labels}),
+     * as a comma-separated list. An empty value lets the chat retrieve from every document the
+     * user may see.
+     *
+     * @param value the comma-separated label values
+     */
+    default void setRagChatLabels(final String value) {
+        setSystemProperty(Constants.RAG_CHAT_LABELS, value);
+        propMap.remove(RAG_CHAT_LABEL_VALUE_LIST);
+    }
+
+    /**
+     * Returns the raw {@code rag.chat.labels} value.
+     *
+     * @return the comma-separated label values, empty when the chat is not restricted
+     */
+    default String getRagChatLabels() {
+        return getSystemProperty(Constants.RAG_CHAT_LABELS, StringUtil.EMPTY);
+    }
+
+    /**
+     * Returns the label values the RAG chat may retrieve documents from, parsed from
+     * {@code rag.chat.labels}.
+     *
+     * @return the trimmed, distinct label values; empty when the chat is not restricted
+     */
+    default List<String> getRagChatLabelValueList() {
+        @SuppressWarnings("unchecked")
+        List<String> valueList = (List<String>) propMap.get(RAG_CHAT_LABEL_VALUE_LIST);
+        if (valueList == null) {
+            valueList = split(getRagChatLabels(), ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).distinct().toList());
+            propMap.put(RAG_CHAT_LABEL_VALUE_LIST, valueList);
+        }
+        return valueList;
     }
 
     Integer getLdapMaxUsernameLengthAsInteger();

@@ -2649,6 +2649,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LLM Provider */
     public static final String LABELS_rag_llm_name = "{labels.rag_llm_name}";
 
+    /** The key of the message: Chat Permissions */
+    public static final String LABELS_rag_chat_permissions = "{labels.rag_chat_permissions}";
+
+    /** The key of the message: Comma-separated permissions allowed to use the chat, in the same notation as the permissions of a crawl configuration. Include the guest role to allow anonymous users. Leave empty to allow all users. */
+    public static final String LABELS_rag_chat_permissions_help = "{labels.rag_chat_permissions_help}";
+
+    /** The key of the message: Chat Labels */
+    public static final String LABELS_rag_chat_labels = "{labels.rag_chat_labels}";
+
+    /** The key of the message: Comma-separated label values the chat may retrieve documents from. Leave empty to use every document the user may see. */
+    public static final String LABELS_rag_chat_labels_help = "{labels.rag_chat_labels_help}";
+
     /** The key of the message: Log Level */
     public static final String LABELS_llm_log_level = "{labels.llm_log_level}";
 

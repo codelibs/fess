@@ -28,10 +28,12 @@ import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.helper.ChatApiHelper;
 import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,6 +55,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p>Anonymous users are supported the same way v1 supports them — the user is
  * identified by {@code UserInfoHelper#getUserCode()} when no logged-in bean is
  * present. See §Risks (3) in the plan for the auth-posture rationale.</p>
+ *
+ * <p>When {@code rag.chat.permissions} is set, only a caller holding one of the listed permissions
+ * may chat: an anonymous caller without one gets {@code 401 auth_required}, a signed-in one
+ * {@code 403 forbidden} (see {@link org.codelibs.fess.helper.ChatApiHelper#getChatAccessError()}).</p>
  */
 public class ChatHandler {
 
@@ -96,6 +102,21 @@ public class ChatHandler {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
+            return;
+        }
+        // rag.chat.permissions: decided before the body is read or the caller is throttled.
+        final OptionalThing<V2ErrorCode> accessError;
+        try {
+            accessError = getChatAccessError();
+        } catch (final RuntimeException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/chat");
+            return;
+        }
+        if (accessError.isPresent()) {
+            final V2ErrorCode code = accessError.get();
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, code, code == V2ErrorCode.AUTH_REQUIRED ? "login required" : "chat is not permitted",
+                            Map.of("reason", ChatApiHelper.CHAT_NOT_PERMITTED_REASON));
             return;
         }
 
@@ -222,6 +243,16 @@ public class ChatHandler {
     protected void recordChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
             final LlmUsageCollector usage, final ChatResult result) {
         ComponentUtil.getChatApiHelper().storeChatLog(chatLog, status, error, responseTime, usage, result);
+    }
+
+    /**
+     * Decides whether the current user may use the chat ({@code rag.chat.permissions}). Exposed as a
+     * seam so unit tests can decide the outcome without resolving the caller's roles.
+     *
+     * @return the error to answer, or empty when the current user may use the chat
+     */
+    protected OptionalThing<V2ErrorCode> getChatAccessError() {
+        return ComponentUtil.getChatApiHelper().getChatAccessError();
     }
 
     /**

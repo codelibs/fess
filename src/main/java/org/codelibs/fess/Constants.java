@@ -720,6 +720,12 @@ public class Constants extends CoreLibConstants {
     /** RAG LLM name configuration key. */
     public static final String RAG_LLM_NAME = "rag.llm.name";
 
+    /** RAG chat permissions configuration key: who may use the chat (empty means everyone). */
+    public static final String RAG_CHAT_PERMISSIONS = "rag.chat.permissions";
+
+    /** RAG chat labels configuration key: label values the chat may retrieve from (empty means all). */
+    public static final String RAG_CHAT_LABELS = "rag.chat.labels";
+
     /** Storage region configuration key (for S3). */
     public static final String STORAGE_REGION = "storage.region";
 

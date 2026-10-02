@@ -804,9 +804,18 @@ paths:
         Synchronous chat completion. The session is identified by
         `session_id`; if omitted, the server creates one and returns it.
 
-        Rate-limited per user at `api.v2.chat.rate.limit.per.user.per.minute`
-        (default 30/min). The feature is disabled (`invalid_request`) when
+        Rate-limited at `api.chat.rate.limit.per.user.per.minute` (default
+        30/min), per signed-in user or, for an anonymous caller, per client IP.
+        The feature is disabled (`invalid_request`) when
         `rag.chat.enabled=false`.
+
+        When `rag.chat.permissions` is set, only a caller holding one of the
+        listed permissions may chat. Otherwise the request is rejected before
+        the body is read: an anonymous caller gets `auth_required` (HTTP 401),
+        a signed-in caller `forbidden` (HTTP 403); both carry
+        `details.reason` = `chat_not_permitted`. When `rag.chat.labels` is
+        set, the chat only retrieves documents that carry at least one of the
+        listed label values, and a `doc_id` outside them returns `not_found`.
 
         Invalid values supplied in `fields.label` or `extra_queries` are
         dropped silently from the resolved request — they are not surfaced to
@@ -874,7 +883,9 @@ paths:
           same string as `error_code`; clients should localize on `error_code`.
 
         Pre-stream validation failures still produce a JSON envelope
-        (same error codes as `/chat`).
+        (same error codes as `/chat`, including the `rag.chat.permissions`
+        rejection: `auth_required` / `forbidden` with `details.reason` =
+        `chat_not_permitted`).
 
         Invalid values supplied in `fields.label` or `extra_queries` are
         dropped silently from the resolved request — they are not surfaced to
@@ -938,8 +949,10 @@ paths:
         on success. Returns `not_found` (404) when no active session matches
         the given id.
 
-        Rate-limited per user at `api.v2.chat.rate.limit.per.user.per.minute`
-        (shared with `POST /chat`). Requires `X-Fess-CSRF-Token`.
+        Rate-limited at `api.chat.rate.limit.per.user.per.minute` (shared
+        with `POST /chat`). Requires `X-Fess-CSRF-Token`. Rejected like
+        `POST /chat` (`auth_required` / `forbidden` with `details.reason` =
+        `chat_not_permitted`) when `rag.chat.permissions` excludes the caller.
       operationId: chatClearSessionV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -1139,7 +1152,9 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorEnvelope' }
     Forbidden:
-      description: Caller is not permitted (e.g. missing or stale CSRF token).
+      description: |-
+        Caller is not permitted (e.g. missing or stale CSRF token, or a
+        signed-in user outside `rag.chat.permissions` on the chat endpoints).
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorEnvelope' }
@@ -1711,7 +1726,10 @@ components:
                         at `osdd` (`osdd.link.enabled`; `auto` turns it off under SSO).
                     rag_chat_enabled:
                       type: boolean
-                      description: Whether the RAG chat feature is available.
+                      description: |-
+                        Whether the RAG chat feature is available to the
+                        current user (false when `rag.chat.permissions`
+                        excludes them).
                 page_size_default: { type: integer }
                 page_size_max: { type: integer }
                 sort_options:

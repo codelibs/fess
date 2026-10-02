@@ -556,6 +556,13 @@ describe("main", () => {
     expect(document.getElementById("chat-nav-item").classList.contains("d-none")).toBe(false);
   });
 
+  it("keeps the chat nav item hidden when chat is not enabled for the user", async () => {
+    mountFullDom();
+    api.getConfig.mockReturnValue({ features: { rag_chat_enabled: false } });
+    await main();
+    expect(document.getElementById("chat-nav-item").classList.contains("d-none")).toBe(true);
+  });
+
   it("renders sanitized notification banners from config into the slots", async () => {
     mountFullDom();
     api.getConfig.mockReturnValue({
@@ -656,6 +663,29 @@ describe("auth events", () => {
     expect(search.initSearchOptions).toHaveBeenCalled();
     expect(router.dispatch).toHaveBeenCalled();
     expect(search.refresh).not.toHaveBeenCalled();
+  });
+
+  it("shows the chat nav item when the config fetched after a login enables chat", async () => {
+    mountFullDom();
+    await main();
+    const item = document.getElementById("chat-nav-item");
+    expect(item.classList.contains("d-none")).toBe(true);
+    api.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+    document.dispatchEvent(new CustomEvent("fess:auth:login"));
+    await flush();
+    expect(item.classList.contains("d-none")).toBe(false);
+  });
+
+  it("hides the chat nav item when the config fetched after a logout disables chat", async () => {
+    mountFullDom();
+    api.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+    await main();
+    const item = document.getElementById("chat-nav-item");
+    expect(item.classList.contains("d-none")).toBe(false);
+    api.getConfig.mockReturnValue({ features: { rag_chat_enabled: false } });
+    document.dispatchEvent(new CustomEvent("fess:auth:logout"));
+    await flush();
+    expect(item.classList.contains("d-none")).toBe(true);
   });
 
   it("forgets the page size and fetches the config again after a logout", async () => {
