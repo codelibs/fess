@@ -64,20 +64,22 @@
                         <th><la:message key="labels.searchlog_col_word"/></th>
                         <th class="text-right"><la:message key="labels.searchlog_count"/></th>
                         <th class="text-right"><la:message key="labels.searchlog_metric_users"/></th>
+                        <th class="text-right"><la:message key="labels.searchlog_metric_lastSearchedAt"/></th>
                     </tr>
                     </thead>
                     <tbody>
                     <c:forEach var="row" items="${report.tables['zeroHitQueries']}" varStatus="st">
                         <tr>
                             <td class="searchlog-rank">${st.count}</td>
-                            <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
+                            <td class="text-break"><a href="${zeroHitWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
                             <td class="text-right"><fmt:formatNumber value="${row.count}"/></td>
                             <td class="text-right">${row.users == null ? '-' : ''}<fmt:formatNumber value="${row.users}"/></td>
+                            <td class="text-right text-nowrap">${empty row.lastSearchedAt ? '-' : f:h(row.lastSearchedAt)}</td>
                         </tr>
                     </c:forEach>
                     <c:if test="${empty report.tables['zeroHitQueries']}">
                         <tr>
-                            <td colspan="4" class="searchlog-no-data text-muted"><la:message
+                            <td colspan="5" class="searchlog-no-data text-muted"><la:message
                                     key="labels.searchlog_no_data"/></td>
                         </tr>
                     </c:if>

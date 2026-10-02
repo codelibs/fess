@@ -74,7 +74,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     private static final DateTimeFormatter FILE_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private static final String[] CONDITION_FIELDS =
-            { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize", "searchWord" };
+            { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize", "searchWord", "hitCount" };
 
     // ===================================================================================
     //                                                                           Attribute

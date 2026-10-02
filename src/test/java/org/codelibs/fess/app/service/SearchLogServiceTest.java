@@ -162,6 +162,47 @@ public class SearchLogServiceTest extends UnitFessTestCase {
         assertNotNull(cb.get(), "the condition was built");
     }
 
+    private static String searchLogQuery(final SearchLogPager pager) throws IOException {
+        final AtomicReference<SearchLogCB> cb = new AtomicReference<>();
+        serviceWith(List.of(), cb).exportCsv(pager, new StringWriter());
+        final Object query = cb.get().query().getQuery();
+        return query == null ? "" : query.toString().replaceAll("\\s+", "");
+    }
+
+    @Test
+    public void test_searchLogCondition_hitCount() throws IOException {
+        final SearchLogPager pager = new SearchLogPager();
+        pager.hitCount = SearchLogPager.HIT_COUNT_ZERO;
+        final String zero = searchLogQuery(pager);
+        assertTrue(zero.contains("\"term\":{\"hitCount\":{\"value\":0"), zero);
+
+        pager.hitCount = SearchLogPager.HIT_COUNT_NONZERO;
+        final String nonzero = searchLogQuery(pager);
+        assertTrue(nonzero.contains("\"range\":{\"hitCount\":{\"from\":0,\"to\":null,\"include_lower\":false"), nonzero);
+
+        pager.hitCount = null;
+        assertFalse(searchLogQuery(pager).contains("hitCount"), "no hit count filter");
+        pager.hitCount = "unknown";
+        assertFalse(searchLogQuery(pager).contains("hitCount"), "an unknown value is ignored");
+    }
+
+    @Test
+    public void test_searchLogCondition_rangeEndCoversWholeMinute() throws IOException {
+        final TimeZone original = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        try {
+            final SearchLogPager pager = new SearchLogPager();
+            pager.requestedTimeRange = "2026-09-01 00:00 - 2026-09-30 23:59";
+            final String query = searchLogQuery(pager);
+            // [2026-09-01T00:00, 2026-10-01T00:00): a log written at 23:59:30 on the last day is included
+            assertTrue(query.contains(
+                    "\"from\":\"2026-09-01T00:00:00\",\"to\":\"2026-10-01T00:00:00\",\"include_lower\":true,\"include_upper\":false"),
+                    query);
+        } finally {
+            TimeZone.setDefault(original);
+        }
+    }
+
     @Test
     public void test_exportCsv_formulaGuardAndQuoting() throws IOException {
         final SearchLog log = searchLog("=cmd", "=1+1");
