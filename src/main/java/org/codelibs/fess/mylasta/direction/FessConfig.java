@@ -2117,6 +2117,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10 */
     String RAG_CHAT_DOCUMENT_MAX_PARTS = "rag.chat.document.max.parts";
 
+    /** The key of the configuration. e.g. browser */
+    String RAG_CHAT_RESPONSE_LANGUAGE = "rag.chat.response.language";
+
     /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
 
@@ -10263,6 +10266,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagChatDocumentMaxPartsAsInteger();
 
     /**
+     * Get the value for the key 'rag.chat.response.language'. <br>
+     * The value is, e.g. browser <br>
+     * comment: <br>
+     * Language the LLM is asked to answer in.<br>
+     * browser  - the language of the user's browser or UI locale; no instruction for English (default)<br>
+     * none     - no language instruction; the LLM usually answers in the language of the question<br>
+     * en, ja.. - always answer in this language
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatResponseLanguage();
+
+    /**
      * Get the value for the key 'index.export.path'. <br>
      * The value is, e.g. /var/lib/fess/export <br>
      * comment: Index Export
@@ -14423,6 +14438,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_DOCUMENT_MAX_PARTS);
         }
 
+        public String getRagChatResponseLanguage() {
+            return get(FessConfig.RAG_CHAT_RESPONSE_LANGUAGE);
+        }
+
         public String getIndexExportPath() {
             return get(FessConfig.INDEX_EXPORT_PATH);
         }
@@ -15249,6 +15268,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT, "smart_summary");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT, "5");
             defaultMap.put(FessConfig.RAG_CHAT_DOCUMENT_MAX_PARTS, "10");
+            defaultMap.put(FessConfig.RAG_CHAT_RESPONSE_LANGUAGE, "browser");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");

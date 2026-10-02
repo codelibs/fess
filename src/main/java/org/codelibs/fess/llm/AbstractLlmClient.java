@@ -924,11 +924,25 @@ public abstract class AbstractLlmClient implements LlmClient {
     }
 
     /**
-     * Gets the language instruction based on the user's locale.
+     * Gets the language instruction according to {@code rag.chat.response.language}.
+     * {@code browser} (the default) asks for the user's locale language, {@code none} adds no instruction,
+     * and a language code such as {@code en} or {@code ja} always asks for that language.
      *
-     * @return the language instruction string, or empty string if locale is English
+     * @return the language instruction string, or empty string if no instruction is needed
      */
     protected String getLanguageInstruction() {
+        final String value = ComponentUtil.getFessConfig().getRagChatResponseLanguage();
+        final String responseLanguage = value == null ? StringUtil.EMPTY : value.trim();
+        if ("none".equalsIgnoreCase(responseLanguage)) {
+            return StringUtil.EMPTY;
+        }
+        if (!responseLanguage.isEmpty() && !"browser".equalsIgnoreCase(responseLanguage)) {
+            final Locale locale = Locale.forLanguageTag(responseLanguage.replace('_', '-'));
+            if (StringUtil.isNotBlank(locale.getLanguage())) {
+                return getLanguageInstructionPrompt().replace("{{language}}", locale.getDisplayLanguage(Locale.ENGLISH));
+            }
+            logger.warn("Invalid rag.chat.response.language={}. Using the user's locale.", responseLanguage);
+        }
         final Locale locale = getUserLocale();
         final String language = locale.getLanguage();
         if ("en".equals(language)) {
