@@ -656,6 +656,50 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
+    /** Runs the handler with fixed chat availability and permission, returning the response body. */
+    private String ragChatConfigBody(final boolean available, final boolean permitted) throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler() {
+            @Override
+            protected boolean isRagChatAvailable() {
+                return available;
+            }
+
+            @Override
+            protected boolean isChatPermitted() {
+                if (!available) {
+                    throw new AssertionError("permissions must not be resolved when chat is unavailable");
+                }
+                return permitted;
+            }
+        }.handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        return res.body();
+    }
+
+    @Test
+    public void test_features_ragChatEnabled_trueWhenAvailableAndPermitted() throws Exception {
+        assertTrue(ragChatConfigBody(true, true).contains("\"rag_chat_enabled\":true"));
+    }
+
+    @Test
+    public void test_features_ragChatEnabled_falseWhenUserNotPermitted() throws Exception {
+        assertTrue(ragChatConfigBody(true, false).contains("\"rag_chat_enabled\":false"),
+                "a user outside rag.chat.permissions must not see the chat entry point");
+    }
+
+    @Test
+    public void test_features_ragChatEnabled_falseWhenUnavailable() throws Exception {
+        assertTrue(ragChatConfigBody(false, true).contains("\"rag_chat_enabled\":false"));
+    }
+
+    @Test
+    public void test_isChatPermitted_unrestrictedByDefault() {
+        // No rag.chat.permissions: the real check permits everyone without resolving roles.
+        org.codelibs.fess.mylasta.direction.FessProp.propMap.remove(org.codelibs.fess.mylasta.direction.FessProp.RAG_CHAT_PERMISSION_SET);
+        assertTrue(new UiConfigHandler().isChatPermitted());
+    }
+
     /**
      * ADV-1: buildFiletypeOptions must return exactly the 10 canonical file-type entries
      * in the order matching index.filetype / labels.facet_filetype_* mappings, each with

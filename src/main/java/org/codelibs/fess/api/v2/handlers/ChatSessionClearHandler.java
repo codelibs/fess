@@ -24,8 +24,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2ErrorCode;
+import org.codelibs.fess.helper.ChatApiHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,6 +50,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * <ul>
  *   <li>{@code 405} — wrong HTTP method</li>
  *   <li>{@code 400} — invalid or missing session_id (fails URL pattern validation)</li>
+ *   <li>{@code 401} — {@code rag.chat.permissions} excludes the caller, who is not signed in</li>
+ *   <li>{@code 403} — {@code rag.chat.permissions} excludes the signed-in caller</li>
  *   <li>{@code 404} — session not found or belongs to a different user</li>
  *   <li>{@code 429} — rate limit exceeded</li>
  *   <li>{@code 500} — unexpected server error</li>
@@ -97,6 +101,21 @@ public class ChatSessionClearHandler {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
             return;
         }
+        // rag.chat.permissions: decided before the body is read or the caller is throttled.
+        final OptionalThing<V2ErrorCode> accessError;
+        try {
+            accessError = getChatAccessError();
+        } catch (final RuntimeException e) {
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/chat/sessions");
+            return;
+        }
+        if (accessError.isPresent()) {
+            final V2ErrorCode code = accessError.get();
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeErrorWithDetails(res, code, code == V2ErrorCode.AUTH_REQUIRED ? "login required" : "chat is not permitted",
+                            Map.of("reason", ChatApiHelper.CHAT_NOT_PERMITTED_REASON));
+            return;
+        }
 
         // Validate the session_id path segment before touching any backend state.
         if (sessionId == null || !SESSION_ID_PATTERN.matcher(sessionId).matches()) {
@@ -141,6 +160,16 @@ public class ChatSessionClearHandler {
             logger.warn("[RAG] DELETE /api/v2/chat/sessions/{} failed. error={}", sessionId, e.getMessage(), e);
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
         }
+    }
+
+    /**
+     * Decides whether the current user may use the chat ({@code rag.chat.permissions}). Exposed as a
+     * seam so unit tests can decide the outcome without resolving the caller's roles.
+     *
+     * @return the error to answer, or empty when the current user may use the chat
+     */
+    protected OptionalThing<V2ErrorCode> getChatAccessError() {
+        return ComponentUtil.getChatApiHelper().getChatAccessError();
     }
 
     /**

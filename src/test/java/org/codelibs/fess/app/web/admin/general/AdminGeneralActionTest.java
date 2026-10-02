@@ -98,6 +98,61 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_updateConfig_ragChatSettings_roundTripNormalized() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            final EditForm form = createEditForm();
+            form.ragChatPermissions = " {role}rag-user , {group}sales,,{role}rag-user ";
+            form.ragChatLabels = "public, faq ,";
+            AdminGeneralAction.updateConfig(fessConfig, form);
+            assertEquals("{role}rag-user,{group}sales", ComponentUtil.getSystemProperties().getProperty(Constants.RAG_CHAT_PERMISSIONS));
+            assertEquals("public,faq", ComponentUtil.getSystemProperties().getProperty(Constants.RAG_CHAT_LABELS));
+            assertEquals(java.util.List.of("public", "faq"), fessConfig.getRagChatLabelValueList());
+
+            final EditForm reloaded = new EditForm();
+            AdminGeneralAction.updateForm(fessConfig, reloaded);
+            assertEquals("{role}rag-user,{group}sales", reloaded.ragChatPermissions);
+            assertEquals("public,faq", reloaded.ragChatLabels);
+
+            // An empty value lifts the restriction.
+            reloaded.ragChatLabels = "";
+            AdminGeneralAction.updateConfig(fessConfig, reloaded);
+            assertEquals("", ComponentUtil.getSystemProperties().getProperty(Constants.RAG_CHAT_LABELS));
+            assertTrue(fessConfig.getRagChatLabelValueList().isEmpty());
+        } finally {
+            fessConfig.setRagChatPermissions("");
+            fessConfig.setRagChatLabels("");
+        }
+    }
+
+    @Test
+    public void test_updateConfig_ragChatSettings_keptWhenAbsent() {
+        // The RAG section is not rendered while RAG chat is off, so the fields arrive as null
+        // (and the admin API may omit them); the stored restriction must survive the save.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            fessConfig.setRagChatPermissions("{role}rag-user");
+            fessConfig.setRagChatLabels("public");
+            final EditForm form = createEditForm();
+            form.ragChatPermissions = null;
+            form.ragChatLabels = null;
+            AdminGeneralAction.updateConfig(fessConfig, form);
+            assertEquals("{role}rag-user", fessConfig.getRagChatPermissions());
+            assertEquals("public", fessConfig.getRagChatLabels());
+        } finally {
+            fessConfig.setRagChatPermissions("");
+            fessConfig.setRagChatLabels("");
+        }
+    }
+
+    @Test
+    public void test_normalizeCommaSeparatedValue() {
+        assertEquals("", AdminGeneralAction.normalizeCommaSeparatedValue(""));
+        assertEquals("", AdminGeneralAction.normalizeCommaSeparatedValue(" , ,"));
+        assertEquals("a,b", AdminGeneralAction.normalizeCommaSeparatedValue(" a ,b,a,"));
+    }
+
+    @Test
     public void test_updateConfig_spnegoPreauthPassword_canBeCleared() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 

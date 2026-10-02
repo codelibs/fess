@@ -423,6 +423,52 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertEquals(2, countOccurrences(json, "\"role\":{\"value\":\"Rguest\""), json);
     }
 
+    @Test
+    public void test_buildSemanticQuery_appliesRequestFilterQueriesToBothPlaces() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public java.util.List<QueryBuilder> getFilterQueries() {
+                return java.util.List.of(QueryBuilders.termsQuery("label", "public"));
+            }
+        };
+        final SemanticChunkSearcher.SemanticQueryContext annContext =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, null);
+        final String annJson = searcher.buildSemanticQuery(annContext, params).toString().replaceAll("\\s", "");
+        // a hard bool filter on the outer query, plus the recall copy inside the knn query
+        assertEquals(2, countOccurrences(annJson, "\"terms\":{\"label\":[\"public\"]"), annJson);
+        assertEquals(2, countOccurrences(annJson, "\"role\":{\"value\":\"Rguest\""), annJson);
+
+        final SemanticChunkSearcher.SemanticQueryContext exactContext =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, false, null);
+        final String exactJson = searcher.buildSemanticQuery(exactContext, params).toString().replaceAll("\\s", "");
+        assertEquals(1, countOccurrences(exactJson, "\"terms\":{\"label\":[\"public\"]"), exactJson);
+    }
+
+    @Test
+    public void test_buildSemanticQuery_noFilterQueriesByDefault() {
+        givenPermissionContext();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final SemanticChunkSearcher.SemanticQueryContext context =
+                new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, null);
+        final String json = searcher.buildSemanticQuery(context, new StubSearchRequestParams(0, 10)).toString().replaceAll("\\s", "");
+        assertFalse(json.contains("\"terms\""), json);
+    }
+
+    @Test
+    public void test_semanticSearchRequestParams_delegatesFilterQueries() {
+        final java.util.List<QueryBuilder> filters = java.util.List.of(QueryBuilders.termsQuery("label", "public"));
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public java.util.List<QueryBuilder> getFilterQueries() {
+                return filters;
+            }
+        };
+        assertEquals(filters, new SemanticChunkSearcher.SemanticSearchRequestParams(params).getFilterQueries());
+        assertEquals(filters, new RankFusionProcessor.SearchRequestParamsWrapper(params, 0, 5).getFilterQueries());
+    }
+
     // -------------------------------------------------------------------------------------
     //                                                                               min_score
     //                                                                               ---------

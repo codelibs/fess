@@ -696,7 +696,9 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
     }
 
     /**
-     * Fetches full content for the given document ids via doc_id lookup (no highlighting).
+     * Fetches full content for the given document ids via doc_id lookup (no highlighting). The
+     * lookup is role-filtered and applies the chat filter ({@code rag.chat.labels}), so a document
+     * the chat may not use is left out.
      *
      * @param docIds the document ids
      * @return document maps (unordered)
@@ -711,7 +713,7 @@ public class DefaultChatContentFetcher implements ChatContentFetcher {
         try {
             return ComponentUtil.getSearchHelper()
                     .getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
-                            SearchRequestParams.SearchRequestType.JSON);
+                            SearchRequestParams.SearchRequestType.JSON, ComponentUtil.getChatApiHelper().getChatFilterQueries());
         } catch (final Exception e) {
             // This WARN is the only trace of the failure (the caller just sees an empty list), so
             // pass the Throwable itself: a bare getMessage() is empty for e.g. an NPE.

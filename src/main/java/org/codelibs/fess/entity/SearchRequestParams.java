@@ -17,11 +17,14 @@ package org.codelibs.fess.entity;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -248,6 +251,20 @@ public abstract class SearchRequestParams {
      */
     public Float getMinScore() {
         return null;
+    }
+
+    /**
+     * Returns extra filter clauses every search over these parameters must apply.
+     *
+     * <p>Each clause is added to the request as a {@code bool} filter next to the role filter,
+     * in the keyword branch as well as in the vector branches of rank fusion. Unlike the query
+     * string, a clause here is never rewritten, so it constrains the result set however the
+     * query string is interpreted. The default is no extra filter.</p>
+     *
+     * @return the filter clauses, never null
+     */
+    public List<QueryBuilder> getFilterQueries() {
+        return Collections.emptyList();
     }
 
     /**

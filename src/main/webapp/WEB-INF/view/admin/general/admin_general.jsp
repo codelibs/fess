@@ -1230,6 +1230,30 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
+                                    <label for="ragChatPermissions"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.rag_chat_permissions"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="ragChatPermissions"/>
+                                        <la:text styleId="ragChatPermissions" property="ragChatPermissions"
+                                                 styleClass="form-control" placeholder="{role}rag-user,{group}sales,{user}taro"/>
+                                        <small class="form-text text-muted"><la:message
+                                                key="labels.rag_chat_permissions_help"/></small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="ragChatLabels"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.rag_chat_labels"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="ragChatLabels"/>
+                                        <la:text styleId="ragChatLabels" property="ragChatLabels"
+                                                 styleClass="form-control"/>
+                                        <small class="form-text text-muted"><la:message
+                                                key="labels.rag_chat_labels_help"/></small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="llmLogLevel"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.llm_log_level"/></label>

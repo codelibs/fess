@@ -445,4 +445,164 @@ public class ChatApiHelperTest extends UnitFessTestCase {
                 () -> chatApiHelper.parseFieldFilters(raw, warnings), "1001-char label element must throw TooManyValuesException");
     }
 
+    // ── rag.chat.permissions / rag.chat.labels ────────────────────────────────
+
+    /** Installs a config whose chat permission set and chat label values are fixed. */
+    private static void setChatRestrictions(final java.util.Set<String> permissions, final List<String> labels) {
+        org.codelibs.fess.util.ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getRagChatPermissions() {
+                return permissions == null ? "" : String.join(",", permissions);
+            }
+
+            @Override
+            public java.util.Set<String> getRagChatPermissionSet() {
+                return permissions;
+            }
+
+            @Override
+            public List<String> getRagChatLabelValueList() {
+                return labels;
+            }
+
+            @Override
+            public String getIndexFieldLabel() {
+                return "label";
+            }
+
+            @Override
+            public String getIndexFieldDocId() {
+                return "doc_id";
+            }
+        });
+    }
+
+    /** A helper whose caller roles and sign-in state are fixed; counts role lookups. */
+    private static class FixedUserChatApiHelper extends ChatApiHelper {
+        private final java.util.Set<String> roles;
+        private final boolean loggedIn;
+        int roleLookups;
+
+        FixedUserChatApiHelper(final java.util.Set<String> roles, final boolean loggedIn) {
+            this.roles = roles;
+            this.loggedIn = loggedIn;
+        }
+
+        @Override
+        protected java.util.Set<String> getCurrentUserRoles() {
+            roleLookups++;
+            return roles;
+        }
+
+        @Override
+        protected boolean isLoggedIn() {
+            return loggedIn;
+        }
+    }
+
+    @Test
+    public void test_isChatPermitted_emptyPermissions_permitsWithoutResolvingRoles() {
+        setChatRestrictions(java.util.Set.of(), List.of());
+        final FixedUserChatApiHelper helper = new FixedUserChatApiHelper(java.util.Set.of(), false);
+        assertTrue(helper.isChatPermitted(), "no rag.chat.permissions must leave the chat open to everyone");
+        assertTrue(helper.getChatAccessError().isEmpty());
+        assertEquals(0, helper.roleLookups, "an unrestricted chat must not resolve the caller's roles");
+    }
+
+    @Test
+    public void test_isChatPermitted_userHoldsListedRole_permitted() {
+        setChatRestrictions(java.util.Set.of("Rrag-user", "2sales"), List.of());
+        final FixedUserChatApiHelper helper = new FixedUserChatApiHelper(java.util.Set.of("1taro", "2sales"), true);
+        assertTrue(helper.isChatPermitted(), "holding any listed permission must permit the chat");
+        assertTrue(helper.getChatAccessError().isEmpty());
+    }
+
+    @Test
+    public void test_getChatAccessError_signedInWithoutRole_forbidden() {
+        setChatRestrictions(java.util.Set.of("Rrag-user"), List.of());
+        final FixedUserChatApiHelper helper = new FixedUserChatApiHelper(java.util.Set.of("1taro", "Rother"), true);
+        assertFalse(helper.isChatPermitted());
+        assertEquals(org.codelibs.fess.api.v2.V2ErrorCode.FORBIDDEN, helper.getChatAccessError().get());
+    }
+
+    @Test
+    public void test_getChatAccessError_anonymousWithoutRole_authRequired() {
+        setChatRestrictions(java.util.Set.of("Rrag-user"), List.of());
+        final FixedUserChatApiHelper helper = new FixedUserChatApiHelper(java.util.Set.of("Rguest"), false);
+        assertFalse(helper.isChatPermitted());
+        assertEquals("an anonymous caller must be asked to log in, like the login.required gate does",
+                org.codelibs.fess.api.v2.V2ErrorCode.AUTH_REQUIRED, helper.getChatAccessError().get());
+    }
+
+    @Test
+    public void test_isChatPermitted_guestRoleListed_permitsAnonymous() {
+        setChatRestrictions(java.util.Set.of("Rguest"), List.of());
+        final FixedUserChatApiHelper helper = new FixedUserChatApiHelper(java.util.Set.of("Rguest"), false);
+        assertTrue(helper.isChatPermitted(), "listing the guest role must open the chat to anonymous users");
+    }
+
+    @Test
+    public void test_isChatPermitted_unusableEntriesOnly_deniesEveryone() {
+        // rag.chat.permissions is set, but nothing in it encodes to a role (e.g. a bare "{role}").
+        org.codelibs.fess.util.ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getRagChatPermissions() {
+                return "{role}";
+            }
+
+            @Override
+            public java.util.Set<String> getRagChatPermissionSet() {
+                return java.util.Set.of();
+            }
+        });
+        assertFalse(new FixedUserChatApiHelper(java.util.Set.of("Rguest", "Radmin"), true).isChatPermitted(),
+                "a set but unusable rag.chat.permissions must fail closed");
+    }
+
+    @Test
+    public void test_isChatPermitted_nullRoles_denied() {
+        setChatRestrictions(java.util.Set.of("Rrag-user"), List.of());
+        assertFalse(new FixedUserChatApiHelper(null, true).isChatPermitted());
+    }
+
+    @Test
+    public void test_getChatFilterQueries_noLabels_empty() {
+        setChatRestrictions(java.util.Set.of(), List.of());
+        assertTrue(chatApiHelper.getChatFilterQueries().isEmpty(), "no rag.chat.labels must add no filter");
+    }
+
+    @Test
+    public void test_getChatFilterQueries_labels_termsOnLabelField() {
+        setChatRestrictions(java.util.Set.of(), List.of("public", "faq"));
+        final List<org.codelibs.fesen.opensearch.index.query.QueryBuilder> filters = chatApiHelper.getChatFilterQueries();
+        assertEquals(1, filters.size());
+        final org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder terms =
+                (org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder) filters.get(0);
+        assertEquals(org.codelibs.fess.util.ComponentUtil.getFessConfig().getIndexFieldLabel(), terms.fieldName());
+        assertEquals(List.of("public", "faq"), terms.values());
+    }
+
+    @Test
+    public void test_existsDocument_appliesChatLabelFilter() {
+        setChatRestrictions(java.util.Set.of(), List.of("public"));
+        final List<List<org.codelibs.fesen.opensearch.index.query.QueryBuilder>> captured = new ArrayList<>();
+        org.codelibs.fess.util.ComponentUtil.register(new SearchHelper() {
+            @Override
+            public org.dbflute.optional.OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> userBean,
+                    final List<org.codelibs.fesen.opensearch.index.query.QueryBuilder> filterQueries) {
+                captured.add(filterQueries);
+                return org.dbflute.optional.OptionalEntity.empty();
+            }
+        }, "searchHelper");
+        assertFalse(chatApiHelper.existsDocument("doc1"), "a document outside the chat labels must be reported as missing");
+        assertEquals(1, captured.size());
+        assertEquals(1, captured.get(0).size(), "the doc-id lookup must carry the chat label filter");
+        assertEquals(chatApiHelper.getChatFilterQueries(), captured.get(0));
+    }
+
 }

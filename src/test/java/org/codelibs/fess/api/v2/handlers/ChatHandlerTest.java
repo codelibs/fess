@@ -472,6 +472,93 @@ public class ChatHandlerTest extends UnitFessTestCase {
         assertTrue(lookedUp.isEmpty(), "no document lookup without doc_id");
     }
 
+    // ── rag.chat.permissions gate ─────────────────────────────────────────────
+
+    /** A handler whose permission decision is fixed and whose later steps must never run. */
+    private static ChatHandler deniedHandler(final org.codelibs.fess.api.v2.V2ErrorCode error) {
+        return new ChatHandler() {
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.api.v2.V2ErrorCode> getChatAccessError() {
+                return org.dbflute.optional.OptionalThing.of(error);
+            }
+
+            @Override
+            protected String getUserId(final HttpServletRequest req) {
+                throw new AssertionError("a denied request must not resolve the chat user");
+            }
+
+            @Override
+            protected String getRateLimitKey(final HttpServletRequest req) {
+                throw new AssertionError("a denied request must not be throttled");
+            }
+
+            @Override
+            protected ChatClient getChatClient() {
+                throw new AssertionError("a denied request must not reach the chat client");
+            }
+        };
+    }
+
+    @Test
+    public void test_permissionDenied_anonymous_returnsAuthRequiredBeforeBodyParse() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        // A malformed body proves the gate runs before the body is parsed.
+        deniedHandler(org.codelibs.fess.api.v2.V2ErrorCode.AUTH_REQUIRED)
+                .handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{not json"), res);
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertTrue(res.body().contains("\"reason\":\"chat_not_permitted\""), res.body());
+    }
+
+    @Test
+    public void test_permissionDenied_signedIn_returnsForbidden() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        deniedHandler(org.codelibs.fess.api.v2.V2ErrorCode.FORBIDDEN)
+                .handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+        assertEquals(403, res.status);
+        assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
+        assertTrue(res.body().contains("\"reason\":\"chat_not_permitted\""), res.body());
+    }
+
+    @Test
+    public void test_permissionCheckFailure_returnsInternalError() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        new ChatHandler() {
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.api.v2.V2ErrorCode> getChatAccessError() {
+                throw new IllegalStateException("roles unavailable");
+            }
+        }.handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+        assertEquals(500, res.status);
+        assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+    }
+
+    @Test
+    public void test_permissionGate_disabledChatWinsOverPermission() throws Exception {
+        // rag.chat.enabled=false is still reported as before, without consulting the permissions.
+        final CapturingResponse res = new CapturingResponse();
+        deniedHandler(org.codelibs.fess.api.v2.V2ErrorCode.FORBIDDEN)
+                .handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_permissionGate_unrestrictedByDefault() throws Exception {
+        // No rag.chat.permissions: the real helper permits everyone and the request goes on
+        // to the body checks exactly as before the setting existed.
+        enableRagChat();
+        org.codelibs.fess.mylasta.direction.FessProp.propMap.remove(org.codelibs.fess.mylasta.direction.FessProp.RAG_CHAT_PERMISSION_SET);
+        assertTrue(ComponentUtil.getChatApiHelper().getChatAccessError().isEmpty());
+        final CapturingResponse res = new CapturingResponse();
+        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{not json"), res);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
     /** Enables RAG chat by registering a fess-config subclass that returns true. */
     private static void enableRagChat() {
         ComponentUtil.setFessConfig(new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {

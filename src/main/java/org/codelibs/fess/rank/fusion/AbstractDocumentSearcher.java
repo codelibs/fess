@@ -258,6 +258,7 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
                     .searchRequestType(params.getType())
                     .trackTotalHits(params.getTrackTotalHits())
                     .minScore(params.getMinScore())
+                    .filterQueries(params.getFilterQueries())
                     .build();
         };
     }
@@ -276,6 +277,8 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
      */
     protected BoolQueryBuilder buildPermissionQuery(final SearchRequestParams params) {
         final BoolQueryBuilder permissionQuery = QueryBuilders.boolQuery();
+        // The request's own filters bind every branch, as SearchConditionBuilder applies them to the keyword branch.
+        params.getFilterQueries().forEach(permissionQuery::filter);
         if (params.getType() == SearchRequestType.ADMIN_SEARCH) {
             return permissionQuery;
         }

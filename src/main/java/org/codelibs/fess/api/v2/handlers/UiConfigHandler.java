@@ -188,6 +188,37 @@ public class UiConfigHandler {
     }
 
     /**
+     * Tells whether the RAG chat client is available. A seam so tests decide it without wiring a
+     * chat client; a failed lookup counts as unavailable.
+     *
+     * @return true if the chat client reports itself available
+     */
+    protected boolean isRagChatAvailable() {
+        try {
+            final ChatClient chatClient = ComponentUtil.getComponent(ChatClient.class);
+            return chatClient != null && chatClient.isAvailable();
+        } catch (final Exception e) {
+            logger.debug("chat client lookup failed; reporting the chat as unavailable", e);
+            return false;
+        }
+    }
+
+    /**
+     * Tells whether the current user may use the RAG chat ({@code rag.chat.permissions}). A seam so
+     * tests decide it without resolving the caller's roles; a failed check counts as not permitted.
+     *
+     * @return true if the current user may use the chat
+     */
+    protected boolean isChatPermitted() {
+        try {
+            return ComponentUtil.getChatApiHelper().isChatPermitted();
+        } catch (final Exception e) {
+            logger.debug("chat permission check failed; reporting the chat as not permitted", e);
+            return false;
+        }
+    }
+
+    /**
      * Resolves the logged-in user. A seam so tests supply a user without the login subsystem;
      * a failed lookup counts as a guest.
      *
@@ -412,18 +443,9 @@ public class UiConfigHandler {
             // osdd_link: whether an OpenSearch description document is configured, so the
             // static theme can render <link rel="search"> only when applicable.
             features.put("osdd_link", hasOpenSearchFile());
-            // rag_chat_enabled: whether the RAG chat client is available, so the static-theme
-            // SPA can gate the chat entry point accordingly.
-            boolean ragChatEnabled = false;
-            try {
-                final ChatClient chatClient = ComponentUtil.getComponent(ChatClient.class);
-                if (chatClient != null) {
-                    ragChatEnabled = chatClient.isAvailable();
-                }
-            } catch (final Exception ignored) {
-                // ChatClient not wired in unit harness — default to false.
-            }
-            features.put("rag_chat_enabled", ragChatEnabled);
+            // rag_chat_enabled: whether the RAG chat client is available and the current user may
+            // use it (rag.chat.permissions), so the static-theme SPA can gate the chat entry point.
+            features.put("rag_chat_enabled", isRagChatAvailable() && isChatPermitted());
 
             // Server-wide supported language list, surfaced as plain JSON array of codes.
             final String[] langs = cfg.getSupportedLanguagesAsArray();

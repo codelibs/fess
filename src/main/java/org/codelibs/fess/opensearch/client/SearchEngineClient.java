@@ -2341,6 +2341,8 @@ public class SearchEngineClient implements Client {
         protected String trackTotalHits = null;
         /** Minimum score threshold for results */
         protected Float minScore = null;
+        /** Extra filter clauses applied next to the role filter */
+        protected List<QueryBuilder> filterQueries = Collections.emptyList();
 
         /**
          * Creates a new SearchConditionBuilder instance.
@@ -2524,6 +2526,18 @@ public class SearchEngineClient implements Client {
          */
         public SearchConditionBuilder minScore(final Float minScore) {
             this.minScore = minScore;
+            return this;
+        }
+
+        /**
+         * Sets extra filter clauses. Each one is added as a {@code bool} filter, so it constrains
+         * the result set whatever the query string is.
+         *
+         * @param filterQueries the filter clauses; null means none
+         * @return this builder for method chaining
+         */
+        public SearchConditionBuilder filterQueries(final List<QueryBuilder> filterQueries) {
+            this.filterQueries = filterQueries != null ? filterQueries : Collections.emptyList();
             return this;
         }
 
@@ -2792,6 +2806,10 @@ public class SearchEngineClient implements Client {
 
                 if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
                     context.addQuery(boolQuery -> boolQuery.filter(geoInfo.toQueryBuilder()));
+                }
+
+                if (!filterQueries.isEmpty()) {
+                    context.addQuery(boolQuery -> filterQueries.forEach(boolQuery::filter));
                 }
             });
         }

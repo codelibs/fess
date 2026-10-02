@@ -893,5 +893,10 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         public Float getMinScore() {
             return parent.getMinScore();
         }
+
+        @Override
+        public List<QueryBuilder> getFilterQueries() {
+            return parent.getFilterQueries();
+        }
     }
 }
