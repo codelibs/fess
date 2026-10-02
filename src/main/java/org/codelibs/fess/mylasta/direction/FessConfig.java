@@ -1578,6 +1578,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String SEARCHLOG_PROCESS_batch_size = "searchlog.process.batch_size";
 
     /** The key of the configuration. e.g. 100 */
+    String DOCREPORT_DUPLICATE_GROUP_SIZE = "docreport.duplicate.group.size";
+
+    /** The key of the configuration. e.g. 10 */
+    String DOCREPORT_DUPLICATE_DOCS_SIZE = "docreport.duplicate.docs.size";
+
+    /** The key of the configuration. e.g. 10000 */
+    String DOCREPORT_DUPLICATE_EXPORT_PAGE_SIZE = "docreport.duplicate.export.page.size";
+
+    /** The key of the configuration. e.g. 365 */
+    String DOCREPORT_DORMANT_DAYS = "docreport.dormant.days";
+
+    /** The key of the configuration. e.g. 100 */
     String THUMBNAIL_HTML_IMAGE_MIN_WIDTH = "thumbnail.html.image.min.width";
 
     /** The key of the configuration. e.g. 100 */
@@ -8237,6 +8249,74 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSearchlogProcessBatchSizeAsInteger();
 
     /**
+     * Get the value for the key 'docreport.duplicate.group.size'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of duplicate groups the document report screen shows, largest first.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getDocreportDuplicateGroupSize();
+
+    /**
+     * Get the value for the key 'docreport.duplicate.group.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of duplicate groups the document report screen shows, largest first.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getDocreportDuplicateGroupSizeAsInteger();
+
+    /**
+     * Get the value for the key 'docreport.duplicate.docs.size'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of documents the document report screen lists for each duplicate group.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getDocreportDuplicateDocsSize();
+
+    /**
+     * Get the value for the key 'docreport.duplicate.docs.size' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of documents the document report screen lists for each duplicate group.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getDocreportDuplicateDocsSizeAsInteger();
+
+    /**
+     * Get the value for the key 'docreport.duplicate.export.page.size'. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Number of content signatures read per request when the duplicate report is downloaded as CSV.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getDocreportDuplicateExportPageSize();
+
+    /**
+     * Get the value for the key 'docreport.duplicate.export.page.size' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Number of content signatures read per request when the duplicate report is downloaded as CSV.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getDocreportDuplicateExportPageSizeAsInteger();
+
+    /**
+     * Get the value for the key 'docreport.dormant.days'. <br>
+     * The value is, e.g. 365 <br>
+     * comment: Default number of days since the last modification after which a document counts as dormant.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getDocreportDormantDays();
+
+    /**
+     * Get the value for the key 'docreport.dormant.days' as {@link Integer}. <br>
+     * The value is, e.g. 365 <br>
+     * comment: Default number of days since the last modification after which a document counts as dormant.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getDocreportDormantDaysAsInteger();
+
+    /**
      * Get the value for the key 'thumbnail.html.image.min.width'. <br>
      * The value is, e.g. 100 <br>
      * comment: Minimum width for HTML images in thumbnails.
@@ -13510,6 +13590,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.SEARCHLOG_PROCESS_batch_size);
         }
 
+        public String getDocreportDuplicateGroupSize() {
+            return get(FessConfig.DOCREPORT_DUPLICATE_GROUP_SIZE);
+        }
+
+        public Integer getDocreportDuplicateGroupSizeAsInteger() {
+            return getAsInteger(FessConfig.DOCREPORT_DUPLICATE_GROUP_SIZE);
+        }
+
+        public String getDocreportDuplicateDocsSize() {
+            return get(FessConfig.DOCREPORT_DUPLICATE_DOCS_SIZE);
+        }
+
+        public Integer getDocreportDuplicateDocsSizeAsInteger() {
+            return getAsInteger(FessConfig.DOCREPORT_DUPLICATE_DOCS_SIZE);
+        }
+
+        public String getDocreportDuplicateExportPageSize() {
+            return get(FessConfig.DOCREPORT_DUPLICATE_EXPORT_PAGE_SIZE);
+        }
+
+        public Integer getDocreportDuplicateExportPageSizeAsInteger() {
+            return getAsInteger(FessConfig.DOCREPORT_DUPLICATE_EXPORT_PAGE_SIZE);
+        }
+
+        public String getDocreportDormantDays() {
+            return get(FessConfig.DOCREPORT_DORMANT_DAYS);
+        }
+
+        public Integer getDocreportDormantDaysAsInteger() {
+            return getAsInteger(FessConfig.DOCREPORT_DORMANT_DAYS);
+        }
+
         public String getThumbnailHtmlImageMinWidth() {
             return get(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH);
         }
@@ -15171,6 +15283,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SEARCHLOG_AGG_SHARD_SIZE, "-1");
             defaultMap.put(FessConfig.SEARCHLOG_REQUEST_HEADERS, "");
             defaultMap.put(FessConfig.SEARCHLOG_PROCESS_batch_size, "100");
+            defaultMap.put(FessConfig.DOCREPORT_DUPLICATE_GROUP_SIZE, "100");
+            defaultMap.put(FessConfig.DOCREPORT_DUPLICATE_DOCS_SIZE, "10");
+            defaultMap.put(FessConfig.DOCREPORT_DUPLICATE_EXPORT_PAGE_SIZE, "10000");
+            defaultMap.put(FessConfig.DOCREPORT_DORMANT_DAYS, "365");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_WIDTH, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MIN_HEIGHT, "100");
             defaultMap.put(FessConfig.THUMBNAIL_HTML_IMAGE_MAX_ASPECT_RATIO, "3.0");
