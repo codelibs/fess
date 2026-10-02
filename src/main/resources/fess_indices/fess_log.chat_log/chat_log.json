@@ -1,0 +1,65 @@
+{
+    "properties": {
+      "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "user": {
+        "type": "keyword"
+      },
+      "userSessionId": {
+        "type": "keyword"
+      },
+      "roles": {
+        "type": "keyword"
+      },
+      "virtualHost": {
+        "type": "keyword"
+      },
+      "accessType": {
+        "type": "keyword"
+      },
+      "chatType": {
+        "type": "keyword"
+      },
+      "chatSessionId": {
+        "type": "keyword"
+      },
+      "searchQueryId": {
+        "type": "keyword"
+      },
+      "intent": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "errorCode": {
+        "type": "keyword"
+      },
+      "llmName": {
+        "type": "keyword"
+      },
+      "model": {
+        "type": "keyword"
+      },
+      "llmCalls": {
+        "type": "integer"
+      },
+      "promptTokens": {
+        "type": "long"
+      },
+      "completionTokens": {
+        "type": "long"
+      },
+      "totalTokens": {
+        "type": "long"
+      },
+      "responseTime": {
+        "type": "long"
+      },
+      "sourceCount": {
+        "type": "integer"
+      }
+    }
+}

@@ -29,7 +29,9 @@ import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.helper.ChatApiHelper;
+import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
@@ -185,10 +187,17 @@ public class ChatHandler {
         }
 
         // Tag the request for the search-log access-type column, same as v1.
-        req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));
+        final String llmName = fessConfig.getSystemProperty("rag.llm.name", "ollama");
+        req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, llmName);
 
+        // Usage of this request (LLM calls and tokens) for the chat log; never the question or the answer.
+        final long startTime = System.currentTimeMillis();
+        final ChatLog chatLog = ComponentUtil.getChatApiHelper()
+                .createChatLog(ChatLog.ACCESS_TYPE_SYNC, docId != null, body.sessionId(), llmName, startTime);
+        final LlmUsageCollector usage = LlmUsageCollector.start();
+        ChatResult result = null;
+        Exception failure = null;
         try {
-            final ChatResult result;
             final ChatClient chatClient = getChatClient();
             if (docId != null) {
                 // fields and extra_queries are ignored: the answer comes from this one document only.
@@ -208,9 +217,32 @@ public class ChatHandler {
             }
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final Exception e) {
+            if (result == null) {
+                failure = e;
+            }
             logger.warn("[RAG] /api/v2/chat failed. error={}", e.getMessage(), e);
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "chat failed");
+        } finally {
+            usage.close();
+            recordChatLog(chatLog, result != null ? ChatLog.STATUS_SUCCESS : ChatLog.STATUS_ERROR, failure,
+                    System.currentTimeMillis() - startTime, usage, result);
         }
+    }
+
+    /**
+     * Records the usage of a chat request in the chat log. Exposed as a seam so unit tests can
+     * capture what is recorded without a search engine.
+     *
+     * @param chatLog the chat log created before the chat client was called
+     * @param status the outcome of the request
+     * @param error the failure of the request (null unless it failed)
+     * @param responseTime the time the request took, in milliseconds
+     * @param usage the LLM usage collected for the request
+     * @param result the chat result (null unless the request succeeded)
+     */
+    protected void recordChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
+            final LlmUsageCollector usage, final ChatResult result) {
+        ComponentUtil.getChatApiHelper().storeChatLog(chatLog, status, error, responseTime, usage, result);
     }
 
     /**

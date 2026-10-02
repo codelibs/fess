@@ -59,10 +59,12 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.opensearch.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.opensearch.config.exbhv.WebConfigBhv;
+import org.codelibs.fess.opensearch.log.exbhv.ChatLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
@@ -421,6 +423,8 @@ public class AdminBackupAction extends FessAdminAction {
                     return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
                 case "favorite_log":
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
+                case "chat_log":
+                    return writeNdjsonResponse(id, getChatLogNdjsonWriteCall());
                 case null:
                 default:
                     break;
@@ -739,6 +743,60 @@ public class AdminBackupAction extends FessAdminAction {
                     appendJson("access-type", entity.getAccessType(), buf).append(',');
                     appendJson("rank", entity.getRank(), buf).append(',');
                     appendJson("requested-at", entity.getRequestedAt(), buf);
+                    buf.append('}');
+                    buf.append('\n');
+                    try {
+                        writer.write(buf.toString());
+                    } catch (final IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    if (!systemHelper.calibrateCpuLoad(timeout)) {
+                        breakCursor = true;
+                    }
+                }
+            });
+        };
+    }
+
+    /**
+     * Get the write call for chat log ndjson.
+     * @return The write call.
+     */
+    public static Consumer<Writer> getChatLogNdjsonWriteCall() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long timeout = fessConfig.getIndexBackupLogLoadTimeoutAsInteger().longValue();
+        return writer -> {
+            final ChatLogBhv bhv = ComponentUtil.getComponent(ChatLogBhv.class);
+            bhv.selectCursor(cb -> {
+                cb.query().matchAll();
+                cb.query().addOrderBy_RequestedAt_Asc();
+            }, new LogEntityRowHandler<ChatLog>() {
+                @Override
+                public void handle(final ChatLog entity) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append('{');
+                    appendJson("id", entity.getId(), buf).append(',');
+                    appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
+                    appendJson("user", entity.getUser(), buf).append(',');
+                    appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
+                    appendJson("roles", entity.getRoles(), buf).append(',');
+                    appendJson("virtual-host", entity.getVirtualHost(), buf).append(',');
+                    appendJson("access-type", entity.getAccessType(), buf).append(',');
+                    appendJson("chat-type", entity.getChatType(), buf).append(',');
+                    appendJson("chat-session-id", entity.getChatSessionId(), buf).append(',');
+                    appendJson("search-query-id", entity.getSearchQueryId(), buf).append(',');
+                    appendJson("intent", entity.getIntent(), buf).append(',');
+                    appendJson("status", entity.getStatus(), buf).append(',');
+                    appendJson("error-code", entity.getErrorCode(), buf).append(',');
+                    appendJson("llm-name", entity.getLlmName(), buf).append(',');
+                    appendJson("model", entity.getModel(), buf).append(',');
+                    appendJson("llm-calls", entity.getLlmCalls(), buf).append(',');
+                    appendJson("prompt-tokens", entity.getPromptTokens(), buf).append(',');
+                    appendJson("completion-tokens", entity.getCompletionTokens(), buf).append(',');
+                    appendJson("total-tokens", entity.getTotalTokens(), buf).append(',');
+                    appendJson("response-time", entity.getResponseTime(), buf).append(',');
+                    appendJson("source-count", entity.getSourceCount(), buf);
                     buf.append('}');
                     buf.append('\n');
                     try {

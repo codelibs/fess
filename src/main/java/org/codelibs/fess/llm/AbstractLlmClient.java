@@ -805,7 +805,7 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected LlmChatResponse chatWithConcurrencyControl(final LlmChatRequest request) {
         if (concurrencyLimiter == null) {
-            return chat(request);
+            return chatWithUsage(request);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Acquiring concurrency permit. name={}, availablePermits={}, maxConcurrent={}", getName(),
@@ -818,7 +818,7 @@ public abstract class AbstractLlmClient implements LlmClient {
                 throw new LlmException("Too many concurrent requests", LlmException.ERROR_RATE_LIMIT);
             }
             try {
-                return chat(request);
+                return chatWithUsage(request);
             } finally {
                 concurrencyLimiter.release();
             }
@@ -838,7 +838,7 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected void streamChatWithConcurrencyControl(final LlmChatRequest request, final LlmStreamCallback callback) {
         if (concurrencyLimiter == null) {
-            streamChat(request, callback);
+            streamChatWithUsage(request, callback);
             return;
         }
         if (logger.isDebugEnabled()) {
@@ -862,7 +862,7 @@ public abstract class AbstractLlmClient implements LlmClient {
                 throw new LlmException("Too many concurrent requests", LlmException.ERROR_RATE_LIMIT);
             }
             try {
-                streamChat(request, callback);
+                streamChatWithUsage(request, callback);
             } finally {
                 concurrencyLimiter.release();
             }
@@ -870,6 +870,112 @@ public abstract class AbstractLlmClient implements LlmClient {
             logger.warn("[LLM] Request interrupted while waiting for concurrency permit. name={}", getName());
             Thread.currentThread().interrupt();
             throw new LlmException("Request interrupted", LlmException.ERROR_TIMEOUT);
+        }
+    }
+
+    // --- Usage recording ---
+
+    /**
+     * Executes a chat request and records the call, with the token usage its response reports, in
+     * the {@link LlmUsageCollector} bound to the calling thread. A call that fails is counted too.
+     *
+     * @param request the chat request
+     * @return the chat response
+     */
+    protected LlmChatResponse chatWithUsage(final LlmChatRequest request) {
+        final LlmUsageCollector usageCollector = LlmUsageCollector.current();
+        if (usageCollector == null) {
+            return chat(request);
+        }
+        LlmChatResponse response = null;
+        try {
+            response = chat(request);
+            return response;
+        } finally {
+            usageCollector.recordResponse(response);
+        }
+    }
+
+    /**
+     * Executes a streaming chat request and records the call in the {@link LlmUsageCollector} bound to
+     * the calling thread. The collector is captured here, on the calling thread, so the usage the client
+     * reports through {@link LlmStreamCallback#onUsage(LlmUsage)} reaches it even when the client invokes
+     * the callback from another thread. The call is counted whether or not usage is reported.
+     *
+     * @param request the chat request
+     * @param callback the streaming callback
+     */
+    protected void streamChatWithUsage(final LlmChatRequest request, final LlmStreamCallback callback) {
+        final LlmUsageCollector usageCollector = LlmUsageCollector.current();
+        if (usageCollector == null) {
+            streamChat(request, callback);
+            return;
+        }
+        usageCollector.recordCall();
+        streamChat(request, new UsageRecordingStreamCallback(callback, usageCollector));
+    }
+
+    /**
+     * Forwards every event to the wrapped callback and adds the reported usage to a collector.
+     */
+    protected static class UsageRecordingStreamCallback implements LlmStreamCallback {
+
+        private final LlmStreamCallback delegate;
+
+        private final LlmUsageCollector usageCollector;
+
+        /**
+         * Creates the callback.
+         *
+         * @param delegate the callback to forward the events to (may be null)
+         * @param usageCollector the collector to add the reported usage to
+         */
+        protected UsageRecordingStreamCallback(final LlmStreamCallback delegate, final LlmUsageCollector usageCollector) {
+            this.delegate = delegate;
+            this.usageCollector = usageCollector;
+        }
+
+        @Override
+        public void onChunk(final String chunk, final boolean done) {
+            if (delegate != null) {
+                delegate.onChunk(chunk, done);
+            }
+        }
+
+        @Override
+        public void onError(final Throwable error) {
+            if (delegate != null) {
+                delegate.onError(error);
+            }
+        }
+
+        @Override
+        public void onRetry(final String operation, final int attempt, final int maxAttempts, final long sleepMs, final Throwable cause) {
+            if (delegate != null) {
+                delegate.onRetry(operation, attempt, maxAttempts, sleepMs, cause);
+            }
+        }
+
+        @Override
+        public void onWaiting(final String reason, final long elapsedMs, final long timeoutMs) {
+            if (delegate != null) {
+                delegate.onWaiting(reason, elapsedMs, timeoutMs);
+            }
+        }
+
+        @Override
+        public void onWarning(final String code, final String detail) {
+            if (delegate != null) {
+                delegate.onWarning(code, detail);
+            }
+        }
+
+        @Override
+        public void onUsage(final LlmUsage usage) {
+            usageCollector.recordUsage(usage);
+            if (delegate != null) {
+                delegate.onUsage(usage);
+            }
         }
     }
 

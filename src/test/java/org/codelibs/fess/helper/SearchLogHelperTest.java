@@ -32,6 +32,7 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
@@ -721,12 +722,105 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertNull(searchLog.getVirtualHost());
     }
 
+    // ===== chat log =====
+
+    @Test
+    public void test_addChatLog_completesAndQueues() {
+        searchLogHelper.testChatContext = new SearchLogHelper.SearchLogContext((FessConfig) ComponentUtil.getFessConfig(),
+                new String[] { "Ruser", "Rguest" }, "code-1", "taro", null, null, "vhost-a");
+        final ChatLog chatLog = new ChatLog();
+        chatLog.setStatus(ChatLog.STATUS_SUCCESS);
+        searchLogHelper.addChatLog(chatLog);
+
+        assertEquals(1, searchLogHelper.chatLogQueue.size());
+        final ChatLog queued = searchLogHelper.chatLogQueue.peek();
+        assertSame(chatLog, queued);
+        assertEquals("taro", queued.getUser());
+        assertEquals("code-1", queued.getUserSessionId());
+        assertEquals(List.of("Ruser", "Rguest"), List.of(queued.getRoles()));
+        assertEquals("vhost-a", queued.getVirtualHost());
+    }
+
+    @Test
+    public void test_addChatLog_guestWithoutUserInfo() {
+        searchLogHelper.testChatContext = new SearchLogHelper.SearchLogContext((FessConfig) ComponentUtil.getFessConfig(), new String[0],
+                null, null, null, null, null);
+        final ChatLog chatLog = new ChatLog();
+        searchLogHelper.addChatLog(chatLog);
+        final ChatLog queued = searchLogHelper.chatLogQueue.poll();
+        assertNull(queued.getUser());
+        assertNull(queued.getUserSessionId());
+        // an empty virtual host is stored as "" like in the search log
+        assertEquals("", queued.toSource().get("virtualHost"));
+    }
+
+    @Test
+    public void test_addChatLog_skipsWhenQueueIsFull() {
+        searchLogHelper.testChatContext =
+                new SearchLogHelper.SearchLogContext((FessConfig) ComponentUtil.getFessConfig(), new String[0], null, null, null, null, "");
+        ((MockFessConfig) ComponentUtil.getFessConfig()).chatMaxQueueSize = 1;
+        searchLogHelper.addChatLog(new ChatLog());
+        searchLogHelper.addChatLog(new ChatLog());
+        // the guard is "size > limit", as for the search and click logs
+        searchLogHelper.addChatLog(new ChatLog());
+        assertEquals(2, searchLogHelper.chatLogQueue.size());
+    }
+
+    @Test
+    public void test_storeSearchLog_flushesChatLogsInBatches() {
+        ((MockFessConfig) ComponentUtil.getFessConfig()).batchSize = 2;
+        for (int i = 0; i < 5; i++) {
+            final ChatLog chatLog = new ChatLog();
+            chatLog.setChatSessionId("s" + i);
+            searchLogHelper.chatLogQueue.add(chatLog);
+        }
+        searchLogHelper.storeSearchLog();
+
+        assertTrue(searchLogHelper.chatLogQueue.isEmpty());
+        assertEquals(List.of(2, 2, 1), searchLogHelper.storedChatLogBatches.stream().map(List::size).collect(Collectors.toList()));
+        assertEquals("s0", searchLogHelper.storedChatLogBatches.get(0).get(0).getChatSessionId());
+        assertEquals("s4", searchLogHelper.storedChatLogBatches.get(2).get(0).getChatSessionId());
+    }
+
+    @Test
+    public void test_storeSearchLog_chatLogFailureIsNotFatal() {
+        searchLogHelper.failChatLogStore = true;
+        searchLogHelper.chatLogQueue.add(new ChatLog());
+        searchLogHelper.storeSearchLog();
+        assertTrue(searchLogHelper.chatLogQueue.isEmpty());
+    }
+
+    @Test
+    public void test_storeSearchLog_noChatLogs() {
+        searchLogHelper.storeSearchLog();
+        assertTrue(searchLogHelper.storedChatLogBatches.isEmpty());
+    }
+
     private static class TestableSearchLogHelper extends SearchLogHelper {
         private SearchLogContext testContext;
+
+        private SearchLogContext testChatContext;
+
+        private final List<List<ChatLog>> storedChatLogBatches = new ArrayList<>();
+
+        private boolean failChatLogStore;
 
         @Override
         protected SearchLogContext createSearchLogContext(final SearchRequestParams params, final FessConfig fessConfig) {
             return testContext != null ? testContext : super.createSearchLogContext(params, fessConfig);
+        }
+
+        @Override
+        protected SearchLogContext createChatLogContext(final FessConfig fessConfig) {
+            return testChatContext != null ? testChatContext : super.createChatLogContext(fessConfig);
+        }
+
+        @Override
+        protected void storeChatLogList(final List<ChatLog> chatLogList) {
+            if (failChatLogStore) {
+                throw new IllegalStateException("index_not_found");
+            }
+            storedChatLogBatches.add(new ArrayList<>(chatLogList));
         }
     }
 
@@ -820,6 +914,15 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
         private boolean searchHistoryEnabled = true;
 
+        private int chatMaxQueueSize = 1000;
+
+        private int batchSize = 100;
+
+        @Override
+        public Integer getLoggingChatMaxQueueSizeAsInteger() {
+            return chatMaxQueueSize;
+        }
+
         @Override
         public boolean isSearchHistoryEnabled() {
             return searchHistoryEnabled;
@@ -867,7 +970,7 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
         @Override
         public Integer getSearchlogProcessBatchSizeAsInteger() {
-            return 100;
+            return batchSize;
         }
 
         @Override

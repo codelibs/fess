@@ -145,6 +145,16 @@ map:{
             ; esfluteDiFile = esflute_config.xml
         }
         # Index: fess_user
+        ; fess_log.chat_log = map:{
+            ; package = log
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_log.xml
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; date@dateOptionalTime = LocalDateTime
+                }
+            }
+        }
         ; fess_log.click_log = map:{
             ; package = log
             ; esclientDiFile = esclient.xml

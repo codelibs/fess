@@ -512,6 +512,9 @@
 		</postConstruct>
 		<!-- fess_log index -->
 		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.chat_log/chat_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>"fess_log.click_log/click_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

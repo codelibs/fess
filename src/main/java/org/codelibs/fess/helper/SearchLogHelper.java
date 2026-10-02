@@ -44,10 +44,12 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exbhv.ChatLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
@@ -102,6 +104,9 @@ public class SearchLogHelper {
 
     /** Queue for storing click logs. */
     protected Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<>();
+
+    /** Queue for storing chat logs. */
+    protected Queue<ChatLog> chatLogQueue = new ConcurrentLinkedQueue<>();
 
     /** Cache for storing user information. */
     protected LoadingCache<String, UserInfo> userInfoCache;
@@ -428,11 +433,71 @@ public class SearchLogHelper {
     }
 
     /**
+     * Adds a chat log to the queue. The user, the session ID, the roles and the virtual host are
+     * resolved here, so this method must be called on the request thread.
+     *
+     * @param chatLog The chat log with the chat metrics set.
+     */
+    public void addChatLog(final ChatLog chatLog) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (chatLogQueue.size() > fessConfig.getLoggingChatMaxQueueSizeAsInteger()) {
+            logger.warn("Chat log queue size exceeded: queueSize={}, limit={}. Skipped.", chatLogQueue.size(),
+                    fessConfig.getLoggingChatMaxQueueSizeAsInteger());
+            return;
+        }
+        createChatLog(chatLog, createChatLogContext(fessConfig));
+    }
+
+    /**
+     * Resolves the runtime dependencies needed to complete a ChatLog. Chat searches run as JSON
+     * API searches, so the roles are those of a JSON search.
+     *
+     * @param fessConfig The Fess configuration.
+     * @return The resolved context.
+     */
+    protected SearchLogContext createChatLogContext(final FessConfig fessConfig) {
+        final String[] roles = ComponentUtil.getRoleQueryHelper().build(SearchRequestType.JSON).stream().toArray(n -> new String[n]);
+        final String userCode = fessConfig.isUserInfo() ? ComponentUtil.getUserInfoHelper().getUserCode() : null;
+        final String userId = ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(null);
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        return new SearchLogContext(fessConfig, roles, userCode, userId, null, null, virtualHostKey);
+    }
+
+    /**
+     * Completes a ChatLog with the user, the session ID, the roles and the virtual host, then adds it to the queue.
+     * No client IP address and no request header is recorded.
+     *
+     * @param chatLog The chat log.
+     * @param context The context holding the resolved dependencies.
+     */
+    protected void createChatLog(final ChatLog chatLog, final SearchLogContext context) {
+        if (context.userCode != null) {
+            chatLog.setUserSessionId(context.userCode);
+        }
+        if (context.userId != null) {
+            chatLog.setUser(context.userId);
+        }
+        chatLog.setRoles(context.roles);
+        chatLog.setVirtualHost(StringUtil.isNotBlank(context.virtualHostKey) ? context.virtualHostKey : StringUtil.EMPTY);
+        chatLogQueue.add(chatLog);
+    }
+
+    /**
      * Stores search logs from the queue.
      */
     public void storeSearchLog() {
         storeSearchLogFromQueue();
         storeClickLogFromQueue();
+        storeChatLogFromQueue();
+    }
+
+    /**
+     * Stores chat logs from the queue.
+     */
+    protected void storeChatLogFromQueue() {
+        if (!chatLogQueue.isEmpty()) {
+            processChatLogQueue(chatLogQueue);
+        }
     }
 
     /**
@@ -797,6 +862,60 @@ public class SearchLogHelper {
                 logger.warn("Failed to insert: {}", clickLogList, e);
             }
         }
+    }
+
+    /**
+     * Processes the chat log queue in batches of {@code searchlog.process.batch_size}.
+     *
+     * @param queue The chat log queue.
+     */
+    protected void processChatLogQueue(final Queue<ChatLog> queue) {
+        final int batchSize = ComponentUtil.getFessConfig().getSearchlogProcessBatchSizeAsInteger();
+        final List<ChatLog> chatLogList = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            final ChatLog chatLog = queue.poll();
+            if (chatLog != null) {
+                chatLogList.add(chatLog);
+            }
+            if (chatLogList.size() >= batchSize) {
+                processChatLog(chatLogList);
+                chatLogList.clear();
+            }
+        }
+        if (!chatLogList.isEmpty()) {
+            processChatLog(chatLogList);
+        }
+    }
+
+    /**
+     * Writes a list of chat logs to the log file, if enabled, and stores them in the chat log index.
+     *
+     * @param chatLogList The chat log list.
+     */
+    protected void processChatLog(final List<ChatLog> chatLogList) {
+        if (chatLogList.isEmpty()) {
+            return;
+        }
+        if (ComponentUtil.getFessConfig().isLoggingSearchUseLogfile()) {
+            chatLogList.forEach(this::writeSearchLogEvent);
+        }
+        try {
+            storeChatLogList(chatLogList);
+        } catch (final Exception e) {
+            logger.warn("Failed to store chat logs: size={}", chatLogList.size(), e);
+        }
+    }
+
+    /**
+     * Stores a list of chat logs.
+     *
+     * @param chatLogList The chat log list.
+     */
+    protected void storeChatLogList(final List<ChatLog> chatLogList) {
+        final ChatLogBhv chatLogBhv = ComponentUtil.getComponent(ChatLogBhv.class);
+        chatLogBhv.batchInsert(chatLogList, op -> {
+            op.setRefreshPolicy(Constants.TRUE);
+        });
     }
 
     /**

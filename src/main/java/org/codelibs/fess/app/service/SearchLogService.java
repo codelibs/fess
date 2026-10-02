@@ -41,6 +41,7 @@ import org.codelibs.fess.opensearch.log.cbean.ClickLogCB;
 import org.codelibs.fess.opensearch.log.cbean.FavoriteLogCB;
 import org.codelibs.fess.opensearch.log.cbean.SearchLogCB;
 import org.codelibs.fess.opensearch.log.cbean.UserInfoCB;
+import org.codelibs.fess.opensearch.log.exbhv.ChatLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
@@ -99,6 +100,10 @@ public class SearchLogService {
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
 
+    /** Behavior handler for chat log operations. */
+    @Resource
+    protected ChatLogBhv chatLogBhv;
+
     /** Behavior handler for user information operations. */
     @Resource
     protected UserInfoBhv userInfoBhv;
@@ -148,6 +153,17 @@ public class SearchLogService {
     public void deleteFavoriteLogBefore(final int days) {
         favoriteLogBhv.queryDelete(cb -> {
             cb.query().setCreatedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+        });
+    }
+
+    /**
+     * Deletes chat logs older than the specified number of days.
+     *
+     * @param days Number of days to keep (logs older than this will be deleted)
+     */
+    public void deleteChatLogBefore(final int days) {
+        chatLogBhv.queryDelete(cb -> {
+            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
         });
     }
 

@@ -26,7 +26,7 @@ import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Job for purging old log entries from the system.
- * This job removes old crawling sessions, search logs, job logs, and user info logs
+ * This job removes old crawling sessions, search logs (including click, favorite and chat logs), job logs, and user info logs
  * based on configured retention periods. It helps maintain system performance by
  * preventing log tables from growing too large.
  */
@@ -48,6 +48,7 @@ public class PurgeLogJob {
      * Performs the following cleanup operations:
      * - Purges old crawling sessions
      * - Purges search logs older than configured days
+     * - Purges click, favorite and chat logs older than the search log retention days
      * - Purges job logs older than configured days
      * - Purges user info logs older than configured days
      * - Updates job log status
@@ -107,6 +108,19 @@ public class PurgeLogJob {
             }
         } catch (final Exception e) {
             logger.warn("Failed to purge favorite logs.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
+        // purge chat logs
+        try {
+            final int days = ComponentUtil.getFessConfig().getPurgeSearchLogDay();
+            if (days >= 0) {
+                searchLogService.deleteChatLogBefore(days);
+            } else {
+                resultBuf.append("Skipped to purge chat logs.\n");
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to purge chat logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 

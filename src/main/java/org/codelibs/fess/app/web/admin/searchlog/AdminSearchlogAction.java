@@ -24,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +33,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.SearchLogPager;
+import org.codelibs.fess.app.service.ChatLogAnalyticsService;
 import org.codelibs.fess.app.service.SearchLogAnalyticsService;
 import org.codelibs.fess.app.service.SearchLogService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -71,6 +74,11 @@ public class AdminSearchlogAction extends FessAdminAction {
     private static final String[] CONDITION_FIELDS =
             { "logType", "queryId", "userSessionId", "accessType", "requestedTimeRange", "pageSize", "searchWord", "hitCount" };
 
+    /** All analytics tabs in display order: the search log tabs, then the AI chat tab. */
+    public static final List<String> TABS =
+            Stream.concat(SearchLogAnalyticsService.TABS.stream(), Stream.of(ChatLogAnalyticsService.TAB_CHAT))
+                    .collect(Collectors.toUnmodifiableList());
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -83,6 +91,9 @@ public class AdminSearchlogAction extends FessAdminAction {
     /** Service for aggregating search log analytics */
     @Resource
     private SearchLogAnalyticsService searchLogAnalyticsService;
+    /** Service for aggregating chat log analytics (the AI chat tab) */
+    @Resource
+    private ChatLogAnalyticsService chatLogAnalyticsService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -117,7 +128,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     /**
      * Displays one analytics tab.
      *
-     * @param tab the tab name (overview, queries, clicks, performance or audience)
+     * @param tab the tab name (overview, queries, clicks, performance, audience or chat)
      * @param form the analytics filter form
      * @return HTML response for the tab, or a redirect to the overview when the tab is missing or unknown
      */
@@ -132,8 +143,9 @@ public class AdminSearchlogAction extends FessAdminAction {
      * Downloads one table, chart or KPI list of an analytics tab as CSV. The report is the one the tab
      * shows for the same filter.
      *
-     * @param tab the tab name (overview, queries, clicks, performance or audience)
-     * @param item the item of the tab, see {@link SearchLogAnalyticsService#isExportable(String, String)}
+     * @param tab the tab name (overview, queries, clicks, performance, audience or chat)
+     * @param item the item of the tab, see {@link SearchLogAnalyticsService#isExportable(String, String)} and
+     *             {@link ChatLogAnalyticsService#isExportable(String)}
      * @param form the analytics filter form
      * @return the CSV file, a redirect to the overview when the tab or the item is unknown, or a redirect to the tab when the report failed
      */
@@ -141,16 +153,21 @@ public class AdminSearchlogAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse downloadreport(final String tab, final String item, final AnalyticsForm form) {
         validate(form, messages -> {}, () -> redirect(getClass()));
-        if (!searchLogAnalyticsService.isExportable(tab, item)) {
+        if (!isExportable(tab, item)) {
             return redirect(getClass());
         }
         final AnalyticsCondition cond = createAnalyticsCondition(tab, form);
-        final AnalyticsReport report = searchLogAnalyticsService.getReport(tab, cond);
+        final AnalyticsReport report = getAnalyticsReport(tab, cond);
         if (report.isFailed()) {
             return redirectWith(getClass(), moreUrl("report", tab).params(buildAnalyticsParams(cond, form).toArray()));
         }
-        return asCsvStream("searchlog_" + tab + "_" + item + "_" + cond.getFrom() + "_" + cond.getTo() + ".csv",
-                writer -> searchLogAnalyticsService.exportCsv(report, tab, item, writer));
+        return asCsvStream("searchlog_" + tab + "_" + item + "_" + cond.getFrom() + "_" + cond.getTo() + ".csv", writer -> {
+            if (isChatTab(tab)) {
+                chatLogAnalyticsService.exportCsv(report, item, writer);
+            } else {
+                searchLogAnalyticsService.exportCsv(report, tab, item, writer);
+            }
+        });
     }
 
     /**
@@ -264,7 +281,7 @@ public class AdminSearchlogAction extends FessAdminAction {
      */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "searchLogItems", searchLogService.getSearchLogList(searchLogPager)); // page navi
-        RenderDataUtil.register(data, "tabItems", SearchLogAnalyticsService.TABS);
+        RenderDataUtil.register(data, "tabItems", TABS);
 
         // restore from pager
         copyBeanToBean(searchLogPager, form, op -> op.include(CONDITION_FIELDS));
@@ -348,7 +365,25 @@ public class AdminSearchlogAction extends FessAdminAction {
      * @return true if the tab exists
      */
     static boolean isValidTab(final String tab) {
-        return tab != null && SearchLogAnalyticsService.TABS.contains(tab);
+        return tab != null && TABS.contains(tab);
+    }
+
+    /**
+     * Checks whether the tab is the AI chat tab, which is built from the chat log.
+     *
+     * @param tab the tab name
+     * @return true for the AI chat tab
+     */
+    static boolean isChatTab(final String tab) {
+        return ChatLogAnalyticsService.TAB_CHAT.equals(tab);
+    }
+
+    private boolean isExportable(final String tab, final String item) {
+        return isChatTab(tab) ? chatLogAnalyticsService.isExportable(item) : searchLogAnalyticsService.isExportable(tab, item);
+    }
+
+    private AnalyticsReport getAnalyticsReport(final String tab, final AnalyticsCondition cond) {
+        return isChatTab(tab) ? chatLogAnalyticsService.getReport(cond) : searchLogAnalyticsService.getReport(tab, cond);
     }
 
     /**
@@ -380,7 +415,7 @@ public class AdminSearchlogAction extends FessAdminAction {
 
     private HtmlResponse asAnalyticsHtml(final String tab, final AnalyticsForm form) {
         final AnalyticsCondition cond = createAnalyticsCondition(tab, form);
-        final AnalyticsReport report = searchLogAnalyticsService.getReport(tab, cond);
+        final AnalyticsReport report = getAnalyticsReport(tab, cond);
         if (cond.isAdjusted()) {
             report.getNotices().add(0, new AnalyticsReport.Notice("warning", "labels.searchlog_notice_range_adjusted"));
         }
@@ -391,10 +426,12 @@ public class AdminSearchlogAction extends FessAdminAction {
             RenderDataUtil.register(data, "tab", tab);
             RenderDataUtil.register(data, "cond", cond);
             RenderDataUtil.register(data, "report", report);
-            RenderDataUtil.register(data, "accessTypeItems", searchLogAnalyticsService.getAccessTypes(cond));
+            // the access type filter does not apply to chat logs
+            RenderDataUtil.register(data, "accessTypeItems",
+                    isChatTab(tab) ? new ArrayList<String>() : searchLogAnalyticsService.getAccessTypes(cond));
             RenderDataUtil.register(data, "rangeItems", AnalyticsCondition.RANGES);
             RenderDataUtil.register(data, "sizeItems", AnalyticsCondition.SIZES);
-            RenderDataUtil.register(data, "tabItems", SearchLogAnalyticsService.TABS);
+            RenderDataUtil.register(data, "tabItems", TABS);
             RenderDataUtil.register(data, "analyticsQuery", buildAnalyticsQuery(cond, form));
             RenderDataUtil.register(data, "chartJson", chartJson);
         });
@@ -465,7 +502,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             RenderDataUtil.register(data, "searchLogItems", searchLogService.getSearchLogList(searchLogPager)); // page navi
-            RenderDataUtil.register(data, "tabItems", SearchLogAnalyticsService.TABS);
+            RenderDataUtil.register(data, "tabItems", TABS);
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(searchLogPager, form, op -> op.include(CONDITION_FIELDS));

@@ -32,7 +32,12 @@ import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.llm.ChatIntent;
+import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmUsage;
+import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -467,6 +472,137 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         assertEquals(List.of("hi"), calls);
         assertTrue(res.body().contains("event: done"), res.body());
         assertTrue(lookedUp.isEmpty(), "no document lookup without doc_id");
+    }
+
+    // ── chat log ───────────────────────────────────────────────────────────────
+
+    @Test
+    public void test_chatLog_recordsStreamSuccessWithUsage() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult streamChatEnhanced(final String sessionId, final String userMessage, final String userId,
+                    final ChatPhaseCallback callback) {
+                final LlmUsageCollector usage = LlmUsageCollector.current();
+                usage.recordCall();
+                usage.recordIntent(ChatIntent.FAQ);
+                // a streaming LLM client may report its usage from another thread
+                final Thread thread = new Thread(() -> usage.recordUsage(new LlmUsage(100, 20, null, "model-a")));
+                thread.start();
+                try {
+                    thread.join();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return new ChatResult("sess-1", new ChatMessage("assistant", "normal"), java.util.Collections.emptyList());
+            }
+        };
+        final RecordingStreamHandler handler = new RecordingStreamHandler(client);
+        handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), new CapturingResponse());
+
+        assertEquals(1, handler.recorded.size());
+        final Object[] call = handler.recorded.get(0);
+        final ChatLog chatLog = (ChatLog) call[0];
+        assertEquals(ChatLog.STATUS_SUCCESS, call[1]);
+        assertNull(call[2]);
+        final LlmUsageCollector usage = (LlmUsageCollector) call[4];
+        assertEquals(1, usage.getLlmCalls());
+        assertEquals(Long.valueOf(120), usage.getTotalTokens());
+        assertEquals("model-a", usage.getModel());
+        assertEquals("faq", usage.getIntent());
+        assertNotNull(call[5]);
+        assertEquals(ChatLog.ACCESS_TYPE_STREAM, chatLog.getAccessType());
+        assertEquals(ChatLog.CHAT_TYPE_CHAT, chatLog.getChatType());
+        assertNull(LlmUsageCollector.current(), "the collector must be unbound after the request");
+    }
+
+    @Test
+    public void test_chatLog_recordsStreamLlmError() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final LlmException failure = new LlmException("limited", LlmException.ERROR_RATE_LIMIT);
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult streamChatAboutDocument(final String sessionId, final String userMessage, final String userId,
+                    final String docId, final ChatPhaseCallback callback) {
+                throw failure;
+            }
+        };
+        final RecordingStreamHandler handler = new RecordingStreamHandler(client);
+        handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\",\"doc_id\":\"doc-1\"}"),
+                new CapturingResponse());
+
+        assertEquals(1, handler.recorded.size());
+        final Object[] call = handler.recorded.get(0);
+        assertEquals(ChatLog.STATUS_ERROR, call[1]);
+        assertSame(failure, call[2]);
+        assertNull(call[5]);
+        assertEquals(ChatLog.CHAT_TYPE_DOCUMENT, ((ChatLog) call[0]).getChatType());
+        assertNull(LlmUsageCollector.current());
+    }
+
+    @Test
+    public void test_chatLog_recordsCancelledOnClientDisconnect() throws Exception {
+        enableRagChat();
+        ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
+        ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
+        final ChatClient client = new ChatClient() {
+            @Override
+            public ChatResult streamChatEnhanced(final String sessionId, final String userMessage, final String userId,
+                    final ChatPhaseCallback callback) {
+                throw new ChatStreamHandler.ClientDisconnectedException();
+            }
+        };
+        final RecordingStreamHandler handler = new RecordingStreamHandler(client);
+        handler.handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), new CapturingResponse());
+
+        assertEquals(1, handler.recorded.size());
+        assertEquals(ChatLog.STATUS_CANCELLED, handler.recorded.get(0)[1]);
+        assertNull(handler.recorded.get(0)[2]);
+    }
+
+    /** A stream handler that captures what it records in the chat log instead of storing it. */
+    private static class RecordingStreamHandler extends ChatStreamHandler {
+        final List<Object[]> recorded = new ArrayList<>();
+        private final ChatClient client;
+
+        RecordingStreamHandler(final ChatClient client) {
+            this.client = client;
+        }
+
+        @Override
+        protected String getUserId(final HttpServletRequest req) {
+            return "log-user";
+        }
+
+        @Override
+        protected String getRateLimitKey(final HttpServletRequest req) {
+            return "u:log-user";
+        }
+
+        @Override
+        protected void setSseHeaders(final HttpServletResponse res) {
+            res.setContentType("text/event-stream");
+        }
+
+        @Override
+        protected boolean documentExists(final String docId) {
+            return true;
+        }
+
+        @Override
+        protected ChatClient getChatClient() {
+            return client;
+        }
+
+        @Override
+        protected void recordChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
+                final LlmUsageCollector usage, final ChatResult result) {
+            recorded.add(new Object[] { chatLog, status, error, responseTime, usage, result });
+        }
     }
 
     // ── SSE event snake_case key verification ─────────────────────────────────

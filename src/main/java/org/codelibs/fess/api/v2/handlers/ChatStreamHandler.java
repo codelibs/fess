@@ -43,7 +43,9 @@ import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.helper.ChatApiHelper;
 import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmUsageCollector;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exentity.ChatLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
@@ -313,7 +315,8 @@ public class ChatStreamHandler {
         final Object writeLock = new Object();
 
         // Tag the request for the search-log access-type column, same as v1.
-        req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));
+        final String llmName = fessConfig.getSystemProperty("rag.llm.name", "ollama");
+        req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, llmName);
 
         // Schedule periodic keep-alive pings to defeat idle-connection timeouts on
         // intermediaries (nginx default proxy_read_timeout = 60s) during long LLM phases.
@@ -321,10 +324,17 @@ public class ChatStreamHandler {
         final long keepaliveMs = resolveKeepaliveIntervalMs(fessConfig);
         final ScheduledFuture<?> pingerFuture = startKeepalivePinger(writer, writeLock, keepaliveMs);
 
+        // Usage of this request (LLM calls and tokens) for the chat log; never the question or the answer.
+        final long startTime = System.currentTimeMillis();
+        final ChatLog chatLog = ComponentUtil.getChatApiHelper()
+                .createChatLog(ChatLog.ACCESS_TYPE_STREAM, docId != null, body.sessionId(), llmName, startTime);
+        final LlmUsageCollector usage = LlmUsageCollector.start();
+        ChatResult result = null;
+        Exception failure = null;
+        String status = ChatLog.STATUS_ERROR;
         try {
             final ChatPhaseCallback phaseCallback = newPhaseCallback(writer, errorEmittedHolder, writeLock);
 
-            final ChatResult result;
             final ChatClient chatClient = getChatClient();
             if (docId != null) {
                 // fields and extra_queries are ignored: the answer comes from this one document only.
@@ -335,6 +345,7 @@ public class ChatStreamHandler {
                 result = chatClient.streamChatEnhanced(body.sessionId(), body.message(), userId, body.fields(), body.extraQueries(),
                         phaseCallback);
             }
+            status = ChatLog.STATUS_SUCCESS;
 
             final List<ChatSource> sources = result.getMessage().getSources();
             if (sources != null && !sources.isEmpty()) {
@@ -353,13 +364,20 @@ public class ChatStreamHandler {
                 sendSseEvent(writer, "done", doneData);
             }
         } catch (final LlmException e) {
+            failure = e;
             // The callback already emitted onError to the SSE stream; do not double-send.
             logger.warn("[RAG] /api/v2/chat/stream LLM error. sessionId={}, errorCode={}", body.sessionId(), e.getErrorCode());
         } catch (final ClientDisconnectedException e) {
+            if (result == null) {
+                status = ChatLog.STATUS_CANCELLED;
+            }
             // Client closed the TCP connection mid-stream; no point writing an error event
             // to a dead socket. Log at DEBUG to avoid noise in normal operation.
             logger.debug("[RAG] /api/v2/chat/stream aborted: client disconnected mid-stream. sessionId={}", body.sessionId());
         } catch (final Exception e) {
+            if (result == null) {
+                failure = e;
+            }
             logger.warn("[RAG] /api/v2/chat/stream failed. error={}", e.getMessage(), e);
             // Avoid double-emitting an error event when the callback already wrote one,
             // and avoid writing to a closed response body. Reuse the same writer we
@@ -376,7 +394,25 @@ public class ChatStreamHandler {
             }
         } finally {
             stopKeepalivePinger(pingerFuture);
+            usage.close();
+            recordChatLog(chatLog, status, failure, System.currentTimeMillis() - startTime, usage, result);
         }
+    }
+
+    /**
+     * Records the usage of a chat request in the chat log. Exposed as a seam so unit tests can
+     * capture what is recorded without a search engine.
+     *
+     * @param chatLog the chat log created before the chat client was called
+     * @param status the outcome of the request
+     * @param error the failure of the request (null unless it failed)
+     * @param responseTime the time the request took, in milliseconds
+     * @param usage the LLM usage collected for the request
+     * @param result the chat result (null unless the request succeeded)
+     */
+    protected void recordChatLog(final ChatLog chatLog, final String status, final Throwable error, final long responseTime,
+            final LlmUsageCollector usage, final ChatResult result) {
+        ComponentUtil.getChatApiHelper().storeChatLog(chatLog, status, error, responseTime, usage, result);
     }
 
     /**
