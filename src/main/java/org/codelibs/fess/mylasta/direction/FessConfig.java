@@ -2093,6 +2093,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5 */
     String RAG_CHAT_CONTEXT_MAX_DOCUMENTS = "rag.chat.context.max.documents";
 
+    /** The key of the configuration. e.g. 2 */
+    String RAG_CHAT_QUERY_REGENERATION_MAX_COUNT = "rag.chat.query.regeneration.max.count";
+
     /** The key of the configuration. e.g. 30 */
     String RAG_CHAT_SESSION_TIMEOUT_MINUTES = "rag.chat.session.timeout.minutes";
 
@@ -10127,6 +10130,29 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagChatContextMaxDocumentsAsInteger();
 
     /**
+     * Get the value for the key 'rag.chat.query.regeneration.max.count'. <br>
+     * The value is, e.g. 2 <br>
+     * comment: <br>
+     * Maximum number of times one chat request regenerates its search query and searches again<br>
+     * when the search finds no documents or, in the streaming chat, none of the hits is judged relevant.<br>
+     * Each regeneration makes one LLM call, plus one relevance evaluation call when the new search has hits (0 disables).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatQueryRegenerationMaxCount();
+
+    /**
+     * Get the value for the key 'rag.chat.query.regeneration.max.count' as {@link Integer}. <br>
+     * The value is, e.g. 2 <br>
+     * comment: <br>
+     * Maximum number of times one chat request regenerates its search query and searches again<br>
+     * when the search finds no documents or, in the streaming chat, none of the hits is judged relevant.<br>
+     * Each regeneration makes one LLM call, plus one relevance evaluation call when the new search has hits (0 disables).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatQueryRegenerationMaxCountAsInteger();
+
+    /**
      * Get the value for the key 'rag.chat.session.timeout.minutes'. <br>
      * The value is, e.g. 30 <br>
      * comment: Session settings.
@@ -14434,6 +14460,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS);
         }
 
+        public String getRagChatQueryRegenerationMaxCount() {
+            return get(FessConfig.RAG_CHAT_QUERY_REGENERATION_MAX_COUNT);
+        }
+
+        public Integer getRagChatQueryRegenerationMaxCountAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_QUERY_REGENERATION_MAX_COUNT);
+        }
+
         public String getRagChatSessionTimeoutMinutes() {
             return get(FessConfig.RAG_CHAT_SESSION_TIMEOUT_MINUTES);
         }
@@ -15344,6 +15378,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
             defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
             defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS, "5");
+            defaultMap.put(FessConfig.RAG_CHAT_QUERY_REGENERATION_MAX_COUNT, "2");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_TIMEOUT_MINUTES, "30");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_MAX_SIZE, "10000");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES, "30");
