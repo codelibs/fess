@@ -245,6 +245,54 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_documentTagsRoutesToDocumentTagsHandler() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> docIds = new java.util.ArrayList<>();
+        m.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
+                docIds.add(docId);
+            }
+        };
+        m.process(new StubRequest("/api/v2/documents/abc123/tags"), new CapturingResponse(), new NopChain());
+        // "all" and "export" are only matched exactly, so they are plain doc ids here.
+        m.process(new StubRequest("/api/v2/documents/all/tags"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("abc123", "all"), docIds);
+    }
+
+    @Test
+    public void test_process_documentTagsWithoutADocIdIsNotFound() throws Exception {
+        // "/documents/tags" satisfies both ends of the tags pattern and leaves no doc id between them.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final boolean[] called = { false };
+        m.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
+                called[0] = true;
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/tags"), res, new NopChain());
+        assertFalse(called[0], "/documents/tags must not reach the documentTagsHandler");
+        assertEquals(404, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"not_found\""), body);
+        assertTrue(body.contains("unknown action on document"), body);
+    }
+
+    @Test
+    public void test_process_documentTagsRejectsMalformedDocId() throws Exception {
+        // Reaches the real handler, which validates the doc id before it needs any other component.
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/has spaces/tags"), res, new NopChain());
+        assertEquals(400, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertTrue(body.contains("invalid doc_id"), body);
+    }
+
+    @Test
     public void test_process_labelsRejectsPostAtCsrfGate() throws Exception {
         // Per spec §7.3, an anonymous client POSTing to a GET-only endpoint like /labels
         // without a CSRF token is rejected at the CSRF gate (403 forbidden) before the

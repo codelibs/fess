@@ -73,6 +73,264 @@ function el(tag, opts) {
   return node;
 }
 
+// ─── Shared user tags (features.user_tag) ────────────────────────────────────
+// A tag is a name. Its value is an opaque id that fields.tag filters by and the tag API takes
+// back; it is never parsed. Hits carry their tags as [{ value, name, mine }] (mine: the caller
+// holds the tag and may remove it from their tags), the "tag" facet as [{ value, count, label }].
+
+function userTagEnabled() {
+  return !!(api.getConfig()?.features?.user_tag);
+}
+
+/** value -> name of the tags in the current response (hits, tag facet, editor answers), for the filter badges. */
+const tagNames = new Map();
+
+function rememberTagName(value, name) {
+  if (value && name) tagNames.set(String(value), String(name));
+}
+
+/** Collect the tag names of a search response: the hits' tags and the tag facet's labels. */
+function collectTagNames(env) {
+  tagNames.clear();
+  if (!userTagEnabled() || !env) return;
+  (Array.isArray(env.data) ? env.data : []).forEach(d =>
+    (Array.isArray(d && d.tags) ? d.tags : []).forEach(tag => tag && rememberTagName(tag.value, tag.name)));
+  const field = (Array.isArray(env.facet_field) ? env.facet_field : []).find(f => f && f.name === "tag");
+  ((field && field.result) || []).forEach(r => r && rememberTagName(r.value, r.label));
+}
+
+/** The text of a tag on a card and in the editor: its name, or its raw value without one. */
+function tagText(tag) {
+  return String(tag.name || tag.value || "");
+}
+
+/** The name of a tag value for the active-filter badge; the raw value when the response does not name it. */
+function tagNameOf(value) {
+  return tagNames.get(String(value)) || String(value);
+}
+
+/** The /documents/{id}/tags path of a document. */
+function tagsPath(docId) {
+  return "/documents/" + encodeURIComponent(docId) + "/tags";
+}
+
+function isAuthError(e) {
+  return !!e && (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403);
+}
+
+function showLoginModal() {
+  if (!window.bootstrap || !bootstrap.Modal) {
+    console.warn("[fess] bootstrap not loaded; skipping modal show");
+  } else {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
+  }
+}
+
+/** Narrow the current search to one tag (fields.tag), keeping the query and the other filters. */
+function filterByTag(value) {
+  state.fields = { ...state.fields, tag: [value] };
+  state.start = 0;
+  runSearch();
+}
+
+/** (Re-)render a card's tag chips; each one filters the search by its tag. */
+function renderTagChips(container, tags) {
+  while (container.firstChild) container.removeChild(container.firstChild);
+  (tags || []).forEach(tag => {
+    if (!tag || !tag.value) return;
+    rememberTagName(tag.value, tag.name);
+    const chip = el("button", {
+      className: "badge rounded-pill tag-chip me-1",
+      text: tagText(tag),
+      attrs: { type: "button" }
+    });
+    chip.addEventListener("click", () => filterByTag(tag.value));
+    container.appendChild(chip);
+  });
+}
+
+/**
+ * The inline tag editor of a result card: lists the document's tags (GET /documents/{id}/tags)
+ * with a remove button on the user's own ones (mine; removing takes the tag out of the user's
+ * tags, it may stay visible to others), and adds a tag by name with an input and an Add button.
+ * Each answer re-renders the list and hands the tags to onTags so the card's chips follow.
+ * Escape calls onClose.
+ *
+ * @param {string} docId
+ * @param {string} id - id of the editor element
+ * @param {{ onTags: function(Object[]), onClose: function() }} handlers
+ * @returns {{ node: HTMLElement, load: function(): Promise<void>, focus: function() }}
+ */
+function buildTagEditor(docId, id, handlers) {
+  const node = el("div", {
+    className: "tag-editor border rounded p-2 mt-1",
+    attrs: { id, role: "group", "aria-label": t("tag.title") }
+  });
+  const list = el("ul", { className: "list-unstyled d-flex flex-wrap gap-1 mb-2 tag-editor-list" });
+  const empty = el("p", { className: "small text-body-secondary mb-2 tag-editor-empty d-none", text: t("tag.empty") });
+  const form = el("form", { className: "d-flex flex-wrap align-items-center gap-1 tag-editor-form", attrs: { novalidate: "" } });
+  form.appendChild(el("label", { className: "visually-hidden", text: t("tag.name"), attrs: { for: id + "-name" } }));
+  const input = el("input", {
+    className: "form-control form-control-sm w-auto",
+    attrs: { id: id + "-name", type: "text", maxlength: "50", autocomplete: "off", placeholder: t("tag.name") }
+  });
+  form.appendChild(input);
+  const addBtn = el("button", { className: "btn btn-sm btn-primary", text: t("tag.add_button"), attrs: { type: "submit" } });
+  form.appendChild(addBtn);
+  // A quiet inline message, like the other inline errors of this theme; polite, not an alert.
+  const error = el("div", { className: "small text-danger mt-1 tag-editor-error d-none", attrs: { "aria-live": "polite" } });
+  node.appendChild(list);
+  node.appendChild(empty);
+  node.appendChild(form);
+  node.appendChild(error);
+
+  let busy = false;
+  const setError = msg => {
+    error.textContent = msg || "";
+    error.classList.toggle("d-none", !msg);
+  };
+  // 401/403 asks for login like the favorite star; a 400 carries a message meant for the user.
+  const fail = e => {
+    if (isAuthError(e)) { showLoginModal(); return; }
+    const invalid = e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || e.httpStatus === 400);
+    setError(invalid && e.message ? e.message : t("tag.error"));
+  };
+  const focusForm = () => {
+    if (!form.classList.contains("d-none")) input.focus();
+    else node.focus();
+  };
+  const remove = async (tag, btn) => {
+    if (busy) return;
+    busy = true;
+    btn.disabled = true;
+    setError("");
+    try {
+      apply(await api.del(tagsPath(docId), { value: tag.value }));
+      // The button is gone with the re-rendered list; keep focus inside the editor.
+      focusForm();
+    } catch (e) {
+      btn.disabled = false;
+      fail(e);
+    } finally {
+      busy = false;
+    }
+  };
+  const renderList = tags => {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    tags.forEach(tag => {
+      if (!tag || !tag.value) return;
+      const text = tagText(tag);
+      const li = el("li", { className: "badge rounded-pill tag-chip tag-editor-item d-inline-flex align-items-center gap-1" });
+      li.appendChild(el("span", { text }));
+      if (tag.mine === true) {
+        const btn = el("button", {
+          className: "btn-close tag-remove",
+          attrs: { type: "button", "aria-label": t("tag.remove", { name: text }) }
+        });
+        btn.addEventListener("click", () => remove(tag, btn));
+        li.appendChild(btn);
+      }
+      list.appendChild(li);
+    });
+    empty.classList.toggle("d-none", list.childElementCount > 0);
+  };
+  const apply = env => {
+    const tags = Array.isArray(env && env.tags) ? env.tags : [];
+    renderList(tags);
+    form.classList.toggle("d-none", !(env && env.addable));
+    handlers.onTags(tags);
+  };
+
+  form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const name = input.value.trim();
+    if (!name || busy) return;
+    busy = true;
+    addBtn.disabled = true;
+    setError("");
+    try {
+      apply(await api.post(tagsPath(docId), { name }));
+      input.value = "";
+      input.focus();
+    } catch (e) {
+      fail(e);
+    } finally {
+      busy = false;
+      addBtn.disabled = false;
+    }
+  });
+  node.addEventListener("keydown", ev => {
+    if (ev.key !== "Escape") return;
+    ev.preventDefault();
+    handlers.onClose();
+  });
+  // Focus target when the form is hidden (addable: false).
+  node.setAttribute("tabindex", "-1");
+
+  return {
+    node,
+    load: async () => {
+      setError("");
+      try {
+        apply(await api.get(tagsPath(docId)));
+      } catch (e) {
+        fail(e);
+      }
+    },
+    focus: () => input.focus()
+  };
+}
+
+/**
+ * The tag row of a result card: the document's tags as chips and, for a logged-in user, an
+ * "Add tag" toggle that opens the inline editor. Null when the feature is off or
+ * there is nothing to show.
+ *
+ * @param {Object} d    - result document
+ * @param {number} idx0 - 0-based position of the card (for element ids)
+ * @returns {HTMLElement|null}
+ */
+function buildTagRow(d, idx0) {
+  if (!userTagEnabled() || !d.doc_id) return null;
+  const tags = Array.isArray(d.tags) ? d.tags : [];
+  const canAdd = api.isAuthenticated();
+  if (tags.length === 0 && !canAdd) return null;
+  const row = el("div", { className: "tags" });
+  const chips = el("span", { className: "tag-chips" });
+  renderTagChips(chips, tags);
+  row.appendChild(chips);
+  if (!canAdd) return row;
+
+  const editorId = "result" + idx0 + "-tag-editor";
+  const toggle = el("button", {
+    className: "btn btn-link btn-sm p-0 tag-add-btn d-print-none",
+    attrs: { type: "button", "aria-expanded": "false" }
+  });
+  toggle.appendChild(el("i", { className: "fa fa-tag me-1", attrs: { "aria-hidden": "true" } }));
+  toggle.appendChild(document.createTextNode(t("tag.add")));
+  row.appendChild(toggle);
+
+  let editor = null;
+  const close = () => {
+    if (editor) editor.node.classList.add("d-none");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.focus();
+  };
+  toggle.addEventListener("click", () => {
+    if (editor && !editor.node.classList.contains("d-none")) { close(); return; }
+    if (!editor) {
+      editor = buildTagEditor(d.doc_id, editorId, { onTags: list => renderTagChips(chips, list), onClose: close });
+      row.appendChild(editor.node);
+      toggle.setAttribute("aria-controls", editorId);
+    }
+    editor.node.classList.remove("d-none");
+    toggle.setAttribute("aria-expanded", "true");
+    editor.focus();
+    editor.load();
+  });
+  return row;
+}
+
 /**
  * Copy text to the clipboard with a fallback for non-secure contexts.
  * navigator.clipboard is undefined on plain-HTTP non-localhost origins
@@ -409,6 +667,11 @@ function buildResultCard(d, queryId, order) {
   }
 
   li.appendChild(info);
+
+  // --- div.tags > chips + (add-tag toggle + inline editor)? (theme extra; features.user_tag) ---
+  // Its own row rather than part of .info, which phones hide.
+  const tagRow = buildTagRow(d, idx0);
+  if (tagRow) li.appendChild(tagRow);
   return li;
 }
 
@@ -717,24 +980,32 @@ function exQClauses() {
 }
 
 /**
- * Keep the address bar's start= and ex_q= in step with state.start and the facet
- * selections, as the JSP paging and facet links did, so reload, back/forward and a
- * shared link land on the same page with the same filters (runFromUrl reads them
- * back).
+ * Keep the address bar's start=, ex_q= and fields.tag= in step with state.start, the facet
+ * selections and the tag filter, as the JSP paging and facet links did, so reload,
+ * back/forward and a shared link land on the same page with the same filters (runFromUrl
+ * reads them back). fields.tag is the only field filter kept here: it is set by the tag
+ * facet and chips, while the other fields.* come from the URL or default labels that are
+ * deliberately not written back.
  *
  * @param {boolean} push - add a history entry (paging) instead of correcting the
  *                         current one (a filter change resetting to the first page)
  */
 function syncUrlParams(push) {
   const params = new URLSearchParams(location.search);
+  const sameList = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
   const clauses = exQClauses();
-  const current = params.getAll("ex_q");
-  const sameExQ = current.length === clauses.length && current.every((v, i) => v === clauses[i]);
-  if ((Number(params.get("start")) || 0) === state.start && sameExQ) return;
+  const sameExQ = sameList(params.getAll("ex_q"), clauses);
+  const tags = Array.isArray(state.fields.tag) ? state.fields.tag : [];
+  const sameTags = sameList(params.getAll("fields.tag"), tags);
+  if ((Number(params.get("start")) || 0) === state.start && sameExQ && sameTags) return;
   if (state.start > 0) params.set("start", String(state.start)); else params.delete("start");
   if (!sameExQ) {
     params.delete("ex_q");
     clauses.forEach(v => params.append("ex_q", v));
+  }
+  if (!sameTags) {
+    params.delete("fields.tag");
+    tags.forEach(v => params.append("fields.tag", v));
   }
   const qs = params.toString();
   const url = location.pathname + (qs ? "?" + qs : "");
@@ -782,8 +1053,9 @@ function buildSearchParams() {
   // every configured facet-query view (timestamp / size / filetype ranges). Without
   // these the API returns no facet data, so the query-view groups render empty and
   // the sidebar is effectively dead (JSP parity: query.facet.fields + .queries).
+  // Shared user tags add the "tag" field facet.
   const cfgFacet = api.getConfig() || {};
-  params["facet.field"] = ["label"];
+  params["facet.field"] = userTagEnabled() ? ["label", "tag"] : ["label"];
   const facetQueryValues = [];
   (cfgFacet.facet_views || []).forEach(v =>
     (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.push(qy.value); }));
@@ -842,6 +1114,7 @@ async function runSearch() {
         warningEl.classList.add("d-none");
       }
     }
+    collectTagNames(env);
     renderResults(env);
     renderPagination(env);
     const labels = await loadLabels();
@@ -1595,7 +1868,10 @@ export function attach() {
       // URL's ex_q clauses (sidebar facet selections and advanced-search conditions) so that
       // changing the sort does not silently drop a selected label. Only a new query from the
       // header form starts over without them.
-      new URLSearchParams(location.search).getAll("ex_q").forEach(v => params.append("ex_q", v));
+      // The tag filter of the facet and the result chips is kept for the same reason.
+      const current = new URLSearchParams(location.search);
+      current.getAll("ex_q").forEach(v => params.append("ex_q", v));
+      current.getAll("fields.tag").forEach(v => params.append("fields.tag", v));
       navigate("search?" + params.toString());
     });
   }
@@ -1697,17 +1973,18 @@ async function loadLabels() {
 }
 
 /**
- * Build a generic facet group for field-value facets (label, dynamic fields).
- * Each entry click toggles the value in state.facets[fieldKey].
+ * Build a generic facet group for field-value facets (label, tag, dynamic fields).
+ * Each entry click toggles the value in state[store][fieldKey]: state.facets (sent as
+ * ex_q clauses) by default, or state.fields (sent as fields.* params) for the tag facet.
  */
-function buildFacetGroup(title, entries, fieldKey) {
+function buildFacetGroup(title, entries, fieldKey, store = "facets") {
   // Tag-parity with searchResults.jsp facet group:
   //   ul.list-group.mb-2 > li.list-group-item.text-uppercase(title)
   //                      + li.list-group-item > a > span.badge.rounded-pill.text-bg-secondary.float-end
   const ul = el("ul", { className: "list-group mb-2" });
   ul.appendChild(el("li", { className: "list-group-item text-uppercase", text: title }));
   entries.forEach(entry => {
-    const active = (state.facets[fieldKey] || []).includes(entry.value);
+    const active = (state[store][fieldKey] || []).includes(entry.value);
     const li = el("li", { className: "list-group-item" + (active ? " active" : "") });
     const a = el("a", { attrs: { href: "#" } });
     a.appendChild(document.createTextNode(entry.labelText + " "));
@@ -1716,8 +1993,8 @@ function buildFacetGroup(title, entries, fieldKey) {
     }
     a.addEventListener("click", ev => {
       ev.preventDefault();
-      state.facets[fieldKey] = state.facets[fieldKey] || [];
-      const arr = state.facets[fieldKey];
+      state[store][fieldKey] = state[store][fieldKey] || [];
+      const arr = state[store][fieldKey];
       const idx = arr.indexOf(entry.value);
       if (idx >= 0) arr.splice(idx, 1); else arr.push(entry.value);
       state.start = 0;
@@ -1833,16 +2110,30 @@ function renderFacets(env, labels) {
     }
   }
 
-  // 2. Dynamic facet fields from API (excluding filetype and label — rendered separately)
+  // 2. Shared user tags (features.user_tag) — values come already filtered to the tags the user
+  //    may see, each with its name as label (the value is an opaque id). Unlike the label facet, a click filters through fields.tag (the API's tag
+  //    filter, ORing the selected tags); a selected tag stays listed so it can be cleared.
+  const tagField = userTagEnabled() ? facetField.find(f => f.name === "tag") : null;
+  if (tagField) {
+    const selectedTags = state.fields.tag || [];
+    const entries = (tagField.result || [])
+      .filter(r => r && r.value && (Number(r.count) > 0 || selectedTags.includes(r.value)))
+      .map(r => ({ labelText: String(r.label || r.value), value: r.value, count: r.count }));
+    if (entries.length > 0) {
+      body.appendChild(buildFacetGroup(t("tag.title"), entries, "tag", "fields"));
+    }
+  }
+
+  // 3. Dynamic facet fields from API (excluding filetype, label and tag — rendered separately)
   for (const field of facetField) {
-    if (field.name === "filetype" || field.name === "label") continue;
+    if (field.name === "filetype" || field.name === "label" || field.name === "tag") continue;
     const entries = (field.result || []).map(r => ({ labelText: r.value, value: r.value, count: r.count }));
     if (entries.length > 0) {
       body.appendChild(buildFacetGroup(field.name, entries, field.name));
     }
   }
 
-  // 3. Server-driven facet query views (timestamp ranges, size ranges, filetype
+  // 4. Server-driven facet query views (timestamp ranges, size ranges, filetype
   //    ranges, etc.) (SRCH-4). The filetype group is one of these query views
   //    (filetype:html, filetype:word, …), matching the JSP sidebar — so there is
   //    no separate field-based filetype group (that produced a duplicate
@@ -1921,7 +2212,8 @@ function renderActiveChips() {
 
   for (const [field, valueSet] of Object.entries(chipFieldSets)) {
     valueSet.forEach(v => chips.push({
-      label: field + ": " + v,
+      // A tag reads as its name rather than "tag: <opaque id>".
+      label: field === "tag" ? tagNameOf(v) : field + ": " + v,
       remove: () => {
         // Remove from whichever store(s) hold this value.
         if (state.facets[field]) {
@@ -2294,13 +2586,7 @@ async function toggleFavorite(docId, btn, queryId) {
     // expired between page load and the click) *before* the auth check runs, so a
     // guest click can surface as 403 instead of 401. Logging in through the modal
     // issues a fresh session + token, so treat both the same.
-    if (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403) {
-      if (!window.bootstrap || !bootstrap.Modal) {
-        console.warn("[fess] bootstrap not loaded; skipping modal show");
-      } else {
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
-      }
-    }
+    if (isAuthError(e)) showLoginModal();
   }
 }
 

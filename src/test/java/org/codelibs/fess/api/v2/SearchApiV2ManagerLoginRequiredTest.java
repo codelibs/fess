@@ -139,6 +139,24 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_documentTags_isRejectedForAnonymousWhenLoginRequired() throws Exception {
+        setLoginRequired(true);
+        final boolean[] called = { false };
+        final SearchApiV2Manager manager = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        manager.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
+                called[0] = true;
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        manager.process(request("/api/v2/documents/abc123/tags"), res, nopChain());
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertFalse(called[0], "the tags handler must not run for an anonymous caller");
+    }
+
+    @Test
     public void test_health_staysReachableWhenLoginRequired() throws Exception {
         setLoginRequired(true);
         final CapturingResponse res = process("/api/v2/health");
@@ -225,7 +243,8 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
     public void test_sessionOnlyEndpoints_stayGatedWithValidAccessTokenWhenLoginRequired() throws Exception {
         setLoginRequired(true);
         for (final String path : new String[] { "/api/v2/chat", "/api/v2/favorites", "/api/v2/search-history", "/api/v2/click",
-                "/api/v2/cache/abc123", "/api/v2/related-queries", "/api/v2/related-content", "/api/v2/auth/password" }) {
+                "/api/v2/documents/abc123/tags", "/api/v2/cache/abc123", "/api/v2/related-queries", "/api/v2/related-content",
+                "/api/v2/auth/password" }) {
             final CapturingResponse res = processWithTokens(path, "Bearer " + VALID_TOKEN);
             assertEquals(401, res.status, path);
             assertTrue(res.body().contains("login required"), path + " -> " + res.body());

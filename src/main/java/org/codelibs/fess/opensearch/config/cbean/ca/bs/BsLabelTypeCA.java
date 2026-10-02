@@ -726,6 +726,136 @@ public abstract class BsLabelTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setKind_Terms() {
+        setKind_Terms(null);
+    }
+
+    public void setKind_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
+        setKind_Terms("kind", opLambda, null);
+    }
+
+    public void setKind_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsLabelTypeCA> aggsLambda) {
+        setKind_Terms("kind", opLambda, aggsLambda);
+    }
+
+    public void setKind_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsLabelTypeCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            LabelTypeCA ca = new LabelTypeCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setKind_SignificantTerms() {
+        setKind_SignificantTerms(null);
+    }
+
+    public void setKind_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
+        setKind_SignificantTerms("kind", opLambda, null);
+    }
+
+    public void setKind_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsLabelTypeCA> aggsLambda) {
+        setKind_SignificantTerms("kind", opLambda, aggsLambda);
+    }
+
+    public void setKind_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsLabelTypeCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            LabelTypeCA ca = new LabelTypeCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setKind_IpRange() {
+        setKind_IpRange(null);
+    }
+
+    public void setKind_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
+        setKind_IpRange("kind", opLambda, null);
+    }
+
+    public void setKind_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsLabelTypeCA> aggsLambda) {
+        setKind_IpRange("kind", opLambda, aggsLambda);
+    }
+
+    public void setKind_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsLabelTypeCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            LabelTypeCA ca = new LabelTypeCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setKind_Count() {
+        setKind_Count(null);
+    }
+
+    public void setKind_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setKind_Count("kind", opLambda);
+    }
+
+    public void setKind_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Cardinality() {
+        setKind_Cardinality(null);
+    }
+
+    public void setKind_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setKind_Cardinality("kind", opLambda);
+    }
+
+    public void setKind_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Missing() {
+        setKind_Missing(null);
+    }
+
+    public void setKind_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setKind_Missing("kind", opLambda, null);
+    }
+
+    public void setKind_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsLabelTypeCA> aggsLambda) {
+        setKind_Missing("kind", opLambda, aggsLambda);
+    }
+
+    public void setKind_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsLabelTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            LabelTypeCA ca = new LabelTypeCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setName_Terms() {
         setName_Terms(null);
     }

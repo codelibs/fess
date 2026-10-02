@@ -50,7 +50,7 @@ public class LoginRequirementCompleteCoverageTest {
     private static final Map<String, Boolean> ENDPOINT_DECISIONS;
 
     /** Must equal {@code ENDPOINT_DECISIONS.size()}. */
-    private static final int EXPECTED_ENTRY_COUNT = 20;
+    private static final int EXPECTED_ENTRY_COUNT = 21;
 
     static {
         final Map<String, Boolean> m = new LinkedHashMap<>();
@@ -80,6 +80,7 @@ public class LoginRequirementCompleteCoverageTest {
         m.put("/favorites", true);
         m.put("/search-history", true);
         m.put("/documents/abc123/favorite", true);
+        m.put("/documents/abc123/tags", true);
         m.put("/chat", true);
 
         ENDPOINT_DECISIONS = Collections.unmodifiableMap(m);

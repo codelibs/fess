@@ -192,6 +192,10 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
             doColumn("includedPaths");
         }
 
+        public void columnKind() {
+            doColumn("kind");
+        }
+
         public void columnName() {
             doColumn("name");
         }
