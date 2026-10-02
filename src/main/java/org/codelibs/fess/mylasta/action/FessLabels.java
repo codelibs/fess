@@ -542,6 +542,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Search */
     public static final String LABELS_menu_search_list = "{labels.menu_search_list}";
 
+    /** The key of the message: Document Report */
+    public static final String LABELS_menu_doc_report = "{labels.menu_doc_report}";
+
     /** The key of the message: Backup */
     public static final String LABELS_menu_backup = "{labels.menu_backup}";
 
@@ -3183,11 +3186,17 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Searches by day and hour */
     public static final String LABELS_searchlog_table_weekHour = "{labels.searchlog_table_weekHour}";
 
+    /** The key of the message: Searches by Role and Group */
+    public static final String LABELS_searchlog_table_roles = "{labels.searchlog_table_roles}";
+
     /** The key of the message: Query */
     public static final String LABELS_searchlog_col_word = "{labels.searchlog_col_word}";
 
     /** The key of the message: URL */
     public static final String LABELS_searchlog_col_url = "{labels.searchlog_col_url}";
+
+    /** The key of the message: Role or Group */
+    public static final String LABELS_searchlog_col_role = "{labels.searchlog_col_role}";
 
     /** The key of the message: Mon */
     public static final String LABELS_searchlog_dow_1 = "{labels.searchlog_dow_1}";
@@ -3216,6 +3225,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Search word */
     public static final String LABELS_searchlog_searchword = "{labels.searchlog_searchword}";
 
+    /** The key of the message: Hit Count */
+    public static final String LABELS_searchlog_hitcount = "{labels.searchlog_hitcount}";
+
+    /** The key of the message: All */
+    public static final String LABELS_searchlog_hitcount_all = "{labels.searchlog_hitcount_all}";
+
+    /** The key of the message: Zero hits only */
+    public static final String LABELS_searchlog_hitcount_zero = "{labels.searchlog_hitcount_zero}";
+
+    /** The key of the message: One or more hits */
+    public static final String LABELS_searchlog_hitcount_nonzero = "{labels.searchlog_hitcount_nonzero}";
+
     /** The key of the message: Per-query click metrics include only clicks recorded since {0}. */
     public static final String LABELS_searchlog_notice_click_since = "{labels.searchlog_notice_click_since}";
 
@@ -3237,8 +3258,83 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Failed to load analytics data. See the log for details. */
     public static final String LABELS_searchlog_notice_failed = "{labels.searchlog_notice_failed}";
 
+    /** The key of the message: A search counts toward every role and group of the user who ran it. Individual users are not listed. */
+    public static final String LABELS_searchlog_note_roles = "{labels.searchlog_note_roles}";
+
     /** The key of the message: Download CSV */
     public static final String LABELS_searchlog_download_csv = "{labels.searchlog_download_csv}";
+
+    /** The key of the message: Document Report */
+    public static final String LABELS_docreport_title = "{labels.docreport_title}";
+
+    /** The key of the message: Duplicates */
+    public static final String LABELS_docreport_tab_duplicate = "{labels.docreport_tab_duplicate}";
+
+    /** The key of the message: Dormant Documents */
+    public static final String LABELS_docreport_tab_dormant = "{labels.docreport_tab_dormant}";
+
+    /** The key of the message: URL prefix */
+    public static final String LABELS_docreport_url = "{labels.docreport_url}";
+
+    /** The key of the message: e.g. smb://server/share/ */
+    public static final String LABELS_docreport_url_placeholder = "{labels.docreport_url_placeholder}";
+
+    /** The key of the message: Not modified for (days) */
+    public static final String LABELS_docreport_days = "{labels.docreport_days}";
+
+    /** The key of the message: Never opened from search results */
+    public static final String LABELS_docreport_unclicked = "{labels.docreport_unclicked}";
+
+    /** The key of the message: Apply */
+    public static final String LABELS_docreport_apply = "{labels.docreport_apply}";
+
+    /** The key of the message: Download CSV */
+    public static final String LABELS_docreport_download_csv = "{labels.docreport_download_csv}";
+
+    /** The key of the message: Groups of documents whose content is the same or nearly the same, largest first. Up to {0} groups are shown here; download the CSV to get every group. */
+    public static final String LABELS_docreport_duplicate_description = "{labels.docreport_duplicate_description}";
+
+    /** The key of the message: Group {0}: {1} documents */
+    public static final String LABELS_docreport_duplicate_group = "{labels.docreport_duplicate_group}";
+
+    /** The key of the message: and {0} more documents */
+    public static final String LABELS_docreport_duplicate_more = "{labels.docreport_duplicate_more}";
+
+    /** The key of the message: The duplicate report is not available because the index of this search engine does not store content signatures. */
+    public static final String LABELS_docreport_duplicate_unavailable = "{labels.docreport_duplicate_unavailable}";
+
+    /** The key of the message: Documents whose last modification is older than the given number of days, oldest first. Documents without a last modification date are not listed. */
+    public static final String LABELS_docreport_dormant_description = "{labels.docreport_dormant_description}";
+
+    /** The key of the message: {0} documents, {1} bytes in total */
+    public static final String LABELS_docreport_dormant_summary = "{labels.docreport_dormant_summary}";
+
+    /** The key of the message: Only the first {0} documents can be shown here. Download the CSV to get every document. */
+    public static final String LABELS_docreport_dormant_limited = "{labels.docreport_dormant_limited}";
+
+    /** The key of the message: Title / URL */
+    public static final String LABELS_docreport_col_title = "{labels.docreport_col_title}";
+
+    /** The key of the message: Size (bytes) */
+    public static final String LABELS_docreport_col_size = "{labels.docreport_col_size}";
+
+    /** The key of the message: Last Modified */
+    public static final String LABELS_docreport_col_last_modified = "{labels.docreport_col_last_modified}";
+
+    /** The key of the message: Owner */
+    public static final String LABELS_docreport_col_owner = "{labels.docreport_col_owner}";
+
+    /** The key of the message: Last Modifier */
+    public static final String LABELS_docreport_col_last_modifier = "{labels.docreport_col_last_modifier}";
+
+    /** The key of the message: Clicks */
+    public static final String LABELS_docreport_col_clicks = "{labels.docreport_col_clicks}";
+
+    /** The key of the message: No documents found. */
+    public static final String LABELS_docreport_no_data = "{labels.docreport_no_data}";
+
+    /** The key of the message: Failed to build the report. See the log for details. */
+    public static final String LABELS_docreport_failed = "{labels.docreport_failed}";
 
     /** The key of the message: Maintenance */
     public static final String LABELS_maintenance_title_configuration = "{labels.maintenance_title_configuration}";

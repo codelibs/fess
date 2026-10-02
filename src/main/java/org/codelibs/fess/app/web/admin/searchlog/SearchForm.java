@@ -64,6 +64,12 @@ public class SearchForm {
     public String searchWord;
 
     /**
+     * The hit count field for filtering search logs by their number of results
+     * ({@code zero} or {@code nonzero}; blank for all).
+     */
+    public String hitCount;
+
+    /**
      * The size field for controlling page size.
      */
     public String size;

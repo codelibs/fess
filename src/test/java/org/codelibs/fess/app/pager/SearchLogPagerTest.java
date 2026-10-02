@@ -70,6 +70,7 @@ public class SearchLogPagerTest extends UnitFessTestCase {
         searchLogPager.requestedTimeRange = "2025-01-01 00:00 - 2025-01-02 00:00";
         searchLogPager.accessType = "web";
         searchLogPager.searchWord = "w";
+        searchLogPager.hitCount = SearchLogPager.HIT_COUNT_ZERO;
         searchLogPager.logType = SearchLogPager.LOG_TYPE_CLICK;
         searchLogPager.setAllRecordCount(100);
         searchLogPager.setAllPageCount(10);
@@ -83,6 +84,7 @@ public class SearchLogPagerTest extends UnitFessTestCase {
         assertNull(searchLogPager.requestedTimeRange);
         assertNull(searchLogPager.accessType);
         assertNull(searchLogPager.searchWord, "cleared");
+        assertNull(searchLogPager.hitCount, "cleared");
         assertEquals(SearchLogPager.LOG_TYPE_SEARCH, searchLogPager.logType);
         assertEquals(0, searchLogPager.getAllRecordCount());
         assertEquals(0, searchLogPager.getAllPageCount());

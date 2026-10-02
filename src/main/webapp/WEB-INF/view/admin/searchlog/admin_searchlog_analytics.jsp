@@ -95,8 +95,10 @@ ${fe:html(true)}
                                                                     arg0="${fn:length(n.args) > 0 ? f:h(n.args[0]) : ''}"/></div>
             </c:forEach>
             <%-- Link from a query word to the raw search logs of the period --%>
-            <c:set var="searchWordLink" scope="request"
-                   value="${fe:url('/admin/searchlog/search')}?logType=search&amp;requestedTimeRange=${f:u(cond.from += ' 00:00 - ' += cond.to += ' 23:59')}${empty cond.accessType ? '' : '&amp;accessType='}${f:u(cond.accessType)}&amp;searchWord="/>
+            <c:set var="searchLogLink"
+                   value="${fe:url('/admin/searchlog/search')}?logType=search&amp;requestedTimeRange=${f:u(cond.from += ' 00:00 - ' += cond.to += ' 23:59')}${empty cond.accessType ? '' : '&amp;accessType='}${f:u(cond.accessType)}"/>
+            <c:set var="searchWordLink" scope="request" value="${searchLogLink}&amp;searchWord="/>
+            <c:set var="zeroHitWordLink" scope="request" value="${searchLogLink}&amp;hitCount=zero&amp;searchWord="/>
             <%-- KPI cards (overview and clicks) --%>
             <c:if test="${not empty report.kpis}">
                 <div class="row">

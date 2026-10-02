@@ -82,6 +82,27 @@ public class SearchLogAnalyticsServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_formatTime() {
+        final long millis = ZonedDateTime.of(2026, 9, 14, 0, 30, 0, 0, ZoneOffset.UTC).toInstant().toEpochMilli();
+        assertEquals("2026-09-14 09:30", SearchLogAnalyticsService.formatTime(millis, ZoneId.of("Asia/Tokyo")));
+        assertEquals("2026-09-14 09:30", SearchLogAnalyticsService.formatTime((double) millis, ZoneId.of("Asia/Tokyo")));
+        assertNull(SearchLogAnalyticsService.formatTime(null, ZoneId.of("Asia/Tokyo")), "no value");
+    }
+
+    @Test
+    public void test_userRoleExcludePattern() {
+        assertEquals("1.*", SearchLogAnalyticsService.userRoleExcludePattern("1"));
+        assertEquals("U\\.\\+.*", SearchLogAnalyticsService.userRoleExcludePattern("U.+"));
+        assertNull(SearchLogAnalyticsService.userRoleExcludePattern(""), "blank prefix");
+        assertNull(SearchLogAnalyticsService.userRoleExcludePattern(null), "no prefix");
+        // the pattern keeps the user roles out and the group and role entries in
+        final java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(SearchLogAnalyticsService.userRoleExcludePattern("1"));
+        assertTrue(pattern.matcher("1alice").matches());
+        assertFalse(pattern.matcher("2sales").matches());
+        assertFalse(pattern.matcher("Radmin").matches());
+    }
+
+    @Test
     public void test_zeroClickWords_excludesClicked() {
         final List<Map<String, Object>> searched = List.of(row("a", 30L), row("b", 20L), row("c", 10L), row("d", 5L));
         final List<Map<String, Object>> result = SearchLogAnalyticsService.zeroClickWords(searched, Set.of("b"), 2);
@@ -334,6 +355,8 @@ public class SearchLogAnalyticsServiceTest extends UnitFessTestCase {
         assertTrue(service.isExportable("performance", "slowQueries"));
         assertTrue(service.isExportable("audience", "weekHour"));
         assertTrue(service.isExportable("audience", "accessTypes"));
+        assertTrue(service.isExportable("audience", "roles"));
+        assertFalse(service.isExportable("overview", "roles"), "item of another tab");
         assertFalse(service.isExportable("overview", "weekHour"), "item of another tab");
         assertFalse(service.isExportable("queries", "kpis"), "tab without KPIs");
         assertFalse(service.isExportable("overview", "unknown"));
@@ -392,7 +415,9 @@ public class SearchLogAnalyticsServiceTest extends UnitFessTestCase {
         report.putTable("zeroClickQueries", new ArrayList<>());
         assertEquals(List.of(List.of("word", "count", "lastSearchedAt")), export(report, "queries", "zeroClickQueries"));
         // a table the report does not carry at all (e.g. no click data) is an empty one too
-        assertEquals(List.of(List.of("word", "count", "users")), export(new AnalyticsReport(), "queries", "zeroHitQueries"));
+        assertEquals(List.of(List.of("word", "count", "users", "lastSearchedAt")),
+                export(new AnalyticsReport(), "queries", "zeroHitQueries"));
+        assertEquals(List.of(List.of("value", "count", "users", "zeroHitRate")), export(new AnalyticsReport(), "audience", "roles"));
     }
 
     @Test
