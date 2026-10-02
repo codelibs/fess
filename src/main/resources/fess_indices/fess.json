@@ -24,6 +24,11 @@
           "type": "mapping",
           "mappings_path": "${fess.dictionary.path}mapping.txt"
         },
+        "prolonged_sound_mark_filter": {
+          "type": "pattern_replace",
+          "pattern": "[\\u2010-\\u2015\\u207B\\u208B\\u2212\\uFF0D](?<=[\\u3041-\\u3096\\u3099\\u309A\\u309D\\u309E\\u30A1-\\u30FA\\u30FC-\\u30FE\\u31F0-\\u31FF\\uFF66-\\uFF9F][\\u2010-\\u2015\\u207B\\u208B\\u2212\\uFF0D]{1,8})",
+          "replacement": "\u30FC"
+        },
         "traditional_chinese_convert": {
           "type": "fess_traditional_chinese_convert",
           "convert_type": "t2s"
@@ -1139,6 +1144,7 @@
         "standard_analyzer": {
           "type": "custom",
           "char_filter": [
+            "prolonged_sound_mark_filter",
             "mapping_filter"
           ],
           "tokenizer": "standard",
@@ -1156,6 +1162,7 @@
         "standard_search_analyzer": {
           "type": "custom",
           "char_filter": [
+            "prolonged_sound_mark_filter",
             "mapping_filter"
           ],
           "tokenizer": "standard",
