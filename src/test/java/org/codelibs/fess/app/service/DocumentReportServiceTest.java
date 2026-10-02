@@ -153,6 +153,17 @@ public class DocumentReportServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_buildDuplicateQuery() {
+        final TestService service = new TestService(new TestFessConfig());
+        final String json = service.buildDuplicateQuery("smb://server/").toString();
+        assertTrue(json.contains("\"must_not\""), json);
+        assertTrue(json.contains("\"regexp\""), json);
+        assertTrue(json.contains("\"content_minhash_bits\""), json);
+        assertTrue(json.contains("\"1+\""), json);
+        assertTrue(json.contains("\"smb://server/\""), json);
+    }
+
+    @Test
     public void test_buildDormantQuery() {
         final TestService service = new TestService(new TestFessConfig());
         final String json = service.buildDormantQuery(null, 30, false).toString();

@@ -172,7 +172,7 @@ public class DocumentReportService {
         }
         try {
             report.getGroups()
-                    .addAll(searchDuplicateGroups(buildBaseQuery(urlPrefix), fessConfig.getDocreportDuplicateGroupSizeAsInteger(),
+                    .addAll(searchDuplicateGroups(buildDuplicateQuery(urlPrefix), fessConfig.getDocreportDuplicateGroupSizeAsInteger(),
                             fessConfig.getDocreportDuplicateDocsSizeAsInteger()));
         } catch (final Exception e) {
             logger.warn("Failed to build the duplicate document report.", e);
@@ -197,7 +197,7 @@ public class DocumentReportService {
         final CsvWriter csvWriter = new CsvWriter(writer, CsvUtil.createCsvConfig());
         csvWriter.writeValues(DUPLICATE_CSV_COLUMNS);
         if (isDuplicateReportAvailable()) {
-            final QueryBuilder baseQuery = buildBaseQuery(urlPrefix);
+            final QueryBuilder baseQuery = buildDuplicateQuery(urlPrefix);
             final String hashField = fessConfig.getIndexFieldContentMinhashBits();
             final long[] groupNumber = { 0 };
             final String[] currentHash = { null };
@@ -311,6 +311,20 @@ public class DocumentReportService {
             return QueryBuilders.matchAllQuery();
         }
         return QueryBuilders.boolQuery().filter(QueryBuilders.prefixQuery(fessConfig.getIndexFieldUrl(), urlPrefix.trim()));
+    }
+
+    /**
+     * Builds the filter of the duplicate report: {@link #buildBaseQuery(String)} without the documents
+     * whose signature has every bit set. That signature means the content has no token at all (an
+     * empty file, or one with only stop words), so those documents are not copies of each other.
+     *
+     * @param urlPrefix the URL prefix, or blank for all documents
+     * @return the query
+     */
+    protected QueryBuilder buildDuplicateQuery(final String urlPrefix) {
+        return QueryBuilders.boolQuery()
+                .filter(buildBaseQuery(urlPrefix))
+                .mustNot(QueryBuilders.regexpQuery(fessConfig.getIndexFieldContentMinhashBits(), "1+"));
     }
 
     /**
