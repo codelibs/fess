@@ -400,6 +400,47 @@ public class ChatSessionClearHandlerTest extends UnitFessTestCase {
         assertFalse(body.contains("\"cleared\""), "must not contain cleared field when chat is disabled: " + body);
     }
 
+    // ── rag.chat.permissions gate ─────────────────────────────────────────────────
+
+    private static ChatSessionClearHandler deniedClearHandler(final org.codelibs.fess.api.v2.V2ErrorCode error) {
+        return new ChatSessionClearHandler() {
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.api.v2.V2ErrorCode> getChatAccessError() {
+                return org.dbflute.optional.OptionalThing.of(error);
+            }
+
+            @Override
+            protected String getUserId(final HttpServletRequest req) {
+                throw new AssertionError("a denied request must not resolve the chat user");
+            }
+
+            @Override
+            protected String getRateLimitKey(final HttpServletRequest req) {
+                throw new AssertionError("a denied request must not be throttled");
+            }
+        };
+    }
+
+    @Test
+    public void test_permissionDenied_anonymous_returnsAuthRequiredBeforeSessionIdCheck() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        // An invalid session id proves the gate runs before the path is validated.
+        deniedClearHandler(org.codelibs.fess.api.v2.V2ErrorCode.AUTH_REQUIRED).handle(new StubRequest("DELETE"), res, "bad id!");
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertTrue(res.body().contains("\"reason\":\"chat_not_permitted\""), res.body());
+    }
+
+    @Test
+    public void test_permissionDenied_signedIn_returnsForbidden() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        deniedClearHandler(org.codelibs.fess.api.v2.V2ErrorCode.FORBIDDEN).handle(new StubRequest("DELETE"), res, "valid-session-1");
+        assertEquals(403, res.status);
+        assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────────
 
     private static void enableRagChat() {

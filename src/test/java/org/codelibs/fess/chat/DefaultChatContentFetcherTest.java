@@ -16,6 +16,7 @@
 package org.codelibs.fess.chat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1387,7 +1388,8 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
             @Override
             public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
                     final org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> userBean,
-                    final org.codelibs.fess.entity.SearchRequestParams.SearchRequestType searchRequestType) {
+                    final org.codelibs.fess.entity.SearchRequestParams.SearchRequestType searchRequestType,
+                    final List<org.codelibs.fesen.opensearch.index.query.QueryBuilder> filterQueries) {
                 throw failure;
             }
 
@@ -1482,5 +1484,71 @@ public class DefaultChatContentFetcherTest extends UnitFessTestCase {
         final org.codelibs.fess.query.QueryFieldConfig queryFieldConfig = new org.codelibs.fess.query.QueryFieldConfig();
         queryFieldConfig.init();
         org.codelibs.fess.util.ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+    }
+
+    // ===================================================================================
+    //                                            rag.chat.labels: chat filter on fetches
+    //                                                                           =========
+
+    /** Sets {@code rag.chat.labels} on the active config; an empty value lifts the restriction. */
+    private static void setChatLabels(final String labels) {
+        org.codelibs.fess.util.ComponentUtil.getFessConfig().setRagChatLabels(labels);
+    }
+
+    @Test
+    public void test_fetchFullContent_appliesChatLabelFilter() {
+        final List<List<org.codelibs.fesen.opensearch.index.query.QueryBuilder>> captured = new ArrayList<>();
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.SearchHelper() {
+            @Override
+            public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
+                    final org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> userBean,
+                    final org.codelibs.fess.entity.SearchRequestParams.SearchRequestType searchRequestType,
+                    final List<org.codelibs.fesen.opensearch.index.query.QueryBuilder> filterQueries) {
+                captured.add(filterQueries);
+                return Collections.emptyList();
+            }
+        }, "searchHelper");
+        try {
+            setChatLabels("public,faq");
+            new DefaultChatContentFetcher().fetchFullContent(List.of("a"));
+            // fetchWholeDocument (document chat) goes through the same lookup
+            new DefaultChatContentFetcher().fetchWholeDocument("b");
+            assertEquals(2, captured.size());
+            for (final List<org.codelibs.fesen.opensearch.index.query.QueryBuilder> filters : captured) {
+                assertEquals(1, filters.size());
+                final org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder terms =
+                        (org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder) filters.get(0);
+                assertEquals("label", terms.fieldName());
+                assertEquals(List.of("public", "faq"), terms.values());
+            }
+
+            captured.clear();
+            setChatLabels("");
+            new DefaultChatContentFetcher().fetchFullContent(List.of("a"));
+            assertEquals(1, captured.size());
+            assertTrue(captured.get(0).isEmpty(), "no rag.chat.labels must add no filter");
+        } finally {
+            setChatLabels("");
+        }
+    }
+
+    @Test
+    public void test_highlightSearchParams_carryChatLabelFilter() {
+        final org.codelibs.fess.mylasta.direction.FessConfig fessConfig = org.codelibs.fess.util.ComponentUtil.getFessConfig();
+        try {
+            setChatLabels("public");
+            final DefaultChatContentFetcher.AnswerHighlightSearchParams highlightParams =
+                    new DefaultChatContentFetcher.AnswerHighlightSearchParams("q", 1, fessConfig, new String[] { "doc_id:a" });
+            assertEquals(org.codelibs.fess.util.ComponentUtil.getChatApiHelper().getChatFilterQueries(),
+                    highlightParams.getFilterQueries());
+            assertEquals(1, highlightParams.getFilterQueries().size());
+            // the keyword/semantic chat search params carry the same filter
+            assertEquals(1, new ChatClient.ChatSearchRequestParams("q", 3, fessConfig).getFilterQueries().size());
+
+            setChatLabels("");
+            assertTrue(new ChatClient.ChatSearchRequestParams("q", 3, fessConfig).getFilterQueries().isEmpty());
+        } finally {
+            setChatLabels("");
+        }
     }
 }

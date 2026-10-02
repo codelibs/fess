@@ -51,6 +51,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -1745,6 +1746,16 @@ public class ChatClient {
         @Override
         public String getSimilarDocHash() {
             return null;
+        }
+
+        /**
+         * Restricts every chat retrieval to the documents the chat may use ({@code rag.chat.labels}).
+         *
+         * @return the chat filter clauses; empty when the chat is not restricted
+         */
+        @Override
+        public List<QueryBuilder> getFilterQueries() {
+            return ComponentUtil.getChatApiHelper().getChatFilterQueries();
         }
     }
 }

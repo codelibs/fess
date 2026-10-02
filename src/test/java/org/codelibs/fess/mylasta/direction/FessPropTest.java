@@ -1211,4 +1211,54 @@ public class FessPropTest extends UnitFessTestCase {
         };
     }
 
+    @Test
+    public void test_ragChatPermissions_encodedAndCachedUntilSet() {
+        FessProp.propMap.clear();
+        ComponentUtil.register(new org.codelibs.fess.helper.PermissionHelper() {
+            {
+                systemHelper = new SystemHelper();
+            }
+        }, "permissionHelper");
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        try {
+            assertEquals("", fessConfig.getRagChatPermissions());
+            assertTrue(fessConfig.getRagChatPermissionSet().isEmpty(), "unset rag.chat.permissions must not restrict the chat");
+
+            fessConfig.setRagChatPermissions(" {role}rag-user , {group}sales,{user}taro,, ");
+            assertEquals(java.util.Set.of("Rrag-user", "2sales", "1taro"), fessConfig.getRagChatPermissionSet());
+
+            // The parsed set is cached; a direct property change is only seen after the setter runs.
+            ComponentUtil.getSystemProperties().setProperty(Constants.RAG_CHAT_PERMISSIONS, "{role}other");
+            assertEquals(java.util.Set.of("Rrag-user", "2sales", "1taro"), fessConfig.getRagChatPermissionSet());
+            fessConfig.setRagChatPermissions("{role}guest");
+            assertEquals(java.util.Set.of("Rguest"), fessConfig.getRagChatPermissionSet());
+
+            fessConfig.setRagChatPermissions("");
+            assertTrue(fessConfig.getRagChatPermissionSet().isEmpty());
+        } finally {
+            fessConfig.setRagChatPermissions("");
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
+    public void test_ragChatLabels_parsedAndCachedUntilSet() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        try {
+            assertEquals("", fessConfig.getRagChatLabels());
+            assertTrue(fessConfig.getRagChatLabelValueList().isEmpty(), "unset rag.chat.labels must not restrict the chat");
+
+            fessConfig.setRagChatLabels(" public, faq ,,public ");
+            assertEquals(Arrays.asList("public", "faq"), fessConfig.getRagChatLabelValueList());
+
+            ComponentUtil.getSystemProperties().setProperty(Constants.RAG_CHAT_LABELS, "other");
+            assertEquals(Arrays.asList("public", "faq"), fessConfig.getRagChatLabelValueList());
+            fessConfig.setRagChatLabels("other");
+            assertEquals(Arrays.asList("other"), fessConfig.getRagChatLabelValueList());
+        } finally {
+            fessConfig.setRagChatLabels("");
+            FessProp.propMap.clear();
+        }
+    }
 }

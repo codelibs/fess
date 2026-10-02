@@ -392,6 +392,20 @@ public class EditForm {
     public String ragLlmName;
 
     /**
+     * Permissions allowed to use the RAG chat ({@code rag.chat.permissions}), comma-separated.
+     * Empty allows every user.
+     */
+    @Size(max = 4000)
+    public String ragChatPermissions;
+
+    /**
+     * Label values the RAG chat may retrieve documents from ({@code rag.chat.labels}), comma-separated.
+     * Empty allows every document the user may see.
+     */
+    @Size(max = 4000)
+    public String ragChatLabels;
+
+    /**
      * LLM log level.
      * Controls the logging level for LLM-related packages.
      */

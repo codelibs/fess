@@ -531,6 +531,47 @@ describe("attachInline / attachStandalone submit", () => {
     expect(apiMock.sseStream.mock.calls[0][1]).toEqual({ message: "just a question" });
   });
 
+  it("attachStandalone: rebuilds when chat becomes available after a login", async () => {
+    vi.resetModules();
+    apiMock.getConfig.mockReturnValue({ features: { rag_chat_enabled: false } });
+    const chat = await import(CHAT_PATH);
+    mountBody('<div id="chat-view" hidden></div>');
+    chat.attachStandalone();
+    expect(document.querySelector("#chat-view .alert.alert-warning")).not.toBeNull();
+    expect(document.getElementById("standalone-chat-input")).toBeNull();
+
+    // The config fetched for the new user enables chat; the route runs again.
+    apiMock.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+    chat.attachStandalone();
+    expect(document.querySelector("#chat-view .alert.alert-warning")).toBeNull();
+    expect(document.getElementById("standalone-chat-input")).not.toBeNull();
+  });
+
+  it("attachStandalone: shows the disabled notice when chat becomes unavailable after a logout", async () => {
+    vi.resetModules();
+    apiMock.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+    const chat = await import(CHAT_PATH);
+    mountBody('<div id="chat-view" hidden></div>');
+    chat.attachStandalone();
+    expect(document.getElementById("standalone-chat-input")).not.toBeNull();
+
+    apiMock.getConfig.mockReturnValue({ features: { rag_chat_enabled: false } });
+    chat.attachStandalone();
+    expect(document.getElementById("standalone-chat-input")).toBeNull();
+    expect(document.querySelector("#chat-view .alert.alert-warning").textContent).toBe("chat.disabled");
+  });
+
+  it("attachStandalone: keeps the view when availability is unchanged on re-entry", async () => {
+    vi.resetModules();
+    apiMock.getConfig.mockReturnValue({ features: { rag_chat_enabled: true } });
+    const chat = await import(CHAT_PATH);
+    mountBody('<div id="chat-view" hidden></div>');
+    chat.attachStandalone();
+    const ta = document.getElementById("standalone-chat-input");
+    chat.attachStandalone();
+    expect(document.getElementById("standalone-chat-input")).toBe(ta);
+  });
+
   it("attachStandalone: renders the disabled notice when rag chat is off", async () => {
     vi.resetModules();
     apiMock.getConfig.mockReturnValue({ features: { rag_chat_enabled: false } });
@@ -713,6 +754,35 @@ describe("attachStandalone document mode", () => {
     ask("b");
     fail(new NetworkError(new Error("offline")));
     expect(errorText()).toBe(en["error.network"]);
+  });
+
+  it("a 401 from the chat permission gate asks for a login", async () => {
+    const { ApiError } = await vi.importActual("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    const show = vi.fn();
+    vi.stubGlobal("bootstrap", { Modal: { getOrCreateInstance: vi.fn(() => ({ show })) } });
+    await mount("", "");
+    document.body.insertAdjacentHTML("beforeend", '<div id="login-modal"></div>');
+    ask("hello");
+    fail(new ApiError("auth_required", "login required", 401, { reason: "chat_not_permitted" }));
+    expect(errorText()).toBe(en["labels.chat_auth_required"]);
+    expect(show).toHaveBeenCalledTimes(1);
+    expect(input().disabled).toBe(false);
+  });
+
+  it("a 403 from the chat permission gate says the feature is not available", async () => {
+    const { ApiError } = await vi.importActual("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    await mount("", "");
+    ask("hello");
+    fail(new ApiError("forbidden", "chat is not permitted", 403, { reason: "chat_not_permitted" }));
+    expect(errorText()).toBe(en["error.feature_disabled"]);
+  });
+
+  it("any other 403 (e.g. a rejected CSRF token) keeps the generic server error", async () => {
+    const { ApiError } = await vi.importActual("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    await mount("", "");
+    ask("hello");
+    fail(new ApiError("forbidden", "invalid csrf token", 403));
+    expect(errorText()).toBe(en["error.server"]);
   });
 
   it("a 404 in normal chat stays the generic server error", async () => {

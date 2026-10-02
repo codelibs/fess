@@ -136,6 +136,51 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         assertFalse(res.body().contains("event: error"), res.body());
     }
 
+    // ── rag.chat.permissions gate ─────────────────────────────────────────────
+
+    /** A handler whose permission decision is fixed and whose later steps must never run. */
+    private static ChatStreamHandler deniedStreamHandler(final org.codelibs.fess.api.v2.V2ErrorCode error) {
+        return new ChatStreamHandler() {
+            @Override
+            protected org.dbflute.optional.OptionalThing<org.codelibs.fess.api.v2.V2ErrorCode> getChatAccessError() {
+                return org.dbflute.optional.OptionalThing.of(error);
+            }
+
+            @Override
+            protected String getUserId(final HttpServletRequest req) {
+                throw new AssertionError("a denied request must not resolve the chat user");
+            }
+
+            @Override
+            protected String getRateLimitKey(final HttpServletRequest req) {
+                throw new AssertionError("a denied request must not be throttled");
+            }
+        };
+    }
+
+    @Test
+    public void test_permissionDenied_anonymous_returnsAuthRequiredJsonWithoutSse() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        deniedStreamHandler(org.codelibs.fess.api.v2.V2ErrorCode.AUTH_REQUIRED)
+                .handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{not json"), res);
+        assertEquals(401, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        assertTrue(res.body().contains("\"reason\":\"chat_not_permitted\""), res.body());
+    }
+
+    @Test
+    public void test_permissionDenied_signedIn_returnsForbiddenJsonWithoutSse() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        deniedStreamHandler(org.codelibs.fess.api.v2.V2ErrorCode.FORBIDDEN)
+                .handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
+        assertEquals(403, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
+    }
+
     /**
      * Overrides the default {@code rag.chat.enabled=false} via a {@link FessConfig.SimpleImpl}
      * subclass so we can reach the post-gate validation branches.

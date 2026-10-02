@@ -308,17 +308,15 @@ function renderFooterCopyright() {
 }
 
 /**
- * D.4: Conditionally insert a Chat nav link when rag_chat_enabled is true.
- * The Phase E agent will add the <a> element to the markup; until then we
- * create it dynamically next to the Help link so chat navigation works.
+ * D.4: Show the Chat nav link only while rag_chat_enabled is true. The flag depends on the
+ * user (rag.chat.permissions), so this runs again whenever the config is fetched for a new user.
  */
 function renderChatNavLink() {
   const features = api.getConfig()?.features || {};
-  if (!features.rag_chat_enabled) return;
   // The chat nav entry is the li.nav-item#chat-nav-item in markup (header.jsp
-  // parity). Reveal it by removing d-none from the li wrapper.
+  // parity). Show or hide it through d-none on the li wrapper.
   const item = document.getElementById("chat-nav-item");
-  if (item) item.classList.remove("d-none");
+  if (item) item.classList.toggle("d-none", !features.rag_chat_enabled);
 }
 
 /**
@@ -478,6 +476,7 @@ async function refreshForUser() {
     console.error("Fess /ui/config failed:", e);
   }
   search.initSearchOptions();
+  renderChatNavLink();
   dispatchOrGate();
 }
 

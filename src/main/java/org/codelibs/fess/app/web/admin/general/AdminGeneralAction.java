@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -251,6 +252,13 @@ public class AdminGeneralAction extends FessAdminAction {
         if (form.ragLlmName != null && isValidRagLlmName(form.ragLlmName)) {
             fessConfig.setRagLlmName(form.ragLlmName);
         }
+        // Absent (null) when the RAG section is not shown, so the stored value is kept.
+        if (form.ragChatPermissions != null) {
+            fessConfig.setRagChatPermissions(normalizeCommaSeparatedValue(form.ragChatPermissions));
+        }
+        if (form.ragChatLabels != null) {
+            fessConfig.setRagChatLabels(normalizeCommaSeparatedValue(form.ragChatLabels));
+        }
 
         // OpenID Connect
         if (form.oicClientId != null && StringUtil.isNotBlank(form.oicClientId.replace("*", " "))) {
@@ -403,6 +411,8 @@ public class AdminGeneralAction extends FessAdminAction {
         form.storageProjectId = fessConfig.getStorageProjectId();
         form.storageCredentialsPath = fessConfig.getStorageCredentialsPath();
         form.ragLlmName = fessConfig.getRagLlmName();
+        form.ragChatPermissions = fessConfig.getRagChatPermissions();
+        form.ragChatLabels = fessConfig.getRagChatLabels();
         form.llmLogLevel = ComponentUtil.getSystemHelper().getLlmLogLevel().toUpperCase();
         form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
 
@@ -532,6 +542,18 @@ public class AdminGeneralAction extends FessAdminAction {
         }
         items.add(Integer.toString(365));
         return items;
+    }
+
+    /**
+     * Normalizes a comma-separated setting: trims every entry and drops empty ones, so a value
+     * typed with spaces or stray commas is stored the way it is read.
+     *
+     * @param value the submitted value
+     * @return the normalized value; empty when no entry is left
+     */
+    static String normalizeCommaSeparatedValue(final String value) {
+        return stream(value.split(","))
+                .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining(",")));
     }
 
     private boolean isRagSectionVisible() {

@@ -77,6 +77,7 @@ import org.codelibs.fesen.opensearch.action.update.UpdateRequestBuilder;
 import org.codelibs.fesen.opensearch.action.update.UpdateResponse;
 import org.codelibs.fesen.opensearch.common.document.DocumentField;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 import tools.jackson.databind.ObjectMapper;
@@ -302,6 +303,7 @@ public class SearchHelper {
                             .size(pageSize)
                             .responseFields(queryFieldConfig.getScrollResponseFields())
                             .searchRequestType(params.getType())
+                            .filterQueries(params.getFilterQueries())
                             .build();
                 }, (searchResponse, hit) -> {
                     final Map<String, Object> docMap = new HashMap<>();
@@ -351,6 +353,10 @@ public class SearchHelper {
 
         final QueryContext queryContext = ComponentUtil.getQueryHelper().build(params.getType(), query, context -> {
             context.skipRoleQuery();
+            final List<QueryBuilder> filterQueries = params.getFilterQueries();
+            if (!filterQueries.isEmpty()) {
+                context.addQuery(boolQuery -> filterQueries.forEach(boolQuery::filter));
+            }
         });
         return ComponentUtil.getSearchEngineClient()
                 .deleteByQuery(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(), queryContext.getQueryBuilder());
@@ -417,6 +423,20 @@ public class SearchHelper {
      */
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
             final OptionalThing<FessUserBean> userBean) {
+        return getDocumentByDocId(docId, fields, userBean, Collections.emptyList());
+    }
+
+    /**
+     * Retrieves a single document by its document ID, constrained by extra filter clauses.
+     *
+     * @param docId The document ID to retrieve
+     * @param fields Array of field names to include in the result
+     * @param userBean Optional user information for permission checking
+     * @param filterQueries Filter clauses the document must also match, applied next to the role filter
+     * @return Optional entity containing the document data if found
+     */
+    public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+            final OptionalThing<FessUserBean> userBean, final List<QueryBuilder> filterQueries) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return ComponentUtil.getSearchEngineClient().getDocument(fessConfig.getIndexDocumentSearchIndex(), builder -> {
             final BoolQueryBuilder boolQuery =
@@ -425,6 +445,9 @@ public class SearchHelper {
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
             if (!roleSet.isEmpty()) {
                 queryHelper.buildRoleQuery(roleSet, boolQuery);
+            }
+            if (filterQueries != null) {
+                filterQueries.forEach(boolQuery::filter);
             }
             builder.setQuery(boolQuery);
             builder.setFetchSource(fields, null);
@@ -445,6 +468,21 @@ public class SearchHelper {
      */
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
             final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
+        return getDocumentListByDocIds(docIds, fields, userBean, searchRequestType, Collections.emptyList());
+    }
+
+    /**
+     * Retrieves multiple documents by their document IDs, constrained by extra filter clauses.
+     *
+     * @param docIds Array of document IDs to retrieve
+     * @param fields Array of field names to include in the results
+     * @param userBean Optional user information for permission checking
+     * @param searchRequestType Type of search request for role-based access control
+     * @param filterQueries Filter clauses the documents must also match, applied next to the role filter
+     * @return List of document data maps
+     */
+    public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
+            final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType, final List<QueryBuilder> filterQueries) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return ComponentUtil.getSearchEngineClient().getDocumentList(fessConfig.getIndexDocumentSearchIndex(), builder -> {
             final BoolQueryBuilder boolQuery =
@@ -455,6 +493,9 @@ public class SearchHelper {
                 if (!roleSet.isEmpty()) {
                     queryHelper.buildRoleQuery(roleSet, boolQuery);
                 }
+            }
+            if (filterQueries != null) {
+                filterQueries.forEach(boolQuery::filter);
             }
             builder.setQuery(boolQuery);
             builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger());

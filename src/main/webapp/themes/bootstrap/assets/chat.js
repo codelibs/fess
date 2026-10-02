@@ -4,6 +4,7 @@
 // attachStandalone() for the full-width /chat route.
 
 import * as api from "./api.js";
+import { promptLogin } from "./auth.js";
 import { t } from "./i18n.js";
 import { sanitizeHtml } from "./format.js";
 import { parseMarkdown } from "./markdown.js";
@@ -23,6 +24,12 @@ let sessionId = null;
 
 /** Whether the standalone view has been mounted at least once. */
 let standaloneMounted = false;
+
+/**
+ * The rag_chat_enabled flag the standalone view was built for. The flag depends on the user,
+ * so a re-entry after a login or logout that changed it rebuilds the view.
+ */
+let standaloneEnabled = false;
 
 /**
  * Set by the mounted standalone view: applies the document context ({ id, title }) read
@@ -971,6 +978,15 @@ function submitQuestion(question, uiRefs) {
       // Document mode: the server answers 404 before streaming when the document is gone
       // or the user may not see it.
       msg = t("labels.chat_document_unavailable");
+    } else if (err && (err.code === "auth_required" || err.httpStatus === 401)) {
+      // Chat is limited to permitted users (rag.chat.permissions) and nobody is signed in:
+      // ask for a login (the SSO login when SSO is served).
+      promptLogin();
+      msg = t("labels.chat_auth_required");
+    } else if (err && err.httpStatus === 403 && err.details && err.details.reason === "chat_not_permitted") {
+      // The signed-in user is not permitted to use chat (rag.chat.permissions). Other 403s,
+      // such as a rejected CSRF token, keep the generic message.
+      msg = t("error.feature_disabled");
     } else {
       msg = t("error.server");
     }
@@ -1164,15 +1180,24 @@ export function attachStandalone() {
   container.removeAttribute("hidden");
 
   const documentContext = readDocumentContext();
-  if (standaloneMounted) {
-    // Already built — just re-show, switching the conversation if the document changed.
-    if (applyDocumentContext) applyDocumentContext(documentContext);
-    return;
-  }
-  standaloneMounted = true;
-
   const cfg = api.getConfig();
   const enabled = !!(cfg && cfg.features && cfg.features.rag_chat_enabled);
+  if (standaloneMounted) {
+    if (enabled === standaloneEnabled) {
+      // Already built — just re-show, switching the conversation if the document changed.
+      if (applyDocumentContext) applyDocumentContext(documentContext);
+      return;
+    }
+    // The user changed and chat availability with it: drop the old conversation and rebuild.
+    if (currentStream) {
+      try { currentStream.abort(); } catch { /* ignore */ }
+      currentStream = null;
+    }
+    sessionId = null;
+    applyDocumentContext = null;
+  }
+  standaloneMounted = true;
+  standaloneEnabled = enabled;
 
   // Clear and build
   while (container.firstChild) container.removeChild(container.firstChild);
