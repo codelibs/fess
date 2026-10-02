@@ -27,6 +27,7 @@ import org.codelibs.fess.api.v2.handlers.ChatHandler;
 import org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler;
 import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
+import org.codelibs.fess.api.v2.handlers.DocumentTagsHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.ExportSearchHandler;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
@@ -101,6 +102,10 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code POST /api/v2/documents/{id}/favorite} (toggle favorite state). */
     @Resource
     protected FavoritePostHandler favoritePostHandler;
+
+    /** Handles {@code GET/POST/DELETE /api/v2/documents/{id}/tags} (list, add and remove user tags). */
+    @Resource
+    protected DocumentTagsHandler documentTagsHandler;
 
     /** Handles {@code GET /api/v2/favorites} (list favorited doc ids in a previously issued search result). */
     @Resource
@@ -300,6 +305,12 @@ public class SearchApiV2Manager extends BaseApiManager {
                 } else {
                     favoriteGetHandler.handle(request, response, docId);
                 }
+                return;
+            }
+            // "/documents/tags" leaves no doc id between the two ends, like "/documents/favorite" above.
+            if (sub.startsWith("/documents/") && sub.endsWith("/tags") && sub.length() > "/documents/".length() + "/tags".length()) {
+                final String docId = sub.substring("/documents/".length(), sub.length() - "/tags".length());
+                documentTagsHandler.handle(request, response, docId);
                 return;
             }
             if (sub.startsWith("/cache/")) {

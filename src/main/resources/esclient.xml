@@ -521,6 +521,9 @@
 			<arg>"fess_log.search_log/search_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.tag_log/tag_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>"fess_log.user_info/user_info"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

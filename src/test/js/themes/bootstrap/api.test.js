@@ -113,6 +113,37 @@ describe("post", () => {
   });
 });
 
+describe("del", () => {
+  it("sends DELETE with the query string and the CSRF header, and unwraps the envelope", async () => {
+    api.setCsrfToken("tok-9");
+    const fetchMock = installFetch(async () => envelope({ status: 0, removed: 1 }));
+    const env = await api.del("/documents/d1/tags", { value: "general:a b&c" });
+    expect(env.removed).toBe(1);
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toBe("api/v2/documents/d1/tags?value=general%3Aa+b%26c");
+    expect(opts.method).toBe("DELETE");
+    expect(opts.credentials).toBe("same-origin");
+    expect(opts.headers["X-Fess-CSRF-Token"]).toBe("tok-9");
+    expect(opts.body).toBeUndefined();
+  });
+
+  it("omits the query string without parameters", async () => {
+    const fetchMock = installFetch(async () => envelope({ status: 0 }));
+    await api.del("/x");
+    expect(fetchMock.mock.calls[0][0]).toBe("api/v2/x");
+  });
+
+  it("throws ApiError from an error envelope", async () => {
+    installFetch(async () => jsonResponse({ response: { status: 1, error: { code: "invalid_request", message: "bad" } } }, { status: 400 }));
+    await expect(api.del("/x")).rejects.toMatchObject({ code: "invalid_request", message: "bad", httpStatus: 400 });
+  });
+
+  it("wraps a fetch rejection in NetworkError", async () => {
+    installFetch(async () => { throw new Error("down"); });
+    await expect(api.del("/x")).rejects.toBeInstanceOf(api.NetworkError);
+  });
+});
+
 describe("init + state accessors", () => {
   it("init stores the config envelope and csrf token", async () => {
     installFetch(async () => envelope({ status: 0, csrf_token: "abc", search: { enabled: true } }));

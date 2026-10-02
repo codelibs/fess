@@ -107,6 +107,29 @@ export async function post(path, body) {
 }
 
 /**
+ * DELETE /api/v2{path}, with the same CSRF header, credentials and envelope handling as post().
+ * Named del because delete is a reserved word.
+ * @param {string} path
+ * @param {object} [params] - query parameters
+ */
+export async function del(path, params) {
+  let resp;
+  try {
+    resp = await fetch(BASE + path + qs(params), {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: {
+        "Accept": "application/json",
+        "X-Fess-CSRF-Token": csrfToken || ""
+      }
+    });
+  } catch (e) {
+    throw new NetworkError(e);
+  }
+  return unwrap(resp);
+}
+
+/**
  * @deprecated — use sseStream for POST-based streaming (EventSource cannot send custom headers).
  * Kept for backward compatibility; will be removed once all callers migrate to sseStream.
  */

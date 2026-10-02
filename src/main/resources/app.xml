@@ -63,6 +63,8 @@
 	</component>
 	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
 	</component>
+	<component name="tagHelper" class="org.codelibs.fess.helper.TagHelper">
+	</component>
 	<component name="themeRegistry" class="org.codelibs.fess.theme.ThemeRegistry">
 	</component>
 	<component name="staticThemeResponder" class="org.codelibs.fess.theme.StaticThemeResponder">

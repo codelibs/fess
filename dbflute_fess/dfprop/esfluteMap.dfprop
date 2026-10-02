@@ -175,6 +175,16 @@ map:{
                 }
             }
         }
+        ; fess_log.tag_log = map:{
+            ; package = log
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_log.xml
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; date@dateOptionalTime = LocalDateTime
+                }
+            }
+        }
         ; fess_log.user_info = map:{
             ; package = log
             ; esclientDiFile = esclient.xml

@@ -1,0 +1,20 @@
+{
+    "properties": {
+      "user": {
+        "type": "keyword"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "tag": {
+        "type": "keyword"
+      },
+      "docId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      }
+    }
+}

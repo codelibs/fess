@@ -24,6 +24,7 @@ import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getDocJso
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFavoriteLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getFessJsonPath;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getSearchLogNdjsonWriteCall;
+import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getTagLogNdjsonWriteCall;
 import static org.codelibs.fess.app.web.admin.backup.AdminBackupAction.getUserInfoNdjsonWriteCall;
 
 import java.io.BufferedWriter;
@@ -154,6 +155,8 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
                 return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
             case "favorite_log":
                 return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
+            case "tag_log":
+                return writeNdjsonResponse(id, getTagLogNdjsonWriteCall());
             case null:
             default:
                 break;

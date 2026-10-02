@@ -68,7 +68,7 @@ public class CsrfRequirementCompleteCoverageTest {
      * Must equal {@code ENDPOINT_DECISIONS.size()}. Increment when adding a new endpoint
      * so that the mismatch causes a deliberate compile-time / test-time notice.
      */
-    private static final int EXPECTED_ENTRY_COUNT = 18;
+    private static final int EXPECTED_ENTRY_COUNT = 19;
 
     static {
         // LinkedHashMap preserves insertion order for readable failure messages.
@@ -98,6 +98,8 @@ public class CsrfRequirementCompleteCoverageTest {
         m.put("/click", true); // POST, CSRF required
         // /documents/{id}/favorite is a pattern — tested via representative docId
         m.put("/documents/abc123/favorite", true); // POST, CSRF required
+        // /documents/{id}/tags is a pattern — GET lists, POST adds and DELETE removes a tag
+        m.put("/documents/abc123/tags", true); // POST/DELETE, CSRF required
         m.put("/favorites", true); // GET only — secure default (CSRF required if called via POST)
         m.put("/search-history", true); // GET only — secure default (CSRF required if called via POST)
 
@@ -146,8 +148,8 @@ public class CsrfRequirementCompleteCoverageTest {
     public void test_stateChangingEndpointsAreAllCsrfRequired() {
         // Secondary assertion: all paths that POST/DELETE actual state changes (auth/logout,
         // auth/password, click, favorite, chat, chat/stream, chat/sessions) must require CSRF.
-        final List<String> stateChangingPost =
-                Arrays.asList("/auth/logout", "/auth/password", "/click", "/documents/abc123/favorite", "/chat", "/chat/stream");
+        final List<String> stateChangingPost = Arrays.asList("/auth/logout", "/auth/password", "/click", "/documents/abc123/favorite",
+                "/documents/abc123/tags", "/chat", "/chat/stream");
         for (final String path : stateChangingPost) {
             assertTrue(new CsrfRequirement().requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
         }
@@ -164,6 +166,22 @@ public class CsrfRequirementCompleteCoverageTest {
         assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/def", "DELETE"), "DELETE /chat/sessions/def must require CSRF");
         assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/", "DELETE"),
                 "DELETE /chat/sessions/ (trailing slash) must require CSRF");
+    }
+
+    @Test
+    public void test_documentTags_requiresCsrfForWritesOnly() {
+        // POST adds and DELETE removes a tag; GET only lists the tags.
+        final CsrfRequirement requirement = new CsrfRequirement();
+        for (final String path : new String[] { "/documents/abc123/tags", "/documents/a-b_c/tags" }) {
+            assertTrue(requirement.requiresCsrf(path, "POST"), "POST " + path + " must require CSRF");
+            assertTrue(requirement.requiresCsrf(path, "DELETE"), "DELETE " + path + " must require CSRF");
+            assertTrue(requirement.requiresCsrf(path, "delete"), "delete " + path + " must require CSRF (case-insensitive)");
+            assertTrue(requirement.requiresCsrf(path, "PUT"), "PUT " + path + " must require CSRF (secure default)");
+            assertFalse(requirement.requiresCsrf(path, "GET"), "GET " + path + " must be CSRF-exempt");
+            assertFalse(requirement.requiresCsrf(path, "HEAD"), "HEAD " + path + " must be CSRF-exempt");
+        }
+        // The id-less path is not a tags endpoint (it answers not_found), but a write to it stays gated.
+        assertTrue(requirement.requiresCsrf("/documents/tags", "POST"));
     }
 
     @Test

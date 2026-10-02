@@ -17,9 +17,13 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +32,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.entity.SearchRenderData;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.RelatedContentHelper;
@@ -115,7 +120,7 @@ public class SearchHandler {
                 ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
                 return;
             }
-            final Map<String, Object> payload = buildPayload(params.getQuery(), data);
+            final Map<String, Object> payload = buildPayload(params.getQuery(), data, getTagTypeValueSet(request));
             // Evaluated per search: a user whose group and role permissions are still loading or
             // failed sees fewer results.
             final OptionalThing<FessUserBean> userBean = getSavedUserBean();
@@ -169,9 +174,10 @@ public class SearchHandler {
      *
      * @param query the original {@code q} parameter (may be {@code null})
      * @param data the populated render data returned by the search helper
+     * @param tagTypeSet the tag label types that the caller can see
      * @return the ordered payload map ready for envelope serialization
      */
-    private Map<String, Object> buildPayload(final String query, final SearchRenderData data) {
+    private Map<String, Object> buildPayload(final String query, final SearchRenderData data, final Set<String> tagTypeSet) {
         final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
         final RelatedContentHelper relatedContentHelper = ComponentUtil.getRelatedContentHelper();
 
@@ -198,11 +204,11 @@ public class SearchHandler {
         payload.put("requested_time", data.getRequestedTime());
         payload.put("related_query", relatedQueryHelper.getRelatedQueries(query));
         payload.put("related_contents", relatedContentHelper.getRelatedContents(query));
-        payload.put("data", filterDocuments(data.getDocumentItems()));
+        payload.put("data", filterDocuments(data.getDocumentItems(), tagTypeSet));
 
         final FacetResponse facetResponse = data.getFacetResponse();
         if (facetResponse != null && facetResponse.hasFacetResponse()) {
-            payload.put("facet_field", buildFacetField(facetResponse));
+            payload.put("facet_field", buildFacetField(facetResponse, tagTypeSet));
             payload.put("facet_query", buildFacetQuery(facetResponse));
         }
         return payload;
@@ -215,21 +221,33 @@ public class SearchHandler {
      * <p>Drops blank keys and {@code null} values — matching v1's behavior so the
      * wire payload size stays stable across versions.</p>
      *
+     * <p>The {@code tag} field is not an API response field: the tags of the label types that the caller
+     * can see are returned as {@code tags}, a list of {@code {value, type, name}}.</p>
+     *
      * @param docs the raw document items from {@link SearchRenderData}
+     * @param tagTypeSet the tag label types that the caller can see
      * @return a new list of filtered, order-preserved document maps
      */
-    private List<Map<String, Object>> filterDocuments(final List<Map<String, Object>> docs) {
+    List<Map<String, Object>> filterDocuments(final List<Map<String, Object>> docs, final Set<String> tagTypeSet) {
         if (docs == null || docs.isEmpty()) {
             return new ArrayList<>(0);
         }
         final QueryFieldConfig cfg = ComponentUtil.getQueryFieldConfig();
+        // never returned as is, even when query.additional.api.response.fields lists it
+        final String tagField = ComponentUtil.getFessConfig().getIndexFieldTag();
         final List<Map<String, Object>> out = new ArrayList<>(docs.size());
         for (final Map<String, Object> doc : docs) {
             final Map<String, Object> filtered = new LinkedHashMap<>();
             for (final Map.Entry<String, Object> e : doc.entrySet()) {
                 final String name = e.getKey();
-                if (StringUtil.isNotBlank(name) && e.getValue() != null && cfg.isApiResponseField(name)) {
+                if (StringUtil.isNotBlank(name) && e.getValue() != null && cfg.isApiResponseField(name) && !tagField.equals(name)) {
                     filtered.put(name, e.getValue());
+                }
+            }
+            if (!tagTypeSet.isEmpty()) {
+                final List<Map<String, Object>> tags = ComponentUtil.getTagHelper().toTagItems(toStringList(doc.get(tagField)), tagTypeSet);
+                if (!tags.isEmpty()) {
+                    filtered.put("tags", tags);
                 }
             }
             out.add(filtered);
@@ -248,6 +266,18 @@ public class SearchHandler {
      * @return a list of {@code {name, result:[{value, count}]}} maps
      */
     List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse) {
+        return buildFacetField(facetResponse, Collections.emptySet());
+    }
+
+    /**
+     * Builds the {@code facet_field} array. The values of the {@code tag} facet are limited to the tags of the
+     * label types that the caller can see, so a tag of another department is not revealed by its count.
+     *
+     * @param facetResponse the populated facet response (never {@code null})
+     * @param tagTypeSet the tag label types that the caller can see
+     * @return a list of {@code {name, result:[{value, count}]}} maps
+     */
+    List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse, final Set<String> tagTypeSet) {
         final List<Field> fields = facetResponse.getFieldList();
         if (fields == null || fields.isEmpty()) {
             return new ArrayList<>(0);
@@ -257,7 +287,11 @@ public class SearchHandler {
             final Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("name", field.getName());
             final List<Map<String, Object>> results = new ArrayList<>();
+            final boolean tagField = ComponentUtil.getFessConfig().getIndexFieldTag().equals(field.getName());
             for (final Map.Entry<String, Long> vc : field.getValueCountMap().entrySet()) {
+                if (tagField && !ComponentUtil.getTagHelper().isVisible(vc.getKey(), tagTypeSet)) {
+                    continue;
+                }
                 final Map<String, Object> result = new LinkedHashMap<>();
                 result.put("value", vc.getKey());
                 result.put("count", vc.getValue());
@@ -267,6 +301,40 @@ public class SearchHandler {
             out.add(entry);
         }
         return out;
+    }
+
+    /**
+     * Returns the tag label types that the caller can see, or an empty set while user tags are disabled.
+     * Exposed as a seam for unit tests.
+     *
+     * @param request the request
+     * @return the label type values
+     */
+    protected Set<String> getTagTypeValueSet(final HttpServletRequest request) {
+        try {
+            if (!ComponentUtil.getFessConfig().isUserTagEnabled()) {
+                return Collections.emptySet();
+            }
+            final Locale locale = request.getLocale() == null ? Locale.ROOT : request.getLocale();
+            return ComponentUtil.getLabelTypeHelper().getTagTypeValueSet(SearchRequestType.JSON, locale);
+        } catch (final Exception e) {
+            logger.debug("Failed to resolve the tag label types; no tags are returned.", e);
+            return Collections.emptySet();
+        }
+    }
+
+    private static List<String> toStringList(final Object value) {
+        final List<String> list = new ArrayList<>();
+        if (value instanceof final Collection<?> collection) {
+            collection.forEach(v -> list.add(String.valueOf(v)));
+        } else if (value instanceof final Object[] array) {
+            for (final Object v : array) {
+                list.add(String.valueOf(v));
+            }
+        } else if (value != null) {
+            list.add(value.toString());
+        }
+        return list;
     }
 
     /**

@@ -71,6 +71,8 @@ tags:
     description: Monitoring operations
   - name: favorite
     description: Favorite operations
+  - name: tag
+    description: Tags that users add to documents
   - name: auth
     description: Authentication and session operations
   - name: ui
@@ -1073,6 +1075,95 @@ paths:
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
+  /documents/{docId}/tags:
+    parameters:
+      - { $ref: '#/components/parameters/DocId' }
+    get:
+      tags: [tag]
+      summary: List the tags of a document
+      description: |-
+        Lists the tags of the document that the caller can see. A tag belongs to
+        a label of the kind `tag`, whose permissions decide who can see and add
+        its tags, and its value is `<label value>:<tag name>`. Tags are recorded
+        per URL, so every indexed document of the URL has the same tags.
+        Answers `400` while `user.tag.enabled` is false, and `404` when the
+        caller cannot see the document.
+      operationId: documentTagsGetV2
+      responses:
+        '200':
+          description: Tags returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTagsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    post:
+      tags: [tag]
+      summary: Add a tag to a document
+      description: |-
+        Adds a tag for the logged-in user; an access token does not stand in for
+        a login. The name is NFKC-normalized, whitespace is collapsed and it is
+        trimmed. Adding a tag the user already added is a no-op that answers
+        `added: false`. `user.tag.max.per.document` limits the tags one user adds
+        to one document and `user.tag.max.document.tags` the distinct tags of a
+        document.
+      operationId: documentTagsPostV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentTagPostRequest'
+      responses:
+        '200':
+          description: Tag added, or already added by the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTagsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    delete:
+      tags: [tag]
+      summary: Remove a tag from a document
+      description: |-
+        Removes the logged-in user's tag. A user with an admin role
+        (`authentication.admin.roles`) or the `admin-labeltype` role removes the
+        tag of every user.
+      operationId: documentTagsDeleteV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+        - name: value
+          in: query
+          required: true
+          description: The tag value, `<label value>:<tag name>`.
+          schema: { type: string }
+      responses:
+        '200':
+          description: Tag removed, or nothing to remove.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTagsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
   /cache/{docId}:
     get:
       tags: [cache]
@@ -1445,6 +1536,18 @@ components:
           description: Stored as the string `"true"`/`"false"`, not a JSON boolean.
         click_count: { type: integer, format: int64 }
         favorite_count: { type: integer, format: int64 }
+        tag_count:
+          type: integer
+          format: int64
+          description: The number of tags that users added to the document.
+        tags:
+          type: array
+          description: |-
+            The tags of the document that the caller can see. Present only while
+            `user.tag.enabled` is true and the document has such tags. The `tag`
+            index field itself is not returned.
+          items:
+            $ref: '#/components/schemas/DocumentTag'
         similar_docs_count:
           type: integer
           format: int64
@@ -1662,6 +1765,11 @@ components:
                       description: |-
                         `true` when `GET /documents/export` is available
                         (`api.search.export`).
+                    user_tag:
+                      type: boolean
+                      description: |-
+                        `true` when users can see and add tags
+                        (`/documents/{docId}/tags`, `user.tag.enabled`).
                     popular_word: { type: boolean }
                     suggest_search_log: { type: boolean }
                     suggest_documents: { type: boolean }
@@ -1748,6 +1856,18 @@ components:
                   description: |-
                     Labels offered to the caller, filtered by the request locale and
                     the caller's roles; empty when none.
+                  items:
+                    type: object
+                    required: [value, name]
+                    properties:
+                      value: { type: string }
+                      name: { type: string }
+                tag_types:
+                  type: array
+                  description: |-
+                    Labels of the kind `tag` whose tags the caller can see and, when
+                    logged in, add; filtered like `label_options`. Present only while
+                    `features.user_tag` is true.
                   items:
                     type: object
                     required: [value, name]
@@ -2199,6 +2319,67 @@ components:
                   description: |
                     True when the favorite was previously recorded (idempotent re-POST).
                     Absent on the first POST that newly records the favorite.
+
+    # --- Tags --------------------------------------------------------
+    DocumentTag:
+      type: object
+      required: [value, type, name]
+      properties:
+        value:
+          type: string
+          description: '`<label value>:<tag name>`; filter results with `fields.tag=<value>`.'
+        type:
+          type: string
+          description: The value of the label of the kind `tag`.
+        name: { type: string }
+
+    DocumentTagPostRequest:
+      type: object
+      required: [type, name]
+      properties:
+        type:
+          type: string
+          description: The value of a label of the kind `tag` in `tag_types`.
+        name:
+          type: string
+          description: |-
+            1 to `user.tag.name.max.length` (default 50) characters, without a
+            double quote, a backslash or a control character.
+
+    DocumentTagsResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [doc_id, addable, tags]
+              properties:
+                doc_id: { type: string }
+                addable:
+                  type: boolean
+                  description: '`true` when the caller is logged in and can add tags of at least one type.'
+                added:
+                  type: boolean
+                  description: POST only. `false` when the user had already added the tag.
+                removed:
+                  type: integer
+                  description: DELETE only. The number of removed records.
+                tags:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/DocumentTag'
+                      - type: object
+                        required: [count, mine, removable]
+                        properties:
+                          count:
+                            type: integer
+                            format: int64
+                            description: The number of users who added the tag.
+                          mine: { type: boolean }
+                          removable: { type: boolean }
 
     # --- Cache -------------------------------------------------------
     CacheResponse:

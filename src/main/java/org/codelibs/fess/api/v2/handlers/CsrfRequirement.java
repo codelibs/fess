@@ -89,6 +89,9 @@ public class CsrfRequirement {
         if (subPath.startsWith("/documents/") && subPath.endsWith("/favorite")) {
             return true;
         }
+        if (subPath.startsWith("/documents/") && subPath.endsWith("/tags")) {
+            return true;
+        }
         if ("/chat".equals(subPath)) {
             return true;
         }

@@ -132,6 +132,10 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             addFavoriteCountField(dataMap, url, fessConfig.getIndexFieldFavoriteCount());
         }
 
+        if (fessConfig.isUserTagEnabled()) {
+            ComponentUtil.getTagHelper().addTagFields(dataMap);
+        }
+
         final Set<String> matchedLabelSet = ComponentUtil.getLabelTypeHelper().getMatchedLabelValueSet(url);
         if (!matchedLabelSet.isEmpty()) {
             final Set<String> newLabelSet = new HashSet<>();

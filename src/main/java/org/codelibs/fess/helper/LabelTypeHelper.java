@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -100,6 +101,7 @@ public class LabelTypeHelper extends AbstractConfigHelper {
             item.setPermissions(labelType.getPermissions());
             item.setVirtualHost(labelType.getVirtualHost());
             item.setLocale(labelType.getLocale());
+            item.setTag(labelType.isTagKind());
             itemList.add(item);
         }
         labelTypeItemList = itemList;
@@ -116,13 +118,52 @@ public class LabelTypeHelper extends AbstractConfigHelper {
     }
 
     /**
-     * Returns a list of label type items.
+     * Returns a list of label type items. Label types of the kind {@value LabelType#KIND_TAG} are not included.
      *
      * @param searchRequestType The search request type.
      * @param requestLocale The request locale.
      * @return A list of label type items.
      */
     public List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType, final Locale requestLocale) {
+        return getVisibleItemList(searchRequestType, requestLocale, false);
+    }
+
+    /**
+     * Returns a list of the label types of the kind {@value LabelType#KIND_TAG} that the current user can see.
+     * The user can see and add the tags of these label types. The same virtual host, locale and permission
+     * rules as {@link #getLabelTypeItemList(SearchRequestType, Locale)} apply.
+     *
+     * @param searchRequestType The search request type.
+     * @param requestLocale The request locale.
+     * @return A list of maps with the label and the value of each label type.
+     */
+    public List<Map<String, String>> getTagTypeItemList(final SearchRequestType searchRequestType, final Locale requestLocale) {
+        return getVisibleItemList(searchRequestType, requestLocale, true);
+    }
+
+    /**
+     * Returns the values of the label types of the kind {@value LabelType#KIND_TAG} that the current user can see.
+     *
+     * @param searchRequestType The search request type.
+     * @param requestLocale The request locale.
+     * @return A set of label type values.
+     */
+    public Set<String> getTagTypeValueSet(final SearchRequestType searchRequestType, final Locale requestLocale) {
+        return getTagTypeItemList(searchRequestType, requestLocale).stream()
+                .map(item -> item.get(Constants.ITEM_VALUE))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /**
+     * Returns the label type items of one kind that the current user can see.
+     *
+     * @param searchRequestType The search request type.
+     * @param requestLocale The request locale.
+     * @param tag true for the label types of the kind {@value LabelType#KIND_TAG}, false for the others
+     * @return A list of maps with the label and the value of each label type.
+     */
+    protected List<Map<String, String>> getVisibleItemList(final SearchRequestType searchRequestType, final Locale requestLocale,
+            final boolean tag) {
         if (labelTypeItemList == null) {
             init();
         }
@@ -130,11 +171,13 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final List<LabelTypeItem> labelList;
         if (StringUtil.isBlank(virtualHostKey)) {
-            labelList =
-                    labelTypeItemList.stream().filter(item -> matchLocale(requestLocale, item.getLocale())).collect(Collectors.toList());
+            labelList = labelTypeItemList.stream()
+                    .filter(item -> item.isTag() == tag && matchLocale(requestLocale, item.getLocale()))
+                    .collect(Collectors.toList());
         } else {
             labelList = labelTypeItemList.stream()
-                    .filter(item -> matchLocale(requestLocale, item.getLocale()) && virtualHostKey.equals(item.getVirtualHost()))
+                    .filter(item -> item.isTag() == tag && matchLocale(requestLocale, item.getLocale())
+                            && virtualHostKey.equals(item.getVirtualHost()))
                     .collect(Collectors.toList());
         }
 
@@ -221,6 +264,10 @@ public class LabelTypeHelper extends AbstractConfigHelper {
     protected void buildLabelTypePatternList(final List<LabelType> labelTypeList) {
         final List<LabelTypePattern> list = new ArrayList<>();
         for (final LabelType labelType : labelTypeList) {
+            if (labelType.isTagKind()) {
+                // users add the tags of this label type; the crawler does not assign it
+                continue;
+            }
             final String includedPaths = labelType.getIncludedPaths();
             final String excludedPaths = labelType.getExcludedPaths();
             if (StringUtil.isNotBlank(includedPaths) || StringUtil.isNotBlank(excludedPaths)) {
@@ -255,6 +302,8 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         private String virtualHost;
 
         private Locale locale;
+
+        private boolean tag;
 
         /**
          * Returns the label.
@@ -344,6 +393,24 @@ public class LabelTypeHelper extends AbstractConfigHelper {
          */
         public void setLocale(final Locale locale) {
             this.locale = locale;
+        }
+
+        /**
+         * Returns whether this label type defines user tags.
+         *
+         * @return True if the kind of the label type is {@value LabelType#KIND_TAG}.
+         */
+        public boolean isTag() {
+            return tag;
+        }
+
+        /**
+         * Sets whether this label type defines user tags.
+         *
+         * @param tag True if the kind of the label type is {@value LabelType#KIND_TAG}.
+         */
+        public void setTag(final boolean tag) {
+            this.tag = tag;
         }
     }
 

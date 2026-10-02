@@ -717,6 +717,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. label */
     String INDEX_FIELD_LABEL = "index.field.label";
 
+    /** The key of the configuration. e.g. tag */
+    String INDEX_FIELD_TAG = "index.field.tag";
+
+    /** The key of the configuration. e.g. tag_count */
+    String INDEX_FIELD_tag_count = "index.field.tag_count";
+
     /** The key of the configuration. e.g. mimetype */
     String INDEX_FIELD_MIMETYPE = "index.field.mimetype";
 
@@ -834,7 +840,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_DICTIONARY_PREFIX = "index.dictionary.prefix";
 
-    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host */
+    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host,tag */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
     /** The key of the configuration. e.g. expires,created,timestamp,last_modified */
@@ -843,7 +849,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_ADMIN_INTEGER_FIELDS = "index.admin.integer.fields";
 
-    /** The key of the configuration. e.g. content_length,favorite_count,click_count */
+    /** The key of the configuration. e.g. content_length,favorite_count,click_count,tag_count */
     String INDEX_ADMIN_LONG_FIELDS = "index.admin.long.fields";
 
     /** The key of the configuration. e.g. boost */
@@ -1181,6 +1187,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0.5 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
+    /** The key of the configuration. e.g. 0.0 */
+    String QUERY_BOOST_TAG_COUNT = "query.boost.tag.count";
+
     /** The key of the configuration. e.g. 1.0 */
     String QUERY_BOOST_TITLE_LANG = "query.boost.title.lang";
 
@@ -1325,7 +1334,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
-    /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
+    /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,tag_log.ndjson,user_info.ndjson */
     String INDEX_BACKUP_LOG_TARGETS = "index.backup.log.targets";
 
     /** The key of the configuration. e.g. 60000 */
@@ -1354,6 +1363,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 10 */
     String SEARCH_HISTORY_SIZE = "search.history.size";
+
+    /** The key of the configuration. e.g. false */
+    String USER_TAG_ENABLED = "user.tag.enabled";
+
+    /** The key of the configuration. e.g. 50 */
+    String USER_TAG_NAME_MAX_LENGTH = "user.tag.name.max.length";
+
+    /** The key of the configuration. e.g. 10 */
+    String USER_TAG_MAX_PER_DOCUMENT = "user.tag.max.per.document";
+
+    /** The key of the configuration. e.g. 100 */
+    String USER_TAG_MAX_DOCUMENT_TAGS = "user.tag.max.document.tags";
 
     /** The key of the configuration. e.g. 10000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
@@ -4773,6 +4794,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexFieldLabel();
 
     /**
+     * Get the value for the key 'index.field.tag'. <br>
+     * The value is, e.g. tag <br>
+     * comment: Field name for the tags that users added to the document, as &lt;label value&gt;:&lt;tag name&gt;, in the index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldTag();
+
+    /**
+     * Get the value for the key 'index.field.tag_count'. <br>
+     * The value is, e.g. tag_count <br>
+     * comment: Field name for the number of tags that users added to the document in the index.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldTagCount();
+
+    /**
      * Get the value for the key 'index.field.mimetype'. <br>
      * The value is, e.g. mimetype <br>
      * comment: Field name for MIME type in the index.
@@ -5170,7 +5207,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
-     * The value is, e.g. lang,role,label,anchor,virtual_host <br>
+     * The value is, e.g. lang,role,label,anchor,virtual_host,tag <br>
      * comment: Array-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -5203,7 +5240,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.long.fields'. <br>
-     * The value is, e.g. content_length,favorite_count,click_count <br>
+     * The value is, e.g. content_length,favorite_count,click_count,tag_count <br>
      * comment: Long-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -6292,6 +6329,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     java.math.BigDecimal getQueryBoostTitleAsDecimal();
 
     /**
+     * Get the value for the key 'query.boost.tag.count'. <br>
+     * The value is, e.g. 0.0 <br>
+     * comment: Weight of the number of user tags (tag_count) in the ranking. 0 disables it. A positive value multiplies the score by 1 + weight * ln(1 + tag_count).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostTagCount();
+
+    /**
+     * Get the value for the key 'query.boost.tag.count' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 0.0 <br>
+     * comment: Weight of the number of user tags (tag_count) in the ranking. 0 disables it. A positive value multiplies the score by 1 + weight * ln(1 + tag_count).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostTagCountAsDecimal();
+
+    /**
      * Get the value for the key 'query.boost.title.lang'. <br>
      * The value is, e.g. 1.0 <br>
      * comment: Boost value for title field with language in queries.
@@ -6972,7 +7026,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.backup.log.targets'. <br>
-     * The value is, e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson <br>
+     * The value is, e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,tag_log.ndjson,user_info.ndjson <br>
      * comment: Target log files for index backup.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -7109,6 +7163,73 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getSearchHistorySizeAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether logged-in users can add tags to documents from the search screen. A label of the kind "tag" defines the tags that the users in its permissions can see and add.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagEnabled();
+
+    /**
+     * Is the property for the key 'user.tag.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Whether logged-in users can add tags to documents from the search screen. A label of the kind "tag" defines the tags that the users in its permissions can see and add.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isUserTagEnabled();
+
+    /**
+     * Get the value for the key 'user.tag.name.max.length'. <br>
+     * The value is, e.g. 50 <br>
+     * comment: Maximum length of a tag name.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagNameMaxLength();
+
+    /**
+     * Get the value for the key 'user.tag.name.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * comment: Maximum length of a tag name.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagNameMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.max.per.document'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of tags that one user can add to one document.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagMaxPerDocument();
+
+    /**
+     * Get the value for the key 'user.tag.max.per.document' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: Maximum number of tags that one user can add to one document.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagMaxPerDocumentAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.max.document.tags'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of distinct tags that one document keeps.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagMaxDocumentTags();
+
+    /**
+     * Get the value for the key 'user.tag.max.document.tags' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of distinct tags that one document keeps.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagMaxDocumentTagsAsInteger();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -11922,6 +12043,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_LABEL);
         }
 
+        public String getIndexFieldTag() {
+            return get(FessConfig.INDEX_FIELD_TAG);
+        }
+
+        public String getIndexFieldTagCount() {
+            return get(FessConfig.INDEX_FIELD_tag_count);
+        }
+
         public String getIndexFieldMimetype() {
             return get(FessConfig.INDEX_FIELD_MIMETYPE);
         }
@@ -12590,6 +12719,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsDecimal(FessConfig.QUERY_BOOST_TITLE);
         }
 
+        public String getQueryBoostTagCount() {
+            return get(FessConfig.QUERY_BOOST_TAG_COUNT);
+        }
+
+        public java.math.BigDecimal getQueryBoostTagCountAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_TAG_COUNT);
+        }
+
         public String getQueryBoostTitleLang() {
             return get(FessConfig.QUERY_BOOST_TITLE_LANG);
         }
@@ -12980,6 +13117,38 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getSearchHistorySizeAsInteger() {
             return getAsInteger(FessConfig.SEARCH_HISTORY_SIZE);
+        }
+
+        public String getUserTagEnabled() {
+            return get(FessConfig.USER_TAG_ENABLED);
+        }
+
+        public boolean isUserTagEnabled() {
+            return is(FessConfig.USER_TAG_ENABLED);
+        }
+
+        public String getUserTagNameMaxLength() {
+            return get(FessConfig.USER_TAG_NAME_MAX_LENGTH);
+        }
+
+        public Integer getUserTagNameMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_NAME_MAX_LENGTH);
+        }
+
+        public String getUserTagMaxPerDocument() {
+            return get(FessConfig.USER_TAG_MAX_PER_DOCUMENT);
+        }
+
+        public Integer getUserTagMaxPerDocumentAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_MAX_PER_DOCUMENT);
+        }
+
+        public String getUserTagMaxDocumentTags() {
+            return get(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS);
+        }
+
+        public Integer getUserTagMaxDocumentTagsAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS);
         }
 
         public String getFormAdminMaxInputSize() {
@@ -14921,6 +15090,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_CREATED, "created");
             defaultMap.put(FessConfig.INDEX_FIELD_TIMESTAMP, "timestamp");
             defaultMap.put(FessConfig.INDEX_FIELD_LABEL, "label");
+            defaultMap.put(FessConfig.INDEX_FIELD_TAG, "tag");
+            defaultMap.put(FessConfig.INDEX_FIELD_tag_count, "tag_count");
             defaultMap.put(FessConfig.INDEX_FIELD_MIMETYPE, "mimetype");
             defaultMap.put(FessConfig.INDEX_FIELD_parent_id, "parent_id");
             defaultMap.put(FessConfig.INDEX_FIELD_important_content, "important_content");
@@ -14960,10 +15131,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_USER_INDEX, "fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
             defaultMap.put(FessConfig.INDEX_DICTIONARY_PREFIX, "");
-            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host");
+            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host,tag");
             defaultMap.put(FessConfig.INDEX_ADMIN_DATE_FIELDS, "expires,created,timestamp,last_modified");
             defaultMap.put(FessConfig.INDEX_ADMIN_INTEGER_FIELDS, "");
-            defaultMap.put(FessConfig.INDEX_ADMIN_LONG_FIELDS, "content_length,favorite_count,click_count");
+            defaultMap.put(FessConfig.INDEX_ADMIN_LONG_FIELDS, "content_length,favorite_count,click_count,tag_count");
             defaultMap.put(FessConfig.INDEX_ADMIN_FLOAT_FIELDS, "boost");
             defaultMap.put(FessConfig.INDEX_ADMIN_DOUBLE_FIELDS, "");
             defaultMap.put(FessConfig.INDEX_ADMIN_REQUIRED_FIELDS, "url,title,role,boost");
@@ -15043,6 +15214,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_LANGUAGE_MAPPING,
                     "ar=ar\nbg=bg\nbn=bn\nca=ca\nckb-iq=ckb-iq\nckb_IQ=ckb-iq\ncs=cs\nda=da\nde=de\nel=el\nen=en\nen-ie=en-ie\nen_IE=en-ie\nes=es\net=et\neu=eu\nfa=fa\nfi=fi\nfr=fr\ngl=gl\ngu=gu\nhe=he\nhi=hi\nhr=hr\nhu=hu\nhy=hy\nid=id\nit=it\nja=ja\nko=ko\nlt=lt\nlv=lv\nmk=mk\nml=ml\nnl=nl\nno=no\npa=pa\npl=pl\npt=pt\npt-br=pt-br\npt_BR=pt-br\nro=ro\nru=ru\nsi=si\nsq=sq\nsv=sv\nta=ta\nte=te\nth=th\ntl=tl\ntr=tr\nuk=uk\nur=ur\nvi=vi\nzh-cn=zh-cn\nzh_CN=zh-cn\nzh-tw=zh-tw\nzh_TW=zh-tw\nzh=zh\n");
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE, "0.5");
+            defaultMap.put(FessConfig.QUERY_BOOST_TAG_COUNT, "0.0");
             defaultMap.put(FessConfig.QUERY_BOOST_TITLE_LANG, "1.0");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT, "0.05");
             defaultMap.put(FessConfig.QUERY_BOOST_CONTENT_LANG, "0.1");
@@ -15087,7 +15259,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FTP_ROLE_FROM_FILE, "true");
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS,
                     "fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json");
-            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
+            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS,
+                    "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,tag_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT, "60000");
             defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
@@ -15098,6 +15271,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE, "10000");
             defaultMap.put(FessConfig.SEARCH_HISTORY_ENABLED, "true");
             defaultMap.put(FessConfig.SEARCH_HISTORY_SIZE, "10");
+            defaultMap.put(FessConfig.USER_TAG_ENABLED, "false");
+            defaultMap.put(FessConfig.USER_TAG_NAME_MAX_LENGTH, "50");
+            defaultMap.put(FessConfig.USER_TAG_MAX_PER_DOCUMENT, "10");
+            defaultMap.put(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS, "100");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");

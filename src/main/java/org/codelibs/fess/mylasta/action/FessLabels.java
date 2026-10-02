@@ -1565,6 +1565,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Value */
     public static final String LABELS_labeltype_value = "{labels.labeltype_value}";
 
+    /** The key of the message: Kind */
+    public static final String LABELS_labeltype_kind = "{labels.labeltype_kind}";
+
+    /** The key of the message: Label */
+    public static final String LABELS_labeltype_kind_label = "{labels.labeltype_kind_label}";
+
+    /** The key of the message: Tag */
+    public static final String LABELS_labeltype_kind_tag = "{labels.labeltype_kind_tag}";
+
+    /** The key of the message: A Tag lets the users in Permissions see and add their own tags to documents from the search screen. Included Paths and Excluded Paths are not used for tags. */
+    public static final String LABELS_labeltype_kind_help = "{labels.labeltype_kind_help}";
+
     /** The key of the message: Included Paths */
     public static final String LABELS_labeltype_included_paths = "{labels.labeltype_included_paths}";
 

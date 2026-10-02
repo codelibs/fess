@@ -289,6 +289,63 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
     }
 
     // Helper method to create test data
+    @Test
+    public void test_tagKind_listedOnlyAsTagType() {
+        ComponentUtil.register(new RoleQueryHelper() {
+            @Override
+            public Set<String> build(SearchRequestType searchRequestType) {
+                return new HashSet<>(List.of("Rguest"));
+            }
+        }, "roleQueryHelper");
+        labelTypeHelper.refresh(List.of(createLabelType("lbl", null, "Rguest"), //
+                createLabelType("plain", LabelType.KIND_LABEL, "Rguest"), //
+                createLabelType("general", LabelType.KIND_TAG, "Rguest"), //
+                createLabelType("sales", LabelType.KIND_TAG, "Rsales")));
+
+        final List<Map<String, String>> labels = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON, Locale.ROOT);
+        assertEquals(List.of("lbl", "plain"), labels.stream().map(m -> m.get("value")).toList());
+
+        final List<Map<String, String>> tagTypes = labelTypeHelper.getTagTypeItemList(SearchRequestType.JSON, Locale.ROOT);
+        assertEquals(1, tagTypes.size());
+        assertEquals("general", tagTypes.get(0).get("value"));
+        assertEquals("general name", tagTypes.get(0).get("label"));
+        assertEquals(Set.of("general"), labelTypeHelper.getTagTypeValueSet(SearchRequestType.JSON, Locale.ROOT));
+    }
+
+    @Test
+    public void test_tagKind_noRoles() {
+        labelTypeHelper.refresh(List.of(createLabelType("general", LabelType.KIND_TAG, "Rguest")));
+        assertTrue(labelTypeHelper.getTagTypeValueSet(SearchRequestType.JSON, Locale.ROOT).isEmpty());
+    }
+
+    @Test
+    public void test_tagKind_notAssignedByPaths() {
+        final LabelType label = createLabelType("lbl", null, "Rguest");
+        label.setIncludedPaths("http://example.com/.*");
+        final LabelType tag = createLabelType("general", LabelType.KIND_TAG, "Rguest");
+        tag.setIncludedPaths("http://example.com/.*");
+        labelTypeHelper.refresh(List.of(label, tag));
+
+        assertEquals(Set.of("lbl"), labelTypeHelper.getMatchedLabelValueSet("http://example.com/a.html"));
+    }
+
+    @Test
+    public void test_isTagKind() {
+        assertFalse(createLabelType("a", null, "Rguest").isTagKind());
+        assertFalse(createLabelType("a", LabelType.KIND_LABEL, "Rguest").isTagKind());
+        assertTrue(createLabelType("a", LabelType.KIND_TAG, "Rguest").isTagKind());
+    }
+
+    private LabelType createLabelType(final String value, final String kind, final String permission) {
+        final LabelType labelType = new LabelType();
+        labelType.setName(value + " name");
+        labelType.setValue(value);
+        labelType.setKind(kind);
+        labelType.setPermissions(new String[] { permission });
+        labelType.setVirtualHost("");
+        return labelType;
+    }
+
     private List<LabelType> createTestLabelTypeList() {
         List<LabelType> labelTypeList = new ArrayList<>();
 

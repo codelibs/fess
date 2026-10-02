@@ -164,6 +164,22 @@ public abstract class QueryTestBase extends UnitFessTestCase {
             }
 
             @Override
+
+            public String getIndexFieldTag() {
+
+                return "tag";
+
+            }
+
+            @Override
+
+            public String getIndexFieldTagCount() {
+
+                return "tag_count";
+
+            }
+
+            @Override
             public String getIndexFieldCreated() {
                 return "created";
             }

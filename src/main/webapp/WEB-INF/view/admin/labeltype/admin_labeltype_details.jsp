@@ -67,6 +67,15 @@ ${fe:html(true)}
                                         <td>${f:h(value)}<la:hidden property="value"/></td>
                                     </tr>
                                     <tr>
+                                        <th><la:message key="labels.labeltype_kind"/></th>
+                                        <td><c:choose>
+                                            <c:when test="${kind == 'tag'}"><la:message
+                                                    key="labels.labeltype_kind_tag"/></c:when>
+                                            <c:otherwise><la:message
+                                                    key="labels.labeltype_kind_label"/></c:otherwise>
+                                        </c:choose><la:hidden property="kind"/></td>
+                                    </tr>
+                                    <tr>
                                         <th><la:message key="labels.labeltype_included_paths"/></th>
                                         <td>${f:br(f:h(includedPaths))}<la:hidden
                                                 property="includedPaths"/></td>

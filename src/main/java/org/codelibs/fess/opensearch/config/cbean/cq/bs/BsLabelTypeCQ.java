@@ -1038,6 +1038,230 @@ public abstract class BsLabelTypeCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setKind_Equal(String kind) {
+        setKind_Term(kind, null);
+    }
+
+    public void setKind_Equal(String kind, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setKind_Term(kind, opLambda);
+    }
+
+    public void setKind_Term(String kind) {
+        setKind_Term(kind, null);
+    }
+
+    public void setKind_Term(String kind, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_NotEqual(String kind) {
+        setKind_NotTerm(kind, null);
+    }
+
+    public void setKind_NotTerm(String kind) {
+        setKind_NotTerm(kind, null);
+    }
+
+    public void setKind_NotEqual(String kind, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setKind_NotTerm(kind, opLambda);
+    }
+
+    public void setKind_NotTerm(String kind, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setKind_Term(kind), opLambda);
+    }
+
+    public void setKind_Terms(Collection<String> kindList) {
+        setKind_Terms(kindList, null);
+    }
+
+    public void setKind_Terms(Collection<String> kindList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("kind", kindList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_InScope(Collection<String> kindList) {
+        setKind_Terms(kindList, null);
+    }
+
+    public void setKind_InScope(Collection<String> kindList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setKind_Terms(kindList, opLambda);
+    }
+
+    public void setKind_Match(String kind) {
+        setKind_Match(kind, null);
+    }
+
+    public void setKind_Match(String kind, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_MatchPhrase(String kind) {
+        setKind_MatchPhrase(kind, null);
+    }
+
+    public void setKind_MatchPhrase(String kind, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_MatchPhrasePrefix(String kind) {
+        setKind_MatchPhrasePrefix(kind, null);
+    }
+
+    public void setKind_MatchPhrasePrefix(String kind, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Fuzzy(String kind) {
+        setKind_Fuzzy(kind, null);
+    }
+
+    public void setKind_Fuzzy(String kind, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Prefix(String kind) {
+        setKind_Prefix(kind, null);
+    }
+
+    public void setKind_Prefix(String kind, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Wildcard(String kind) {
+        setKind_Wildcard(kind, null);
+    }
+
+    public void setKind_Wildcard(String kind, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Regexp(String kind) {
+        setKind_Regexp(kind, null);
+    }
+
+    public void setKind_Regexp(String kind, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_SpanTerm(String kind) {
+        setKind_SpanTerm("kind", null);
+    }
+
+    public void setKind_SpanTerm(String kind, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_GreaterThan(String kind) {
+        setKind_GreaterThan(kind, null);
+    }
+
+    public void setKind_GreaterThan(String kind, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = kind;
+        RangeQueryBuilder builder = regRangeQ("kind", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_LessThan(String kind) {
+        setKind_LessThan(kind, null);
+    }
+
+    public void setKind_LessThan(String kind, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = kind;
+        RangeQueryBuilder builder = regRangeQ("kind", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_GreaterEqual(String kind) {
+        setKind_GreaterEqual(kind, null);
+    }
+
+    public void setKind_GreaterEqual(String kind, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = kind;
+        RangeQueryBuilder builder = regRangeQ("kind", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_LessEqual(String kind) {
+        setKind_LessEqual(kind, null);
+    }
+
+    public void setKind_LessEqual(String kind, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = kind;
+        RangeQueryBuilder builder = regRangeQ("kind", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKind_Exists() {
+        setKind_Exists(null);
+    }
+
+    public void setKind_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("kind");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    @Deprecated
+    public void setKind_CommonTerms(String kind) {
+        setKind_CommonTerms(kind, null);
+    }
+
+    @Deprecated
+    public void setKind_CommonTerms(String kind, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("kind", kind);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsLabelTypeCQ addOrderBy_Kind_Asc() {
+        regOBA("kind");
+        return this;
+    }
+
+    public BsLabelTypeCQ addOrderBy_Kind_Desc() {
+        regOBD("kind");
+        return this;
+    }
+
     public void setName_Equal(String name) {
         setName_Term(name, null);
     }
