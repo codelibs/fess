@@ -25,7 +25,9 @@ import java.util.Map;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -1847,6 +1849,73 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         client.setTestLanguageInstructionPrompt("Answer in {{language}} please.");
 
         assertEquals("", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_browserModeUsesUserLocale() {
+        setResponseLanguage("browser");
+        client.setTestUserLocale(Locale.JAPANESE);
+
+        assertEquals("IMPORTANT: You MUST respond in Japanese.", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_blankModeUsesUserLocale() {
+        setResponseLanguage(" ");
+        client.setTestUserLocale(Locale.JAPANESE);
+
+        assertEquals("IMPORTANT: You MUST respond in Japanese.", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_noneModeIsEmpty() {
+        setResponseLanguage("none");
+        client.setTestUserLocale(Locale.ITALIAN);
+
+        assertEquals("", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_fixedLanguageIgnoresUserLocale() {
+        setResponseLanguage("ja");
+        client.setTestUserLocale(Locale.ITALIAN);
+
+        assertEquals("IMPORTANT: You MUST respond in Japanese.", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_fixedEnglishIsNotEmpty() {
+        setResponseLanguage("en");
+        client.setTestUserLocale(Locale.ITALIAN);
+
+        assertEquals("IMPORTANT: You MUST respond in English.", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_fixedLanguageWithCountry() {
+        setResponseLanguage("pt_BR");
+        client.setTestUserLocale(Locale.ITALIAN);
+
+        assertEquals("IMPORTANT: You MUST respond in Portuguese.", client.testGetLanguageInstruction());
+    }
+
+    @Test
+    public void test_getLanguageInstruction_invalidLanguageUsesUserLocale() {
+        setResponseLanguage("!!");
+        client.setTestUserLocale(Locale.JAPANESE);
+
+        assertEquals("IMPORTANT: You MUST respond in Japanese.", client.testGetLanguageInstruction());
+    }
+
+    private void setResponseLanguage(final String value) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getRagChatResponseLanguage() {
+                return value;
+            }
+        });
     }
 
     @Test
