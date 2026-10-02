@@ -177,6 +177,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/synonym/admin_dict_synonym_upload.jsp */
     HtmlNext path_AdminDictSynonym_AdminDictSynonymUploadJsp = new HtmlNext("/admin/dict/synonym/admin_dict_synonym_upload.jsp");
 
+    /** The path of the HTML: /admin/docreport/admin_docreport.jsp */
+    HtmlNext path_AdminDocreport_AdminDocreportJsp = new HtmlNext("/admin/docreport/admin_docreport.jsp");
+
     /** The path of the HTML: /admin/duplicatehost/admin_duplicatehost.jsp */
     HtmlNext path_AdminDuplicatehost_AdminDuplicatehostJsp = new HtmlNext("/admin/duplicatehost/admin_duplicatehost.jsp");
 
