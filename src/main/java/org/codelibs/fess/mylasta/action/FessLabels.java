@@ -3177,11 +3177,17 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Searches by day and hour */
     public static final String LABELS_searchlog_table_weekHour = "{labels.searchlog_table_weekHour}";
 
+    /** The key of the message: Searches by Role and Group */
+    public static final String LABELS_searchlog_table_roles = "{labels.searchlog_table_roles}";
+
     /** The key of the message: Query */
     public static final String LABELS_searchlog_col_word = "{labels.searchlog_col_word}";
 
     /** The key of the message: URL */
     public static final String LABELS_searchlog_col_url = "{labels.searchlog_col_url}";
+
+    /** The key of the message: Role or Group */
+    public static final String LABELS_searchlog_col_role = "{labels.searchlog_col_role}";
 
     /** The key of the message: Mon */
     public static final String LABELS_searchlog_dow_1 = "{labels.searchlog_dow_1}";
@@ -3210,6 +3216,18 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Search word */
     public static final String LABELS_searchlog_searchword = "{labels.searchlog_searchword}";
 
+    /** The key of the message: Hit Count */
+    public static final String LABELS_searchlog_hitcount = "{labels.searchlog_hitcount}";
+
+    /** The key of the message: All */
+    public static final String LABELS_searchlog_hitcount_all = "{labels.searchlog_hitcount_all}";
+
+    /** The key of the message: Zero hits only */
+    public static final String LABELS_searchlog_hitcount_zero = "{labels.searchlog_hitcount_zero}";
+
+    /** The key of the message: One or more hits */
+    public static final String LABELS_searchlog_hitcount_nonzero = "{labels.searchlog_hitcount_nonzero}";
+
     /** The key of the message: Per-query click metrics include only clicks recorded since {0}. */
     public static final String LABELS_searchlog_notice_click_since = "{labels.searchlog_notice_click_since}";
 
@@ -3230,6 +3248,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Failed to load analytics data. See the log for details. */
     public static final String LABELS_searchlog_notice_failed = "{labels.searchlog_notice_failed}";
+
+    /** The key of the message: A search counts toward every role and group of the user who ran it. Individual users are not listed. */
+    public static final String LABELS_searchlog_note_roles = "{labels.searchlog_note_roles}";
 
     /** The key of the message: Download CSV */
     public static final String LABELS_searchlog_download_csv = "{labels.searchlog_download_csv}";

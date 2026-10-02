@@ -102,3 +102,49 @@
         </div>
     </c:forEach>
 </div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><la:message key="labels.searchlog_table_roles"/></h3>
+                <div class="card-tools">
+                    <jsp:include page="/WEB-INF/view/admin/searchlog/admin_searchlog_csvlink.jsp"><jsp:param name="item" value="roles"/></jsp:include>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th class="searchlog-rank">#</th>
+                        <th><la:message key="labels.searchlog_col_role"/></th>
+                        <th><la:message key="labels.searchlog_metric_searches"/></th>
+                        <th class="text-right"><la:message key="labels.searchlog_metric_users"/></th>
+                        <th class="text-right"><la:message key="labels.searchlog_metric_zeroHitRate"/></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="row" items="${report.tables['roles']}" varStatus="st">
+                        <tr>
+                            <td class="searchlog-rank">${st.count}</td>
+                            <td class="text-break">${f:h(row.value)}</td>
+                            <td class="searchlog-bar-cell">
+                                <div class="searchlog-bar" style="width:${row.bar}%"></div>
+                                <span><fmt:formatNumber value="${row.count}"/></span></td>
+                            <td class="text-right">${row.users == null ? '-' : ''}<fmt:formatNumber value="${row.users}"/></td>
+                            <td class="text-right">${row.zeroHitRate == null ? '-' : ''}<c:if test="${row.zeroHitRate != null}"><fmt:formatNumber
+                                    value="${row.zeroHitRate * 100}" maxFractionDigits="1" minFractionDigits="1"/>%</c:if></td>
+                        </tr>
+                    </c:forEach>
+                    <c:if test="${empty report.tables['roles']}">
+                        <tr>
+                            <td colspan="5" class="searchlog-no-data text-muted"><la:message
+                                    key="labels.searchlog_no_data"/></td>
+                        </tr>
+                    </c:if>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer small text-muted"><la:message key="labels.searchlog_note_roles"/></div>
+        </div>
+    </div>
+</div>

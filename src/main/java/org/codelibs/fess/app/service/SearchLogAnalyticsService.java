@@ -46,6 +46,7 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.AnalyticsCondition;
 import org.codelibs.fess.entity.AnalyticsCondition.Interval;
 import org.codelibs.fess.entity.AnalyticsReport;
@@ -53,6 +54,7 @@ import org.codelibs.fess.entity.AnalyticsReport.Chart;
 import org.codelibs.fess.entity.AnalyticsReport.Kpi;
 import org.codelibs.fess.entity.AnalyticsReport.Notice;
 import org.codelibs.fess.entity.AnalyticsReport.Series;
+import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.allcommon.EsPagingResultBean;
 import org.codelibs.fess.opensearch.log.cbean.ClickLogCB;
@@ -67,6 +69,7 @@ import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.CsvUtil;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
@@ -76,6 +79,7 @@ import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.DateHi
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.histogram.Histogram;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.range.Range;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
@@ -206,6 +210,8 @@ public class SearchLogAnalyticsService {
 
     private static final String ACCESS_TYPES = "accessTypes";
 
+    private static final String ROLES = "roles";
+
     private static final String WORD = "word";
 
     private static final String VALUE = "value";
@@ -226,18 +232,21 @@ public class SearchLogAnalyticsService {
      * The items of each tab that can be downloaded as CSV. A table lists its columns (the presentational
      * bar width is not one of them); a KPI list, a chart and the weekday by hour table list none.
      */
-    private static final Map<String, Map<String, List<String>>> EXPORT_ITEMS = Map.of(TAB_OVERVIEW,
-            Map.of(ITEM_KPIS, List.of(), TREND, List.of(), "topQueries", WORD_COLUMNS, "zeroHitQueries", WORD_COLUMNS), TAB_QUERIES,
-            Map.of(TAB_QUERIES, List.of(WORD, COUNT, USERS, AVG_HITS, CLICKS, CTR, AVG_RANK), "zeroHitQueries", List.of(WORD, COUNT, USERS),
-                    "zeroClickQueries", List.of(WORD, COUNT, LAST_SEARCHED_AT)),
-            TAB_CLICKS,
-            Map.of(ITEM_KPIS, List.of(), "rankDistribution", List.of(), "pagingRate", List.of(), "clickedUrls", URL_COLUMNS, "favoriteUrls",
-                    URL_COLUMNS),
-            TAB_PERFORMANCE,
-            Map.of("responseTime", List.of(), "responseTimeDistribution", List.of(), "queryTime", List.of(), "slowQueries",
-                    List.of(WORD, COUNT, AVG_RESPONSE_TIME)),
-            TAB_AUDIENCE, Map.of(USERS, List.of(), ACCESS_TYPES, List.of(), ITEM_WEEK_HOUR, List.of(), "userAgents", VALUE_COLUMNS,
-                    "referers", VALUE_COLUMNS, "languages", VALUE_COLUMNS, "virtualHosts", VALUE_COLUMNS));
+    private static final Map<String, Map<String, List<String>>> EXPORT_ITEMS =
+            Map.of(TAB_OVERVIEW, Map.of(ITEM_KPIS, List.of(), TREND, List.of(), "topQueries", WORD_COLUMNS, "zeroHitQueries", WORD_COLUMNS),
+                    TAB_QUERIES,
+                    Map.of(TAB_QUERIES, List.of(WORD, COUNT, USERS, AVG_HITS, CLICKS, CTR, AVG_RANK), "zeroHitQueries",
+                            List.of(WORD, COUNT, USERS, LAST_SEARCHED_AT), "zeroClickQueries", List.of(WORD, COUNT, LAST_SEARCHED_AT)),
+                    TAB_CLICKS,
+                    Map.of(ITEM_KPIS, List.of(), "rankDistribution", List.of(), "pagingRate", List.of(), "clickedUrls", URL_COLUMNS,
+                            "favoriteUrls", URL_COLUMNS),
+                    TAB_PERFORMANCE,
+                    Map.of("responseTime", List.of(), "responseTimeDistribution", List.of(), "queryTime", List.of(), "slowQueries",
+                            List.of(WORD, COUNT, AVG_RESPONSE_TIME)),
+                    TAB_AUDIENCE,
+                    Map.of(USERS, List.of(), ACCESS_TYPES, List.of(), ITEM_WEEK_HOUR, List.of(), "userAgents", VALUE_COLUMNS, "referers",
+                            VALUE_COLUMNS, "languages", VALUE_COLUMNS, "virtualHosts", VALUE_COLUMNS, ROLES,
+                            List.of(VALUE, COUNT, USERS, ZERO_HIT_RATE)));
 
     /** Behavior for the search log index. */
     @Resource
@@ -566,8 +575,11 @@ public class SearchLogAnalyticsService {
                 ca.setHitCount_Avg(AVG_HITS, null);
             });
             cb.aggregation()
-                    .filter(ZERO_HIT, cq -> cq.setHitCount_Equal(0L), null, ca -> ca.setSearchWord_Terms(WORDS,
-                            op -> applyTermsSize(op, size), sub -> sub.setUserInfoId_Cardinality(USERS, null)));
+                    .filter(ZERO_HIT, cq -> cq.setHitCount_Equal(0L), null,
+                            ca -> ca.setSearchWord_Terms(WORDS, op -> applyTermsSize(op, size), sub -> {
+                                sub.setUserInfoId_Cardinality(USERS, null);
+                                sub.addAggregation(AggregationBuilders.max(LAST_SEARCHED_AT).field(REQUESTED_AT));
+                            }));
             if (hasClickData) {
                 cb.aggregation().filter(ZERO_CLICK, cq -> {
                     cq.setHitCount_GreaterThan(0L);
@@ -584,9 +596,7 @@ public class SearchLogAnalyticsService {
             final Map<String, Object> row = new LinkedHashMap<>();
             row.put(WORD, bucket.getKeyAsString());
             row.put(COUNT, bucket.getDocCount());
-            final Number last = value(bucket.getAggregations(), LAST_SEARCHED_AT);
-            row.put(LAST_SEARCHED_AT,
-                    last == null ? null : DATE_TIME.format(Instant.ofEpochMilli(last.longValue()).atZone(cond.getZoneId())));
+            row.put(LAST_SEARCHED_AT, formatTime(value(bucket.getAggregations(), LAST_SEARCHED_AT), cond.getZoneId()));
             candidates.add(row);
         }
         final List<String> candidateWords = new ArrayList<>();
@@ -642,6 +652,7 @@ public class SearchLogAnalyticsService {
             row.put(WORD, bucket.getKeyAsString());
             row.put(COUNT, bucket.getDocCount());
             row.put(USERS, cardinality(bucket.getAggregations(), USERS));
+            row.put(LAST_SEARCHED_AT, formatTime(value(bucket.getAggregations(), LAST_SEARCHED_AT), cond.getZoneId()));
             zeroHits.add(row);
         }
         report.putTable("zeroHitQueries", zeroHits);
@@ -848,6 +859,16 @@ public class SearchLogAnalyticsService {
             cb.aggregation().setReferer_Terms("referers", op -> applyTermsSize(op, size), null);
             cb.aggregation().setLanguages_Terms("languages", op -> applyTermsSize(op, size), null);
             cb.aggregation().setVirtualHost_Terms("virtualHosts", op -> applyTermsSize(op, size), null);
+            cb.aggregation().setRoles_Terms(ROLES, op -> {
+                applyTermsSize(op, size);
+                final String userRoleExclude = userRoleExcludePattern(fessConfig.getRoleSearchUserPrefix());
+                if (userRoleExclude != null) {
+                    op.includeExclude(new IncludeExclude(null, userRoleExclude));
+                }
+            }, ca -> {
+                ca.setUserInfoId_Cardinality(USERS, null);
+                ca.filter(ZERO_HIT, cq -> cq.setHitCount_Equal(0L), null, null);
+            });
         });
         final Aggregations userInfo = userInfoAggs(cond.getStart(), cond.getEnd(), cb -> cb.aggregation()
                 .setCreatedAt_DateHistogram(TREND, op -> applyInterval(op, cond.getInterval(), cond.getZoneId()), null));
@@ -886,6 +907,20 @@ public class SearchLogAnalyticsService {
         report.putTable("referers", withBars(termsRows(search, "referers", VALUE), COUNT));
         report.putTable("languages", withBars(termsRows(search, "languages", VALUE), COUNT));
         report.putTable("virtualHosts", withBars(termsRows(search, "virtualHosts", VALUE), COUNT));
+
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+        final List<Map<String, Object>> roles = new ArrayList<>();
+        for (final Terms.Bucket bucket : termsBuckets(search, ROLES)) {
+            final Map<String, Object> row = new LinkedHashMap<>();
+            final String role = bucket.getKeyAsString();
+            final String decoded = permissionHelper.decode(role);
+            row.put(VALUE, decoded == null ? role : decoded);
+            row.put(COUNT, bucket.getDocCount());
+            row.put(USERS, cardinality(bucket.getAggregations(), USERS));
+            row.put(ZERO_HIT_RATE, ratio(docCount(bucket.getAggregations(), ZERO_HIT), bucket.getDocCount()));
+            roles.add(row);
+        }
+        report.putTable(ROLES, withBars(roles, COUNT));
         return report;
     }
 
@@ -1073,6 +1108,38 @@ public class SearchLogAnalyticsService {
             }
         }
         return rows;
+    }
+
+    /**
+     * Formats an epoch millisecond metric value, such as the max of the request time, as a date and time.
+     *
+     * @param millis the epoch milliseconds
+     * @param zone the zone
+     * @return the formatted time, or null when there is no value
+     */
+    static String formatTime(final Number millis, final ZoneId zone) {
+        return millis == null ? null : DATE_TIME.format(Instant.ofEpochMilli(millis.longValue()).atZone(zone));
+    }
+
+    /**
+     * Builds the terms aggregation exclude pattern that drops the per-user search roles, so that the role ranking
+     * lists groups and roles only and never names an individual user.
+     *
+     * @param userPrefix the prefix of a user search role
+     * @return the regular expression, or null when the prefix is blank
+     */
+    static String userRoleExcludePattern(final String userPrefix) {
+        if (StringUtil.isBlank(userPrefix)) {
+            return null;
+        }
+        final StringBuilder buf = new StringBuilder();
+        for (final char c : userPrefix.toCharArray()) {
+            if (".?+*|{}[]()\"\\#@&<>~^".indexOf(c) >= 0) {
+                buf.append('\\');
+            }
+            buf.append(c);
+        }
+        return buf.append(".*").toString();
     }
 
     /**
