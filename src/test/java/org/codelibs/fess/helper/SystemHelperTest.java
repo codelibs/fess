@@ -722,6 +722,92 @@ public class SystemHelperTest extends UnitFessTestCase {
         helper.updateSystemProperties();
         assertEquals("test1", System.getProperty("fess." + now));
         assertEquals("test2", System.getProperty("test." + now));
+
+        // An edited value replaces the one set before, and a removed key is cleared.
+        appValue.set("fess." + now + "=test3\ntest." + now + "=test4");
+        helper.updateSystemProperties();
+        assertEquals("test3", System.getProperty("fess." + now));
+        assertEquals("test4", System.getProperty("test." + now));
+        appValue.set("fess." + now + "=test3");
+        helper.updateSystemProperties();
+        assertEquals("test3", System.getProperty("fess." + now));
+        assertNull(System.getProperty("test." + now));
+        appValue.set(StringUtil.EMPTY);
+        helper.updateSystemProperties();
+        assertNull(System.getProperty("fess." + now));
+    }
+
+    @Test
+    public void test_updateChangedSystemProperties() {
+        final SystemHelper helper = new SystemHelper();
+        final AtomicReference<String> appValue = new AtomicReference<>(StringUtil.EMPTY);
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAppValue() {
+                return appValue.get();
+            }
+
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*key|.*token|.*secret";
+            }
+        });
+        final String now = String.valueOf(System.currentTimeMillis());
+        try {
+            helper.updateSystemProperties();
+
+            // A hand edit of system.properties changes the app value without the admin screen.
+            appValue.set("test." + now + "=edited");
+            helper.updateChangedSystemProperties();
+            assertEquals("edited", System.getProperty("test." + now));
+
+            // Unchanged: a property changed elsewhere since is not overwritten again.
+            System.setProperty("test." + now, "other");
+            helper.updateChangedSystemProperties();
+            assertEquals("other", System.getProperty("test." + now));
+        } finally {
+            System.clearProperty("test." + now);
+        }
+    }
+
+    @Test
+    public void test_updateSystemProperties_keepsPropertySetElsewhere() {
+        final SystemHelper helper = new SystemHelper();
+        final AtomicReference<String> appValue = new AtomicReference<>(StringUtil.EMPTY);
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAppValue() {
+                return appValue.get();
+            }
+
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*key|.*token|.*secret";
+            }
+        });
+        final String now = String.valueOf(System.currentTimeMillis());
+        try {
+            // Like -D on the command line: a key outside fess.* set elsewhere wins over the app value.
+            System.setProperty("test." + now, "cmdline");
+            System.setProperty("fess." + now, "cmdline");
+            appValue.set("fess." + now + "=app\ntest." + now + "=app");
+            helper.updateSystemProperties();
+            assertEquals("app", System.getProperty("fess." + now));
+            assertEquals("cmdline", System.getProperty("test." + now));
+
+            // Removing the key from the app value restores what was there before.
+            appValue.set(StringUtil.EMPTY);
+            helper.updateSystemProperties();
+            assertEquals("cmdline", System.getProperty("fess." + now));
+            assertEquals("cmdline", System.getProperty("test." + now));
+        } finally {
+            System.clearProperty("fess." + now);
+            System.clearProperty("test." + now);
+        }
     }
 
     @Test

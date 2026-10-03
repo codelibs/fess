@@ -782,6 +782,32 @@ public class OsddHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_ssoType_changed_after_init() {
+        final String[] ssoType = { "none" };
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getOsddLinkEnabled() {
+                return "auto";
+            }
+
+            @Override
+            public String getSsoType() {
+                return ssoType[0];
+            }
+        });
+        final OsddHelper osddHelper = new OsddHelper();
+        osddHelper.setOsddPath("osdd/osdd.xml");
+        osddHelper.init();
+        assertTrue(osddHelper.hasOpenSearchFile());
+
+        // sso.type is a system property; turning SSO on or off must not wait for a restart.
+        ssoType[0] = "oic";
+        assertFalse(osddHelper.hasOpenSearchFile());
+        ssoType[0] = "none";
+        assertTrue(osddHelper.hasOpenSearchFile());
+    }
+
+    @Test
     public void test_path_change_after_init() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override

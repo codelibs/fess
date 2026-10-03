@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -90,7 +91,10 @@ public class RankFusionProcessor implements AutoCloseable {
     protected int windowSize;
 
     /** Set of available searcher names that can be used for search processing */
-    protected Set<String> availableSearcherNameSet;
+    protected volatile Set<String> availableSearcherNameSet;
+
+    /** The rank.fusion.searchers value {@link #availableSearcherNameSet} was loaded from */
+    protected volatile String availableSearcherNames;
 
     /**
      * Default constructor for RankFusionProcessor.
@@ -148,6 +152,7 @@ public class RankFusionProcessor implements AutoCloseable {
             availableSearcherNameSet = StreamUtil.split(value, ",")
                     .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toUnmodifiableSet()));
         }
+        availableSearcherNames = value;
         if (isLegacySemanticAllowlist(availableSearcherNameSet.toArray(new String[0]))) {
             logger.warn("rank.fusion.searchers allows 'semantic' but not 'semantic_chunk', so the built-in semantic chunk searcher "
                     + "is silently excluded from search. Remove the rank.fusion.searchers setting or add 'semantic_chunk' to it.");
@@ -322,15 +327,20 @@ public class RankFusionProcessor implements AutoCloseable {
             logger.warn("No searchers registered");
             return new RankFusionSearcher[0];
         }
-        if (availableSearcherNameSet.isEmpty()) {
+        // rank.fusion.searchers is usually set from the admin screen's System Property field, which
+        // changes it at runtime, so a change is picked up here instead of only by update().
+        if (!Objects.equals(System.getProperty("rank.fusion.searchers"), availableSearcherNames)) {
+            load();
+        }
+        final Set<String> nameSet = availableSearcherNameSet;
+        if (nameSet.isEmpty()) {
             return searchers.toArray(new RankFusionSearcher[0]);
         }
-        final RankFusionSearcher[] availableSearchers = searchers.stream()
-                .filter(searcher -> availableSearcherNameSet.contains(searcher.getName()))
-                .toArray(RankFusionSearcher[]::new);
+        final RankFusionSearcher[] availableSearchers =
+                searchers.stream().filter(searcher -> nameSet.contains(searcher.getName())).toArray(RankFusionSearcher[]::new);
         if (availableSearchers.length == 0) {
             if (logger.isDebugEnabled()) {
-                logger.debug("No available searchers from {}, falling back to default searcher", availableSearcherNameSet);
+                logger.debug("No available searchers from {}, falling back to default searcher", nameSet);
             }
             return new RankFusionSearcher[] { searchers.get(0) };
         }

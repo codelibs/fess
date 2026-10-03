@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -118,6 +119,28 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_resolveActiveTheme_followsDefaultChangedWithoutReload() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final FessConfig cfg = ComponentUtil.getFessConfig();
+        final String before = cfg.getDefaultTheme();
+        try {
+            writeTheme(tempThemesDir, ThemeRegistry.BUILT_IN_THEME_NAME);
+            writeTheme(tempThemesDir, "alpha");
+            cfg.setDefaultTheme("");
+            final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
+            reg.reload();
+            assertEquals(ThemeRegistry.BUILT_IN_THEME_NAME, reg.resolveActiveTheme(null).get().getName());
+
+            // A hand edit of system.properties changes theme.default without a reload.
+            ComponentUtil.getSystemProperties().setProperty(Constants.DEFAULT_THEME_PROPERTY, "alpha");
+            assertEquals("alpha", reg.resolveActiveTheme(null).get().getName());
+        } finally {
+            cfg.setDefaultTheme(before == null ? "" : before);
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
     public void test_resolveActiveTheme_systemPropertyOverridesBuiltinDefault() throws Exception {
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         final FessConfig cfg = ComponentUtil.getFessConfig();
@@ -133,10 +156,6 @@ public class ThemeRegistryTest extends UnitFessTestCase {
                     "displayName: Alpha", //
                     "version: 1.0.0"));
 
-            // Point the system property at our fixture BEFORE reload — the registry caches
-            // the resolved default into its snapshot at reload time (so per-read does not
-            // dip into FessConfig). Property changes therefore require a fresh reload to
-            // take effect, mirroring how the admin UI calls reload() after setdefault.
             cfg.setDefaultTheme("alpha");
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
             reg.reload();
@@ -158,9 +177,6 @@ public class ThemeRegistryTest extends UnitFessTestCase {
         try {
             writeTheme(tempThemesDir, ThemeRegistry.BUILT_IN_THEME_NAME);
 
-            // Point the system property at a theme nobody installed BEFORE reload — the
-            // registry caches the resolved default into its snapshot at reload time, so a
-            // property change after reload would not be observed.
             cfg.setDefaultTheme("this-theme-does-not-exist");
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
             reg.reload();
@@ -192,11 +208,8 @@ public class ThemeRegistryTest extends UnitFessTestCase {
 
             // A second, DIFFERENT unknown default must warn again: this is what distinguishes
             // "warn once per distinct value" from a naive "warn once ever" latch, which would
-            // still report 1 here. theme.default is cached into the snapshot at reload time
-            // (see test_resolveActiveTheme_fallsBackToBuiltInWhenDefaultIsNotInstalled), so the
-            // property must be changed BEFORE reload() for the new value to take effect.
+            // still report 1 here.
             cfg.setDefaultTheme("ghost2");
-            reg.reload();
             reg.resolveActiveTheme(null);
             reg.resolveActiveTheme(null);
 
@@ -208,7 +221,7 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_reload_reportsDefaultThemeLookupFailureOnEveryReload() throws Exception {
+    public void test_resolveActiveTheme_reportsDefaultThemeLookupFailureOnEveryResolution() throws Exception {
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         final FessConfig failing = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -222,7 +235,8 @@ public class ThemeRegistryTest extends UnitFessTestCase {
         try {
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, failing);
             reg.reload();
-            reg.reload();
+            reg.resolveActiveTheme(null);
+            reg.resolveActiveTheme(null);
             final List<LogEvent> warns = appender.eventsAt(Level.WARN)
                     .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("Failed to read default theme"))
@@ -239,7 +253,7 @@ public class ThemeRegistryTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_reload_defaultThemeLookupFailureCarriesStackTraceAtDebug() throws Exception {
+    public void test_resolveActiveTheme_defaultThemeLookupFailureCarriesStackTraceAtDebug() throws Exception {
         final Path tempThemesDir = Files.createTempDirectory("themes-test-");
         final FessConfig failing = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -251,7 +265,9 @@ public class ThemeRegistryTest extends UnitFessTestCase {
         };
         final LogCapturingAppender appender = LogCapturingAppender.attach(ThemeRegistry.class.getName(), Level.DEBUG);
         try {
-            newRegistryWithFessConfig(tempThemesDir, failing).reload();
+            final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, failing);
+            reg.reload();
+            reg.resolveActiveTheme(null);
             final List<LogEvent> warns = appender.eventsAt(Level.WARN)
                     .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("Failed to read default theme"))

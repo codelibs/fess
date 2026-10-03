@@ -937,8 +937,8 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
     // ========== Credential inheritance from fess core's search-engine settings ==========
     //
     // getUsername()/getPassword() fall back to search_engine.username/password because the
-    // DEFAULT api.url is fess core's own cluster. buildHttpClient() installs the result as a
-    // PREEMPTIVE Authorization: Basic default header, so it is sent on the very first request to
+    // DEFAULT api.url is fess core's own cluster. setAuthorization() sends the result as a
+    // PREEMPTIVE Authorization: Basic header, so it is sent on the very first request to
     // whatever getApiUrl() resolved. The fallback must therefore be conditional on api.url NOT
     // being explicitly configured, or a third-party api.url receives the local cluster's
     // credentials unprompted. Note the two fallbacks are independent, so the leak also has to be
@@ -1073,6 +1073,79 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             ComponentUtil.getSystemProperties().remove(DIMENSION_CONFIG_KEY);
             ComponentUtil.setFessConfig(original);
             server.shutdown();
+        }
+    }
+
+    @Test
+    public void test_credentials_followApiUrlChangedAfterClientBuilt() throws Exception {
+        // The HTTP client is built once, but api.url and the credentials are system properties that
+        // change at runtime: the local cluster's credentials must not follow a later api.url change.
+        final MockWebServer local = new MockWebServer();
+        local.enqueue(
+                new MockResponse().setBody(modelResponse("DEPLOYED", "TEXT_EMBEDDING", 384)).setHeader("Content-Type", "application/json"));
+        local.start();
+        final MockWebServer external = new MockWebServer();
+        external.enqueue(
+                new MockResponse().setBody(modelResponse("DEPLOYED", "TEXT_EMBEDDING", 384)).setHeader("Content-Type", "application/json"));
+        external.start();
+        final String[] apiUrl = { null };
+        final FessConfig original = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                if (API_URL_CONFIG_KEY.equals(key) && apiUrl[0] != null) {
+                    return apiUrl[0];
+                }
+                if (MODEL_ID_CONFIG_KEY.equals(key)) {
+                    return TEST_MODEL_ID;
+                }
+                return super.getSystemProperty(key, defaultValue);
+            }
+
+            @Override
+            public String getSearchEngineUsername() {
+                return LOCAL_CLUSTER_USERNAME;
+            }
+
+            @Override
+            public String getSearchEnginePassword() {
+                return LOCAL_CLUSTER_PASSWORD;
+            }
+
+            @Override
+            public String getHttpProxyHost() {
+                return "";
+            }
+
+            @Override
+            public Integer getHttpProxyPortAsInteger() {
+                return null;
+            }
+        });
+        final String oldAddress = System.getProperty(SEARCH_ENGINE_ADDRESS_PROPERTY);
+        System.setProperty(SEARCH_ENGINE_ADDRESS_PROPERTY, local.url("").toString().replaceAll("/$", ""));
+        ComponentUtil.getSystemProperties().setProperty(DIMENSION_CONFIG_KEY, "384");
+        try {
+            final OpenSearchEmbeddingClient realClient = new OpenSearchEmbeddingClient();
+            try {
+                assertTrue(realClient.checkAvailabilityNow());
+                assertEquals(basicHeader(LOCAL_CLUSTER_USERNAME, LOCAL_CLUSTER_PASSWORD), takeRequest(local).getHeader("Authorization"));
+
+                apiUrl[0] = external.url("").toString().replaceAll("/$", "");
+                assertTrue(realClient.checkAvailabilityNow());
+                assertNull(takeRequest(external).getHeader("Authorization"),
+                        "the local cluster's credentials must not reach an api.url configured after the client was built");
+            } finally {
+                realClient.destroy();
+            }
+        } finally {
+            ComponentUtil.getSystemProperties().remove(DIMENSION_CONFIG_KEY);
+            restoreSystemProperty(SEARCH_ENGINE_ADDRESS_PROPERTY, oldAddress);
+            ComponentUtil.setFessConfig(original);
+            local.shutdown();
+            external.shutdown();
         }
     }
 

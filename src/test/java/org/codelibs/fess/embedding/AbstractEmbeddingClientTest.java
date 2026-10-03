@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -356,6 +357,50 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         final CloseableHttpClient http = client.getHttpClient();
         assertNotNull(http, "getHttpClient() should lazily call init() when httpClient is null");
         assertSame(http, client.getHttpClient(), "a second call must reuse the same client, not build a new one");
+    }
+
+    @Test
+    public void test_getHttpClient_rebuildsWhenTimeoutChanges() {
+        final String key = "test.embedding.connect.timeout";
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        try {
+            final CloseableHttpClient first = client.getHttpClient();
+            assertSame(first, client.getHttpClient());
+
+            // A hand edit of system.properties: the timeouts are fixed in the client when it is built.
+            ComponentUtil.getSystemProperties().setProperty(key, "250");
+            final CloseableHttpClient second = client.getHttpClient();
+            assertFalse(first == second, "a changed timeout must build a new client");
+            assertEquals(250, client.httpClientConnectTimeout);
+            assertSame(second, client.getHttpClient());
+        } finally {
+            ComponentUtil.getSystemProperties().remove(key);
+            client.destroy();
+        }
+    }
+
+    @Test
+    public void test_runAvailabilityCheck_restartsWhenIntervalChanges() {
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        client.setTestContentChunkerEnabled(true);
+        client.setTestAvailabilityCheckInterval(30);
+        try {
+            client.init();
+            final TimeoutTask first = client.availabilityCheckTask;
+            assertNotNull(first);
+            assertEquals(30, client.availabilityCheckInterval);
+
+            client.runAvailabilityCheck();
+            assertSame(first, client.availabilityCheckTask, "an unchanged interval keeps the task");
+
+            client.setTestAvailabilityCheckInterval(10);
+            client.runAvailabilityCheck();
+            assertTrue(first.isCanceled());
+            assertFalse(first == client.availabilityCheckTask);
+            assertEquals(10, client.availabilityCheckInterval);
+        } finally {
+            client.destroy();
+        }
     }
 
     @Test
