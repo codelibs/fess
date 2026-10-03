@@ -1212,7 +1212,7 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_ragChatPermissions_encodedAndCachedUntilSet() {
+    public void test_ragChatPermissions_encodedAndFollowsTheProperty() {
         FessProp.propMap.clear();
         ComponentUtil.register(new org.codelibs.fess.helper.PermissionHelper() {
             {
@@ -1227,9 +1227,13 @@ public class FessPropTest extends UnitFessTestCase {
             fessConfig.setRagChatPermissions(" {role}rag-user , {group}sales,{user}taro,, ");
             assertEquals(java.util.Set.of("Rrag-user", "2sales", "1taro"), fessConfig.getRagChatPermissionSet());
 
-            // The parsed set is cached; a direct property change is only seen after the setter runs.
+            // The parsed set is cached while the property is unchanged.
+            assertSame(fessConfig.getRagChatPermissionSet(), fessConfig.getRagChatPermissionSet());
+
+            // A change that does not go through the setter (a hand edit of system.properties picked up by the
+            // live reload) is seen as well: the chat gate must not keep admitting or refusing by the old value.
             ComponentUtil.getSystemProperties().setProperty(Constants.RAG_CHAT_PERMISSIONS, "{role}other");
-            assertEquals(java.util.Set.of("Rrag-user", "2sales", "1taro"), fessConfig.getRagChatPermissionSet());
+            assertEquals(java.util.Set.of("Rother"), fessConfig.getRagChatPermissionSet());
             fessConfig.setRagChatPermissions("{role}guest");
             assertEquals(java.util.Set.of("Rguest"), fessConfig.getRagChatPermissionSet());
 
@@ -1242,7 +1246,7 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_ragChatLabels_parsedAndCachedUntilSet() {
+    public void test_ragChatLabels_parsedAndFollowsTheProperty() {
         FessProp.propMap.clear();
         final FessConfig fessConfig = new FessConfig.SimpleImpl();
         try {
@@ -1252,10 +1256,12 @@ public class FessPropTest extends UnitFessTestCase {
             fessConfig.setRagChatLabels(" public, faq ,,public ");
             assertEquals(Arrays.asList("public", "faq"), fessConfig.getRagChatLabelValueList());
 
+            // Cached while the property is unchanged, and re-parsed when it changes without the setter.
+            assertSame(fessConfig.getRagChatLabelValueList(), fessConfig.getRagChatLabelValueList());
             ComponentUtil.getSystemProperties().setProperty(Constants.RAG_CHAT_LABELS, "other");
-            assertEquals(Arrays.asList("public", "faq"), fessConfig.getRagChatLabelValueList());
-            fessConfig.setRagChatLabels("other");
             assertEquals(Arrays.asList("other"), fessConfig.getRagChatLabelValueList());
+            fessConfig.setRagChatLabels("last");
+            assertEquals(Arrays.asList("last"), fessConfig.getRagChatLabelValueList());
         } finally {
             fessConfig.setRagChatLabels("");
             FessProp.propMap.clear();
