@@ -38,6 +38,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -213,6 +214,29 @@ public interface FessProp {
         setSystemProperty(key, Integer.toString(value));
     }
 
+    /**
+     * Returns the form parsed from a system property value, parsing it again only when the value differs
+     * from the one the cached form came from. A system property also changes without its setter (a hand edit
+     * of system.properties picked up by its reload, or the admin screen's System Property field setting
+     * {@code fess.system.*}), so the parsed form is kept with its value instead of being dropped by the setter.
+     *
+     * @param <T> the type of the parsed form
+     * @param cacheKey the key in {@link #propMap}
+     * @param value the current value, not null
+     * @param parser makes the parsed form, not null, from the value
+     * @return the parsed form of the value
+     */
+    private <T> T getParsedSystemPropertyValue(final String cacheKey, final String value, final Function<String, T> parser) {
+        @SuppressWarnings("unchecked")
+        final Map.Entry<String, T> cached = (Map.Entry<String, T>) propMap.get(cacheKey);
+        if (cached != null && cached.getKey().equals(value)) {
+            return cached.getValue();
+        }
+        final T parsed = parser.apply(value);
+        propMap.put(cacheKey, Map.entry(value, parsed));
+        return parsed;
+    }
+
     default void setSearchFileProxy(final boolean value) {
         setSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, value);
     }
@@ -230,31 +254,26 @@ public interface FessProp {
     }
 
     default String[] getDefaultSortValues(final OptionalThing<FessUserBean> userBean) {
-        @SuppressWarnings("unchecked")
-        List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(DEFAULT_SORT_VALUES);
-        if (list == null) {
-            final String value = getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+        final List<Pair<String, String>> list = getParsedSystemPropertyValue(DEFAULT_SORT_VALUES, getDefaultSortValue(), value -> {
             if (StringUtil.isBlank(value)) {
-                list = Collections.emptyList();
-            } else {
-                final Set<String> keySet = new HashSet<>();
-                list = split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                    final String[] pair = s.split("=");
-                    if (pair.length == 1) {
-                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
-                    }
-                    if (pair.length == 2) {
-                        String sortValue = pair[1].trim();
-                        if (StringUtil.isBlank(sortValue) || "score".equals(sortValue)) {
-                            sortValue = "score.desc";
-                        }
-                        return new Pair<>(pair[0].trim(), sortValue);
-                    }
-                    return null;
-                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toList()));
+                return Collections.emptyList();
             }
-            propMap.put(DEFAULT_SORT_VALUES, list);
-        }
+            final Set<String> keySet = new HashSet<>();
+            return split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+                final String[] pair = s.split("=");
+                if (pair.length == 1) {
+                    return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                }
+                if (pair.length == 2) {
+                    String sortValue = pair[1].trim();
+                    if (StringUtil.isBlank(sortValue) || "score".equals(sortValue)) {
+                        sortValue = "score.desc";
+                    }
+                    return new Pair<>(pair[0].trim(), sortValue);
+                }
+                return null;
+            }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toList()));
+        });
         return list.stream().map(p -> {
             final String key = p.getFirst();
             if (StringUtil.isEmpty(key) || userBean
@@ -297,7 +316,6 @@ public interface FessProp {
 
     default void setDefaultSortValue(final String value) {
         setSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, value);
-        propMap.remove(DEFAULT_SORT_VALUES);
     }
 
     default String getDefaultSortValue() {
@@ -305,30 +323,25 @@ public interface FessProp {
     }
 
     default String[] getDefaultLabelValues(final OptionalThing<FessUserBean> userBean) {
-        @SuppressWarnings("unchecked")
-        Map<String, List<String>> map = (Map<String, List<String>>) propMap.get(DEFAULT_LABEL_VALUES);
-        if (map == null) {
-            final String value = getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+        final Map<String, List<String>> map = getParsedSystemPropertyValue(DEFAULT_LABEL_VALUES, getDefaultLabelValue(), value -> {
             if (StringUtil.isBlank(value)) {
-                map = Collections.emptyMap();
-            } else {
-                final Set<String> keySet = new HashSet<>();
-                map = split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
-                    final String[] pair = s.split("=");
-                    if (pair.length == 1) {
-                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
-                    }
-                    if (pair.length == 2) {
-                        return new Pair<>(pair[0].trim(), pair[1].trim());
-                    }
-                    return null;
-                })
-                        .filter(o -> o != null && keySet.add(o.getFirst()))
-                        .collect(HashMap<String, List<String>>::new, (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))),
-                                HashMap::putAll));
+                return Collections.emptyMap();
             }
-            propMap.put(DEFAULT_LABEL_VALUES, map);
-        }
+            final Set<String> keySet = new HashSet<>();
+            return split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
+                final String[] pair = s.split("=");
+                if (pair.length == 1) {
+                    return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                }
+                if (pair.length == 2) {
+                    return new Pair<>(pair[0].trim(), pair[1].trim());
+                }
+                return null;
+            })
+                    .filter(o -> o != null && keySet.add(o.getFirst()))
+                    .collect(HashMap<String, List<String>>::new, (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))),
+                            HashMap::putAll));
+        });
         return map.entrySet().stream().flatMap(e -> {
             final String key = e.getKey();
             if (StringUtil.isEmpty(key) || userBean
@@ -352,7 +365,6 @@ public interface FessProp {
 
     default void setDefaultLabelValue(final String value) {
         setSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, value);
-        propMap.remove(DEFAULT_LABEL_VALUES);
     }
 
     default String getDefaultLabelValue() {
@@ -361,7 +373,6 @@ public interface FessProp {
 
     default void setVirtualHostValue(final String value) {
         setSystemProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, value);
-        propMap.remove(VIRTUAL_HOST_HEADERS);
     }
 
     default String getVirtualHostValue() {
@@ -749,27 +760,16 @@ public interface FessProp {
      * @return the encoded roles; empty when the chat is not restricted
      */
     default Set<String> getRagChatPermissionSet() {
-        // The parsed set is kept with the value it was parsed from, so a change of the property that
-        // does not go through the setter (a hand edit of system.properties picked up by its live reload)
-        // is seen as well.
-        final String value = getRagChatPermissions();
-        @SuppressWarnings("unchecked")
-        final Map.Entry<String, Set<String>> cached = (Map.Entry<String, Set<String>>) propMap.get(RAG_CHAT_PERMISSION_SET);
-        if (cached != null && cached.getKey().equals(value)) {
-            return cached.getValue();
-        }
-        final Set<String> permissionSet;
-        if (StringUtil.isBlank(value)) {
-            permissionSet = Collections.emptySet();
-        } else {
+        return getParsedSystemPropertyValue(RAG_CHAT_PERMISSION_SET, getRagChatPermissions(), value -> {
+            if (StringUtil.isBlank(value)) {
+                return Collections.<String> emptySet();
+            }
             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-            permissionSet = split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank)
+            return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank)
                     .map(s -> permissionHelper.encode(s))
                     .filter(StringUtil::isNotBlank)
                     .collect(Collectors.toUnmodifiableSet()));
-        }
-        propMap.put(RAG_CHAT_PERMISSION_SET, Map.entry(value, permissionSet));
-        return permissionSet;
+        });
     }
 
     /**
@@ -799,17 +799,8 @@ public interface FessProp {
      * @return the trimmed, distinct label values; empty when the chat is not restricted
      */
     default List<String> getRagChatLabelValueList() {
-        // Kept with the value it was parsed from, like the permission set.
-        final String value = getRagChatLabels();
-        @SuppressWarnings("unchecked")
-        final Map.Entry<String, List<String>> cached = (Map.Entry<String, List<String>>) propMap.get(RAG_CHAT_LABEL_VALUE_LIST);
-        if (cached != null && cached.getKey().equals(value)) {
-            return cached.getValue();
-        }
-        final List<String> valueList =
-                split(value, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).distinct().toList());
-        propMap.put(RAG_CHAT_LABEL_VALUE_LIST, Map.entry(value, valueList));
-        return valueList;
+        return getParsedSystemPropertyValue(RAG_CHAT_LABEL_VALUE_LIST, getRagChatLabels(),
+                value -> split(value, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).distinct().toList()));
     }
 
     Integer getLdapMaxUsernameLengthAsInteger();
@@ -2058,31 +2049,27 @@ public interface FessProp {
 
     @SuppressWarnings("unchecked")
     default Tuple3<String, String, String>[] getVirtualHosts() {
-        Tuple3<String, String, String>[] hosts = (Tuple3<String, String, String>[]) propMap.get(VIRTUAL_HOST_HEADERS);
-        if (hosts == null) {
-            hosts = split(getVirtualHostHeaderValue(), "\n").get(stream -> stream.map(s -> {
-                final String[] v1 = s.split("=");
-                if (v1.length == 2) {
-                    final String[] v2 = v1[0].split(":", 2);
-                    if (v2.length == 2) {
-                        return new Tuple3<>(v2[0].trim(), v2[1].trim(), v1[1].replaceAll("[^a-zA-Z0-9_]", StringUtil.EMPTY).trim());
+        return getParsedSystemPropertyValue(VIRTUAL_HOST_HEADERS, getVirtualHostHeaderValue(),
+                value -> split(value, "\n").get(stream -> stream.map(s -> {
+                    final String[] v1 = s.split("=");
+                    if (v1.length == 2) {
+                        final String[] v2 = v1[0].split(":", 2);
+                        if (v2.length == 2) {
+                            return new Tuple3<>(v2[0].trim(), v2[1].trim(), v1[1].replaceAll("[^a-zA-Z0-9_]", StringUtil.EMPTY).trim());
+                        }
                     }
-                }
-                return null;
-            }).filter(v -> {
-                if (v == null) {
-                    return false;
-                }
-                if ("admin".equalsIgnoreCase(v.getValue3()) || "common".equalsIgnoreCase(v.getValue3())
-                        || "error".equalsIgnoreCase(v.getValue3()) || "login".equalsIgnoreCase(v.getValue3())
-                        || "profile".equalsIgnoreCase(v.getValue3())) {
-                    return false;
-                }
-                return true;
-            }).toArray(n -> new Tuple3[n]));
-            propMap.put(VIRTUAL_HOST_HEADERS, hosts);
-        }
-        return hosts;
+                    return null;
+                }).filter(v -> {
+                    if (v == null) {
+                        return false;
+                    }
+                    if ("admin".equalsIgnoreCase(v.getValue3()) || "common".equalsIgnoreCase(v.getValue3())
+                            || "error".equalsIgnoreCase(v.getValue3()) || "login".equalsIgnoreCase(v.getValue3())
+                            || "profile".equalsIgnoreCase(v.getValue3())) {
+                        return false;
+                    }
+                    return true;
+                }).toArray(n -> new Tuple3[n])));
     }
 
     String getCrawlerFailureUrlStatusCodes();

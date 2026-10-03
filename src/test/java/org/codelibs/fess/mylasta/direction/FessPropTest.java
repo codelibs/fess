@@ -1267,4 +1267,69 @@ public class FessPropTest extends UnitFessTestCase {
             FessProp.propMap.clear();
         }
     }
+
+    @Test
+    public void test_defaultSortValues_followsTheProperty() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        try {
+            fessConfig.setDefaultSortValue("last_modified.desc");
+            assertEquals(Arrays.asList("last_modified.desc"), Arrays.asList(fessConfig.getDefaultSortValues(OptionalThing.empty())));
+
+            ComponentUtil.getSystemProperties().setProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, "filename.asc");
+            assertEquals(Arrays.asList("filename.asc"), Arrays.asList(fessConfig.getDefaultSortValues(OptionalThing.empty())));
+            ComponentUtil.getSystemProperties().remove(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+            assertEquals(0, fessConfig.getDefaultSortValues(OptionalThing.empty()).length);
+        } finally {
+            fessConfig.setDefaultSortValue(null);
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
+    public void test_defaultLabelValues_followsTheProperty() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl();
+        try {
+            fessConfig.setDefaultLabelValue("public");
+            assertEquals(Arrays.asList("public"), Arrays.asList(fessConfig.getDefaultLabelValues(OptionalThing.empty())));
+
+            ComponentUtil.getSystemProperties().setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, "faq");
+            assertEquals(Arrays.asList("faq"), Arrays.asList(fessConfig.getDefaultLabelValues(OptionalThing.empty())));
+            ComponentUtil.getSystemProperties().remove(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+            assertEquals(0, fessConfig.getDefaultLabelValues(OptionalThing.empty()).length);
+        } finally {
+            fessConfig.setDefaultLabelValue(null);
+            FessProp.propMap.clear();
+        }
+    }
+
+    @Test
+    public void test_virtualHosts_followsTheProperty() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getVirtualHostHeaders() {
+                return "";
+            }
+        };
+        try {
+            fessConfig.setVirtualHostValue("Host:a.example.com=hostA");
+            Tuple3<String, String, String>[] hosts = fessConfig.getVirtualHosts();
+            assertEquals(1, hosts.length);
+            assertEquals("hostA", hosts[0].getValue3());
+            assertSame(hosts, fessConfig.getVirtualHosts());
+
+            ComponentUtil.getSystemProperties().setProperty(Constants.VIRTUAL_HOST_VALUE_PROPERTY, "Host:b.example.com=hostB");
+            hosts = fessConfig.getVirtualHosts();
+            assertEquals(1, hosts.length);
+            assertEquals("b.example.com", hosts[0].getValue2());
+            assertEquals("hostB", hosts[0].getValue3());
+        } finally {
+            fessConfig.setVirtualHostValue(null);
+            FessProp.propMap.clear();
+        }
+    }
 }
