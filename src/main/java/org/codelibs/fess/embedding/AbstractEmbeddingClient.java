@@ -76,6 +76,15 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
     /** The scheduled task for periodic availability checks. */
     protected TimeoutTask availabilityCheckTask;
 
+    /** The connect timeout in milliseconds {@link #httpClient} was built with. */
+    protected int httpClientConnectTimeout;
+
+    /** The response timeout in milliseconds {@link #httpClient} was built with. */
+    protected int httpClientTimeout;
+
+    /** The interval in seconds {@link #availabilityCheckTask} was started with. */
+    protected int availabilityCheckInterval;
+
     /**
      * Set once {@link #destroy()} has run. Guards {@link #getHttpClient()} against silently
      * recreating an HTTP client for a client instance the container has already torn down.
@@ -124,9 +133,12 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
                 logger.warn("[Embedding] {} failed to close prior HTTP client during re-init.", getName(), e);
             }
         }
+        httpClientConnectTimeout = getConnectTimeout();
+        httpClientTimeout = getTimeout();
         httpClient = buildHttpClient();
         if (logger.isDebugEnabled()) {
-            logger.debug("[Embedding] {} initialized. connectTimeout={}ms, timeout={}ms", getName(), getConnectTimeout(), getTimeout());
+            logger.debug("[Embedding] {} initialized. connectTimeout={}ms, timeout={}ms", getName(), httpClientConnectTimeout,
+                    httpClientTimeout);
         }
 
         startAvailabilityCheck();
@@ -269,7 +281,29 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
             return;
         }
         updateAvailability();
-        availabilityCheckTask = TimeoutManager.getInstance().addTimeoutTarget(this::updateAvailability, checkInterval, true);
+        availabilityCheckInterval = checkInterval;
+        availabilityCheckTask = TimeoutManager.getInstance().addTimeoutTarget(this::runAvailabilityCheck, checkInterval, true);
+    }
+
+    /**
+     * Runs one periodic availability check. The interval is a system property that changes at
+     * runtime, so a changed interval restarts the check with it instead of updating the availability.
+     */
+    protected void runAvailabilityCheck() {
+        if (getAvailabilityCheckInterval() != availabilityCheckInterval) {
+            synchronized (this) {
+                if (destroyed) {
+                    return;
+                }
+                if (availabilityCheckTask != null) {
+                    availabilityCheckTask.cancel();
+                    availabilityCheckTask = null;
+                }
+                startAvailabilityCheck();
+            }
+            return;
+        }
+        updateAvailability();
     }
 
     /**
@@ -326,7 +360,7 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
     }
 
     /**
-     * Gets the HTTP client, initializing it if necessary.
+     * Gets the HTTP client, initializing it if necessary and rebuilding it when the timeouts changed.
      *
      * <p>Synchronized so two threads racing here on the first lazy call -- e.g. right after
      * a live {@code content_chunker.embedding.name}/{@code rag.llm.name} switch activates a
@@ -343,6 +377,30 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
         }
         if (httpClient == null) {
             init();
+        } else {
+            final int connectTimeout = getConnectTimeout();
+            final int timeout = getTimeout();
+            if (connectTimeout != httpClientConnectTimeout || timeout != httpClientTimeout) {
+                // The timeouts are system properties that change at runtime but are fixed in the client
+                // when it is built, so a change builds a new one. The old one may still be serving
+                // requests, so it is closed once they have had the time their timeouts allow.
+                final CloseableHttpClient oldClient = httpClient;
+                final int closeDelay = (httpClientConnectTimeout + httpClientTimeout) / 1000 + 1;
+                httpClientConnectTimeout = connectTimeout;
+                httpClientTimeout = timeout;
+                httpClient = buildHttpClient();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[Embedding] {} rebuilt the HTTP client. connectTimeout={}ms, timeout={}ms", getName(), connectTimeout,
+                            timeout);
+                }
+                TimeoutManager.getInstance().addTimeoutTarget(() -> {
+                    try {
+                        oldClient.close();
+                    } catch (final IOException e) {
+                        logger.warn("[Embedding] {} failed to close the replaced HTTP client.", getName(), e);
+                    }
+                }, closeDelay, false);
+            }
         }
         return httpClient;
     }

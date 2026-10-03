@@ -738,6 +738,41 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_updateChangedSystemProperties() {
+        final SystemHelper helper = new SystemHelper();
+        final AtomicReference<String> appValue = new AtomicReference<>(StringUtil.EMPTY);
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAppValue() {
+                return appValue.get();
+            }
+
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*key|.*token|.*secret";
+            }
+        });
+        final String now = String.valueOf(System.currentTimeMillis());
+        try {
+            helper.updateSystemProperties();
+
+            // A hand edit of system.properties changes the app value without the admin screen.
+            appValue.set("test." + now + "=edited");
+            helper.updateChangedSystemProperties();
+            assertEquals("edited", System.getProperty("test." + now));
+
+            // Unchanged: a property changed elsewhere since is not overwritten again.
+            System.setProperty("test." + now, "other");
+            helper.updateChangedSystemProperties();
+            assertEquals("other", System.getProperty("test." + now));
+        } finally {
+            System.clearProperty("test." + now);
+        }
+    }
+
+    @Test
     public void test_updateSystemProperties_keepsPropertySetElsewhere() {
         final SystemHelper helper = new SystemHelper();
         final AtomicReference<String> appValue = new AtomicReference<>(StringUtil.EMPTY);

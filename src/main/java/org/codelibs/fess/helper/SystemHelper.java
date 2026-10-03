@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
@@ -160,6 +161,15 @@ public class SystemHelper {
     protected record AppliedSystemProperty(String original, String value) {
     }
 
+    /** The interval in seconds at which a changed app value is looked for. */
+    protected int appValueCheckInterval = 5;
+
+    /** The app value {@link #updateSystemProperties()} applied last. */
+    protected volatile String appliedAppValue;
+
+    /** The task that applies the app value when it changes without the admin screen. */
+    protected TimeoutTask appValueCheckTask;
+
     /** A set of names of threads that are currently waiting. */
     protected Set<String> waitingThreadNames = Collections.synchronizedSet(new HashSet<>());
 
@@ -179,6 +189,10 @@ public class SystemHelper {
             logger.error("Your system is out of support. See https://fess.codelibs.org/eol.html");
         }
         updateSystemProperties();
+        if (appValueCheckInterval > 0) {
+            appValueCheckTask =
+                    TimeoutManager.getInstance().addTimeoutTarget(this::updateChangedSystemProperties, appValueCheckInterval, true);
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         reportSearchRolePrefixProblems(fessConfig);
         filterPathEncoding = fessConfig.getPathEncoding();
@@ -222,6 +236,9 @@ public class SystemHelper {
      */
     @PreDestroy
     public void destroy() {
+        if (appValueCheckTask != null) {
+            appValueCheckTask.cancel();
+        }
         shutdownHookList.forEach(action -> {
             try {
                 action.run();
@@ -816,6 +833,7 @@ public class SystemHelper {
      */
     public synchronized void updateSystemProperties() {
         final String value = ComponentUtil.getFessConfig().getAppValue();
+        appliedAppValue = value;
         if (logger.isDebugEnabled()) {
             logger.debug("system.properties: {}", value);
         }
@@ -854,6 +872,21 @@ public class SystemHelper {
             System.setProperty(key, v);
             appliedSystemPropertyMap.put(key, new AppliedSystemProperty(setHere ? applied.original() : current, v));
         });
+    }
+
+    /**
+     * Applies the app value when it differs from the one applied last. The admin General screen
+     * applies it on save, but a hand edit of system.properties, picked up by its reload, or a backup
+     * import of it changes the value without that, so it is looked for periodically.
+     */
+    protected void updateChangedSystemProperties() {
+        try {
+            if (!Objects.equals(ComponentUtil.getFessConfig().getAppValue(), appliedAppValue)) {
+                updateSystemProperties();
+            }
+        } catch (final RuntimeException e) {
+            logger.warn("Failed to apply the changed system properties.", e);
+        }
     }
 
     /**
