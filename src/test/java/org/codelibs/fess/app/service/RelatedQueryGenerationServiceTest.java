@@ -25,6 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.codelibs.fess.app.service.RelatedQueryGenerationService.GenerationResult;
@@ -36,9 +38,14 @@ import org.codelibs.fess.app.service.RelatedQueryGenerationService.WordCount;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.RelatedQuery;
+import org.codelibs.fess.opensearch.log.cbean.SearchLogCB;
+import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.cbean.result.PagingResultBean;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -438,6 +445,128 @@ public class RelatedQueryGenerationServiceTest extends UnitFessTestCase {
             // expected
         }
         assertFalse(RelatedQueryGenerationService.RUNNING.get());
+    }
+
+    // ===================================================================================
+    //                                                                          Time Range
+    //                                                                          ==========
+
+    @Test
+    public void test_fetchFollowLogs_rangeInUtc() {
+        withTimeZone("Asia/Tokyo", () -> {
+            final String query = followLogQuery();
+            // BASE (12:00 JST) and BASE + window (12:10 JST) are sent as the UTC instants
+            assertTrue(query.contains(
+                    "\"requestedAt\":{\"from\":\"2026-09-20T03:00:00\",\"to\":\"2026-09-20T03:10:00\",\"include_lower\":false,\"include_upper\":true"),
+                    query);
+        });
+    }
+
+    @Test
+    public void test_fetchFollowLogs_rangeInUtc_utcZone() {
+        withTimeZone("UTC", () -> {
+            final String query = followLogQuery();
+            assertTrue(query.contains(
+                    "\"requestedAt\":{\"from\":\"2026-09-20T12:00:00\",\"to\":\"2026-09-20T12:10:00\",\"include_lower\":false,\"include_upper\":true"),
+                    query);
+        });
+    }
+
+    @Test
+    public void test_fetchSeedLogs_rangeInUtc() {
+        withTimeZone("America/New_York", () -> {
+            final AtomicReference<SearchLogCB> cb = new AtomicReference<>();
+            final RelatedQueryGenerationService target = serviceCapturing(cb);
+            // 2026-09-01T12:00 EDT is 16:00 UTC
+            target.fetchSeedLogs(new Seed("", "java", "java", List.of("java")), LocalDateTime.of(2026, 9, 1, 12, 0), settings());
+            final String query = queryOf(cb.get());
+            assertTrue(query.contains("\"from\":\"2026-09-01T16:00:00\",\"to\":null,\"include_lower\":true"), query);
+        });
+    }
+
+    @Test
+    public void test_fetchSeeds_rangeInUtc() {
+        withTimeZone("Asia/Tokyo", () -> {
+            final AtomicReference<SearchLogCB> cb = new AtomicReference<>();
+            final RelatedQueryGenerationService target = serviceCapturing(cb);
+            try {
+                target.fetchSeeds(LocalDateTime.of(2026, 9, 1, 12, 0), settings());
+                fail("the capturing behavior stops the query");
+            } catch (final CapturedException e) {
+                // expected
+            }
+            final String query = queryOf(cb.get());
+            assertTrue(query.contains("\"from\":\"2026-09-01T03:00:00\",\"to\":null,\"include_lower\":true"), query);
+        });
+    }
+
+    @Test
+    public void test_toIndexTime() {
+        withTimeZone("Asia/Tokyo", () -> {
+            assertEquals(LocalDateTime.of(2026, 9, 19, 23, 30),
+                    RelatedQueryGenerationService.toIndexTime(LocalDateTime.of(2026, 9, 20, 8, 30)));
+        });
+        withTimeZone("UTC", () -> {
+            assertEquals(LocalDateTime.of(2026, 9, 20, 8, 30),
+                    RelatedQueryGenerationService.toIndexTime(LocalDateTime.of(2026, 9, 20, 8, 30)));
+        });
+    }
+
+    private String followLogQuery() {
+        final AtomicReference<SearchLogCB> cb = new AtomicReference<>();
+        final RelatedQueryGenerationService target = serviceCapturing(cb);
+        target.fetchFollowLogs(new Seed("", "java", "java", List.of("java")), seedTimes("s1", "s2"), settings());
+        return queryOf(cb.get());
+    }
+
+    private String queryOf(final SearchLogCB cb) {
+        assertNotNull(cb, "the condition was built");
+        final Object query = cb.query().getQuery();
+        return query == null ? "" : query.toString().replaceAll("\\s+", "");
+    }
+
+    private RelatedQueryGenerationService serviceCapturing(final AtomicReference<SearchLogCB> holder) {
+        final RelatedQueryGenerationService target = new RelatedQueryGenerationService();
+        target.fessConfig = new MockFessConfig() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getSearchlogAggShardSizeAsInteger() {
+                return null;
+            }
+        };
+        target.searchLogBhv = new SearchLogBhv() {
+            @Override
+            public ListResultBean<SearchLog> selectList(final CBCall<SearchLogCB> cbLambda) {
+                final SearchLogCB cb = new SearchLogCB();
+                cbLambda.callback(cb);
+                holder.set(cb);
+                return new ListResultBean<>();
+            }
+
+            @Override
+            public PagingResultBean<SearchLog> selectPage(final CBCall<SearchLogCB> cbLambda) {
+                final SearchLogCB cb = new SearchLogCB();
+                cbLambda.callback(cb);
+                holder.set(cb);
+                throw new CapturedException();
+            }
+        };
+        return target;
+    }
+
+    private static void withTimeZone(final String zone, final Runnable runnable) {
+        final TimeZone original = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone(zone));
+        try {
+            runnable.run();
+        } finally {
+            TimeZone.setDefault(original);
+        }
+    }
+
+    static class CapturedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
     }
 
     // ===================================================================================
