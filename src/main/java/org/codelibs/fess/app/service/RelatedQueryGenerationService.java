@@ -19,6 +19,8 @@ import static org.codelibs.fess.app.service.SearchLogAggregationReader.termsBuck
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -253,7 +255,7 @@ public class RelatedQueryGenerationService {
     protected Map<String, List<WordCount>> fetchSeeds(final LocalDateTime from, final Settings settings) {
         final EsPagingResultBean<SearchLog> result = (EsPagingResultBean<SearchLog>) searchLogBhv.selectPage(cb -> {
             cb.fetchFirst(0);
-            cb.query().setRequestedAt_GreaterEqual(from);
+            cb.query().setRequestedAt_GreaterEqual(toIndexTime(from));
             cb.query().setUserSessionId_Exists();
             cb.query().setAccessType_NotTerm(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
             cb.aggregation().setVirtualHost_Terms(VIRTUAL_HOSTS, op -> {
@@ -287,7 +289,7 @@ public class RelatedQueryGenerationService {
         return searchLogBhv.selectList(cb -> {
             cb.query().setSearchWord_InScope(seed.searchWords());
             setupVirtualHost(cb.query(), seed.virtualHost());
-            cb.query().setRequestedAt_GreaterEqual(from);
+            cb.query().setRequestedAt_GreaterEqual(toIndexTime(from));
             cb.query().setUserSessionId_Exists();
             cb.query().setAccessType_NotTerm(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
             cb.query().addOrderBy_RequestedAt_Desc();
@@ -328,8 +330,8 @@ public class RelatedQueryGenerationService {
         return searchLogBhv.selectList(cb -> {
             cb.query().setUserSessionId_InScope(seedTimes.keySet());
             setupVirtualHost(cb.query(), seed.virtualHost());
-            cb.query().setRequestedAt_GreaterThan(start);
-            cb.query().setRequestedAt_LessEqual(end);
+            cb.query().setRequestedAt_GreaterThan(toIndexTime(start));
+            cb.query().setRequestedAt_LessEqual(toIndexTime(end));
             cb.query().setHitCount_GreaterThan(0L);
             cb.query().setAccessType_NotTerm(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
             cb.query().not(q -> q.setSearchWord_InScope(seed.searchWords()));
@@ -341,6 +343,19 @@ public class RelatedQueryGenerationService {
             cb.specify().columnHitCount();
             cb.fetchFirst(settings.logFetchSize());
         });
+    }
+
+    /**
+     * Converts a time in the system default time zone, the zone {@link SearchLogBhv} reads
+     * {@code requestedAt} in and the zone of the current time, to UTC for a range condition. The
+     * condition is sent without a zone and the search engine reads it as UTC, so passing the
+     * local time would shift the range by the zone offset.
+     *
+     * @param time the time in the system default time zone
+     * @return the same instant as a UTC local time
+     */
+    protected static LocalDateTime toIndexTime(final LocalDateTime time) {
+        return time.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
     /**
