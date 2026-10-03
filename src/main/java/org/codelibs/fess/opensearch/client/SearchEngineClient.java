@@ -1233,6 +1233,11 @@ public class SearchEngineClient implements Client {
      * the index already has are never changed. The document index is skipped: its mapping is
      * rewritten by plugins and is upgraded by a reindex.</p>
      *
+     * <p>Only the webapp process ({@link #isWebappProcess()}) adds the fields. The webapp opens the
+     * client before it starts any job process, so the fields are already there when a crawler,
+     * thumbnail, suggest or chunk process starts. The crawler, thumbnail and suggest processes also
+     * lack {@code ChunkVectorHelper}, which the placeholder substitution needs.</p>
+     *
      * @param index              the index configuration name
      * @param docType            the document type name
      * @param indexName          the actual index name
@@ -1240,11 +1245,15 @@ public class SearchEngineClient implements Client {
      */
     protected void addMissingProperties(final String index, final String docType, final String indexName,
             final MappingMetadata existingProperties) {
-        if (DOC_INDEX.equals(index)) {
+        if (DOC_INDEX.equals(index) || !isWebappProcess()) {
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
+        if (!ResourceUtil.isExist(mappingFile)) {
+            logger.warn("{} is not found.", mappingFile);
+            return;
+        }
         final Map<String, Object> missingProperties;
         try {
             final String source = substitutePlaceholders(FileUtil.readUTF8(mappingFile), fessConfig.getIndexNumberOfShards(),
@@ -1255,7 +1264,7 @@ public class SearchEngineClient implements Client {
             final Map<String, Object> bundledProperties = (Map<String, Object>) mapping.getOrDefault("properties", Collections.emptyMap());
             missingProperties = getMissingProperties(existingProperties.sourceAsMap(), bundledProperties);
         } catch (final Exception e) {
-            logger.warn("{} is not found.", mappingFile, e);
+            logger.warn("Failed to read the bundled mapping {} for {}/{}.", mappingFile, indexName, docType, e);
             return;
         }
         if (missingProperties.isEmpty()) {

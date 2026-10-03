@@ -447,8 +447,62 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
 
             assertTrue(client.putSources.isEmpty(), client.putSources.toString());
             assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+            assertTrue(capture.warnings().get(0).contains("is not found"), capture.warnings().get(0));
+            assertNull(capture.eventsAt(Level.WARN).get(0).getThrown(), "a missing file needs no stack trace");
         } finally {
             capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_readFailureIsNotReportedAsMissingFile() {
+        final PutRecordingClient client = new PutRecordingClient() {
+            @Override
+            protected String substitutePlaceholders(final String source, final String numberOfShards, final String autoExpandReplicas) {
+                throw new IllegalStateException("placeholder failure");
+            }
+        };
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess_log.search_log", "search_log", "fess_log.search_log",
+                    toMappingMetadata(Map.of("user", Map.of("type", "keyword"))));
+
+            assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+            final List<String> warnings = capture.warnings();
+            assertEquals(1, warnings.size(), warnings.toString());
+            assertTrue(warnings.get(0).startsWith("Failed to read the bundled mapping"), warnings.get(0));
+            assertTrue(warnings.get(0).contains("fess_log.search_log/search_log"), warnings.get(0));
+            assertFalse(warnings.get(0).contains("is not found"), warnings.get(0));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_skippedInJobProcesses() throws Exception {
+        // A crawler, thumbnail, suggest or chunk process has no ChunkVectorHelper, so reading a
+        // bundled mapping there failed and logged a WARN with a stack trace for every index at
+        // every start. Only the webapp adds missing fields; it runs before any job process. The
+        // helper is registered here, so without the gate the field below would be put.
+        final Map<String, Object> existing = readBundledProperties(SEARCH_LOG_MAPPING);
+        existing.remove("virtualHost");
+        final String[] processProperties =
+                { "fess.crawler.process", "fess.thumbnail.process", "fess.suggest.process", "fess.chunk.process" };
+        for (final String property : processProperties) {
+            final PutRecordingClient client = new PutRecordingClient();
+            final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+            System.setProperty(property, "true");
+            try {
+                client.addMissingProperties("fess_log.search_log", "search_log", "fess_log.search_log", toMappingMetadata(existing));
+
+                assertTrue(client.putSources.isEmpty(), property + ": " + client.putSources);
+                assertTrue(capture.warnings().isEmpty(), property + ": " + capture.warnings());
+                assertTrue(capture.messagesAt(Level.INFO).isEmpty(), property + ": " + capture.messagesAt(Level.INFO));
+            } finally {
+                System.clearProperty(property);
+                capture.detach();
+            }
         }
     }
 
