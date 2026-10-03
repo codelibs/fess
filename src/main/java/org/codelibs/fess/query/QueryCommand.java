@@ -18,17 +18,24 @@ package org.codelibs.fess.query;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.lang.Character.UnicodeBlock;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.DisMaxQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchNoneQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.search.sort.SortBuilder;
@@ -40,6 +47,7 @@ import org.codelibs.fesen.opensearch.search.sort.SortOrder;
  * Provides common functionality for processing and executing search queries.
  */
 public abstract class QueryCommand {
+    private static final Logger logger = LogManager.getLogger(QueryCommand.class);
 
     /**
      * Default constructor for QueryCommand.
@@ -110,6 +118,64 @@ public abstract class QueryCommand {
     protected boolean isSearchField(final String field) {
         final QueryFieldConfig config = getQueryFieldConfig();
         return config.searchFieldSet != null && config.searchFieldSet.contains(field);
+    }
+
+    /**
+     * Checks if a condition on the field must be limited to the tags that the caller can see. The {@code tag} field
+     * holds the values of every tag of a document, including tags whose label permissions do not include the caller,
+     * so a condition on it is restricted for every search except the admin search.
+     * @param context The query context.
+     * @param field The field name.
+     * @return True if the field is the tag field and the condition must be restricted.
+     */
+    protected boolean isRestrictedTagField(final QueryContext context, final String field) {
+        return field != null && field.equals(ComponentUtil.getFessConfig().getIndexFieldTag())
+                && !SearchRequestType.ADMIN_SEARCH.equals(context.getSearchRequestType());
+    }
+
+    /**
+     * Checks if the caller can see a tag. The visible tags are resolved once per query context.
+     * @param context The query context.
+     * @param value The tag value.
+     * @return True if the tag is visible to the caller.
+     */
+    protected boolean isVisibleTag(final QueryContext context, final String value) {
+        Set<String> valueSet = context.getVisibleTagValueSet();
+        if (valueSet == null) {
+            valueSet = getVisibleTagValueSet(context);
+            context.setVisibleTagValueSet(valueSet);
+        }
+        return valueSet.contains(value);
+    }
+
+    /**
+     * Resolves the values of the tags that the caller can see.
+     * @param context The query context.
+     * @return The visible tag values, or an empty set if they cannot be resolved.
+     */
+    protected Set<String> getVisibleTagValueSet(final QueryContext context) {
+        try {
+            final SearchRequestType searchRequestType =
+                    context.getSearchRequestType() != null ? context.getSearchRequestType() : SearchRequestType.JSON;
+            final Locale locale = LaRequestUtil.getOptionalRequest().map(request -> request.getLocale()).orElse(null);
+            return ComponentUtil.getLabelTypeHelper().getTagValueSet(searchRequestType, locale != null ? locale : Locale.ROOT);
+        } catch (final RuntimeException e) {
+            logger.debug("Failed to resolve the visible tags; no tag condition matches.", e);
+            return Collections.emptySet();
+        }
+    }
+
+    /**
+     * Builds the query for a condition on the tag field that the caller may not use: it matches no document, so the
+     * condition does not reveal which documents carry a tag that the caller cannot see.
+     * @param context The query context.
+     * @param field The field name.
+     * @param text The query text.
+     * @return A query that matches no document.
+     */
+    protected QueryBuilder buildHiddenTagQuery(final QueryContext context, final String field, final String text) {
+        context.addFieldLog(field, text);
+        return new MatchNoneQueryBuilder();
     }
 
     /**

@@ -125,6 +125,7 @@ public class QueryHelper {
      */
     public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {
         final QueryContext queryContext = new QueryContext(appendAdditionalQuery(query), true);
+        queryContext.setSearchRequestType(searchRequestType);
         buildBaseQuery(queryContext, context);
         buildBoostQuery(queryContext);
         buildRoleQuery(queryContext, searchRequestType);

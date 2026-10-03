@@ -2712,6 +2712,7 @@ public class SearchEngineClient implements Client {
             }));
             stream(facetInfo.query).of(stream -> stream.forEach(fq -> {
                 final QueryContext facetContext = new QueryContext(fq, false);
+                facetContext.setSearchRequestType(searchRequestType);
                 queryHelper.buildBaseQuery(facetContext, c -> {});
                 final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
                 final FilterAggregationBuilder filterBuilder =

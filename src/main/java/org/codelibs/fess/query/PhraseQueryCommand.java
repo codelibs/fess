@@ -30,6 +30,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.codelibs.fesen.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 /**
  * Query command for phrase queries.
@@ -97,6 +98,14 @@ public class PhraseQueryCommand extends QueryCommand {
             final float boost, final String field, final String[] texts) {
         final String text = String.join(" ", texts);
         final int slop = phraseQuery.getSlop();
+
+        if (isRestrictedTagField(context, field)) {
+            if (texts.length != 1 || !isVisibleTag(context, texts[0])) {
+                return buildHiddenTagQuery(context, field, text);
+            }
+            context.addFieldLog(field, text);
+            return QueryBuilders.termQuery(field, texts[0]).boost(boost);
+        }
 
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);

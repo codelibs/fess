@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
@@ -69,6 +70,12 @@ public class QueryContext {
 
     /** The default field to search in when no specific field is specified. */
     protected String defaultField = null;
+
+    /** The type of the search request, or null when the query is not built for a search request. */
+    protected SearchRequestType searchRequestType = null;
+
+    /** The values of the tags that the caller can see, resolved on first use. */
+    protected Set<String> visibleTagValueSet = null;
 
     /**
      * Constructs a new QueryContext with the specified query string.
@@ -267,5 +274,37 @@ public class QueryContext {
      */
     public Map<String, List<String>> getFieldLogMap() {
         return fieldLogMap != null ? fieldLogMap : new HashMap<>();
+    }
+
+    /**
+     * Gets the type of the search request that this query is built for.
+     * @return The search request type, or null if it is not known.
+     */
+    public SearchRequestType getSearchRequestType() {
+        return searchRequestType;
+    }
+
+    /**
+     * Sets the type of the search request that this query is built for.
+     * @param searchRequestType The search request type.
+     */
+    public void setSearchRequestType(final SearchRequestType searchRequestType) {
+        this.searchRequestType = searchRequestType;
+    }
+
+    /**
+     * Gets the values of the tags that the caller can see, as resolved for this query.
+     * @return The visible tag values, or null if they are not resolved yet.
+     */
+    public Set<String> getVisibleTagValueSet() {
+        return visibleTagValueSet;
+    }
+
+    /**
+     * Sets the values of the tags that the caller can see.
+     * @param visibleTagValueSet The visible tag values.
+     */
+    public void setVisibleTagValueSet(final Set<String> visibleTagValueSet) {
+        this.visibleTagValueSet = visibleTagValueSet;
     }
 }
