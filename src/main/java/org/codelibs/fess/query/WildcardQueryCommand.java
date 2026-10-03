@@ -80,6 +80,10 @@ public class WildcardQueryCommand extends QueryCommand {
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), wildcardQuery.getField());
+        if (isRestrictedTagField(context, field)) {
+            // a tag value is a hash of the name: a pattern has no use but to probe for tags the caller cannot see
+            return buildHiddenTagQuery(context, field, wildcardQuery.getTerm().text());
+        }
         if (Constants.DEFAULT_FIELD.equals(field)) {
             final String text = wildcardQuery.getTerm().text();
             context.addFieldLog(field, text);
