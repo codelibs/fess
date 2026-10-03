@@ -64,7 +64,7 @@ public class FessSetupTest {
     public void test_list_showsOpensearch() {
         assertEquals(0, run("list"));
         assertTrue(out().contains("opensearch"), out());
-        assertTrue(out().contains("3.8.0"), out());
+        assertTrue(out().contains("3.9.0"), out());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class FessSetupTest {
     public void test_loadDefinitions_findsTheBundledFile() throws Exception {
         final Map<String, ComponentDefinition> defs = FessSetup.loadDefinitions();
         assertTrue(defs.containsKey("opensearch"), defs.keySet().toString());
-        assertEquals("3.8.0", defs.get("opensearch").get("version"));
+        assertEquals("3.9.0", defs.get("opensearch").get("version"));
         assertEquals(4, defs.get("opensearch").list("plugin.artifacts").size());
         assertEquals(List.of("opensearch-security-analytics", "opensearch-performance-analyzer"),
                 defs.get("opensearch").list("plugin.removals"));
