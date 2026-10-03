@@ -730,7 +730,6 @@ public interface FessProp {
      */
     default void setRagChatPermissions(final String value) {
         setSystemProperty(Constants.RAG_CHAT_PERMISSIONS, value);
-        propMap.remove(RAG_CHAT_PERMISSION_SET);
     }
 
     /**
@@ -750,21 +749,26 @@ public interface FessProp {
      * @return the encoded roles; empty when the chat is not restricted
      */
     default Set<String> getRagChatPermissionSet() {
+        // The parsed set is kept with the value it was parsed from, so a change of the property that
+        // does not go through the setter (a hand edit of system.properties picked up by its live reload)
+        // is seen as well.
+        final String value = getRagChatPermissions();
         @SuppressWarnings("unchecked")
-        Set<String> permissionSet = (Set<String>) propMap.get(RAG_CHAT_PERMISSION_SET);
-        if (permissionSet == null) {
-            final String value = getRagChatPermissions();
-            if (StringUtil.isBlank(value)) {
-                permissionSet = Collections.emptySet();
-            } else {
-                final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                permissionSet = split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank)
-                        .map(s -> permissionHelper.encode(s))
-                        .filter(StringUtil::isNotBlank)
-                        .collect(Collectors.toUnmodifiableSet()));
-            }
-            propMap.put(RAG_CHAT_PERMISSION_SET, permissionSet);
+        final Map.Entry<String, Set<String>> cached = (Map.Entry<String, Set<String>>) propMap.get(RAG_CHAT_PERMISSION_SET);
+        if (cached != null && cached.getKey().equals(value)) {
+            return cached.getValue();
         }
+        final Set<String> permissionSet;
+        if (StringUtil.isBlank(value)) {
+            permissionSet = Collections.emptySet();
+        } else {
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            permissionSet = split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank)
+                    .map(s -> permissionHelper.encode(s))
+                    .filter(StringUtil::isNotBlank)
+                    .collect(Collectors.toUnmodifiableSet()));
+        }
+        propMap.put(RAG_CHAT_PERMISSION_SET, Map.entry(value, permissionSet));
         return permissionSet;
     }
 
@@ -777,7 +781,6 @@ public interface FessProp {
      */
     default void setRagChatLabels(final String value) {
         setSystemProperty(Constants.RAG_CHAT_LABELS, value);
-        propMap.remove(RAG_CHAT_LABEL_VALUE_LIST);
     }
 
     /**
@@ -796,13 +799,16 @@ public interface FessProp {
      * @return the trimmed, distinct label values; empty when the chat is not restricted
      */
     default List<String> getRagChatLabelValueList() {
+        // Kept with the value it was parsed from, like the permission set.
+        final String value = getRagChatLabels();
         @SuppressWarnings("unchecked")
-        List<String> valueList = (List<String>) propMap.get(RAG_CHAT_LABEL_VALUE_LIST);
-        if (valueList == null) {
-            valueList = split(getRagChatLabels(), ",")
-                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).distinct().toList());
-            propMap.put(RAG_CHAT_LABEL_VALUE_LIST, valueList);
+        final Map.Entry<String, List<String>> cached = (Map.Entry<String, List<String>>) propMap.get(RAG_CHAT_LABEL_VALUE_LIST);
+        if (cached != null && cached.getKey().equals(value)) {
+            return cached.getValue();
         }
+        final List<String> valueList =
+                split(value, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).distinct().toList());
+        propMap.put(RAG_CHAT_LABEL_VALUE_LIST, Map.entry(value, valueList));
         return valueList;
     }
 
