@@ -59,6 +59,38 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_availableSearchers_followRankFusionSearchersChangedAfterInit() throws Exception {
+        final String before = System.getProperty("rank.fusion.searchers");
+        try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
+            rankFusionProcessor.setSearcher(new TestMainSearcher(10));
+            rankFusionProcessor.register(new TestSubSearcher(0, 0, 0) {
+                @Override
+                public String getName() {
+                    return "sub";
+                }
+            });
+            System.clearProperty("rank.fusion.searchers");
+            rankFusionProcessor.init();
+            assertEquals(2, rankFusionProcessor.getAvailableSearchers().length);
+
+            // Set at runtime through the admin screen's System Property field, without update().
+            System.setProperty("rank.fusion.searchers", "sub");
+            final RankFusionSearcher[] searchers = rankFusionProcessor.getAvailableSearchers();
+            assertEquals(1, searchers.length);
+            assertEquals("sub", searchers[0].getName());
+
+            System.clearProperty("rank.fusion.searchers");
+            assertEquals(2, rankFusionProcessor.getAvailableSearchers().length);
+        } finally {
+            if (before == null) {
+                System.clearProperty("rank.fusion.searchers");
+            } else {
+                System.setProperty("rank.fusion.searchers", before);
+            }
+        }
+    }
+
+    @Test
     public void test_default_1000docs_10size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;

@@ -145,6 +145,21 @@ public class SystemHelper {
     /** A map of listeners for configuration updates. */
     protected Map<String, Supplier<String>> updateConfigListenerMap = new HashMap<>();
 
+    /**
+     * The JVM system properties set by {@link #updateSystemProperties()}, by key, with the value each
+     * held before, so a key edited or removed in the app value is updated or restored.
+     */
+    protected final Map<String, AppliedSystemProperty> appliedSystemPropertyMap = new HashMap<>();
+
+    /**
+     * A JVM system property set from the app value.
+     *
+     * @param original the value before it was first set from the app value, or null
+     * @param value the value set from the app value
+     */
+    protected record AppliedSystemProperty(String original, String value) {
+    }
+
     /** A set of names of threads that are currently waiting. */
     protected Set<String> waitingThreadNames = Collections.synchronizedSet(new HashSet<>());
 
@@ -794,29 +809,51 @@ public class SystemHelper {
 
     /**
      * Updates system properties from the application configuration.
+     *
+     * <p>A key outside {@code fess.*} that is already set by something else, such as {@code -D} on the
+     * command line, is left alone. A key set here earlier is replaced when its value is edited and
+     * restored to its former value when it is removed, as long as nothing else has changed it since.</p>
      */
-    public void updateSystemProperties() {
+    public synchronized void updateSystemProperties() {
         final String value = ComponentUtil.getFessConfig().getAppValue();
         if (logger.isDebugEnabled()) {
             logger.debug("system.properties: {}", value);
         }
-        if (StringUtil.isNotBlank(value)) {
-            ParameterUtil.parse(ParameterUtil.encrypt(value)).entrySet().stream().filter(e -> {
-                final String key = e.getKey();
-                if (StringUtil.isBlank(key)) {
-                    return false;
-                }
-                if (key.startsWith("fess.")) {
-                    return true;
-                }
-                return System.getProperty(key) == null;
-            }).forEach(e -> {
+        final Map<String, String> paramMap =
+                StringUtil.isNotBlank(value) ? ParameterUtil.parse(ParameterUtil.encrypt(value)) : Collections.emptyMap();
+        appliedSystemPropertyMap.entrySet().removeIf(e -> {
+            final String key = e.getKey();
+            if (paramMap.containsKey(key)) {
+                return false;
+            }
+            if (e.getValue().value().equals(System.getProperty(key))) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("system.properties: setProperty({}, {})", e.getKey(), e.getValue());
+                    logger.debug("system.properties: restore({})", key);
                 }
-                System.setProperty(e.getKey(), e.getValue());
-            });
-        }
+                if (e.getValue().original() == null) {
+                    System.clearProperty(key);
+                } else {
+                    System.setProperty(key, e.getValue().original());
+                }
+            }
+            return true;
+        });
+        paramMap.forEach((key, v) -> {
+            if (StringUtil.isBlank(key)) {
+                return;
+            }
+            final String current = System.getProperty(key);
+            final AppliedSystemProperty applied = appliedSystemPropertyMap.get(key);
+            final boolean setHere = applied != null && applied.value().equals(current);
+            if (!key.startsWith("fess.") && current != null && !setHere) {
+                return;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("system.properties: setProperty({}, {})", key, v);
+            }
+            System.setProperty(key, v);
+            appliedSystemPropertyMap.put(key, new AppliedSystemProperty(setHere ? applied.original() : current, v));
+        });
     }
 
     /**

@@ -73,18 +73,12 @@ public class ThemeRegistry {
     @Resource
     protected FessConfig fessConfig;
 
-    /** Immutable snapshot of themes + the resolved default theme name. */
-    private static final class Snapshot {
-        final Map<String, Theme> byName;
-        final String defaultThemeName;
-
-        Snapshot(final Map<String, Theme> byName, final String defaultThemeName) {
-            this.byName = byName;
-            this.defaultThemeName = defaultThemeName;
-        }
-    }
-
-    private volatile Snapshot snapshot = new Snapshot(Map.of(), null);
+    /**
+     * Immutable snapshot of the installed themes keyed by name. The default theme name is not part
+     * of it: {@code theme.default} is a system property, which also changes without a reload (a hand
+     * edit of system.properties picked up by its reload), so it is read on each resolution.
+     */
+    private volatile Map<String, Theme> snapshot = Map.of();
     private Path themesDirOverride; // test seam
 
     /**
@@ -117,8 +111,7 @@ public class ThemeRegistry {
         final Map<String, Theme> next = new HashMap<>();
         scanStatic(next);
         final Map<String, Theme> immutable = Collections.unmodifiableMap(next);
-        final String defaultThemeName = lookupDefaultThemeName();
-        snapshot = new Snapshot(immutable, defaultThemeName);
+        snapshot = immutable;
         if (logger.isInfoEnabled()) {
             logger.info("ThemeRegistry reloaded; {} themes registered", immutable.size());
         }
@@ -194,7 +187,7 @@ public class ThemeRegistry {
         if (StringUtil.isBlank(name)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(snapshot.byName.get(name));
+        return Optional.ofNullable(snapshot.get(name));
     }
 
     /**
@@ -203,7 +196,7 @@ public class ThemeRegistry {
      * @return unmodifiable map of registered themes
      */
     public Map<String, Theme> getAllThemes() {
-        return snapshot.byName;
+        return snapshot;
     }
 
     /**
@@ -227,13 +220,13 @@ public class ThemeRegistry {
      * @return the resolved theme, or empty if even the bundled theme is not installed
      */
     public Optional<Theme> resolveActiveTheme(final String virtualHostKey) {
-        final Snapshot snap = snapshot;
+        final Map<String, Theme> snap = snapshot;
         if (StringUtil.isNotBlank(virtualHostKey)) {
             // Theme names are enforced lowercase by NAME_PATTERN (^[a-z0-9][a-z0-9_-]{0,63}$);
             // the lowercase here is for resilience against case-preserving virtual-host
             // configurations that may supply mixed-case keys.
             final String key = virtualHostKey.toLowerCase(Locale.ROOT);
-            final Theme t = snap.byName.get(key);
+            final Theme t = snap.get(key);
             if (t != null) {
                 return Optional.of(t);
             }
@@ -241,9 +234,9 @@ public class ThemeRegistry {
                 logger.debug("Virtual host key '{}' did not resolve to a known theme; falling back", virtualHostKey);
             }
         }
-        final String def = snap.defaultThemeName;
+        final String def = lookupDefaultThemeName();
         if (StringUtil.isNotBlank(def)) {
-            final Theme configured = snap.byName.get(def);
+            final Theme configured = snap.get(def);
             if (configured != null) {
                 return Optional.of(configured);
             }
@@ -258,7 +251,7 @@ public class ThemeRegistry {
         // The bundled theme ships inside the WAR and is refused by the delete path, so this is
         // the last resort: without it there is no static UI and the request falls through to
         // whatever Fess routes are left.
-        return Optional.ofNullable(snap.byName.get(BUILT_IN_THEME_NAME));
+        return Optional.ofNullable(snap.get(BUILT_IN_THEME_NAME));
     }
 
     private String lookupDefaultThemeName() {
@@ -269,7 +262,7 @@ public class ThemeRegistry {
             return fessConfig.getDefaultTheme();
         } catch (final Exception e) {
             // System-property lookup can fail when the config layer is mid-init or
-            // the system-properties index is unreachable. Reported on every reload that hits it.
+            // the system-properties index is unreachable. Reported on every resolution that hits it.
             if (logger.isDebugEnabled()) {
                 logger.warn("Failed to read default theme system property; key={}", Constants.DEFAULT_THEME_PROPERTY, e);
             } else {
@@ -300,8 +293,8 @@ public class ThemeRegistry {
      * populate the registry without materialising real fixtures.
      */
     synchronized void injectThemeForTest(final Theme theme) {
-        final Map<String, Theme> next = new HashMap<>(snapshot.byName);
+        final Map<String, Theme> next = new HashMap<>(snapshot);
         next.put(theme.getName(), theme);
-        snapshot = new Snapshot(Collections.unmodifiableMap(next), snapshot.defaultThemeName);
+        snapshot = Collections.unmodifiableMap(next);
     }
 }

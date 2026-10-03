@@ -30,12 +30,11 @@ import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -161,6 +160,7 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
         }
         try {
             final HttpGet request = new HttpGet(createRequestUri(apiUrl + "/_plugins/_ml/models/" + modelId));
+            setAuthorization(request);
             try (var response = getHttpClient().execute(request)) {
                 final int statusCode = response.getCode();
                 if (statusCode < 200 || statusCode >= 300) {
@@ -389,6 +389,7 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
             return executeWithRetry(operation, () -> {
                 final HttpPost httpRequest = new HttpPost(requestUri);
                 httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+                setAuthorization(httpRequest);
                 try (var response = getHttpClient().execute(httpRequest)) {
                     final int statusCode = response.getCode();
                     if (statusCode < 200 || statusCode >= 300) {
@@ -642,24 +643,21 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
     }
 
     /**
-     * Adds a preemptive {@code Authorization: Basic ...} default header when both a username and a
-     * password resolve to non-blank values, matching how fess core authenticates against the same
-     * cluster. The timeouts and the shared proxy configuration come from
-     * {@link AbstractEmbeddingClient#buildHttpClient()}.
+     * Adds a preemptive {@code Authorization: Basic ...} header to the request when both a username
+     * and a password resolve to non-blank values, matching how fess core authenticates against the
+     * same cluster. It is resolved for each request rather than installed as a default header of the
+     * HTTP client, which is built once: the credentials and {@code api.url} are system properties
+     * that change at runtime, and a header fixed at build time would keep sending the old credentials,
+     * including the local cluster's to an {@code api.url} configured later.
      *
-     * @param builder the HTTP client builder to configure
+     * @param request the request to authorize
      */
-    @Override
-    protected void configureHttpClient(final HttpClientBuilder builder) {
+    protected void setAuthorization(final HttpRequest request) {
         final String username = getUsername();
         final String password = getPassword();
         if (StringUtil.isNotBlank(username) && StringUtil.isNotBlank(password)) {
             final String token = Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
-            builder.setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + token)));
-            // Never log the password (or the token, which encodes it).
-            if (logger.isDebugEnabled()) {
-                logger.debug("[Embedding:OPENSEARCH] Basic authentication enabled. username={}", username);
-            }
+            request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + token);
         }
     }
 
@@ -703,8 +701,8 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
      *
      * <p>This gates the {@code search_engine.username}/{@code search_engine.password}
      * fallbacks in {@link #getUsername()}/{@link #getPassword()}. Those credentials are
-     * installed by {@link #buildHttpClient()} as a <em>preemptive</em>
-     * {@code Authorization: Basic} default header, so they are sent on the very first request
+     * sent by {@link #setAuthorization(HttpRequest)} as a <em>preemptive</em>
+     * {@code Authorization: Basic} header, so they are sent on the very first request
      * to whatever {@link #getApiUrl()} resolved - a configured third-party {@code api.url}
      * would receive the local cluster's credentials unprompted. The two fallbacks are checked
      * independently for exactly this reason: configuring only

@@ -87,10 +87,6 @@ public class OsddHelper {
      * @return the OSDD file
      */
     protected File getOsddFile() {
-        if (!isOsddLinkEnabled()) {
-            logger.debug("OSDD is disabled.");
-            return null;
-        }
         if (StringUtil.isBlank(osddPath)) {
             logger.info("OSDD file is not found.");
             return null;
@@ -109,7 +105,9 @@ public class OsddHelper {
     }
 
     /**
-     * Checks if OSDD link is enabled.
+     * Checks if OSDD link is enabled. Checked on each use rather than once at init: with
+     * {@code osdd.link.enabled=auto} it depends on {@code sso.type}, a system property that
+     * changes at runtime (the admin General screen or a hand edit of system.properties).
      *
      * @return true if OSDD link is enabled
      */
@@ -129,12 +127,12 @@ public class OsddHelper {
     }
 
     /**
-     * Checks if the OpenSearch file exists.
+     * Checks if the OpenSearch file exists and the OSDD link is enabled.
      *
-     * @return true if the OpenSearch file exists
+     * @return true if the OpenSearch description document is served
      */
     public boolean hasOpenSearchFile() {
-        return osddFile != null;
+        return osddFile != null && isOsddLinkEnabled();
     }
 
     /**
@@ -144,7 +142,7 @@ public class OsddHelper {
      * @return the stream response
      */
     public StreamResponse asStream() {
-        if (osddFile == null) {
+        if (!hasOpenSearchFile()) {
             throw ComponentUtil.getResponseManager().new404("Unsupported Open Search Description Document response.");
         }
 
