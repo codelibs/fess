@@ -28,7 +28,7 @@ jobs:
     # official OpenSearch distribution plus the four CodeLibs plugins, built by docker-fess.
     services:
       opensearch:
-        image: ghcr.io/codelibs/fess-opensearch:3.8.0
+        image: ghcr.io/codelibs/fess-opensearch:3.9.0
         env:
           discovery.type: single-node
           cluster.name: fess-search
