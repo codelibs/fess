@@ -135,6 +135,67 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksJvmArgumentSpellingOfSensitiveKeys() {
+        // -Dfess.system.<key> and -Dfess.config.<key> carry the value of <key>, so the JVM
+        // property list has to mask them under the same rule as the setting itself.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.system.content_chunker.embedding.opensearch.password"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.system.content_chunker.embedding.openai.api.key"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.system.oic.client.secret"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.config.rag.llm.openai.api.key"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.config.app.cipher.key"));
+
+        // The prefix alone does not make a key sensitive.
+        assertFalse(AdminSysteminfoAction.isMaskedValue("fess.system.content_chunker.embedding.name"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("fess.config.rag.llm.name"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("fess.system."));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("fess.home"));
+    }
+
+    @Test
+    public void test_getPropItems_masksSensitiveJvmArguments() {
+        final String passwordKey = "fess.system.content_chunker.embedding.opensearch.password";
+        final String apiKeyKey = "fess.config.rag.llm.openai.api.key";
+        final String plainKey = "fess.system.content_chunker.embedding.dimension";
+        System.setProperty(passwordKey, "hunter2");
+        System.setProperty(apiKeyKey, "sk-chat-secret");
+        System.setProperty(plainKey, "384");
+        try {
+            final List<Map<String, String>> itemList = AdminSysteminfoAction.getPropItems();
+
+            // The key stays listed so an operator can see it is set, but not its value.
+            assertEquals(MASKED_VALUE, findValue(itemList, passwordKey));
+            assertEquals(MASKED_VALUE, findValue(itemList, apiKeyKey));
+            // An ordinary diagnostic property is unaffected.
+            assertEquals("384", findValue(itemList, plainKey));
+            assertEquals(System.getProperty("java.vm.name"), findValue(itemList, "java.vm.name"));
+            itemList.forEach(item -> {
+                assertFalse(item.get(Constants.ITEM_VALUE).contains("hunter2"));
+                assertFalse(item.get(Constants.ITEM_VALUE).contains("sk-chat-secret"));
+            });
+        } finally {
+            System.clearProperty(passwordKey);
+            System.clearProperty(apiKeyKey);
+            System.clearProperty(plainKey);
+        }
+    }
+
+    @Test
+    public void test_createMaskedItem_masksSensitiveLabelsOnly() {
+        // The environment variable list builds its items the same way as the JVM property list.
+        final Map<String, String> secret = AdminSysteminfoAction.createMaskedItem("app.cipher.key", "hunter2");
+        assertEquals("app.cipher.key", secret.get(Constants.ITEM_LABEL));
+        assertEquals(MASKED_VALUE, secret.get(Constants.ITEM_VALUE));
+
+        final Map<String, String> plain = AdminSysteminfoAction.createMaskedItem("PATH", "/usr/bin");
+        assertEquals("PATH", plain.get(Constants.ITEM_LABEL));
+        assertEquals("/usr/bin", plain.get(Constants.ITEM_VALUE));
+
+        final Map<String, String> nullValue = AdminSysteminfoAction.createMaskedItem("PATH", null);
+        assertEquals("", nullValue.get(Constants.ITEM_VALUE));
+        assertEquals("", AdminSysteminfoAction.createMaskedItem(null, "x").get(Constants.ITEM_LABEL));
+    }
+
+    @Test
     public void test_getBugReportItems_masksSensitiveKeysInsteadOfLeakingCleartext() {
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.openai.api.key", "sk-super-secret");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.gemini.api.key", "gm-super-secret");

@@ -145,7 +145,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     public static List<Map<String, String>> getEnvItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<String, String> entry : System.getenv().entrySet()) {
-            itemList.add(createItem(entry.getKey(), entry.getValue()));
+            itemList.add(createMaskedItem(entry.getKey(), entry.getValue()));
         }
         return itemList;
     }
@@ -158,7 +158,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     public static List<Map<String, String>> getPropItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
-            itemList.add(createItem(entry.getKey(), entry.getValue()));
+            itemList.add(createMaskedItem(entry.getKey(), entry.getValue()));
         }
         return itemList;
     }
@@ -198,10 +198,15 @@ public class AdminSysteminfoAction extends FessAdminAction {
     /**
      * Checks if a property value should be masked for security reasons.
      *
-     * @param key the property key to check
+     * <p>A {@code -Dfess.system.<key>} or {@code -Dfess.config.<key>} JVM argument carries the value
+     * of the setting {@code <key>}, so it is masked under the same rule as that setting. Without
+     * this the JVM property list showed, in cleartext, a password that App Properties masks.
+     *
+     * @param name the property key to check, optionally spelled as a JVM argument
      * @return true if the value should be masked, false otherwise
      */
-    protected static boolean isMaskedValue(final String key) {
+    protected static boolean isMaskedValue(final String name) {
+        final String key = toSettingKey(name);
         return "http.proxy.password".equals(key) //
                 || "ldap.admin.security.credentials".equals(key) //
                 || "spnego.preauth.password".equals(key) //
@@ -211,6 +216,18 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || isPrivateKeyMaterial(key) //
                 || isEmbeddingApiKey(key) //
                 || isLlmApiKey(key);
+    }
+
+    private static String toSettingKey(final String name) {
+        if (name != null) {
+            if (name.startsWith(Constants.SYSTEM_PROP_PREFIX)) {
+                return name.substring(Constants.SYSTEM_PROP_PREFIX.length());
+            }
+            if (name.startsWith(Constants.FESS_CONFIG_PREFIX)) {
+                return name.substring(Constants.FESS_CONFIG_PREFIX.length());
+            }
+        }
+        return name;
     }
 
     /**
@@ -334,6 +351,18 @@ public class AdminSysteminfoAction extends FessAdminAction {
      */
     protected static Map<String, String> createPropItem(final String key) {
         return createItem(key, System.getProperty(key));
+    }
+
+    /**
+     * Creates a key-value item map for display, replacing the value with the masked
+     * placeholder when the key is sensitive.
+     *
+     * @param label the item label, which is the key checked by {@link #isMaskedValue(String)}
+     * @param value the item value
+     * @return map containing the key and the possibly masked value
+     */
+    protected static Map<String, String> createMaskedItem(final Object label, final Object value) {
+        return createItem(label, label != null && isMaskedValue(label.toString()) ? MASKED_VALUE : value);
     }
 
     /**
