@@ -82,9 +82,6 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
     /** The response timeout in milliseconds {@link #httpClient} was built with. */
     protected int httpClientTimeout;
 
-    /** The interval in seconds {@link #availabilityCheckTask} was started with. */
-    protected int availabilityCheckInterval;
-
     /**
      * Set once {@link #destroy()} has run. Guards {@link #getHttpClient()} against silently
      * recreating an HTTP client for a client instance the container has already torn down.
@@ -276,34 +273,44 @@ public abstract class AbstractEmbeddingClient implements EmbeddingClient {
         if (!isContentChunkerEnabled()) {
             return;
         }
-        final int checkInterval = getAvailabilityCheckInterval();
-        if (checkInterval <= 0) {
+        if (getAvailabilityCheckInterval() <= 0) {
             return;
         }
         updateAvailability();
-        availabilityCheckInterval = checkInterval;
-        availabilityCheckTask = TimeoutManager.getInstance().addTimeoutTarget(this::runAvailabilityCheck, checkInterval, true);
+        scheduleAvailabilityCheck();
     }
 
     /**
-     * Runs one periodic availability check. The interval is a system property that changes at
-     * runtime, so a changed interval restarts the check with it instead of updating the availability.
+     * Arms the next availability check with the interval currently configured. The check is a
+     * one-shot task that arms its successor when it finishes (see {@link #runAvailabilityCheck()}),
+     * so there is exactly one pending check at any time.
+     */
+    private void scheduleAvailabilityCheck() {
+        final int checkInterval = getAvailabilityCheckInterval();
+        if (checkInterval > 0) {
+            availabilityCheckTask = TimeoutManager.getInstance().addTimeoutTarget(this::runAvailabilityCheck, checkInterval, false);
+        }
+    }
+
+    /**
+     * Runs one availability check and arms the next one. The interval is a system property that
+     * changes at runtime, so it is read again every time a check is armed.
+     *
+     * <p>A permanent {@link TimeoutTask} cannot be used for this: {@link TimeoutManager} calls
+     * {@code restart()} on a permanent task after every run, which undoes a {@code cancel()} made
+     * from inside that run, so a task that cancels itself to be replaced would keep running next to
+     * its replacement.</p>
      */
     protected void runAvailabilityCheck() {
-        if (getAvailabilityCheckInterval() != availabilityCheckInterval) {
-            synchronized (this) {
-                if (destroyed) {
-                    return;
-                }
-                if (availabilityCheckTask != null) {
-                    availabilityCheckTask.cancel();
-                    availabilityCheckTask = null;
-                }
-                startAvailabilityCheck();
-            }
+        if (destroyed) {
             return;
         }
         updateAvailability();
+        synchronized (this) {
+            if (!destroyed) {
+                scheduleAvailabilityCheck();
+            }
+        }
     }
 
     /**
