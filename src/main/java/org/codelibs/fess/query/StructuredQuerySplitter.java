@@ -32,6 +32,7 @@ import org.apache.lucene.search.TermQuery;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
@@ -109,9 +110,13 @@ public class StructuredQuerySplitter {
      * Splits an assembled query.
      *
      * @param query the assembled query string
+     * @param searchRequestType the type of the search request the query belongs to, so that a
+     *        condition matches what it matches in the keyword branch of that request, e.g. a
+     *        condition on the tag field matches only the tags that type can see (all of them for
+     *        the admin search)
      * @return the split, or {@code null} when the query is not safe to split
      */
-    public Split split(final String query) {
+    public Split split(final String query, final SearchRequestType searchRequestType) {
         if (StringUtil.isBlank(query)) {
             return null;
         }
@@ -119,6 +124,7 @@ public class StructuredQuerySplitter {
         final Query parsed;
         try {
             context = createQueryContext(query);
+            context.setSearchRequestType(searchRequestType);
             if (context.getDefaultField() != null) {
                 // `allintitle:` / `allinurl:` narrow the search to one field. The vector branch
                 // has no way to honour that -- a chunk vector covers the document's text, not a

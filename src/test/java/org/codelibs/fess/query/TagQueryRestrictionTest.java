@@ -21,6 +21,7 @@ import java.util.Set;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.query.StructuredQuerySplitter.Split;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.MatchNoneQueryBuilder;
@@ -148,6 +149,52 @@ public class TagQueryRestrictionTest extends QueryTestBase {
     public void test_queryTag_adminSearch() {
         assertTermQuery(build("tag:" + HIDDEN, SearchRequestType.ADMIN_SEARCH), HIDDEN);
         assertEquals(0, resolveCount);
+    }
+
+    /**
+     * The vector leg builds the conditions of the query with the same commands as the keyword leg,
+     * so a condition on the tag field has to see the request type of the search that is running.
+     */
+    private QueryBuilder splitFilter(final String query, final SearchRequestType searchRequestType) {
+        final Split split = new StructuredQuerySplitter().split(query, searchRequestType);
+        assertNotNull(split);
+        assertEquals("report", split.text);
+        assertNotNull(split.conditionFilter);
+        return split.conditionFilter;
+    }
+
+    @Test
+    public void test_vectorLeg_adminSearch_keepsTheTagOfAnyValue() {
+        // Like the keyword leg of an admin search, the vector leg is not limited to the visible tags.
+        final String filter = splitFilter("report tag:" + HIDDEN, SearchRequestType.ADMIN_SEARCH).toString();
+        assertTrue(filter.contains(HIDDEN), filter);
+        assertFalse(filter.contains("match_none"), filter);
+        assertEquals(0, resolveCount);
+    }
+
+    @Test
+    public void test_vectorLeg_jsonSearch_stillLimitedToVisibleTags() {
+        final String filter = splitFilter("report tag:" + HIDDEN, SearchRequestType.JSON).toString();
+        assertTrue(filter.contains("match_none"), filter);
+        assertFalse(filter.contains(HIDDEN), filter);
+        assertEquals(SearchRequestType.JSON, resolvedType);
+        assertTrue(splitFilter("report tag:" + VISIBLE, SearchRequestType.JSON).toString().contains(VISIBLE));
+    }
+
+    @Test
+    public void test_vectorLeg_htmlSearch_limitedToTheTagsOfThatRequestType() {
+        final String filter = splitFilter("report tag:" + HIDDEN, SearchRequestType.SEARCH).toString();
+        assertTrue(filter.contains("match_none"), filter);
+        assertFalse(filter.contains(HIDDEN), filter);
+        // the visible tags are resolved for the HTML search, not for the JSON API
+        assertEquals(SearchRequestType.SEARCH, resolvedType);
+    }
+
+    @Test
+    public void test_vectorLeg_unknownRequestType_stillLimitedToVisibleTags() {
+        final String filter = splitFilter("report tag:" + HIDDEN, null).toString();
+        assertTrue(filter.contains("match_none"), filter);
+        assertEquals(SearchRequestType.JSON, resolvedType);
     }
 
     @Test

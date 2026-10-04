@@ -213,7 +213,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         // The assembled query is not the user's words: QueryStringBuilder has appended whatever
         // the user narrowed by, so a search stops being embeddable the moment a facet is
         // clicked. Split it instead of refusing it - embed the words, filter on the rest.
-        final Split split = getQuerySplitter().split(toSemanticQuery(query, params));
+        final Split split = getQuerySplitter().split(toSemanticQuery(query, params), params.getType());
         if (split == null) {
             return OptionalThing.empty();
         }

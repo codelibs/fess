@@ -382,6 +382,24 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_prepare_splitsTheQueryAsTheRunningSearchRequestType() {
+        // The conditions are built with the type of the search that is running, as the keyword
+        // branch of that search is, so the two branches select the same documents for a tag
+        // condition: an admin search is not limited to the visible tags, the others are.
+        for (final SearchRequestParams.SearchRequestType type : SearchRequestParams.SearchRequestType.values()) {
+            final GuardedSearcher searcher = new GuardedSearcher();
+            final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+                @Override
+                public SearchRequestParams.SearchRequestType getType() {
+                    return type;
+                }
+            };
+            assertTrue(searcher.prepare("opensearch label:\"news\"", params).isPresent());
+            assertEquals(List.of(type), searcher.splitter.convertedTypes);
+        }
+    }
+
+    @Test
     public void test_prepare_embedsTheWordsWithoutTheConditions() {
         final GuardedSearcher searcher = new GuardedSearcher();
         searcher.prepare("opensearch label:\"news\"", new StubSearchRequestParams(0, 10));
