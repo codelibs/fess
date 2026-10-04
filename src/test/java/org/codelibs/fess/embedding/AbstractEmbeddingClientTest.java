@@ -15,17 +15,22 @@
  */
 package org.codelibs.fess.embedding;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -34,6 +39,8 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import com.sun.net.httpserver.HttpServer;
 
 public class AbstractEmbeddingClientTest extends UnitFessTestCase {
 
@@ -246,6 +253,74 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
             assertNotNull(built);
         }
         assertEquals(1, client.configureHttpClientCallCount(), "buildHttpClient must give subclasses a shot at the builder");
+    }
+
+    // A provider that accepts requests and never answers pins one connection per request until the
+    // response timeout. The pool has to hold as many of them as there are threads in the rank fusion
+    // executor, plus one for the availability probe; with the HttpClient default of 5 connections per
+    // route a handful of hung searches left every later request waiting for a connection long after the
+    // provider had recovered.
+    @Test
+    public void test_buildHttpClient_hungRequestsDoNotExhaustThePool() throws Exception {
+        final int fusionThreads = 12;
+        final CountDownLatch release = new CountDownLatch(1);
+        final AtomicInteger hung = new AtomicInteger();
+        final HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+        server.createContext("/hang", exchange -> {
+            hung.incrementAndGet();
+            try {
+                release.await(30, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+        });
+        server.createContext("/ok", exchange -> {
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+        });
+        final ExecutorService serverThreads = Executors.newCachedThreadPool();
+        server.setExecutor(serverThreads);
+        server.start();
+        final ExecutorService callers = Executors.newCachedThreadPool();
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        client.setTestTimeout(30000);
+        client.setTestMaxConnections(fusionThreads + 1);
+        final String base = "http://" + server.getAddress().getHostString() + ":" + server.getAddress().getPort();
+        try (CloseableHttpClient http = client.testBuildHttpClient()) {
+            for (int i = 0; i < fusionThreads; i++) {
+                callers.submit(() -> {
+                    try (var response = http.execute(new HttpGet(base + "/hang"))) {
+                        return response.getCode();
+                    }
+                });
+            }
+            final long deadline = System.currentTimeMillis() + 10000;
+            while (hung.get() < fusionThreads && System.currentTimeMillis() < deadline) {
+                Thread.sleep(50);
+            }
+            assertEquals(fusionThreads, hung.get(), "every thread of the rank fusion executor must be able to hold a request open");
+
+            final long start = System.currentTimeMillis();
+            try (var response = http.execute(new HttpGet(base + "/ok"))) {
+                assertEquals(200, response.getCode());
+            }
+            assertTrue(System.currentTimeMillis() - start < 3000, "the availability probe must not wait for a pooled connection");
+        } finally {
+            release.countDown();
+            callers.shutdownNow();
+            server.stop(0);
+            serverThreads.shutdownNow();
+        }
+    }
+
+    @Test
+    public void test_getMaxConnections_coversTheRankFusionExecutorAndTheProbe() {
+        final int fusionThreads = Runtime.getRuntime().availableProcessors() * 3 / 2 + 1;
+        final int maxConnections = new TestEmbeddingClient().testGetMaxConnections();
+        assertTrue(maxConnections >= fusionThreads + 1, "one connection per fusion thread and one for the probe: " + maxConnections);
+        assertTrue(maxConnections >= 5, "never fewer than the HttpClient default: " + maxConnections);
     }
 
     // ========== Proxy configuration tests ==========
@@ -520,6 +595,8 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         private String testProxyPassword;
         private boolean testContentChunkerEnabled = false;
         private int testAvailabilityCheckInterval = 0;
+        private int testTimeout = 1000;
+        private Integer testMaxConnections;
         private RuntimeException testAvailabilityFailure;
         private final AtomicInteger availabilityProbes = new AtomicInteger();
         private final AtomicInteger configureHttpClientCalls = new AtomicInteger();
@@ -530,6 +607,14 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
 
         void setTestAvailabilityCheckInterval(final int interval) {
             this.testAvailabilityCheckInterval = interval;
+        }
+
+        void setTestTimeout(final int timeout) {
+            this.testTimeout = timeout;
+        }
+
+        void setTestMaxConnections(final int maxConnections) {
+            this.testMaxConnections = maxConnections;
         }
 
         void setTestAvailabilityFailure(final RuntimeException failure) {
@@ -596,6 +681,15 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
             return buildHttpClient();
         }
 
+        int testGetMaxConnections() {
+            return super.getMaxConnections();
+        }
+
+        @Override
+        protected int getMaxConnections() {
+            return testMaxConnections != null ? testMaxConnections : super.getMaxConnections();
+        }
+
         @Override
         protected void configureHttpClient(final HttpClientBuilder builder) {
             configureHttpClientCalls.incrementAndGet();
@@ -636,7 +730,7 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
 
         @Override
         protected int getTimeout() {
-            return 1000;
+            return testTimeout;
         }
 
         @Override
