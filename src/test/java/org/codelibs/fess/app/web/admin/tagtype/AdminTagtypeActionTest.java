@@ -194,6 +194,19 @@ public class AdminTagtypeActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_update_ownerChangeMovesTheOwnerPermission() throws Exception {
+        final AdminTagtypeAction action = createAction();
+        final TagType stored = env.put("foo", "alice", "http://a/");
+        final EditForm form = editForm(stored, "foo", "bob", "http://a/");
+        // as the edit form shows them: the old owner, the sharing role and a role an administrator added
+        form.permissions = "{user}alice\n{role}guest\n{group}sales";
+
+        action.update(form);
+
+        assertEquals(List.of("1bob", "Rguest", "2sales"), List.of(env.stored("foo", "bob").getPermissions()));
+    }
+
+    @Test
     public void test_update_renameToExistingTagIsRefused() throws Exception {
         final AdminTagtypeAction action = createAction();
         final TagType stored = env.put("foo", "alice", "http://a/");

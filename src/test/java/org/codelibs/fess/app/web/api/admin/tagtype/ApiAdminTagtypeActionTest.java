@@ -105,6 +105,18 @@ public class ApiAdminTagtypeActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_put_ownerChangeMovesTheOwnerPermission() throws Exception {
+        final ApiAdminTagtypeAction action = createAction();
+        final TagType stored = env.put("foo", "alice", "http://a/");
+        final EditBody body = editBody(stored, "foo", "bob", "http://a/");
+        body.permissions = "{user}alice\n{role}guest\n{group}sales";
+
+        action.put$setting(body);
+
+        assertEquals(List.of("1bob", "Rguest", "2sales"), List.of(env.stored("foo", "bob").getPermissions()));
+    }
+
+    @Test
     public void test_put_staleVersionIsRefused() throws Exception {
         final ApiAdminTagtypeAction action = createAction();
         final TagType stored = env.put("foo", "alice", "http://a/");

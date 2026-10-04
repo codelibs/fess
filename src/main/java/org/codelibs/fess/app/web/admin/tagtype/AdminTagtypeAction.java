@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.tagtype;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -456,6 +457,9 @@ public class AdminTagtypeAction extends FessAdminAction {
             edited.setCreatedBy(current.getCreatedBy());
             edited.setCreatedTime(current.getCreatedTime());
             copyToEntity(form, edited, systemHelper.getUsername(), systemHelper.getCurrentTimeAsLong());
+            if (!current.getOwner().equals(edited.getOwner())) {
+                edited.setPermissions(moveOwnerPermission(edited.getPermissions(), current.getOwner(), edited.getOwner()));
+            }
             final String newValue = edited.getTagValue();
             if (oldValue.equals(newValue)) {
                 edited.setSeqNo(current.getSeqNo());
@@ -479,6 +483,28 @@ public class AdminTagtypeAction extends FessAdminAction {
             oldPathSet.stream().filter(path -> !newPathSet.contains(path)).forEach(path -> enqueue(TagChange.remove(newValue, path)));
             return edited;
         });
+    }
+
+    /**
+     * Replaces the user role of the old owner with that of the new owner, so that the old owner
+     * does not keep seeing the tag. The sharing roles and any other role are kept.
+     *
+     * @param permissions the permissions as entered
+     * @param oldOwner the owner the tag had
+     * @param newOwner the owner the tag gets
+     * @return the permissions
+     */
+    protected static String[] moveOwnerPermission(final String[] permissions, final String oldOwner, final String newOwner) {
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final Set<String> oldRoles = new HashSet<>();
+        oldRoles.add(systemHelper.getSearchRoleByDirectoryUser(oldOwner));
+        oldRoles.add(systemHelper.getSearchRoleByUser(oldOwner));
+        final String newRole = systemHelper.getSearchRoleByDirectoryUser(newOwner);
+        final Set<String> moved = new LinkedHashSet<>();
+        for (final String permission : permissions) {
+            moved.add(oldRoles.contains(permission) ? newRole : permission);
+        }
+        return moved.toArray(String[]::new);
     }
 
     /**
