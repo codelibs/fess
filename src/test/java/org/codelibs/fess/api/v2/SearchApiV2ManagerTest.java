@@ -244,40 +244,55 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         assertTrue(body.contains("invalid doc_id"), body);
     }
 
-    @Test
-    public void test_process_documentTagsRoutesToDocumentTagsHandler() throws Exception {
-        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
-        final java.util.List<String> docIds = new java.util.ArrayList<>();
+    /** Replaces the document tags handler with one that records "docId|tagId" for each request. */
+    private static java.util.List<String> recordDocumentTagsCalls(final SearchApiV2Manager m) {
+        final java.util.List<String> calls = new java.util.ArrayList<>();
         m.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
             @Override
-            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
-                docIds.add(docId);
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId, final String tagId)
+                    throws IOException {
+                calls.add(docId + "|" + tagId);
             }
         };
-        m.process(new StubRequest("/api/v2/documents/abc123/tags"), new CapturingResponse(), new NopChain());
-        // "all" and "export" are only matched exactly, so they are plain doc ids here.
-        m.process(new StubRequest("/api/v2/documents/all/tags"), new CapturingResponse(), new NopChain());
-        assertEquals(java.util.List.of("abc123", "all"), docIds);
+        return calls;
+    }
+
+    /** Replaces the tags handler with one that records the tag id of each request. */
+    private static java.util.List<String> recordTagsCalls(final SearchApiV2Manager m) {
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.tagsHandler = new org.codelibs.fess.api.v2.handlers.TagsHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String tagId) throws IOException {
+                calls.add(String.valueOf(tagId));
+            }
+        };
+        return calls;
     }
 
     @Test
-    public void test_process_documentTagsWithoutADocIdIsNotFound() throws Exception {
-        // "/documents/tags" satisfies both ends of the tags pattern and leaves no doc id between them.
+    public void test_process_documentTagsRoutesToDocumentTagsHandler() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
-        final boolean[] called = { false };
-        m.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
-            @Override
-            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
-                called[0] = true;
-            }
-        };
-        final CapturingResponse res = new CapturingResponse();
-        m.process(new StubRequest("/api/v2/documents/tags"), res, new NopChain());
-        assertFalse(called[0], "/documents/tags must not reach the documentTagsHandler");
-        assertEquals(404, res.status);
-        final String body = res.body();
-        assertTrue(body.contains("\"code\":\"not_found\""), body);
-        assertTrue(body.contains("unknown action on document"), body);
+        final java.util.List<String> calls = recordDocumentTagsCalls(m);
+        m.process(new StubRequest("/api/v2/documents/abc123/tags"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/documents/abc123/tags/"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/documents/abc123/tags/t1"), new CapturingResponse(), new NopChain());
+        // "all" and "export" are only matched exactly, so they are plain doc ids here.
+        m.process(new StubRequest("/api/v2/documents/all/tags"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("abc123|null", "abc123|null", "abc123|t1", "all|null"), calls);
+    }
+
+    @Test
+    public void test_process_documentTagsWithoutADocIdOrWithExtraSegmentsIsNotFound() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = recordDocumentTagsCalls(m);
+        for (final String path : new String[] { "/api/v2/documents/tags", "/api/v2/documents//tags", "/api/v2/documents/abc/tags/t1/x",
+                "/api/v2/documents/abc/tagsx" }) {
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest(path), res, new NopChain());
+            assertEquals(404, res.status, path);
+            assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+        }
+        assertTrue(calls.isEmpty(), calls.toString());
     }
 
     @Test
@@ -287,9 +302,22 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/documents/has spaces/tags"), res, new NopChain());
         assertEquals(400, res.status);
-        final String body = res.body();
-        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
-        assertTrue(body.contains("invalid doc_id"), body);
+        assertTrue(res.body().contains("invalid doc_id"), res.body());
+    }
+
+    @Test
+    public void test_process_tagsRoutesToTagsHandler() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = recordTagsCalls(m);
+        m.process(new StubRequest("/api/v2/tags"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/tags/"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/tags/abc"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("null", "null", "abc"), calls);
+
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/tags/abc/def"), res, new NopChain());
+        assertEquals(404, res.status);
+        assertEquals(3, calls.size());
     }
 
     @Test

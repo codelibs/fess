@@ -30,6 +30,7 @@
 	<component name="requestHeaderBhv" class="org.codelibs.fess.opensearch.config.exbhv.RequestHeaderBhv"/>
 	<component name="roleTypeBhv" class="org.codelibs.fess.opensearch.config.exbhv.RoleTypeBhv"/>
 	<component name="scheduledJobBhv" class="org.codelibs.fess.opensearch.config.exbhv.ScheduledJobBhv"/>
+	<component name="tagTypeBhv" class="org.codelibs.fess.opensearch.config.exbhv.TagTypeBhv"/>
 	<component name="thumbnailQueueBhv" class="org.codelibs.fess.opensearch.config.exbhv.ThumbnailQueueBhv"/>
 	<component name="webAuthenticationBhv" class="org.codelibs.fess.opensearch.config.exbhv.WebAuthenticationBhv"/>
 	<component name="webConfigBhv" class="org.codelibs.fess.opensearch.config.exbhv.WebConfigBhv"/>

@@ -66,7 +66,7 @@ public class ShippedScriptCompilationTest extends UnitFessTestCase {
                 }
             }
         }
-        assertEquals(14, scripts.size());
+        assertEquals(15, scripts.size());
         for (final String script : scripts) {
             assertCompiles(script);
         }

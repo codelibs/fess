@@ -15,7 +15,12 @@
  */
 package org.codelibs.fess.job;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codelibs.fess.helper.SearchLogHelper;
+import org.codelibs.fess.helper.TagTypeHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -351,5 +356,64 @@ public class AggregateLogJobTest extends UnitFessTestCase {
 
         // Fifth execution - RuntimeException
         assertTrue(aggregateLogJob.execute().contains("Generic error"));
+    }
+
+    private List<String> registerTagMocks(final boolean enabled, final boolean failTags) {
+        final List<String> calls = new ArrayList<>();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isUserTagEnabled() {
+                return enabled;
+            }
+        });
+        ComponentUtil.register(new SearchLogHelper() {
+            @Override
+            public void storeSearchLog() {
+                calls.add("searchLog");
+                throw new RuntimeException("search log failed");
+            }
+        }, "searchLogHelper");
+        ComponentUtil.register(new TagTypeHelper() {
+            @Override
+            public synchronized int processQueue() {
+                calls.add("tags");
+                if (failTags) {
+                    throw new RuntimeException("tags failed");
+                }
+                return 0;
+            }
+        }, "tagTypeHelper");
+        return calls;
+    }
+
+    @Test
+    public void test_execute_processesTagQueueAfterSearchLogFailure() {
+        final List<String> calls = registerTagMocks(true, false);
+
+        final String result = aggregateLogJob.execute();
+
+        assertEquals(List.of("searchLog", "tags"), calls);
+        assertEquals("search log failed\n", result);
+    }
+
+    @Test
+    public void test_execute_tagQueueFailureReported() {
+        final List<String> calls = registerTagMocks(true, true);
+
+        final String result = aggregateLogJob.execute();
+
+        assertEquals(List.of("searchLog", "tags"), calls);
+        assertEquals("search log failed\ntags failed\n", result);
+    }
+
+    @Test
+    public void test_execute_tagQueueSkippedWhenDisabled() {
+        final List<String> calls = registerTagMocks(false, false);
+
+        aggregateLogJob.execute();
+
+        assertEquals(List.of("searchLog"), calls);
     }
 }

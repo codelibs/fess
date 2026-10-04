@@ -171,6 +171,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 entity.put(fessConfig.getIndexFieldId(), newId);
 
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
+                ComponentUtil.getTagTypeHelper().applyTags(List.of(entity));
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
@@ -221,6 +222,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                     }
                 }
 
+                ComponentUtil.getTagTypeHelper().applyTags(List.of(entity));
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {

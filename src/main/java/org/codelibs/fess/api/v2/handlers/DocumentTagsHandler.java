@@ -17,51 +17,50 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.helper.LabelTypeHelper.LabelTypeItem;
-import org.codelibs.fess.helper.TagHelper;
-import org.codelibs.fess.helper.TagHelper.AddResult;
-import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.entity.TagChange;
+import org.codelibs.fess.exception.TagTypeConflictException;
+import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Handles {@code GET}, {@code POST} and {@code DELETE /api/v2/documents/{docId}/tags}.
+ * Handles the tags of one document: {@code GET/POST /api/v2/documents/{docId}/tags} and
+ * {@code DELETE /api/v2/documents/{docId}/tags/{id}}.
  *
- * <p>A tag is a label type of the kind {@code tag}: its name is the tag name, its included paths list the tagged
- * URLs and its permissions list who can see it.</p>
+ * <p>A tag is put on the {@code url} of the document: the URL is added to the paths of the tag and the change of the
+ * tag field of every document of the URL is queued. The document is resolved with the caller's roles, so a document
+ * the caller cannot search is not found.</p>
  *
  * <ul>
- *   <li>{@code GET} lists the tags of the document that the caller can see, and whether the caller added each.</li>
- *   <li>{@code POST} with {@code {"name": "..."}} tags the document for the logged-in user: the URL is added to the
- *       tag of the name and the user to its permissions, and a new tag is visible only to the user.</li>
- *   <li>{@code DELETE ?value=<tag value>} removes the logged-in user from the permissions of the tag. The tag is
- *       deleted when no permission is left.</li>
+ *   <li>{@code GET} lists the tags on the document that the caller can see ({@code tags}) and the caller's own tags
+ *       that are not on it ({@code addable}).</li>
+ *   <li>{@code POST} with {@code {"id": "..."}} puts the caller's tag on the document; with {@code {"name": "..."}} it
+ *       puts the caller's tag of the name on it, creating a private tag when there is none. A tag holds at most
+ *       {@code user.tag.max.paths} URLs.</li>
+ *   <li>{@code DELETE .../tags/{id}} takes the caller's tag off the document.</li>
  * </ul>
- *
- * <p>The document is resolved through the caller's roles, so a document the caller cannot search cannot be
- * tagged. Writes need a logged-in user; an access token does not stand in for one.</p>
  */
-public class DocumentTagsHandler {
+public class DocumentTagsHandler extends AbstractTagHandler {
 
     private static final Logger logger = LogManager.getLogger(DocumentTagsHandler.class);
-
-    /** The request body has one short string. */
-    private static final int MAX_BODY_BYTES = 1024;
 
     /**
      * Default constructor used by the DI container. The handler holds no per-request state.
@@ -70,157 +69,159 @@ public class DocumentTagsHandler {
         // no-op
     }
 
-    /** A failure that is answered with an error envelope. */
-    private static class TagRequestException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        private final V2ErrorCode code;
-
-        TagRequestException(final V2ErrorCode code, final String message) {
-            super(message, null, false, false);
-            this.code = code;
-        }
-    }
-
     /**
-     * Processes one {@code /api/v2/documents/{docId}/tags} request.
+     * Processes one {@code /api/v2/documents/{docId}/tags} or {@code /api/v2/documents/{docId}/tags/{id}} request.
      *
      * @param req the incoming HTTP request
      * @param res the HTTP response to write to
-     * @param docId the document id extracted from the URL path
+     * @param docId the document id from the URL path
+     * @param tagId the tag id of {@code .../tags/{id}}, or null for {@code .../tags}
      * @throws IOException if writing the envelope fails
      */
-    public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
+    public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId, final String tagId)
+            throws IOException {
         final String method = req.getMethod() == null ? StringUtil.EMPTY : req.getMethod().toUpperCase(Locale.ROOT);
-        if (!"GET".equals(method) && !"POST".equals(method) && !"DELETE".equals(method)) {
-            res.setHeader("Allow", "GET, POST, DELETE");
+        final boolean collection = tagId == null;
+        if (collection ? !"GET".equals(method) && !"POST".equals(method) : !"DELETE".equals(method)) {
+            res.setHeader("Allow", collection ? "GET, POST" : "DELETE");
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
-        final String context = "/api/v2/documents/" + docId + "/tags " + method;
+        if (!ComponentUtil.getV2DocIdValidator().isValid(docId)) {
+            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
+            return;
+        }
         try {
-            if (!ComponentUtil.getV2DocIdValidator().isValid(docId)) {
-                throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
-            }
-            final TagHelper tagHelper = ComponentUtil.getTagHelper();
-            if (!tagHelper.isEnabled()) {
-                throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "tag feature is not available");
-            }
-            final String userId = getUserBean().map(FessUserBean::getUserId).orElse(null);
-            if (!"GET".equals(method) && StringUtil.isBlank(userId)) {
-                throw new TagRequestException(V2ErrorCode.AUTH_REQUIRED, "login required");
-            }
+            final String userId = checkRequest();
             final String url = getDocumentUrl(docId);
-
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("doc_id", docId);
             switch (method) {
-            case "POST" -> payload.put("added", addTag(req, tagHelper, userId, url));
-            case "DELETE" -> payload.put("removed", removeTag(req, tagHelper, userId));
+            case "POST" -> addTag(req, userId, url, payload);
+            case "DELETE" -> payload.put("removed", removeTag(tagId, userId, url));
             default -> {
                 // GET lists the tags only
             }
             }
-            payload.put("addable", StringUtil.isNotBlank(userId));
-            payload.put("tags", buildTags(req, tagHelper, userId, url));
+            putTags(payload, userId, url);
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(res, payload);
         } catch (final TagRequestException e) {
             ComponentUtil.getV2EnvelopeWriter().writeError(res, e.code, e.getMessage());
         } catch (final Exception e) {
-            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, context);
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/tags " + method);
         }
     }
 
     /**
-     * Validates the request body of a POST and tags the URL.
-     *
-     * @return true if the URL was tagged, false if the user had already tagged it
+     * Puts the caller's tag of the request body on the URL and adds {@code added} and {@code tag} to the payload.
      */
-    private boolean addTag(final HttpServletRequest req, final TagHelper tagHelper, final String userId, final String url)
+    private void addTag(final HttpServletRequest req, final String userId, final String url, final Map<String, Object> payload)
             throws TagRequestException, IOException {
-        final Map<String, Object> body;
-        try {
-            body = ComponentUtil.getV2JsonBody().read(req, MAX_BODY_BYTES);
-        } catch (final V2JsonBody.PayloadTooLargeException e) {
-            throw new TagRequestException(V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
-        } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
-            throw new TagRequestException(V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
-        } catch (final V2JsonBody.MalformedJsonException e) {
-            throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, e.getMessage());
+        final Map<String, Object> body = readBody(req);
+        final String id;
+        if (body.get("id") instanceof final String value) {
+            id = value;
+        } else if (body.get("name") != null) {
+            final String name = toTagName(body.get("name"));
+            id = getTagTypeHelper().toId(getTagTypeHelper().toTagValue(name, userId));
+            if (!getTagTypeService().getTagType(id).isPresent()) {
+                final TagType created = createTag(name, userId, url);
+                if (created != null) {
+                    payload.put("added", true);
+                    payload.put("tag", toDocumentTag(created, userId));
+                    return;
+                }
+            }
+        } else {
+            throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "name or id is required");
         }
-        final Object name = body.get("name");
-        final String normalizedName = name instanceof final String nameValue ? tagHelper.normalizeName(nameValue) : null;
-        if (normalizedName == null) {
-            throw new TagRequestException(V2ErrorCode.INVALID_REQUEST,
-                    "invalid tag name: enter 1 to " + tagHelper.getNameMaxLength() + " characters");
-        }
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final AddResult result = tagHelper.addTag(userId, url, normalizedName);
-        switch (result) {
-        case TOO_MANY_TAGS -> throw new TagRequestException(V2ErrorCode.INVALID_REQUEST,
-                "too many tags: a document can have up to " + fessConfig.getUserTagMaxDocumentTagsAsInteger() + " tags");
-        case TOO_MANY_LABELS -> throw new TagRequestException(V2ErrorCode.INVALID_REQUEST,
-                "no more tags can be created: the number of labels reached page.labeltype.max.fetch.size");
-        case ALREADY_ADDED -> {
-            return false;
-        }
-        default -> {
-            updateDocuments(() -> tagHelper.addTagToDocuments(url, tagHelper.toValue(normalizedName)), url);
+        final boolean[] added = { false };
+        final int maxPaths = ComponentUtil.getFessConfig().getUserTagMaxPathsAsInteger();
+        final TagType tagType = updateTagType(id, userId, t -> {
+            final String[] paths = t.getPaths() == null ? new String[0] : t.getPaths();
+            if (Arrays.asList(paths).contains(url)) {
+                return false;
+            }
+            if (paths.length >= maxPaths) {
+                throw new TagRequestException(V2ErrorCode.INVALID_REQUEST,
+                        "too many documents: a tag can be put on up to " + maxPaths + " documents");
+            }
+            final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
+            newPaths[paths.length] = url;
+            t.setPaths(newPaths);
+            added[0] = true;
             return true;
+        });
+        if (added[0]) {
+            enqueue(TagChange.add(tagType.getTagValue(), url));
         }
-        }
+        payload.put("added", added[0]);
+        payload.put("tag", toDocumentTag(tagType, userId));
     }
 
     /**
-     * Removes the user from the permissions of the tag of the DELETE request.
+     * Creates a private tag of the caller on the URL and queues the addition.
      *
-     * @return true if the user was removed
+     * @return the tag, or null when a concurrent request created the tag of the name first
      */
-    private boolean removeTag(final HttpServletRequest req, final TagHelper tagHelper, final String userId) throws TagRequestException {
-        final String value = req.getParameter("value");
-        final LabelTypeItem item = StringUtil.isBlank(value) ? null
-                : getTagItemList(req).stream().filter(i -> value.equals(i.getValue())).findFirst().orElse(null);
-        if (item == null) {
-            throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "invalid tag value");
+    private TagType createTag(final String name, final String userId, final String url) throws TagRequestException {
+        final TagType tagType = newTagType(name, userId, false, new String[] { url });
+        try {
+            getTagTypeService().insert(tagType);
+        } catch (final TagTypeConflictException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("The tag was created concurrently; adding the URL to it: id={}", tagType.getId());
+            }
+            return null;
         }
-        if (!tagHelper.isMine(item, userId)) {
-            throw new TagRequestException(V2ErrorCode.FORBIDDEN, "the tag was not added by the user");
-        }
-        if (tagHelper.removeTag(userId, value)) {
-            updateDocuments(() -> tagHelper.removeTagFromDocuments(value), value);
-        }
-        return true;
+        enqueue(TagChange.add(tagType.getTagValue(), url));
+        return tagType;
     }
 
     /**
-     * Updates the tag field of the indexed documents. The label type is already stored, so a failure here is
-     * logged and the next crawl or the label updater job brings the documents up to date.
+     * Takes the caller's tag off the URL.
+     *
+     * @return true if the tag was on the URL
      */
-    private void updateDocuments(final Runnable update, final String target) {
-        try {
-            update.run();
-        } catch (final Exception e) {
-            logger.warn("Failed to update the tag field of the documents: target={}", target, e);
+    private boolean removeTag(final String tagId, final String userId, final String url) throws TagRequestException {
+        final boolean[] removed = { false };
+        final TagType tagType = updateTagType(tagId, userId, t -> {
+            final String[] paths = t.getPaths() == null ? new String[0] : t.getPaths();
+            final String[] newPaths = Arrays.stream(paths).filter(p -> !url.equals(p)).toArray(String[]::new);
+            if (newPaths.length == paths.length) {
+                return false;
+            }
+            t.setPaths(newPaths);
+            removed[0] = true;
+            return true;
+        });
+        if (removed[0]) {
+            enqueue(TagChange.remove(tagType.getTagValue(), url));
         }
+        return removed[0];
     }
 
-    private List<Map<String, Object>> buildTags(final HttpServletRequest req, final TagHelper tagHelper, final String userId,
-            final String url) {
+    /**
+     * Adds {@code tags}, the tags on the URL that the caller can see, and {@code addable}, the caller's tags that are
+     * not on the URL, to the payload.
+     */
+    private void putTags(final Map<String, Object> payload, final String userId, final String url) {
+        final TagTypeHelper helper = getTagTypeHelper();
+        final Set<String> values = helper.findTagValuesByUrls(List.of(url)).getOrDefault(url, Collections.emptySet());
         final List<Map<String, Object>> tags = new ArrayList<>();
-        for (final LabelTypeItem item : getTagItemList(req)) {
-            if (item.getUrlSet().contains(url)) {
-                final Map<String, Object> tag = new LinkedHashMap<>();
-                tag.put("value", item.getValue());
-                tag.put("name", item.getLabel());
-                tag.put("mine", tagHelper.isMine(item, userId));
-                tags.add(tag);
+        helper.getVisibleTagTypes(values, SearchRequestType.JSON).values().forEach(tagType -> tags.add(toDocumentTag(tagType, userId)));
+        final List<Map<String, Object>> addable = new ArrayList<>();
+        for (final TagType tagType : getTagTypeService().getTagTypeListByOwner(userId)) {
+            if (!values.contains(tagType.getTagValue())) {
+                addable.add(toDocumentTag(tagType, userId));
             }
         }
-        return tags;
+        payload.put("tags", tags);
+        payload.put("addable", addable);
     }
 
     /**
-     * Returns the URL of the document, resolved through the caller's roles.
+     * Returns the URL of the document, resolved with the caller's roles.
      */
     private String getDocumentUrl(final String docId) throws TagRequestException {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -241,26 +242,5 @@ public class DocumentTagsHandler {
      */
     protected Map<String, Object> getDocument(final String docId, final String[] fields) {
         return ComponentUtil.getSearchHelper().getDocumentByDocId(docId, fields, getUserBean()).orElse(null);
-    }
-
-    /**
-     * Returns the tags that the caller can see. Exposed as a seam for unit tests.
-     *
-     * @param req the request
-     * @return the visible tags
-     */
-    protected List<LabelTypeItem> getTagItemList(final HttpServletRequest req) {
-        final Locale locale = req.getLocale() == null ? Locale.ROOT : req.getLocale();
-        return ComponentUtil.getLabelTypeHelper().getTagItemList(SearchRequestType.JSON, locale);
-    }
-
-    /**
-     * Returns the user of the login session. An access token is not a login session. Exposed as a seam for unit
-     * tests.
-     *
-     * @return the logged-in user
-     */
-    protected OptionalThing<FessUserBean> getUserBean() {
-        return ComponentUtil.getRequestManager().findUserBean(FessUserBean.class);
     }
 }

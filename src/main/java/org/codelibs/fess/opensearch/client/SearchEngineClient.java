@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.util.BytesRef;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
@@ -166,6 +169,7 @@ import org.codelibs.fesen.opensearch.search.SearchHit;
 import org.codelibs.fesen.opensearch.search.SearchHits;
 import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.codelibs.fesen.opensearch.search.builder.PointInTimeBuilder;
 import org.codelibs.fesen.opensearch.search.collapse.CollapseBuilder;
@@ -1231,7 +1235,8 @@ public class SearchEngineClient implements Client {
      * never receives fields that a new release adds to it. The first write of such a field would
      * map it dynamically, and the intended type could then only be applied by a reindex. Fields
      * the index already has are never changed. The document index is skipped: its mapping is
-     * rewritten by plugins and is upgraded by a reindex.</p>
+     * rewritten by plugins and is upgraded by a reindex. Only its tag field is added, by
+     * {@link #addMissingTagProperty(String, MappingMetadata)}.</p>
      *
      * <p>Only the webapp process ({@link #isWebappProcess()}) adds the fields. The webapp opens the
      * client before it starts any job process, so the fields are already there when a crawler,
@@ -1245,7 +1250,11 @@ public class SearchEngineClient implements Client {
      */
     protected void addMissingProperties(final String index, final String docType, final String indexName,
             final MappingMetadata existingProperties) {
-        if (DOC_INDEX.equals(index) || !isWebappProcess()) {
+        if (!isWebappProcess()) {
+            return;
+        }
+        if (DOC_INDEX.equals(index)) {
+            addMissingTagProperty(indexName, existingProperties);
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -1278,6 +1287,40 @@ public class SearchEngineClient implements Client {
             }
         } catch (final Exception e) {
             logger.warn("Failed to add fields to {}/{} mapping: fields={}", indexName, docType, missingProperties.keySet(), e);
+        }
+    }
+
+    /**
+     * Adds the user tag field to an existing document index that does not have it yet.
+     *
+     * <p>The field was added to the bundled document mapping after release, and an existing index
+     * would map it dynamically as text on the first tag write, which breaks the terms facet and
+     * the term filters on it. Only this one field is put, as {@code keyword}. A tag field the index
+     * already has is never changed; one of another type is reported, since only a reindex can
+     * change it.</p>
+     *
+     * @param indexName          the actual document index name
+     * @param existingProperties the index's current {@code properties} mapping
+     */
+    protected void addMissingTagProperty(final String indexName, final MappingMetadata existingProperties) {
+        final String tagField = ComponentUtil.getFessConfig().getIndexFieldTag();
+        final Object existing = existingProperties.sourceAsMap().get(tagField);
+        if (existing != null) {
+            final Object type = existing instanceof final Map<?, ?> definition ? definition.get("type") : null;
+            if (!"keyword".equals(type)) {
+                logger.warn("The {} field of {} is not mapped as keyword; reindex to use user tags: type={}", tagField, indexName, type);
+            }
+            return;
+        }
+        final Map<String, Object> properties = Collections.singletonMap(tagField, Collections.singletonMap("type", "keyword"));
+        try {
+            if (putMapping(indexName, new ObjectMapper().writeValueAsString(Collections.singletonMap("properties", properties)))) {
+                logger.info("Added fields to {} mapping: fields={}", indexName, properties.keySet());
+            } else {
+                logger.warn("Failed to add fields to {} mapping: fields={}", indexName, properties.keySet());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to add fields to {} mapping: fields={}", indexName, properties.keySet(), e);
         }
     }
 
@@ -2693,9 +2736,22 @@ public class SearchEngineClient implements Client {
                             messages -> messages.addErrorsInvalidQueryUnsupportedFacetField(UserMessages.GLOBAL_PROPERTY_KEY, f),
                             "Unsupported facet field: " + f);
                 }
+                final IncludeExclude tagInclude;
+                if (f.equals(fessConfig.getIndexFieldTag()) && !SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
+                    // a tag value decodes to the name and the owner of a tag: only the tags the caller can see become buckets
+                    tagInclude = buildVisibleTagInclude(fessConfig);
+                    if (tagInclude == null) {
+                        return;
+                    }
+                } else {
+                    tagInclude = null;
+                }
                 final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                 final TermsAggregationBuilder termsBuilder =
                         AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
+                if (tagInclude != null) {
+                    termsBuilder.includeExclude(tagInclude);
+                }
                 termsBuilder.order(facetInfo.getBucketOrder());
                 if (facetInfo.size != null) {
                     final int maxFacetSize = fessConfig.getQueryFacetFieldsSizeMaxOrDefault();
@@ -2719,6 +2775,33 @@ public class SearchEngineClient implements Client {
                         AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery, facetContext.getQueryBuilder());
                 searchRequestBuilder.addAggregation(filterBuilder);
             }));
+        }
+
+        /**
+         * Builds the include of the tag facet: the exact values of the tags that the caller can see.
+         * Not called for the admin search, whose tag facet is not restricted.
+         *
+         * @param fessConfig the Fess configuration
+         * @return the include, or null when the caller can see no tag and the facet is not aggregated
+         */
+        protected IncludeExclude buildVisibleTagInclude(final FessConfig fessConfig) {
+            if (!fessConfig.isUserTagEnabled()) {
+                return null;
+            }
+            final Set<String> values;
+            try {
+                values = ComponentUtil.getTagTypeHelper().getVisibleTagValues(searchRequestType);
+            } catch (final RuntimeException e) {
+                logger.warn("Failed to resolve the visible tags; the tag facet is not aggregated. searchRequestType={}", searchRequestType,
+                        e);
+                return null;
+            }
+            if (values.isEmpty()) {
+                return null;
+            }
+            final SortedSet<BytesRef> includeValues = new TreeSet<>();
+            values.forEach(value -> includeValues.add(new BytesRef(value)));
+            return new IncludeExclude(includeValues, null);
         }
 
         /**

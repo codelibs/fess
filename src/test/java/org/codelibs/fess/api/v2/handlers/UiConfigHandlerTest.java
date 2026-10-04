@@ -598,14 +598,23 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"search_history\":false"), res.body());
     }
 
-    /** Delegates every call to the real configuration except user.tag.enabled. */
-    private static void setUserTagEnabled(final boolean enabled) {
+    @Test
+    public void test_features_userTag_offByDefault() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"user_tag\":false"), res.body());
+    }
+
+    @Test
+    public void test_features_userTag_onWhenEnabled() throws Exception {
+        // Delegate every call to the real configuration except user.tag.enabled.
         final org.codelibs.fess.mylasta.direction.FessConfig real = ComponentUtil.getFessConfig();
         ComponentUtil.setFessConfig((org.codelibs.fess.mylasta.direction.FessConfig) java.lang.reflect.Proxy.newProxyInstance(
                 org.codelibs.fess.mylasta.direction.FessConfig.class.getClassLoader(),
                 new Class<?>[] { org.codelibs.fess.mylasta.direction.FessConfig.class }, (proxy, method, args) -> {
                     if ("isUserTagEnabled".equals(method.getName())) {
-                        return enabled;
+                        return true;
                     }
                     try {
                         return method.invoke(real, args);
@@ -613,28 +622,10 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
                         throw e.getCause();
                     }
                 }));
-    }
-
-    @Test
-    public void test_features_userTag_offByDefault() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
         assertEquals(200, res.status, res.body());
-        assertTrue(res.body().contains("\"user_tag\":false"), res.body());
-        // The tags themselves are label types; the config does not list them.
-        assertFalse(res.body().contains("\"tag_types\""), res.body());
-    }
-
-    @Test
-    public void test_features_userTag_onWhenEnabled() throws Exception {
-        setUserTagEnabled(true);
-        final CapturingResponse res = new CapturingResponse();
-        new UiConfigHandler().handle(
-                new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()).withLocale(java.util.Locale.JAPANESE), res);
-        assertEquals(200, res.status, res.body());
-        final String body = res.body();
-        assertTrue(body.contains("\"user_tag\":true"), body);
-        assertFalse(body.contains("\"tag_types\""), body);
+        assertTrue(res.body().contains("\"user_tag\":true"), res.body());
     }
 
     @Test

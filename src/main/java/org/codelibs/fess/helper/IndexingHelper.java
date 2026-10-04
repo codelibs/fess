@@ -102,6 +102,9 @@ public class IndexingHelper {
                     }
                 });
             }
+            if (fessConfig.isUserTagEnabled()) {
+                ComponentUtil.getTagTypeHelper().applyTags(docList);
+            }
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             synchronized (searchEngineClient) {
                 final long deletedDocCount = deleteOldDocuments(searchEngineClient, docList);

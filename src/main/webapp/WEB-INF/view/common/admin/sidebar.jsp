@@ -112,7 +112,7 @@
 				</ul>
 			</li>
 			</c:if>
-			<c:if test="${fe:permission('admin-webconfig-view') or fe:permission('admin-fileconfig-view') or fe:permission('admin-dataconfig-view') or fe:permission('admin-labeltype-view') or fe:permission('admin-keymatch-view') or fe:permission('admin-boostdoc-view') or fe:permission('admin-relatedcontent-view') or fe:permission('admin-relatedquery-view') or fe:permission('admin-pathmap-view') or fe:permission('admin-webauth-view') or fe:permission('admin-fileauth-view') or fe:permission('admin-reqheader-view') or fe:permission('admin-duplicatehost-view')}">
+			<c:if test="${fe:permission('admin-webconfig-view') or fe:permission('admin-fileconfig-view') or fe:permission('admin-dataconfig-view') or fe:permission('admin-labeltype-view') or fe:permission('admin-tagtype-view') or fe:permission('admin-keymatch-view') or fe:permission('admin-boostdoc-view') or fe:permission('admin-relatedcontent-view') or fe:permission('admin-relatedquery-view') or fe:permission('admin-pathmap-view') or fe:permission('admin-webauth-view') or fe:permission('admin-fileauth-view') or fe:permission('admin-reqheader-view') or fe:permission('admin-duplicatehost-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='crawl'}">menu-open</c:if>">
 				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>">
 					<i class='nav-icon fa fa-cogs' aria-hidden="true"></i>
@@ -150,6 +150,13 @@
 						<a href="${fe:url('/admin/labeltype/')}" class="nav-link <c:if test="${param.menuType=='labelType'}">active</c:if>" <c:if test="${param.menuType=='labelType'}">aria-current="page"</c:if>>
 							<i class='fa fa-tag nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_label_type" /></p>
+						</a></li></c:if>
+						
+					<c:if test="${fe:permission('admin-tagtype-view')}">
+					<li class="nav-item">
+						<a href="${fe:url('/admin/tagtype/')}" class="nav-link <c:if test="${param.menuType=='tagType'}">active</c:if>" <c:if test="${param.menuType=='tagType'}">aria-current="page"</c:if>>
+							<i class='fa fa-tags nav-icon' aria-hidden="true"></i>
+							<p><la:message key="labels.menu_tag_type" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-keymatch-view')}">

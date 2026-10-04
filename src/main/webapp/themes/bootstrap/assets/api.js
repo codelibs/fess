@@ -107,15 +107,39 @@ export async function post(path, body) {
 }
 
 /**
+ * PUT /api/v2{path} with a JSON body, with the same CSRF header, credentials and envelope
+ * handling as post().
+ * @param {string} path
+ * @param {object} body
+ */
+export async function put(path, body) {
+  let resp;
+  try {
+    resp = await fetch(BASE + path, {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-Fess-CSRF-Token": csrfToken || ""
+      },
+      body: JSON.stringify(body || {})
+    });
+  } catch (e) {
+    throw new NetworkError(e);
+  }
+  return unwrap(resp);
+}
+
+/**
  * DELETE /api/v2{path}, with the same CSRF header, credentials and envelope handling as post().
  * Named del because delete is a reserved word.
  * @param {string} path
- * @param {object} [params] - query parameters
  */
-export async function del(path, params) {
+export async function del(path) {
   let resp;
   try {
-    resp = await fetch(BASE + path + qs(params), {
+    resp = await fetch(BASE + path, {
       method: "DELETE",
       credentials: "same-origin",
       headers: {

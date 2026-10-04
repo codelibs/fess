@@ -1076,11 +1076,13 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(config.searchFieldSet.contains(tag));
         assertTrue(config.isFacetField(tag));
         assertTrue(config.notAnalyzedFieldSet.contains(tag));
-        assertTrue(Arrays.asList(config.getResponseFields()).contains(tag));
-        // the raw tag values include tags the caller cannot see: the search handler returns
-        // the visible ones as "tags", so the field itself is never an API response field
+        // a raw tag value decodes to the name and the owner of a tag, including tags the caller
+        // cannot see: no response returns the field; the v2 search adds it to its own request
+        // and returns only the visible tags
+        assertFalse(Arrays.asList(config.getResponseFields()).contains(tag));
         assertFalse(config.isApiResponseField(tag));
         assertFalse(Arrays.asList(config.getScrollResponseFields()).contains(tag));
+        assertFalse(Arrays.asList(config.getCacheResponseFields()).contains(tag));
     }
 
     @Test

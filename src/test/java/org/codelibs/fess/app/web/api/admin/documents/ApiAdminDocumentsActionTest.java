@@ -44,6 +44,23 @@ public class ApiAdminDocumentsActionTest extends UnitFessTestCase {
     //                                        ================================================
 
     @Test
+    public void test_put$bulk_appliesTagsBeforeIndexing() throws Exception {
+        final CapturingSearchEngineClient client = new CapturingSearchEngineClient();
+        final ApiAdminDocumentsAction action = createInjectedAction(client, buildFullFessConfig());
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "https://example.com/doc");
+        doc.put("title", "Title");
+        doc.put("role", "Rguest");
+        doc.put("boost", "1.0");
+        final BulkBody body = new BulkBody();
+        body.documents = new ArrayList<>();
+        body.documents.add(doc);
+        action.put$bulk(body);
+        org.junit.jupiter.api.Assertions.assertEquals(1, client.capturedDocs.size());
+        org.junit.jupiter.api.Assertions.assertEquals("tv", ((String[]) client.capturedDocs.get(0).get("tag"))[0]);
+    }
+
+    @Test
     public void test_put$bulk_stripsSystemManagedFieldsBeforeIndexing() throws Exception {
         final FessConfig testConfig = buildFullFessConfig();
         final CapturingSearchEngineClient client = new CapturingSearchEngineClient();
@@ -99,6 +116,12 @@ public class ApiAdminDocumentsActionTest extends UnitFessTestCase {
      */
     private ApiAdminDocumentsAction createInjectedAction(final SearchEngineClient client, final FessConfig testConfig) throws Exception {
         suppressBindingOf(org.codelibs.fess.app.web.base.login.FessLoginAssist.class);
+        ComponentUtil.register(new org.codelibs.fess.helper.TagTypeHelper() {
+            @Override
+            public void applyTags(final List<Map<String, Object>> docList) {
+                docList.forEach(d -> d.put("tag", new String[] { "tv" }));
+            }
+        }, "tagTypeHelper");
         // The API action declares an @Resource AccessTokenService whose own AccessTokenBhv field
         // cannot bind without a live datastore; put$bulk never uses it, so suppress its binding.
         suppressBindingOf(org.codelibs.fess.app.service.AccessTokenService.class);
@@ -164,6 +187,11 @@ public class ApiAdminDocumentsActionTest extends UnitFessTestCase {
     private FessConfig buildFullFessConfig() {
         return new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexFieldTag() {
+                return "tag";
+            }
 
             @Override
             public String getIndexAdminRequiredFields() {

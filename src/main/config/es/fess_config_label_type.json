@@ -16,9 +16,6 @@
           "includedPaths" : {
             "type" : "keyword"
           },
-          "kind" : {
-            "type" : "keyword"
-          },
           "name" : {
             "type" : "keyword"
           },

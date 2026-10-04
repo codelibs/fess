@@ -87,7 +87,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
                 "excludedPaths");
         setupEpg(_epgMap, et -> ((LabelType) et).getIncludedPaths(), (et, vl) -> ((LabelType) et).setIncludedPaths(DfTypeUtil.toString(vl)),
                 "includedPaths");
-        setupEpg(_epgMap, et -> ((LabelType) et).getKind(), (et, vl) -> ((LabelType) et).setKind(DfTypeUtil.toString(vl)), "kind");
         setupEpg(_epgMap, et -> ((LabelType) et).getName(), (et, vl) -> ((LabelType) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((LabelType) et).getPermissions(), (et, vl) -> ((LabelType) et).setPermissions((String[]) vl),
                 "permissions");
@@ -144,8 +143,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
             false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths", null,
             false, false, false, "keyword", 0, 0, null, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnKind = cci("kind", "kind", null, null, String.class, "kind", null, false, false, false, "keyword", 0,
-            0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
             0, null, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
@@ -175,10 +172,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
 
     public ColumnInfo columnIncludedPaths() {
         return _columnIncludedPaths;
-    }
-
-    public ColumnInfo columnKind() {
-        return _columnKind;
     }
 
     public ColumnInfo columnName() {
@@ -215,7 +208,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
         ls.add(columnCreatedTime());
         ls.add(columnExcludedPaths());
         ls.add(columnIncludedPaths());
-        ls.add(columnKind());
         ls.add(columnName());
         ls.add(columnPermissions());
         ls.add(columnSortOrder());

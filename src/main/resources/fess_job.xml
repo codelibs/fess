@@ -22,6 +22,8 @@
 	</component>
 	<component name="updateLabelJob" class="org.codelibs.fess.job.UpdateLabelJob" instance="prototype">
 	</component>
+	<component name="tagUpdaterJob" class="org.codelibs.fess.job.TagUpdaterJob" instance="prototype">
+	</component>
 	<component name="pingJob" class="org.codelibs.fess.job.PingSearchEngineJob" instance="prototype">
 	</component>
 	<component name="pythonJob" class="org.codelibs.fess.job.PythonJob" instance="prototype">

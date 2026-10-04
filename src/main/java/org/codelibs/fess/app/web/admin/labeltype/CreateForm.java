@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.web.admin.labeltype;
 
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
 import org.lastaflute.web.validation.Required;
@@ -58,14 +57,6 @@ public class CreateForm {
     @Size(max = 100)
     @Pattern(regexp = "^[a-zA-Z0-9_]+$")
     public String value;
-
-    /**
-     * The kind of the label type: label (assigned to documents whose URL matches the paths) or tag (a tag that users
-     * add from the search screen; the included paths are the tagged URLs). A blank kind is a label.
-     */
-    @Size(max = 10)
-    @Pattern(regexp = "^(label|tag)$")
-    public String kind;
 
     /**
      * The paths to include for this label type.
@@ -117,7 +108,6 @@ public class CreateForm {
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;
-        kind = LabelType.KIND_LABEL;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         permissions = ComponentUtil.getFessConfig().getSearchDefaultDisplayPermission();

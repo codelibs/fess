@@ -1,0 +1,34 @@
+{
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "paths": {
+        "type": "keyword"
+      },
+      "permissions": {
+        "type": "keyword"
+      },
+      "virtualHost": {
+        "type": "keyword"
+      },
+      "sortOrder": {
+        "type": "integer"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}

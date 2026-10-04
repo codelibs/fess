@@ -26,16 +26,6 @@ import org.codelibs.fess.util.ComponentUtil;
 public class LabelType extends BsLabelType {
 
     private static final long serialVersionUID = 1L;
-
-    /** The kind of a label that the crawler assigns to documents by the included and excluded paths. */
-    public static final String KIND_LABEL = "label";
-
-    /**
-     * The kind of a label that is a tag users add from the search screen: its name is the tag name, its included paths
-     * list the tagged URLs (matched exactly) and its permissions list who can see it, including the users who added it.
-     */
-    public static final String KIND_TAG = "tag";
-
     private Locale locale;
 
     public String getId() {
@@ -54,15 +44,6 @@ public class LabelType extends BsLabelType {
         asDocMeta().version(version);
     }
 
-    /**
-     * Returns whether this label type defines user tags. A label type without a kind is a plain label.
-     *
-     * @return true if the kind is {@value #KIND_TAG}
-     */
-    public boolean isTagKind() {
-        return KIND_TAG.equals(getKind());
-    }
-
     public Locale getLocale() {
         if (locale == null) {
             if (getValue() == null) {
@@ -76,7 +57,7 @@ public class LabelType extends BsLabelType {
     @Override
     public String toString() {
         return "LabelType [createdBy=" + createdBy + ", createdTime=" + createdTime + ", excludedPaths=" + excludedPaths
-                + ", includedPaths=" + includedPaths + ", kind=" + kind + ", name=" + name + ", sortOrder=" + sortOrder + ", updatedBy="
-                + updatedBy + ", updatedTime=" + updatedTime + ", value=" + value + ", docMeta=" + docMeta + "]";
+                + ", includedPaths=" + includedPaths + ", name=" + name + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy
+                + ", updatedTime=" + updatedTime + ", value=" + value + ", docMeta=" + docMeta + "]";
     }
 }

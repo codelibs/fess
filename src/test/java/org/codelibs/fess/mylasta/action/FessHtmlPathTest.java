@@ -190,6 +190,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         verifyPathPattern("AdminReqheader", "/admin/reqheader/");
         verifyPathPattern("AdminRole", "/admin/role/");
         verifyPathPattern("AdminScheduler", "/admin/scheduler/");
+        verifyPathPattern("AdminTagtype", "/admin/tagtype/");
         verifyPathPattern("AdminUser", "/admin/user/");
         verifyPathPattern("AdminWebauth", "/admin/webauth/");
         verifyPathPattern("AdminWebconfig", "/admin/webconfig/");

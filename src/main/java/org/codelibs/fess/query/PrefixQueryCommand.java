@@ -77,7 +77,7 @@ public class PrefixQueryCommand extends QueryCommand {
         final String text = prefixQuery.getPrefix().text();
 
         if (isRestrictedTagField(context, field)) {
-            // a tag value is a hash of the name: a prefix has no use but to probe for tags the caller cannot see
+            // a tag value encodes the name and the owner of a tag: a prefix on it would probe for tags the caller cannot see
             return buildHiddenTagQuery(context, field, text + "*");
         }
 

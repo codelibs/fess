@@ -75,7 +75,7 @@ public class TermRangeQueryCommand extends QueryCommand {
         final String field = getSearchField(context.getDefaultField(), termRangeQuery.getField());
 
         if (isRestrictedTagField(context, field)) {
-            // a tag value is a hash of the name: a range has no use but to probe for tags the caller cannot see
+            // a tag value encodes the name and the owner of a tag: a range on it would probe for tags the caller cannot see
             return buildHiddenTagQuery(context, field, termRangeQuery.toString(field));
         }
 

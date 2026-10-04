@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -178,23 +177,6 @@ public interface FessTransformer {
                 final Object[] values = Arrays.copyOf(oldValues, oldValues.length + 1);
                 values[values.length - 1] = value;
                 dataMap.put(key, values);
-            }
-        }
-    }
-
-    /**
-     * Puts the values of the tags whose included paths list the URL into the tag field while user tags are enabled.
-     * A tag is a label type of the kind tag, so the tags come only from the label types.
-     *
-     * @param dataMap the data map to modify
-     * @param url the URL of the document
-     */
-    default void putTagField(final Map<String, Object> dataMap, final String url) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (fessConfig.isUserTagEnabled()) {
-            final Set<String> tagSet = ComponentUtil.getLabelTypeHelper().getMatchedTagValueSet(url);
-            if (!tagSet.isEmpty()) {
-                dataMap.put(fessConfig.getIndexFieldTag(), tagSet.toArray(new String[tagSet.size()]));
             }
         }
     }

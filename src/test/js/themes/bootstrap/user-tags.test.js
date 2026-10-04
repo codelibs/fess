@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
-// Tests for the shared user tags of the bootstrap theme's search.js (features.user_tag): the
-// tag chips and the inline tag editor on the result cards, the "tag" facet group, the
-// fields.tag filter and its active-filter badge. A tag is a name; its value is an opaque id
-// (64 hex characters) that the theme never parses. api.js and router.js are mocked so the
-// config, the auth state and the /search and /documents/{id}/tags answers are controllable;
-// i18n.js and format.js run for real, and i18n.t() returns its key unchanged (no messages
-// loaded), so assertions match i18n keys.
+// Tests for the per-user tags of the bootstrap theme's search.js (features.user_tag): the tag
+// chips and the inline tag editor on the result cards, the "tag" facet group, the fields.tag
+// filter and its active-filter badge, and the "My tags" panel. A tag has an id (64 hex, used by
+// the tag API) and a value (used by fields.tag); the theme never parses either. Tags of other
+// users (mine: false) read as tag.shared_prefix + name. api.js and router.js are mocked so the
+// config, the auth state and the API answers are controllable; i18n.js and format.js run for
+// real, and i18n.t() returns its key unchanged (no messages loaded), so assertions match keys.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { resetDom, mountBody, setLocation } from "../../helpers/dom.js";
-import { jsonResponse, installFetch } from "../../helpers/net.js";
-
-const API_PATH = "../../../../main/webapp/themes/bootstrap/assets/api.js";
 
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
   getConfig: vi.fn(() => null),
   get: vi.fn(async () => ({})),
   post: vi.fn(async () => ({})),
+  put: vi.fn(async () => ({})),
   del: vi.fn(async () => ({})),
   isAuthenticated: vi.fn(() => false),
   url: vi.fn((path) => "api/v2" + path),
@@ -34,6 +32,7 @@ const FIXTURE = `
   <input id="queryId"><input id="rt">
   <div id="search-loading" class="d-none"></div>
   <div id="search-error" class="d-none"></div>
+  <ul id="options-bar"></ul>
   <div id="results-status"></div>
   <ul id="results"></ul>
   <div id="results-meta"></div>
@@ -45,15 +44,20 @@ const FIXTURE = `
   <div id="searchOptions"><button type="submit">Search</button></div>
 `;
 
-// An opaque tag value: 64 hex characters, as the server issues them.
+const PREFIX = "tag.shared_prefix";
 const hex = (n) => n.toString(16).padStart(64, "0");
-const V = { a: hex(0xa), b: hex(0xb), proposal: hex(0x1), draft: hex(0x2), old: hex(0x3), z: hex(0xf) };
+// Tag values as the server issues them: b64url(name):b64url(owner). Opaque to the theme.
+const V = { a: "YQ:dXNlcg", b: "Yg:b3RoZXI", proposal: "cHJvcG9zYWw:dXNlcg", draft: "ZHJhZnQ:b3RoZXI", old: "b2xk:dXNlcg" };
+const ID = { a: hex(0xa), b: hex(0xb), c: hex(0xc) };
 
 function config({ userTag = true } = {}) {
   return { features: { user_tag: userTag } };
 }
 
-const TAG = (value, name, mine = false) => ({ value, name, mine });
+/** A search hit tag: { value, name, owner, mine, shared } (no id). */
+const HIT_TAG = (value, name, mine = true, shared = false) => ({ value, name, owner: mine ? "user" : "other", mine, shared });
+/** A DocumentTag of the document tag API: { id, value, name, owner, mine, shared }. */
+const DOC_TAG = (id, value, name, mine = true, shared = false) => ({ id, value, name, owner: mine ? "user" : "other", mine, shared });
 
 function searchEnv(docs, tagFacet) {
   return {
@@ -68,12 +72,14 @@ function searchEnv(docs, tagFacet) {
 }
 
 let env;
-let tagsAnswer;
+let docTagsAnswer;
+let myTagsAnswer;
 function installApi() {
   api.get.mockImplementation(async (path) => {
     if (path === "/search") return env;
     if (path === "/labels") return { labels: [] };
-    if (path.endsWith("/tags")) return tagsAnswer;
+    if (path === "/tags") return myTagsAnswer;
+    if (path.endsWith("/tags")) return docTagsAnswer;
     return {};
   });
 }
@@ -112,7 +118,8 @@ beforeEach(() => {
   _state.q = "foo";
   api.getConfig.mockReturnValue(config());
   api.isAuthenticated.mockReturnValue(false);
-  tagsAnswer = { status: 0, doc_id: "d1", addable: true, tags: [] };
+  docTagsAnswer = { status: 0, doc_id: "d1", tags: [], addable: [] };
+  myTagsAnswer = { status: 0, tags: [] };
   modalShow = vi.fn();
   window.bootstrap = { Modal: { getOrCreateInstance: vi.fn(() => ({ show: modalShow })) } };
 });
@@ -122,15 +129,15 @@ afterEach(() => {
 });
 
 describe("feature flag", () => {
-  it("renders no tags, no editor and no tag facet, and asks for the label facet only, when the feature is off", async () => {
+  it("renders no tags, no editor, no tag facet and no My tags control when the feature is off", async () => {
     api.getConfig.mockReturnValue(config({ userTag: false }));
     api.isAuthenticated.mockReturnValue(true);
-    await search([{ doc_id: "d1", title: "T", tags: [TAG(V.a, "a")] }], [{ value: V.a, count: 2, label: "a" }]);
+    await search([{ doc_id: "d1", title: "T", tags: [HIT_TAG(V.a, "a")] }], [{ value: V.a, count: 2, label: "a", mine: true }]);
 
     expect(document.querySelector("#result0 .tags")).toBeNull();
     expect(document.querySelector(".tag-add-btn")).toBeNull();
+    expect(document.getElementById("my-tags-toggle")).toBeNull();
     expect(lastSearchParams()["facet.field"]).toEqual(["label"]);
-    // Neither the dedicated group nor the generic one shows the tag field.
     expect(tagGroup()).toBeUndefined();
     const titles = [...document.querySelectorAll("#facet-body ul.list-group > li:first-child")].map((li) => li.textContent);
     expect(titles).not.toContain("tag");
@@ -141,9 +148,10 @@ describe("feature flag", () => {
     expect(lastSearchParams()["facet.field"]).toEqual(["label", "tag"]);
   });
 
-  it("renders no tag row for a guest when the document has no tags", async () => {
+  it("renders no tag row and no My tags control for a guest", async () => {
     await search([{ doc_id: "d1", title: "T", tags: [] }]);
     expect(document.querySelector("#result0 .tags")).toBeNull();
+    expect(document.getElementById("my-tags-toggle")).toBeNull();
   });
 
   it("offers the add control to a logged-in user even when the document has no tags", async () => {
@@ -155,26 +163,25 @@ describe("feature flag", () => {
 });
 
 describe("result card chips", () => {
-  it("renders each tag as a chip with its name as plain text", async () => {
+  it("shows own tags by name and other users' tags with the shared prefix, as plain text", async () => {
     const evil = '<img src=x onerror="alert(1)">';
-    await search([{ doc_id: "d1", title: "T", tags: [TAG(V.proposal, "proposal", true), TAG(V.b, evil)] }]);
+    await search([{ doc_id: "d1", title: "T", tags: [HIT_TAG(V.proposal, "proposal", true, true), HIT_TAG(V.b, evil, false, true)] }]);
 
     const chips = [...document.querySelectorAll("#result0 .tags .tag-chip")];
-    expect(chips.map((c) => c.textContent)).toEqual(["proposal", evil]);
+    expect(chips.map((c) => c.textContent)).toEqual(["proposal", PREFIX + evil]);
     expect(document.querySelector("#result0 .tags img")).toBeNull();
     expect(chips[0].tagName).toBe("BUTTON");
     expect(chips[0].getAttribute("type")).toBe("button");
-    // A guest sees the tags but no add control.
     expect(document.querySelector("#result0 .tag-add-btn")).toBeNull();
   });
 
-  it("shows a name containing a colon as is, and the raw value of a tag without a name", async () => {
-    await search([{ doc_id: "d1", title: "T", tags: [TAG(V.a, "x:y"), { value: V.b }] }]);
-    expect([...document.querySelectorAll("#result0 .tag-chip")].map((c) => c.textContent)).toEqual(["x:y", V.b]);
+  it("prefixes a tag that is not marked as the caller's own", async () => {
+    await search([{ doc_id: "d1", title: "T", tags: [{ value: V.a, name: "x:y" }] }]);
+    expect([...document.querySelectorAll("#result0 .tag-chip")].map((c) => c.textContent)).toEqual([PREFIX + "x:y"]);
   });
 
   it("filters the search by the clicked tag's value, keeping the query, and puts fields.tag in the URL", async () => {
-    await search([{ doc_id: "d1", title: "T", tags: [TAG(V.a, "a b")] }]);
+    await search([{ doc_id: "d1", title: "T", tags: [HIT_TAG(V.a, "a b")] }]);
     _state.fields.label = ["lblA"];
     document.querySelector("#result0 .tag-chip").click();
     await settle();
@@ -193,46 +200,43 @@ describe("result card chips", () => {
 
 describe("tag facet", () => {
   const FACET = [
-    { value: V.proposal, count: 3, label: "proposal" },
-    { value: V.draft, count: 1, label: "draft" },
-    { value: V.old, count: 0, label: "old" },
+    { value: V.proposal, count: 3, label: "proposal", owner: "user", mine: true, shared: false },
+    { value: V.draft, count: 1, label: "draft", owner: "other", mine: false, shared: true },
+    { value: V.old, count: 0, label: "old", owner: "user", mine: true, shared: false },
   ];
 
-  it("renders one Tags group with the tag labels and counts, without zero counts", async () => {
+  it("renders one Tags group with the labels (others' tags prefixed) and counts, without zero counts", async () => {
     await search([{ doc_id: "d1", title: "T" }], FACET);
 
     const group = tagGroup();
     expect(group).toBeTruthy();
     const items = [...group.querySelectorAll("li.list-group-item a")];
-    expect(items.map((a) => a.firstChild.textContent.trim())).toEqual(["proposal", "draft"]);
+    expect(items.map((a) => a.firstChild.textContent.trim())).toEqual(["proposal", PREFIX + "draft"]);
     expect(items.map((a) => a.querySelector(".badge").textContent)).toEqual(["3", "1"]);
-    // Not rendered a second time by the generic field facets.
     const titles = [...document.querySelectorAll("#facet-body ul.list-group > li:first-child")].map((li) => li.textContent);
     expect(titles.filter((x) => x === "tag.title" || x === "tag").length).toBe(1);
-    // Mirrored into the mobile offcanvas.
     expect(document.querySelectorAll("#facet-body-mobile ul.list-group").length).toBe(1);
   });
 
-  it("falls back to the raw value when an entry has no label, and renders a label as plain text", async () => {
+  it("falls back to the raw value without a label, and renders a label as plain text", async () => {
     const evil = "<b>x</b>";
-    await search([{ doc_id: "d1", title: "T" }], [{ value: V.a, count: 2 }, { value: V.b, count: 1, label: evil }]);
+    await search([{ doc_id: "d1", title: "T" }], [{ value: V.a, count: 2, mine: true }, { value: V.b, count: 1, label: evil, mine: true }]);
     const items = [...tagGroup().querySelectorAll("li.list-group-item a")];
     expect(items.map((a) => a.firstChild.textContent.trim())).toEqual([V.a, evil]);
     expect(tagGroup().querySelector("b")).toBeNull();
   });
 
-  it("filters through fields.tag on click and clears the filter on a second click", async () => {
+  it("filters through fields.tag on click, names the badge with the same prefix rule, and clears on a second click", async () => {
     await search([{ doc_id: "d1", title: "T" }], FACET);
-    tagGroup().querySelector("li.list-group-item a").click();
+    tagGroup().querySelectorAll("li.list-group-item a")[1].click();
     await settle();
 
-    expect(lastSearchParams()["fields.tag"]).toEqual([V.proposal]);
+    expect(lastSearchParams()["fields.tag"]).toEqual([V.draft]);
     expect(lastSearchParams()["ex_q"]).toBeUndefined();
-    expect(new URLSearchParams(location.search).getAll("fields.tag")).toEqual([V.proposal]);
+    expect(new URLSearchParams(location.search).getAll("fields.tag")).toEqual([V.draft]);
     const active = tagGroup().querySelector("li.list-group-item.active a");
-    expect(active.firstChild.textContent.trim()).toBe("proposal");
-    // The badge names the tag.
-    expect(badgeTexts()).toEqual(["proposal"]);
+    expect(active.firstChild.textContent.trim()).toBe(PREFIX + "draft");
+    expect(badgeTexts()).toEqual([PREFIX + "draft"]);
 
     active.click();
     await settle();
@@ -249,23 +253,16 @@ describe("tag facet", () => {
 });
 
 describe("fields.tag filter badge", () => {
-  it("reads the tag from the URL and names it from the facet labels and the hits' tags, else shows the raw value", async () => {
-    const gone = hex(0xdead);
+  it("reads the tag from the URL and names it from the facet and the hits, else shows the raw value", async () => {
+    const gone = "Z29uZQ:dXNlcg";
     await searchFromUrl(
-      "/search?q=foo&fields.tag=" + V.proposal + "&fields.tag=" + V.a + "&fields.tag=" + gone,
-      [{ doc_id: "d1", title: "T", tags: [TAG(V.a, "alpha")] }],
-      [{ value: V.proposal, count: 1, label: "proposal" }],
+      "/search?q=foo&fields.tag=" + V.proposal + "&fields.tag=" + V.b + "&fields.tag=" + gone,
+      [{ doc_id: "d1", title: "T", tags: [HIT_TAG(V.b, "beta", false, true)] }],
+      [{ value: V.proposal, count: 1, label: "proposal", mine: true }],
     );
 
-    expect(lastSearchParams()["fields.tag"]).toEqual([V.proposal, V.a, gone]);
-    expect(badgeTexts()).toEqual(["proposal", "alpha", gone]);
-  });
-
-  it("names the tag from the current response only", async () => {
-    await searchFromUrl("/search?q=foo&fields.tag=" + V.a, [{ doc_id: "d1", title: "T", tags: [TAG(V.a, "alpha")] }]);
-    expect(badgeTexts()).toEqual(["alpha"]);
-    await search([{ doc_id: "d2", title: "U" }]);
-    expect(badgeTexts()).toEqual([V.a]);
+    expect(lastSearchParams()["fields.tag"]).toEqual([V.proposal, V.b, gone]);
+    expect(badgeTexts()).toEqual(["proposal", PREFIX + "beta", gone]);
   });
 
   it("drops the tag from the request and the URL when its badge is removed", async () => {
@@ -296,11 +293,13 @@ describe("tag editor", () => {
   const toggle = () => card().querySelector(".tag-add-btn");
   const editor = () => card().querySelector(".tag-editor");
   const editorItems = () => [...editor().querySelectorAll(".tag-editor-item")];
+  const addableButtons = () => [...editor().querySelectorAll(".tag-addable")];
   const input = () => editor().querySelector("input");
   const errorBox = () => editor().querySelector(".tag-editor-error");
+  const pending = () => editor().querySelector(".tag-pending");
   const chipTexts = () => [...card().querySelectorAll(".tag-chips .tag-chip")].map((c) => c.textContent);
 
-  async function openEditor(docs = [{ doc_id: "d1", title: "T", tags: [TAG(V.a, "a", true)] }]) {
+  async function openEditor(docs = [{ doc_id: "d1", title: "T", tags: [HIT_TAG(V.a, "a")] }]) {
     api.isAuthenticated.mockReturnValue(true);
     await search(docs);
     toggle().click();
@@ -313,172 +312,108 @@ describe("tag editor", () => {
     await settle();
   }
 
-  it("shows an add control to a logged-in user that opens the editor and loads the document's tags", async () => {
-    tagsAnswer = {
-      status: 0, doc_id: "d1", addable: true,
-      tags: [TAG(V.a, "a", true), TAG(V.b, "b", false)],
+  it("loads the document's tags: others' tags prefixed, a remove button on own ones, own tags offered to add", async () => {
+    docTagsAnswer = {
+      status: 0, doc_id: "d1",
+      tags: [DOC_TAG(ID.a, V.a, "a"), DOC_TAG(ID.b, V.b, "b", false, true)],
+      addable: [DOC_TAG(ID.c, "Yw:dXNlcg", "c")],
     };
     await openEditor();
 
     expect(toggle().getAttribute("aria-expanded")).toBe("true");
     expect(toggle().getAttribute("aria-controls")).toBe(editor().id);
-    expect(toggle().textContent).toBe("tag.add");
     expect(api.get).toHaveBeenCalledWith("/documents/d1/tags");
-    expect(editor().getAttribute("aria-label")).toBe("tag.title");
     const items = editorItems();
-    expect(items.map((li) => li.firstChild.textContent)).toEqual(["a", "b"]);
-    // No counts any more.
-    expect(editor().querySelector(".tag-count")).toBeNull();
-    expect(items.map((li) => li.textContent)).toEqual(["a", "b"]);
-    // Only the user's own tag can be removed from their tags.
+    expect(items.map((li) => li.firstChild.textContent)).toEqual(["a", PREFIX + "b"]);
     expect(items[0].querySelector("button.tag-remove").getAttribute("aria-label")).toBe("tag.remove");
     expect(items[1].querySelector("button.tag-remove")).toBeNull();
-    // The input is labelled, capped at 50 characters and takes the focus.
+    expect(addableButtons().map((b) => b.textContent)).toEqual(["c"]);
     expect(input().getAttribute("maxlength")).toBe("50");
     expect(editor().querySelector(`label[for="${input().id}"]`).textContent).toBe("tag.name");
     expect(document.activeElement).toBe(input());
-    expect(editor().querySelector(".tag-editor-empty").classList.contains("d-none")).toBe(true);
-    // The chips follow the answer.
-    expect(chipTexts()).toEqual(["a", "b"]);
+    expect(pending().classList.contains("d-none")).toBe(true);
+    expect(chipTexts()).toEqual(["a", PREFIX + "b"]);
   });
 
-  it("offers a name input and no type select", async () => {
+  it("adds one of the user's own tags by id and shows the pending note", async () => {
+    docTagsAnswer = { status: 0, doc_id: "d1", tags: [], addable: [DOC_TAG(ID.c, "Yw:dXNlcg", "c")] };
+    api.post.mockResolvedValue({ status: 0, doc_id: "d1", added: true, tag: DOC_TAG(ID.c, "Yw:dXNlcg", "c"),
+      tags: [DOC_TAG(ID.c, "Yw:dXNlcg", "c")], addable: [] });
     await openEditor();
-    expect(editor().querySelector("select")).toBeNull();
-    expect(editor().querySelectorAll("input").length).toBe(1);
-  });
-
-  it("adds a tag by name and updates the chips without a new search", async () => {
-    await openEditor();
-    api.post.mockResolvedValue({
-      status: 0, doc_id: "d1", addable: true, added: true,
-      tags: [TAG(V.a, "a", true), TAG(V.b, "new one", true)],
-    });
     const before = searchCalls().length;
-    await add("  new one ");
+    addableButtons()[0].click();
+    await settle();
 
-    expect(api.post).toHaveBeenCalledWith("/documents/d1/tags", { name: "new one" });
-    expect(chipTexts()).toEqual(["a", "new one"]);
-    expect(editorItems().length).toBe(2);
-    expect(input().value).toBe("");
-    expect(document.activeElement).toBe(input());
+    expect(api.post).toHaveBeenCalledWith("/documents/d1/tags", { id: ID.c });
+    expect(chipTexts()).toEqual(["c"]);
+    expect(addableButtons().length).toBe(0);
+    expect(pending().textContent).toBe("tag.pending");
+    expect(pending().classList.contains("d-none")).toBe(false);
     expect(searchCalls().length).toBe(before);
   });
 
-  it("ignores an empty name", async () => {
+  it("adds a new tag by name, trimmed, and ignores an empty name", async () => {
     await openEditor();
     await add("   ");
     expect(api.post).not.toHaveBeenCalled();
-    await add("x");
-    expect(api.post).toHaveBeenCalledWith("/documents/d1/tags", { name: "x" });
+
+    api.post.mockResolvedValue({ status: 0, doc_id: "d1", added: true, tag: DOC_TAG(ID.c, "x", "new one"),
+      tags: [DOC_TAG(ID.c, "x", "new one")], addable: [] });
+    await add("  new one ");
+    expect(api.post).toHaveBeenCalledWith("/documents/d1/tags", { name: "new one" });
+    expect(chipTexts()).toEqual(["new one"]);
+    expect(input().value).toBe("");
+    expect(document.activeElement).toBe(input());
+    expect(pending().classList.contains("d-none")).toBe(false);
   });
 
-  it("opens the login modal when adding answers 401 or 403", async () => {
-    await openEditor();
-    api.post.mockRejectedValueOnce({ code: "auth_required", httpStatus: 401, message: "login" });
-    await add("x");
-    expect(window.bootstrap.Modal.getOrCreateInstance).toHaveBeenCalledWith(document.getElementById("login-modal"));
-    expect(modalShow).toHaveBeenCalledTimes(1);
-    expect(errorBox().classList.contains("d-none")).toBe(true);
-
-    api.post.mockRejectedValueOnce({ code: "forbidden", httpStatus: 403, message: "csrf" });
-    await add("x");
-    expect(modalShow).toHaveBeenCalledTimes(2);
-  });
-
-  it("shows the server's message for a 400 and a generic one for other failures", async () => {
-    await openEditor();
-    api.post.mockRejectedValueOnce({ code: "invalid_request", httpStatus: 400, message: "Too many tags." });
-    await add("x");
-    expect(errorBox().textContent).toBe("Too many tags.");
-    expect(errorBox().classList.contains("d-none")).toBe(false);
-    expect(errorBox().getAttribute("aria-live")).toBe("polite");
-    expect(input().value).toBe("x");
-
-    api.post.mockRejectedValueOnce({ name: "NetworkError", message: "down" });
-    await add("x");
-    expect(errorBox().textContent).toBe("tag.error");
-    expect(modalShow).not.toHaveBeenCalled();
-
-    // The next successful answer clears the message.
-    api.post.mockResolvedValueOnce({ status: 0, addable: true, added: true, tags: [] });
-    await add("x");
-    expect(errorBox().classList.contains("d-none")).toBe(true);
-  });
-
-  it("removes a tag from the user's tags through DELETE with its value and updates the chips", async () => {
-    tagsAnswer = { status: 0, doc_id: "d/1", addable: true, tags: [TAG(V.a, "a b&c", true)] };
-    api.del.mockResolvedValue({ status: 0, doc_id: "d/1", addable: true, removed: true, tags: [] });
-    await openEditor([{ doc_id: "d/1", title: "T", tags: [TAG(V.a, "a b&c", true)] }]);
+  it("removes an own tag through DELETE /documents/{docId}/tags/{id}", async () => {
+    docTagsAnswer = { status: 0, doc_id: "d/1", tags: [DOC_TAG(ID.a, V.a, "a b&c")], addable: [] };
+    api.del.mockResolvedValue({ status: 0, doc_id: "d/1", removed: true, tags: [], addable: [DOC_TAG(ID.a, V.a, "a b&c")] });
+    await openEditor([{ doc_id: "d/1", title: "T", tags: [HIT_TAG(V.a, "a b&c")] }]);
     expect(api.get).toHaveBeenCalledWith("/documents/d%2F1/tags");
 
     editorItems()[0].querySelector("button.tag-remove").click();
     await settle();
 
-    expect(api.del).toHaveBeenCalledWith("/documents/d%2F1/tags", { value: V.a });
+    expect(api.del).toHaveBeenCalledWith("/documents/d%2F1/tags/" + ID.a);
     expect(chipTexts()).toEqual([]);
     expect(editorItems().length).toBe(0);
+    expect(addableButtons().map((b) => b.textContent)).toEqual(["a b&c"]);
     expect(editor().querySelector(".tag-editor-empty").classList.contains("d-none")).toBe(false);
-    expect(document.activeElement).toBe(input());
+    expect(pending().classList.contains("d-none")).toBe(false);
   });
 
-  it("keeps a removed tag the user still sees through a group, without the remove button", async () => {
-    tagsAnswer = { status: 0, doc_id: "d1", addable: true, tags: [TAG(V.a, "a", true)] };
-    api.del.mockResolvedValue({ status: 0, doc_id: "d1", addable: true, removed: true, tags: [TAG(V.a, "a", false)] });
+  it("opens the login modal when a write answers 401 or 403", async () => {
     await openEditor();
-    editorItems()[0].querySelector("button.tag-remove").click();
-    await settle();
-
-    expect(chipTexts()).toEqual(["a"]);
-    expect(editorItems().map((li) => li.textContent)).toEqual(["a"]);
-    expect(editorItems()[0].querySelector("button.tag-remove")).toBeNull();
-  });
-
-  it("URL-encodes the tag value in the DELETE request", async () => {
-    const actual = await vi.importActual(API_PATH);
-    const fetchMock = installFetch(async () => jsonResponse({ response: { status: 0, addable: true, removed: true, tags: [] } }));
-    api.del.mockImplementation(actual.del);
-    // An unexpected value must still reach the server intact.
-    const odd = "a b&c=d";
-    tagsAnswer = { status: 0, addable: true, tags: [TAG(odd, "odd", true)] };
-    try {
-      await openEditor();
-      editorItems()[0].querySelector("button.tag-remove").click();
-      await settle();
-      const [url, opts] = fetchMock.mock.calls[0];
-      expect(url).toBe("api/v2/documents/d1/tags?value=a+b%26c%3Dd");
-      expect(opts.method).toBe("DELETE");
-      expect(new URLSearchParams(url.split("?")[1]).get("value")).toBe(odd);
-    } finally {
-      vi.unstubAllGlobals();
-    }
-  });
-
-  it("re-enables the remove button and asks for login when the DELETE answers 401", async () => {
-    tagsAnswer = { status: 0, addable: true, tags: [TAG(V.a, "a", true)] };
-    api.del.mockRejectedValueOnce({ code: "auth_required", httpStatus: 401 });
-    await openEditor();
-    const btn = editorItems()[0].querySelector("button.tag-remove");
-    btn.click();
-    await settle();
+    api.post.mockRejectedValueOnce({ code: "auth_required", httpStatus: 401, message: "login required" });
+    await add("x");
+    expect(window.bootstrap.Modal.getOrCreateInstance).toHaveBeenCalledWith(document.getElementById("login-modal"));
     expect(modalShow).toHaveBeenCalledTimes(1);
-    expect(btn.disabled).toBe(false);
+    expect(errorBox().classList.contains("d-none")).toBe(true);
+    expect(pending().classList.contains("d-none")).toBe(true);
+
+    api.post.mockRejectedValueOnce({ code: "forbidden", httpStatus: 403, message: "invalid csrf token" });
+    await add("x");
+    expect(modalShow).toHaveBeenCalledTimes(2);
   });
 
-  it("shows the server's message inline when the DELETE answers 400", async () => {
-    tagsAnswer = { status: 0, addable: true, tags: [TAG(V.a, "a", true)] };
-    api.del.mockRejectedValueOnce({ code: "invalid_request", httpStatus: 400, message: "Not your tag." });
+  it("shows the server's message for a 400 or 409 and a generic one for other failures", async () => {
     await openEditor();
-    editorItems()[0].querySelector("button.tag-remove").click();
-    await settle();
-    expect(errorBox().textContent).toBe("Not your tag.");
+    api.post.mockRejectedValueOnce({ code: "invalid_request", httpStatus: 400, message: "too many tags" });
+    await add("x");
+    expect(errorBox().textContent).toBe("too many tags");
+    expect(errorBox().classList.contains("d-none")).toBe(false);
+    expect(input().value).toBe("x");
+
+    api.post.mockRejectedValueOnce({ code: "conflict", httpStatus: 409, message: "try again" });
+    await add("x");
+    expect(errorBox().textContent).toBe("try again");
+
+    api.post.mockRejectedValueOnce({ name: "NetworkError", message: "down" });
+    await add("x");
+    expect(errorBox().textContent).toBe("tag.error");
     expect(modalShow).not.toHaveBeenCalled();
-  });
-
-  it("hides the add form when the server says the user cannot add tags", async () => {
-    tagsAnswer = { status: 0, addable: false, tags: [TAG(V.a, "a", false)] };
-    await openEditor();
-    expect(editor().querySelector("form").classList.contains("d-none")).toBe(true);
   });
 
   it("shows the generic error when the tags cannot be loaded", async () => {
@@ -500,23 +435,166 @@ describe("tag editor", () => {
     expect(toggle().getAttribute("aria-expanded")).toBe("false");
     expect(document.activeElement).toBe(toggle());
 
-    // Reopening reuses the editor and reloads the tags.
     toggle().click();
     await settle();
     expect(card().querySelectorAll(".tag-editor").length).toBe(1);
-    expect(editor().classList.contains("d-none")).toBe(false);
     expect(api.get.mock.calls.filter((c) => c[0] === "/documents/d1/tags").length).toBe(2);
 
     toggle().click();
     expect(editor().classList.contains("d-none")).toBe(true);
-    expect(toggle().getAttribute("aria-expanded")).toBe("false");
+  });
+});
+
+describe("My tags panel", () => {
+  const panel = () => document.getElementById("my-tags-panel");
+  const rows = () => [...panel().querySelectorAll(".my-tag")];
+  const nameOf = (row) => row.querySelector(".my-tag-name").textContent;
+  const pending = () => panel().querySelector(".tag-pending");
+  const errorBox = () => panel().querySelector(".my-tags-error");
+
+  const MINE = [
+    { id: ID.a, value: V.a, name: "alpha", shared: false, sort_order: 0, path_count: 2 },
+    { id: ID.b, value: V.proposal, name: "<b>beta</b>", shared: true, sort_order: 0, path_count: 0 },
+  ];
+
+  async function openPanel() {
+    api.isAuthenticated.mockReturnValue(true);
+    myTagsAnswer = { status: 0, tags: MINE };
+    await search([{ doc_id: "d1", title: "T" }]);
+    document.getElementById("my-tags-toggle").click();
+    await settle();
+  }
+
+  it("lists the user's tags from GET /tags with their names as plain text and the shared state", async () => {
+    await openPanel();
+    expect(api.get).toHaveBeenCalledWith("/tags");
+    expect(document.getElementById("my-tags-toggle").getAttribute("aria-expanded")).toBe("true");
+    expect(rows().map(nameOf)).toEqual(["alpha", "<b>beta</b>"]);
+    expect(panel().querySelector(".my-tag-name b")).toBeNull();
+    expect(rows().map((r) => r.querySelector("input.my-tag-shared").checked)).toEqual([false, true]);
   });
 
-  it("filters by a chip after the chips were re-rendered from the editor", async () => {
-    tagsAnswer = { status: 0, addable: true, tags: [TAG(V.z, "zeta", true)] };
-    await openEditor();
-    card().querySelector(".tag-chips .tag-chip").click();
+  it("says so when the user has no tags", async () => {
+    api.isAuthenticated.mockReturnValue(true);
+    myTagsAnswer = { status: 0, tags: [] };
+    await search([{ doc_id: "d1", title: "T" }]);
+    document.getElementById("my-tags-toggle").click();
     await settle();
-    expect(lastSearchParams()["fields.tag"]).toEqual([V.z]);
+    expect(panel().querySelector(".my-tags-empty").textContent).toBe("tag.my_empty");
+  });
+
+  it("filters the search by a tag's value when its name is clicked", async () => {
+    await openPanel();
+    rows()[0].querySelector(".my-tag-name").click();
+    await settle();
+    expect(lastSearchParams()["fields.tag"]).toEqual([V.a]);
+    expect(badgeTexts()).toEqual(["alpha"]);
+  });
+
+  it("renames a tag through PUT /tags/{id} with the new name, reloads the list and shows the pending note", async () => {
+    await openPanel();
+    api.put.mockResolvedValue({ status: 0, renamed: true, tag: { ...MINE[0], id: ID.c, name: "gamma" } });
+    rows()[0].querySelector(".my-tag-rename").click();
+    const input = rows()[0].querySelector("input.my-tag-name-input");
+    expect(input.value).toBe("alpha");
+    expect(document.activeElement).toBe(input);
+    myTagsAnswer = { status: 0, tags: [{ ...MINE[0], id: ID.c, name: "gamma" }, MINE[1]] };
+    input.value = "  gamma ";
+    rows()[0].querySelector("form").dispatchEvent(new Event("submit", { cancelable: true }));
+    await settle();
+
+    expect(api.put).toHaveBeenCalledWith("/tags/" + ID.a, { name: "gamma" });
+    expect(rows().map(nameOf)).toEqual(["gamma", "<b>beta</b>"]);
+    expect(pending().classList.contains("d-none")).toBe(false);
+  });
+
+  it("cancels a rename without a request", async () => {
+    await openPanel();
+    rows()[0].querySelector(".my-tag-rename").click();
+    rows()[0].querySelector(".my-tag-cancel").click();
+    expect(api.put).not.toHaveBeenCalled();
+    expect(rows()[0].querySelector("input.my-tag-name-input")).toBeNull();
+    expect(nameOf(rows()[0])).toBe("alpha");
+  });
+
+  it("toggles sharing through PUT /tags/{id} with shared", async () => {
+    await openPanel();
+    api.put.mockResolvedValue({ status: 0, renamed: false, tag: { ...MINE[0], shared: true } });
+    myTagsAnswer = { status: 0, tags: [{ ...MINE[0], shared: true }, MINE[1]] };
+    const box = rows()[0].querySelector("input.my-tag-shared");
+    box.click();
+    await settle();
+    expect(api.put).toHaveBeenCalledWith("/tags/" + ID.a, { shared: true });
+    expect(rows()[0].querySelector("input.my-tag-shared").checked).toBe(true);
+  });
+
+  it("deletes a tag only after an in-page confirmation, through DELETE /tags/{id}", async () => {
+    const confirmSpy = vi.fn(() => true);
+    window.confirm = confirmSpy;
+    await openPanel();
+    rows()[1].querySelector(".my-tag-delete").click();
+    expect(api.del).not.toHaveBeenCalled();
+    const confirmBox = rows()[1].querySelector(".my-tag-confirm");
+    expect(confirmBox.textContent).toContain("tag.delete_confirm");
+
+    // Cancel keeps the tag.
+    confirmBox.querySelector(".my-tag-cancel").click();
+    expect(rows()[1].querySelector(".my-tag-confirm")).toBeNull();
+    expect(api.del).not.toHaveBeenCalled();
+
+    api.del.mockResolvedValue({ status: 0, id: ID.b, deleted: true });
+    myTagsAnswer = { status: 0, tags: [MINE[0]] };
+    rows()[1].querySelector(".my-tag-delete").click();
+    rows()[1].querySelector(".my-tag-confirm .my-tag-confirm-delete").click();
+    await settle();
+
+    expect(api.del).toHaveBeenCalledWith("/tags/" + ID.b);
+    expect(rows().map(nameOf)).toEqual(["alpha"]);
+    expect(pending().classList.contains("d-none")).toBe(false);
+    expect(confirmSpy).not.toHaveBeenCalled();
+    delete window.confirm;
+  });
+
+  it("shows the server's message when a rename conflicts", async () => {
+    await openPanel();
+    api.put.mockRejectedValueOnce({ code: "conflict", httpStatus: 409, message: "a tag with the name already exists" });
+    rows()[0].querySelector(".my-tag-rename").click();
+    rows()[0].querySelector("input.my-tag-name-input").value = "beta";
+    rows()[0].querySelector("form").dispatchEvent(new Event("submit", { cancelable: true }));
+    await settle();
+    expect(errorBox().textContent).toBe("a tag with the name already exists");
+    expect(errorBox().classList.contains("d-none")).toBe(false);
+    expect(modalShow).not.toHaveBeenCalled();
+  });
+
+  it("opens the login modal when GET /tags answers 401", async () => {
+    api.isAuthenticated.mockReturnValue(true);
+    await search([{ doc_id: "d1", title: "T" }]);
+    api.get.mockImplementation(async (path) => {
+      if (path === "/tags") throw { code: "auth_required", httpStatus: 401, message: "login required" };
+      return {};
+    });
+    document.getElementById("my-tags-toggle").click();
+    await settle();
+    expect(modalShow).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens the login modal when a delete answers 403", async () => {
+    await openPanel();
+    api.del.mockRejectedValueOnce({ code: "forbidden", httpStatus: 403, message: "invalid csrf token" });
+    rows()[0].querySelector(".my-tag-delete").click();
+    rows()[0].querySelector(".my-tag-confirm-delete").click();
+    await settle();
+    expect(modalShow).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes on a second toggle click and survives a new search", async () => {
+    await openPanel();
+    await search([{ doc_id: "d1", title: "T" }]);
+    expect(document.getElementById("my-tags-toggle").getAttribute("aria-expanded")).toBe("true");
+    expect(panel().classList.contains("d-none")).toBe(false);
+    document.getElementById("my-tags-toggle").click();
+    expect(panel().classList.contains("d-none")).toBe(true);
+    expect(document.getElementById("my-tags-toggle").getAttribute("aria-expanded")).toBe("false");
   });
 });

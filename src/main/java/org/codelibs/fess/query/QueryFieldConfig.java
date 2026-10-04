@@ -143,7 +143,6 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldThumbnail(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
-                    fessConfig.getIndexFieldTag(), //
                     fessConfig.getIndexFieldConfigId(), //
                     fessConfig.getIndexFieldLang(), //
                     fessConfig.getIndexFieldHasCache());

@@ -1253,6 +1253,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Label Type Details */
     public static final String LABELS_labeltype_details = "{labels.labeltype_details}";
 
+    /** The key of the message: Tag Details */
+    public static final String LABELS_tagtype_details = "{labels.tagtype_details}";
+
     /** The key of the message: Path Mapping Details */
     public static final String LABELS_pathmap_details = "{labels.pathmap_details}";
 
@@ -1324,6 +1327,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Label Type List */
     public static final String LABELS_labeltype_list = "{labels.labeltype_list}";
+
+    /** The key of the message: Tag List */
+    public static final String LABELS_tagtype_list = "{labels.tagtype_list}";
 
     /** The key of the message: Key Match List */
     public static final String LABELS_key_match_list = "{labels.key_match_list}";
@@ -1568,23 +1574,26 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Value */
     public static final String LABELS_labeltype_value = "{labels.labeltype_value}";
 
-    /** The key of the message: Kind */
-    public static final String LABELS_labeltype_kind = "{labels.labeltype_kind}";
-
-    /** The key of the message: Label */
-    public static final String LABELS_labeltype_kind_label = "{labels.labeltype_kind_label}";
-
-    /** The key of the message: Tag */
-    public static final String LABELS_labeltype_kind_tag = "{labels.labeltype_kind_tag}";
-
-    /** The key of the message: A Tag is a tag that users add from the search screen: Name is the tag name, Included Paths lists the tagged URLs (one URL per line, exact match), and Permissions decides who can see it. A user who adds a tag is added to its Permissions. */
-    public static final String LABELS_labeltype_kind_help = "{labels.labeltype_kind_help}";
-
     /** The key of the message: Included Paths */
     public static final String LABELS_labeltype_included_paths = "{labels.labeltype_included_paths}";
 
     /** The key of the message: Excluded Paths */
     public static final String LABELS_labeltype_excluded_paths = "{labels.labeltype_excluded_paths}";
+
+    /** The key of the message: Tag */
+    public static final String LABELS_tagtype_configuration = "{labels.tagtype_configuration}";
+
+    /** The key of the message: Tag */
+    public static final String LABELS_tagtype_title_details = "{labels.tagtype_title_details}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_tagtype_name = "{labels.tagtype_name}";
+
+    /** The key of the message: Owner */
+    public static final String LABELS_tagtype_owner = "{labels.tagtype_owner}";
+
+    /** The key of the message: Paths */
+    public static final String LABELS_tagtype_paths = "{labels.tagtype_paths}";
 
     /** The key of the message: Role */
     public static final String LABELS_roletype_configuration = "{labels.roletype_configuration}";

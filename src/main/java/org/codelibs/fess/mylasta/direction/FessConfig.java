@@ -837,7 +837,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_DICTIONARY_PREFIX = "index.dictionary.prefix";
 
-    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host,tag */
+    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
     /** The key of the configuration. e.g. expires,created,timestamp,last_modified */
@@ -1367,8 +1367,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 50 */
     String USER_TAG_NAME_MAX_LENGTH = "user.tag.name.max.length";
 
+    /** The key of the configuration. e.g. 1000 */
+    String USER_TAG_MAX_TAGS = "user.tag.max.tags";
+
+    /** The key of the configuration. e.g. 10000 */
+    String USER_TAG_MAX_PATHS = "user.tag.max.paths";
+
+    /** The key of the configuration. e.g. 10000 */
+    String USER_TAG_QUEUE_MAX_SIZE = "user.tag.queue.max.size";
+
     /** The key of the configuration. e.g. 100 */
-    String USER_TAG_MAX_DOCUMENT_TAGS = "user.tag.max.document.tags";
+    String USER_TAG_PROCESS_BATCH_SIZE = "user.tag.process.batch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String USER_TAG_VISIBLE_MAX_SIZE = "user.tag.visible.max.size";
 
     /** The key of the configuration. e.g. 10000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
@@ -1480,6 +1492,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 1000 */
     String PAGE_LABELTYPE_MAX_FETCH_SIZE = "page.labeltype.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_TAGTYPE_MAX_FETCH_SIZE = "page.tagtype.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
     String PAGE_ROLETYPE_MAX_FETCH_SIZE = "page.roletype.max.fetch.size";
@@ -1822,6 +1837,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. labeltype */
     String ONLINE_HELP_NAME_LABELTYPE = "online.help.name.labeltype";
+
+    /** The key of the configuration. e.g. tagtype */
+    String ONLINE_HELP_NAME_TAGTYPE = "online.help.name.tagtype";
 
     /** The key of the configuration. e.g. duplicatehost */
     String ONLINE_HELP_NAME_DUPLICATEHOST = "online.help.name.duplicatehost";
@@ -2198,7 +2216,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
 
-    /** The key of the configuration. e.g. cache */
+    /** The key of the configuration. e.g. cache,tag */
     String INDEX_EXPORT_EXCLUDE_FIELDS = "index.export.exclude.fields";
 
     /** The key of the configuration. e.g. 100 */
@@ -4838,7 +4856,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.tag'. <br>
      * The value is, e.g. tag <br>
-     * comment: Field name for the tags of the document in the index: the values of the labels of the kind "tag" whose included paths list the document URL.
+     * comment: Field name for the user tags of the document in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldTag();
@@ -5241,7 +5259,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
-     * The value is, e.g. lang,role,label,anchor,virtual_host,tag <br>
+     * The value is, e.g. lang,role,label,anchor,virtual_host <br>
      * comment: Array-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -7201,7 +7219,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.tag.enabled'. <br>
      * The value is, e.g. false <br>
-     * comment: Whether logged-in users can tag documents from the search screen. A tag is a label of the kind "tag": its name is the tag name, its included paths list the tagged URLs and its permissions list the users who added it.
+     * comment: Whether logged-in users can tag documents. Each tag belongs to the user who created it.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUserTagEnabled();
@@ -7209,7 +7227,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'user.tag.enabled' true? <br>
      * The value is, e.g. false <br>
-     * comment: Whether logged-in users can tag documents from the search screen. A tag is a label of the kind "tag": its name is the tag name, its included paths list the tagged URLs and its permissions list the users who added it.
+     * comment: Whether logged-in users can tag documents. Each tag belongs to the user who created it.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isUserTagEnabled();
@@ -7217,7 +7235,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.tag.name.max.length'. <br>
      * The value is, e.g. 50 <br>
-     * comment: Maximum length of a tag name.
+     * comment: Maximum length of a tag name, in code points.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUserTagNameMaxLength();
@@ -7225,28 +7243,96 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.tag.name.max.length' as {@link Integer}. <br>
      * The value is, e.g. 50 <br>
-     * comment: Maximum length of a tag name.
+     * comment: Maximum length of a tag name, in code points.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getUserTagNameMaxLengthAsInteger();
 
     /**
-     * Get the value for the key 'user.tag.max.document.tags'. <br>
-     * The value is, e.g. 100 <br>
-     * comment: Maximum number of tags on one document.
+     * Get the value for the key 'user.tag.max.tags'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of tags one user can own.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getUserTagMaxDocumentTags();
+    String getUserTagMaxTags();
 
     /**
-     * Get the value for the key 'user.tag.max.document.tags' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
-     * comment: Maximum number of tags on one document.
+     * Get the value for the key 'user.tag.max.tags' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of tags one user can own.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getUserTagMaxDocumentTagsAsInteger();
+    Integer getUserTagMaxTagsAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.max.paths'. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum number of URLs one tag can be put on.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagMaxPaths();
+
+    /**
+     * Get the value for the key 'user.tag.max.paths' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum number of URLs one tag can be put on.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagMaxPathsAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.queue.max.size'. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum number of pending tag changes held in memory until they are applied to the documents.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagQueueMaxSize();
+
+    /**
+     * Get the value for the key 'user.tag.queue.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * comment: Maximum number of pending tag changes held in memory until they are applied to the documents.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagQueueMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.process.batch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Number of URLs updated per bulk request when tag changes are applied to the documents.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagProcessBatchSize();
+
+    /**
+     * Get the value for the key 'user.tag.process.batch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Number of URLs updated per bulk request when tag changes are applied to the documents.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagProcessBatchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'user.tag.visible.max.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of tags visible to one user in a search.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUserTagVisibleMaxSize();
+
+    /**
+     * Get the value for the key 'user.tag.visible.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of tags visible to one user in a search.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getUserTagVisibleMaxSizeAsInteger();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -7745,6 +7831,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPageLabeltypeMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.tagtype.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of tagtype records to fetch per page.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageTagtypeMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.tagtype.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of tagtype records to fetch per page.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageTagtypeMaxFetchSizeAsInteger();
 
     /**
      * Get the value for the key 'page.roletype.max.fetch.size'. <br>
@@ -9278,6 +9381,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameLabeltype();
 
     /**
+     * Get the value for the key 'online.help.name.tagtype'. <br>
+     * The value is, e.g. tagtype <br>
+     * comment: Online help key for tag type.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameTagtype();
+
+    /**
      * Get the value for the key 'online.help.name.duplicatehost'. <br>
      * The value is, e.g. duplicatehost <br>
      * comment: Online help key for duplicate host.
@@ -10766,7 +10877,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.export.exclude.fields'. <br>
-     * The value is, e.g. cache <br>
+     * The value is, e.g. cache,tag <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexExportExcludeFields();
@@ -13429,12 +13540,44 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.USER_TAG_NAME_MAX_LENGTH);
         }
 
-        public String getUserTagMaxDocumentTags() {
-            return get(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS);
+        public String getUserTagMaxTags() {
+            return get(FessConfig.USER_TAG_MAX_TAGS);
         }
 
-        public Integer getUserTagMaxDocumentTagsAsInteger() {
-            return getAsInteger(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS);
+        public Integer getUserTagMaxTagsAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_MAX_TAGS);
+        }
+
+        public String getUserTagMaxPaths() {
+            return get(FessConfig.USER_TAG_MAX_PATHS);
+        }
+
+        public Integer getUserTagMaxPathsAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_MAX_PATHS);
+        }
+
+        public String getUserTagQueueMaxSize() {
+            return get(FessConfig.USER_TAG_QUEUE_MAX_SIZE);
+        }
+
+        public Integer getUserTagQueueMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_QUEUE_MAX_SIZE);
+        }
+
+        public String getUserTagProcessBatchSize() {
+            return get(FessConfig.USER_TAG_PROCESS_BATCH_SIZE);
+        }
+
+        public Integer getUserTagProcessBatchSizeAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_PROCESS_BATCH_SIZE);
+        }
+
+        public String getUserTagVisibleMaxSize() {
+            return get(FessConfig.USER_TAG_VISIBLE_MAX_SIZE);
+        }
+
+        public Integer getUserTagVisibleMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.USER_TAG_VISIBLE_MAX_SIZE);
         }
 
         public String getFormAdminMaxInputSize() {
@@ -13667,6 +13810,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPageLabeltypeMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_LABELTYPE_MAX_FETCH_SIZE);
+        }
+
+        public String getPageTagtypeMaxFetchSize() {
+            return get(FessConfig.PAGE_TAGTYPE_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageTagtypeMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_TAGTYPE_MAX_FETCH_SIZE);
         }
 
         public String getPageRoletypeMaxFetchSize() {
@@ -14399,6 +14550,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameLabeltype() {
             return get(FessConfig.ONLINE_HELP_NAME_LABELTYPE);
+        }
+
+        public String getOnlineHelpNameTagtype() {
+            return get(FessConfig.ONLINE_HELP_NAME_TAGTYPE);
         }
 
         public String getOnlineHelpNameDuplicatehost() {
@@ -15544,7 +15699,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_USER_INDEX, "fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
             defaultMap.put(FessConfig.INDEX_DICTIONARY_PREFIX, "");
-            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host,tag");
+            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host");
             defaultMap.put(FessConfig.INDEX_ADMIN_DATE_FIELDS, "expires,created,timestamp,last_modified");
             defaultMap.put(FessConfig.INDEX_ADMIN_INTEGER_FIELDS, "");
             defaultMap.put(FessConfig.INDEX_ADMIN_LONG_FIELDS, "content_length,favorite_count,click_count");
@@ -15686,7 +15841,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.SEARCH_HISTORY_SIZE, "10");
             defaultMap.put(FessConfig.USER_TAG_ENABLED, "false");
             defaultMap.put(FessConfig.USER_TAG_NAME_MAX_LENGTH, "50");
-            defaultMap.put(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS, "100");
+            defaultMap.put(FessConfig.USER_TAG_MAX_TAGS, "1000");
+            defaultMap.put(FessConfig.USER_TAG_MAX_PATHS, "10000");
+            defaultMap.put(FessConfig.USER_TAG_QUEUE_MAX_SIZE, "10000");
+            defaultMap.put(FessConfig.USER_TAG_PROCESS_BATCH_SIZE, "100");
+            defaultMap.put(FessConfig.USER_TAG_VISIBLE_MAX_SIZE, "1000");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
@@ -15723,6 +15882,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PAGE_DOCBOOST_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_KEYMATCH_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_LABELTYPE_MAX_FETCH_SIZE, "1000");
+            defaultMap.put(FessConfig.PAGE_TAGTYPE_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_ROLETYPE_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_USER_MAX_FETCH_SIZE, "1000");
             defaultMap.put(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE, "1000");
@@ -15837,6 +15997,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_FILECONFIG, "fileconfig");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_FILEAUTH, "fileauth");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_LABELTYPE, "labeltype");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_TAGTYPE, "tagtype");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_DUPLICATEHOST, "duplicatehost");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SCHEDULER, "scheduler");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_CRAWLINGINFO, "crawlinginfo");
@@ -15963,7 +16124,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_DOCUMENT_MAX_PARTS, "10");
             defaultMap.put(FessConfig.RAG_CHAT_RESPONSE_LANGUAGE, "browser");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
-            defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
+            defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache,tag");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");
             defaultMap.put(FessConfig.INDEX_EXPORT_FORMAT, "html");
             defaultMap.put(FessConfig.LOG_NOTIFICATION_FLUSH_INTERVAL, "30");

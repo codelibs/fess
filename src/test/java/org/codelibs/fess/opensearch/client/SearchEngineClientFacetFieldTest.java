@@ -15,7 +15,16 @@
  */
 package org.codelibs.fess.opensearch.client;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.codelibs.fess.entity.FacetInfo;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.helper.TagTypeHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBuilder;
 import org.codelibs.fess.query.QueryFieldConfig;
@@ -25,6 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.codelibs.fesen.opensearch.action.search.SearchAction;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
 /**
  * Verifies that a facet field outside the allowlist is reported as an invalid
@@ -43,14 +54,52 @@ public class SearchEngineClientFacetFieldTest extends UnitFessTestCase {
 
     private QueryFieldConfig queryFieldConfig;
 
+    private boolean userTagEnabled;
+
+    private Set<String> visibleTagValues;
+
+    private SearchRequestType resolvedType;
+
+    private int resolveCount;
+
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         queryFieldConfig = new QueryFieldConfig();
         // setFacetFields() repopulates the lookup set, so init() (and its long
         // list of index.field.* getters) is not needed here.
-        queryFieldConfig.setFacetFields(new String[] { "label", "filetype" });
+        queryFieldConfig.setFacetFields(new String[] { "label", "filetype", "tag" });
         ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+        userTagEnabled = true;
+        visibleTagValues = new LinkedHashSet<>();
+        resolvedType = null;
+        resolveCount = 0;
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isUserTagEnabled() {
+                return userTagEnabled;
+            }
+
+            @Override
+            public String getIndexFieldTag() {
+                return "tag";
+            }
+        });
+        ComponentUtil.register(new TagTypeHelper() {
+            @Override
+            public Set<String> getVisibleTagValues(final SearchRequestType type) {
+                resolveCount++;
+                resolvedType = type;
+                return visibleTagValues;
+            }
+
+            @Override
+            public Map<String, TagType> getVisibleTagTypes(final Collection<String> values, final SearchRequestType type) {
+                throw new AssertionError("the facet must not look up tags one by one");
+            }
+        }, "tagTypeHelper");
     }
 
     @Test
@@ -91,6 +140,73 @@ public class SearchEngineClientFacetFieldTest extends UnitFessTestCase {
                 .buildFacet(null, queryFieldConfig, ComponentUtil.getFessConfig());
 
         assertEquals(2, searchRequestBuilder.request().source().aggregations().count());
+    }
+
+    private SearchRequestBuilder buildTagFacet(final SearchRequestType type) {
+        final FacetInfo facetInfo = new FacetInfo();
+        facetInfo.field = new String[] { "label", "tag" };
+        final SearchRequestBuilder searchRequestBuilder = newSearchRequestBuilder();
+        SearchConditionBuilder.builder(searchRequestBuilder)
+                .facetInfo(facetInfo)
+                .searchRequestType(type)
+                .buildFacet(null, queryFieldConfig, ComponentUtil.getFessConfig());
+        return searchRequestBuilder;
+    }
+
+    private TermsAggregationBuilder findTagAggregation(final SearchRequestBuilder searchRequestBuilder) {
+        for (final AggregationBuilder aggregation : searchRequestBuilder.request().source().aggregations().getAggregatorFactories()) {
+            if (aggregation instanceof final TermsAggregationBuilder terms && "tag".equals(terms.field())) {
+                return terms;
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void test_buildFacet_tag_includesOnlyVisibleTags() {
+        final String own = TagType.toTagValue("foo", "alice");
+        final String shared = TagType.toTagValue("foo", "bob");
+        visibleTagValues.add(own);
+        visibleTagValues.add(shared);
+
+        final SearchRequestBuilder searchRequestBuilder = buildTagFacet(SearchRequestType.JSON);
+
+        final TermsAggregationBuilder terms = findTagAggregation(searchRequestBuilder);
+        assertNotNull(terms);
+        assertNotNull(terms.includeExclude());
+        final String json = searchRequestBuilder.request().source().toString().replaceAll("\\s", "");
+        // the same name of two owners is two separate values, and only those two may become buckets
+        assertTrue(json.contains("\"include\":[\"" + own + "\",\"" + shared + "\"]")
+                || json.contains("\"include\":[\"" + shared + "\",\"" + own + "\"]"), json);
+        assertEquals(SearchRequestType.JSON, resolvedType);
+        assertEquals(1, resolveCount);
+    }
+
+    @Test
+    public void test_buildFacet_tag_noVisibleTags_notAggregated() {
+        // an anonymous caller sees no tag: the tag facet is left out, the others are kept, no error
+        final SearchRequestBuilder searchRequestBuilder = buildTagFacet(SearchRequestType.SEARCH);
+        assertNull(findTagAggregation(searchRequestBuilder));
+        assertEquals(1, searchRequestBuilder.request().source().aggregations().count());
+        assertEquals(SearchRequestType.SEARCH, resolvedType);
+    }
+
+    @Test
+    public void test_buildFacet_tag_disabled_notAggregated() {
+        userTagEnabled = false;
+        visibleTagValues.add(TagType.toTagValue("foo", "alice"));
+        final SearchRequestBuilder searchRequestBuilder = buildTagFacet(SearchRequestType.JSON);
+        assertNull(findTagAggregation(searchRequestBuilder));
+        assertEquals(0, resolveCount);
+    }
+
+    @Test
+    public void test_buildFacet_tag_adminSearch_unrestricted() {
+        final SearchRequestBuilder searchRequestBuilder = buildTagFacet(SearchRequestType.ADMIN_SEARCH);
+        final TermsAggregationBuilder terms = findTagAggregation(searchRequestBuilder);
+        assertNotNull(terms);
+        assertNull(terms.includeExclude());
+        assertEquals(0, resolveCount);
     }
 
     private void buildFacet(final FacetInfo facetInfo) {

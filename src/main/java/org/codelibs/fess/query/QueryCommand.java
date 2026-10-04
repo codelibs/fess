@@ -18,9 +18,8 @@ package org.codelibs.fess.query;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.lang.Character.UnicodeBlock;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -121,9 +120,10 @@ public abstract class QueryCommand {
     }
 
     /**
-     * Checks if a condition on the field must be limited to the tags that the caller can see. The {@code tag} field
-     * holds the values of every tag of a document, including tags whose label permissions do not include the caller,
-     * so a condition on it is restricted for every search except the admin search.
+     * Checks if a condition on the field must be limited to the tags that the caller can see. A value
+     * of the {@code tag} field decodes to the name and the owner of a tag, and the field of a document
+     * holds the values of every tag put on it, so a condition on it is restricted for every search
+     * except the admin search.
      * @param context The query context.
      * @param field The field name.
      * @return True if the field is the tag field and the condition must be restricted.
@@ -134,34 +134,42 @@ public abstract class QueryCommand {
     }
 
     /**
-     * Checks if the caller can see a tag. The visible tags are resolved once per query context.
+     * Checks if the caller can see a tag. Nothing is visible while user tags are disabled or to a
+     * caller who is not logged in. Each value is resolved once per query context. Only called for a
+     * field that {@link #isRestrictedTagField} restricts, so never for the admin search.
      * @param context The query context.
      * @param value The tag value.
      * @return True if the tag is visible to the caller.
      */
     protected boolean isVisibleTag(final QueryContext context, final String value) {
-        Set<String> valueSet = context.getVisibleTagValueSet();
-        if (valueSet == null) {
-            valueSet = getVisibleTagValueSet(context);
-            context.setVisibleTagValueSet(valueSet);
+        if (!ComponentUtil.getFessConfig().isUserTagEnabled()) {
+            return false;
         }
-        return valueSet.contains(value);
+        final Map<String, Boolean> visibilityMap = context.getTagVisibilityMap();
+        final Boolean cached = visibilityMap.get(value);
+        if (cached != null) {
+            return cached;
+        }
+        final boolean visible = resolveTagVisibility(context, value);
+        visibilityMap.put(value, visible);
+        return visible;
     }
 
     /**
-     * Resolves the values of the tags that the caller can see.
+     * Resolves whether the caller can see a tag.
      * @param context The query context.
-     * @return The visible tag values, or an empty set if they cannot be resolved.
+     * @param value The tag value.
+     * @return True if the tag is visible, false if it is not or cannot be resolved.
      */
-    protected Set<String> getVisibleTagValueSet(final QueryContext context) {
+    protected boolean resolveTagVisibility(final QueryContext context, final String value) {
+        final SearchRequestType searchRequestType =
+                context.getSearchRequestType() != null ? context.getSearchRequestType() : SearchRequestType.JSON;
         try {
-            final SearchRequestType searchRequestType =
-                    context.getSearchRequestType() != null ? context.getSearchRequestType() : SearchRequestType.JSON;
-            final Locale locale = LaRequestUtil.getOptionalRequest().map(request -> request.getLocale()).orElse(null);
-            return ComponentUtil.getLabelTypeHelper().getTagValueSet(searchRequestType, locale != null ? locale : Locale.ROOT);
+            return ComponentUtil.getTagTypeHelper().getVisibleTagTypes(List.of(value), searchRequestType).containsKey(value);
         } catch (final RuntimeException e) {
-            logger.debug("Failed to resolve the visible tags; no tag condition matches.", e);
-            return Collections.emptySet();
+            logger.warn("Failed to resolve the visibility of a tag; the tag condition matches nothing. searchRequestType={}",
+                    searchRequestType, e);
+            return false;
         }
     }
 

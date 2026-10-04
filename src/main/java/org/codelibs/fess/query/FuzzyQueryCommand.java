@@ -86,7 +86,7 @@ public class FuzzyQueryCommand extends QueryCommand {
         final String field = getSearchField(context.getDefaultField(), term.field());
 
         if (isRestrictedTagField(context, field)) {
-            // a tag value is a hash of the name: a fuzzy match has no use but to probe for tags the caller cannot see
+            // a tag value encodes the name and the owner of a tag: a fuzzy match on it would probe for tags the caller cannot see
             return buildHiddenTagQuery(context, field, term.text());
         }
 

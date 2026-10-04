@@ -370,6 +370,15 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/systeminfo/admin_systeminfo.jsp */
     HtmlNext path_AdminSysteminfo_AdminSysteminfoJsp = new HtmlNext("/admin/systeminfo/admin_systeminfo.jsp");
 
+    /** The path of the HTML: /admin/tagtype/admin_tagtype.jsp */
+    HtmlNext path_AdminTagtype_AdminTagtypeJsp = new HtmlNext("/admin/tagtype/admin_tagtype.jsp");
+
+    /** The path of the HTML: /admin/tagtype/admin_tagtype_details.jsp */
+    HtmlNext path_AdminTagtype_AdminTagtypeDetailsJsp = new HtmlNext("/admin/tagtype/admin_tagtype_details.jsp");
+
+    /** The path of the HTML: /admin/tagtype/admin_tagtype_edit.jsp */
+    HtmlNext path_AdminTagtype_AdminTagtypeEditJsp = new HtmlNext("/admin/tagtype/admin_tagtype_edit.jsp");
+
     /** The path of the HTML: /admin/theme/admin_theme.jsp */
     HtmlNext path_AdminTheme_AdminThemeJsp = new HtmlNext("/admin/theme/admin_theme.jsp");
 

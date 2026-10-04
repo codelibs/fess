@@ -87,18 +87,20 @@ public class AdminSearchlistAction extends FessAdminAction {
      * client-supplied doc map (server-side, regardless of transport) by {@link #stripSystemManagedFields}
      * before it is overlaid onto the fetched entity in {@link #create}/{@link #update}.
      */
-    private static final Set<String> SYSTEM_MANAGED_FIELDS =
-            Set.of(Constants.CONTENT_CHUNK_VECTOR_FIELD, Constants.CONTENT_CHUNK_STATUS_FIELD);
+    private static Set<String> systemManagedFields() {
+        return Set.of(Constants.CONTENT_CHUNK_VECTOR_FIELD, Constants.CONTENT_CHUNK_STATUS_FIELD,
+                ComponentUtil.getFessConfig().getIndexFieldTag());
+    }
 
     /**
-     * Strips {@link #SYSTEM_MANAGED_FIELDS} (and, when the FETCHED entity's existing {@code content}
+     * Strips {@link #systemManagedFields()} (and, when the FETCHED entity's existing {@code content}
      * value is a {@code List} -- i.e. an already-chunked document -- the {@code content} key too) from
      * a client-supplied doc map, in place, before it is overlaid onto the freshly-fetched entity via
      * {@code entity.putAll(...)}.
      *
      * <p>{@link #registerContentReadOnly} only renders the {@code content} textarea as {@code disabled}
      * for an already-chunked document, and the editable-field walk in {@link #registerExtraFields} only
-     * hides {@link #SYSTEM_MANAGED_FIELDS} from that same rendering pass -- neither stops a direct POST
+     * hides {@link #systemManagedFields()} from that same rendering pass -- neither stops a direct POST
      * or API call that includes these keys in the submitted map, since a disabled/hidden form control is
      * purely a client-side rendering convention. This method is the server-side enforcement point,
      * shared by this action's {@link #create}/{@link #update} and {@code ApiAdminSearchlistAction}'s
@@ -113,7 +115,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         if (doc == null) {
             return;
         }
-        SYSTEM_MANAGED_FIELDS.forEach(doc::remove);
+        systemManagedFields().forEach(doc::remove);
         if (entity != null && entity.get("content") instanceof List<?>) {
             doc.remove("content");
         }
@@ -431,6 +433,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 entity.put(fessConfig.getIndexFieldId(), newId);
 
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
+                ComponentUtil.getTagTypeHelper().applyTags(List.of(entity));
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
@@ -476,6 +479,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                     }
                 }
 
+                ComponentUtil.getTagTypeHelper().applyTags(List.of(entity));
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
@@ -616,10 +620,11 @@ public class AdminSearchlistAction extends FessAdminAction {
 
         registerContentReadOnly(data, doc);
 
+        final Set<String> systemManagedFields = systemManagedFields();
         final List<String> extraFieldNames = new ArrayList<>();
         final Map<String, String> extraFieldTypes = new TreeMap<>();
         candidateFields.stream()
-                .filter(key -> !STANDARD_EDIT_FIELDS.contains(key) && !reservedFields.contains(key) && !SYSTEM_MANAGED_FIELDS.contains(key))
+                .filter(key -> !STANDARD_EDIT_FIELDS.contains(key) && !reservedFields.contains(key) && !systemManagedFields.contains(key))
                 .forEach(key -> {
                     final String type;
                     if (arrayFieldSet.contains(key)) {

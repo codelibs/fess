@@ -489,6 +489,9 @@
 			<arg>"fess_config.scheduled_job/scheduled_job"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
+			<arg>"fess_config.tag_type/tag_type"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>"fess_config.thumbnail_queue/thumbnail_queue"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

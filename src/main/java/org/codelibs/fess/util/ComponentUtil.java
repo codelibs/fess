@@ -86,7 +86,7 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.helper.TagHelper;
+import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.helper.ThemeArtifactHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
@@ -203,8 +203,6 @@ public final class ComponentUtil {
 
     private static final String SUGGEST_HELPER = "suggestHelper";
 
-    private static final String TAG_HELPER = "tagHelper";
-
     private static final String SEARCH_ENGINE_CLIENT = "searchEngineClient";
 
     private static final String DICTIONARY_MANAGER = "dictionaryManager";
@@ -246,6 +244,8 @@ public final class ComponentUtil {
     private static final String SEARCH_LOG_HELPER = "searchLogHelper";
 
     private static final String LABEL_TYPE_HELPER = "labelTypeHelper";
+
+    private static final String TAG_TYPE_HELPER = "tagTypeHelper";
 
     private static final String QUERY_HELPER = "queryHelper";
 
@@ -409,6 +409,14 @@ public final class ComponentUtil {
      */
     public static LabelTypeHelper getLabelTypeHelper() {
         return getComponent(LABEL_TYPE_HELPER);
+    }
+
+    /**
+     * Gets the tag type helper component.
+     * @return The tag type helper.
+     */
+    public static TagTypeHelper getTagTypeHelper() {
+        return getComponent(TAG_TYPE_HELPER);
     }
 
     /**
@@ -640,14 +648,6 @@ public final class ComponentUtil {
      */
     public static SuggestHelper getSuggestHelper() {
         return getComponent(SUGGEST_HELPER);
-    }
-
-    /**
-     * Gets the tag helper component.
-     * @return The tag helper.
-     */
-    public static TagHelper getTagHelper() {
-        return getComponent(TAG_HELPER);
     }
 
     /**

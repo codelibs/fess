@@ -74,8 +74,8 @@ public class QueryContext {
     /** The type of the search request, or null when the query is not built for a search request. */
     protected SearchRequestType searchRequestType = null;
 
-    /** The values of the tags that the caller can see, resolved on first use. */
-    protected Set<String> visibleTagValueSet = null;
+    /** Whether the caller can see each tag value used in a condition, resolved on first use. */
+    protected Map<String, Boolean> tagVisibilityMap = null;
 
     /**
      * Constructs a new QueryContext with the specified query string.
@@ -293,18 +293,14 @@ public class QueryContext {
     }
 
     /**
-     * Gets the values of the tags that the caller can see, as resolved for this query.
-     * @return The visible tag values, or null if they are not resolved yet.
+     * Gets whether the caller can see each tag value that a condition of this query has used so far.
+     * A value is resolved once per query, however many conditions use it.
+     * @return The visibility of each resolved tag value, never null.
      */
-    public Set<String> getVisibleTagValueSet() {
-        return visibleTagValueSet;
-    }
-
-    /**
-     * Sets the values of the tags that the caller can see.
-     * @param visibleTagValueSet The visible tag values.
-     */
-    public void setVisibleTagValueSet(final Set<String> visibleTagValueSet) {
-        this.visibleTagValueSet = visibleTagValueSet;
+    public Map<String, Boolean> getTagVisibilityMap() {
+        if (tagVisibilityMap == null) {
+            tagVisibilityMap = new HashMap<>();
+        }
+        return tagVisibilityMap;
     }
 }

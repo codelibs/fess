@@ -31,13 +31,12 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.LabelTypeHelper.LabelTypeItem;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
-import org.codelibs.fess.helper.TagHelper;
+import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
-import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
@@ -223,228 +222,6 @@ public class SearchHandlerTest extends UnitFessTestCase {
         assertEquals(1, out.size());
         assertEquals("filetype:pdf", out.get(0).get("value"));
         assertEquals(17L, out.get(0).get("count"));
-    }
-
-    // ===== User tags =====
-
-    /** Registers the real tag rules and the real API response field set (in which the raw tag field is absent). */
-    private static void registerTagComponents() {
-        ComponentUtil.register(new TagHelper(), "tagHelper");
-        final QueryFieldConfig queryFieldConfig = new QueryFieldConfig();
-        queryFieldConfig.init();
-        ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
-    }
-
-    /** A visible tag: a label type of the kind tag whose permissions are the given users. */
-    private static LabelTypeItem tagLabel(final String value, final String name, final String... users) {
-        final LabelTypeItem item = new LabelTypeItem();
-        item.setValue(value);
-        item.setLabel(name);
-        item.setTag(true);
-        item.setPermissions(java.util.Arrays.stream(users).map(u -> "1" + u).toArray(String[]::new));
-        item.setUrlSet(new java.util.LinkedHashSet<>(List.of("http://example.com/")));
-        return item;
-    }
-
-    private static Map<String, LabelTypeItem> tagItemMap(final LabelTypeItem... items) {
-        final Map<String, LabelTypeItem> map = new LinkedHashMap<>();
-        for (final LabelTypeItem item : items) {
-            map.put(item.getValue(), item);
-        }
-        return map;
-    }
-
-    private static Map<String, Object> tagItem(final String value, final String name, final boolean mine) {
-        final Map<String, Object> item = new LinkedHashMap<>();
-        item.put("value", value);
-        item.put("name", name);
-        item.put("mine", mine);
-        return item;
-    }
-
-    @Test
-    public void test_filterDocuments_addsTheVisibleTags() {
-        registerTagComponents();
-        final Map<String, Object> doc = new LinkedHashMap<>();
-        doc.put("title", "Title");
-        doc.put("url", "http://example.com/");
-        doc.put("tag", new String[] { "aaa", "hidden", "bbb" });
-        final Map<String, LabelTypeItem> visible = tagItemMap(tagLabel("aaa", "Alpha", "alice", "bob"), tagLabel("bbb", "Beta", "bob"));
-        final List<Map<String, Object>> out = new SearchHandler().filterDocuments(List.of(doc), visible, "alice");
-        assertEquals(1, out.size());
-        final Map<String, Object> filtered = out.get(0);
-        assertEquals("Title", filtered.get("title"));
-        assertEquals("http://example.com/", filtered.get("url"));
-        // The raw field can carry the values of tags that the caller cannot see, so it never reaches the response.
-        assertFalse(filtered.containsKey("tag"), filtered.toString());
-        assertEquals(List.of(tagItem("aaa", "Alpha", true), tagItem("bbb", "Beta", false)), filtered.get("tags"));
-    }
-
-    @Test
-    public void test_filterDocuments_anonymousCallerOwnsNoTag() {
-        registerTagComponents();
-        final Map<String, Object> doc = new LinkedHashMap<>();
-        doc.put("tag", new String[] { "aaa" });
-        final Map<String, LabelTypeItem> visible = tagItemMap(tagLabel("aaa", "Alpha", "alice"));
-        for (final String userId : new String[] { null, "", "bob" }) {
-            final List<Map<String, Object>> out = new SearchHandler().filterDocuments(List.of(doc), visible, userId);
-            org.junit.jupiter.api.Assertions.assertEquals(List.of(tagItem("aaa", "Alpha", false)), out.get(0).get("tags"),
-                    "userId=" + userId);
-        }
-    }
-
-    @Test
-    public void test_filterDocuments_acceptsListAndSingleTagValues() {
-        registerTagComponents();
-        final Map<String, Object> listDoc = new LinkedHashMap<>();
-        listDoc.put("title", "list");
-        listDoc.put("tag", List.of("aaa", "hidden"));
-        final Map<String, Object> singleDoc = new LinkedHashMap<>();
-        singleDoc.put("title", "single");
-        singleDoc.put("tag", "zzz");
-        final Map<String, LabelTypeItem> visible = tagItemMap(tagLabel("aaa", "Alpha"), tagLabel("zzz", "Zeta", "alice"));
-        final List<Map<String, Object>> out = new SearchHandler().filterDocuments(List.of(listDoc, singleDoc), visible, "alice");
-        assertEquals(List.of(tagItem("aaa", "Alpha", false)), out.get(0).get("tags"));
-        assertEquals(List.of(tagItem("zzz", "Zeta", true)), out.get(1).get("tags"));
-    }
-
-    @Test
-    public void test_filterDocuments_noTagsKeyWithoutAVisibleTag() {
-        registerTagComponents();
-        final Map<String, Object> hiddenOnly = new LinkedHashMap<>();
-        hiddenOnly.put("title", "hidden");
-        hiddenOnly.put("tag", new String[] { "hidden" });
-        final Map<String, Object> untagged = new LinkedHashMap<>();
-        untagged.put("title", "untagged");
-        final List<Map<String, Object>> out =
-                new SearchHandler().filterDocuments(List.of(hiddenOnly, untagged), tagItemMap(tagLabel("aaa", "Alpha", "alice")), "alice");
-        for (final Map<String, Object> filtered : out) {
-            assertFalse(filtered.containsKey("tags"), filtered.toString());
-            assertFalse(filtered.containsKey("tag"), filtered.toString());
-        }
-    }
-
-    @Test
-    public void test_filterDocuments_emptyTagMapAddsNothing() {
-        // No tag helper is registered: with no visible tag (or user tags disabled) it is not consulted.
-        final QueryFieldConfig queryFieldConfig = new QueryFieldConfig();
-        queryFieldConfig.init();
-        ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
-        final Map<String, Object> doc = new LinkedHashMap<>();
-        doc.put("title", "Title");
-        doc.put("tag", new String[] { "aaa" });
-        final List<Map<String, Object>> out = new SearchHandler().filterDocuments(List.of(doc), Collections.emptyMap(), "alice");
-        assertEquals(Map.of("title", "Title"), out.get(0));
-    }
-
-    private static HttpServletRequest localeRequest(final Locale locale) {
-        return (HttpServletRequest) java.lang.reflect.Proxy.newProxyInstance(SearchHandlerTest.class.getClassLoader(),
-                new Class<?>[] { HttpServletRequest.class }, (proxy, method, args) -> "getLocale".equals(method.getName()) ? locale : null);
-    }
-
-    /** Delegates to the container's configuration except for user.tag.enabled. */
-    private static void setUserTagEnabled(final boolean enabled) {
-        final org.codelibs.fess.mylasta.direction.FessConfig real = ComponentUtil.getFessConfig();
-        ComponentUtil.setFessConfig((org.codelibs.fess.mylasta.direction.FessConfig) java.lang.reflect.Proxy.newProxyInstance(
-                org.codelibs.fess.mylasta.direction.FessConfig.class.getClassLoader(),
-                new Class<?>[] { org.codelibs.fess.mylasta.direction.FessConfig.class }, (proxy, method, args) -> {
-                    if ("isUserTagEnabled".equals(method.getName())) {
-                        return enabled;
-                    }
-                    try {
-                        return method.invoke(real, args);
-                    } catch (final java.lang.reflect.InvocationTargetException e) {
-                        throw e.getCause();
-                    }
-                }));
-    }
-
-    @Test
-    public void test_getTagItemMap_followsTheFeatureFlag() {
-        final List<Locale> requested = new java.util.ArrayList<>();
-        final LabelTypeItem alpha = tagLabel("aaa", "Alpha", "alice");
-        final LabelTypeItem beta = tagLabel("bbb", "Beta");
-        ComponentUtil.register(new org.codelibs.fess.helper.LabelTypeHelper() {
-            @Override
-            public List<LabelTypeItem> getTagItemList(final SearchRequestParams.SearchRequestType searchRequestType,
-                    final Locale requestLocale) {
-                assertEquals(SearchRequestParams.SearchRequestType.JSON, searchRequestType);
-                requested.add(requestLocale);
-                return List.of(alpha, beta);
-            }
-        }, "labelTypeHelper");
-
-        setUserTagEnabled(false);
-        assertEquals(Map.of(), new SearchHandler().getTagItemMap(localeRequest(Locale.JAPANESE)));
-        org.junit.jupiter.api.Assertions.assertEquals(List.of(), requested, "the label types are not read while user tags are disabled");
-
-        setUserTagEnabled(true);
-        final Map<String, LabelTypeItem> map = new SearchHandler().getTagItemMap(localeRequest(Locale.JAPANESE));
-        assertEquals(List.of("aaa", "bbb"), List.copyOf(map.keySet()));
-        assertSame(alpha, map.get("aaa"));
-        assertSame(beta, map.get("bbb"));
-        assertEquals(List.of("aaa", "bbb"), List.copyOf(new SearchHandler().getTagItemMap(localeRequest(null)).keySet()));
-        assertEquals(List.of(Locale.JAPANESE, Locale.ROOT), requested);
-    }
-
-    @Test
-    public void test_getTagItemMap_failureMeansNoTags() {
-        setUserTagEnabled(true);
-        ComponentUtil.register(new org.codelibs.fess.helper.LabelTypeHelper() {
-            @Override
-            public List<LabelTypeItem> getTagItemList(final SearchRequestParams.SearchRequestType searchRequestType,
-                    final Locale requestLocale) {
-                throw new IllegalStateException("label types unavailable");
-            }
-        }, "labelTypeHelper");
-        assertEquals(Map.of(), new SearchHandler().getTagItemMap(localeRequest(Locale.ENGLISH)));
-    }
-
-    @Test
-    public void test_buildFacetField_tagValuesLimitedToVisibleTags() {
-        final TestFacetField tagField = new TestFacetField("tag");
-        tagField.overrideName = "tag";
-        tagField.overrideValueCountMap.put("hidden", 9L);
-        tagField.overrideValueCountMap.put("aaa", 3L);
-        tagField.overrideValueCountMap.put("bbb", 1L);
-        final TestFacetField labelField = new TestFacetField("label");
-        labelField.overrideName = "label";
-        labelField.overrideValueCountMap.put("hidden", 4L);
-        final TestFacetResponse fr = new TestFacetResponse();
-        fr.addField(tagField);
-        fr.addField(labelField);
-
-        final List<Map<String, Object>> out =
-                new SearchHandler().buildFacetField(fr, tagItemMap(tagLabel("aaa", "Alpha", "alice"), tagLabel("bbb", "Beta")));
-        assertEquals(2, out.size());
-        assertEquals("tag", out.get(0).get("name"));
-        // A tag that the caller cannot see is not revealed by its count; a visible one carries its name.
-        assertEquals(List.of(Map.of("value", "aaa", "count", 3L, "label", "Alpha"), Map.of("value", "bbb", "count", 1L, "label", "Beta")),
-                out.get(0).get("result"));
-        // Only the tag facet is filtered; a value of another facet is kept and gets no label.
-        assertEquals("label", out.get(1).get("name"));
-        assertEquals(List.of(Map.of("value", "hidden", "count", 4L)), out.get(1).get("result"));
-    }
-
-    @Test
-    public void test_buildFacetField_withoutVisibleTags_dropsEveryTagValue() {
-        final TestFacetField tagField = new TestFacetField("tag");
-        tagField.overrideName = "tag";
-        tagField.overrideValueCountMap.put("aaa", 3L);
-        final TestFacetField labelField = new TestFacetField("label");
-        labelField.overrideName = "label";
-        labelField.overrideValueCountMap.put("news", 5L);
-        final TestFacetResponse fr = new TestFacetResponse();
-        fr.addField(tagField);
-        fr.addField(labelField);
-
-        for (final List<Map<String, Object>> out : List.of(new SearchHandler().buildFacetField(fr),
-                new SearchHandler().buildFacetField(fr, Collections.emptyMap()))) {
-            assertEquals(2, out.size());
-            assertEquals("tag", out.get(0).get("name"));
-            assertEquals(List.of(), out.get(0).get("result"));
-            assertEquals(List.of(Map.of("value", "news", "count", 5L)), out.get(1).get("result"));
-        }
     }
 
     /**
@@ -701,6 +478,352 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         assertEquals(body, 200, res.status);
         assertTrue(body.contains("\"permission_state\":\"RESOLVED\""), body);
+    }
+
+    // ===== User tags =====
+
+    /** Delegates to the container's configuration except for user.tag.enabled. */
+    private static void setUserTagEnabled(final boolean enabled) {
+        final org.codelibs.fess.mylasta.direction.FessConfig real = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig((org.codelibs.fess.mylasta.direction.FessConfig) java.lang.reflect.Proxy.newProxyInstance(
+                org.codelibs.fess.mylasta.direction.FessConfig.class.getClassLoader(),
+                new Class<?>[] { org.codelibs.fess.mylasta.direction.FessConfig.class }, (proxy, method, args) -> {
+                    if ("isUserTagEnabled".equals(method.getName())) {
+                        return enabled;
+                    }
+                    try {
+                        return method.invoke(real, args);
+                    } catch (final java.lang.reflect.InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                }));
+    }
+
+    /** Registers the real response field configuration, in which the tag field is not a response field. */
+    private static void registerQueryFieldConfig() {
+        final org.codelibs.fess.query.QueryFieldConfig queryFieldConfig = new org.codelibs.fess.query.QueryFieldConfig();
+        queryFieldConfig.init();
+        ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+    }
+
+    private static TagType tagType(final String name, final String owner, final boolean shared) {
+        final TagType tagType = new TagType();
+        tagType.setName(name);
+        tagType.setOwner(owner);
+        tagType.setPermissions(shared ? new String[] { "1" + owner, "Rguest" } : new String[] { "1" + owner });
+        return tagType;
+    }
+
+    private static Map<String, TagType> visibleMap(final TagType... tagTypes) {
+        final Map<String, TagType> map = new LinkedHashMap<>();
+        for (final TagType tagType : tagTypes) {
+            map.put(tagType.getTagValue(), tagType);
+        }
+        return map;
+    }
+
+    private static Map<String, Object> tagItem(final TagType tagType, final boolean mine, final boolean shared) {
+        final Map<String, Object> item = new LinkedHashMap<>();
+        item.put("value", tagType.getTagValue());
+        item.put("name", tagType.getName());
+        item.put("owner", tagType.getOwner());
+        item.put("mine", mine);
+        item.put("shared", shared);
+        return item;
+    }
+
+    /** A tag type helper whose visible tags are fixed by the test and whose sharing role is Rguest. */
+    private static class StubTagTypeHelper extends TagTypeHelper {
+        final Map<String, TagType> visible = new LinkedHashMap<>();
+        final List<List<String>> requests = new java.util.ArrayList<>();
+        int visibleValuesCalls;
+
+        @Override
+        public java.util.Set<String> getVisibleTagValues(final SearchRequestParams.SearchRequestType type) {
+            org.junit.jupiter.api.Assertions.assertEquals(SearchRequestParams.SearchRequestType.JSON, type);
+            visibleValuesCalls++;
+            return java.util.Set.copyOf(visible.keySet());
+        }
+
+        @Override
+        public Map<String, TagType> getVisibleTagTypes(final java.util.Collection<String> values,
+                final SearchRequestParams.SearchRequestType type) {
+            org.junit.jupiter.api.Assertions.assertEquals(SearchRequestParams.SearchRequestType.JSON, type);
+            requests.add(List.copyOf(values));
+            final Map<String, TagType> map = new LinkedHashMap<>();
+            values.forEach(v -> {
+                if (visible.containsKey(v)) {
+                    map.put(v, visible.get(v));
+                }
+            });
+            return map;
+        }
+
+        @Override
+        protected List<String> getSharedRoleList() {
+            return List.of("Rguest");
+        }
+    }
+
+    @Test
+    public void test_filterDocuments_hitTagsAreVisibleOnlyWithMineAndShared() {
+        registerQueryFieldConfig();
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        ComponentUtil.register(helper, "tagTypeHelper");
+        final TagType own = tagType("foo", "frank", false);
+        final TagType othersShared = tagType("bar", "bob", true);
+        final TagType ownShared = tagType("baz", "frank", true);
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("title", "Title");
+        doc.put("tag", List.of(own.getTagValue(), "hidden", othersShared.getTagValue(), ownShared.getTagValue()));
+
+        final List<Map<String, Object>> out =
+                new SearchHandler().filterDocuments(List.of(doc), visibleMap(own, othersShared, ownShared), "frank");
+
+        final Map<String, Object> filtered = out.get(0);
+        assertEquals("Title", filtered.get("title"));
+        // the raw values decode to the name and the owner of every tag, visible or not
+        assertFalse(filtered.containsKey("tag"), filtered.toString());
+        assertEquals(List.of(tagItem(own, true, false), tagItem(othersShared, false, true), tagItem(ownShared, true, true)),
+                filtered.get("tags"));
+    }
+
+    @Test
+    public void test_filterDocuments_noVisibleTagMeansNoTagsKey() {
+        registerQueryFieldConfig();
+        final Map<String, Object> tagged = new LinkedHashMap<>();
+        tagged.put("title", "tagged");
+        tagged.put("tag", new String[] { "hidden" });
+        final Map<String, Object> untagged = new LinkedHashMap<>();
+        untagged.put("title", "untagged");
+        for (final Map<String, Object> filtered : new SearchHandler().filterDocuments(List.of(tagged, untagged), Map.of(), null)) {
+            assertFalse(filtered.containsKey("tag"), filtered.toString());
+            assertFalse(filtered.containsKey("tags"), filtered.toString());
+        }
+    }
+
+    @Test
+    public void test_buildFacetField_tagBucketsAreVisibleOnesWithOwnerMineShared() {
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        ComponentUtil.register(helper, "tagTypeHelper");
+        final TagType own = tagType("foo", "frank", false);
+        final TagType othersShared = tagType("foo", "bob", true);
+        final TestFacetField tagField = new TestFacetField("tag");
+        tagField.overrideName = "tag";
+        tagField.overrideValueCountMap.put("hidden", 9L);
+        tagField.overrideValueCountMap.put(own.getTagValue(), 3L);
+        tagField.overrideValueCountMap.put(othersShared.getTagValue(), 1L);
+        final TestFacetField labelField = new TestFacetField("label");
+        labelField.overrideName = "label";
+        labelField.overrideValueCountMap.put("news", 4L);
+        final TestFacetResponse fr = new TestFacetResponse();
+        fr.addField(tagField);
+        fr.addField(labelField);
+
+        final List<Map<String, Object>> out = new SearchHandler().buildFacetField(fr, visibleMap(own, othersShared), "frank");
+
+        final Map<String, Object> ownBucket = new LinkedHashMap<>();
+        ownBucket.put("value", own.getTagValue());
+        ownBucket.put("count", 3L);
+        ownBucket.put("label", "foo");
+        ownBucket.put("owner", "frank");
+        ownBucket.put("mine", true);
+        ownBucket.put("shared", false);
+        final Map<String, Object> sharedBucket = new LinkedHashMap<>();
+        sharedBucket.put("value", othersShared.getTagValue());
+        sharedBucket.put("count", 1L);
+        sharedBucket.put("label", "foo");
+        sharedBucket.put("owner", "bob");
+        sharedBucket.put("mine", false);
+        sharedBucket.put("shared", true);
+        assertEquals(List.of(ownBucket, sharedBucket), out.get(0).get("result"));
+        // other facets are untouched
+        assertEquals(List.of(Map.of("value", "news", "count", 4L)), out.get(1).get("result"));
+        // the one-argument form has no visible tag
+        assertEquals(List.of(), new SearchHandler().buildFacetField(fr).get(0).get("result"));
+    }
+
+    @SafeVarargs
+    private static void registerTaggedSearch(final List<String[]> responseFields, final Map<String, Object>... docs) {
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                responseFields.add(searchRequestParams.getResponseFields());
+                data.setDocumentItems(List.of(docs));
+            }
+        }, "searchHelper");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return new String[0];
+            }
+        }, "relatedQueryHelper");
+        ComponentUtil.register(new RelatedContentHelper() {
+            @Override
+            public String[] getRelatedContents(final String query) {
+                return new String[0];
+            }
+        }, "relatedContentHelper");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_search_hitTagsAreResolvedOncePerRequest() throws Exception {
+        registerQueryFieldConfig();
+        setUserTagEnabled(true);
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        final TagType own = tagType("foo", "frank", false);
+        final TagType othersShared = tagType("bar", "bob", true);
+        helper.visible.putAll(visibleMap(own, othersShared));
+        ComponentUtil.register(helper, "tagTypeHelper");
+        final List<String[]> responseFields = new java.util.ArrayList<>();
+        final Map<String, Object> doc1 = new LinkedHashMap<>();
+        doc1.put("title", "one");
+        doc1.put("tag", List.of(own.getTagValue(), "hidden"));
+        final Map<String, Object> doc2 = new LinkedHashMap<>();
+        doc2.put("title", "two");
+        doc2.put("tag", othersShared.getTagValue());
+        registerTaggedSearch(responseFields, doc1, doc2);
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(FessUser.PermissionState.RESOLVED)));
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(List.of(responseFields.get(0)).contains("tag"), "the v2 search fetches the tag field");
+        assertEquals(1, helper.requests.size());
+        assertEquals(1, helper.visibleValuesCalls);
+        // a value that is not among the visible tags is not looked up
+        assertEquals(List.of(own.getTagValue(), othersShared.getTagValue()), helper.requests.get(0));
+        final Map<String, Object> root = tools.jackson.databind.json.JsonMapper.builder().build().readValue(body, Map.class);
+        final List<Map<String, Object>> data = (List<Map<String, Object>>) ((Map<String, Object>) root.get("response")).get("data");
+        assertEquals(List.of(tagItem(own, true, false)), data.get(0).get("tags"));
+        assertEquals(List.of(tagItem(othersShared, false, true)), data.get(1).get("tags"));
+        assertFalse(body.contains("\"tag\":"), body);
+        assertFalse(body.contains("hidden"), body);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_search_invisibleHitTagsAreNotLookedUp() throws Exception {
+        registerQueryFieldConfig();
+        setUserTagEnabled(true);
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        final TagType own = tagType("foo", "frank", false);
+        helper.visible.putAll(visibleMap(own));
+        ComponentUtil.register(helper, "tagTypeHelper");
+        // a popular document carrying the tags of many other users
+        final List<String> tagValues = new java.util.ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            tagValues.add("hidden" + i);
+        }
+        tagValues.add(500, own.getTagValue());
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("title", "popular");
+        doc.put("tag", tagValues);
+        registerTaggedSearch(new java.util.ArrayList<>(), doc);
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(FessUser.PermissionState.RESOLVED)));
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertEquals(1, helper.visibleValuesCalls);
+        assertEquals(List.of(List.of(own.getTagValue())), helper.requests);
+        final Map<String, Object> root = tools.jackson.databind.json.JsonMapper.builder().build().readValue(body, Map.class);
+        final List<Map<String, Object>> data = (List<Map<String, Object>>) ((Map<String, Object>) root.get("response")).get("data");
+        assertEquals(List.of(tagItem(own, true, false)), data.get(0).get("tags"));
+        assertFalse(body.contains("hidden"), body);
+    }
+
+    @Test
+    public void test_search_noVisibleTagMeansNoLookup() throws Exception {
+        registerQueryFieldConfig();
+        setUserTagEnabled(true);
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        ComponentUtil.register(helper, "tagTypeHelper");
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("title", "one");
+        doc.put("tag", List.of("hidden1", "hidden2"));
+        registerTaggedSearch(new java.util.ArrayList<>(), doc);
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(FessUser.PermissionState.RESOLVED)));
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(helper.requests.isEmpty(), "nothing is looked up when the caller sees no tag");
+        assertFalse(body.contains("\"tags\""), body);
+    }
+
+    @Test
+    public void test_search_anonymousGetsNoTags() throws Exception {
+        registerQueryFieldConfig();
+        setUserTagEnabled(true);
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        final TagType shared = tagType("bar", "bob", true);
+        helper.visible.putAll(visibleMap(shared));
+        ComponentUtil.register(helper, "tagTypeHelper");
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("title", "one");
+        doc.put("tag", List.of(shared.getTagValue()));
+        registerTaggedSearch(new java.util.ArrayList<>(), doc);
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.empty();
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(helper.requests.isEmpty(), "the tags are not looked up for an anonymous caller");
+        assertEquals(0, helper.visibleValuesCalls);
+        assertFalse(body.contains("\"tags\""), body);
+        assertFalse(body.contains("\"tag\""), body);
+    }
+
+    @Test
+    public void test_search_responseFieldsIncludeTagOnlyWhenEnabled() throws Exception {
+        registerQueryFieldConfig();
+        for (final boolean enabled : new boolean[] { false, true }) {
+            setUserTagEnabled(enabled);
+            ComponentUtil.register(new StubTagTypeHelper(), "tagTypeHelper");
+            final List<String[]> responseFields = new java.util.ArrayList<>();
+            registerTaggedSearch(responseFields);
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            new SearchHandler().handle(new StubRequest("/api/v2/search", params), new CapturingResponse());
+            org.junit.jupiter.api.Assertions.assertEquals(enabled, List.of(responseFields.get(0)).contains("tag"), "enabled=" + enabled);
+            // the global response fields are not changed
+            assertFalse(List.of(ComponentUtil.getQueryFieldConfig().getResponseFields()).contains("tag"));
+        }
     }
 
     private static void registerSearchStubs() {

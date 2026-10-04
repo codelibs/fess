@@ -391,12 +391,100 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_addMissingProperties_skipsDocumentIndex() {
+    public void test_addMissingProperties_documentIndexGetsOnlyTheTagField() {
+        // The document index is upgraded by a reindex, so none of its other bundled fields are
+        // added; the tag field is the one exception, because the first tag write would otherwise
+        // map it dynamically as text and break the terms facet and term filters on it.
         final PutRecordingClient client = new PutRecordingClient();
 
-        client.addMissingProperties("fess", "doc", "fess.20260101000000000", toMappingMetadata(Map.of("url", Map.of("type", "keyword"))));
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess", "doc", "fess.20260101000000000",
+                    toMappingMetadata(Map.of("url", Map.of("type", "keyword"))));
 
-        assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+            assertEquals(List.of("fess.20260101000000000"), client.putIndexNames);
+            assertEquals(List.of("{\"properties\":{\"tag\":{\"type\":\"keyword\"}}}"), client.putSources);
+            final List<String> infos = capture.messagesAt(Level.INFO);
+            assertEquals(1, infos.size(), infos.toString());
+            assertTrue(infos.get(0).contains("fess.20260101000000000"), infos.get(0));
+            assertTrue(capture.warnings().isEmpty(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_documentIndexWithKeywordTagIsLeftAlone() {
+        final PutRecordingClient client = new PutRecordingClient();
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess", "doc", "fess.20260101000000000",
+                    toMappingMetadata(Map.of("url", Map.of("type", "keyword"), "tag", Map.of("type", "keyword"))));
+
+            assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+            assertTrue(capture.messagesAt(Level.INFO).isEmpty(), capture.messagesAt(Level.INFO).toString());
+            assertTrue(capture.warnings().isEmpty(), capture.warnings().toString());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_documentIndexWithOtherTagTypeWarnsAndIsLeftAlone() {
+        // A tag field mapped dynamically before the upgrade cannot be changed in place; it is
+        // reported so that the operator reindexes, and never overwritten.
+        final PutRecordingClient client = new PutRecordingClient();
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess", "doc", "fess.20260101000000000",
+                    toMappingMetadata(Map.of("tag", Map.of("type", "text", "fields", Map.of("keyword", Map.of("type", "keyword"))))));
+
+            assertTrue(client.putSources.isEmpty(), client.putSources.toString());
+            final List<String> warnings = capture.warnings();
+            assertEquals(1, warnings.size(), warnings.toString());
+            assertTrue(warnings.get(0).contains("fess.20260101000000000"), warnings.get(0));
+            assertTrue(warnings.get(0).contains("text"), warnings.get(0));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_documentIndexTagSkippedInJobProcesses() {
+        final String[] processProperties =
+                { "fess.crawler.process", "fess.thumbnail.process", "fess.suggest.process", "fess.chunk.process" };
+        for (final String property : processProperties) {
+            final PutRecordingClient client = new PutRecordingClient();
+            System.setProperty(property, "true");
+            try {
+                client.addMissingProperties("fess", "doc", "fess.20260101000000000",
+                        toMappingMetadata(Map.of("url", Map.of("type", "keyword"))));
+
+                assertTrue(client.putSources.isEmpty(), property + ": " + client.putSources);
+            } finally {
+                System.clearProperty(property);
+            }
+        }
+    }
+
+    @Test
+    public void test_addMissingProperties_documentIndexTagPutFailureLogsWarnAndDoesNotThrow() {
+        final PutRecordingClient client = new PutRecordingClient();
+        client.putFailure = new IllegalStateException("put failed");
+
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.addMissingProperties("fess", "doc", "fess.20260101000000000",
+                    toMappingMetadata(Map.of("url", Map.of("type", "keyword"))));
+
+            assertEquals(1, client.putSources.size());
+            assertEquals(1, capture.warnings().size(), capture.warnings().toString());
+            assertTrue(capture.warnings().get(0).contains("fess.20260101000000000"), capture.warnings().get(0));
+        } finally {
+            capture.detach();
+        }
     }
 
     @Test
@@ -602,6 +690,15 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
             assertEquals(path + "'s method.name must default to hnsw", "hnsw", methodNode.path("name").asText());
             assertEquals(path + "'s method.engine must default to lucene", "lucene", methodNode.path("engine").asText());
             assertEquals(path + "'s method.space_type must default to cosinesimil", "cosinesimil", methodNode.path("space_type").asText());
+        }
+    }
+
+    @Test
+    public void test_docJson_tagIsKeywordInEveryVariant() throws Exception {
+        final ObjectMapper mapper = new ObjectMapper();
+        for (final String path : DOC_JSON_PATHS) {
+            final JsonNode root = mapper.readTree(readResourceAsString(path));
+            assertEquals(path, "keyword", root.path("properties").path("tag").path("type").asText());
         }
     }
 

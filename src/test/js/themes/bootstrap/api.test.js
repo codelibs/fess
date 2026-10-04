@@ -114,33 +114,53 @@ describe("post", () => {
 });
 
 describe("del", () => {
-  it("sends DELETE with the query string and the CSRF header, and unwraps the envelope", async () => {
+  it("sends DELETE with the CSRF header and no body, and unwraps the envelope", async () => {
     api.setCsrfToken("tok-9");
     const fetchMock = installFetch(async () => envelope({ status: 0, removed: true }));
-    const env = await api.del("/documents/d1/tags", { value: "a1 b&c=d" });
+    const env = await api.del("/documents/d1/tags/" + "a".repeat(64));
     expect(env.removed).toBe(true);
     const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toBe("api/v2/documents/d1/tags?value=a1+b%26c%3Dd");
+    expect(url).toBe("api/v2/documents/d1/tags/" + "a".repeat(64));
     expect(opts.method).toBe("DELETE");
     expect(opts.credentials).toBe("same-origin");
     expect(opts.headers["X-Fess-CSRF-Token"]).toBe("tok-9");
     expect(opts.body).toBeUndefined();
   });
 
-  it("omits the query string without parameters", async () => {
-    const fetchMock = installFetch(async () => envelope({ status: 0 }));
-    await api.del("/x");
-    expect(fetchMock.mock.calls[0][0]).toBe("api/v2/x");
-  });
-
   it("throws ApiError from an error envelope", async () => {
-    installFetch(async () => jsonResponse({ response: { status: 1, error: { code: "invalid_request", message: "bad" } } }, { status: 400 }));
-    await expect(api.del("/x")).rejects.toMatchObject({ code: "invalid_request", message: "bad", httpStatus: 400 });
+    installFetch(async () => jsonResponse({ response: { status: 1, error: { code: "not_found", message: "tag not found" } } }, { status: 404 }));
+    await expect(api.del("/x")).rejects.toMatchObject({ code: "not_found", message: "tag not found", httpStatus: 404 });
   });
 
   it("wraps a fetch rejection in NetworkError", async () => {
     installFetch(async () => { throw new Error("down"); });
     await expect(api.del("/x")).rejects.toBeInstanceOf(api.NetworkError);
+  });
+});
+
+describe("put", () => {
+  it("sends PUT with a JSON body and the CSRF header, and unwraps the envelope", async () => {
+    api.setCsrfToken("tok-7");
+    const fetchMock = installFetch(async () => envelope({ status: 0, renamed: true }));
+    const env = await api.put("/tags/abc", { name: "x" });
+    expect(env.renamed).toBe(true);
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toBe("api/v2/tags/abc");
+    expect(opts.method).toBe("PUT");
+    expect(opts.credentials).toBe("same-origin");
+    expect(opts.headers["Content-Type"]).toBe("application/json");
+    expect(opts.headers["X-Fess-CSRF-Token"]).toBe("tok-7");
+    expect(JSON.parse(opts.body)).toEqual({ name: "x" });
+  });
+
+  it("throws ApiError from an error envelope", async () => {
+    installFetch(async () => jsonResponse({ response: { status: 1, error: { code: "conflict", message: "exists" } } }, { status: 409 }));
+    await expect(api.put("/x", {})).rejects.toMatchObject({ code: "conflict", httpStatus: 409 });
+  });
+
+  it("wraps a fetch rejection in NetworkError", async () => {
+    installFetch(async () => { throw new Error("down"); });
+    await expect(api.put("/x", {})).rejects.toBeInstanceOf(api.NetworkError);
   });
 });
 
