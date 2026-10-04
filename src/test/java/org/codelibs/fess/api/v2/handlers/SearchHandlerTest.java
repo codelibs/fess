@@ -536,6 +536,14 @@ public class SearchHandlerTest extends UnitFessTestCase {
     private static class StubTagTypeHelper extends TagTypeHelper {
         final Map<String, TagType> visible = new LinkedHashMap<>();
         final List<List<String>> requests = new java.util.ArrayList<>();
+        int visibleValuesCalls;
+
+        @Override
+        public java.util.Set<String> getVisibleTagValues(final SearchRequestParams.SearchRequestType type) {
+            org.junit.jupiter.api.Assertions.assertEquals(SearchRequestParams.SearchRequestType.JSON, type);
+            visibleValuesCalls++;
+            return java.util.Set.copyOf(visible.keySet());
+        }
 
         @Override
         public Map<String, TagType> getVisibleTagTypes(final java.util.Collection<String> values,
@@ -692,13 +700,82 @@ public class SearchHandlerTest extends UnitFessTestCase {
         assertEquals(body, 200, res.status);
         assertTrue(List.of(responseFields.get(0)).contains("tag"), "the v2 search fetches the tag field");
         assertEquals(1, helper.requests.size());
-        assertEquals(List.of(own.getTagValue(), "hidden", othersShared.getTagValue()), helper.requests.get(0));
+        assertEquals(1, helper.visibleValuesCalls);
+        // a value that is not among the visible tags is not looked up
+        assertEquals(List.of(own.getTagValue(), othersShared.getTagValue()), helper.requests.get(0));
         final Map<String, Object> root = tools.jackson.databind.json.JsonMapper.builder().build().readValue(body, Map.class);
         final List<Map<String, Object>> data = (List<Map<String, Object>>) ((Map<String, Object>) root.get("response")).get("data");
         assertEquals(List.of(tagItem(own, true, false)), data.get(0).get("tags"));
         assertEquals(List.of(tagItem(othersShared, false, true)), data.get(1).get("tags"));
         assertFalse(body.contains("\"tag\":"), body);
         assertFalse(body.contains("hidden"), body);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_search_invisibleHitTagsAreNotLookedUp() throws Exception {
+        registerQueryFieldConfig();
+        setUserTagEnabled(true);
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        final TagType own = tagType("foo", "frank", false);
+        helper.visible.putAll(visibleMap(own));
+        ComponentUtil.register(helper, "tagTypeHelper");
+        // a popular document carrying the tags of many other users
+        final List<String> tagValues = new java.util.ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            tagValues.add("hidden" + i);
+        }
+        tagValues.add(500, own.getTagValue());
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("title", "popular");
+        doc.put("tag", tagValues);
+        registerTaggedSearch(new java.util.ArrayList<>(), doc);
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(FessUser.PermissionState.RESOLVED)));
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertEquals(1, helper.visibleValuesCalls);
+        assertEquals(List.of(List.of(own.getTagValue())), helper.requests);
+        final Map<String, Object> root = tools.jackson.databind.json.JsonMapper.builder().build().readValue(body, Map.class);
+        final List<Map<String, Object>> data = (List<Map<String, Object>>) ((Map<String, Object>) root.get("response")).get("data");
+        assertEquals(List.of(tagItem(own, true, false)), data.get(0).get("tags"));
+        assertFalse(body.contains("hidden"), body);
+    }
+
+    @Test
+    public void test_search_noVisibleTagMeansNoLookup() throws Exception {
+        registerQueryFieldConfig();
+        setUserTagEnabled(true);
+        final StubTagTypeHelper helper = new StubTagTypeHelper();
+        ComponentUtil.register(helper, "tagTypeHelper");
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("title", "one");
+        doc.put("tag", List.of("hidden1", "hidden2"));
+        registerTaggedSearch(new java.util.ArrayList<>(), doc);
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler() {
+            @Override
+            protected OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(new FessUserBean(new StubFessUser(FessUser.PermissionState.RESOLVED)));
+            }
+        }.handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(helper.requests.isEmpty(), "nothing is looked up when the caller sees no tag");
+        assertFalse(body.contains("\"tags\""), body);
     }
 
     @Test
@@ -727,6 +804,7 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         assertEquals(body, 200, res.status);
         assertTrue(helper.requests.isEmpty(), "the tags are not looked up for an anonymous caller");
+        assertEquals(0, helper.visibleValuesCalls);
         assertFalse(body.contains("\"tags\""), body);
         assertFalse(body.contains("\"tag\""), body);
     }

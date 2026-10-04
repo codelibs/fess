@@ -2779,6 +2779,7 @@ public class SearchEngineClient implements Client {
 
         /**
          * Builds the include of the tag facet: the exact values of the tags that the caller can see.
+         * Not called for the admin search, whose tag facet is not restricted.
          *
          * @param fessConfig the Fess configuration
          * @return the include, or null when the caller can see no tag and the facet is not aggregated

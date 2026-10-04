@@ -135,7 +135,8 @@ public abstract class QueryCommand {
 
     /**
      * Checks if the caller can see a tag. Nothing is visible while user tags are disabled or to a
-     * caller who is not logged in. Each value is resolved once per query context.
+     * caller who is not logged in. Each value is resolved once per query context. Only called for a
+     * field that {@link #isRestrictedTagField} restricts, so never for the admin search.
      * @param context The query context.
      * @param value The tag value.
      * @return True if the tag is visible to the caller.

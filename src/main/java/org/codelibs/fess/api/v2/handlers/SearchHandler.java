@@ -39,6 +39,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
@@ -176,7 +177,9 @@ public class SearchHandler {
 
     /**
      * Returns the tags of the hits and the tag facet that the caller can see, looked up in one call.
-     * Nobody who is not logged in sees a tag.
+     * Nobody who is not logged in sees a tag. A hit can carry the tags of any number of users, so
+     * only the values among the tags the caller can see, at most {@code user.tag.visible.max.size}
+     * and computed once per request (the tag facet shares it), are looked up.
      *
      * @param data the search result
      * @param userId the logged-in user, or null
@@ -204,7 +207,12 @@ public class SearchHandler {
             return Collections.emptyMap();
         }
         try {
-            return ComponentUtil.getTagTypeHelper().getVisibleTagTypes(values, SearchRequestType.JSON);
+            final TagTypeHelper tagTypeHelper = ComponentUtil.getTagTypeHelper();
+            values.retainAll(tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON));
+            if (values.isEmpty()) {
+                return Collections.emptyMap();
+            }
+            return tagTypeHelper.getVisibleTagTypes(values, SearchRequestType.JSON);
         } catch (final RuntimeException e) {
             logger.warn("Failed to resolve the visible tags; the hits are returned without tags.", e);
             return Collections.emptyMap();

@@ -255,22 +255,11 @@ public class TagTypeHelperTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_visibility_adminSearchSeesAll() {
-        login("admin");
-        final TagType tagType = store(createTagType("foo", "alice", "1alice"));
-        tagType.setVirtualHost("other");
-
-        assertTrue(tagTypeHelper.getVisibleTagTypes(List.of(tagType.getTagValue()), SearchRequestType.ADMIN_SEARCH)
-                .containsKey(tagType.getTagValue()));
-    }
-
-    @Test
     public void test_visibility_anonymousSeesNothing() {
         roleSet.add("Rguest");
         final TagType tagType = store(createTagType("foo", "alice", "1alice", "Rguest"));
 
         assertTrue(tagTypeHelper.getVisibleTagTypes(List.of(tagType.getTagValue()), SearchRequestType.JSON).isEmpty());
-        assertTrue(tagTypeHelper.getVisibleTagTypes(List.of(tagType.getTagValue()), SearchRequestType.ADMIN_SEARCH).isEmpty());
         assertTrue(tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON).isEmpty());
         assertEquals(0, tagTypeBhv.selectListCount.get());
     }
@@ -389,6 +378,7 @@ public class TagTypeHelperTest extends UnitFessTestCase {
         // the budget was spent on own tags, so the permission query is not sent
         assertEquals(1, tagTypeBhv.selectListCount.get());
 
+        clearRequestCache();
         visibleMaxSize = 4;
         final Set<String> values = tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON);
         assertEquals(4, values.size());
@@ -397,6 +387,23 @@ public class TagTypeHelperTest extends UnitFessTestCase {
         }
         assertTrue(values.contains(others.get(0).getTagValue()));
         assertEquals(1, tagTypeBhv.lastFetchSize);
+    }
+
+    @Test
+    public void test_getVisibleTagValues_cachedPerRequest() {
+        login("alice");
+        roleSet.add("1alice");
+        store(createTagType("foo", "alice", "1alice"));
+
+        final Set<String> first = tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON);
+        final int count = tagTypeBhv.selectListCount.get();
+        assertEquals(Set.of(tagTypeHelper.toTagValue("foo", "alice")), first);
+        assertEquals(first, tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON));
+        assertEquals(count, tagTypeBhv.selectListCount.get());
+
+        clearRequestCache();
+        tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON);
+        assertTrue(tagTypeBhv.selectListCount.get() > count);
     }
 
     @Test
@@ -512,6 +519,7 @@ public class TagTypeHelperTest extends UnitFessTestCase {
     private void clearRequestCache() {
         for (final SearchRequestType type : SearchRequestType.values()) {
             getMockRequest().removeAttribute(TagTypeHelper.VISIBLE_TAG_TYPES_ATTRIBUTE + type.name());
+            getMockRequest().removeAttribute(TagTypeHelper.VISIBLE_TAG_VALUES_ATTRIBUTE + type.name());
         }
     }
 

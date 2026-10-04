@@ -63,6 +63,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Helper for user tags: the value a tag puts on a document, the tags a caller may see, and the
@@ -79,6 +80,9 @@ public class TagTypeHelper {
 
     /** The prefix of the request attribute caching the visible tag types, followed by the search request type. */
     public static final String VISIBLE_TAG_TYPES_ATTRIBUTE = "fess.tagTypeHelper.visibleTagTypes.";
+
+    /** The prefix of the request attribute caching the visible tag values, followed by the search request type. */
+    public static final String VISIBLE_TAG_VALUES_ATTRIBUTE = "fess.tagTypeHelper.visibleTagValues.";
 
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
@@ -240,13 +244,13 @@ public class TagTypeHelper {
 
     /**
      * Returns the tag types of the given values that the caller may see, without their paths.
-     * Nothing is visible to a caller who is not logged in; an admin search sees every tag.
-     * Otherwise a tag is visible when the virtual host of the request is not set or is the tag's,
+     * Nothing is visible to a caller who is not logged in. Otherwise a tag is visible when the virtual host of the request is not set or is the tag's,
      * and the caller owns the tag or holds one of its permissions, the sharing roles included.
-     * The result of each value is cached in the request.
+     * The result of each value is cached in the request. The admin search, which sees every tag,
+     * is not handled here: the callers skip the tag restriction for it.
      *
      * @param values the tag values
-     * @param type the search request type
+     * @param type the search request type, never {@link SearchRequestType#ADMIN_SEARCH}
      * @return the visible tag types keyed by their value
      */
     public Map<String, TagType> getVisibleTagTypes(final Collection<String> values, final SearchRequestType type) {
@@ -267,12 +271,11 @@ public class TagTypeHelper {
         }
         if (!missing.isEmpty()) {
             final Map<String, TagType> fetched = fetchTagTypes(missing);
-            final boolean adminSearch = SearchRequestType.ADMIN_SEARCH == type;
-            final Set<String> roles = adminSearch ? Collections.emptySet() : getViewerRoles(type);
-            final String virtualHostKey = adminSearch ? null : ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+            final Set<String> roles = getViewerRoles(type);
+            final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
             for (final String value : missing) {
                 final TagType tagType = fetched.get(value);
-                final boolean visible = tagType != null && (adminSearch || isVisible(tagType, userId, roles, virtualHostKey));
+                final boolean visible = tagType != null && isVisible(tagType, userId, roles, virtualHostKey);
                 cache.put(value, visible ? Optional.of(tagType) : Optional.empty());
             }
         }
@@ -289,9 +292,11 @@ public class TagTypeHelper {
     /**
      * Returns the values of the tags the caller may see: the caller's own tags and then those
      * of others whose permissions the caller holds, limited to the virtual host of the request and to
-     * {@code user.tag.visible.max.size} tags. Empty for a caller who is not logged in.
+     * {@code user.tag.visible.max.size} tags. Empty for a caller who is not logged in. The result is
+     * cached in the request, so the tag facet and the tags of the hits share one lookup. The admin
+     * search, which sees every tag, is not handled here: the callers skip the tag restriction for it.
      *
-     * @param type the search request type
+     * @param type the search request type, never {@link SearchRequestType#ADMIN_SEARCH}
      * @return the visible tag values
      */
     public Set<String> getVisibleTagValues(final SearchRequestType type) {
@@ -299,43 +304,49 @@ public class TagTypeHelper {
         if (userId == null) {
             return Collections.emptySet();
         }
-        final boolean adminSearch = SearchRequestType.ADMIN_SEARCH == type;
-        final Set<String> roles = adminSearch ? Collections.emptySet() : getViewerRoles(type);
-        final String virtualHostKey = adminSearch ? null : ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
+        final String attributeName = VISIBLE_TAG_VALUES_ATTRIBUTE + (type == null ? StringUtil.EMPTY : type.name());
+        if (request != null && request.getAttribute(attributeName) instanceof final Set<?> cached) {
+            @SuppressWarnings("unchecked")
+            final Set<String> values = (Set<String>) cached;
+            return values;
+        }
+        final Set<String> values = Collections.unmodifiableSet(fetchVisibleTagValues(userId, type));
+        if (request != null) {
+            request.setAttribute(attributeName, values);
+        }
+        return values;
+    }
+
+    private Set<String> fetchVisibleTagValues(final String userId, final SearchRequestType type) {
+        final Set<String> roles = getViewerRoles(type);
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final int maxSize = ComponentUtil.getFessConfig().getUserTagVisibleMaxSizeAsInteger();
         final List<TagType> tagTypeList = new ArrayList<>();
-        if (adminSearch) {
-            tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
-                cb.query().matchAll();
-                specifyNameAndOwner(cb);
-                cb.fetchFirst(maxSize);
-            }));
-        } else {
-            // the caller's own tags first, so that tags of others never push them out
+        // the caller's own tags first, so that tags of others never push them out
+        tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
+            cb.query().bool((must, should, mustNot, filter) -> {
+                filter.setOwner_Term(userId);
+                if (StringUtil.isNotBlank(virtualHostKey)) {
+                    filter.setVirtualHost_Term(virtualHostKey);
+                }
+            });
+            specifyNameAndOwner(cb);
+            cb.fetchFirst(maxSize);
+        }));
+        final int remaining = maxSize - tagTypeList.size();
+        if (remaining > 0 && !roles.isEmpty()) {
             tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
                 cb.query().bool((must, should, mustNot, filter) -> {
-                    filter.setOwner_Term(userId);
+                    filter.setPermissions_InScope(roles);
+                    mustNot.setOwner_Term(userId);
                     if (StringUtil.isNotBlank(virtualHostKey)) {
                         filter.setVirtualHost_Term(virtualHostKey);
                     }
                 });
                 specifyNameAndOwner(cb);
-                cb.fetchFirst(maxSize);
+                cb.fetchFirst(remaining);
             }));
-            final int remaining = maxSize - tagTypeList.size();
-            if (remaining > 0 && !roles.isEmpty()) {
-                tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
-                    cb.query().bool((must, should, mustNot, filter) -> {
-                        filter.setPermissions_InScope(roles);
-                        mustNot.setOwner_Term(userId);
-                        if (StringUtil.isNotBlank(virtualHostKey)) {
-                            filter.setVirtualHost_Term(virtualHostKey);
-                        }
-                    });
-                    specifyNameAndOwner(cb);
-                    cb.fetchFirst(remaining);
-                }));
-            }
         }
         final Set<String> valueSet = new LinkedHashSet<>();
         for (final TagType tagType : tagTypeList) {
@@ -421,7 +432,7 @@ public class TagTypeHelper {
         try {
             tagMap = findTagValuesByUrls(urlSet);
         } catch (final RuntimeException e) {
-            logger.warn("Failed to read the user tags of documents. Run tag_updater to restore them: documents={}", docList.size(), e);
+            logger.error("Failed to read the user tags of documents. Run tag_updater to restore them: documents={}", docList.size(), e);
             return;
         }
         for (final Map<String, Object> doc : docList) {
