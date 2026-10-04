@@ -73,6 +73,503 @@ function el(tag, opts) {
   return node;
 }
 
+// ─── Per-user tags (features.user_tag) ───────────────────────────────────────
+// Every tag belongs to one user. Its id (64 hex) is what the tag API takes, its value is what
+// fields.tag filters by; the theme parses neither. Hits carry { value, name, owner, mine, shared },
+// the "tag" facet { value, count, label, owner, mine, shared }, the document tag API
+// { id, value, name, owner, mine, shared } and GET /tags { id, value, name, shared, path_count }.
+// A tag that is not the caller's own (mine is not true) reads as t("tag.shared_prefix") + name,
+// so another user's tag never passes for one of the caller's.
+
+function userTagEnabled() {
+  return !!(api.getConfig()?.features?.user_tag);
+}
+
+/** The text a tag is shown with: its name, prefixed when it is not the caller's own. */
+function tagLabel(tag) {
+  const name = String(tag.name || tag.value || "");
+  return tag.mine === true ? name : t("tag.shared_prefix") + name;
+}
+
+/**
+ * value -> label of the tags seen so far (hits, tag facet, editor and panel answers), for the
+ * active-filter badges. A value encodes its name and owner, so its label never goes stale.
+ */
+const tagLabels = new Map();
+
+function rememberTag(tag) {
+  if (tag && tag.value && (tag.name || tag.label)) {
+    tagLabels.set(String(tag.value), tagLabel({ name: tag.name || tag.label, mine: tag.mine }));
+  }
+}
+
+/** Remember the tag labels of a search response: the hits' tags and the tag facet's entries. */
+function collectTagNames(env) {
+  if (!userTagEnabled() || !env) return;
+  (Array.isArray(env.data) ? env.data : []).forEach(d =>
+    (Array.isArray(d && d.tags) ? d.tags : []).forEach(rememberTag));
+  const field = (Array.isArray(env.facet_field) ? env.facet_field : []).find(f => f && f.name === "tag");
+  ((field && field.result) || []).forEach(rememberTag);
+}
+
+/** The label of a tag value for the active-filter badge; the raw value when none was seen. */
+function tagLabelOf(value) {
+  return tagLabels.get(String(value)) || String(value);
+}
+
+/** The /documents/{id}/tags path of a document. */
+function docTagsPath(docId) {
+  return "/documents/" + encodeURIComponent(docId) + "/tags";
+}
+
+// A 403 is also how an expired CSRF token answers; logging in issues a fresh one.
+function isAuthError(e) {
+  return !!e && (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403);
+}
+
+function showLoginModal() {
+  if (!window.bootstrap || !bootstrap.Modal) {
+    console.warn("[fess] bootstrap not loaded; skipping modal show");
+  } else {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
+  }
+}
+
+/**
+ * The inline message for a failed tag request, or null after asking for login on 401/403.
+ * A 400 or 409 carries a message meant for the user; anything else gets the generic one.
+ */
+function tagFailMessage(e) {
+  if (isAuthError(e)) {
+    showLoginModal();
+    return null;
+  }
+  const userFacing = e && (e.code === "invalid_request" || e.code === "INVALID_REQUEST" || e.code === "conflict" ||
+    e.httpStatus === 400 || e.httpStatus === 409);
+  return userFacing && e.message ? e.message : t("tag.error");
+}
+
+/** A quiet inline error line, like the other inline errors of this theme; polite, not an alert. */
+function buildTagError(className) {
+  const node = el("div", { className: "small text-danger mt-1 d-none " + className, attrs: { "aria-live": "polite" } });
+  return {
+    node,
+    set: msg => {
+      node.textContent = msg || "";
+      node.classList.toggle("d-none", !msg);
+    }
+  };
+}
+
+/** The note that search results follow a tag change only after the next index update. */
+function buildPendingNote() {
+  return el("p", { className: "small text-body-secondary mt-1 mb-0 tag-pending d-none", text: t("tag.pending"), attrs: { role: "status" } });
+}
+
+/** Narrow the current search to one tag (fields.tag), keeping the query and the other filters. */
+function filterByTag(value) {
+  state.fields = { ...state.fields, tag: [value] };
+  state.start = 0;
+  runSearch();
+}
+
+/** (Re-)render a card's tag chips; each one filters the search by its tag. */
+function renderTagChips(container, tags) {
+  while (container.firstChild) container.removeChild(container.firstChild);
+  (tags || []).forEach(tag => {
+    if (!tag || !tag.value) return;
+    rememberTag(tag);
+    const chip = el("button", {
+      className: "badge rounded-pill tag-chip me-1",
+      text: tagLabel(tag),
+      attrs: { type: "button" }
+    });
+    chip.addEventListener("click", () => filterByTag(tag.value));
+    container.appendChild(chip);
+  });
+}
+
+/**
+ * The inline tag editor of a result card (GET /documents/{id}/tags): the document's tags with a
+ * remove button on the caller's own ones (DELETE /documents/{id}/tags/{tagId}), the caller's other
+ * tags as buttons that add them (POST {id}), and a name input that adds a tag by name, creating
+ * it when the caller has none of that name (POST {name}). Each answer re-renders the editor and
+ * hands the tags to onTags so the card's chips follow. Escape calls onClose.
+ *
+ * @param {string} docId
+ * @param {string} id - id of the editor element
+ * @param {{ onTags: function(Object[]), onClose: function() }} handlers
+ * @returns {{ node: HTMLElement, load: function(): Promise<void>, focus: function() }}
+ */
+function buildTagEditor(docId, id, handlers) {
+  const node = el("div", {
+    className: "tag-editor border rounded p-2 mt-1",
+    attrs: { id, role: "group", "aria-label": t("tag.title"), tabindex: "-1" }
+  });
+  const list = el("ul", { className: "list-unstyled d-flex flex-wrap gap-1 mb-2 tag-editor-list" });
+  const empty = el("p", { className: "small text-body-secondary mb-2 tag-editor-empty d-none", text: t("tag.empty") });
+  const addable = el("div", {
+    className: "d-flex flex-wrap gap-1 mb-2 tag-editor-addable",
+    attrs: { role: "group", "aria-label": t("tag.addable") }
+  });
+  const form = el("form", { className: "d-flex flex-wrap align-items-center gap-1 tag-editor-form", attrs: { novalidate: "" } });
+  form.appendChild(el("label", { className: "visually-hidden", text: t("tag.name"), attrs: { for: id + "-name" } }));
+  const input = el("input", {
+    className: "form-control form-control-sm w-auto",
+    attrs: { id: id + "-name", type: "text", maxlength: "50", autocomplete: "off", placeholder: t("tag.name") }
+  });
+  form.appendChild(input);
+  const addBtn = el("button", { className: "btn btn-sm btn-primary", text: t("tag.add_button"), attrs: { type: "submit" } });
+  form.appendChild(addBtn);
+  const error = buildTagError("tag-editor-error");
+  const pending = buildPendingNote();
+  [list, empty, addable, form, error.node, pending].forEach(n => node.appendChild(n));
+
+  let busy = false;
+  const fail = e => error.set(tagFailMessage(e));
+  const focusForm = () => input.focus();
+
+  const apply = env => {
+    const tags = Array.isArray(env && env.tags) ? env.tags : [];
+    renderList(tags);
+    renderAddable(Array.isArray(env && env.addable) ? env.addable : []);
+    handlers.onTags(tags);
+  };
+  // One write at a time; a success shows the pending note, since search results follow later.
+  const write = async (request, btn) => {
+    if (busy) return false;
+    busy = true;
+    if (btn) btn.disabled = true;
+    error.set("");
+    try {
+      apply(await request());
+      pending.classList.remove("d-none");
+      return true;
+    } catch (e) {
+      fail(e);
+      return false;
+    } finally {
+      busy = false;
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  const renderList = tags => {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    tags.forEach(tag => {
+      if (!tag || !tag.value) return;
+      const text = tagLabel(tag);
+      const li = el("li", { className: "badge rounded-pill tag-chip tag-editor-item d-inline-flex align-items-center gap-1" });
+      li.appendChild(el("span", { text }));
+      if (tag.mine === true && tag.id) {
+        const btn = el("button", {
+          className: "btn-close tag-remove",
+          attrs: { type: "button", "aria-label": t("tag.remove", { name: text }) }
+        });
+        btn.addEventListener("click", async () => {
+          // The button is gone with the re-rendered list; keep focus inside the editor.
+          if (await write(() => api.del(docTagsPath(docId) + "/" + encodeURIComponent(tag.id)), btn)) focusForm();
+        });
+        li.appendChild(btn);
+      }
+      list.appendChild(li);
+    });
+    empty.classList.toggle("d-none", list.childElementCount > 0);
+  };
+  const renderAddable = tags => {
+    while (addable.firstChild) addable.removeChild(addable.firstChild);
+    tags.forEach(tag => {
+      if (!tag || !tag.id) return;
+      const btn = el("button", { className: "btn btn-sm btn-outline-secondary tag-addable", attrs: { type: "button" } });
+      btn.appendChild(el("i", { className: "fa fa-plus me-1", attrs: { "aria-hidden": "true" } }));
+      btn.appendChild(document.createTextNode(tagLabel(tag)));
+      btn.addEventListener("click", async () => {
+        if (await write(() => api.post(docTagsPath(docId), { id: tag.id }), btn)) focusForm();
+      });
+      addable.appendChild(btn);
+    });
+    addable.classList.toggle("d-none", addable.childElementCount === 0);
+  };
+
+  form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const name = input.value.trim();
+    if (!name) return;
+    if (await write(() => api.post(docTagsPath(docId), { name }), addBtn)) {
+      input.value = "";
+      input.focus();
+    }
+  });
+  node.addEventListener("keydown", ev => {
+    if (ev.key !== "Escape") return;
+    ev.preventDefault();
+    handlers.onClose();
+  });
+
+  return {
+    node,
+    load: async () => {
+      error.set("");
+      pending.classList.add("d-none");
+      try {
+        apply(await api.get(docTagsPath(docId)));
+      } catch (e) {
+        fail(e);
+      }
+    },
+    focus: () => input.focus()
+  };
+}
+
+/**
+ * The tag row of a result card: the document's tags as chips and, for a logged-in user, an
+ * "Add tag" toggle that opens the inline editor. Null when the feature is off or there is
+ * nothing to show.
+ *
+ * @param {Object} d    - result document
+ * @param {number} idx0 - 0-based position of the card (for element ids)
+ * @returns {HTMLElement|null}
+ */
+function buildTagRow(d, idx0) {
+  if (!userTagEnabled() || !d.doc_id) return null;
+  const tags = Array.isArray(d.tags) ? d.tags : [];
+  const canAdd = api.isAuthenticated();
+  if (tags.length === 0 && !canAdd) return null;
+  const row = el("div", { className: "tags" });
+  const chips = el("span", { className: "tag-chips" });
+  renderTagChips(chips, tags);
+  row.appendChild(chips);
+  if (!canAdd) return row;
+
+  const editorId = "result" + idx0 + "-tag-editor";
+  const toggle = el("button", {
+    className: "btn btn-link btn-sm p-0 tag-add-btn d-print-none",
+    attrs: { type: "button", "aria-expanded": "false" }
+  });
+  toggle.appendChild(el("i", { className: "fa fa-tag me-1", attrs: { "aria-hidden": "true" } }));
+  toggle.appendChild(document.createTextNode(t("tag.add")));
+  row.appendChild(toggle);
+
+  let editor = null;
+  const close = () => {
+    if (editor) editor.node.classList.add("d-none");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.focus();
+  };
+  toggle.addEventListener("click", () => {
+    if (editor && !editor.node.classList.contains("d-none")) { close(); return; }
+    if (!editor) {
+      editor = buildTagEditor(d.doc_id, editorId, { onTags: list => renderTagChips(chips, list), onClose: close });
+      row.appendChild(editor.node);
+      toggle.setAttribute("aria-controls", editorId);
+    }
+    editor.node.classList.remove("d-none");
+    toggle.setAttribute("aria-expanded", "true");
+    editor.focus();
+    editor.load();
+  });
+  return row;
+}
+
+// ─── My tags panel ───────────────────────────────────────────────────────────
+// A panel under the options bar, opened from a "My tags" item on it, that lists the caller's
+// tags (GET /tags) and renames (PUT {name}), shares or unshares (PUT {shared}) and deletes
+// (DELETE, after a confirmation inside the panel) them. A tag name filters the search by it.
+
+const MY_TAGS_PANEL_ID = "my-tags-panel";
+
+function myTagsPanelOpen() {
+  const panel = document.getElementById(MY_TAGS_PANEL_ID);
+  return !!panel && !panel.classList.contains("d-none");
+}
+
+/** Add the "My tags" toggle to the options bar for a logged-in user; hide the panel otherwise. */
+function renderMyTagsToggle(bar) {
+  if (!userTagEnabled() || !api.isAuthenticated()) {
+    const panel = document.getElementById(MY_TAGS_PANEL_ID);
+    if (panel) panel.classList.add("d-none");
+    return;
+  }
+  const li = el("li", { className: "list-inline-item" });
+  const toggle = el("button", {
+    className: "btn btn-link btn-sm p-0 align-baseline",
+    attrs: { id: "my-tags-toggle", type: "button", "aria-controls": MY_TAGS_PANEL_ID, "aria-expanded": String(myTagsPanelOpen()) }
+  });
+  toggle.appendChild(el("i", { className: "fa fa-tags me-1", attrs: { "aria-hidden": "true" } }));
+  toggle.appendChild(document.createTextNode(t("tag.my_tags")));
+  toggle.addEventListener("click", () => {
+    const panel = myTagsPanel(bar);
+    const open = panel.node.classList.contains("d-none");
+    panel.node.classList.toggle("d-none", !open);
+    toggle.setAttribute("aria-expanded", String(open));
+    if (open) panel.load();
+  });
+  li.appendChild(toggle);
+  bar.appendChild(li);
+}
+
+let myTags = null;
+
+/** The My tags panel, built once and placed right after the options bar. */
+function myTagsPanel(bar) {
+  if (myTags && document.body.contains(myTags.node)) return myTags;
+  const node = el("section", {
+    className: "my-tags-panel border rounded p-2 mb-2 d-none",
+    attrs: { id: MY_TAGS_PANEL_ID, "aria-labelledby": MY_TAGS_PANEL_ID + "-title" }
+  });
+  const title = el("h2", { className: "h6", text: t("tag.my_tags"), attrs: { id: MY_TAGS_PANEL_ID + "-title", tabindex: "-1" } });
+  node.appendChild(title);
+  const list = el("ul", { className: "list-unstyled mb-0 my-tags-list" });
+  const empty = el("p", { className: "small text-body-secondary mb-0 my-tags-empty d-none", text: t("tag.my_empty") });
+  const error = buildTagError("my-tags-error");
+  const pending = buildPendingNote();
+  [list, empty, error.node, pending].forEach(n => node.appendChild(n));
+  bar.after(node);
+
+  let busy = false;
+  let tags = [];
+
+  const load = async () => {
+    error.set("");
+    try {
+      const env = await api.get("/tags");
+      tags = Array.isArray(env && env.tags) ? env.tags : [];
+      render();
+    } catch (e) {
+      error.set(tagFailMessage(e));
+    }
+  };
+  // One write at a time, then a fresh list (a rename gives the tag a new id and value).
+  const write = async (request, showPending) => {
+    if (busy) return false;
+    busy = true;
+    error.set("");
+    try {
+      await request();
+      if (showPending) pending.classList.remove("d-none");
+      await load();
+      return true;
+    } catch (e) {
+      error.set(tagFailMessage(e));
+      return false;
+    } finally {
+      busy = false;
+    }
+  };
+
+  const render = () => {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    tags.forEach((tag, i) => { if (tag && tag.id) list.appendChild(buildRow(tag, i, "view")); });
+    empty.classList.toggle("d-none", list.childElementCount > 0);
+  };
+  const swap = (li, tag, i, mode) => {
+    const next = buildRow(tag, i, mode);
+    li.replaceWith(next);
+    return next;
+  };
+
+  const buildRow = (tag, i, mode) => {
+    const own = { ...tag, mine: true };
+    const li = el("li", { className: "my-tag d-flex flex-wrap align-items-center gap-2 py-1" });
+    const rowId = MY_TAGS_PANEL_ID + "-" + i;
+
+    if (mode === "rename") {
+      const form = el("form", { className: "d-flex flex-wrap align-items-center gap-1", attrs: { novalidate: "" } });
+      form.appendChild(el("label", { className: "visually-hidden", text: t("tag.name"), attrs: { for: rowId + "-name" } }));
+      const input = el("input", {
+        className: "form-control form-control-sm w-auto my-tag-name-input",
+        attrs: { id: rowId + "-name", type: "text", maxlength: "50", autocomplete: "off" }
+      });
+      input.value = String(tag.name || "");
+      form.appendChild(input);
+      form.appendChild(el("button", { className: "btn btn-sm btn-primary", text: t("tag.save"), attrs: { type: "submit" } }));
+      const cancel = el("button", { className: "btn btn-sm btn-outline-secondary my-tag-cancel", text: t("tag.cancel"), attrs: { type: "button" } });
+      cancel.addEventListener("click", () => swap(li, tag, i, "view").querySelector(".my-tag-rename").focus());
+      form.appendChild(cancel);
+      form.addEventListener("submit", ev => {
+        ev.preventDefault();
+        const name = input.value.trim();
+        if (!name || name === tag.name) { cancel.click(); return; }
+        // The re-rendered list drops the focused row; keep focus inside the panel.
+        write(() => api.put("/tags/" + encodeURIComponent(tag.id), { name }), true).then(ok => ok && title.focus());
+      });
+      form.addEventListener("keydown", ev => {
+        if (ev.key === "Escape") { ev.preventDefault(); cancel.click(); }
+      });
+      li.appendChild(form);
+      return li;
+    }
+
+    const name = el("button", { className: "btn btn-link btn-sm p-0 my-tag-name", text: tagLabel(own), attrs: { type: "button" } });
+    name.addEventListener("click", () => {
+      rememberTag(own);
+      filterByTag(tag.value);
+    });
+    li.appendChild(name);
+    li.appendChild(el("span", { className: "small text-body-secondary", text: t("tag.path_count", { n: Number(tag.path_count) || 0 }) }));
+
+    if (mode === "confirm") {
+      const box = el("div", { className: "my-tag-confirm d-flex flex-wrap align-items-center gap-1", attrs: { role: "group" } });
+      box.appendChild(el("span", { className: "small", text: t("tag.delete_confirm", { name: tagLabel(own) }) }));
+      const yes = el("button", { className: "btn btn-sm btn-danger my-tag-confirm-delete", text: t("tag.delete"), attrs: { type: "button" } });
+      yes.addEventListener("click", () => write(() => api.del("/tags/" + encodeURIComponent(tag.id)), true).then(ok => ok && title.focus()));
+      const no = el("button", { className: "btn btn-sm btn-outline-secondary my-tag-cancel", text: t("tag.cancel"), attrs: { type: "button" } });
+      no.addEventListener("click", () => swap(li, tag, i, "view").querySelector(".my-tag-delete").focus());
+      box.appendChild(yes);
+      box.appendChild(no);
+      li.appendChild(box);
+      return li;
+    }
+
+    const sw = el("div", { className: "form-check form-switch mb-0" });
+    const box = el("input", {
+      className: "form-check-input my-tag-shared",
+      attrs: { id: rowId + "-shared", type: "checkbox", role: "switch" }
+    });
+    box.checked = tag.shared === true;
+    box.addEventListener("change", async () => {
+      const shared = box.checked;
+      box.disabled = true;
+      if (await write(() => api.put("/tags/" + encodeURIComponent(tag.id), { shared }), false)) {
+        // Sharing keeps the tag's id, value and place in the list: refocus its switch.
+        const again = document.getElementById(rowId + "-shared");
+        if (again) again.focus();
+      } else {
+        box.checked = !shared;
+        box.disabled = false;
+      }
+    });
+    sw.appendChild(box);
+    sw.appendChild(el("label", { className: "form-check-label small", text: t("tag.shared"), attrs: { for: rowId + "-shared" } }));
+    li.appendChild(sw);
+
+    const rename = el("button", {
+      className: "btn btn-sm btn-outline-secondary my-tag-rename",
+      text: t("tag.rename"),
+      attrs: { type: "button", "aria-label": t("tag.rename_label", { name: tagLabel(own) }) }
+    });
+    rename.addEventListener("click", () => swap(li, tag, i, "rename").querySelector(".my-tag-name-input").focus());
+    li.appendChild(rename);
+    const del = el("button", {
+      className: "btn btn-sm btn-outline-danger my-tag-delete",
+      text: t("tag.delete"),
+      attrs: { type: "button", "aria-label": t("tag.delete_label", { name: tagLabel(own) }) }
+    });
+    del.addEventListener("click", () => swap(li, tag, i, "confirm").querySelector(".my-tag-cancel").focus());
+    li.appendChild(del);
+    return li;
+  };
+
+  myTags = {
+    node,
+    load: () => {
+      pending.classList.add("d-none");
+      return load();
+    }
+  };
+  return myTags;
+}
+
 /**
  * Copy text to the clipboard with a fallback for non-secure contexts.
  * navigator.clipboard is undefined on plain-HTTP non-localhost origins
@@ -409,6 +906,11 @@ function buildResultCard(d, queryId, order) {
   }
 
   li.appendChild(info);
+
+  // --- div.tags > chips + (add-tag toggle + inline editor)? (theme extra; features.user_tag) ---
+  // Its own row rather than part of .info, which phones hide.
+  const tagRow = buildTagRow(d, idx0);
+  if (tagRow) li.appendChild(tagRow);
   return li;
 }
 
@@ -609,6 +1111,8 @@ function renderOptionsBar() {
     }
     bar.appendChild(makeItem(t("search.menu_labels"), labelText));
   }
+
+  renderMyTagsToggle(bar);
 }
 
 /**
@@ -717,24 +1221,32 @@ function exQClauses() {
 }
 
 /**
- * Keep the address bar's start= and ex_q= in step with state.start and the facet
- * selections, as the JSP paging and facet links did, so reload, back/forward and a
- * shared link land on the same page with the same filters (runFromUrl reads them
- * back).
+ * Keep the address bar's start=, ex_q= and fields.tag= in step with state.start, the facet
+ * selections and the tag filter, as the JSP paging and facet links did, so reload,
+ * back/forward and a shared link land on the same page with the same filters (runFromUrl
+ * reads them back). fields.tag is the only field filter kept here: it is set by the tag
+ * facet, chips and the My tags panel, while the other fields.* come from the URL or default
+ * labels that are deliberately not written back.
  *
  * @param {boolean} push - add a history entry (paging) instead of correcting the
  *                         current one (a filter change resetting to the first page)
  */
 function syncUrlParams(push) {
   const params = new URLSearchParams(location.search);
+  const sameList = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
   const clauses = exQClauses();
-  const current = params.getAll("ex_q");
-  const sameExQ = current.length === clauses.length && current.every((v, i) => v === clauses[i]);
-  if ((Number(params.get("start")) || 0) === state.start && sameExQ) return;
+  const sameExQ = sameList(params.getAll("ex_q"), clauses);
+  const tags = Array.isArray(state.fields.tag) ? state.fields.tag : [];
+  const sameTags = sameList(params.getAll("fields.tag"), tags);
+  if ((Number(params.get("start")) || 0) === state.start && sameExQ && sameTags) return;
   if (state.start > 0) params.set("start", String(state.start)); else params.delete("start");
   if (!sameExQ) {
     params.delete("ex_q");
     clauses.forEach(v => params.append("ex_q", v));
+  }
+  if (!sameTags) {
+    params.delete("fields.tag");
+    tags.forEach(v => params.append("fields.tag", v));
   }
   const qs = params.toString();
   const url = location.pathname + (qs ? "?" + qs : "");
@@ -782,8 +1294,9 @@ function buildSearchParams() {
   // every configured facet-query view (timestamp / size / filetype ranges). Without
   // these the API returns no facet data, so the query-view groups render empty and
   // the sidebar is effectively dead (JSP parity: query.facet.fields + .queries).
+  // User tags add the "tag" field facet.
   const cfgFacet = api.getConfig() || {};
-  params["facet.field"] = ["label"];
+  params["facet.field"] = userTagEnabled() ? ["label", "tag"] : ["label"];
   const facetQueryValues = [];
   (cfgFacet.facet_views || []).forEach(v =>
     (v.queries || []).forEach(qy => { if (qy && qy.value) facetQueryValues.push(qy.value); }));
@@ -842,6 +1355,7 @@ async function runSearch() {
         warningEl.classList.add("d-none");
       }
     }
+    collectTagNames(env);
     renderResults(env);
     renderPagination(env);
     const labels = await loadLabels();
@@ -1595,7 +2109,10 @@ export function attach() {
       // URL's ex_q clauses (sidebar facet selections and advanced-search conditions) so that
       // changing the sort does not silently drop a selected label. Only a new query from the
       // header form starts over without them.
-      new URLSearchParams(location.search).getAll("ex_q").forEach(v => params.append("ex_q", v));
+      // The tag filter of the facet, the result chips and the My tags panel is kept for the same reason.
+      const current = new URLSearchParams(location.search);
+      current.getAll("ex_q").forEach(v => params.append("ex_q", v));
+      current.getAll("fields.tag").forEach(v => params.append("fields.tag", v));
       navigate("search?" + params.toString());
     });
   }
@@ -1697,17 +2214,18 @@ async function loadLabels() {
 }
 
 /**
- * Build a generic facet group for field-value facets (label, dynamic fields).
- * Each entry click toggles the value in state.facets[fieldKey].
+ * Build a generic facet group for field-value facets (label, tag, dynamic fields).
+ * Each entry click toggles the value in state[store][fieldKey]: state.facets (sent as
+ * ex_q clauses) by default, or state.fields (sent as fields.* params) for the tag facet.
  */
-function buildFacetGroup(title, entries, fieldKey) {
+function buildFacetGroup(title, entries, fieldKey, store = "facets") {
   // Tag-parity with searchResults.jsp facet group:
   //   ul.list-group.mb-2 > li.list-group-item.text-uppercase(title)
   //                      + li.list-group-item > a > span.badge.rounded-pill.text-bg-secondary.float-end
   const ul = el("ul", { className: "list-group mb-2" });
   ul.appendChild(el("li", { className: "list-group-item text-uppercase", text: title }));
   entries.forEach(entry => {
-    const active = (state.facets[fieldKey] || []).includes(entry.value);
+    const active = (state[store][fieldKey] || []).includes(entry.value);
     const li = el("li", { className: "list-group-item" + (active ? " active" : "") });
     const a = el("a", { attrs: { href: "#" } });
     a.appendChild(document.createTextNode(entry.labelText + " "));
@@ -1716,8 +2234,8 @@ function buildFacetGroup(title, entries, fieldKey) {
     }
     a.addEventListener("click", ev => {
       ev.preventDefault();
-      state.facets[fieldKey] = state.facets[fieldKey] || [];
-      const arr = state.facets[fieldKey];
+      state[store][fieldKey] = state[store][fieldKey] || [];
+      const arr = state[store][fieldKey];
       const idx = arr.indexOf(entry.value);
       if (idx >= 0) arr.splice(idx, 1); else arr.push(entry.value);
       state.start = 0;
@@ -1833,16 +2351,31 @@ function renderFacets(env, labels) {
     }
   }
 
-  // 2. Dynamic facet fields from API (excluding filetype and label — rendered separately)
+  // 2. User tags (features.user_tag) — the server returns only the tags the user may see, each
+  //    with its name as label; other users' tags read with the shared prefix. Unlike the label
+  //    facet, a click filters through fields.tag (the API's tag filter, ORing the selected
+  //    tags); a selected tag stays listed so it can be cleared.
+  const tagField = userTagEnabled() ? facetField.find(f => f.name === "tag") : null;
+  if (tagField) {
+    const selectedTags = state.fields.tag || [];
+    const entries = (tagField.result || [])
+      .filter(r => r && r.value && (Number(r.count) > 0 || selectedTags.includes(r.value)))
+      .map(r => ({ labelText: tagLabel({ value: r.value, name: r.label, mine: r.mine }), value: r.value, count: r.count }));
+    if (entries.length > 0) {
+      body.appendChild(buildFacetGroup(t("tag.title"), entries, "tag", "fields"));
+    }
+  }
+
+  // 3. Dynamic facet fields from API (excluding filetype, label and tag — rendered separately)
   for (const field of facetField) {
-    if (field.name === "filetype" || field.name === "label") continue;
+    if (field.name === "filetype" || field.name === "label" || field.name === "tag") continue;
     const entries = (field.result || []).map(r => ({ labelText: r.value, value: r.value, count: r.count }));
     if (entries.length > 0) {
       body.appendChild(buildFacetGroup(field.name, entries, field.name));
     }
   }
 
-  // 3. Server-driven facet query views (timestamp ranges, size ranges, filetype
+  // 4. Server-driven facet query views (timestamp ranges, size ranges, filetype
   //    ranges, etc.) (SRCH-4). The filetype group is one of these query views
   //    (filetype:html, filetype:word, …), matching the JSP sidebar — so there is
   //    no separate field-based filetype group (that produced a duplicate
@@ -1921,7 +2454,8 @@ function renderActiveChips() {
 
   for (const [field, valueSet] of Object.entries(chipFieldSets)) {
     valueSet.forEach(v => chips.push({
-      label: field + ": " + v,
+      // A tag reads as its name rather than "tag: <opaque value>".
+      label: field === "tag" ? tagLabelOf(v) : field + ": " + v,
       remove: () => {
         // Remove from whichever store(s) hold this value.
         if (state.facets[field]) {
@@ -2294,13 +2828,7 @@ async function toggleFavorite(docId, btn, queryId) {
     // expired between page load and the click) *before* the auth check runs, so a
     // guest click can surface as 403 instead of 401. Logging in through the modal
     // issues a fresh session + token, so treat both the same.
-    if (e.code === "auth_required" || e.code === "AUTH_REQUIRED" || e.httpStatus === 401 || e.httpStatus === 403) {
-      if (!window.bootstrap || !bootstrap.Modal) {
-        console.warn("[fess] bootstrap not loaded; skipping modal show");
-      } else {
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
-      }
-    }
+    if (isAuthError(e)) showLoginModal();
   }
 }
 
