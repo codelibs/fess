@@ -32,6 +32,7 @@ import org.codelibs.fess.embedding.EmbeddingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -1191,7 +1192,7 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
 
         final String result = runHelper.executeChunkVectorProcessing();
 
-        assertEquals("Processed 3 documents. Succeeded: 2, Failed/Skipped: 1."
+        assertEquals("Processed 3 documents. Succeeded: 2, Failed/Skipped: 1. Failed: 0, skipped: 0, left pending: 1."
                 + " Concurrent updates: 2 document(s) were changed by another process before they could be written;"
                 + " 1 stored after a retry, 1 left pending for the next run.", result);
     }
@@ -1232,6 +1233,125 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         client.sources.get("doc-A").put("content", "content-A");
 
         assertEquals("Processed 1 documents. Succeeded: 1, Failed/Skipped: 0.", runHelper.executeChunkVectorProcessing());
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_reportsFailedSkippedAndPendingDocumentsSeparately() {
+        // One document of each outcome in a single run: stored, marked failed (a chunk the provider
+        // rejects), marked skipped (nothing to embed) and left pending (it could not be read).
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.add("doc-B", "content-B");
+        client.add("doc-C", "   ");
+        client.add("doc-D", "content-D");
+        client.failFetch = (id, n) -> "doc-D".equals(id);
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A", "doc-B", "doc-C", "doc-D");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testChunksByContent.put("content-B", List.of("poison"));
+        runHelper.poisonChunks.add("poison");
+        runHelper.testVectorsByChunk.put("chunk", new float[] { 1f });
+
+        final String result = runHelper.executeChunkVectorProcessing();
+
+        assertEquals("Processed 4 documents. Succeeded: 1, Failed/Skipped: 3. Failed: 1, skipped: 1, left pending: 1.", result);
+        assertEquals(Constants.DONE, client.sources.get("doc-A").get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.FAIL, client.sources.get("doc-B").get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertEquals(Constants.SKIPPED, client.sources.get("doc-C").get(Constants.CONTENT_CHUNK_STATUS_FIELD));
+        assertNull(client.sources.get("doc-D").get(Constants.CONTENT_CHUNK_STATUS_FIELD), "an unread document must stay pending");
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_everyDocumentFailed_isNotReportedAsSucceeded() {
+        // What a run reports when every document is rejected (an unset dimension, a provider that
+        // refuses the model): it must not read like a healthy run.
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.add("doc-B", "content-B");
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A", "doc-B");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testChunksByContent.put("content-B", List.of("chunk"));
+        runHelper.testEmbedFailure = new EmbeddingException("content_chunker.embedding.dimension is not configured");
+
+        final String result = runHelper.executeChunkVectorProcessing();
+
+        assertEquals("Processed 2 documents. Succeeded: 0, Failed/Skipped: 2. Failed: 2, skipped: 0, left pending: 0.", result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_everyDocumentSkipped_isNotReportedAsSucceeded() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "");
+        client.add("doc-B", "  ");
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A", "doc-B");
+
+        final String result = runHelper.executeChunkVectorProcessing();
+
+        assertEquals("Processed 2 documents. Succeeded: 0, Failed/Skipped: 2. Failed: 0, skipped: 2, left pending: 0.", result);
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_documentsMarkedFailed_logAWarning() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testEmbedFailure = new EmbeddingException("OpenSearch ML predict API error: 400 Bad Request");
+        final LogCapturingAppender capture = LogCapturingAppender.attach(ChunkVectorHelper.class);
+        try {
+            runHelper.executeChunkVectorProcessing();
+
+            assertTrue(
+                    capture.warnings().stream().anyMatch(m -> m.contains("1 document(s) were marked failed") && m.contains("retry_failed")),
+                    "a run that marked documents failed must say so at WARN and name the way back: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_withoutFailedDocuments_logsNoFailureWarning() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.add("doc-B", "   ");
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A", "doc-B");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testVectorsByChunk.put("chunk", new float[] { 1f });
+        final LogCapturingAppender capture = LogCapturingAppender.attach(ChunkVectorHelper.class);
+        try {
+            runHelper.executeChunkVectorProcessing();
+
+            assertTrue(capture.warnings().stream().noneMatch(m -> m.contains("marked failed")),
+                    "a skipped document is not a failure: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_executeChunkVectorProcessing_outcomeCountsStartOverEachRun() {
+        final ConcurrentWriterClient client = new ConcurrentWriterClient();
+        client.add("doc-A", "content-A");
+        client.add("doc-B", "   ");
+        ComponentUtil.register(client, "searchEngineClient");
+        final RunHelper runHelper = new RunHelper();
+        runHelper.ids = List.of("doc-A");
+        runHelper.testChunksByContent.put("content-A", List.of("chunk"));
+        runHelper.testEmbedFailure = new EmbeddingException("OpenSearch ML predict API error: 400 Bad Request");
+        assertTrue(runHelper.executeChunkVectorProcessing().contains("Failed: 1, skipped: 0"));
+
+        runHelper.ids = List.of("doc-B");
+        assertEquals("Processed 1 documents. Succeeded: 0, Failed/Skipped: 1. Failed: 0, skipped: 1, left pending: 0.",
+                runHelper.executeChunkVectorProcessing());
     }
 
     @Test
