@@ -41,6 +41,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingException;
+import org.codelibs.fess.embedding.RetryableEmbeddingException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.CredentialUrlUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -358,7 +359,10 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
      * @param operation log label, e.g. {@code "embedDocuments"} or {@code "embedQuery"}
      * @param texts the texts to embed, in the form to send as-is to the API
      * @return the parsed vectors, one per input text, in the same order
-     * @throws EmbeddingException if the model id is not configured, the provider call fails,
+     * @throws RetryableEmbeddingException if the provider could not be reached or kept failing with a
+     *         retryable condition through every attempt, or rejected the request while no node has the
+     *         model loaded (see {@link #isModelLoadedOnNoNode()}): nothing that says the texts are at fault
+     * @throws EmbeddingException if the model id is not configured, the provider rejected the request,
      *         or the response is unusable
      */
     private List<float[]> callEmbedApi(final String operation, final List<String> texts) {
@@ -398,6 +402,12 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
                         }
                         logger.warn("[Embedding:OPENSEARCH] API error. url={}, statusCode={}, message={}", url, statusCode,
                                 response.getReasonPhrase());
+                        // Release the connection before the probe below asks for another one.
+                        EntityUtils.consumeQuietly(response.getEntity());
+                        if (isModelLoadedOnNoNode()) {
+                            throw new RetryableEmbeddingException("OpenSearch ML predict API error: " + statusCode + " "
+                                    + response.getReasonPhrase() + " (the model is not loaded on any node)");
+                        }
                         throw new EmbeddingException("OpenSearch ML predict API error: " + statusCode + " " + response.getReasonPhrase());
                     }
                     String responseBody;
@@ -414,9 +424,72 @@ public class OpenSearchEmbeddingClient extends AbstractEmbeddingClient {
             });
         } catch (final EmbeddingException e) {
             throw e;
+        } catch (final IOException e) {
+            // executeWithRetry retries every IOException and a retryable status, so what reaches here
+            // has used up the whole retry budget on a failure that says nothing about the texts.
+            logger.warn("[Embedding:OPENSEARCH] Failed to call OpenSearch ML predict API. url={}, error={}", url, e.getMessage(), e);
+            throw new RetryableEmbeddingException("Failed to call OpenSearch ML predict API", e);
         } catch (final Exception e) {
             logger.warn("[Embedding:OPENSEARCH] Failed to call OpenSearch ML predict API. url={}, error={}", url, e.getMessage(), e);
             throw new EmbeddingException("Failed to call OpenSearch ML predict API", e);
+        }
+    }
+
+    /**
+     * Reports whether the nodes themselves say that none of them has the model deployed, from
+     * {@code GET /_plugins/_ml/profile/models/{model_id}}, which lists the model under every node that
+     * holds it together with its state there.
+     *
+     * <p>Consulted only after {@code _predict} rejected a request with a status that is not retryable,
+     * to tell a rejection of the texts from a rejection by a provider that is not serving. Right after a
+     * restart ML Commons answers {@code _predict} with a 400 until the model is loaded again, and
+     * {@code GET /_plugins/_ml/models/{model_id}} cannot tell: the model document keeps its persisted
+     * {@code DEPLOYED} for several seconds and only then goes through {@code DEPLOYING}. The profile is
+     * the nodes' own view, and it does not list the model for that whole time.</p>
+     *
+     * <p>Only a positive answer counts. A response that is not a successful JSON object (a role that may
+     * not call the profile API, an endpoint that is not there, an unreachable cluster) is no evidence
+     * about the model, so the rejection stays what it was before the profile was consulted. This is
+     * deliberately not part of {@link #checkAvailabilityNow()}, which decides whether a run starts at
+     * all and is left as it was.</p>
+     *
+     * @return true if the profile is readable and no node reports the model as deployed
+     */
+    protected boolean isModelLoadedOnNoNode() {
+        final String apiUrl = getApiUrl();
+        final String modelId = getModelId();
+        if (StringUtil.isBlank(apiUrl) || StringUtil.isBlank(modelId)) {
+            return false;
+        }
+        try {
+            final HttpGet request = new HttpGet(createRequestUri(apiUrl + "/_plugins/_ml/profile/models/" + modelId));
+            setAuthorization(request);
+            try (var response = getHttpClient().execute(request)) {
+                final int statusCode = response.getCode();
+                if (statusCode < 200 || statusCode >= 300) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[Embedding:OPENSEARCH] Model profile get failed. modelId={}, statusCode={}", modelId, statusCode);
+                    }
+                    return false;
+                }
+                final JsonNode profile =
+                        objectMapper.readTree(response.getEntity() != null ? EntityUtils.toString(response.getEntity()) : "");
+                if (!profile.isObject()) {
+                    return false;
+                }
+                for (final JsonNode node : profile.path("nodes")) {
+                    final String modelState = node.path("models").path(modelId).path("model_state").asText();
+                    if (MODEL_STATE_DEPLOYED.equals(modelState) || MODEL_STATE_PARTIALLY_DEPLOYED.equals(modelState)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Embedding:OPENSEARCH] Model profile is not available. modelId={}, error={}", modelId, e.getMessage());
+            }
+            return false;
         }
     }
 

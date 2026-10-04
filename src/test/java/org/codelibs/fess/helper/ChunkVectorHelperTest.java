@@ -29,6 +29,7 @@ import java.util.function.BiPredicate;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.embedding.EmbeddingException;
+import org.codelibs.fess.embedding.RetryableEmbeddingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
@@ -766,6 +767,46 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertFalse(results.get("doc-A"), "doc-A must stay pending through a retryable provider storm");
         assertFalse(results.get("doc-B"), "doc-B must stay pending through a retryable provider storm");
         assertEquals("a retryable provider storm must not stamp any document failed", 0, searchEngineClient.storeCallCount);
+    }
+
+    @Test
+    public void test_processDocument_retryableEmbeddingExceptionWhileProviderReportsAvailable_leavesDocumentPending() {
+        // The client raises RetryableEmbeddingException for a provider that did not answer within its own
+        // retries (a connection closed without a response) or that rejected the call because it is not
+        // serving yet. The availability cache says nothing different - it can lag a whole check interval -
+        // so the type of the failure is what keeps the document from being stamped failed.
+        final Map<String, Object> doc = baseDoc();
+        doc.put("content", "original content");
+        searchEngineClient.documentToReturn = doc;
+        helper.testChunks = List.of("chunk-a");
+        helper.testEmbeddingAvailable = true;
+        helper.testEmbedFailure = new RetryableEmbeddingException("Failed to call OpenSearch ML predict API",
+                new IOException("The target server failed to respond"));
+
+        final boolean result = helper.processDocument("doc-1");
+
+        assertFalse(result, "a provider failure is not a per-document defect");
+        assertEquals("a provider failure must write no status", 0, searchEngineClient.storeCallCount);
+    }
+
+    @Test
+    public void test_processBatch_retryableEmbeddingExceptionWhileProviderReportsAvailable_leavesAllDocumentsPending() {
+        final Map<String, Object> docA = baseDoc();
+        docA.put("content", "content-A");
+        final Map<String, Object> docB = baseDoc();
+        docB.put("content", "content-B");
+        helper.testDocumentsById.put("doc-A", docA);
+        helper.testDocumentsById.put("doc-B", docB);
+        helper.testChunksByContent.put("content-A", List.of("a1"));
+        helper.testChunksByContent.put("content-B", List.of("b1"));
+        helper.testEmbeddingAvailable = true;
+        helper.testEmbedFailure = new RetryableEmbeddingException("OpenSearch ML predict API error: 400 Bad Request");
+
+        final Map<String, Boolean> results = helper.processBatch(List.of("doc-A", "doc-B"));
+
+        assertFalse(results.get("doc-A"), "doc-A must stay pending while the provider is not serving");
+        assertFalse(results.get("doc-B"), "doc-B must stay pending while the provider is not serving");
+        assertEquals("no document may be stamped failed while the provider is not serving", 0, searchEngineClient.storeCallCount);
     }
 
     @Test
@@ -2185,6 +2226,14 @@ public class ChunkVectorHelperTest extends UnitFessTestCase {
         assertTrue(helper.isRetryableEmbeddingFailure(new java.net.ConnectException("Connection refused")),
                 "a connection refusal is retryable");
         assertTrue(helper.isRetryableEmbeddingFailure(new java.net.UnknownHostException("opensearch")), "a DNS failure is retryable");
+    }
+
+    @Test
+    public void test_isRetryableEmbeddingFailure_classifiesRetryableEmbeddingException() {
+        assertTrue(helper.isRetryableEmbeddingFailure(new RetryableEmbeddingException("Failed to call OpenSearch ML predict API",
+                new IOException("The target server failed to respond"))), "the client's own retryable failure must be retryable");
+        assertTrue(helper.isRetryableEmbeddingFailure(new RuntimeException("wrapper", new RetryableEmbeddingException("provider down"))),
+                "it must be recognised anywhere in the cause chain");
     }
 
     @Test

@@ -23,16 +23,19 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.codelibs.fess.embedding.EmbeddingException;
+import org.codelibs.fess.embedding.RetryableEmbeddingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.SocketPolicy;
 
 public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
 
@@ -58,6 +61,9 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
 
     /** Model get endpoint path for {@link #TEST_MODEL_ID}, used by the availability check. */
     private static final String MODEL_GET_PATH = "/_plugins/_ml/models/" + TEST_MODEL_ID;
+
+    /** Runtime profile endpoint path for {@link #TEST_MODEL_ID}: what the nodes themselves report about the model. */
+    private static final String MODEL_PROFILE_PATH = "/_plugins/_ml/profile/models/" + TEST_MODEL_ID;
 
     /** Captured live from OpenSearch 3.7.0 when the ML memory circuit breaker is open. */
     private static final String CIRCUIT_BREAKER_429_BODY =
@@ -352,6 +358,7 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             } catch (final EmbeddingException e) {
                 assertTrue(e.getMessage().contains("Failed to parse OpenSearch ML predict response"),
                         "message should indicate a parse failure: " + e.getMessage());
+                assertFalse(e instanceof RetryableEmbeddingException, "an unparsable response is a defect, never a retryable condition");
             }
         } finally {
             server.shutdown();
@@ -394,6 +401,8 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             // model") - a configuration error that must never be retried.
             server.enqueue(new MockResponse().setResponseCode(404)
                     .setBody("{\"error\":{\"type\":\"status_exception\",\"reason\":\"Failed to find model\"},\"status\":404}"));
+            // The rejection is then checked against what the nodes report about the model.
+            server.enqueue(new MockResponse().setBody(profileResponse("DEPLOYED")).setHeader("Content-Type", "application/json"));
             server.start();
 
             client.setTestApiUrl(server.url("/").toString().replaceAll("/$", ""));
@@ -408,7 +417,8 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             } catch (final EmbeddingException e) {
                 // expected
             }
-            assertEquals("404 must not be retried", 1, server.getRequestCount());
+            assertEquals("404 must not be retried: one predict, then one profile check", 2, server.getRequestCount());
+            assertEquals(PREDICT_PATH, takeRequest(server).getPath());
         } finally {
             server.shutdown();
         }
@@ -489,10 +499,143 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             } catch (final EmbeddingException e) {
                 assertTrue(e.getCause() instanceof java.io.IOException,
                         "cause should be the IOException from exhausted retries: " + e.getCause());
+                assertTrue(e instanceof RetryableEmbeddingException,
+                        "a retry-exhausted retryable status is the provider's failure, not the text's: " + e);
             }
             assertEquals("all retry attempts should have been made", 3, server.getRequestCount());
         } finally {
             server.shutdown();
+        }
+    }
+
+    @Test
+    public void test_embedDocuments_connectionClosedWithoutResponse_exhaustsRetriesAsRetryable() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        try {
+            // The server reads the request and drops the connection without answering (what ML Commons
+            // does while the node it runs on is going down). The client retries it like every other
+            // IOException; once the budget is spent the failure says nothing about the text.
+            server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+            server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+            server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+            server.start();
+
+            client.setTestApiUrl(server.url("/").toString().replaceAll("/$", ""));
+            client.setTestDimension(3);
+            client.setTestRetryMax(3);
+            client.setTestRetryBaseDelayMs(1L);
+            client.initHttpClient();
+
+            try {
+                client.embedDocuments(List.of("chunk"));
+                fail("expected RetryableEmbeddingException after retry exhaustion");
+            } catch (final RetryableEmbeddingException e) {
+                assertTrue(e.getCause() instanceof java.io.IOException, "cause should be the transport failure: " + e.getCause());
+            }
+            assertEquals("all retry attempts should have been made", 3, server.getRequestCount());
+        } finally {
+            server.shutdown();
+        }
+    }
+
+    @Test
+    public void test_embedDocuments_rejectedWhileModelIsLoadedOnNoNode_throwsRetryable() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        try {
+            // Captured live right after an OpenSearch restart: predict answers 400 "Model not ready yet"
+            // while the model document still says DEPLOYED, and the runtime profile - what the nodes
+            // actually hold - is an empty object. The rejection is the provider's, not the text's.
+            server.enqueue(new MockResponse().setResponseCode(400)
+                    .setBody("{\"error\":{\"type\":\"illegal_argument_exception\",\"reason\":\"Model not ready yet\"},\"status\":400}"));
+            server.enqueue(new MockResponse().setBody("{}").setHeader("Content-Type", "application/json"));
+            server.start();
+
+            client.setTestApiUrl(server.url("/").toString().replaceAll("/$", ""));
+            client.setTestDimension(3);
+            client.setTestRetryMax(5);
+            client.setTestRetryBaseDelayMs(1L);
+            client.initHttpClient();
+
+            try {
+                client.embedDocuments(List.of("chunk"));
+                fail("expected RetryableEmbeddingException");
+            } catch (final RetryableEmbeddingException e) {
+                // expected
+            }
+            assertEquals("a 400 is not retried by the client: one predict, one profile check", 2, server.getRequestCount());
+            assertEquals(PREDICT_PATH, takeRequest(server).getPath());
+            final RecordedRequest profileRequest = takeRequest(server);
+            assertEquals(MODEL_PROFILE_PATH, profileRequest.getPath());
+            assertEquals("GET", profileRequest.getMethod());
+        } finally {
+            server.shutdown();
+        }
+    }
+
+    @Test
+    public void test_embedDocuments_rejectedWhileModelIsStillDeploying_throwsRetryable() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        try {
+            server.enqueue(new MockResponse().setResponseCode(400)
+                    .setBody("{\"error\":{\"type\":\"illegal_argument_exception\",\"reason\":\"Model not ready yet\"},\"status\":400}"));
+            server.enqueue(new MockResponse().setBody(profileResponse("DEPLOYING")).setHeader("Content-Type", "application/json"));
+            server.start();
+
+            client.setTestApiUrl(server.url("/").toString().replaceAll("/$", ""));
+            client.setTestDimension(3);
+            client.initHttpClient();
+
+            Assertions.assertThrows(RetryableEmbeddingException.class, () -> client.embedDocuments(List.of("chunk")));
+        } finally {
+            server.shutdown();
+        }
+    }
+
+    @Test
+    public void test_embedDocuments_rejectedWhileModelIsLoaded_throwsPlainEmbeddingException() throws Exception {
+        final MockWebServer server = new MockWebServer();
+        try {
+            // Control: the nodes hold the model, so a 400 is about this request (a text the model
+            // cannot embed) and must stay a per-document failure.
+            server.enqueue(new MockResponse().setResponseCode(400)
+                    .setBody("{\"error\":{\"type\":\"illegal_argument_exception\",\"reason\":\"bad input\"},\"status\":400}"));
+            server.enqueue(new MockResponse().setBody(profileResponse("DEPLOYED")).setHeader("Content-Type", "application/json"));
+            server.start();
+
+            client.setTestApiUrl(server.url("/").toString().replaceAll("/$", ""));
+            client.setTestDimension(3);
+            client.initHttpClient();
+
+            final EmbeddingException e = Assertions.assertThrows(EmbeddingException.class, () -> client.embedDocuments(List.of("chunk")));
+            assertFalse(e instanceof RetryableEmbeddingException, "a rejection while the model is loaded is the text's: " + e);
+        } finally {
+            server.shutdown();
+        }
+    }
+
+    @Test
+    public void test_embedDocuments_rejectedWithoutRuntimeView_throwsPlainEmbeddingException() throws Exception {
+        // No answer from the profile endpoint is no evidence about the model: a role without the
+        // permission (403), an endpoint that is not there (404) and a body that is not JSON must
+        // leave the rejection a per-document failure, as it was before the profile was consulted.
+        for (final MockResponse profile : List.of(new MockResponse().setResponseCode(403).setBody("{\"status\":403}"),
+                new MockResponse().setResponseCode(404).setBody("{\"status\":404}"), new MockResponse().setBody("not json"))) {
+            final MockWebServer server = new MockWebServer();
+            try {
+                server.enqueue(new MockResponse().setResponseCode(400).setBody("{\"status\":400}"));
+                server.enqueue(profile);
+                server.start();
+
+                client.setTestApiUrl(server.url("/").toString().replaceAll("/$", ""));
+                client.setTestDimension(3);
+                client.initHttpClient();
+
+                final EmbeddingException e =
+                        Assertions.assertThrows(EmbeddingException.class, () -> client.embedDocuments(List.of("chunk")));
+                assertFalse(e instanceof RetryableEmbeddingException, "no evidence about the model must not turn into a retry: " + e);
+            } finally {
+                server.shutdown();
+            }
         }
     }
 
@@ -1688,6 +1831,15 @@ public class OpenSearchEmbeddingClientTest extends UnitFessTestCase {
             throw new AssertionError("no request recorded within 10 seconds");
         }
         return request;
+    }
+
+    /**
+     * Builds a {@code GET /_plugins/_ml/profile/models/{id}} response body in which one node reports
+     * {@link #TEST_MODEL_ID} in the given state, shaped like the response captured live from OpenSearch 3.9.0.
+     */
+    private static String profileResponse(final String modelState) {
+        return "{\"nodes\":{\"node-1\":{\"models\":{\"" + TEST_MODEL_ID + "\":{\"model_state\":\"" + modelState
+                + "\",\"target_worker_nodes\":[\"node-1\"]}}}}}";
     }
 
     /**
