@@ -67,6 +67,23 @@ public class TagTypeServiceTest extends UnitFessTestCase {
             }
         }
 
+        org.codelibs.fesen.opensearch.action.delete.DeleteRequest deleteRequest;
+
+        @Override
+        public void delete(final TagType entity,
+                final RequestOptionCall<org.codelibs.fesen.opensearch.action.delete.DeleteRequestBuilder> opLambda) {
+            final org.codelibs.fesen.opensearch.action.delete.DeleteRequestBuilder builder =
+                    new org.codelibs.fesen.opensearch.action.delete.DeleteRequestBuilder(null,
+                            org.codelibs.fesen.opensearch.action.delete.DeleteAction.INSTANCE, null);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+            deleteRequest = builder.request();
+            if (failure != null) {
+                throw failure;
+            }
+        }
+
         @Override
         public void update(final TagType entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
             updateRequest = apply(opLambda);
@@ -150,6 +167,40 @@ public class TagTypeServiceTest extends UnitFessTestCase {
         tagType.setPrimaryTerm(2L);
 
         assertThrows(TagTypeConflictException.class, () -> createService(bhv).update(tagType));
+    }
+
+    @Test
+    public void test_delete_passesSeqNoAndPrimaryTerm() {
+        final RecordingTagTypeBhv bhv = new RecordingTagTypeBhv();
+        final TagType tagType = createTagType();
+        tagType.setSeqNo(5L);
+        tagType.setPrimaryTerm(2L);
+
+        createService(bhv).delete(tagType);
+
+        assertEquals(5L, bhv.deleteRequest.ifSeqNo());
+        assertEquals(2L, bhv.deleteRequest.ifPrimaryTerm());
+        assertEquals(RefreshPolicy.IMMEDIATE, bhv.deleteRequest.getRefreshPolicy());
+    }
+
+    @Test
+    public void test_delete_withoutSeqNoIsRefused() {
+        // A delete without the sequence number would drop a concurrent change unseen.
+        final RecordingTagTypeBhv bhv = new RecordingTagTypeBhv();
+
+        assertThrows(IllegalArgumentException.class, () -> createService(bhv).delete(createTagType()));
+        assertNull(bhv.deleteRequest);
+    }
+
+    @Test
+    public void test_delete_conflictThrowsTagTypeConflictException() {
+        final RecordingTagTypeBhv bhv = new RecordingTagTypeBhv();
+        bhv.failure = new VersionConflictEngineException("[0123456789abcdef]: version conflict, required seqNo [5]");
+        final TagType tagType = createTagType();
+        tagType.setSeqNo(5L);
+        tagType.setPrimaryTerm(2L);
+
+        assertThrows(TagTypeConflictException.class, () -> createService(bhv).delete(tagType));
     }
 
     @Test

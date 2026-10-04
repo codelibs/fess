@@ -140,6 +140,14 @@ final class TagHandlerTestSupport {
         final List<String> calls = new ArrayList<>();
         /** The number of the next updates that lose a race with another writer. */
         int updateConflicts;
+        /** The number of the next deletes that lose a race with another writer. */
+        int deleteConflicts;
+        /** The tags whose deletes lose the race; all when null. */
+        java.util.function.Predicate<TagType> deleteConflictOn;
+        /** The change the other writer makes to the stored tag when a delete loses the race. */
+        java.util.function.Consumer<TagType> onDeleteConflict;
+        /** The deletes that fail with an error other than a conflict. */
+        java.util.function.Predicate<TagType> deleteFailure;
 
         @Override
         public OptionalEntity<TagType> getTagType(final String id) {
@@ -213,7 +221,27 @@ final class TagHandlerTestSupport {
         @Override
         public void delete(final TagType tagType) {
             calls.add("delete " + tagType.getName() + "/" + tagType.getOwner());
-            store.remove(tagType.getId());
+            final String id = tagType.getId();
+            if (tagType.getSeqNo() == null || tagType.getPrimaryTerm() == null) {
+                throw new IllegalArgumentException("no seqNo");
+            }
+            if (deleteFailure != null && deleteFailure.test(tagType)) {
+                throw new IllegalStateException("delete failed: " + id);
+            }
+            if (deleteConflicts > 0 && (deleteConflictOn == null || deleteConflictOn.test(tagType))) {
+                deleteConflicts--;
+                // another writer changes the tag between the read and the delete
+                final TagType stored = store.get(id);
+                if (stored != null && onDeleteConflict != null) {
+                    onDeleteConflict.accept(stored);
+                }
+                seqNoMap.merge(id, 1L, Long::sum);
+                throw new TagTypeConflictException("changed: " + id, null);
+            }
+            if (!store.containsKey(id) || !tagType.getSeqNo().equals(seqNoMap.get(id))) {
+                throw new TagTypeConflictException("changed: " + id, null);
+            }
+            store.remove(id);
         }
     }
 

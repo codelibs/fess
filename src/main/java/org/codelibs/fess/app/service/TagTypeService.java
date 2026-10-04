@@ -224,14 +224,32 @@ public class TagTypeService extends FessAppService {
     }
 
     /**
-     * Delete a tag type.
+     * Delete a tag type that was read with {@link #getTagType(String)}. The delete fails when the
+     * stored tag type changed since it was read, so that a concurrent change, such as a URL added to
+     * its paths, is not dropped unseen.
      *
-     * @param tagType The tag type to delete.
+     * @param tagType The tag type to delete, carrying the sequence number and primary term it was read with.
+     * @throws IllegalArgumentException When the tag type carries no sequence number or primary term.
+     * @throws TagTypeConflictException When the stored tag type changed since it was read.
      */
     public void delete(final TagType tagType) {
-        tagTypeBhv.delete(tagType, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        final Long seqNo = tagType.getSeqNo();
+        final Long primaryTerm = tagType.getPrimaryTerm();
+        if (seqNo == null || seqNo.longValue() < 0L || primaryTerm == null || primaryTerm.longValue() <= 0L) {
+            throw new IllegalArgumentException("The tag type has no sequence number or primary term: id=" + tagType.getId());
+        }
+        try {
+            tagTypeBhv.delete(tagType, op -> {
+                op.setIfSeqNo(seqNo);
+                op.setIfPrimaryTerm(primaryTerm);
+                op.setRefreshPolicy(Constants.TRUE);
+            });
+        } catch (final RuntimeException e) {
+            if (isVersionConflict(e)) {
+                throw new TagTypeConflictException("The tag type was changed concurrently: id=" + tagType.getId(), e);
+            }
+            throw e;
+        }
     }
 
     /**

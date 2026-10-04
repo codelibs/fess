@@ -254,6 +254,70 @@ public class TagsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_put_rename_retriesWhenTheOldTagChangedConcurrently() throws Exception {
+        env.user("alice");
+        final TagType old = env.put("foo", "alice", false, "http://a/");
+        env.service.deleteConflicts = 1;
+        // a concurrent attach to the old tag between the read and the delete
+        env.service.onDeleteConflict = stored -> stored.setPaths(new String[] { "http://a/", "http://b/" });
+        final Response res = call(request("PUT").json("{\"name\":\"bar\"}"), old.getId());
+        Assertions.assertEquals(200, res.status, res.body());
+        final TagType renamed = env.stored("bar", "alice");
+        Assertions.assertEquals(list("http://a/", "http://b/"), list(renamed.getPaths()));
+        Assertions.assertNull(env.service.store.get(old.getId()));
+        Assertions.assertEquals(List.of(TagChange.rename(old.getTagValue(), renamed.getTagValue())), env.helper.changes);
+    }
+
+    @Test
+    public void test_put_rename_keepsLosingTheRace_returnsConflictAndRollsBack() throws Exception {
+        env.user("alice");
+        final TagType old = env.put("foo", "alice", false, "http://a/");
+        env.service.deleteConflicts = 100;
+        env.service.deleteConflictOn = t -> "foo".equals(t.getName());
+        final Response res = call(request("PUT").json("{\"name\":\"bar\"}"), old.getId());
+        Assertions.assertEquals(409, res.status, res.body());
+        Assertions.assertEquals("the tag was changed concurrently; try again", res.errorMessage());
+        Assertions.assertNull(env.stored("bar", "alice"), "the new tag is rolled back");
+        Assertions.assertNotNull(env.service.store.get(old.getId()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
+    public void test_put_rename_deleteFailure_rollsBackTheNewTag() throws Exception {
+        env.user("alice");
+        final TagType old = env.put("foo", "alice", false, "http://a/");
+        env.service.deleteFailure = t -> "foo".equals(t.getName());
+        final Response res = call(request("PUT").json("{\"name\":\"bar\"}"), old.getId());
+        Assertions.assertEquals(500, res.status, res.body());
+        Assertions.assertNull(env.stored("bar", "alice"), "the new tag is rolled back");
+        Assertions.assertNotNull(env.service.store.get(old.getId()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
+    public void test_delete_retriesWhenTheTagChangedConcurrently() throws Exception {
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/");
+        env.service.deleteConflicts = 1;
+        final Response res = call(request("DELETE"), tag.getId());
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertNull(env.service.store.get(tag.getId()));
+        Assertions.assertEquals(List.of(TagChange.delete(tag.getTagValue())), env.helper.changes);
+    }
+
+    @Test
+    public void test_delete_keepsLosingTheRace_returnsConflict() throws Exception {
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/");
+        env.service.deleteConflicts = 100;
+        final Response res = call(request("DELETE"), tag.getId());
+        Assertions.assertEquals(409, res.status, res.body());
+        Assertions.assertEquals("conflict", res.errorCode());
+        Assertions.assertNotNull(env.service.store.get(tag.getId()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
     public void test_put_renameToExistingName_returnsConflictAndKeepsTheOldTag() throws Exception {
         env.user("alice");
         final TagType old = env.put("foo", "alice", false, "http://a/");

@@ -155,32 +155,68 @@ public class TagsHandler extends AbstractTagHandler {
     /**
      * Renames a tag: the tag of the new name is created with the paths, permissions, virtual host and sort order of
      * the old one, the old one is deleted, and the rename of the value on the documents is queued. When the caller
-     * has a tag of the new name already, nothing changes.
+     * has a tag of the new name already, nothing changes. The old tag is deleted only if it did not change since it
+     * was read; otherwise the new tag is removed again and the rename is retried on a fresh read, so that a URL
+     * added to the old tag meanwhile is carried over.
      */
-    private TagType renameTag(final TagType current, final String name, final Boolean shared, final String userId)
-            throws TagRequestException {
+    private TagType renameTag(final TagType read, final String name, final Boolean shared, final String userId) throws TagRequestException {
         final TagTypeHelper helper = getTagTypeHelper();
-        final TagType renamed = new TagType();
-        renamed.setName(name);
-        renamed.setOwner(current.getOwner());
-        renamed.setId(helper.toId(renamed.getTagValue()));
-        renamed.setPaths(current.getPaths());
-        renamed.setPermissions(
-                shared == null ? current.getPermissions() : applyShared(current.getPermissions(), current.getOwner(), shared));
-        renamed.setVirtualHost(current.getVirtualHost());
-        renamed.setSortOrder(current.getSortOrder());
-        renamed.setCreatedBy(current.getCreatedBy());
-        renamed.setCreatedTime(current.getCreatedTime());
-        renamed.setUpdatedBy(userId);
-        renamed.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
-        try {
-            getTagTypeService().insert(renamed);
-        } catch (final TagTypeConflictException e) {
-            throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
+        TagType current = read;
+        for (int attempt = 1;; attempt++) {
+            if (attempt > 1) {
+                current = getOwnTagType(read.getId(), userId);
+            }
+            final TagType renamed = new TagType();
+            renamed.setName(name);
+            renamed.setOwner(current.getOwner());
+            renamed.setId(helper.toId(renamed.getTagValue()));
+            renamed.setPaths(current.getPaths());
+            renamed.setPermissions(
+                    shared == null ? current.getPermissions() : applyShared(current.getPermissions(), current.getOwner(), shared));
+            renamed.setVirtualHost(current.getVirtualHost());
+            renamed.setSortOrder(current.getSortOrder());
+            renamed.setCreatedBy(current.getCreatedBy());
+            renamed.setCreatedTime(current.getCreatedTime());
+            renamed.setUpdatedBy(userId);
+            renamed.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+            try {
+                getTagTypeService().insert(renamed);
+            } catch (final TagTypeConflictException e) {
+                throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
+            }
+            try {
+                getTagTypeService().delete(current);
+            } catch (final TagTypeConflictException e) {
+                rollBack(renamed);
+                if (attempt >= MAX_UPDATE_ATTEMPTS) {
+                    logger.warn("Failed to rename the tag after {} attempts: id={}", attempt, read.getId(), e);
+                    throw new TagRequestException(V2ErrorCode.CONFLICT, "the tag was changed concurrently; try again");
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("The tag was changed concurrently; retrying the rename: id={}, attempt={}", read.getId(), attempt);
+                }
+                continue;
+            } catch (final RuntimeException e) {
+                rollBack(renamed);
+                throw e;
+            }
+            enqueue(TagChange.rename(current.getTagValue(), renamed.getTagValue()));
+            return renamed;
         }
-        getTagTypeService().delete(current);
-        enqueue(TagChange.rename(current.getTagValue(), renamed.getTagValue()));
-        return renamed;
+    }
+
+    /**
+     * Deletes the tag created for a rename that could not delete the old tag, so that the caller is not left with
+     * both. A failure is logged; the caller can delete the leftover tag.
+     *
+     * @param inserted the tag created for the rename
+     */
+    private void rollBack(final TagType inserted) {
+        try {
+            getTagTypeService().getTagType(inserted.getId()).ifPresent(getTagTypeService()::delete);
+        } catch (final RuntimeException e) {
+            logger.warn("Failed to remove the tag created for a rename: id={}", inserted.getId(), e);
+        }
     }
 
     /**
@@ -217,9 +253,20 @@ public class TagsHandler extends AbstractTagHandler {
     }
 
     private Map<String, Object> deleteTag(final String tagId, final String userId) throws TagRequestException {
-        final TagType tagType = getOwnTagType(tagId, userId);
-        getTagTypeService().delete(tagType);
-        enqueue(TagChange.delete(tagType.getTagValue()));
+        for (int attempt = 1;; attempt++) {
+            final TagType tagType = getOwnTagType(tagId, userId);
+            try {
+                getTagTypeService().delete(tagType);
+            } catch (final TagTypeConflictException e) {
+                if (attempt >= MAX_UPDATE_ATTEMPTS) {
+                    logger.warn("Failed to delete the tag after {} attempts: id={}", attempt, tagId, e);
+                    throw new TagRequestException(V2ErrorCode.CONFLICT, "the tag was changed concurrently; try again");
+                }
+                continue;
+            }
+            enqueue(TagChange.delete(tagType.getTagValue()));
+            break;
+        }
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("id", tagId);
         payload.put("deleted", true);
