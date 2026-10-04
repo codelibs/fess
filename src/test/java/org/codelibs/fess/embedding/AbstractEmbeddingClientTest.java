@@ -379,8 +379,10 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
         }
     }
 
+    // The check is a one-shot task that re-arms itself with the interval in force when it finishes,
+    // so a changed interval takes effect at the next run and no task is left over.
     @Test
-    public void test_runAvailabilityCheck_restartsWhenIntervalChanges() {
+    public void test_runAvailabilityCheck_rearmsWithCurrentInterval() {
         final TestEmbeddingClient client = new TestEmbeddingClient();
         client.setTestContentChunkerEnabled(true);
         client.setTestAvailabilityCheckInterval(30);
@@ -388,16 +390,62 @@ public class AbstractEmbeddingClientTest extends UnitFessTestCase {
             client.init();
             final TimeoutTask first = client.availabilityCheckTask;
             assertNotNull(first);
-            assertEquals(30, client.availabilityCheckInterval);
+            assertFalse(first.isPermanent(), "a permanent task cannot be replaced from inside its own run");
 
             client.runAvailabilityCheck();
-            assertSame(first, client.availabilityCheckTask, "an unchanged interval keeps the task");
+            final TimeoutTask second = client.availabilityCheckTask;
+            assertFalse(first == second, "every run arms the next one");
+            assertFalse(second.isPermanent());
 
             client.setTestAvailabilityCheckInterval(10);
             client.runAvailabilityCheck();
-            assertTrue(first.isCanceled());
-            assertFalse(first == client.availabilityCheckTask);
-            assertEquals(10, client.availabilityCheckInterval);
+            assertFalse(second == client.availabilityCheckTask);
+            assertFalse(client.availabilityCheckTask.isCanceled());
+        } finally {
+            client.destroy();
+        }
+    }
+
+    @Test
+    public void test_runAvailabilityCheck_afterDestroy_doesNotRearm() {
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        client.setTestContentChunkerEnabled(true);
+        client.setTestAvailabilityCheckInterval(30);
+        client.init();
+        final TimeoutTask last = client.availabilityCheckTask;
+        final int probes = client.availabilityProbeCount();
+        client.destroy();
+
+        client.runAvailabilityCheck();
+        assertSame(last, client.availabilityCheckTask, "a check that outlives destroy() must not arm another one");
+        assertTrue(last.isCanceled());
+        assertEquals(probes, client.availabilityProbeCount());
+    }
+
+    // corelib's TimeoutManager calls restart() on a permanent task after every run, which undoes a cancel()
+    // made from inside that run. Cancelling the running check when the interval changed therefore left it
+    // running next to its replacement: after 60 -> 5 -> 60 the 5 s check never stopped. Driven by the real
+    // TimeoutManager, so it takes about ten seconds.
+    @Test
+    public void test_availabilityCheck_intervalChangeLeavesOneCheckRunning() throws Exception {
+        final TestEmbeddingClient client = new TestEmbeddingClient();
+        client.setTestContentChunkerEnabled(true);
+        client.setTestAvailabilityCheckInterval(1);
+        try {
+            client.init();
+            final long deadline = System.currentTimeMillis() + 20000;
+            while (client.availabilityProbeCount() < 3 && System.currentTimeMillis() < deadline) {
+                Thread.sleep(100);
+            }
+            assertTrue(client.availabilityProbeCount() >= 3, "the check should be running every second");
+
+            client.setTestAvailabilityCheckInterval(5);
+            Thread.sleep(2000); // the pending one-second run picks the new interval up
+            final int before = client.availabilityProbeCount();
+            Thread.sleep(7000);
+            final int probes = client.availabilityProbeCount() - before;
+            assertTrue(probes >= 1, "the check must keep running: " + probes);
+            assertTrue(probes <= 3, "a 5 s check runs once or twice in 7 s, but a left-over 1 s check adds about 7: " + probes);
         } finally {
             client.destroy();
         }
