@@ -50,6 +50,11 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         private static final long serialVersionUID = 1L;
 
         @Override
+        public String getIndexFieldTag() {
+            return "tag";
+        }
+
+        @Override
         public Integer getPageSearchlistContentMaxLengthAsInteger() {
             // SimpleImpl's ObjectiveConfig backing is never initialized in unit tests (a plain
             // getAsInteger would NPE), so resolve from the generated default map -- which also
@@ -1205,6 +1210,78 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_stripSystemManagedFields_removesTagField() {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "https://example.com");
+        doc.put("tag", new String[] { "smuggled" });
+        AdminSearchlistAction.stripSystemManagedFields(new HashMap<>(), doc);
+        assertFalse(doc.containsKey("tag"));
+    }
+
+    @Test
+    public void test_create_setsTagFromTagTypes() throws Exception {
+        final FessConfig testConfig = buildFullFessConfig();
+        final FakeSearchEngineClient client = new FakeSearchEngineClient();
+        ComponentUtil.register(new org.codelibs.fess.helper.TagTypeHelper() {
+            @Override
+            public void applyTags(final List<Map<String, Object>> docList) {
+                docList.forEach(d -> d.put("tag", new String[] { "tv" }));
+            }
+        }, "tagTypeHelper");
+        final AdminSearchlistAction action = createInjectedAction(client, testConfig);
+        mockTokenRequested(action.getClass());
+
+        final CreateForm form = new CreateForm();
+        form.crudMode = CrudMode.CREATE;
+        form.doc = new HashMap<>();
+        form.doc.put("url", "https://example.com/new");
+        form.doc.put("title", "Title");
+        form.doc.put("role", "Rguest");
+        form.doc.put("boost", "1.0");
+        form.doc.put("tag", new String[] { "smuggled" });
+        action.create(form);
+
+        assertNotNull(client.lastStoredDoc);
+        assertEquals("tv", ((String[]) client.lastStoredDoc.get("tag"))[0]);
+    }
+
+    @Test
+    public void test_update_recomputesTagFromTagTypes() throws Exception {
+        final FessConfig testConfig = buildFullFessConfig();
+        final FakeSearchEngineClient client = new FakeSearchEngineClient();
+        final Map<String, Object> fetched = new HashMap<>();
+        fetched.put("doc_id", "d1");
+        fetched.put("_id", "d1-id");
+        fetched.put("url", "https://example.com/a");
+        fetched.put("tag", new String[] { "old" });
+        fetched.put("_seq_no", 5L);
+        fetched.put("_primary_term", 1L);
+        client.documentToReturn = fetched;
+        ComponentUtil.register(new org.codelibs.fess.helper.TagTypeHelper() {
+            @Override
+            public void applyTags(final List<Map<String, Object>> docList) {
+                docList.forEach(d -> d.put("tag", new String[] { "new:" + d.get("url") }));
+            }
+        }, "tagTypeHelper");
+        final AdminSearchlistAction action = createInjectedAction(client, testConfig);
+        mockTokenRequested(action.getClass());
+
+        final EditForm form = new EditForm();
+        form.crudMode = CrudMode.EDIT;
+        form.doc = new HashMap<>();
+        form.doc.put("doc_id", "d1");
+        form.doc.put("url", "https://example.com/b");
+        form.doc.put("title", "Title");
+        form.doc.put("role", "Rguest");
+        form.doc.put("boost", "1.0");
+        form.q = "test-query";
+        action.update(form);
+
+        assertNotNull(client.lastStoredDoc);
+        assertEquals("new:https://example.com/b", ((String[]) client.lastStoredDoc.get("tag"))[0]);
+    }
+
+    @Test
     public void test_create_freshEntity_stripsSystemFieldsButKeepsClientContentString() throws Exception {
         final FessConfig testConfig = buildFullFessConfig();
         final FakeSearchEngineClient client = new FakeSearchEngineClient();
@@ -1251,6 +1328,14 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
      */
     private AdminSearchlistAction createInjectedAction(final FakeSearchEngineClient client, final FessConfig testConfig) throws Exception {
         suppressBindingOf(org.codelibs.fess.app.web.base.login.FessLoginAssist.class);
+        if (!ComponentUtil.hasComponent("tagTypeHelper")) {
+            ComponentUtil.register(new org.codelibs.fess.helper.TagTypeHelper() {
+                @Override
+                public void applyTags(final List<Map<String, Object>> docList) {
+                    // no-op
+                }
+            }, "tagTypeHelper");
+        }
         final AdminSearchlistAction action = new AdminSearchlistAction();
         inject(action);
 

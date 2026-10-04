@@ -214,6 +214,12 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
     private ApiAdminSearchlistAction createInjectedAction(final FakeSearchEngineClient client, final FessConfig testConfig)
             throws Exception {
         suppressBindingOf(org.codelibs.fess.app.web.base.login.FessLoginAssist.class);
+        ComponentUtil.register(new org.codelibs.fess.helper.TagTypeHelper() {
+            @Override
+            public void applyTags(final List<Map<String, Object>> docList) {
+                docList.forEach(d -> d.put("tag", new String[] { "tv" }));
+            }
+        }, "tagTypeHelper");
         // FessApiAction declares @Resource AccessTokenService, whose own AccessTokenBhv @Resource
         // cannot be assembled in the unit container; only isAccessAllowed() (never reached when the
         // execute method is called directly) uses it.
@@ -252,6 +258,11 @@ public class ApiAdminSearchlistActionTest extends UnitFessTestCase {
     private FessConfig buildFullFessConfig() {
         return new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexFieldTag() {
+                return "tag";
+            }
 
             @Override
             public String getIndexAdminRequiredFields() {

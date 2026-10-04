@@ -169,6 +169,7 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
             });
         }
 
+        ComponentUtil.getTagTypeHelper().applyTags(docList);
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final BulkResponse response = searchEngineClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
             if (doc.get(fessConfig.getIndexFieldConfigId()) instanceof final String configId) {

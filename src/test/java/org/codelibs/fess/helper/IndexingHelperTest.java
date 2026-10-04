@@ -131,6 +131,77 @@ public class IndexingHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_sendDocuments_appliesTagsBeforeAddAll() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isUserTagEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isThumbnailCrawlerEnabled() {
+                return false;
+            }
+
+            @Override
+            public String getIndexDocumentUpdateIndex() {
+                return "fess.update";
+            }
+
+            @Override
+            public String getIndexFieldConfigId() {
+                return "config_id";
+            }
+
+            @Override
+            public String getIndexFieldUrl() {
+                return "url";
+            }
+
+            @Override
+            public String getIndexFieldId() {
+                return "_id";
+            }
+
+            @Override
+            public String getIndexFieldDocId() {
+                return "doc_id";
+            }
+        });
+        final List<Map<String, Object>> applied = new ArrayList<>();
+        ComponentUtil.register(new TagTypeHelper() {
+            @Override
+            public void applyTags(final List<Map<String, Object>> docList) {
+                applied.addAll(docList);
+                docList.forEach(d -> d.put("tag", new String[] { "t1" }));
+            }
+        }, "tagTypeHelper");
+        final List<Object> tagsAtAddAll = new ArrayList<>();
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            public BulkResponse addAll(final String index, final List<Map<String, Object>> docList,
+                    final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
+                docList.forEach(d -> tagsAtAddAll.add(d.get("tag")));
+                return new BulkResponse(new BulkItemResponse[0], 0L);
+            }
+
+            @Override
+            public List<Map<String, Object>> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition) {
+                return Collections.emptyList();
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+        final DocList docList = new DocList();
+        docList.add(new HashMap<>(Map.of("_id", "001", "url", "http://test.com/001")));
+        indexingHelper.sendDocuments(client, docList);
+        assertEquals(1, applied.size());
+        assertEquals(1, tagsAtAddAll.size());
+        assertNotNull(tagsAtAddAll.get(0));
+    }
+
+    @Test
     public void test_deleteOldDocuments() {
         documentSizeByQuery = 0L;
         final List<String> deletedDocIdList = new ArrayList<>();
