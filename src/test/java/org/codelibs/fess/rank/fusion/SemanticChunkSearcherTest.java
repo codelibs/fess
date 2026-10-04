@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.apache.logging.log4j.Level;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -40,8 +42,11 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryStringBuilder;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequestImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.di.core.ExternalContext;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.codelibs.fesen.opensearch.action.search.SearchAction;
@@ -397,6 +402,124 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         // allintitle: narrows to one field, and a chunk vector covers the document rather than a
         // field, so the branch cannot honour it and must not run without it
         assertFalse(searcher.prepare("allintitle:opensearch", new StubSearchRequestParams(0, 10)).isPresent());
+    }
+
+    // -------------------------------------------------------------------------------------
+    //                                                              one embedding per request
+    //                                                              -------------------------
+
+    @Test
+    public void test_prepare_embedsTheSameWordsOnceForTheRequest() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> first =
+                searcher.prepare("opensearch", new StubSearchRequestParams(0, 10));
+        // a second branch of the same request - the Fess-side fusion that follows a refused fused
+        // request, or the retry of a rejected query - asks for the same words again
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> second =
+                searcher.prepare("opensearch", new StubSearchRequestParams(0, 10));
+        assertEquals(1, searcher.embedCount, "the words of a request must be embedded once");
+        assertTrue(first.isPresent() && second.isPresent());
+        assertEquals(first.get().getQueryVector()[0], second.get().getQueryVector()[0]);
+    }
+
+    @Test
+    public void test_prepare_neverReusesTheEmbeddingOfOtherWords() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final float[] first = searcher.prepare("opensearch", new StubSearchRequestParams(0, 10)).get().getQueryVector();
+        final float[] other = searcher.prepare("fess", new StubSearchRequestParams(0, 10)).get().getQueryVector();
+        assertEquals(2, searcher.embedCount);
+        assertEquals("fess", searcher.embeddedQuery);
+        assertTrue(first[0] == "opensearch".length());
+        assertTrue(other[0] == "fess".length(), "the vector of other words must be computed for them");
+        // the words of the request are now the other ones
+        assertTrue(searcher.prepare("opensearch", new StubSearchRequestParams(0, 10)).get().getQueryVector()[0] == "opensearch".length());
+    }
+
+    @Test
+    public void test_prepare_doesNotShareTheEmbeddingBetweenRequests() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.prepare("opensearch", new StubSearchRequestParams(0, 10));
+        assertEquals(1, searcher.embedCount);
+
+        // another request - another user - asking for the same words
+        final HttpServletRequest other = new MockletHttpServletRequestImpl(getMockRequest().getServletContext(), "/search");
+        final ExternalContext externalContext = SingletonLaContainerFactory.getExternalContext();
+        final Object current = externalContext.getRequest();
+        externalContext.setRequest(other);
+        try {
+            searcher.prepare("opensearch", new StubSearchRequestParams(0, 10));
+        } finally {
+            externalContext.setRequest(current);
+        }
+        assertEquals(2, searcher.embedCount, "an embedding must never outlive the request it was computed for");
+    }
+
+    @Test
+    public void test_prepare_withoutARequestEmbedsEveryTime() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final ExternalContext externalContext = SingletonLaContainerFactory.getExternalContext();
+        final Object current = externalContext.getRequest();
+        externalContext.setRequest(null);
+        try {
+            assertTrue(searcher.prepare("opensearch", new StubSearchRequestParams(0, 10)).isPresent());
+            assertTrue(searcher.prepare("opensearch", new StubSearchRequestParams(0, 10)).isPresent());
+        } finally {
+            externalContext.setRequest(current);
+        }
+        // nothing ties the embedding to a request, so nothing is kept
+        assertEquals(2, searcher.embedCount);
+    }
+
+    @Test
+    public void test_prepare_aFailedEmbeddingIsNotRemembered() {
+        final GuardedSearcher searcher = new GuardedSearcher();
+        searcher.embedFailure = new RuntimeException("provider down");
+        assertFalse(searcher.prepare("opensearch", new StubSearchRequestParams(0, 10)).isPresent());
+        searcher.embedFailure = null;
+        assertTrue(searcher.prepare("opensearch", new StubSearchRequestParams(0, 10)).isPresent(),
+                "a provider that answered once it recovered must be asked again");
+        assertEquals(2, searcher.embedCount);
+    }
+
+    @Test
+    public void test_prepare_escapedRetryOfAPlainQueryReusesTheEmbedding() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "opensearch cluster";
+            }
+        };
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+        // what SearchHelper runs again when the first attempt is rejected as an invalid query
+        final String escaped = ComponentUtil.getQueryStringBuilder().params(params).escape(true).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        assertTrue(searcher.prepare(query, params).isPresent());
+        assertTrue(searcher.prepare(escaped, params).isPresent());
+        assertEquals("opensearch cluster", searcher.embeddedQuery);
+        assertEquals(1, searcher.embedCount, "escaping a query without reserved characters leaves the words alone");
+    }
+
+    @Test
+    public void test_prepare_escapedRetryThatChangesTheWordsEmbedsAgain() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "opensearch label:news";
+            }
+        };
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+        final String escaped = ComponentUtil.getQueryStringBuilder().params(params).escape(true).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        assertTrue(searcher.prepare(query, params).isPresent());
+        assertEquals("opensearch", searcher.embeddedQuery);
+        // escaped, the condition the user typed is words to search for: not the embedding of the first attempt
+        assertTrue(searcher.prepare(escaped, params).isPresent());
+        assertEquals(2, searcher.embedCount);
+        assertFalse("opensearch".equals(searcher.embeddedQuery), searcher.embeddedQuery);
     }
 
     @Test
@@ -808,6 +931,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         Float minScore = null;
         final StubProcessorSplitter splitter = new StubProcessorSplitter();
         String embeddedQuery;
+        int embedCount = 0;
+        RuntimeException embedFailure;
 
         @Override
         protected boolean isSearchEnabled() {
@@ -842,8 +967,13 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
 
                 @Override
                 public float[] embedQuery(final String query) {
+                    embedCount++;
                     embeddedQuery = query;
-                    return new float[] { 0.1f, 0.2f };
+                    if (embedFailure != null) {
+                        throw embedFailure;
+                    }
+                    // what the model answers depends on the words
+                    return new float[] { query.length(), 0.2f };
                 }
             };
         }
