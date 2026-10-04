@@ -172,6 +172,39 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_resolveEngineMinScore_faissCosinesimilScoresLikeLucene() {
+        // The k-NN plugin translates the cosinesimil distance d = 1 - cos to (2 - d) / 2 =
+        // (1 + cos) / 2 for every engine, so a faiss index needs the same cutoff as a lucene one.
+        // (Measured on OpenSearch 3.9.0: cos 0.244 scores 0.622 on faiss, not 1 / (2 - 0.244).)
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper() {
+            @Override
+            public String getKnnEngine() {
+                return "faiss";
+            }
+        }, org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
+        assertTrue(Math.abs(searcher.resolveEngineMinScore(0.4f, true).get() - 0.7f) < 0.0001f);
+        assertTrue(Math.abs(searcher.resolveEngineMinScore(0.35f, true).get() - 0.675f) < 0.0001f);
+        assertTrue(Math.abs(searcher.resolveEngineMinScore(0.0f, true).get() - 0.5f) < 0.0001f);
+        assertTrue(Math.abs(searcher.resolveEngineMinScore(1.0f, true).get() - 1.0f) < 0.0001f);
+    }
+
+    @Test
+    public void test_resolveEngineMinScore_faissInnerproductIsSkipped() {
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper() {
+            @Override
+            public String getKnnEngine() {
+                return "faiss";
+            }
+
+            @Override
+            public String getKnnSpaceType() {
+                return "innerproduct";
+            }
+        }, org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
+        assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
+    }
+
+    @Test
     public void test_search_skipsWhenSimilarDocHashPresent() {
         final GuardedSearcher guarded = new GuardedSearcher();
         final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {

@@ -547,11 +547,12 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
     /**
      * Converts the configured cosine cutoff (0..1) to the engine score scale of the
      * active mode. The exact script adds {@link #SCORE_OFFSET} to the cosine. In ann
-     * mode the k-NN plugin's score depends on the engine and space type baked into
-     * the mapping: {@code lucene}+{@code cosinesimil} scores as {@code (1 + cos) / 2},
-     * {@code faiss}+{@code cosinesimil} (the only other engine {@link ChunkVectorHelper#getKnnEngine()}
-     * can return) as {@code 1 / (2 - cos)}. For any other space type a cosine cutoff is not
-     * well-defined, so the cutoff is skipped with a warning rather than silently mis-filtering.
+     * mode the k-NN plugin's score depends on the space type baked into the mapping:
+     * {@code cosinesimil} scores as {@code (2 - d) / 2 = (1 + cos) / 2} for both engines
+     * {@link ChunkVectorHelper#getKnnEngine()} can return ({@code lucene} and {@code faiss}),
+     * where {@code d = 1 - cos} is the distance the plugin documents for that space. For any
+     * other space type a cosine cutoff is not well-defined, so the cutoff is skipped with a
+     * warning rather than silently mis-filtering.
      *
      * @param minCosine the configured minimum cosine similarity
      * @param annMode whether the ann (knn query) mode is active
@@ -568,10 +569,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
                     SEARCH_MIN_SCORE_PROPERTY, spaceType);
             return OptionalThing.empty();
         }
-        if ("lucene".equals(chunkVectorHelper.getKnnEngine())) {
-            return OptionalThing.of((1.0f + minCosine) / 2.0f);
-        }
-        return OptionalThing.of(1.0f / (2.0f - minCosine));
+        return OptionalThing.of((1.0f + minCosine) / 2.0f);
     }
 
     /**
