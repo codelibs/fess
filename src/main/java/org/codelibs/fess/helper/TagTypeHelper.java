@@ -170,7 +170,9 @@ public class TagTypeHelper {
     }
 
     /**
-     * Tests whether a tag is shared, that is, its permissions hold one of the guest roles.
+     * Tests whether a tag is shared, that is, its permissions hold one of the encoded
+     * {@code role.search.guest.permissions}. The guest user role is not one of them, so the
+     * private tag of a user named {@code guest} is not shared.
      *
      * @param tagType the tag type
      * @return true if every logged-in user may see the tag
@@ -180,9 +182,9 @@ public class TagTypeHelper {
         if (permissions == null || permissions.length == 0) {
             return false;
         }
-        final List<String> guestRoleList = ComponentUtil.getFessConfig().getSearchGuestRoleList();
+        final List<String> sharedRoleList = getSharedRoleList();
         for (final String permission : permissions) {
-            if (guestRoleList.contains(permission)) {
+            if (sharedRoleList.contains(permission)) {
                 return true;
             }
         }
@@ -202,10 +204,8 @@ public class TagTypeHelper {
         final List<String> permissions = new ArrayList<>();
         permissions.add(ComponentUtil.getSystemHelper().getSearchRoleByDirectoryUser(owner));
         if (shared) {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final String guestUserRole = fessConfig.getRoleSearchUserPrefix() + Constants.GUEST_USER;
-            for (final String role : fessConfig.getSearchGuestRoleList()) {
-                if (!guestUserRole.equals(role) && !permissions.contains(role)) {
+            for (final String role : getSharedRoleList()) {
+                if (!permissions.contains(role)) {
                     permissions.add(role);
                 }
             }
@@ -217,7 +217,7 @@ public class TagTypeHelper {
      * Returns the tag types of the given values that the caller may see, without their paths.
      * Nothing is visible to a caller who is not logged in; an admin search sees every tag.
      * Otherwise a tag is visible when the virtual host of the request is not set or is the tag's,
-     * and the caller owns the tag or holds one of its permissions, the guest roles included.
+     * and the caller owns the tag or holds one of its permissions, the sharing roles included.
      * The result of each value is cached in the request.
      *
      * @param values the tag values
@@ -262,8 +262,8 @@ public class TagTypeHelper {
     }
 
     /**
-     * Returns the values of the tags the caller may see: the caller's own tags and those whose
-     * permissions the caller holds, limited to the virtual host of the request and to
+     * Returns the values of the tags the caller may see: the caller's own tags and then those
+     * of others whose permissions the caller holds, limited to the virtual host of the request and to
      * {@code user.tag.visible.max.size} tags. Empty for a caller who is not logged in.
      *
      * @param type the search request type
@@ -278,34 +278,55 @@ public class TagTypeHelper {
         final Set<String> roles = adminSearch ? Collections.emptySet() : getViewerRoles(type);
         final String virtualHostKey = adminSearch ? null : ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final int maxSize = ComponentUtil.getFessConfig().getUserTagVisibleMaxSizeAsInteger();
-        final List<TagType> tagTypeList = tagTypeBhv.selectList(cb -> {
-            if (adminSearch) {
+        final List<TagType> tagTypeList = new ArrayList<>();
+        if (adminSearch) {
+            tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
                 cb.query().matchAll();
-            } else {
+                specifyNameAndOwner(cb);
+                cb.fetchFirst(maxSize);
+            }));
+        } else {
+            // the caller's own tags first, so that tags of others never push them out
+            tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
                 cb.query().bool((must, should, mustNot, filter) -> {
-                    should.setOwner_Term(userId);
-                    if (!roles.isEmpty()) {
-                        should.setPermissions_InScope(roles);
-                    }
+                    filter.setOwner_Term(userId);
                     if (StringUtil.isNotBlank(virtualHostKey)) {
                         filter.setVirtualHost_Term(virtualHostKey);
                     }
-                }, bool -> bool.minimumShouldMatch(1));
+                });
+                specifyNameAndOwner(cb);
+                cb.fetchFirst(maxSize);
+            }));
+            final int remaining = maxSize - tagTypeList.size();
+            if (remaining > 0 && !roles.isEmpty()) {
+                tagTypeList.addAll(tagTypeBhv.selectList(cb -> {
+                    cb.query().bool((must, should, mustNot, filter) -> {
+                        filter.setPermissions_InScope(roles);
+                        mustNot.setOwner_Term(userId);
+                        if (StringUtil.isNotBlank(virtualHostKey)) {
+                            filter.setVirtualHost_Term(virtualHostKey);
+                        }
+                    });
+                    specifyNameAndOwner(cb);
+                    cb.fetchFirst(remaining);
+                }));
             }
-            cb.specify().columnName();
-            cb.specify().columnOwner();
-            cb.query().addOrderBy_SortOrder_Asc();
-            cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(maxSize);
-        });
+        }
         final Set<String> valueSet = new LinkedHashSet<>();
         for (final TagType tagType : tagTypeList) {
             final String value = tagType.getTagValue();
-            if (value != null) {
+            if (value != null && valueSet.size() < maxSize) {
                 valueSet.add(value);
             }
         }
         return valueSet;
+    }
+
+    private void specifyNameAndOwner(final TagTypeCB cb) {
+        cb.specify().columnName();
+        cb.specify().columnOwner();
+        cb.query().addOrderBy_SortOrder_Asc();
+        cb.query().addOrderBy_Name_Asc();
     }
 
     /**
@@ -446,7 +467,7 @@ public class TagTypeHelper {
      *
      * @param tagType the tag type
      * @param userId the user id of the caller
-     * @param roles the roles of the caller, the guest roles included
+     * @param roles the roles of the caller, the sharing roles included
      * @param virtualHostKey the virtual host key of the request
      * @return true if the caller may see the tag
      */
@@ -469,15 +490,39 @@ public class TagTypeHelper {
     }
 
     /**
-     * Returns the roles of the caller together with the guest roles.
+     * Returns the roles of the caller together with the sharing roles, without the guest user role.
      *
      * @param type the search request type
      * @return the roles
      */
     protected Set<String> getViewerRoles(final SearchRequestType type) {
         final Set<String> roles = new HashSet<>(ComponentUtil.getRoleQueryHelper().build(type));
-        roles.addAll(ComponentUtil.getFessConfig().getSearchGuestRoleList());
+        roles.addAll(getSharedRoleList());
+        // the guest user role is the own permission of a user named guest, not a sharing role
+        roles.remove(getGuestUserRole());
         return roles;
+    }
+
+    /**
+     * Returns the roles that mark a tag as shared: the encoded
+     * {@code role.search.guest.permissions}, without the guest user role that
+     * {@link FessConfig#getSearchGuestRoleList()} adds.
+     *
+     * @return the sharing roles
+     */
+    protected List<String> getSharedRoleList() {
+        final String guestUserRole = getGuestUserRole();
+        final List<String> list = new ArrayList<>();
+        for (final String role : ComponentUtil.getFessConfig().getSearchGuestRoleList()) {
+            if (!guestUserRole.equals(role)) {
+                list.add(role);
+            }
+        }
+        return list;
+    }
+
+    private String getGuestUserRole() {
+        return ComponentUtil.getFessConfig().getRoleSearchUserPrefix() + Constants.GUEST_USER;
     }
 
     /**

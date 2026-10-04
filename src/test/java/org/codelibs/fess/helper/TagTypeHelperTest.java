@@ -61,6 +61,8 @@ public class TagTypeHelperTest extends UnitFessTestCase {
 
     private List<String> guestRoleList;
 
+    private int visibleMaxSize;
+
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -69,6 +71,7 @@ public class TagTypeHelperTest extends UnitFessTestCase {
         virtualHostKey = "";
         userTagEnabled = true;
         guestRoleList = new ArrayList<>(List.of("Rguest", "1guest"));
+        visibleMaxSize = 1000;
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
@@ -84,7 +87,7 @@ public class TagTypeHelperTest extends UnitFessTestCase {
 
             @Override
             public Integer getUserTagVisibleMaxSizeAsInteger() {
-                return 1000;
+                return visibleMaxSize;
             }
 
             @Override
@@ -340,17 +343,81 @@ public class TagTypeHelperTest extends UnitFessTestCase {
 
         final Set<String> values = tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON);
         assertEquals(Set.of(tagTypeHelper.toTagValue("foo", "alice"), tagTypeHelper.toTagValue("bar", "bob")), values);
-        final String query = tagTypeBhv.lastQuery;
-        assertTrue(query.contains("\"owner\""), query);
-        assertTrue(query.contains("\"alice\""), query);
-        assertTrue(query.contains("\"permissions\""), query);
-        assertTrue(query.contains("\"2dev\""), query);
-        assertTrue(query.contains("\"Rguest\""), query);
-        assertTrue(query.contains("\"virtualHost\""), query);
-        assertTrue(query.contains("\"host1\""), query);
-        assertTrue(query.contains("\"minimum_should_match\" : \"1\""), query);
-        assertEquals(1000, tagTypeBhv.lastFetchSize);
+        assertEquals(2, tagTypeBhv.queries.size());
+        // own tags first
+        final String ownQuery = tagTypeBhv.queries.get(0);
+        assertTrue(ownQuery.contains("\"owner\""), ownQuery);
+        assertTrue(ownQuery.contains("\"alice\""), ownQuery);
+        assertFalse(ownQuery.contains("\"permissions\""), ownQuery);
+        assertTrue(ownQuery.contains("\"host1\""), ownQuery);
+        // then tags of others the caller holds a permission of, with the rest of the budget
+        final String otherQuery = tagTypeBhv.queries.get(1);
+        assertTrue(otherQuery.contains("\"permissions\""), otherQuery);
+        assertTrue(otherQuery.contains("\"2dev\""), otherQuery);
+        assertTrue(otherQuery.contains("\"Rguest\""), otherQuery);
+        assertFalse(otherQuery.contains("\"1guest\""), otherQuery);
+        assertTrue(otherQuery.contains("\"must_not\""), otherQuery);
+        assertTrue(otherQuery.contains("\"alice\""), otherQuery);
+        assertTrue(otherQuery.contains("\"virtualHost\""), otherQuery);
+        assertTrue(otherQuery.contains("\"host1\""), otherQuery);
+        // the mock answered both stored tags to the first query
+        assertEquals(998, tagTypeBhv.lastFetchSize);
         assertFalse(tagTypeBhv.lastSpecifiedColumns.contains("paths"));
+    }
+
+    @Test
+    public void test_getVisibleTagValues_ownTagsKeptWithinCap() {
+        login("alice");
+        roleSet.add("1alice");
+        final List<TagType> own = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            own.add(store(createTagType("own" + i, "alice", "1alice")));
+        }
+        final List<TagType> others = new ArrayList<>();
+        // sorted before the own tags by sortOrder
+        for (int i = 0; i < 3; i++) {
+            final TagType tagType = store(createTagType("shared" + i, "bob", "1bob", "Rguest"));
+            tagType.setSortOrder(-1);
+            others.add(tagType);
+        }
+        // the owner query answers own tags; the permission query (must_not owner) answers others
+        tagTypeBhv.responder = query -> query.contains("must_not") ? others : own;
+
+        visibleMaxSize = 3;
+        assertEquals(Set.of(own.get(0).getTagValue(), own.get(1).getTagValue(), own.get(2).getTagValue()),
+                tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON));
+        // the budget was spent on own tags, so the permission query is not sent
+        assertEquals(1, tagTypeBhv.selectListCount.get());
+
+        visibleMaxSize = 4;
+        final Set<String> values = tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON);
+        assertEquals(4, values.size());
+        for (final TagType tagType : own) {
+            assertTrue(values.contains(tagType.getTagValue()));
+        }
+        assertTrue(values.contains(others.get(0).getTagValue()));
+        assertEquals(1, tagTypeBhv.lastFetchSize);
+    }
+
+    @Test
+    public void test_guestNamedOwner_privateTagNotShared() {
+        // a user named guest has the guest user role 1guest as their own permission
+        final TagType tagType = store(createTagType("foo", "guest", tagTypeHelper.buildPermissions("guest", false)));
+        assertArrayEquals(new String[] { "1guest" }, tagType.getPermissions());
+        assertFalse(tagTypeHelper.isShared(tagType));
+
+        // bob's roles may carry the guest roles, 1guest included
+        login("bob");
+        roleSet.addAll(List.of("1bob", "Rguest", "1guest"));
+        assertTrue(tagTypeHelper.getVisibleTagTypes(List.of(tagType.getTagValue()), SearchRequestType.JSON).isEmpty());
+        tagTypeHelper.getVisibleTagValues(SearchRequestType.JSON);
+        assertFalse(tagTypeBhv.lastQuery.contains("\"1guest\""), tagTypeBhv.lastQuery);
+
+        // the owner still sees it
+        clearRequestCache();
+        login("guest");
+        assertTrue(tagTypeHelper.getVisibleTagTypes(List.of(tagType.getTagValue()), SearchRequestType.JSON)
+                .containsKey(tagType.getTagValue()));
     }
 
     // -----------------------------------------------------------------------
@@ -480,11 +547,16 @@ public class TagTypeHelperTest extends UnitFessTestCase {
 
         String lastQuery;
 
+        final List<String> queries = new ArrayList<>();
+
         Set<String> lastSpecifiedColumns;
 
         int lastFetchSize;
 
         RuntimeException failure;
+
+        /** When set, answers selectList from the query, truncated to the fetch size. */
+        java.util.function.Function<String, List<TagType>> responder;
 
         private TagTypeCB capture(final CBCall<TagTypeCB> cbLambda) {
             if (failure != null) {
@@ -493,6 +565,7 @@ public class TagTypeHelperTest extends UnitFessTestCase {
             final TagTypeCB cb = new TagTypeCB();
             cbLambda.callback(cb);
             lastQuery = String.valueOf(cb.query().getQuery());
+            queries.add(lastQuery);
             final SearchSourceBuilder source = cb.build(new SearchRequestBuilder(null, SearchAction.INSTANCE)).request().source();
             lastSpecifiedColumns = new LinkedHashSet<>();
             if (source != null && source.fetchSource() != null) {
@@ -507,6 +580,11 @@ public class TagTypeHelperTest extends UnitFessTestCase {
             capture(cbLambda);
             selectListCount.incrementAndGet();
             final ListResultBean<TagType> list = new ListResultBean<>();
+            if (responder != null) {
+                final List<TagType> answer = responder.apply(lastQuery);
+                list.setSelectedList(new ArrayList<>(answer.subList(0, Math.min(answer.size(), lastFetchSize))));
+                return list;
+            }
             list.setSelectedList(new ArrayList<>(entities));
             return list;
         }
