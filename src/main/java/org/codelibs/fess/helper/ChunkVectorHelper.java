@@ -195,6 +195,12 @@ public class ChunkVectorHelper {
     /** Of {@link #conflictRetried}, the documents a retry then stored. */
     private final AtomicInteger conflictRecovered = new AtomicInteger();
 
+    /** Documents the current run durably marked {@code skipped}. */
+    private final AtomicInteger skippedMarked = new AtomicInteger();
+
+    /** Documents the current run durably marked {@code fail}. */
+    private final AtomicInteger failedMarked = new AtomicInteger();
+
     /**
      * Default constructor.
      */
@@ -252,8 +258,10 @@ public class ChunkVectorHelper {
      * spend. When running multiple Fess nodes, pin this job to a single node via its scheduler
      * target setting.</p>
      *
-     * @return a summary result message (processed/succeeded/failed counts, followed by how many
-     *         documents lost a write race and were retried when any did; or the skip reason)
+     * @return a summary result message (how many documents were processed and how many of them
+     *         succeeded; when some did not, how many of those were marked failed, marked skipped or left
+     *         pending; then how many documents lost a write race and were retried when any did; or the
+     *         skip reason)
      */
     public String executeChunkVectorProcessing() {
         if (!isContentChunkerEnabled()) {
@@ -319,6 +327,8 @@ public class ChunkVectorHelper {
 
         conflictRetried.set(0);
         conflictRecovered.set(0);
+        skippedMarked.set(0);
+        failedMarked.set(0);
 
         // A scroll failure is a genuine run failure, not an intentional skip: let it propagate so
         // the ChunkVectorIndexer child process exits non-zero and the parent ChunkVectorJob
@@ -326,8 +336,8 @@ public class ChunkVectorHelper {
         final List<String> idList = scrollPendingIds(embeddingActive);
 
         final AtomicInteger processed = new AtomicInteger();
-        final AtomicInteger succeeded = new AtomicInteger();
-        final AtomicInteger failed = new AtomicInteger();
+        final AtomicInteger recorded = new AtomicInteger();
+        final AtomicInteger unrecorded = new AtomicInteger();
 
         final int bulkSize = Math.max(1, getJobBulkSize());
         final List<List<String>> batches = partitionIds(idList, bulkSize);
@@ -343,15 +353,15 @@ public class ChunkVectorHelper {
                         for (final String id : batch) {
                             processed.incrementAndGet();
                             if (Boolean.TRUE.equals(results.get(id))) {
-                                succeeded.incrementAndGet();
+                                recorded.incrementAndGet();
                             } else {
-                                failed.incrementAndGet();
+                                unrecorded.incrementAndGet();
                             }
                         }
                     } catch (final Exception e) {
                         for (final String id : batch) {
                             processed.incrementAndGet();
-                            failed.incrementAndGet();
+                            unrecorded.incrementAndGet();
                         }
                         logger.warn("Failed to process a batch of {} document(s). ids={}", batch.size(), batch, e);
                     }
@@ -368,8 +378,19 @@ public class ChunkVectorHelper {
             executor.shutdown();
         }
 
-        final String summary =
-                "Processed " + processed.get() + " documents. Succeeded: " + succeeded.get() + ", Failed/Skipped: " + failed.get() + ".";
+        // "Recorded" means a terminal status was written, whichever one: the success path and the writes
+        // of the skipped and failed statuses all return true. Only the first is a success.
+        final int skipped = skippedMarked.get();
+        final int failed = failedMarked.get();
+        final int succeeded = recorded.get() - skipped - failed;
+        final int notSucceeded = processed.get() - succeeded;
+        final String summary = "Processed " + processed.get() + " documents. Succeeded: " + succeeded + ", Failed/Skipped: " + notSucceeded
+                + "."
+                + (notSucceeded == 0 ? "" : " Failed: " + failed + ", skipped: " + skipped + ", left pending: " + unrecorded.get() + ".");
+        if (failed > 0) {
+            logger.warn("[ChunkVector] {} document(s) were marked failed in this run. A failed document is not selected again unless "
+                    + "{}=true; set it for one run once the cause is fixed.", failed, JOB_RETRY_FAILED_PROPERTY);
+        }
         final int retried = conflictRetried.get();
         if (retried == 0) {
             return summary;
@@ -1683,7 +1704,11 @@ public class ChunkVectorHelper {
             }
         }
         doc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.FAIL);
-        return storeSafely(searchEngineClient, fessConfig, doc, id);
+        final boolean stored = storeSafely(searchEngineClient, fessConfig, doc, id);
+        if (stored) {
+            failedMarked.incrementAndGet();
+        }
+        return stored;
     }
 
     /**
@@ -1764,7 +1789,11 @@ public class ChunkVectorHelper {
         final Map<String, Object> updatedDoc = new HashMap<>(doc);
         updatedDoc.put(Constants.CONTENT_CHUNK_STATUS_FIELD, Constants.SKIPPED);
         try {
-            return storeSafely(searchEngineClient, fessConfig, updatedDoc, id);
+            final boolean stored = storeSafely(searchEngineClient, fessConfig, updatedDoc, id);
+            if (stored) {
+                skippedMarked.incrementAndGet();
+            }
+            return stored;
         } catch (final Exception e) {
             logger.warn("[ChunkVector] Failed to mark document skipped; leaving it pending for the next run. id={}", id, e);
             return false;
