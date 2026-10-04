@@ -1074,21 +1074,21 @@ public class SearchEngineClient implements Client {
      * FessProp#getSystemProperty}'s default only fires when the key is <em>absent</em>) is rejected
      * and replaced with the documented default instead of being spliced into the shipped mapping
      * unvalidated, which would otherwise 400 {@code preparePutMapping} and leave the index with no
-     * proper mapping at all; second, this method and {@link ChunkVectorHelper#getKnnEngine()}/
-     * {@link ChunkVectorHelper#getKnnSpaceType()}'s query-time score-scale conversion then read the
-     * exact same validated values instead of duplicating the literal defaults, so the two sides
-     * cannot silently diverge.</p>
+     * proper mapping at all; second, this method and {@link ChunkVectorHelper#getKnnSpaceType()}'s
+     * query-time score-scale conversion then read the exact same validated values instead of
+     * duplicating the literal defaults, so the two sides cannot silently diverge.</p>
      *
-     * <p>{@code content_chunker.search.knn.engine}/{@code .space_type} are read again at query time
-     * by those same {@code ChunkVectorHelper} getters, so the {@code content_chunk_vector} mapping's
-     * ANN {@code method} block (baked in here, at index-creation time) and
+     * <p>{@code content_chunker.search.knn.space_type} is read again at query time by that same
+     * {@code ChunkVectorHelper} getter, so the {@code content_chunk_vector} mapping's ANN
+     * {@code method} block (baked in here, at index-creation time) and
      * {@code SemanticChunkSearcher}'s score-scale conversion agree for any index created under the
-     * configuration active right now -- but {@code engine}/{@code space_type} are live-reloadable
-     * while the mapping is not, so an index created under an older configuration keeps its original
-     * values until it is recreated, even after the config changes underneath it.
-     * {@code content_chunker.search.knn.method}, by contrast, has no query-time reader -- it only
-     * feeds the {@code doc.json} placeholder, so {@link ChunkVectorHelper#getKnnMethod()} exists
-     * solely to validate it.</p>
+     * configuration active right now -- but {@code space_type} is live-reloadable while the mapping
+     * is not, so an index created under an older configuration keeps its original value until it is
+     * recreated, even after the config changes underneath it.
+     * {@code content_chunker.search.knn.method} and {@code .engine}, by contrast, have no
+     * query-time reader -- they only feed the {@code doc.json} placeholders, so
+     * {@link ChunkVectorHelper#getKnnMethod()}/{@link ChunkVectorHelper#getKnnEngine()} exist
+     * solely to validate them.</p>
      *
      * @param source             the raw JSON read from the index definition file
      * @param numberOfShards     the number of primary shards

@@ -168,9 +168,9 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
 
     @Test
     public void test_substitutePlaceholders_knnEngineSpaceTypeFromSystemProperty() {
-        // engine/space_type feed BOTH the static mapping (via this substitution) and
-        // ChunkVectorHelper#getKnnEngine/getKnnSpaceType's query-time score-scale conversion --
-        // they must resolve from the same system properties so the two sides cannot diverge.
+        // space_type feeds BOTH the static mapping (via this substitution) and
+        // ChunkVectorHelper#getKnnSpaceType's query-time score-scale conversion --
+        // it must resolve from the same system property so the two sides cannot diverge.
         // method is NOT exercised here with a non-default override: "hnsw" is currently the only
         // value getKnnMethod() accepts (doc.json's method.parameters block is hardcoded to hnsw's
         // {m, ef_construction}; any other method 400s regardless of engine -- see

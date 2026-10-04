@@ -73,12 +73,13 @@ public class ChunkVectorHelper {
     public static final String SEMANTIC_SEARCH_ENABLED_PROPERTY = "content_chunker.search.enabled";
 
     /**
-     * System property key for the ANN engine, read by both sides of the k-NN feature: the shipped
-     * {@code content_chunk_vector} mapping's {@code method.engine} is resolved from this same key
-     * via the {@code ${fess.content_chunker.search.knn.engine}} placeholder in {@code doc.json}
-     * (substituted at index-creation time), and {@link #getKnnEngine()} reads it again at query
-     * time so {@code SemanticChunkSearcher}'s score-scale conversion always agrees with the engine
-     * actually baked into the live mapping.
+     * System property key for the ANN engine: the shipped {@code content_chunk_vector} mapping's
+     * {@code method.engine} is resolved from this key via the
+     * {@code ${fess.content_chunker.search.knn.engine}} placeholder in {@code doc.json}
+     * (substituted at index-creation time). It has no query-time reader --
+     * {@code SemanticChunkSearcher}'s score-scale conversion is the same for every engine -- so
+     * {@link #getKnnEngine()} exists solely to validate the value before it is spliced into the
+     * shipped mapping.
      */
     public static final String KNN_ENGINE_PROPERTY = "content_chunker.search.knn.engine";
 
@@ -97,8 +98,8 @@ public class ChunkVectorHelper {
      * System property key for the ANN method used by the {@code content_chunk_vector} mapping's
      * {@code method.name}, resolved via the {@code ${fess.content_chunker.search.knn.method}}
      * placeholder in {@code doc.json} (substituted at index-creation time). Unlike
-     * {@link #KNN_ENGINE_PROPERTY}/{@link #KNN_SPACE_TYPE_PROPERTY}, this key has no query-time
-     * reader -- {@code SemanticChunkSearcher}'s score-scale conversion does not depend on the ANN
+     * {@link #KNN_SPACE_TYPE_PROPERTY}, this key has no query-time reader --
+     * {@code SemanticChunkSearcher}'s score-scale conversion does not depend on the ANN
      * method -- so {@link #getKnnMethod()} exists solely to validate the value before it is spliced
      * into the shipped mapping.
      */
@@ -581,10 +582,10 @@ public class ChunkVectorHelper {
      * Gets the ANN method the {@code content_chunk_vector} mapping's knn_vector field is created
      * with. This reads {@link #KNN_METHOD_PROPERTY}, the exact same system property that
      * {@code doc.json}'s {@code ${fess.content_chunker.search.knn.method}} placeholder resolves
-     * from at index-creation time. Unlike {@link #getKnnEngine()}/{@link #getKnnSpaceType()}, no
-     * query-time code re-reads this value -- {@code SemanticChunkSearcher}'s score-scale conversion
-     * does not depend on the ANN method -- so this getter exists purely to keep the mapping
-     * placeholder's validation in one place rather than duplicated in {@code SearchEngineClient}.
+     * from at index-creation time. Unlike {@link #getKnnSpaceType()}, no query-time code re-reads
+     * this value -- {@code SemanticChunkSearcher}'s score-scale conversion does not depend on the
+     * ANN method -- so this getter exists purely to keep the mapping placeholder's validation in
+     * one place rather than duplicated in {@code SearchEngineClient}.
      *
      * <p>{@code ivf} is deliberately not in the allowed set even though the k-NN plugin supports it
      * for faiss: {@code doc.json}'s {@code method.parameters} block is hardcoded to {@code {m,
@@ -600,13 +601,12 @@ public class ChunkVectorHelper {
     }
 
     /**
-     * Gets the ANN engine {@code SemanticChunkSearcher}'s query-time score-scale conversion should
-     * assume. This reads {@link #KNN_ENGINE_PROPERTY}, the exact same system property that
-     * {@code doc.json}'s {@code ${fess.content_chunker.search.knn.engine}} placeholder resolves
-     * from at index-creation time -- so the engine this returns always matches the engine actually
-     * baked into the live {@code content_chunk_vector} mapping. Embedded (zip) OpenSearch only
-     * supports {@code lucene} (its bundled {@code opensearch-knn} has no JNI native libraries);
-     * Docker/external OpenSearch also supports {@code faiss}.
+     * Gets the ANN engine the {@code content_chunk_vector} mapping is created with. This reads
+     * {@link #KNN_ENGINE_PROPERTY}, the system property that {@code doc.json}'s
+     * {@code ${fess.content_chunker.search.knn.engine}} placeholder resolves from at index-creation
+     * time. Embedded (zip) OpenSearch only supports {@code lucene} (its bundled
+     * {@code opensearch-knn} has no JNI native libraries); Docker/external OpenSearch also
+     * supports {@code faiss}.
      *
      * <p>{@code nmslib} is deliberately not in the allowed set: the k-NN plugin's own
      * {@code KNNEngine.ENGINES_SUPPORTING_NESTED_FIELDS} is {@code {LUCENE, FAISS}} only, and
