@@ -37,6 +37,7 @@ import org.codelibs.fess.chunk.ChunkerManager;
 import org.codelibs.fess.embedding.AbstractEmbeddingClient;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.embedding.EmbeddingException;
+import org.codelibs.fess.embedding.RetryableEmbeddingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
@@ -1625,7 +1626,11 @@ public class ChunkVectorHelper {
      * returns 500 under a tripped memory circuit breaker, so a sustained 5xx storm exhausts the
      * client's small retry budget on every document with {@code available() == true}. Gating on
      * availability alone would stamp the entire corpus {@code content_chunk_status="fail"} in one
-     * run -- a status the pending query then excludes on every subsequent run.</li>
+     * run -- a status the pending query then excludes on every subsequent run. The cached
+     * availability can also lag a whole check interval behind the provider, and the model document
+     * keeps saying {@code DEPLOYED} for seconds after a restart while {@code _predict} still answers
+     * 400, which is why the client classifies those rejections itself
+     * ({@link RetryableEmbeddingException}).</li>
      * </ul>
      *
      * <p>A genuine per-document defect (a non-retryable HTTP 400, a count/dimension mismatch, an
@@ -1693,6 +1698,12 @@ public class ChunkVectorHelper {
      * Anything not recognised here falls through to the failure write, so an unrecognised shape
      * keeps the pre-existing behaviour.</p>
      *
+     * <p>The embedding client states the verdict itself with a {@link RetryableEmbeddingException}: it
+     * knows which failures it retried to exhaustion (a connection that is refused, closed without a
+     * response or timed out) and which rejections came from a provider that is not serving, which
+     * nothing in the cause chain of a plain {@link EmbeddingException} can tell the job. The shapes
+     * below remain for clients that do not use it.</p>
+     *
      * <p>The retryable-HTTP case is matched by class name, mirroring {@link #isVersionConflict}:
      * the client's {@code RetryableHttpException} is package-private to
      * {@code org.codelibs.fess.embedding.opensearch}, and it survives in the cause chain of the
@@ -1711,8 +1722,8 @@ public class ChunkVectorHelper {
         // Bounded walk: a malformed exception chain with a cycle longer than one frame must not
         // spin here.
         for (int depth = 0; cur != null && depth < MAX_CAUSE_CHAIN_DEPTH; depth++) {
-            if (cur.getClass().getName().endsWith("RetryableHttpException") || cur instanceof SocketException
-                    || cur instanceof InterruptedIOException || cur instanceof UnknownHostException) {
+            if (cur instanceof RetryableEmbeddingException || cur.getClass().getName().endsWith("RetryableHttpException")
+                    || cur instanceof SocketException || cur instanceof InterruptedIOException || cur instanceof UnknownHostException) {
                 return true;
             }
             final Throwable next = cur.getCause();
