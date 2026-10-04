@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.util.BytesRef;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
@@ -166,6 +169,7 @@ import org.codelibs.fesen.opensearch.search.SearchHit;
 import org.codelibs.fesen.opensearch.search.SearchHits;
 import org.codelibs.fesen.opensearch.search.aggregations.AggregationBuilders;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.IncludeExclude;
 import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.codelibs.fesen.opensearch.search.builder.PointInTimeBuilder;
 import org.codelibs.fesen.opensearch.search.collapse.CollapseBuilder;
@@ -2732,9 +2736,22 @@ public class SearchEngineClient implements Client {
                             messages -> messages.addErrorsInvalidQueryUnsupportedFacetField(UserMessages.GLOBAL_PROPERTY_KEY, f),
                             "Unsupported facet field: " + f);
                 }
+                final IncludeExclude tagInclude;
+                if (f.equals(fessConfig.getIndexFieldTag()) && !SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
+                    // a tag value decodes to the name and the owner of a tag: only the tags the caller can see become buckets
+                    tagInclude = buildVisibleTagInclude(fessConfig);
+                    if (tagInclude == null) {
+                        return;
+                    }
+                } else {
+                    tagInclude = null;
+                }
                 final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                 final TermsAggregationBuilder termsBuilder =
                         AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
+                if (tagInclude != null) {
+                    termsBuilder.includeExclude(tagInclude);
+                }
                 termsBuilder.order(facetInfo.getBucketOrder());
                 if (facetInfo.size != null) {
                     final int maxFacetSize = fessConfig.getQueryFacetFieldsSizeMaxOrDefault();
@@ -2758,6 +2775,32 @@ public class SearchEngineClient implements Client {
                         AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery, facetContext.getQueryBuilder());
                 searchRequestBuilder.addAggregation(filterBuilder);
             }));
+        }
+
+        /**
+         * Builds the include of the tag facet: the exact values of the tags that the caller can see.
+         *
+         * @param fessConfig the Fess configuration
+         * @return the include, or null when the caller can see no tag and the facet is not aggregated
+         */
+        protected IncludeExclude buildVisibleTagInclude(final FessConfig fessConfig) {
+            if (!fessConfig.isUserTagEnabled()) {
+                return null;
+            }
+            final Set<String> values;
+            try {
+                values = ComponentUtil.getTagTypeHelper().getVisibleTagValues(searchRequestType);
+            } catch (final RuntimeException e) {
+                logger.warn("Failed to resolve the visible tags; the tag facet is not aggregated. searchRequestType={}", searchRequestType,
+                        e);
+                return null;
+            }
+            if (values.isEmpty()) {
+                return null;
+            }
+            final SortedSet<BytesRef> includeValues = new TreeSet<>();
+            values.forEach(value -> includeValues.add(new BytesRef(value)));
+            return new IncludeExclude(includeValues, null);
         }
 
         /**

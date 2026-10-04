@@ -224,6 +224,7 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldAnchor(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldTag(), //
                     fessConfig.getIndexFieldLang());
             // Initialize Set for O(1) lookup performance
             searchFieldSet = new HashSet<>();
@@ -243,6 +244,7 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldOwner(), //
                     fessConfig.getIndexFieldLastModifier(), //
                     fessConfig.getIndexFieldLabel(), //
+                    fessConfig.getIndexFieldTag(), //
                     fessConfig.getIndexFieldSegment());
             // Initialize Set for O(1) lookup performance
             facetFieldSet = new HashSet<>();
@@ -321,6 +323,7 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldSegment(), //
                     fessConfig.getIndexFieldSeqNo(), //
                     fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldTag(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldVersion()));

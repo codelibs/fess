@@ -74,6 +74,9 @@ public class QueryContext {
     /** The type of the search request, or null when the query is not built for a search request. */
     protected SearchRequestType searchRequestType = null;
 
+    /** Whether the caller can see each tag value used in a condition, resolved on first use. */
+    protected Map<String, Boolean> tagVisibilityMap = null;
+
     /**
      * Constructs a new QueryContext with the specified query string.
      * Processes special query prefixes (allinurl:, allintitle:) and initializes
@@ -287,5 +290,17 @@ public class QueryContext {
      */
     public void setSearchRequestType(final SearchRequestType searchRequestType) {
         this.searchRequestType = searchRequestType;
+    }
+
+    /**
+     * Gets whether the caller can see each tag value that a condition of this query has used so far.
+     * A value is resolved once per query, however many conditions use it.
+     * @return The visibility of each resolved tag value, never null.
+     */
+    public Map<String, Boolean> getTagVisibilityMap() {
+        if (tagVisibilityMap == null) {
+            tagVisibilityMap = new HashMap<>();
+        }
+        return tagVisibilityMap;
     }
 }

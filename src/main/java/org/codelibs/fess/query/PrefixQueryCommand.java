@@ -76,6 +76,11 @@ public class PrefixQueryCommand extends QueryCommand {
         final String field = getSearchField(context.getDefaultField(), prefixQuery.getField());
         final String text = prefixQuery.getPrefix().text();
 
+        if (isRestrictedTagField(context, field)) {
+            // a tag value encodes the name and the owner of a tag: a prefix on it would probe for tags the caller cannot see
+            return buildHiddenTagQuery(context, field, text + "*");
+        }
+
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text + "*");
             context.addHighlightedQuery(text);

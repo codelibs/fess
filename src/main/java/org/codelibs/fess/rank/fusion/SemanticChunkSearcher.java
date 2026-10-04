@@ -940,5 +940,10 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         public List<QueryBuilder> getFilterQueries() {
             return parent.getFilterQueries();
         }
+
+        @Override
+        public String[] getResponseFields() {
+            return parent.getResponseFields();
+        }
     }
 }

@@ -18,17 +18,23 @@ package org.codelibs.fess.query;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.lang.Character.UnicodeBlock;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.DisMaxQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.MatchNoneQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.search.sort.SortBuilder;
@@ -40,6 +46,7 @@ import org.codelibs.fesen.opensearch.search.sort.SortOrder;
  * Provides common functionality for processing and executing search queries.
  */
 public abstract class QueryCommand {
+    private static final Logger logger = LogManager.getLogger(QueryCommand.class);
 
     /**
      * Default constructor for QueryCommand.
@@ -110,6 +117,72 @@ public abstract class QueryCommand {
     protected boolean isSearchField(final String field) {
         final QueryFieldConfig config = getQueryFieldConfig();
         return config.searchFieldSet != null && config.searchFieldSet.contains(field);
+    }
+
+    /**
+     * Checks if a condition on the field must be limited to the tags that the caller can see. A value
+     * of the {@code tag} field decodes to the name and the owner of a tag, and the field of a document
+     * holds the values of every tag put on it, so a condition on it is restricted for every search
+     * except the admin search.
+     * @param context The query context.
+     * @param field The field name.
+     * @return True if the field is the tag field and the condition must be restricted.
+     */
+    protected boolean isRestrictedTagField(final QueryContext context, final String field) {
+        return field != null && field.equals(ComponentUtil.getFessConfig().getIndexFieldTag())
+                && !SearchRequestType.ADMIN_SEARCH.equals(context.getSearchRequestType());
+    }
+
+    /**
+     * Checks if the caller can see a tag. Nothing is visible while user tags are disabled or to a
+     * caller who is not logged in. Each value is resolved once per query context.
+     * @param context The query context.
+     * @param value The tag value.
+     * @return True if the tag is visible to the caller.
+     */
+    protected boolean isVisibleTag(final QueryContext context, final String value) {
+        if (!ComponentUtil.getFessConfig().isUserTagEnabled()) {
+            return false;
+        }
+        final Map<String, Boolean> visibilityMap = context.getTagVisibilityMap();
+        final Boolean cached = visibilityMap.get(value);
+        if (cached != null) {
+            return cached;
+        }
+        final boolean visible = resolveTagVisibility(context, value);
+        visibilityMap.put(value, visible);
+        return visible;
+    }
+
+    /**
+     * Resolves whether the caller can see a tag.
+     * @param context The query context.
+     * @param value The tag value.
+     * @return True if the tag is visible, false if it is not or cannot be resolved.
+     */
+    protected boolean resolveTagVisibility(final QueryContext context, final String value) {
+        final SearchRequestType searchRequestType =
+                context.getSearchRequestType() != null ? context.getSearchRequestType() : SearchRequestType.JSON;
+        try {
+            return ComponentUtil.getTagTypeHelper().getVisibleTagTypes(List.of(value), searchRequestType).containsKey(value);
+        } catch (final RuntimeException e) {
+            logger.warn("Failed to resolve the visibility of a tag; the tag condition matches nothing. searchRequestType={}",
+                    searchRequestType, e);
+            return false;
+        }
+    }
+
+    /**
+     * Builds the query for a condition on the tag field that the caller may not use: it matches no document, so the
+     * condition does not reveal which documents carry a tag that the caller cannot see.
+     * @param context The query context.
+     * @param field The field name.
+     * @param text The query text.
+     * @return A query that matches no document.
+     */
+    protected QueryBuilder buildHiddenTagQuery(final QueryContext context, final String field, final String text) {
+        context.addFieldLog(field, text);
+        return new MatchNoneQueryBuilder();
     }
 
     /**

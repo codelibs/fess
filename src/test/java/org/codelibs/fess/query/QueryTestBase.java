@@ -30,6 +30,9 @@ public abstract class QueryTestBase extends UnitFessTestCase {
 
     protected QueryProcessor queryProcessor;
 
+    /** The value of {@code user.tag.enabled} that the base FessConfig returns. */
+    protected boolean userTagEnabled = true;
+
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -161,6 +164,16 @@ public abstract class QueryTestBase extends UnitFessTestCase {
             @Override
             public String getIndexFieldLastModifier() {
                 return "last_modifier";
+            }
+
+            @Override
+            public String getIndexFieldTag() {
+                return "tag";
+            }
+
+            @Override
+            public boolean isUserTagEnabled() {
+                return userTagEnabled;
             }
 
             @Override

@@ -120,6 +120,11 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
             }
 
             @Override
+            public String getIndexFieldTag() {
+                return "tag";
+            }
+
+            @Override
             public String getIndexFieldCreated() {
                 return "created";
             }

@@ -643,6 +643,20 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertEquals(filters, new RankFusionProcessor.SearchRequestParamsWrapper(params, 0, 5).getFilterQueries());
     }
 
+    @Test
+    public void test_semanticSearchRequestParams_delegatesResponseFields() {
+        // a request that adds a field to its response (the v2 search adds tag) must get it on hits of the vector leg too
+        final String[] fields = { "title", "url", "tag" };
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String[] getResponseFields() {
+                return fields;
+            }
+        };
+        org.junit.jupiter.api.Assertions.assertArrayEquals(fields,
+                new SemanticChunkSearcher.SemanticSearchRequestParams(params).getResponseFields());
+    }
+
     // -------------------------------------------------------------------------------------
     //                                                                               min_score
     //                                                                               ---------
