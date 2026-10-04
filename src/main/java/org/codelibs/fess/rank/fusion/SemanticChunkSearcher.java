@@ -43,6 +43,7 @@ import org.codelibs.fess.query.StructuredQuerySplitter;
 import org.codelibs.fess.query.StructuredQuerySplitter.Split;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.codelibs.fesen.opensearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
@@ -54,6 +55,7 @@ import org.codelibs.fesen.opensearch.script.Script;
 import org.codelibs.fesen.opensearch.script.ScriptType;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Rank-fusion searcher that scores documents by the cosine similarity between the
@@ -123,6 +125,9 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
      * stay positive (OpenSearch rejects negative script scores).
      */
     protected static final float SCORE_OFFSET = 1.0f;
+
+    /** Request attribute holding the {@link QueryEmbedding} the request computed last. */
+    protected static final String QUERY_EMBEDDING_ATTRIBUTE = "fess.QueryEmbedding";
 
     /** Timestamp of the last {@link #isKnnIndexReady()} probe. */
     private volatile long knnReadyCheckedAt;
@@ -230,7 +235,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         }
         final float[] queryVector;
         try {
-            queryVector = embeddingClientManager.embedQuery(split.text);
+            queryVector = embedQuery(embeddingClientManager, split.text);
         } catch (final Exception e) {
             logger.warn("Failed to embed query for semantic chunk search; falling back to keyword-only results. query={}", query, e);
             return OptionalThing.empty();
@@ -241,6 +246,36 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         final boolean annMode = isKnnIndexReady();
         logExactMode(annMode);
         return OptionalThing.of(new SemanticQueryContext(queryVector, annMode, split.conditionFilter));
+    }
+
+    /**
+     * Embeds the words of a query, once for the running request.
+     *
+     * <p>A request can ask for the same words more than once. Engine-side rank fusion builds this
+     * branch before the search engine has had its say, so when the engine refuses the fused
+     * request, or Fess refuses it after the branch is built, Fess fuses the search itself and runs
+     * the branch again. {@code SearchHelper} runs a search again as well when it retries a query
+     * that was rejected, with its reserved characters escaped. The embedding is a function of the
+     * words alone, so the one computed for the request is kept on the request and handed back for
+     * the same words. It is never handed back for other words - an escaped retry that changes the
+     * words embeds again - and it goes away with the request, so another request, whatever the
+     * user, computes its own. A failed embedding is not kept.</p>
+     *
+     * @param embeddingClientManager the provider to embed with
+     * @param text the words to embed
+     * @return the embedding
+     */
+    protected float[] embedQuery(final EmbeddingClientManager embeddingClientManager, final String text) {
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
+        if (request != null && request.getAttribute(QUERY_EMBEDDING_ATTRIBUTE) instanceof final QueryEmbedding embedded
+                && embedded.text().equals(text)) {
+            return embedded.vector();
+        }
+        final float[] vector = embeddingClientManager.embedQuery(text);
+        if (request != null && vector != null && vector.length > 0) {
+            request.setAttribute(QUERY_EMBEDDING_ATTRIBUTE, new QueryEmbedding(text, vector));
+        }
+        return vector;
     }
 
     /**
@@ -389,6 +424,15 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         // function_score with no functions leaves the score alone and only applies the cutoff,
         // so this needs no script.
         return QueryBuilders.functionScoreQuery(chunkQuery).setMinScore(engineMinScore.get().floatValue());
+    }
+
+    /**
+     * The embedding a request computed, with the words it was computed for.
+     *
+     * @param text the words that were embedded
+     * @param vector the embedding, never modified
+     */
+    protected record QueryEmbedding(String text, float[] vector) {
     }
 
     /**

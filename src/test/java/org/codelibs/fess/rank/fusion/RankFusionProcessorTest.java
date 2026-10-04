@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.lucene.search.TotalHits.Relation;
+import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
@@ -33,14 +34,24 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
+import org.codelibs.fess.query.StructuredQuerySplitter;
+import org.codelibs.fess.query.StubProcessorSplitter;
 import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequestImpl;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.di.core.ExternalContext;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.codelibs.fesen.opensearch.OpenSearchStatusException;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
+import org.codelibs.fesen.opensearch.action.search.SearchResponse;
+import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
@@ -716,6 +727,136 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         assertEquals(0, sub.buildCount.get());
     }
 
+    // -------------------------------------------------------------------------------------
+    //                                        the query is embedded once, however the search ends
+    //                                        ----------------------------------------------------
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenFused() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.5");
+        final RefusingMainSearcher main = new RefusingMainSearcher();
+        final EmbeddingSemanticSearcher semantic = new EmbeddingSemanticSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, semantic)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+        }
+        assertEquals(1, main.fusedCount.get());
+        assertEquals(0, semantic.searchCount.get());
+        assertEquals(1, semantic.embedCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenFusedByFess() throws Exception {
+        givenEngineFusion("", 10, 10000, false);
+        final EmbeddingSemanticSearcher semantic = new EmbeddingSemanticSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new RefusingMainSearcher(), semantic)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+        }
+        assertEquals(1, semantic.searchCount.get());
+        assertEquals(1, semantic.embedCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenTheWeightsAreRefusedBeforeABranchIsBuilt() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.6");
+        final EmbeddingSemanticSearcher semantic = new EmbeddingSemanticSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new RefusingMainSearcher(), semantic)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+        }
+        assertEquals(0, semantic.buildCount.get());
+        assertEquals(1, semantic.searchCount.get());
+        assertEquals(1, semantic.embedCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenTheCombinationTechniqueIsUnknown() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.5");
+        combinationTechnique = "median";
+        assertFallsBackToFessWithOneEmbedding(new RefusingMainSearcher(), fusionParams(0));
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenZScoreIsCombinedWithAMeanTheEngineRejects() throws Exception {
+        givenEngineFusion("");
+        combinationTechnique = "geometric_mean";
+        normalizationTechnique = "z_score";
+        assertFallsBackToFessWithOneEmbedding(new RefusingMainSearcher(), fusionParams(0));
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenTheWeightsNameOnlySomeOfTheBranches() throws Exception {
+        // sums to 1.0 and names this searcher, so it passes the check made before a branch is built,
+        // and then does not match the two branches that take part
+        givenEngineFusion("fusing_main:1.0");
+        assertFallsBackToFessWithOneEmbedding(new RefusingMainSearcher(), fusionParams(0));
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenTheEngineRejectsALaterPage() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.5", 1000, 10000);
+        final RefusingMainSearcher main = new RefusingMainSearcher();
+        main.refusal = engineError("a page past the last fused hit");
+        assertFallsBackToFessWithOneEmbedding(main, fusionParams(50));
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenTheSearchEngineDoesNotKnowTheHybridQuery() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.5");
+        final RefusingMainSearcher main = new RefusingMainSearcher();
+        main.refusal = engineError("unknown query [hybrid]");
+        assertFallsBackToFessWithOneEmbedding(main, fusionParams(0));
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOnceWhenAPageAtTheDepthIsRetried() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.5", 1000, 10000);
+        final EmbeddingSemanticSearcher semantic = new EmbeddingSemanticSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new RefusingMainSearcher(), semantic)) {
+            // the page starts at the depth: refused once the branch is built, and SearchHelper
+            // runs the search a second time with the query escaped
+            assertThrows(InvalidQueryException.class, () -> processor.search("q", fusionParams(1000), OptionalThing.empty()));
+            assertThrows(InvalidQueryException.class, () -> processor.search("q", fusionParams(1000), OptionalThing.empty()));
+        }
+        assertEquals(2, semantic.buildCount.get());
+        assertEquals(1, semantic.embedCount.get());
+    }
+
+    @Test
+    public void test_engineFusion_embedsTheQueryOfEachRequestOnce() throws Exception {
+        givenEngineFusion("fusing_main:0.5,semantic_chunk:0.5");
+        final EmbeddingSemanticSearcher semantic = new EmbeddingSemanticSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(new RefusingMainSearcher(), semantic)) {
+            processor.search("q", fusionParams(0), OptionalThing.empty());
+            final ExternalContext externalContext = SingletonLaContainerFactory.getExternalContext();
+            final Object current = externalContext.getRequest();
+            externalContext.setRequest(new MockletHttpServletRequestImpl(getMockRequest().getServletContext(), "/search"));
+            try {
+                processor.search("q", fusionParams(0), OptionalThing.empty());
+            } finally {
+                externalContext.setRequest(current);
+            }
+        }
+        assertEquals(2, semantic.embedCount.get(), "the embedding of one request is not another request's");
+    }
+
+    /** A bad request of the search engine, as the search engine client reports it. */
+    private static InvalidQueryException engineError(final String reason) {
+        final OpenSearchStatusException cause =
+                new OpenSearchStatusException("OpenSearch exception [reason=" + reason + "]", RestStatus.BAD_REQUEST, null);
+        return new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+                "Failed to process the query.", cause);
+    }
+
+    /** Runs a search that the search engine side cannot fuse and checks that Fess fused it with one embedding. */
+    private void assertFallsBackToFessWithOneEmbedding(final RefusingMainSearcher main, final SearchRequestParams params) throws Exception {
+        final EmbeddingSemanticSearcher semantic = new EmbeddingSemanticSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, semantic)) {
+            processor.search("q", params, OptionalThing.empty());
+        }
+        assertEquals(0, main.fusedCount.get(), "the search must not have been fused by the engine");
+        assertEquals(1, semantic.searchCount.get(), "the search must have been fused by Fess");
+        assertEquals(1, semantic.embedCount.get(), "the query must be embedded once");
+    }
+
     private static SearchRequestParams fusionParams(final int start) {
         return new TestSearchRequestParams(start, 10, 0) {
             @Override
@@ -747,6 +888,10 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         return processor;
     }
 
+    private String combinationTechnique = "rrf";
+
+    private String normalizationTechnique = "min_max";
+
     private void givenEngineFusion(final String weights) {
         givenEngineFusion(weights, 10, 10000);
     }
@@ -772,7 +917,12 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
             @Override
             public String getRankFusionCombinationTechnique() {
-                return "rrf";
+                return combinationTechnique;
+            }
+
+            @Override
+            public String getRankFusionNormalizationTechnique() {
+                return normalizationTechnique;
             }
 
             @Override
@@ -852,6 +1002,99 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
             final Optional<SearchResult> result = super.searchWithSubQueries(query, params, userBean, subQueries);
             result.ifPresent(r -> fusedCount.incrementAndGet());
             return result;
+        }
+    }
+
+    /**
+     * A main searcher that fuses without a search engine, and refuses the fused request - the first
+     * request it is asked to run - with the given failure.
+     */
+    static class RefusingMainSearcher extends FusingMainSearcher {
+
+        RuntimeException refusal;
+
+        private final AtomicInteger executed = new AtomicInteger();
+
+        @Override
+        protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
+            if (executed.getAndIncrement() == 0 && refusal != null) {
+                throw refusal;
+            }
+            return super.execute(params, condition);
+        }
+    }
+
+    /**
+     * The built-in semantic branch over a stub embedding provider, counting the queries it embeds,
+     * the branches it builds and the searches it runs on its own.
+     */
+    static class EmbeddingSemanticSearcher extends SemanticChunkSearcher {
+
+        final AtomicInteger embedCount = new AtomicInteger();
+
+        final AtomicInteger buildCount = new AtomicInteger();
+
+        final AtomicInteger searchCount = new AtomicInteger();
+
+        private final StubProcessorSplitter splitter = new StubProcessorSplitter();
+
+        EmbeddingSemanticSearcher() {
+            name = "semantic_chunk";
+        }
+
+        @Override
+        protected boolean isSearchEnabled() {
+            return true;
+        }
+
+        @Override
+        protected boolean isKnnIndexReady() {
+            return false;
+        }
+
+        @Override
+        protected StructuredQuerySplitter getQuerySplitter() {
+            return splitter;
+        }
+
+        @Override
+        protected EmbeddingClientManager getEmbeddingClientManager() {
+            return new EmbeddingClientManager() {
+                @Override
+                public boolean available() {
+                    return true;
+                }
+
+                @Override
+                public float[] embedQuery(final String query) {
+                    embedCount.incrementAndGet();
+                    return new float[] { 0.1f, 0.2f };
+                }
+            };
+        }
+
+        @Override
+        protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
+                final OptionalThing<FessUserBean> userBean) {
+            buildCount.incrementAndGet();
+            return super.buildSubQuery(query, params, userBean);
+        }
+
+        @Override
+        protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
+            searchCount.incrementAndGet();
+            return super.search(query, params, userBean);
+        }
+
+        @Override
+        protected QueryBuilder buildSemanticQuery(final SemanticQueryContext context, final SearchRequestParams params) {
+            return QueryBuilders.matchAllQuery();
+        }
+
+        @Override
+        protected OptionalEntity<SearchResponse> sendRequest(final SearchRequestParams params,
+                final SearchCondition<SearchRequestBuilder> condition) {
+            return OptionalEntity.empty();
         }
     }
 
