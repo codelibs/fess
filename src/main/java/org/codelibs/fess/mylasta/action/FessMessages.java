@@ -491,6 +491,18 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Related queries are already being generated. */
     public static final String ERRORS_related_query_generation_in_progress = "{errors.related_query_generation_in_progress}";
 
+    /** The key of the message: Enter a tag name of 1 to {0} characters without control characters. */
+    public static final String ERRORS_tagtype_invalid_name = "{errors.tagtype_invalid_name}";
+
+    /** The key of the message: A tag can have up to {0} paths. */
+    public static final String ERRORS_tagtype_too_many_paths = "{errors.tagtype_too_many_paths}";
+
+    /** The key of the message: A tag with the same name and owner already exists. */
+    public static final String ERRORS_tagtype_already_exists = "{errors.tagtype_already_exists}";
+
+    /** The key of the message: The tag was changed by someone else. Reload it and try again. */
+    public static final String ERRORS_tagtype_changed_concurrently = "{errors.tagtype_changed_concurrently}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -2890,6 +2902,64 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsRelatedQueryGenerationInProgress(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_related_query_generation_in_progress));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.tagtype_invalid_name' with parameters.
+     * <pre>
+     * message: Enter a tag name of 1 to {0} characters without control characters.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsTagtypeInvalidName(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_tagtype_invalid_name, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.tagtype_too_many_paths' with parameters.
+     * <pre>
+     * message: A tag can have up to {0} paths.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsTagtypeTooManyPaths(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_tagtype_too_many_paths, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.tagtype_already_exists' with parameters.
+     * <pre>
+     * message: A tag with the same name and owner already exists.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsTagtypeAlreadyExists(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_tagtype_already_exists));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.tagtype_changed_concurrently' with parameters.
+     * <pre>
+     * message: The tag was changed by someone else. Reload it and try again.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsTagtypeChangedConcurrently(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_tagtype_changed_concurrently));
         return this;
     }
 

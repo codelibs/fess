@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fesen.opensearch.search.aggregations.Aggregations;
@@ -48,6 +50,8 @@ import jakarta.annotation.Resource;
  * a {@link TagTypeConflictException}.</p>
  */
 public class TagTypeService extends FessAppService {
+
+    private static final Logger logger = LogManager.getLogger(TagTypeService.class);
 
     /** The name of the aggregations that count the paths of each tag. */
     private static final String PATH_COUNT_AGGREGATION = "path_count";
@@ -249,6 +253,49 @@ public class TagTypeService extends FessAppService {
                 throw new TagTypeConflictException("The tag type was changed concurrently: id=" + tagType.getId(), e);
             }
             throw e;
+        }
+    }
+
+    /**
+     * Replaces a tag type with one of another id, which a change of the name or the owner needs
+     * since the id is derived from them. The replacement is created first; then the tag type is
+     * deleted only if it did not change since it was read, so that a change made meanwhile, such as
+     * a URL added to its paths, is not dropped unseen. When the delete fails, the replacement is
+     * removed again so that both are not left behind.
+     *
+     * @param current The tag type to replace, carrying the sequence number and primary term it was read with.
+     * @param replacement The tag type to create, with its id set.
+     * @return true if the tag type was replaced; false if it changed since it was read, in which case nothing changed
+     * @throws TagTypeConflictException When a tag type with the id of the replacement already exists.
+     */
+    public boolean replace(final TagType current, final TagType replacement) {
+        insert(replacement);
+        try {
+            delete(current);
+            return true;
+        } catch (final TagTypeConflictException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("The tag type was changed concurrently: id={}", current.getId(), e);
+            }
+            removeReplacement(replacement);
+            return false;
+        } catch (final RuntimeException e) {
+            removeReplacement(replacement);
+            throw e;
+        }
+    }
+
+    /**
+     * Deletes the tag type created by {@link #replace(TagType, TagType)} when the tag type it was to
+     * replace could not be deleted. A failure is logged; the leftover tag type can be deleted later.
+     *
+     * @param replacement The tag type created for the replacement.
+     */
+    protected void removeReplacement(final TagType replacement) {
+        try {
+            getTagType(replacement.getId()).ifPresent(this::delete);
+        } catch (final RuntimeException e) {
+            logger.warn("Failed to remove the tag type created for a replacement: id={}", replacement.getId(), e);
         }
     }
 

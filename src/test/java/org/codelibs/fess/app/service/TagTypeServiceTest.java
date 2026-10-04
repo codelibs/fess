@@ -212,6 +212,107 @@ public class TagTypeServiceTest extends UnitFessTestCase {
         assertSame(bhv.failure, e);
     }
 
+    /** Records the writes of {@link TagTypeService#replace}; the delete of the given id fails as configured. */
+    private static final class ReplaceTagTypeService extends TagTypeService {
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        final java.util.Map<String, TagType> store = new java.util.HashMap<>();
+        RuntimeException insertFailure;
+        RuntimeException deleteFailure;
+        String deleteFailureId;
+
+        @Override
+        public void insert(final TagType tagType) {
+            calls.add("insert " + tagType.getId());
+            if (insertFailure != null) {
+                throw insertFailure;
+            }
+            store.put(tagType.getId(), tagType);
+        }
+
+        @Override
+        public void delete(final TagType tagType) {
+            calls.add("delete " + tagType.getId());
+            if (deleteFailure != null && tagType.getId().equals(deleteFailureId)) {
+                throw deleteFailure;
+            }
+            store.remove(tagType.getId());
+        }
+
+        @Override
+        public org.dbflute.optional.OptionalEntity<TagType> getTagType(final String id) {
+            final TagType tagType = store.get(id);
+            return tagType == null ? org.dbflute.optional.OptionalEntity.empty() : org.dbflute.optional.OptionalEntity.of(tagType);
+        }
+    }
+
+    private static TagType tagTypeWithId(final String id) {
+        final TagType tagType = createTagTypeStatic();
+        tagType.setId(id);
+        tagType.setSeqNo(1L);
+        tagType.setPrimaryTerm(1L);
+        return tagType;
+    }
+
+    private static TagType createTagTypeStatic() {
+        final TagType tagType = new TagType();
+        tagType.setName("foo");
+        tagType.setOwner("alice");
+        return tagType;
+    }
+
+    @Test
+    public void test_replace_insertsThenDeletesTheCurrentTagType() {
+        final ReplaceTagTypeService service = new ReplaceTagTypeService();
+        final TagType current = tagTypeWithId("old");
+        service.store.put("old", current);
+
+        assertTrue(service.replace(current, tagTypeWithId("new")));
+
+        assertEquals(java.util.List.of("insert new", "delete old"), service.calls);
+        assertEquals(java.util.Set.of("new"), service.store.keySet());
+    }
+
+    @Test
+    public void test_replace_existingReplacementThrowsAndKeepsTheCurrentTagType() {
+        final ReplaceTagTypeService service = new ReplaceTagTypeService();
+        final TagType current = tagTypeWithId("old");
+        service.store.put("old", current);
+        service.insertFailure = new TagTypeConflictException("exists", null);
+
+        assertThrows(TagTypeConflictException.class, () -> service.replace(current, tagTypeWithId("new")));
+
+        assertEquals(java.util.List.of("insert new"), service.calls);
+        assertEquals(java.util.Set.of("old"), service.store.keySet());
+    }
+
+    @Test
+    public void test_replace_changedCurrentRemovesTheReplacementAndReturnsFalse() {
+        final ReplaceTagTypeService service = new ReplaceTagTypeService();
+        final TagType current = tagTypeWithId("old");
+        service.store.put("old", current);
+        service.deleteFailure = new TagTypeConflictException("changed", null);
+        service.deleteFailureId = "old";
+
+        assertFalse(service.replace(current, tagTypeWithId("new")));
+
+        assertEquals(java.util.List.of("insert new", "delete old", "delete new"), service.calls);
+        assertEquals(java.util.Set.of("old"), service.store.keySet());
+    }
+
+    @Test
+    public void test_replace_otherDeleteFailureRemovesTheReplacementAndRethrows() {
+        final ReplaceTagTypeService service = new ReplaceTagTypeService();
+        final TagType current = tagTypeWithId("old");
+        service.store.put("old", current);
+        service.deleteFailure = new IllegalStateException("down");
+        service.deleteFailureId = "old";
+
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> service.replace(current, tagTypeWithId("new")));
+
+        assertSame(service.deleteFailure, e);
+        assertEquals(java.util.Set.of("old"), service.store.keySet());
+    }
+
     @Test
     public void test_getTagValue_encodesNameAndOwner() {
         final TagType tagType = new TagType();

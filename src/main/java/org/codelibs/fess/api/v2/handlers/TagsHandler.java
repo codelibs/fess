@@ -179,43 +179,24 @@ public class TagsHandler extends AbstractTagHandler {
             renamed.setCreatedTime(current.getCreatedTime());
             renamed.setUpdatedBy(userId);
             renamed.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+            final boolean replaced;
             try {
-                getTagTypeService().insert(renamed);
+                replaced = getTagTypeService().replace(current, renamed);
             } catch (final TagTypeConflictException e) {
                 throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
             }
-            try {
-                getTagTypeService().delete(current);
-            } catch (final TagTypeConflictException e) {
-                rollBack(renamed);
+            if (!replaced) {
                 if (attempt >= MAX_UPDATE_ATTEMPTS) {
-                    logger.warn("Failed to rename the tag after {} attempts: id={}", attempt, read.getId(), e);
+                    logger.warn("Failed to rename the tag after {} attempts: id={}", attempt, read.getId());
                     throw new TagRequestException(V2ErrorCode.CONFLICT, "the tag was changed concurrently; try again");
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("The tag was changed concurrently; retrying the rename: id={}, attempt={}", read.getId(), attempt);
                 }
                 continue;
-            } catch (final RuntimeException e) {
-                rollBack(renamed);
-                throw e;
             }
             enqueue(TagChange.rename(current.getTagValue(), renamed.getTagValue()));
             return renamed;
-        }
-    }
-
-    /**
-     * Deletes the tag created for a rename that could not delete the old tag, so that the caller is not left with
-     * both. A failure is logged; the caller can delete the leftover tag.
-     *
-     * @param inserted the tag created for the rename
-     */
-    private void rollBack(final TagType inserted) {
-        try {
-            getTagTypeService().getTagType(inserted.getId()).ifPresent(getTagTypeService()::delete);
-        } catch (final RuntimeException e) {
-            logger.warn("Failed to remove the tag created for a rename: id={}", inserted.getId(), e);
         }
     }
 

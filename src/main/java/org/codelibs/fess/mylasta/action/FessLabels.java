@@ -1253,6 +1253,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Label Type Details */
     public static final String LABELS_labeltype_details = "{labels.labeltype_details}";
 
+    /** The key of the message: Tag Details */
+    public static final String LABELS_tagtype_details = "{labels.tagtype_details}";
+
     /** The key of the message: Path Mapping Details */
     public static final String LABELS_pathmap_details = "{labels.pathmap_details}";
 
@@ -1324,6 +1327,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Label Type List */
     public static final String LABELS_labeltype_list = "{labels.labeltype_list}";
+
+    /** The key of the message: Tag List */
+    public static final String LABELS_tagtype_list = "{labels.tagtype_list}";
 
     /** The key of the message: Key Match List */
     public static final String LABELS_key_match_list = "{labels.key_match_list}";
@@ -1573,6 +1579,21 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Excluded Paths */
     public static final String LABELS_labeltype_excluded_paths = "{labels.labeltype_excluded_paths}";
+
+    /** The key of the message: Tag */
+    public static final String LABELS_tagtype_configuration = "{labels.tagtype_configuration}";
+
+    /** The key of the message: Tag */
+    public static final String LABELS_tagtype_title_details = "{labels.tagtype_title_details}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_tagtype_name = "{labels.tagtype_name}";
+
+    /** The key of the message: Owner */
+    public static final String LABELS_tagtype_owner = "{labels.tagtype_owner}";
+
+    /** The key of the message: Paths */
+    public static final String LABELS_tagtype_paths = "{labels.tagtype_paths}";
 
     /** The key of the message: Role */
     public static final String LABELS_roletype_configuration = "{labels.roletype_configuration}";

@@ -48,6 +48,7 @@ import org.codelibs.fess.app.web.admin.sereq.AdminSereqAction;
 import org.codelibs.fess.app.web.admin.storage.AdminStorageAction;
 import org.codelibs.fess.app.web.admin.suggest.AdminSuggestAction;
 import org.codelibs.fess.app.web.admin.systeminfo.AdminSysteminfoAction;
+import org.codelibs.fess.app.web.admin.tagtype.AdminTagtypeAction;
 import org.codelibs.fess.app.web.admin.user.AdminUserAction;
 import org.codelibs.fess.app.web.admin.webauth.AdminWebauthAction;
 import org.codelibs.fess.app.web.admin.webconfig.AdminWebconfigAction;
@@ -106,6 +107,8 @@ public class AdminAction extends FessAdminAction {
             AdminDataconfigAction.ROLE + VIEW, //
             AdminLabeltypeAction.ROLE, //
             AdminLabeltypeAction.ROLE + VIEW, //
+            AdminTagtypeAction.ROLE, //
+            AdminTagtypeAction.ROLE + VIEW, //
             AdminKeymatchAction.ROLE, //
             AdminKeymatchAction.ROLE + VIEW, //
             AdminBoostdocAction.ROLE, //
@@ -178,6 +181,8 @@ public class AdminAction extends FessAdminAction {
             AdminDataconfigAction.ROLE + VIEW, //
             AdminLabeltypeAction.ROLE, //
             AdminLabeltypeAction.ROLE + VIEW, //
+            AdminTagtypeAction.ROLE, //
+            AdminTagtypeAction.ROLE + VIEW, //
             AdminKeymatchAction.ROLE, //
             AdminKeymatchAction.ROLE + VIEW, //
             AdminBoostdocAction.ROLE, //
@@ -250,6 +255,8 @@ public class AdminAction extends FessAdminAction {
             AdminDataconfigAction.ROLE + VIEW, //
             AdminLabeltypeAction.ROLE, //
             AdminLabeltypeAction.ROLE + VIEW, //
+            AdminTagtypeAction.ROLE, //
+            AdminTagtypeAction.ROLE + VIEW, //
             AdminKeymatchAction.ROLE, //
             AdminKeymatchAction.ROLE + VIEW, //
             AdminBoostdocAction.ROLE, //
@@ -351,6 +358,9 @@ public class AdminAction extends FessAdminAction {
         }
         if (user.hasRoles(getActionRoles(AdminLabeltypeAction.ROLE))) {
             return AdminLabeltypeAction.class;
+        }
+        if (user.hasRoles(getActionRoles(AdminTagtypeAction.ROLE))) {
+            return AdminTagtypeAction.class;
         }
         if (user.hasRoles(getActionRoles(AdminKeymatchAction.ROLE))) {
             return AdminKeymatchAction.class;
