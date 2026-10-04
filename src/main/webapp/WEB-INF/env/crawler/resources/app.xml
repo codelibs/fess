@@ -12,6 +12,8 @@
 
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
+	<component name="tagTypeHelper" class="org.codelibs.fess.helper.TagTypeHelper">
+	</component>
 	<component name="webFsIndexHelper" class="org.codelibs.fess.helper.WebFsIndexHelper">
 	</component>
 	<component name="dataIndexHelper" class="org.codelibs.fess.helper.DataIndexHelper">

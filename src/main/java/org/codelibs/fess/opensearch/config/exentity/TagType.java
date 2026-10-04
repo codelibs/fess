@@ -72,6 +72,19 @@ public class TagType extends BsTagType {
         if (name == null || owner == null) {
             return null;
         }
+        return toTagValue(name, owner);
+    }
+
+    /**
+     * Encodes a tag name and its owner into the value a tag puts on the tag field of a document:
+     * each encoded as Base64URL without padding from UTF-8, joined by {@code ':'}. Neither part
+     * can contain {@code ':'}, so the value splits back into the two unambiguously.
+     *
+     * @param name the tag name
+     * @param owner the owner of the tag
+     * @return the tag value
+     */
+    public static String toTagValue(final String name, final String owner) {
         final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
         return encoder.encodeToString(name.getBytes(StandardCharsets.UTF_8)) + ":"
                 + encoder.encodeToString(owner.getBytes(StandardCharsets.UTF_8));
