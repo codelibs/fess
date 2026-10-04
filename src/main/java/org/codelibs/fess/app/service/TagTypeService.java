@@ -15,14 +15,20 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fesen.opensearch.search.aggregations.Aggregations;
+import org.codelibs.fesen.opensearch.search.aggregations.bucket.terms.Terms;
+import org.codelibs.fesen.opensearch.search.aggregations.metrics.ValueCount;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.TagTypePager;
 import org.codelibs.fess.exception.TagTypeConflictException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.allcommon.EsPagingResultBean;
 import org.codelibs.fess.opensearch.config.cbean.TagTypeCB;
 import org.codelibs.fess.opensearch.config.exbhv.TagTypeBhv;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
@@ -42,6 +48,9 @@ import jakarta.annotation.Resource;
  * a {@link TagTypeConflictException}.</p>
  */
 public class TagTypeService extends FessAppService {
+
+    /** The name of the aggregations that count the paths of each tag. */
+    private static final String PATH_COUNT_AGGREGATION = "path_count";
 
     /** The TagType behavior. */
     @Resource
@@ -128,6 +137,32 @@ public class TagTypeService extends FessAppService {
             cb.query().addOrderBy_Name_Asc();
             cb.paging(fessConfig.getUserTagMaxTagsAsInteger(), 1);
         });
+    }
+
+    /**
+     * Count the paths of each tag type of one owner without reading the paths: a terms
+     * aggregation on the name, unique per owner, with a value count of the paths.
+     *
+     * @param owner The owner of the tag types.
+     * @return The number of paths keyed by tag name; a tag without paths may be missing.
+     */
+    public Map<String, Long> getPathCountMapByOwner(final String owner) {
+        final int maxTags = fessConfig.getUserTagMaxTagsAsInteger();
+        final EsPagingResultBean<TagType> result = (EsPagingResultBean<TagType>) tagTypeBhv.selectPage(cb -> {
+            cb.fetchFirst(0);
+            cb.query().setOwner_Term(owner);
+            cb.aggregation()
+                    .setName_Terms(PATH_COUNT_AGGREGATION, op -> op.size(maxTags), ca -> ca.setPaths_Count(PATH_COUNT_AGGREGATION, null));
+        });
+        final Map<String, Long> pathCountMap = new HashMap<>();
+        final Aggregations aggregations = result.getAggregations();
+        if (aggregations != null && aggregations.get(PATH_COUNT_AGGREGATION) instanceof final Terms terms) {
+            for (final Terms.Bucket bucket : terms.getBuckets()) {
+                final ValueCount valueCount = bucket.getAggregations().get(PATH_COUNT_AGGREGATION);
+                pathCountMap.put(bucket.getKeyAsString(), valueCount == null ? 0L : valueCount.getValue());
+            }
+        }
+        return pathCountMap;
     }
 
     /**

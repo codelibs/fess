@@ -225,7 +225,8 @@ public class SearchApiV2ManagerLoginRequiredTest extends UnitFessTestCase {
     public void test_sessionOnlyEndpoints_stayGatedWithValidAccessTokenWhenLoginRequired() throws Exception {
         setLoginRequired(true);
         for (final String path : new String[] { "/api/v2/chat", "/api/v2/favorites", "/api/v2/search-history", "/api/v2/click",
-                "/api/v2/cache/abc123", "/api/v2/related-queries", "/api/v2/related-content", "/api/v2/auth/password" }) {
+                "/api/v2/cache/abc123", "/api/v2/related-queries", "/api/v2/related-content", "/api/v2/auth/password", "/api/v2/tags",
+                "/api/v2/tags/abc", "/api/v2/documents/abc123/tags", "/api/v2/documents/abc123/tags/abc" }) {
             final CapturingResponse res = processWithTokens(path, "Bearer " + VALID_TOKEN);
             assertEquals(401, res.status, path);
             assertTrue(res.body().contains("login required"), path + " -> " + res.body());

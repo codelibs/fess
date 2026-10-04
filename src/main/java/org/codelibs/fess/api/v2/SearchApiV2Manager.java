@@ -28,6 +28,7 @@ import org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler;
 import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
+import org.codelibs.fess.api.v2.handlers.DocumentTagsHandler;
 import org.codelibs.fess.api.v2.handlers.ExportSearchHandler;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
@@ -46,6 +47,7 @@ import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHistoryHandler;
 import org.codelibs.fess.api.v2.handlers.SuggestWordsHandler;
+import org.codelibs.fess.api.v2.handlers.TagsHandler;
 import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
 import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -101,6 +103,14 @@ public class SearchApiV2Manager extends BaseApiManager {
     /** Handles {@code POST /api/v2/documents/{id}/favorite} (toggle favorite state). */
     @Resource
     protected FavoritePostHandler favoritePostHandler;
+
+    /** Handles {@code GET/POST /api/v2/tags} and {@code PUT/DELETE /api/v2/tags/{id}} (the caller's own tags). */
+    @Resource
+    protected TagsHandler tagsHandler;
+
+    /** Handles {@code GET/POST /api/v2/documents/{id}/tags} and {@code DELETE /api/v2/documents/{id}/tags/{tagId}}. */
+    @Resource
+    protected DocumentTagsHandler documentTagsHandler;
 
     /** Handles {@code GET /api/v2/favorites} (list favorited doc ids in a previously issued search result). */
     @Resource
@@ -302,6 +312,17 @@ public class SearchApiV2Manager extends BaseApiManager {
                 }
                 return;
             }
+            // "/documents/{docId}/tags" and "/documents/{docId}/tags/{tagId}". The doc id and the tag
+            // id are single non-empty segments; anything else under /documents/ falls through to the
+            // not_found arm below.
+            if (sub.startsWith("/documents/")) {
+                final String[] segments = sub.substring("/documents/".length()).split("/", -1);
+                if ((segments.length == 2 || segments.length == 3) && !segments[0].isEmpty() && "tags".equals(segments[1])
+                        && (segments.length == 2 || !segments[2].isEmpty())) {
+                    documentTagsHandler.handle(request, response, segments[0], segments.length == 3 ? segments[2] : null);
+                    return;
+                }
+            }
             if (sub.startsWith("/cache/")) {
                 final String docId = sub.substring("/cache/".length());
                 cacheHandler.handle(request, response, docId);
@@ -318,6 +339,15 @@ public class SearchApiV2Manager extends BaseApiManager {
             // closes the dispatch hole where /documents/abc/foo silently fell through.
             if (sub.startsWith("/documents/")) {
                 ComponentUtil.getV2EnvelopeWriter().writeError(response, V2ErrorCode.NOT_FOUND, "unknown action on document: " + sub);
+                return;
+            }
+            // "/tags" and "/tags/{tagId}": the tag id is one non-empty segment.
+            if ("/tags".equals(sub)) {
+                tagsHandler.handle(request, response, null);
+                return;
+            }
+            if (sub.startsWith("/tags/") && sub.indexOf('/', "/tags/".length()) < 0) {
+                tagsHandler.handle(request, response, sub.substring("/tags/".length()));
                 return;
             }
             switch (sub) {

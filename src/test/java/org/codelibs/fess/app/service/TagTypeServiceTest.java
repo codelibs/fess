@@ -177,6 +177,40 @@ public class TagTypeServiceTest extends UnitFessTestCase {
         assertNull(tagType.getTagValue());
     }
 
+    @Test
+    public void test_getPathCountMapByOwner_aggregatesWithoutReadingPaths() {
+        final String[] dsl = new String[1];
+        final TagTypeBhv bhv = new TagTypeBhv() {
+            @Override
+            public org.dbflute.cbean.result.PagingResultBean<TagType> selectPage(
+                    final org.dbflute.bhv.readable.CBCall<org.codelibs.fess.opensearch.config.cbean.TagTypeCB> cbLambda) {
+                final org.codelibs.fess.opensearch.config.cbean.TagTypeCB cb = new org.codelibs.fess.opensearch.config.cbean.TagTypeCB();
+                cbLambda.callback(cb);
+                final org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder builder =
+                        new org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder(null,
+                                org.codelibs.fesen.opensearch.action.search.SearchAction.INSTANCE);
+                cb.build(builder);
+                dsl[0] = builder.toString().replaceAll("\\s+", "");
+                return new org.codelibs.fess.opensearch.config.allcommon.EsPagingResultBean<>(builder);
+            }
+        };
+        final TagTypeService service = createService(bhv);
+        service.fessConfig = new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getUserTagMaxTagsAsInteger() {
+                return 7;
+            }
+        };
+
+        // no aggregations in the response: no counts
+        assertTrue(service.getPathCountMapByOwner("alice").isEmpty());
+        assertTrue(dsl[0].contains("\"owner\":{\"value\":\"alice\""), dsl[0]);
+        assertTrue(dsl[0].contains("\"terms\":{\"field\":\"name\",\"size\":7"), dsl[0]);
+        assertTrue(dsl[0].contains("\"value_count\":{\"field\":\"paths\"}"), dsl[0]);
+    }
+
     /**
      * Stand-in for {@code org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException},
      * recognized by its class name.

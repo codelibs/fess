@@ -145,6 +145,67 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_tagWritesRejectedWithoutCsrfToken_returns403() throws Exception {
+        final String[][] requests = { { "POST", "/api/v2/tags" }, { "PUT", "/api/v2/tags/abc" }, { "DELETE", "/api/v2/tags/abc" },
+                { "POST", "/api/v2/documents/abc123/tags" }, { "DELETE", "/api/v2/documents/abc123/tags/abc" } };
+        for (final String[] r : requests) {
+            final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+            final java.util.List<String> calls = recordTagCalls(m);
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest(r[1]).withMethod(r[0]), res, new NopChain());
+            assertEquals(403, res.status, r[0] + " " + r[1]);
+            assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
+            assertTrue(calls.isEmpty(), r[0] + " " + r[1] + " must be stopped before the handler");
+        }
+    }
+
+    @Test
+    public void test_tagWritesWithValidCsrfToken_reachTheHandlers() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = recordTagCalls(m);
+        final String[][] requests = { { "POST", "/api/v2/tags" }, { "PUT", "/api/v2/tags/abc" }, { "DELETE", "/api/v2/tags/abc" },
+                { "POST", "/api/v2/documents/abc123/tags" }, { "DELETE", "/api/v2/documents/abc123/tags/abc" } };
+        for (final String[] r : requests) {
+            final StubSession session = new StubSession();
+            session.setAttribute(SessionCsrfTokenManager.SESSION_ATTR, "the-valid-token");
+            final CapturingResponse res = new CapturingResponse();
+            m.process(new StubRequest(r[1]).withMethod(r[0]).withSession(session).withHeader("X-Fess-CSRF-Token", "the-valid-token"), res,
+                    new NopChain());
+            assertFalse(res.body().contains("\"code\":\"forbidden\""), res.body());
+        }
+        assertEquals(java.util.List.of("tags POST null", "tags PUT abc", "tags DELETE abc", "documents POST abc123 null",
+                "documents DELETE abc123 abc"), calls);
+    }
+
+    @Test
+    public void test_tagReadsWithoutTokenAreExempt() throws Exception {
+        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
+        final java.util.List<String> calls = recordTagCalls(m);
+        m.process(new StubRequest("/api/v2/tags"), new CapturingResponse(), new NopChain());
+        m.process(new StubRequest("/api/v2/documents/abc123/tags"), new CapturingResponse(), new NopChain());
+        assertEquals(java.util.List.of("tags GET null", "documents GET abc123 null"), calls);
+    }
+
+    /** Replaces both tag handlers with ones that record each request they receive. */
+    private static java.util.List<String> recordTagCalls(final SearchApiV2Manager m) {
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        m.tagsHandler = new org.codelibs.fess.api.v2.handlers.TagsHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String tagId) throws IOException {
+                calls.add("tags " + req.getMethod() + " " + tagId);
+            }
+        };
+        m.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
+            @Override
+            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId, final String tagId)
+                    throws IOException {
+                calls.add("documents " + req.getMethod() + " " + docId + " " + tagId);
+            }
+        };
+        return calls;
+    }
+
+    @Test
     public void test_postChatRejectedWithoutCsrfToken_returns403() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();

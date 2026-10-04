@@ -599,6 +599,36 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_features_userTag_offByDefault() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"user_tag\":false"), res.body());
+    }
+
+    @Test
+    public void test_features_userTag_onWhenEnabled() throws Exception {
+        // Delegate every call to the real configuration except user.tag.enabled.
+        final org.codelibs.fess.mylasta.direction.FessConfig real = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig((org.codelibs.fess.mylasta.direction.FessConfig) java.lang.reflect.Proxy.newProxyInstance(
+                org.codelibs.fess.mylasta.direction.FessConfig.class.getClassLoader(),
+                new Class<?>[] { org.codelibs.fess.mylasta.direction.FessConfig.class }, (proxy, method, args) -> {
+                    if ("isUserTagEnabled".equals(method.getName())) {
+                        return true;
+                    }
+                    try {
+                        return method.invoke(real, args);
+                    } catch (final java.lang.reflect.InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                }));
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"user_tag\":true"), res.body());
+    }
+
+    @Test
     public void test_features_searchExport_offByDefault() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);

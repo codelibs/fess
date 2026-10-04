@@ -25,6 +25,8 @@
 	<component name="favoriteGetHandler" class="org.codelibs.fess.api.v2.handlers.FavoriteGetHandler"/>
 	<component name="favoritePostHandler" class="org.codelibs.fess.api.v2.handlers.FavoritePostHandler"/>
 	<component name="favoritesListHandler" class="org.codelibs.fess.api.v2.handlers.FavoritesListHandler"/>
+	<component name="tagsHandler" class="org.codelibs.fess.api.v2.handlers.TagsHandler"/>
+	<component name="documentTagsHandler" class="org.codelibs.fess.api.v2.handlers.DocumentTagsHandler"/>
 	<component name="searchHistoryHandler" class="org.codelibs.fess.api.v2.handlers.SearchHistoryHandler"/>
 	<component name="meHandler" class="org.codelibs.fess.api.v2.handlers.MeHandler"/>
 	<component name="logoutHandler" class="org.codelibs.fess.api.v2.handlers.LogoutHandler"/>

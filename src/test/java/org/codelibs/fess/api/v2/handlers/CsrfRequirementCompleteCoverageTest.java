@@ -68,7 +68,7 @@ public class CsrfRequirementCompleteCoverageTest {
      * Must equal {@code ENDPOINT_DECISIONS.size()}. Increment when adding a new endpoint
      * so that the mismatch causes a deliberate compile-time / test-time notice.
      */
-    private static final int EXPECTED_ENTRY_COUNT = 18;
+    private static final int EXPECTED_ENTRY_COUNT = 22;
 
     static {
         // LinkedHashMap preserves insertion order for readable failure messages.
@@ -100,6 +100,12 @@ public class CsrfRequirementCompleteCoverageTest {
         m.put("/documents/abc123/favorite", true); // POST, CSRF required
         m.put("/favorites", true); // GET only — secure default (CSRF required if called via POST)
         m.put("/search-history", true); // GET only — secure default (CSRF required if called via POST)
+
+        // --- USER TAG endpoints (POST/PUT/DELETE change the caller's tags) ---
+        m.put("/tags", true); // POST, CSRF required
+        m.put("/tags/abc", true); // PUT/DELETE, CSRF required
+        m.put("/documents/abc123/tags", true); // POST, CSRF required
+        m.put("/documents/abc123/tags/abc", true); // DELETE, CSRF required
 
         // --- CHAT endpoints ---
         m.put("/chat", true); // POST, CSRF required
@@ -150,6 +156,14 @@ public class CsrfRequirementCompleteCoverageTest {
                 Arrays.asList("/auth/logout", "/auth/password", "/click", "/documents/abc123/favorite", "/chat", "/chat/stream");
         for (final String path : stateChangingPost) {
             assertTrue(new CsrfRequirement().requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
+        }
+        for (final String path : Arrays.asList("/tags", "/documents/abc123/tags")) {
+            assertTrue(new CsrfRequirement().requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
+        }
+        assertTrue(new CsrfRequirement().requiresCsrf("/tags/abc", "PUT"), "PUT /tags/{id} must require CSRF token");
+        for (final String path : Arrays.asList("/tags/abc", "/documents/abc123/tags/abc")) {
+            assertTrue(new CsrfRequirement().requiresCsrf(path, "DELETE"),
+                    "State-changing endpoint must require CSRF token: DELETE " + path);
         }
         // DELETE /chat/sessions/{session_id} is state-changing — CSRF required
         assertTrue(new CsrfRequirement().requiresCsrf("/chat/sessions/abc", "DELETE"),

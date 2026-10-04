@@ -17,9 +17,14 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +33,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.entity.SearchRenderData;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.RelatedContentHelper;
@@ -35,6 +41,7 @@ import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
@@ -103,7 +110,7 @@ public class SearchHandler {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final SearchRenderData data = new SearchRenderData();
-            final V2JsonRequestParams params = new V2JsonRequestParams(request, fessConfig);
+            final V2JsonRequestParams params = createRequestParams(request, fessConfig);
             params.enableRedirect();
             searchHelper.search(params, data, OptionalThing.empty());
             // A search request rewriter can send the search elsewhere (e.g. a bang to another
@@ -115,10 +122,11 @@ public class SearchHandler {
                 ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
                 return;
             }
-            final Map<String, Object> payload = buildPayload(params.getQuery(), data);
+            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
+            final String userId = userBean.map(FessUserBean::getUserId).filter(StringUtil::isNotBlank).orElse(null);
+            final Map<String, Object> payload = buildPayload(params.getQuery(), data, getVisibleTagTypes(data, userId), userId);
             // Evaluated per search: a user whose group and role permissions are still loading or
             // failed sees fewer results.
-            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
             payload.put("permission_state",
                     ComponentUtil.getV2UserPayloads().permissionState(userBean.isPresent() ? userBean.get() : null));
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
@@ -139,6 +147,67 @@ public class SearchHandler {
                             messages -> messages.addErrorsResultSizeExceeded(UserMessages.GLOBAL_PROPERTY_KEY));
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/search");
+        }
+    }
+
+    /**
+     * Creates the request parameters of the search. The tag field is fetched while user tags are
+     * enabled so that the hits can carry the tags the caller can see; it is added here rather than
+     * to the global response fields, which every other API returns as is.
+     *
+     * @param request the incoming HTTP request
+     * @param fessConfig the Fess configuration
+     * @return the request parameters
+     */
+    protected V2JsonRequestParams createRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
+        return new V2JsonRequestParams(request, fessConfig) {
+            @Override
+            public String[] getResponseFields() {
+                final String[] fields = super.getResponseFields();
+                if (!fessConfig.isUserTagEnabled()) {
+                    return fields;
+                }
+                final Set<String> fieldSet = new LinkedHashSet<>(Arrays.asList(fields));
+                fieldSet.add(fessConfig.getIndexFieldTag());
+                return fieldSet.toArray(new String[0]);
+            }
+        };
+    }
+
+    /**
+     * Returns the tags of the hits and the tag facet that the caller can see, looked up in one call.
+     * Nobody who is not logged in sees a tag.
+     *
+     * @param data the search result
+     * @param userId the logged-in user, or null
+     * @return the visible tag types keyed by tag value
+     */
+    Map<String, TagType> getVisibleTagTypes(final SearchRenderData data, final String userId) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (userId == null || !fessConfig.isUserTagEnabled()) {
+            return Collections.emptyMap();
+        }
+        final String tagField = fessConfig.getIndexFieldTag();
+        final Set<String> values = new LinkedHashSet<>();
+        final List<Map<String, Object>> docs = data.getDocumentItems();
+        if (docs != null) {
+            docs.forEach(doc -> values.addAll(toStringList(doc.get(tagField))));
+        }
+        final FacetResponse facetResponse = data.getFacetResponse();
+        if (facetResponse != null && facetResponse.getFieldList() != null) {
+            facetResponse.getFieldList()
+                    .stream()
+                    .filter(field -> tagField.equals(field.getName()))
+                    .forEach(field -> values.addAll(field.getValueCountMap().keySet()));
+        }
+        if (values.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            return ComponentUtil.getTagTypeHelper().getVisibleTagTypes(values, SearchRequestType.JSON);
+        } catch (final RuntimeException e) {
+            logger.warn("Failed to resolve the visible tags; the hits are returned without tags.", e);
+            return Collections.emptyMap();
         }
     }
 
@@ -169,9 +238,12 @@ public class SearchHandler {
      *
      * @param query the original {@code q} parameter (may be {@code null})
      * @param data the populated render data returned by the search helper
+     * @param visibleTagTypes the tag types the caller can see, keyed by tag value
+     * @param userId the logged-in user, or null
      * @return the ordered payload map ready for envelope serialization
      */
-    private Map<String, Object> buildPayload(final String query, final SearchRenderData data) {
+    private Map<String, Object> buildPayload(final String query, final SearchRenderData data, final Map<String, TagType> visibleTagTypes,
+            final String userId) {
         final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
         final RelatedContentHelper relatedContentHelper = ComponentUtil.getRelatedContentHelper();
 
@@ -198,11 +270,11 @@ public class SearchHandler {
         payload.put("requested_time", data.getRequestedTime());
         payload.put("related_query", relatedQueryHelper.getRelatedQueries(query));
         payload.put("related_contents", relatedContentHelper.getRelatedContents(query));
-        payload.put("data", filterDocuments(data.getDocumentItems()));
+        payload.put("data", filterDocuments(data.getDocumentItems(), visibleTagTypes, userId));
 
         final FacetResponse facetResponse = data.getFacetResponse();
         if (facetResponse != null && facetResponse.hasFacetResponse()) {
-            payload.put("facet_field", buildFacetField(facetResponse));
+            payload.put("facet_field", buildFacetField(facetResponse, visibleTagTypes, userId));
             payload.put("facet_query", buildFacetQuery(facetResponse));
         }
         return payload;
@@ -215,26 +287,72 @@ public class SearchHandler {
      * <p>Drops blank keys and {@code null} values — matching v1's behavior so the
      * wire payload size stays stable across versions.</p>
      *
+     * <p>The raw {@code tag} field is never returned, even when
+     * {@code query.additional.api.response.fields} lists it: its values decode to the name and the
+     * owner of every tag on the document. The tags the caller can see are returned as {@code tags},
+     * a list of {@code {value, name, owner, mine, shared}}, on a hit that has at least one.</p>
+     *
      * @param docs the raw document items from {@link SearchRenderData}
+     * @param visibleTagTypes the tag types the caller can see, keyed by tag value
+     * @param userId the logged-in user, or null
      * @return a new list of filtered, order-preserved document maps
      */
-    private List<Map<String, Object>> filterDocuments(final List<Map<String, Object>> docs) {
+    List<Map<String, Object>> filterDocuments(final List<Map<String, Object>> docs, final Map<String, TagType> visibleTagTypes,
+            final String userId) {
         if (docs == null || docs.isEmpty()) {
             return new ArrayList<>(0);
         }
         final QueryFieldConfig cfg = ComponentUtil.getQueryFieldConfig();
+        final String tagField = ComponentUtil.getFessConfig().getIndexFieldTag();
         final List<Map<String, Object>> out = new ArrayList<>(docs.size());
         for (final Map<String, Object> doc : docs) {
             final Map<String, Object> filtered = new LinkedHashMap<>();
             for (final Map.Entry<String, Object> e : doc.entrySet()) {
                 final String name = e.getKey();
-                if (StringUtil.isNotBlank(name) && e.getValue() != null && cfg.isApiResponseField(name)) {
+                if (StringUtil.isNotBlank(name) && e.getValue() != null && cfg.isApiResponseField(name) && !tagField.equals(name)) {
                     filtered.put(name, e.getValue());
+                }
+            }
+            if (!visibleTagTypes.isEmpty()) {
+                final List<Map<String, Object>> tags = new ArrayList<>();
+                for (final String value : toStringList(doc.get(tagField))) {
+                    final TagType tagType = visibleTagTypes.get(value);
+                    if (tagType != null) {
+                        final Map<String, Object> tag = new LinkedHashMap<>();
+                        tag.put("value", value);
+                        tag.put("name", tagType.getName());
+                        putOwnership(tag, tagType, userId);
+                        tags.add(tag);
+                    }
+                }
+                if (!tags.isEmpty()) {
+                    filtered.put("tags", tags);
                 }
             }
             out.add(filtered);
         }
         return out;
+    }
+
+    /** Adds {@code owner}, {@code mine} and {@code shared} of a tag. */
+    private static void putOwnership(final Map<String, Object> map, final TagType tagType, final String userId) {
+        map.put("owner", tagType.getOwner());
+        map.put("mine", userId != null && userId.equals(tagType.getOwner()));
+        map.put("shared", ComponentUtil.getTagTypeHelper().isShared(tagType));
+    }
+
+    private static List<String> toStringList(final Object value) {
+        final List<String> list = new ArrayList<>();
+        if (value instanceof final Collection<?> collection) {
+            collection.forEach(v -> list.add(String.valueOf(v)));
+        } else if (value instanceof final Object[] array) {
+            for (final Object v : array) {
+                list.add(String.valueOf(v));
+            }
+        } else if (value != null) {
+            list.add(value.toString());
+        }
+        return list;
     }
 
     /**
@@ -248,6 +366,22 @@ public class SearchHandler {
      * @return a list of {@code {name, result:[{value, count}]}} maps
      */
     List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse) {
+        return buildFacetField(facetResponse, Collections.emptyMap(), null);
+    }
+
+    /**
+     * Builds the {@code facet_field} array. A bucket of the {@code tag} facet is kept only for a tag
+     * the caller can see and carries its name as {@code label} with {@code owner}, {@code mine} and
+     * {@code shared}.
+     *
+     * @param facetResponse the populated facet response (never {@code null})
+     * @param visibleTagTypes the tag types the caller can see, keyed by tag value
+     * @param userId the logged-in user, or null
+     * @return a list of {@code {name, result:[{value, count}]}} maps
+     */
+    List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse, final Map<String, TagType> visibleTagTypes,
+            final String userId) {
+        final String tagField = ComponentUtil.getFessConfig().getIndexFieldTag();
         final List<Field> fields = facetResponse.getFieldList();
         if (fields == null || fields.isEmpty()) {
             return new ArrayList<>(0);
@@ -257,10 +391,19 @@ public class SearchHandler {
             final Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("name", field.getName());
             final List<Map<String, Object>> results = new ArrayList<>();
+            final boolean isTagField = tagField.equals(field.getName());
             for (final Map.Entry<String, Long> vc : field.getValueCountMap().entrySet()) {
+                final TagType tagType = isTagField ? visibleTagTypes.get(vc.getKey()) : null;
+                if (isTagField && tagType == null) {
+                    continue;
+                }
                 final Map<String, Object> result = new LinkedHashMap<>();
                 result.put("value", vc.getKey());
                 result.put("count", vc.getValue());
+                if (tagType != null) {
+                    result.put("label", tagType.getName());
+                    putOwnership(result, tagType, userId);
+                }
                 results.add(result);
             }
             entry.put("result", results);
