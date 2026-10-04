@@ -1231,7 +1231,8 @@ public class SearchEngineClient implements Client {
      * never receives fields that a new release adds to it. The first write of such a field would
      * map it dynamically, and the intended type could then only be applied by a reindex. Fields
      * the index already has are never changed. The document index is skipped: its mapping is
-     * rewritten by plugins and is upgraded by a reindex.</p>
+     * rewritten by plugins and is upgraded by a reindex. Only its tag field is added, by
+     * {@link #addMissingTagProperty(String, MappingMetadata)}.</p>
      *
      * <p>Only the webapp process ({@link #isWebappProcess()}) adds the fields. The webapp opens the
      * client before it starts any job process, so the fields are already there when a crawler,
@@ -1245,7 +1246,11 @@ public class SearchEngineClient implements Client {
      */
     protected void addMissingProperties(final String index, final String docType, final String indexName,
             final MappingMetadata existingProperties) {
-        if (DOC_INDEX.equals(index) || !isWebappProcess()) {
+        if (!isWebappProcess()) {
+            return;
+        }
+        if (DOC_INDEX.equals(index)) {
+            addMissingTagProperty(indexName, existingProperties);
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -1278,6 +1283,40 @@ public class SearchEngineClient implements Client {
             }
         } catch (final Exception e) {
             logger.warn("Failed to add fields to {}/{} mapping: fields={}", indexName, docType, missingProperties.keySet(), e);
+        }
+    }
+
+    /**
+     * Adds the user tag field to an existing document index that does not have it yet.
+     *
+     * <p>The field was added to the bundled document mapping after release, and an existing index
+     * would map it dynamically as text on the first tag write, which breaks the terms facet and
+     * the term filters on it. Only this one field is put, as {@code keyword}. A tag field the index
+     * already has is never changed; one of another type is reported, since only a reindex can
+     * change it.</p>
+     *
+     * @param indexName          the actual document index name
+     * @param existingProperties the index's current {@code properties} mapping
+     */
+    protected void addMissingTagProperty(final String indexName, final MappingMetadata existingProperties) {
+        final String tagField = ComponentUtil.getFessConfig().getIndexFieldTag();
+        final Object existing = existingProperties.sourceAsMap().get(tagField);
+        if (existing != null) {
+            final Object type = existing instanceof final Map<?, ?> definition ? definition.get("type") : null;
+            if (!"keyword".equals(type)) {
+                logger.warn("The {} field of {} is not mapped as keyword; reindex to use user tags: type={}", tagField, indexName, type);
+            }
+            return;
+        }
+        final Map<String, Object> properties = Collections.singletonMap(tagField, Collections.singletonMap("type", "keyword"));
+        try {
+            if (putMapping(indexName, new ObjectMapper().writeValueAsString(Collections.singletonMap("properties", properties)))) {
+                logger.info("Added fields to {} mapping: fields={}", indexName, properties.keySet());
+            } else {
+                logger.warn("Failed to add fields to {} mapping: fields={}", indexName, properties.keySet());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to add fields to {} mapping: fields={}", indexName, properties.keySet(), e);
         }
     }
 

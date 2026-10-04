@@ -129,6 +129,11 @@ map:{
             ; esclientDiFile = esclient.xml
             ; esfluteDiFile = esflute_config.xml
         }
+        ; fess_config.tag_type = map:{
+            ; package = config
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_config.xml
+        }
         ; fess_config.thumbnail_queue = map:{
             ; package = config
             ; esclientDiFile = esclient.xml

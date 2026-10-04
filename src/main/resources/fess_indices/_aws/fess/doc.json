@@ -596,6 +596,9 @@
       "label": {
         "type": "keyword"
       },
+      "tag": {
+        "type": "keyword"
+      },
       "virtual_host": {
         "type": "keyword"
       },
