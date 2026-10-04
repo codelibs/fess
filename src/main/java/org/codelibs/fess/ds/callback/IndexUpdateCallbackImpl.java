@@ -132,16 +132,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             addFavoriteCountField(dataMap, url, fessConfig.getIndexFieldFavoriteCount());
         }
 
-        if (fessConfig.isUserTagEnabled()) {
-            // the tags are users' and come only from the label types of the kind tag
-            final Set<String> tagSet = ComponentUtil.getLabelTypeHelper().getMatchedTagValueSet(url);
-            if (tagSet.isEmpty()) {
-                dataMap.remove(fessConfig.getIndexFieldTag());
-            } else {
-                dataMap.put(fessConfig.getIndexFieldTag(), tagSet.toArray(new String[tagSet.size()]));
-            }
-        }
-
         final Set<String> matchedLabelSet = ComponentUtil.getLabelTypeHelper().getMatchedLabelValueSet(url);
         if (!matchedLabelSet.isEmpty()) {
             final Set<String> newLabelSet = new HashSet<>();

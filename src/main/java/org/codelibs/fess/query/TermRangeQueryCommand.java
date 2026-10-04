@@ -74,11 +74,6 @@ public class TermRangeQueryCommand extends QueryCommand {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), termRangeQuery.getField());
 
-        if (isRestrictedTagField(context, field)) {
-            // a tag value is a hash of the name: a range has no use but to probe for tags the caller cannot see
-            return buildHiddenTagQuery(context, field, termRangeQuery.toString(field));
-        }
-
         if (!isSearchField(field)) {
             final StringBuilder queryBuf = new StringBuilder();
             queryBuf.append(termRangeQuery.includesLower() ? '[' : '{');

@@ -73,7 +73,7 @@ public class LoginRequirement {
         // login_required flag the page needs in order to show the login form at all.
         case "/auth/me", "/auth/login", "/auth/logout", "/ui/config" -> false;
         // Secure default: everything else — search, scroll, suggest, labels, popular words,
-        // related queries/content, chat, click, favorites, tags, search history, cache and any endpoint added later
+        // related queries/content, chat, click, favorites, search history, cache and any endpoint added later
         // — is served only to an authenticated user.
         default -> true;
         };
@@ -85,7 +85,7 @@ public class LoginRequirement {
      *
      * <p>The accepted set is the endpoints on which a token already decides what the caller
      * sees: they resolve the caller's roles through {@code RoleQueryHelper}, which adds the
-     * token's permissions to an API request. Endpoints that act for a signed-in user (favorites, tags,
+     * token's permissions to an API request. Endpoints that act for a signed-in user (favorites,
      * search history, click logging, password change), generative endpoints (chat) and the cache view, which
      * checks the session itself, keep requiring a login.</p>
      *

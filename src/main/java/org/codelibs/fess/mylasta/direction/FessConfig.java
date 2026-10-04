@@ -717,9 +717,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. label */
     String INDEX_FIELD_LABEL = "index.field.label";
 
-    /** The key of the configuration. e.g. tag */
-    String INDEX_FIELD_TAG = "index.field.tag";
-
     /** The key of the configuration. e.g. mimetype */
     String INDEX_FIELD_MIMETYPE = "index.field.mimetype";
 
@@ -837,7 +834,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_DICTIONARY_PREFIX = "index.dictionary.prefix";
 
-    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host,tag */
+    /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
     /** The key of the configuration. e.g. expires,created,timestamp,last_modified */
@@ -1360,15 +1357,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 10 */
     String SEARCH_HISTORY_SIZE = "search.history.size";
-
-    /** The key of the configuration. e.g. false */
-    String USER_TAG_ENABLED = "user.tag.enabled";
-
-    /** The key of the configuration. e.g. 50 */
-    String USER_TAG_NAME_MAX_LENGTH = "user.tag.name.max.length";
-
-    /** The key of the configuration. e.g. 100 */
-    String USER_TAG_MAX_DOCUMENT_TAGS = "user.tag.max.document.tags";
 
     /** The key of the configuration. e.g. 10000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
@@ -4836,14 +4824,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexFieldLabel();
 
     /**
-     * Get the value for the key 'index.field.tag'. <br>
-     * The value is, e.g. tag <br>
-     * comment: Field name for the tags of the document in the index: the values of the labels of the kind "tag" whose included paths list the document URL.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getIndexFieldTag();
-
-    /**
      * Get the value for the key 'index.field.mimetype'. <br>
      * The value is, e.g. mimetype <br>
      * comment: Field name for MIME type in the index.
@@ -5241,7 +5221,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
-     * The value is, e.g. lang,role,label,anchor,virtual_host,tag <br>
+     * The value is, e.g. lang,role,label,anchor,virtual_host <br>
      * comment: Array-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -7197,56 +7177,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getSearchHistorySizeAsInteger();
-
-    /**
-     * Get the value for the key 'user.tag.enabled'. <br>
-     * The value is, e.g. false <br>
-     * comment: Whether logged-in users can tag documents from the search screen. A tag is a label of the kind "tag": its name is the tag name, its included paths list the tagged URLs and its permissions list the users who added it.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getUserTagEnabled();
-
-    /**
-     * Is the property for the key 'user.tag.enabled' true? <br>
-     * The value is, e.g. false <br>
-     * comment: Whether logged-in users can tag documents from the search screen. A tag is a label of the kind "tag": its name is the tag name, its included paths list the tagged URLs and its permissions list the users who added it.
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isUserTagEnabled();
-
-    /**
-     * Get the value for the key 'user.tag.name.max.length'. <br>
-     * The value is, e.g. 50 <br>
-     * comment: Maximum length of a tag name.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getUserTagNameMaxLength();
-
-    /**
-     * Get the value for the key 'user.tag.name.max.length' as {@link Integer}. <br>
-     * The value is, e.g. 50 <br>
-     * comment: Maximum length of a tag name.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getUserTagNameMaxLengthAsInteger();
-
-    /**
-     * Get the value for the key 'user.tag.max.document.tags'. <br>
-     * The value is, e.g. 100 <br>
-     * comment: Maximum number of tags on one document.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getUserTagMaxDocumentTags();
-
-    /**
-     * Get the value for the key 'user.tag.max.document.tags' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
-     * comment: Maximum number of tags on one document.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getUserTagMaxDocumentTagsAsInteger();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -12341,10 +12271,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_FIELD_LABEL);
         }
 
-        public String getIndexFieldTag() {
-            return get(FessConfig.INDEX_FIELD_TAG);
-        }
-
         public String getIndexFieldMimetype() {
             return get(FessConfig.INDEX_FIELD_MIMETYPE);
         }
@@ -13411,30 +13337,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getSearchHistorySizeAsInteger() {
             return getAsInteger(FessConfig.SEARCH_HISTORY_SIZE);
-        }
-
-        public String getUserTagEnabled() {
-            return get(FessConfig.USER_TAG_ENABLED);
-        }
-
-        public boolean isUserTagEnabled() {
-            return is(FessConfig.USER_TAG_ENABLED);
-        }
-
-        public String getUserTagNameMaxLength() {
-            return get(FessConfig.USER_TAG_NAME_MAX_LENGTH);
-        }
-
-        public Integer getUserTagNameMaxLengthAsInteger() {
-            return getAsInteger(FessConfig.USER_TAG_NAME_MAX_LENGTH);
-        }
-
-        public String getUserTagMaxDocumentTags() {
-            return get(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS);
-        }
-
-        public Integer getUserTagMaxDocumentTagsAsInteger() {
-            return getAsInteger(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS);
         }
 
         public String getFormAdminMaxInputSize() {
@@ -15504,7 +15406,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_FIELD_CREATED, "created");
             defaultMap.put(FessConfig.INDEX_FIELD_TIMESTAMP, "timestamp");
             defaultMap.put(FessConfig.INDEX_FIELD_LABEL, "label");
-            defaultMap.put(FessConfig.INDEX_FIELD_TAG, "tag");
             defaultMap.put(FessConfig.INDEX_FIELD_MIMETYPE, "mimetype");
             defaultMap.put(FessConfig.INDEX_FIELD_parent_id, "parent_id");
             defaultMap.put(FessConfig.INDEX_FIELD_important_content, "important_content");
@@ -15544,7 +15445,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_USER_INDEX, "fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
             defaultMap.put(FessConfig.INDEX_DICTIONARY_PREFIX, "");
-            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host,tag");
+            defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host");
             defaultMap.put(FessConfig.INDEX_ADMIN_DATE_FIELDS, "expires,created,timestamp,last_modified");
             defaultMap.put(FessConfig.INDEX_ADMIN_INTEGER_FIELDS, "");
             defaultMap.put(FessConfig.INDEX_ADMIN_LONG_FIELDS, "content_length,favorite_count,click_count");
@@ -15684,9 +15585,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOGGING_CHAT_MAX_QUEUE_SIZE, "10000");
             defaultMap.put(FessConfig.SEARCH_HISTORY_ENABLED, "true");
             defaultMap.put(FessConfig.SEARCH_HISTORY_SIZE, "10");
-            defaultMap.put(FessConfig.USER_TAG_ENABLED, "false");
-            defaultMap.put(FessConfig.USER_TAG_NAME_MAX_LENGTH, "50");
-            defaultMap.put(FessConfig.USER_TAG_MAX_DOCUMENT_TAGS, "100");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");

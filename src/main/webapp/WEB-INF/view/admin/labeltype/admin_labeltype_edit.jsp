@@ -68,21 +68,6 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="kind" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.labeltype_kind"/></label>
-                                    <div class="col-sm-9">
-                                        <la:errors property="kind"/>
-                                        <la:select styleId="kind" property="kind" styleClass="form-control">
-                                            <la:option value="label"><la:message
-                                                    key="labels.labeltype_kind_label"/></la:option>
-                                            <la:option value="tag"><la:message
-                                                    key="labels.labeltype_kind_tag"/></la:option>
-                                        </la:select>
-                                        <small class="form-text text-muted"><la:message
-                                                key="labels.labeltype_kind_help"/></small>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
                                     <label for="includedPaths" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.labeltype_included_paths"/></label>
                                     <div class="col-sm-9">

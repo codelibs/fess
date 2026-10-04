@@ -49,9 +49,6 @@ public class BsLabelType extends EsAbstractEntity {
     /** includedPaths */
     protected String includedPaths;
 
-    /** kind */
-    protected String kind;
-
     /** name */
     protected String name;
 
@@ -106,9 +103,6 @@ public class BsLabelType extends EsAbstractEntity {
         if (includedPaths != null) {
             addFieldToSource(sourceMap, "includedPaths", includedPaths);
         }
-        if (kind != null) {
-            addFieldToSource(sourceMap, "kind", kind);
-        }
         if (name != null) {
             addFieldToSource(sourceMap, "name", name);
         }
@@ -147,7 +141,6 @@ public class BsLabelType extends EsAbstractEntity {
         sb.append(dm).append(createdTime);
         sb.append(dm).append(excludedPaths);
         sb.append(dm).append(includedPaths);
-        sb.append(dm).append(kind);
         sb.append(dm).append(name);
         sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
@@ -203,16 +196,6 @@ public class BsLabelType extends EsAbstractEntity {
     public void setIncludedPaths(String value) {
         registerModifiedProperty("includedPaths");
         this.includedPaths = value;
-    }
-
-    public String getKind() {
-        checkSpecifiedProperty("kind");
-        return convertEmptyToNull(kind);
-    }
-
-    public void setKind(String value) {
-        registerModifiedProperty("kind");
-        this.kind = value;
     }
 
     public String getName() {

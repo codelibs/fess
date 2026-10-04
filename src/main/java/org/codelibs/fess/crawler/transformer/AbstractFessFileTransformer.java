@@ -362,8 +362,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         // label: labelType
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeHelper.getMatchedLabelValueSet(url));
-        // tag: labelType of the kind tag
-        putTagField(dataMap, url);
         // role: roleType
         final List<String> roleTypeList = getRoleTypes(responseData);
         stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));

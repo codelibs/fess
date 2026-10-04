@@ -6,9 +6,6 @@
       "value": {
         "type": "keyword"
       },
-      "kind": {
-        "type": "keyword"
-      },
       "includedPaths": {
         "type": "keyword"
       },

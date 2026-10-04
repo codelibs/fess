@@ -423,8 +423,6 @@ public class UiConfigHandler {
             features.put("search_history", cfg.isSearchHistoryEnabled() && searchLogEnabled);
             // search_export: whether GET /api/v2/documents/export is available, so the theme shows the export links.
             features.put("search_export", cfg.isApiSearchExport());
-            // user_tag: whether users can see and add tags (GET/POST/DELETE /api/v2/documents/{doc_id}/tags).
-            features.put("user_tag", cfg.isUserTagEnabled());
             features.put("popular_word", cfg.isWebApiPopularWord());
             features.put("suggest_search_log", cfg.isSuggestSearchLog());
             features.put("suggest_documents", cfg.isSuggestDocuments());

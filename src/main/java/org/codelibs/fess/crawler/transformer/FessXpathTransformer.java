@@ -593,8 +593,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         putResultDataBody(dataMap, fessConfig.getIndexFieldBoost(), crawlingConfig.getDocumentBoost());
         // label: labelType
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeHelper.getMatchedLabelValueSet(url));
-        // tag: labelType of the kind tag
-        putTagField(dataMap, url);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<>();
         stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));

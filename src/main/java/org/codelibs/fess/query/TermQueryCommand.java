@@ -98,9 +98,6 @@ public class TermQueryCommand extends QueryCommand {
      */
     protected QueryBuilder convertTermQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
-        if (isRestrictedTagField(context, field) && !isVisibleTag(context, text)) {
-            return buildHiddenTagQuery(context, field, text);
-        }
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(fessConfig, context, termQuery, boost, field, text);
         }

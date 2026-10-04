@@ -17,11 +17,8 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,10 +28,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.entity.SearchRenderData;
-import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.LabelTypeHelper.LabelTypeItem;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
@@ -120,11 +115,10 @@ public class SearchHandler {
                 ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
                 return;
             }
-            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
-            final Map<String, Object> payload =
-                    buildPayload(params.getQuery(), data, getTagItemMap(request), userBean.map(FessUserBean::getUserId).orElse(null));
+            final Map<String, Object> payload = buildPayload(params.getQuery(), data);
             // Evaluated per search: a user whose group and role permissions are still loading or
             // failed sees fewer results.
+            final OptionalThing<FessUserBean> userBean = getSavedUserBean();
             payload.put("permission_state",
                     ComponentUtil.getV2UserPayloads().permissionState(userBean.isPresent() ? userBean.get() : null));
             ComponentUtil.getV2EnvelopeWriter().writeSuccess(response, payload);
@@ -175,12 +169,9 @@ public class SearchHandler {
      *
      * @param query the original {@code q} parameter (may be {@code null})
      * @param data the populated render data returned by the search helper
-     * @param tagItemMap the tags that the caller can see, by value
-     * @param userId the logged-in user, or null
      * @return the ordered payload map ready for envelope serialization
      */
-    private Map<String, Object> buildPayload(final String query, final SearchRenderData data, final Map<String, LabelTypeItem> tagItemMap,
-            final String userId) {
+    private Map<String, Object> buildPayload(final String query, final SearchRenderData data) {
         final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
         final RelatedContentHelper relatedContentHelper = ComponentUtil.getRelatedContentHelper();
 
@@ -207,11 +198,11 @@ public class SearchHandler {
         payload.put("requested_time", data.getRequestedTime());
         payload.put("related_query", relatedQueryHelper.getRelatedQueries(query));
         payload.put("related_contents", relatedContentHelper.getRelatedContents(query));
-        payload.put("data", filterDocuments(data.getDocumentItems(), tagItemMap, userId));
+        payload.put("data", filterDocuments(data.getDocumentItems()));
 
         final FacetResponse facetResponse = data.getFacetResponse();
         if (facetResponse != null && facetResponse.hasFacetResponse()) {
-            payload.put("facet_field", buildFacetField(facetResponse, tagItemMap));
+            payload.put("facet_field", buildFacetField(facetResponse));
             payload.put("facet_query", buildFacetQuery(facetResponse));
         }
         return payload;
@@ -224,45 +215,21 @@ public class SearchHandler {
      * <p>Drops blank keys and {@code null} values — matching v1's behavior so the
      * wire payload size stays stable across versions.</p>
      *
-     * <p>The {@code tag} field is not an API response field: the tags of the label types that the caller
-     * can see are returned as {@code tags}, a list of {@code {value, name, mine}}.</p>
-     *
      * @param docs the raw document items from {@link SearchRenderData}
-     * @param tagItemMap the tags that the caller can see, by value
-     * @param userId the logged-in user, or null
      * @return a new list of filtered, order-preserved document maps
      */
-    List<Map<String, Object>> filterDocuments(final List<Map<String, Object>> docs, final Map<String, LabelTypeItem> tagItemMap,
-            final String userId) {
+    private List<Map<String, Object>> filterDocuments(final List<Map<String, Object>> docs) {
         if (docs == null || docs.isEmpty()) {
             return new ArrayList<>(0);
         }
         final QueryFieldConfig cfg = ComponentUtil.getQueryFieldConfig();
-        // never returned as is, even when query.additional.api.response.fields lists it
-        final String tagField = ComponentUtil.getFessConfig().getIndexFieldTag();
         final List<Map<String, Object>> out = new ArrayList<>(docs.size());
         for (final Map<String, Object> doc : docs) {
             final Map<String, Object> filtered = new LinkedHashMap<>();
             for (final Map.Entry<String, Object> e : doc.entrySet()) {
                 final String name = e.getKey();
-                if (StringUtil.isNotBlank(name) && e.getValue() != null && cfg.isApiResponseField(name) && !tagField.equals(name)) {
+                if (StringUtil.isNotBlank(name) && e.getValue() != null && cfg.isApiResponseField(name)) {
                     filtered.put(name, e.getValue());
-                }
-            }
-            if (!tagItemMap.isEmpty()) {
-                final List<Map<String, Object>> tags = new ArrayList<>();
-                for (final String value : toStringList(doc.get(tagField))) {
-                    final LabelTypeItem item = tagItemMap.get(value);
-                    if (item != null) {
-                        final Map<String, Object> tag = new LinkedHashMap<>();
-                        tag.put("value", value);
-                        tag.put("name", item.getLabel());
-                        tag.put("mine", ComponentUtil.getTagHelper().isMine(item, userId));
-                        tags.add(tag);
-                    }
-                }
-                if (!tags.isEmpty()) {
-                    filtered.put("tags", tags);
                 }
             }
             out.add(filtered);
@@ -281,18 +248,6 @@ public class SearchHandler {
      * @return a list of {@code {name, result:[{value, count}]}} maps
      */
     List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse) {
-        return buildFacetField(facetResponse, Collections.emptyMap());
-    }
-
-    /**
-     * Builds the {@code facet_field} array. The values of the {@code tag} facet are limited to the tags that the
-     * caller can see, so a tag is not revealed by its count, and each carries the tag name as {@code label}.
-     *
-     * @param facetResponse the populated facet response (never {@code null})
-     * @param tagItemMap the tags that the caller can see, by value
-     * @return a list of {@code {name, result:[{value, count}]}} maps
-     */
-    List<Map<String, Object>> buildFacetField(final FacetResponse facetResponse, final Map<String, LabelTypeItem> tagItemMap) {
         final List<Field> fields = facetResponse.getFieldList();
         if (fields == null || fields.isEmpty()) {
             return new ArrayList<>(0);
@@ -302,62 +257,16 @@ public class SearchHandler {
             final Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("name", field.getName());
             final List<Map<String, Object>> results = new ArrayList<>();
-            final boolean tagField = ComponentUtil.getFessConfig().getIndexFieldTag().equals(field.getName());
             for (final Map.Entry<String, Long> vc : field.getValueCountMap().entrySet()) {
-                final LabelTypeItem tagItem = tagField ? tagItemMap.get(vc.getKey()) : null;
-                if (tagField && tagItem == null) {
-                    continue;
-                }
                 final Map<String, Object> result = new LinkedHashMap<>();
                 result.put("value", vc.getKey());
                 result.put("count", vc.getValue());
-                if (tagItem != null) {
-                    result.put("label", tagItem.getLabel());
-                }
                 results.add(result);
             }
             entry.put("result", results);
             out.add(entry);
         }
         return out;
-    }
-
-    /**
-     * Returns the tags that the caller can see by value, or an empty map while user tags are disabled.
-     * Exposed as a seam for unit tests.
-     *
-     * @param request the request
-     * @return the visible tags by value
-     */
-    protected Map<String, LabelTypeItem> getTagItemMap(final HttpServletRequest request) {
-        try {
-            if (!ComponentUtil.getFessConfig().isUserTagEnabled()) {
-                return Collections.emptyMap();
-            }
-            final Locale locale = request.getLocale() == null ? Locale.ROOT : request.getLocale();
-            final Map<String, LabelTypeItem> map = new LinkedHashMap<>();
-            ComponentUtil.getLabelTypeHelper()
-                    .getTagItemList(SearchRequestType.JSON, locale)
-                    .forEach(item -> map.put(item.getValue(), item));
-            return map;
-        } catch (final Exception e) {
-            logger.debug("Failed to resolve the tags; no tags are returned.", e);
-            return Collections.emptyMap();
-        }
-    }
-
-    private static List<String> toStringList(final Object value) {
-        final List<String> list = new ArrayList<>();
-        if (value instanceof final Collection<?> collection) {
-            collection.forEach(v -> list.add(String.valueOf(v)));
-        } else if (value instanceof final Object[] array) {
-            for (final Object v : array) {
-                list.add(String.valueOf(v));
-            }
-        } else if (value != null) {
-            list.add(value.toString());
-        }
-        return list;
     }
 
     /**

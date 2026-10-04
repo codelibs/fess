@@ -74,9 +74,6 @@ public class QueryContext {
     /** The type of the search request, or null when the query is not built for a search request. */
     protected SearchRequestType searchRequestType = null;
 
-    /** The values of the tags that the caller can see, resolved on first use. */
-    protected Set<String> visibleTagValueSet = null;
-
     /**
      * Constructs a new QueryContext with the specified query string.
      * Processes special query prefixes (allinurl:, allintitle:) and initializes
@@ -290,21 +287,5 @@ public class QueryContext {
      */
     public void setSearchRequestType(final SearchRequestType searchRequestType) {
         this.searchRequestType = searchRequestType;
-    }
-
-    /**
-     * Gets the values of the tags that the caller can see, as resolved for this query.
-     * @return The visible tag values, or null if they are not resolved yet.
-     */
-    public Set<String> getVisibleTagValueSet() {
-        return visibleTagValueSet;
-    }
-
-    /**
-     * Sets the values of the tags that the caller can see.
-     * @param visibleTagValueSet The visible tag values.
-     */
-    public void setVisibleTagValueSet(final Set<String> visibleTagValueSet) {
-        this.visibleTagValueSet = visibleTagValueSet;
     }
 }

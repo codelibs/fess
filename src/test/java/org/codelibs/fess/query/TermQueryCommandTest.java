@@ -199,11 +199,6 @@ public class TermQueryCommandTest extends QueryTestBase {
             }
 
             @Override
-            public String getIndexFieldTag() {
-                return baseConfig.getIndexFieldTag();
-            }
-
-            @Override
             public String getIndexFieldCreated() {
                 return baseConfig.getIndexFieldCreated();
             }

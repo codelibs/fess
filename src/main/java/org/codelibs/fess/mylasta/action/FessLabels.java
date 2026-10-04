@@ -1568,18 +1568,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Value */
     public static final String LABELS_labeltype_value = "{labels.labeltype_value}";
 
-    /** The key of the message: Kind */
-    public static final String LABELS_labeltype_kind = "{labels.labeltype_kind}";
-
-    /** The key of the message: Label */
-    public static final String LABELS_labeltype_kind_label = "{labels.labeltype_kind_label}";
-
-    /** The key of the message: Tag */
-    public static final String LABELS_labeltype_kind_tag = "{labels.labeltype_kind_tag}";
-
-    /** The key of the message: A Tag is a tag that users add from the search screen: Name is the tag name, Included Paths lists the tagged URLs (one URL per line, exact match), and Permissions decides who can see it. A user who adds a tag is added to its Permissions. */
-    public static final String LABELS_labeltype_kind_help = "{labels.labeltype_kind_help}";
-
     /** The key of the message: Included Paths */
     public static final String LABELS_labeltype_included_paths = "{labels.labeltype_included_paths}";
 

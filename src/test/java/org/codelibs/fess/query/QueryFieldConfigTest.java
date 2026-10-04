@@ -173,11 +173,6 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
             }
 
             @Override
-            public String getIndexFieldTag() {
-                return "tag";
-            }
-
-            @Override
             public String getIndexFieldCreated() {
                 return "created";
             }
@@ -1064,23 +1059,6 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         // is caught even if it happens to be a benign field name.
         assertEquals(allowedFields.length, config.apiResponseFieldSet.size(),
                 "default API response allowlist size changed; actual set: " + config.apiResponseFieldSet);
-    }
-
-    @Test
-    public void test_defaultConfig_tagFields() {
-        final QueryFieldConfig config = ComponentUtil.getQueryFieldConfig();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String tag = fessConfig.getIndexFieldTag();
-
-        // tag:<value>, fields.tag=<value> and facet.field=tag work
-        assertTrue(config.searchFieldSet.contains(tag));
-        assertTrue(config.isFacetField(tag));
-        assertTrue(config.notAnalyzedFieldSet.contains(tag));
-        assertTrue(Arrays.asList(config.getResponseFields()).contains(tag));
-        // the raw tag values include tags the caller cannot see: the search handler returns
-        // the visible ones as "tags", so the field itself is never an API response field
-        assertFalse(config.isApiResponseField(tag));
-        assertFalse(Arrays.asList(config.getScrollResponseFields()).contains(tag));
     }
 
     @Test

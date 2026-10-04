@@ -145,57 +145,6 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_writeDocumentTagsRejectedWithoutCsrfToken_returns403() throws Exception {
-        for (final String method : new String[] { "POST", "DELETE" }) {
-            final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
-            final java.util.List<String> calls = recordDocumentTagsCalls(m);
-            final CapturingResponse res = new CapturingResponse();
-            m.process(new StubRequest("/api/v2/documents/abc123/tags").withMethod(method), res, new NopChain());
-            assertEquals(403, res.status, method);
-            assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
-            assertTrue(calls.isEmpty(), method + " must be stopped before the handler");
-        }
-    }
-
-    @Test
-    public void test_writeDocumentTagsWithValidCsrfToken_reachesTheHandler() throws Exception {
-        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
-        final java.util.List<String> calls = recordDocumentTagsCalls(m);
-        for (final String method : new String[] { "POST", "DELETE" }) {
-            final StubSession session = new StubSession();
-            session.setAttribute(SessionCsrfTokenManager.SESSION_ATTR, "the-valid-token");
-            final CapturingResponse res = new CapturingResponse();
-            m.process(new StubRequest("/api/v2/documents/abc123/tags").withMethod(method)
-                    .withSession(session)
-                    .withHeader("X-Fess-CSRF-Token", "the-valid-token"), res, new NopChain());
-            assertFalse(res.body().contains("\"code\":\"forbidden\""), res.body());
-        }
-        assertEquals(java.util.List.of("POST abc123", "DELETE abc123"), calls);
-    }
-
-    @Test
-    public void test_getDocumentTagsWithoutTokenIsExempt() throws Exception {
-        final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
-        final java.util.List<String> calls = recordDocumentTagsCalls(m);
-        final CapturingResponse res = new CapturingResponse();
-        m.process(new StubRequest("/api/v2/documents/abc123/tags"), res, new NopChain());
-        assertFalse(res.body().contains("\"code\":\"forbidden\""), res.body());
-        assertEquals(java.util.List.of("GET abc123"), calls);
-    }
-
-    /** Replaces the tags handler with one that records "METHOD docId" for each request it receives. */
-    private static java.util.List<String> recordDocumentTagsCalls(final SearchApiV2Manager m) {
-        final java.util.List<String> calls = new java.util.ArrayList<>();
-        m.documentTagsHandler = new org.codelibs.fess.api.v2.handlers.DocumentTagsHandler() {
-            @Override
-            public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
-                calls.add(req.getMethod() + " " + docId);
-            }
-        };
-        return calls;
-    }
-
-    @Test
     public void test_postChatRejectedWithoutCsrfToken_returns403() throws Exception {
         final SearchApiV2Manager m = SearchApiV2ManagerTestSupport.newManagerWithHandlers();
         final CapturingResponse res = new CapturingResponse();
