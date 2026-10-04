@@ -22,7 +22,8 @@ import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Job for aggregating and storing search logs.
- * This job processes search logs and stores them in the search log repository.
+ * This job processes search logs and stores them in the search log repository, and applies the
+ * queued user tag changes to the documents.
  */
 public class AggregateLogJob {
 
@@ -50,6 +51,15 @@ public class AggregateLogJob {
             searchLogHelper.storeSearchLog();
         } catch (final Exception e) {
             logger.warn("Failed to store a search log.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
+        try {
+            if (ComponentUtil.getFessConfig().isUserTagEnabled()) {
+                ComponentUtil.getTagTypeHelper().processQueue();
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to apply user tag changes.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 

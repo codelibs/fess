@@ -34,14 +34,22 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.fesen.opensearch.action.update.UpdateRequest;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.script.Script;
+import org.codelibs.fesen.opensearch.script.ScriptType;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.TagChange;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -49,6 +57,7 @@ import org.codelibs.fess.opensearch.config.cbean.TagTypeCB;
 import org.codelibs.fess.opensearch.config.exbhv.TagTypeBhv;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -72,9 +81,18 @@ public class TagTypeHelper {
 
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
+    /** How many times an update retries on a version conflict. */
+    protected static final int RETRY_ON_CONFLICT = 3;
+
     /** The TagType behavior. */
     @Resource
     protected TagTypeBhv tagTypeBhv;
+
+    /** The tag changes waiting to be applied to the documents. */
+    protected final Queue<TagChange> tagChangeQueue = new ConcurrentLinkedQueue<>();
+
+    /** The number of changes in {@link #tagChangeQueue}. */
+    protected final AtomicInteger tagChangeQueueSize = new AtomicInteger();
 
     /**
      * Default constructor.
@@ -407,6 +425,187 @@ public class TagTypeHelper {
                 doc.put(tagField, values.toArray(String[]::new));
             }
         }
+    }
+
+    /**
+     * Queues a tag change to be applied to the documents by {@link #processQueue()}. A change is
+     * dropped when {@code user.tag.queue.max.size} changes are already waiting.
+     *
+     * @param change the tag change
+     * @return true if the change was queued
+     */
+    public boolean enqueue(final TagChange change) {
+        if (change == null || change.type() == null) {
+            return false;
+        }
+        final int maxSize = ComponentUtil.getFessConfig().getUserTagQueueMaxSizeAsInteger();
+        if (tagChangeQueueSize.incrementAndGet() > maxSize) {
+            tagChangeQueueSize.decrementAndGet();
+            logger.warn("The tag change queue is full. Run tag_updater to restore the dropped change: type={}, limit={}", change.type(),
+                    maxSize);
+            return false;
+        }
+        tagChangeQueue.add(change);
+        return true;
+    }
+
+    /**
+     * Applies the queued tag changes to the documents, in the order they were queued. Additions
+     * and removals are gathered per URL as the final state of each value and written in bulk,
+     * {@code user.tag.process.batch.size} URLs at a time; a deletion or a rename first writes what
+     * was gathered and then updates every document holding the value. A failed write is logged
+     * and the remaining changes are still applied.
+     *
+     * @return the number of changes taken from the queue
+     */
+    public synchronized int processQueue() {
+        final List<TagChange> changeList = new ArrayList<>();
+        TagChange change;
+        while ((change = tagChangeQueue.poll()) != null) {
+            tagChangeQueueSize.decrementAndGet();
+            changeList.add(change);
+        }
+        if (changeList.isEmpty()) {
+            return 0;
+        }
+        final Map<String, Map<String, Boolean>> pendingMap = new LinkedHashMap<>();
+        for (final TagChange tagChange : changeList) {
+            switch (tagChange.type()) {
+            case ADD, REMOVE -> {
+                if (StringUtil.isNotEmpty(tagChange.url()) && StringUtil.isNotEmpty(tagChange.value())) {
+                    pendingMap.computeIfAbsent(tagChange.url(), k -> new LinkedHashMap<>())
+                            .put(tagChange.value(), tagChange.type() == TagChange.Type.ADD);
+                }
+            }
+            case DELETE -> {
+                flushTagChanges(pendingMap);
+                updateDocumentsWithTag(tagChange.value(), Collections.emptyList(), List.of(tagChange.value()));
+            }
+            case RENAME -> {
+                flushTagChanges(pendingMap);
+                if (!StringUtil.equals(tagChange.value(), tagChange.newValue()) && StringUtil.isNotEmpty(tagChange.newValue())) {
+                    updateDocumentsWithTag(tagChange.value(), List.of(tagChange.newValue()), List.of(tagChange.value()));
+                }
+            }
+            default -> logger.warn("Unknown tag change: {}", tagChange.type());
+            }
+        }
+        flushTagChanges(pendingMap);
+        return changeList.size();
+    }
+
+    /**
+     * Writes the gathered additions and removals to every document of their URLs, and clears them.
+     *
+     * @param pendingMap whether each value is to be added (true) or removed (false), keyed by URL
+     */
+    protected void flushTagChanges(final Map<String, Map<String, Boolean>> pendingMap) {
+        if (pendingMap.isEmpty()) {
+            return;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int batchSize = Math.max(1, fessConfig.getUserTagProcessBatchSizeAsInteger());
+        final List<String> urlList = new ArrayList<>(pendingMap.keySet());
+        for (int i = 0; i < urlList.size(); i += batchSize) {
+            final List<String> urls = urlList.subList(i, Math.min(i + batchSize, urlList.size()));
+            int documents = 0;
+            try {
+                final List<UpdateRequest> requestList = new ArrayList<>();
+                final String index = fessConfig.getIndexDocumentUpdateIndex();
+                ComponentUtil.getSearchEngineClient().scrollSearch(index, builder -> {
+                    builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldUrl(), urls))
+                            .setFetchSource(new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() }, null)
+                            .setSize(batchSize);
+                    return true;
+                }, doc -> {
+                    final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
+                    final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+                    final Map<String, Boolean> valueMap = url == null ? null : pendingMap.get(url);
+                    if (id != null && valueMap != null) {
+                        final List<String> addList = new ArrayList<>();
+                        final List<String> removeList = new ArrayList<>();
+                        valueMap.forEach((value, add) -> (add ? addList : removeList).add(value));
+                        requestList.add(new UpdateRequest(index, id).script(createUpdateTagScript(doc, addList, removeList))
+                                .retryOnConflict(RETRY_ON_CONFLICT));
+                    }
+                    return true;
+                });
+                documents = requestList.size();
+                if (!requestList.isEmpty()) {
+                    ComponentUtil.getSearchHelper().bulkUpdate(builder -> requestList.forEach(builder::add));
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to update the user tags of documents. Run tag_updater to restore them: urls={}, documents={}",
+                        urls.size(), documents, e);
+            }
+        }
+        pendingMap.clear();
+    }
+
+    /**
+     * Updates every document holding a tag value. A failure is logged.
+     *
+     * @param value the tag value the documents hold
+     * @param addList the values to put on the documents
+     * @param removeList the values to take off the documents
+     */
+    protected void updateDocumentsWithTag(final String value, final List<String> addList, final List<String> removeList) {
+        if (StringUtil.isEmpty(value)) {
+            return;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            final long count = ComponentUtil.getSearchEngineClient()
+                    .updateByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+                            builder -> builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldTag(), value))
+                                    .setFetchSource(new String[] { fessConfig.getIndexFieldLang() }, null),
+                            (builder, hit) -> builder.setScript(createUpdateTagScript(hit.getSourceAsMap(), addList, removeList))
+                                    .setRetryOnConflict(RETRY_ON_CONFLICT));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Updated the user tag of documents: added={}, removed={}, documents={}", addList.size(), removeList.size(),
+                        count);
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to update the user tag of documents. Run tag_updater to restore them: added={}, removed={}", addList.size(),
+                    removeList.size(), e);
+        }
+    }
+
+    /**
+     * Builds the painless code that puts the values of {@code params.add} on a document and takes
+     * those of {@code params.remove} off it. The field may be missing, a single value or a list; a
+     * value is never added twice. The two parameters never share a value, so the order of adding
+     * and removing does not matter, and the code ends with an expression so that
+     * {@link LanguageHelper#createScript(Map, String)} can append its statements: painless has no
+     * empty statement to follow a closing brace.
+     *
+     * @param field the tag field
+     * @return the painless code
+     */
+    protected static String buildUpdateTagScript(final String field) {
+        final String f = "ctx._source." + field;
+        return "if(" + f + "==null){" + f + "=new ArrayList();}" //
+                + "else if(!(" + f + " instanceof List)){" + f + "=new ArrayList([" + f + "]);}" //
+                + "for(v in params.add){if(!" + f + ".contains(v)){" + f + ".add(v);}}" //
+                + f + ".removeIf(x -> params.remove.contains(x))";
+    }
+
+    /**
+     * Builds the script that puts values on a document and takes others off it, followed by the
+     * statements that keep its language fields.
+     *
+     * @param doc the document, holding its language
+     * @param addList the values to put on the document
+     * @param removeList the values to take off the document
+     * @return the script
+     */
+    protected Script createUpdateTagScript(final Map<String, Object> doc, final List<String> addList, final List<String> removeList) {
+        final Script script =
+                ComponentUtil.getLanguageHelper().createScript(doc, buildUpdateTagScript(ComponentUtil.getFessConfig().getIndexFieldTag()));
+        final Map<String, Object> params = new HashMap<>();
+        params.put("add", addList);
+        params.put("remove", removeList);
+        return new Script(ScriptType.INLINE, "painless", script.getIdOrCode(), params);
     }
 
     /**

@@ -26,3 +26,5 @@
 {"name":"Log Notification","target":"all","cronExpression":"*/5 * * * *","scriptType":"javascript","scriptData":"return container.getComponent(\"logNotificationJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":13,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":"fess_config.scheduled_job","_id":"content-chunk-vector-indexer"}}
 {"name":"Content Chunk Vector Indexer","target":"all","cronExpression":"0 13 * * *","scriptType":"javascript","scriptData":"return container.getComponent(\"chunkVectorJob\").logLevel(\"info\").sessionId(\"CHUNK\").execute(executor);","jobLogging":true,"crawler":false,"available":false,"sortOrder":14,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"index":{"_index":"fess_config.scheduled_job","_id":"tag_updater"}}
+{"name":"Tag Updater","target":"all","cronExpression":"","scriptType":"javascript","scriptData":"return container.getComponent(\"tagUpdaterJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":15,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
