@@ -38,6 +38,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -93,6 +94,12 @@ public class TagTypeHelper {
 
     /** The number of changes in {@link #tagChangeQueue}. */
     protected final AtomicInteger tagChangeQueueSize = new AtomicInteger();
+
+    /**
+     * Whether {@link #processQueue()} wrote to the update index since its last refresh. A search
+     * by tag must not run before such writes are visible.
+     */
+    protected boolean updateIndexDirty;
 
     /**
      * Default constructor.
@@ -469,6 +476,7 @@ public class TagTypeHelper {
             return 0;
         }
         final Map<String, Map<String, Boolean>> pendingMap = new LinkedHashMap<>();
+        updateIndexDirty = false;
         for (final TagChange tagChange : changeList) {
             switch (tagChange.type()) {
             case ADD, REMOVE -> {
@@ -532,6 +540,7 @@ public class TagTypeHelper {
                 });
                 documents = requestList.size();
                 if (!requestList.isEmpty()) {
+                    updateIndexDirty = true;
                     ComponentUtil.getSearchHelper().bulkUpdate(builder -> requestList.forEach(builder::add));
                 }
             } catch (final Exception e) {
@@ -543,7 +552,8 @@ public class TagTypeHelper {
     }
 
     /**
-     * Updates every document holding a tag value. A failure is logged.
+     * Updates every document holding a tag value. The update index is refreshed first when this
+     * cycle wrote to it, so that documents just given the value are found. A failure is logged.
      *
      * @param value the tag value the documents hold
      * @param addList the values to put on the documents
@@ -554,21 +564,47 @@ public class TagTypeHelper {
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String index = fessConfig.getIndexDocumentUpdateIndex();
+        if (updateIndexDirty) {
+            try {
+                refreshUpdateIndex(index);
+                updateIndexDirty = false;
+            } catch (final Exception e) {
+                logger.warn("Failed to refresh the index before updating the user tag of documents: index={}", index, e);
+            }
+        }
+        final AtomicLong documents = new AtomicLong();
         try {
             final long count = ComponentUtil.getSearchEngineClient()
-                    .updateByQuery(fessConfig.getIndexDocumentUpdateIndex(),
-                            builder -> builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldTag(), value))
-                                    .setFetchSource(new String[] { fessConfig.getIndexFieldLang() }, null),
-                            (builder, hit) -> builder.setScript(createUpdateTagScript(hit.getSourceAsMap(), addList, removeList))
-                                    .setRetryOnConflict(RETRY_ON_CONFLICT));
+                    .updateByQuery(index, builder -> builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldTag(), value))
+                            .setFetchSource(new String[] { fessConfig.getIndexFieldLang() }, null), (builder, hit) -> {
+                                documents.incrementAndGet();
+                                updateIndexDirty = true;
+                                return builder.setScript(createUpdateTagScript(hit.getSourceAsMap(), addList, removeList))
+                                        .setRetryOnConflict(RETRY_ON_CONFLICT);
+                            });
             if (logger.isDebugEnabled()) {
                 logger.debug("Updated the user tag of documents: added={}, removed={}, documents={}", addList.size(), removeList.size(),
                         count);
             }
         } catch (final Exception e) {
-            logger.warn("Failed to update the user tag of documents. Run tag_updater to restore them: added={}, removed={}", addList.size(),
-                    removeList.size(), e);
+            logger.warn("Failed to update the user tag of documents. Run tag_updater to restore them: added={}, removed={}, documents={}",
+                    addList.size(), removeList.size(), documents.get(), e);
         }
+    }
+
+    /**
+     * Refreshes an index and waits for it, making the writes before it visible to searches.
+     *
+     * @param index the index
+     */
+    protected void refreshUpdateIndex(final String index) {
+        ComponentUtil.getSearchEngineClient()
+                .admin()
+                .indices()
+                .prepareRefresh(index)
+                .execute()
+                .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
     }
 
     /**

@@ -69,6 +69,11 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
 
     private int queueMaxSize;
 
+    /** Tag values that no document holds, so updateByQuery visits no document. */
+    private List<String> unusedValues;
+
+    private boolean failRefresh;
+
     private int batchSize;
 
     @Override
@@ -80,6 +85,8 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
         updateByQueryRequests = new ArrayList<>();
         failingBulkCalls = new ArrayList<>();
         queueMaxSize = 10000;
+        unusedValues = new ArrayList<>();
+        failRefresh = false;
         batchSize = 100;
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -153,6 +160,9 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
                 final SearchRequestBuilder searchBuilder = option.apply(new SearchRequestBuilder(null, SearchAction.INSTANCE));
                 final TermQueryBuilder termQuery = (TermQueryBuilder) searchBuilder.request().source().query();
                 events.add("updateByQuery:" + index + ":" + termQuery.fieldName() + "=" + termQuery.value());
+                if (unusedValues.contains(termQuery.value())) {
+                    return 0;
+                }
                 final SearchHit hit = new SearchHit(0, "d1", null, null);
                 hit.sourceRef(new BytesArray("{\"lang\":\"ja\"}"));
                 final UpdateRequestBuilder requestBuilder =
@@ -178,7 +188,15 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
                 return true;
             }
         }, "searchHelper");
-        tagTypeHelper = new TagTypeHelper();
+        tagTypeHelper = new TagTypeHelper() {
+            @Override
+            protected void refreshUpdateIndex(final String index) {
+                events.add("refresh:" + index);
+                if (failRefresh) {
+                    throw new IllegalStateException("refresh failed");
+                }
+            }
+        };
     }
 
     private void addDoc(final String id, final String url, final String lang) {
@@ -242,8 +260,8 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
 
         assertEquals(3, tagTypeHelper.processQueue());
 
-        assertEquals(List.of("search:fess.update:[http://example.com/a]", "bulk:1", "updateByQuery:fess.update:tag=v",
-                "search:fess.update:[http://example.com/a]", "bulk:1"), events);
+        assertEquals(List.of("search:fess.update:[http://example.com/a]", "bulk:1", "refresh:fess.update",
+                "updateByQuery:fess.update:tag=v", "search:fess.update:[http://example.com/a]", "bulk:1"), events);
         assertEquals(List.of("v"), param(bulkCalls.get(0).get(0), "remove"));
         final UpdateRequest deleteRequest = updateByQueryRequests.get(0);
         assertEquals(List.of(), param(deleteRequest, "add"));
@@ -377,5 +395,81 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
         thread.join();
         processed += tagTypeHelper.processQueue();
         assertEquals(50, processed);
+    }
+
+    @Test
+    public void test_processQueue_addThenDelete_refreshesFirst() {
+        addDoc("d1", "http://example.com/a", null);
+        assertTrue(tagTypeHelper.enqueue(TagChange.add("v", "http://example.com/a")));
+        assertTrue(tagTypeHelper.enqueue(TagChange.delete("v")));
+
+        assertEquals(2, tagTypeHelper.processQueue());
+
+        assertEquals(
+                List.of("search:fess.update:[http://example.com/a]", "bulk:1", "refresh:fess.update", "updateByQuery:fess.update:tag=v"),
+                events);
+    }
+
+    @Test
+    public void test_processQueue_renameChain_refreshesBetween() {
+        assertTrue(tagTypeHelper.enqueue(TagChange.rename("A", "B")));
+        assertTrue(tagTypeHelper.enqueue(TagChange.rename("B", "C")));
+
+        assertEquals(2, tagTypeHelper.processQueue());
+
+        assertEquals(List.of("updateByQuery:fess.update:tag=A", "refresh:fess.update", "updateByQuery:fess.update:tag=B"), events);
+        assertEquals(List.of("C"), param(updateByQueryRequests.get(1), "add"));
+        assertEquals(List.of("B"), param(updateByQueryRequests.get(1), "remove"));
+    }
+
+    @Test
+    public void test_processQueue_addThenRename_refreshesFirst() {
+        addDoc("d1", "http://example.com/a", null);
+        assertTrue(tagTypeHelper.enqueue(TagChange.add("old", "http://example.com/a")));
+        assertTrue(tagTypeHelper.enqueue(TagChange.rename("old", "new")));
+
+        assertEquals(2, tagTypeHelper.processQueue());
+
+        assertEquals(
+                List.of("search:fess.update:[http://example.com/a]", "bulk:1", "refresh:fess.update", "updateByQuery:fess.update:tag=old"),
+                events);
+    }
+
+    @Test
+    public void test_processQueue_noWrite_skipsRefresh() {
+        // the URL has no document, so nothing is written before the deletions
+        assertTrue(tagTypeHelper.enqueue(TagChange.add("v", "http://example.com/none")));
+        unusedValues.add("v");
+        assertTrue(tagTypeHelper.enqueue(TagChange.delete("v")));
+        assertTrue(tagTypeHelper.enqueue(TagChange.delete("w")));
+
+        assertEquals(3, tagTypeHelper.processQueue());
+
+        assertEquals(List.of("search:fess.update:[http://example.com/none]", "updateByQuery:fess.update:tag=v",
+                "updateByQuery:fess.update:tag=w"), events);
+    }
+
+    @Test
+    public void test_processQueue_refreshOncePerWrite() {
+        assertTrue(tagTypeHelper.enqueue(TagChange.rename("A", "B")));
+        unusedValues.add("B");
+        assertTrue(tagTypeHelper.enqueue(TagChange.delete("B")));
+        assertTrue(tagTypeHelper.enqueue(TagChange.delete("C")));
+
+        tagTypeHelper.processQueue();
+
+        assertEquals(List.of("updateByQuery:fess.update:tag=A", "refresh:fess.update", "updateByQuery:fess.update:tag=B",
+                "updateByQuery:fess.update:tag=C"), events);
+    }
+
+    @Test
+    public void test_processQueue_refreshFailureContinues() {
+        failRefresh = true;
+        assertTrue(tagTypeHelper.enqueue(TagChange.rename("A", "B")));
+        assertTrue(tagTypeHelper.enqueue(TagChange.rename("B", "C")));
+
+        assertEquals(2, tagTypeHelper.processQueue());
+
+        assertEquals(List.of("updateByQuery:fess.update:tag=A", "refresh:fess.update", "updateByQuery:fess.update:tag=B"), events);
     }
 }
