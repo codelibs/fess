@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
@@ -42,6 +43,9 @@ public class StubProcessorSplitter extends StructuredQuerySplitter {
     /** Every Lucene sub-query handed to the processor, in the order it was handed over. */
     public final List<String> converted = new ArrayList<>();
 
+    /** The request type of the context each converted clause was handed over with. */
+    public final List<SearchRequestType> convertedTypes = new ArrayList<>();
+
     /** When true the stub returns null, as the processor does for a clause it cannot express. */
     public boolean convertToNull;
 
@@ -54,6 +58,7 @@ public class StubProcessorSplitter extends StructuredQuerySplitter {
         @Override
         public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
             converted.add(query.toString());
+            convertedTypes.add(context.getSearchRequestType());
             if (convertThrows) {
                 throw new IllegalStateException("stubbed conversion failure");
             }
@@ -69,6 +74,16 @@ public class StubProcessorSplitter extends StructuredQuerySplitter {
      */
     public StubProcessorSplitter() {
         queryParser.init();
+    }
+
+    /**
+     * Splits as a JSON API request would; the shape tests do not depend on the request type.
+     *
+     * @param query the assembled query string
+     * @return the split, or {@code null} when the query is not safe to split
+     */
+    public Split split(final String query) {
+        return split(query, SearchRequestType.JSON);
     }
 
     @Override
