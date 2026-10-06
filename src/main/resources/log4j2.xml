@@ -106,6 +106,19 @@
 		     carry the only human-readable reason a SAML validation failed; off would
 		     suppress those too. -->
 		<Logger name="org.codelibs.saml2" level="info"/>
+		<!-- LastaFlute writes every request at debug: all request headers, the cookies, the request
+		     parameters and the session attributes, and at info the same dump for a request that
+		     ended as a client error (400, 404, ...). That is the Authorization header (a Basic header
+		     is the user name and password in base64, a Negotiate header is a Kerberos ticket), the
+		     session id and the password typed into the login form, so switching Admin > General >
+		     Log Level to DEBUG or INFO, or starting with FESS_LOG_LEVEL=debug, would put credentials
+		     in the log, and one anonymous request for an unknown path would write a page of it.
+		     The filter is pinned at warn, which is also what the default log level gives it: its
+		     warn and error lines are kept and nothing it writes below that is. The one exception is
+		     development: when lasta_di.smart.deploy.mode is hot or warm (production is cool),
+		     SystemHelper makes the logger follow the level of the application loggers, so a
+		     developer still reads the dump. -->
+		<Logger name="org.lastaflute.web.servlet.filter.RequestLoggingFilter" level="warn"/>
 		<Logger name="org.codelibs.fess.llm" additivity="false" level="${llm.log.level}">
 			<AppenderRef ref="LlmFile" />
 		</Logger>

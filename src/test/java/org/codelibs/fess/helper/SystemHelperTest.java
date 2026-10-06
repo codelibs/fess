@@ -510,6 +510,86 @@ public class SystemHelperTest extends UnitFessTestCase {
         before.forEach((pkg, level) -> assertEquals(pkg + " must be restored to its configured level", level, currentLogLevel(pkg)));
     }
 
+    private Level requestLoggingFilterLevel() {
+        final Configuration configuration = ((LoggerContext) LogManager.getContext(false)).getConfiguration();
+        return configuration.getLoggerConfig(SystemHelper.REQUEST_LOGGING_FILTER_LOGGER).getLevel();
+    }
+
+    private SystemHelper systemHelperInSmartDeployMode(final boolean development) {
+        return new SystemHelper() {
+            @Override
+            protected boolean isDevelopmentDeploy() {
+                return development;
+            }
+        };
+    }
+
+    @Test
+    public void test_setLogLevel_keepsTheRequestDumpLoggerWhereItIsInProduction() {
+        // The per-request dump holds the Authorization header, the cookies and the typed password, so no
+        // level an operator picks may turn it on.
+        final Level original = requestLoggingFilterLevel();
+        final Runnable restoreLogLevel = captureLogLevelState();
+        try {
+            Configurator.setLevel(SystemHelper.REQUEST_LOGGING_FILTER_LOGGER, Level.WARN);
+            final SystemHelper production = systemHelperInSmartDeployMode(false);
+            production.setLogLevel("DEBUG");
+            assertEquals(Level.WARN, requestLoggingFilterLevel());
+            production.setLogLevel("INFO");
+            assertEquals(Level.WARN, requestLoggingFilterLevel());
+        } finally {
+            restoreLogLevel.run();
+            Configurator.setLevel(SystemHelper.REQUEST_LOGGING_FILTER_LOGGER, original);
+        }
+    }
+
+    @Test
+    public void test_setLogLevel_letsTheRequestDumpLoggerFollowInDevelopment() {
+        // In development (hot or warm) the dump is what a developer reads, so it follows the application log level.
+        final Level original = requestLoggingFilterLevel();
+        final Runnable restoreLogLevel = captureLogLevelState();
+        try {
+            Configurator.setLevel(SystemHelper.REQUEST_LOGGING_FILTER_LOGGER, Level.WARN);
+            final SystemHelper development = systemHelperInSmartDeployMode(true);
+            development.setLogLevel("DEBUG");
+            assertEquals(Level.DEBUG, requestLoggingFilterLevel());
+            development.setLogLevel("ERROR");
+            assertEquals(Level.ERROR, requestLoggingFilterLevel());
+        } finally {
+            restoreLogLevel.run();
+            Configurator.setLevel(SystemHelper.REQUEST_LOGGING_FILTER_LOGGER, original);
+        }
+    }
+
+    @Test
+    public void test_isDevelopmentDeploy_readsTheSmartDeployMode() {
+        final FessConfig original = ComponentUtil.getFessConfig();
+        try {
+            for (final String mode : new String[] { "hot", "HOT", "warm", "Warm" }) {
+                ComponentUtil.setFessConfig(smartDeployMode(mode));
+                assertTrue(mode, new SystemHelper().isDevelopmentDeploy());
+            }
+            // cool is production; anything else is not a development mode either
+            for (final String mode : new String[] { "cool", "COOL", "" }) {
+                ComponentUtil.setFessConfig(smartDeployMode(mode));
+                assertFalse(mode, new SystemHelper().isDevelopmentDeploy());
+            }
+        } finally {
+            ComponentUtil.setFessConfig(original);
+        }
+    }
+
+    private FessConfig smartDeployMode(final String mode) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getLastaDiSmartDeployMode() {
+                return mode;
+            }
+        };
+    }
+
     @Test
     public void test_createTempFile() {
         assertNotNull(systemHelper.createTempFile("test", ".txt"));

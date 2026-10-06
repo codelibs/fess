@@ -103,6 +103,9 @@ public class SystemHelper {
 
     private static final Logger logger = LogManager.getLogger(SystemHelper.class);
 
+    /** The logger of the per-request dump of LastaFlute (headers, cookies, parameters and session attributes). */
+    protected static final String REQUEST_LOGGING_FILTER_LOGGER = "org.lastaflute.web.servlet.filter.RequestLoggingFilter";
+
     /** A flag to indicate if the system should be forcefully stopped. */
     protected final AtomicBoolean forceStop = new AtomicBoolean(false);
 
@@ -189,6 +192,7 @@ public class SystemHelper {
             logger.error("Your system is out of support. See https://fess.codelibs.org/eol.html");
         }
         updateSystemProperties();
+        followRequestLogLevel(LogManager.getLogger("org.lastaflute").getLevel());
         if (appValueCheckInterval > 0) {
             appValueCheckTask =
                     TimeoutManager.getInstance().addTimeoutTarget(this::updateChangedSystemProperties, appValueCheckInterval, true);
@@ -972,6 +976,36 @@ public class SystemHelper {
         System.setProperty(Constants.FESS_LOG_LEVEL, logLevel.toString());
         split(ComponentUtil.getFessConfig().getLoggingAppPackages(), ",")
                 .of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(s -> Configurator.setLevel(s, logLevel)));
+        followRequestLogLevel(logLevel);
+    }
+
+    /**
+     * Lets the logger of LastaFlute's per-request dump follow the application log level when the application
+     * runs for development.
+     *
+     * <p>{@code log4j2.xml} pins that logger at WARN: at DEBUG, and at INFO for a request that ended as a client
+     * error, it writes the request headers (the Authorization header included), the cookies, the request
+     * parameters (a typed password included) and the session attributes, so no log level an operator can
+     * choose is allowed to turn it on. A developer reads that dump, so when Lasta Di's smart deploy runs in a
+     * development mode ({@code lasta_di.smart.deploy.mode} is hot or warm; production is cool) the logger follows
+     * the level of the application loggers instead.</p>
+     *
+     * @param level the application log level to follow
+     */
+    protected void followRequestLogLevel(final Level level) {
+        if (isDevelopmentDeploy()) {
+            Configurator.setLevel(REQUEST_LOGGING_FILTER_LOGGER, level);
+        }
+    }
+
+    /**
+     * Returns whether Lasta Di's smart deploy runs in a development mode: hot or warm. Production is cool.
+     *
+     * @return true if {@code lasta_di.smart.deploy.mode} is hot or warm
+     */
+    protected boolean isDevelopmentDeploy() {
+        final String mode = ComponentUtil.getFessConfig().getLastaDiSmartDeployMode();
+        return "hot".equalsIgnoreCase(mode) || "warm".equalsIgnoreCase(mode);
     }
 
     /**
