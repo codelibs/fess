@@ -138,6 +138,32 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_lockoutWarning_doesNotLetTheUserNameStartALogLine() throws Throwable {
+        // The user name is typed by an anonymous caller and the lockout is logged at WARN, which is
+        // on by default. The application log is one event per line, so a raw line break in the name
+        // would let the caller write a line of their own.
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
+        final String clientIp = "10.0.0.77";
+        final String typed = "bob\nZZFORGED level=WARN";
+        for (int i = 0; i < 5; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, handler.userScopeKey(clientIp, typed), 5, 60));
+        }
+        final List<LogEvent> events = captureLogEvents(LoginHandler.class.getName(),
+                () -> handler.handle(new StubRequest("POST", "/api/v2/auth/login")
+                        .withJsonBody("{\"username\":\"bob\\nZZFORGED level=WARN\",\"password\":\"p\"}")
+                        .withRemoteAddr(clientIp), new CapturingResponse()));
+        final List<LogEvent> warns = events.stream()
+                .filter(e -> Level.WARN.equals(e.getLevel()))
+                .filter(e -> e.getMessage().getFormattedMessage().contains("user rate limit"))
+                .toList();
+        assertEquals(1, warns.size(), formatEvents(events));
+        final String line = warns.get(0).getMessage().getFormattedMessage();
+        assertTrue(line.contains("username=bob?ZZFORGED level=WARN"), line);
+        assertTrue(line.indexOf('\n') < 0 && line.indexOf('\r') < 0, line);
+    }
+
+    @Test
     public void login_userScopeUsesProxyResolvedIp_whenTrustedProxy() throws Exception {
         // The USER composite key must use the proxy-RESOLVED client IP (from XFF when
         // the direct peer is a trusted proxy 127.0.0.1), not the proxy's own address. UnitFessTestCase

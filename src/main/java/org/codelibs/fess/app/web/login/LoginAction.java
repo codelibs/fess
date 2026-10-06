@@ -23,6 +23,7 @@ import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -106,7 +107,7 @@ public class LoginAction extends FessLoginAction {
             return asHtml(path_AdminLogin_NewpasswordJsp);
         } catch (final LoginFailureException lfe) {
             if (logger.isInfoEnabled()) {
-                logger.info("Login failed for user: username={}, reason={}", username, lfe.getMessage());
+                logger.info("Login failed for user: username={}, reason={}", LogUtil.sanitize(username), lfe.getMessage());
             }
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));

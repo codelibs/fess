@@ -30,6 +30,7 @@ import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.exception.LoginFailureException;
 
@@ -183,6 +184,9 @@ public class LoginHandler {
             return;
         }
         final String userKey = userScopeKey(clientIp, username);
+        // The name is whatever the caller typed, and the lockout lines below are written to the application log
+        // at WARN: a line break in it would let an anonymous caller start a log line of their own.
+        final String loggedName = LogUtil.sanitize(username);
 
         // USER-scope pre-validation uses peek() so the bucket is NOT consumed yet. The slot is
         // taken only on credential failure below, so a system-error path (e.g. login subsystem
@@ -201,9 +205,9 @@ public class LoginHandler {
             // therefore has no reason to back off.
             if (limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec)) {
                 logger.warn("[v2/login] user rate limit exceeded; locking out for {}s: username={}, clientIp={}, limit={}/min", lockoutSec,
-                        username, clientIp, userLimit);
+                        loggedName, clientIp, userLimit);
             } else if (logger.isDebugEnabled()) {
-                logger.debug("[v2/login] refused a retry during the active user lockout: username={}, clientIp={}", username, clientIp);
+                logger.debug("[v2/login] refused a retry during the active user lockout: username={}, clientIp={}", loggedName, clientIp);
             }
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
             return;
@@ -251,7 +255,7 @@ public class LoginHandler {
             // audit.log. Without this the v2 endpoint left no trace of failed authentication at
             // all, so brute-force attempts against the SPA login form were undetectable.
             if (logger.isInfoEnabled()) {
-                logger.info("[v2/login] login failed: username={}, reason={}", username, e.getMessage());
+                logger.info("[v2/login] login failed: username={}, reason={}", loggedName, e.getMessage());
             }
             recordLoginFailureActivity(username, password);
             // Credential rejection consumes the USER slot exactly once, on the failure path
@@ -262,12 +266,12 @@ public class LoginHandler {
             if (!limiter.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60)) {
                 if (limiter.lockOut(LoginRateLimiter.Scope.USER, userKey, lockoutSec)) {
                     logger.warn("[v2/login] user rate limit exhausted; locking out for {}s: username={}, clientIp={}, limit={}/min",
-                            lockoutSec, username, clientIp, userLimit);
+                            lockoutSec, loggedName, clientIp, userLimit);
                 } else if (logger.isDebugEnabled()) {
                     // The peek() gate above admitted this request, so an active lockout here
                     // means a concurrent request armed it in between — already reported.
-                    logger.debug("[v2/login] user bucket exhausted while a lockout was already active: username={}, clientIp={}", username,
-                            clientIp);
+                    logger.debug("[v2/login] user bucket exhausted while a lockout was already active: username={}, clientIp={}",
+                            loggedName, clientIp);
                 }
             }
             ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
@@ -291,7 +295,7 @@ public class LoginHandler {
         // that an unauthenticated attacker with a stolen session cookie cannot trigger a
         // false-positive audit line by posting bad credentials for a different username.
         if (prevUserId != null && !username.equals(prevUserId)) {
-            logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", prevUserId, username);
+            logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", prevUserId, loggedName);
         }
 
         // Successful login — rotate the session id to defeat session fixation, then issue
