@@ -101,6 +101,49 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksSearchEngineAndInitialUserPasswords() {
+        // index.user.initial_password (default "admin") and search_engine.password are
+        // fess_config.properties settings like http.proxy.password, and were listed in cleartext.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("index.user.initial_password"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("search_engine.password"));
+        // The JVM argument spelling of the same settings.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.config.index.user.initial_password"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.system.index.user.initial_password"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.config.search_engine.password"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.system.search_engine.password"));
+    }
+
+    @Test
+    public void test_isMaskedValue_keepsPasswordRelatedSettingsThatAreNotSecretsVisible() {
+        // A user name is not a secret, as for content_chunker.embedding.opensearch.username.
+        assertFalse(AdminSysteminfoAction.isMaskedValue("search_engine.username"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("http.proxy.username"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("index.user.index"));
+        // Settings whose name merely contains "password" or "key" configure a rule or a flag.
+        // The log pattern app.log.sensitive.property.pattern (.*password.*|.*key.*|...) would
+        // hide all of these on the page an administrator reads to diagnose the configuration.
+        assertFalse(AdminSysteminfoAction.isMaskedValue("password.min.length"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("password.require.digit"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("app.password.algorithm"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("ldap.admin.sync.password"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("cookie.search.parameter.keys"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("authentication.admin.roles"));
+    }
+
+    @Test
+    public void test_getFessPropItems_masksTheInitialUserPassword() {
+        ComponentUtil.getSystemProperties().setProperty("search_engine.password", "hunter2");
+
+        final List<Map<String, String>> itemList = AdminSysteminfoAction.getFessPropItems(ComponentUtil.getFessConfig());
+
+        // index.user.initial_password comes from fess_config.properties, where its value is "admin".
+        assertEquals(MASKED_VALUE, findValue(itemList, "index.user.initial_password"));
+        assertEquals(MASKED_VALUE, findValue(itemList, "search_engine.password"));
+        assertEquals("8", findValue(itemList, "password.min.length"));
+        itemList.forEach(item -> assertFalse(item.get(Constants.ITEM_VALUE).contains("hunter2")));
+    }
+
+    @Test
     public void test_isMaskedValue_doesNotMaskOrdinaryKeys() {
         // Other content_chunker.embedding.* keys are plain diagnostic config, not credentials,
         // and must stay visible on the admin screen.
