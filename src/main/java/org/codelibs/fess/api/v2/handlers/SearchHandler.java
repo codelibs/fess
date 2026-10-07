@@ -113,6 +113,9 @@ public class SearchHandler {
             final SearchRenderData data = new SearchRenderData();
             final V2JsonRequestParams params = createRequestParams(request, fessConfig);
             params.enableRedirect();
+            // Read the facet request now: once the search has started, the main searcher reports any failure,
+            // a refused facet parameter included, as an empty partial result instead of an error.
+            params.getFacetInfo();
             searchHelper.search(params, data, OptionalThing.empty());
             // A search request rewriter can send the search elsewhere (e.g. a bang to another
             // search engine); the client is told where instead of being given results.

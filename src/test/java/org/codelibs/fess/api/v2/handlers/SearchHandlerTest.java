@@ -404,6 +404,93 @@ public class SearchHandlerTest extends UnitFessTestCase {
     }
 
     /**
+     * A facet number the search cannot use is refused before the search starts. Once started,
+     * the main searcher reports every failure as an empty partial result, so the caller would
+     * get a 200 that looks like a search of nothing.
+     */
+    @Test
+    public void test_search_invalidFacetNumber_isRefusedBeforeSearching() throws Exception {
+        final java.util.concurrent.atomic.AtomicBoolean searched = new java.util.concurrent.atomic.AtomicBoolean();
+        registerSearchStubs();
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                searched.set(true);
+                data.setDocumentItems(List.of());
+            }
+        }, "searchHelper");
+
+        for (final String[] facetParam : new String[][] { { "facet.size", "abc" }, { "facet.size", "0" }, { "facet.size", "-1" },
+                { "facet.minDocCount", "x" } }) {
+            final CapturingResponse res = new CapturingResponse();
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            params.put("facet.field", new String[] { "label" });
+            params.put(facetParam[0], new String[] { facetParam[1] });
+            new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+            final String body = res.body();
+            assertEquals(facetParam[0] + "=" + facetParam[1] + " " + body, 400, res.status);
+            assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+            assertTrue(body.contains(facetParam[0]), body);
+        }
+        assertFalse(searched.get(), "the search must not start");
+    }
+
+    /** The item limit of {@code facet.field} was checked only inside the search, where it was lost the same way. */
+    @Test
+    public void test_search_tooManyFacetFields_isRefusedBeforeSearching() throws Exception {
+        final java.util.concurrent.atomic.AtomicBoolean searched = new java.util.concurrent.atomic.AtomicBoolean();
+        registerSearchStubs();
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                searched.set(true);
+                data.setDocumentItems(List.of());
+            }
+        }, "searchHelper");
+
+        final String[] fields = new String[101];
+        java.util.Arrays.fill(fields, "label");
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        params.put("facet.field", fields);
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        assertEquals(res.body(), 400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertFalse(searched.get(), "the search must not start");
+    }
+
+    @Test
+    public void test_search_validFacetNumber_isSearched() throws Exception {
+        final java.util.concurrent.atomic.AtomicBoolean searched = new java.util.concurrent.atomic.AtomicBoolean();
+        registerSearchStubs();
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                searched.set(true);
+                data.setDocumentItems(List.of());
+            }
+        }, "searchHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        params.put("facet.field", new String[] { "label" });
+        params.put("facet.size", new String[] { "5" });
+        params.put("facet.minDocCount", new String[] { "2" });
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        assertEquals(res.body(), 200, res.status);
+        assertTrue(searched.get());
+    }
+
+    /**
      * A partial result says why it is partial, so a client does not report a failed shard as a timeout.
      */
     @Test
