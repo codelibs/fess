@@ -1877,6 +1877,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. storage */
     String ONLINE_HELP_NAME_STORAGE = "online.help.name.storage";
 
+    /** The key of the configuration. e.g. docreport */
+    String ONLINE_HELP_NAME_DOCREPORT = "online.help.name.docreport";
+
     /** The key of the configuration. e.g. de,es,fr,ja,ko,zh-cn */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
@@ -9485,6 +9488,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameStorage();
 
     /**
+     * Get the value for the key 'online.help.name.docreport'. <br>
+     * The value is, e.g. docreport <br>
+     * comment: Online help key for document report.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDocreport();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. de,es,fr,ja,ko,zh-cn <br>
      * comment: Supported languages for online help.
@@ -14604,6 +14615,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_STORAGE);
         }
 
+        public String getOnlineHelpNameDocreport() {
+            return get(FessConfig.ONLINE_HELP_NAME_DOCREPORT);
+        }
+
         public String getOnlineHelpSupportedLangs() {
             return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
@@ -16010,6 +16025,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_MAINTENANCE, "maintenance");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_PLUGIN, "plugin");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_STORAGE, "storage");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_DOCREPORT, "docreport");
             defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "de,es,fr,ja,ko,zh-cn");
             defaultMap.put(FessConfig.FORUM_LINK, "https://discuss.codelibs.org/c/Fess{lang}/");
             defaultMap.put(FessConfig.FORUM_SUPPORTED_LANGS, "en,ja");

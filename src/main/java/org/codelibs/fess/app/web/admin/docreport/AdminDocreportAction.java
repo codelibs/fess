@@ -28,6 +28,7 @@ import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import jakarta.annotation.Resource;
 
@@ -64,6 +65,12 @@ public class AdminDocreportAction extends FessAdminAction {
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    @Override
+    protected void setupHtmlData(final ActionRuntime runtime) {
+        super.setupHtmlData(runtime);
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDocreport()));
+    }
+
     @Override
     protected String getActionRole() {
         return ROLE;
