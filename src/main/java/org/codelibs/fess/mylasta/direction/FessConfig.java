@@ -790,7 +790,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String RESPONSE_INLINE_MIMETYPES = "response.inline.mimetypes";
 
     /** The key of the configuration. e.g. text/html=X-XSS-Protection: 1; mode=block<br>
-     * text/html=Content-Security-Policy: reflected-xss block<br>
      * text/html=X-Frame-Options: SAMEORIGIN<br>
      *  */
     String RESPONSE_HEADERS = "response.headers";
@@ -5074,7 +5073,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.headers'. <br>
      * The value is, e.g. text/html=X-XSS-Protection: 1; mode=block<br>
-     * text/html=Content-Security-Policy: reflected-xss block<br>
      * text/html=X-Frame-Options: SAMEORIGIN<br>
      *  <br>
      * comment: HTTP headers for the response. Access-Control-* and Timing-Allow-Origin are ignored (CORS is controlled by api.cors.* / CorsFilter). Do not set Vary here.
@@ -15684,7 +15682,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED, "true");
             defaultMap.put(FessConfig.RESPONSE_INLINE_MIMETYPES, "application/pdf,text/plain");
             defaultMap.put(FessConfig.RESPONSE_HEADERS,
-                    "text/html=X-XSS-Protection: 1; mode=block\ntext/html=Content-Security-Policy: reflected-xss block\ntext/html=X-Frame-Options: SAMEORIGIN\n");
+                    "text/html=X-XSS-Protection: 1; mode=block\ntext/html=X-Frame-Options: SAMEORIGIN\n");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX, "fess");
