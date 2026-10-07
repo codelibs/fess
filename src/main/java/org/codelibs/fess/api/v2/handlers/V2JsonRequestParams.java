@@ -140,13 +140,33 @@ public class V2JsonRequestParams extends SearchRequestParams {
         return createGeoInfo(request);
     }
 
+    /**
+     * Returns the facet request, or {@code null} when no {@code facet.field} or {@code facet.query}
+     * is given.
+     *
+     * <p>{@code facet.size} must be a positive integer (the engine refuses a terms aggregation of
+     * size 0 or less) and {@code facet.minDocCount} an integer; they are not read when no facet is
+     * requested. A negative {@code facet.minDocCount} is still accepted, since the search clamps it to 0.</p>
+     *
+     * @return the facet request, or {@code null}
+     * @throws InvalidRequestParameterException if a facet parameter is out of bounds or not a valid number
+     */
     @Override
     public FacetInfo getFacetInfo() {
         final int maxItems = fessConfig.getApiParamMaxArraySizeOrDefault();
         final int maxLen = fessConfig.getApiParamMaxLengthOrDefault();
         V2ParamValidator.checkArray(request.getParameterValues("facet.field"), maxItems, maxLen, "facet.field");
         V2ParamValidator.checkArray(request.getParameterValues("facet.query"), maxItems, maxLen, "facet.query");
-        return createFacetInfo(request);
+        final FacetInfo facetInfo;
+        try {
+            facetInfo = createFacetInfo(request);
+        } catch (final NumberFormatException e) {
+            throw new InvalidRequestParameterException("facet.size and facet.minDocCount must be integers");
+        }
+        if (facetInfo != null && facetInfo.size != null && facetInfo.size < 1) {
+            throw new InvalidRequestParameterException("facet.size must be positive, got: " + facetInfo.size);
+        }
+        return facetInfo;
     }
 
     @Override

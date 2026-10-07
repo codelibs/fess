@@ -226,13 +226,16 @@ paths:
         - name: facet.size
           in: query
           description: |-
-            Maximum number of facet terms to return. Effective upper bound is
-            clamped by the configuration `query.facet.fields.size.max`.
+            Maximum number of facet terms to return. Values `<= 0` and values
+            that are not integers produce `invalid_request`. Effective upper
+            bound is clamped by the configuration `query.facet.fields.size.max`.
           required: false
-          schema: { type: integer, minimum: 0, maximum: 1000 }
+          schema: { type: integer, minimum: 1, maximum: 1000 }
         - name: facet.minDocCount
           in: query
-          description: Minimum document count for a facet term to be included.
+          description: |-
+            Minimum document count for a facet term to be included. A value
+            that is not an integer produces `invalid_request`.
           required: false
           schema: { type: integer, format: int64, minimum: 0, maximum: 2147483647 }
         - name: facet.sort

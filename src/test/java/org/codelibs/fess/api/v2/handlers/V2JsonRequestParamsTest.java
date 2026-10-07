@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -307,6 +308,66 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
         final V2JsonRequestParams params =
                 newParams(Map.of("facet.field", new String[] { longValue }, "facet.query", new String[] { "q:v" }));
         assertThrows(InvalidRequestParameterException.class, params::getFacetInfo, "facet.field element with 1001 chars must throw");
+    }
+
+    @Test
+    public void test_getFacetInfo_sizeAndMinDocCount_areRead() {
+        final V2JsonRequestParams params = newParams(Map.of("facet.field", new String[] { "label" }, "facet.size", new String[] { "5" },
+                "facet.minDocCount", new String[] { "2" }));
+        final FacetInfo facetInfo = params.getFacetInfo();
+        assertEquals(Integer.valueOf(5), facetInfo.size);
+        assertEquals(Long.valueOf(2), facetInfo.minDocCount);
+    }
+
+    @Test
+    public void test_getFacetInfo_sizeNotAnInteger_throws() {
+        for (final String size : new String[] { "abc", "1.5", "99999999999" }) {
+            final V2JsonRequestParams params =
+                    newParams(Map.of("facet.field", new String[] { "label" }, "facet.size", new String[] { size }));
+            assertThrows(InvalidRequestParameterException.class, params::getFacetInfo, "facet.size=" + size + " must throw");
+        }
+    }
+
+    @Test
+    public void test_getFacetInfo_sizeNotPositive_throws() {
+        // A terms aggregation of size 0 or less is refused by the engine, which RankFusionProcessor turns into an empty partial result.
+        for (final String size : new String[] { "0", "-1" }) {
+            final V2JsonRequestParams params =
+                    newParams(Map.of("facet.field", new String[] { "label" }, "facet.size", new String[] { size }));
+            assertThrows(InvalidRequestParameterException.class, params::getFacetInfo, "facet.size=" + size + " must throw");
+        }
+    }
+
+    @Test
+    public void test_getFacetInfo_minDocCountNotAnInteger_throws() {
+        final V2JsonRequestParams params =
+                newParams(Map.of("facet.query", new String[] { "content_length:[* TO 10]" }, "facet.minDocCount", new String[] { "x" }));
+        assertThrows(InvalidRequestParameterException.class, params::getFacetInfo, "facet.minDocCount=x must throw");
+    }
+
+    @Test
+    public void test_getFacetInfo_negativeMinDocCount_isAcceptedAsBefore() {
+        // The search clamps a negative minimum to 0; it never failed, so it is not turned into an error.
+        final V2JsonRequestParams params =
+                newParams(Map.of("facet.field", new String[] { "label" }, "facet.minDocCount", new String[] { "-1" }));
+        assertEquals(Long.valueOf(-1), params.getFacetInfo().minDocCount);
+    }
+
+    @Test
+    public void test_getFacetInfo_blankNumbersAreIgnored() {
+        final V2JsonRequestParams params = newParams(Map.of("facet.field", new String[] { "label" }, "facet.size", new String[] { "" },
+                "facet.minDocCount", new String[] { " " }));
+        final FacetInfo facetInfo = params.getFacetInfo();
+        assertNull(facetInfo.size);
+        assertNull(facetInfo.minDocCount);
+    }
+
+    @Test
+    public void test_getFacetInfo_numbersWithoutFacet_areIgnored() {
+        // No facet is requested, so the numbers are never read, as before.
+        final V2JsonRequestParams params =
+                newParams(Map.of("facet.size", new String[] { "abc" }, "facet.minDocCount", new String[] { "x" }));
+        assertNull(params.getFacetInfo());
     }
 
     // -----------------------------------------------------------------------
