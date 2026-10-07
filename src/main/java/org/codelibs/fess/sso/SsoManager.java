@@ -17,8 +17,6 @@ package org.codelibs.fess.sso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +25,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogOnce;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 
@@ -55,10 +54,10 @@ public class SsoManager {
      * rather than once per request.
      *
      * <p>{@code /sso/} is anonymous, and the same miss is hit on every visit to it, so a warning
-     * per attempt is a log an unauthenticated client can fill. The set is bounded by the number of
-     * distinct values the setting has held for the life of the JVM, which is one.</p>
+     * per attempt is a log an unauthenticated client can fill. What it remembers is bounded by the
+     * number of distinct values the setting has held for the life of the JVM, which is one.</p>
      */
-    protected final Set<String> unservedSsoTypes = ConcurrentHashMap.newKeySet();
+    protected final LogOnce unservedSsoTypes = new LogOnce();
 
     /**
      * Default constructor for creating a new SsoManager instance.
@@ -188,12 +187,12 @@ public class SsoManager {
         if (StringUtil.isBlank(ssoType) || Constants.NONE.equals(ssoType)) {
             return;
         }
-        if (logger.isWarnEnabled() && unservedSsoTypes.add(ssoType)) {
-            logger.warn("No SSO authenticator is registered as {} for sso.type={}. Every authenticator ships as a fess-sso-* plugin: "
-                    + "install fess-sso-saml for saml, fess-sso-spnego for spnego, fess-sso-entraid for entraid "
-                    + "(or the legacy aad), or fess-sso-oidc for oic. Until then every request to /sso/ is redirected "
-                    + "back to the login page.", componentName, ssoType);
-        }
+        unservedSsoTypes.warn(logger, ssoType,
+                "No SSO authenticator is registered as {} for sso.type={}. Every authenticator ships as a fess-sso-* plugin: "
+                        + "install fess-sso-saml for saml, fess-sso-spnego for spnego, fess-sso-entraid for entraid "
+                        + "(or the legacy aad), or fess-sso-oidc for oic. Until then every request to /sso/ is redirected "
+                        + "back to the login page.",
+                componentName, ssoType);
     }
 
     /**
