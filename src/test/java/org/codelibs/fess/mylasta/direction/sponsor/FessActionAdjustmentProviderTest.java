@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
@@ -128,6 +129,28 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         final FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
         final List<String> emitted = collectHeaders(provider, "application/json");
         assertEquals(List.of("Vary=Accept-Encoding"), emitted);
+    }
+
+    @Test
+    public void test_defaultResponseHeaders_ofHtml_haveNoReflectedXssDirective() {
+        // reflected-xss was a Content-Security-Policy draft directive that browsers no longer know:
+        // they log "Unrecognized Content-Security-Policy directive" and the header protects nothing.
+        final List<String> shipped = collectHeaders(new FessActionAdjustmentProvider(ComponentUtil.getFessConfig()), "text/html");
+        assertTrue(shipped.toString(), shipped.contains("X-XSS-Protection=1; mode=block"));
+        assertTrue(shipped.toString(), shipped.contains("X-Frame-Options=SAMEORIGIN"));
+        shipped.forEach(header -> assertFalse(header, header.contains("reflected-xss")));
+        assertEquals(shipped.toString(), 2, shipped.size());
+
+        // The generated default of FessConfig is the same value.
+        final String generatedDefault = new FessConfig.SimpleImpl() {
+            @Override
+            public Map<String, String> prepareGeneratedDefaultMap() {
+                return super.prepareGeneratedDefaultMap();
+            }
+        }.prepareGeneratedDefaultMap().get(FessConfig.RESPONSE_HEADERS);
+        final List<String> generated =
+                collectHeaders(new FessActionAdjustmentProvider(createFessConfigWithResponseHeaders(generatedDefault)), "text/html");
+        assertEquals(shipped, generated);
     }
 
     private List<String> collectHeaders(final FessActionAdjustmentProvider provider, final String mimeType) {
