@@ -563,7 +563,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final Date now = systemHelper.getCurrentTime();
         putResultDataBody(dataMap, fessConfig.getIndexFieldCreated(), now);
         // anchor
-        putResultDataBody(dataMap, fessConfig.getIndexFieldAnchor(), getAnchorList(document, responseData));
+        // FessCrawlerThread queues the stored anchors again when the page is re-crawled unchanged,
+        // so a nofollow page (applyRobotsDirective) must not store the links it did not follow.
+        putResultDataBody(dataMap, fessConfig.getIndexFieldAnchor(),
+                responseData.isNoFollow() ? new ArrayList<String>() : getAnchorList(document, responseData));
         // mimetype
         putResultDataBody(dataMap, fessConfig.getIndexFieldMimetype(), mimeType);
         if (fileTypeHelper != null) {
