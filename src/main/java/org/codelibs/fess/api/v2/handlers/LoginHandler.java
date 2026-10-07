@@ -30,6 +30,7 @@ import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogOnce;
 import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.exception.LoginFailureException;
@@ -62,6 +63,14 @@ public class LoginHandler {
     private static final Logger logger = LogManager.getLogger(LoginHandler.class);
 
     private static final int MAX_BODY_BYTES = 4 * 1024;
+
+    /**
+     * One-shot warning so only the first IP-resolve failure per JVM lifetime is logged. The login
+     * endpoint is anonymous and reached on every attempt, so a line per attempt would be a log a
+     * client can fill. Static so it is once per JVM rather than once per handler instance; not
+     * re-armed when the helper recovers and fails again (see {@link LogOnce}).
+     */
+    private static final LogOnce ipResolveUnavailable = new LogOnce();
 
     /**
      * MJ-8: Allowlist pattern for return_to values.
@@ -454,11 +463,8 @@ public class LoginHandler {
         try {
             return ComponentUtil.getRateLimitHelper().getClientIp(req);
         } catch (final RuntimeException e) {
-            if (logger.isDebugEnabled()) {
-                logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr", e);
-            } else {
-                logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr: {}", e.getMessage());
-            }
+            ipResolveUnavailable.warn(logger, "rateLimitHelper", "RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr",
+                    e);
             return req.getRemoteAddr();
         }
     }

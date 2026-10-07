@@ -91,7 +91,7 @@ public class ClickHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_userInfoHelperFailure_warnsOnEveryClick() throws Exception {
+    public void test_userInfoHelperFailure_warnsAtMostOncePerJvm() throws Exception {
         final UserInfoHelper stub = new UserInfoHelper() {
             @Override
             public String getUserCode() {
@@ -101,7 +101,7 @@ public class ClickHandlerTest extends UnitFessTestCase {
         ComponentUtil.register(stub, "userInfoHelper");
         final LogCapturingAppender appender = LogCapturingAppender.attach(ClickHandler.class.getName(), Level.INFO);
         try {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 3; i++) {
                 final CapturingResponse res = new CapturingResponse();
                 new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"d\"}"), res);
                 assertEquals(200, res.status);
@@ -110,8 +110,11 @@ public class ClickHandlerTest extends UnitFessTestCase {
                     .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("UserInfoHelper unavailable"))
                     .toList();
-            assertEquals(2, warns.size());
-            warns.forEach(e -> assertNull(e.getThrown(), "the stack trace is only for DEBUG"));
+            // The latch is static, so it is once per JVM and another test that ran earlier in the same
+            // JVM may already have used it up: "the first failure logs" cannot be asserted here. What
+            // must hold is that three failures never log more than once, and that a line carries the cause.
+            assertTrue(warns.size() <= 1, "a repeated failure must not WARN again: " + warns.size());
+            warns.forEach(e -> assertNotNull(e.getThrown(), "the first failure carries the exception"));
         } finally {
             appender.detach();
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");

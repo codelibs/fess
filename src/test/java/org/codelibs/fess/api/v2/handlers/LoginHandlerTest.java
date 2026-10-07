@@ -732,7 +732,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
     // ── M-2: reverse-proxy / client IP resolution ───────────────────────────────
 
     @Test
-    public void login_clientIpResolveFailure_warnsOnEveryRequest() throws Exception {
+    public void login_clientIpResolveFailure_warnsAtMostOncePerJvm() throws Exception {
         // The component map is cleared after each test, so the stub needs no restore.
         ComponentUtil.register(new RateLimitHelper() {
             @Override
@@ -742,7 +742,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         }, "rateLimitHelper");
         final LogCapturingAppender appender = LogCapturingAppender.attach(LoginHandler.class.getName(), Level.INFO);
         try {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 3; i++) {
                 new LoginHandler(new LoginRateLimiter()).handle(
                         new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}"),
                         new CapturingResponse());
@@ -751,10 +751,13 @@ public class LoginHandlerTest extends UnitFessTestCase {
                     .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("RateLimitHelper.getClientIp unavailable"))
                     .toList();
-            assertEquals(2, warns.size());
+            // The latch is static, so it is once per JVM and another test that ran earlier in the same
+            // JVM may already have used it up: "the first failure logs" cannot be asserted here. What
+            // must hold is that three failures never log more than once, and that a line carries the cause.
+            assertTrue(warns.size() <= 1, "a repeated failure must not WARN again: " + warns.size());
             warns.forEach(e -> {
-                assertTrue(e.getMessage().getFormattedMessage().contains("helper broken"));
-                assertNull(e.getThrown(), "the stack trace is only for DEBUG");
+                assertNotNull(e.getThrown(), "the first failure carries the exception");
+                assertTrue(e.getThrown().getMessage().contains("helper broken"));
             });
         } finally {
             appender.detach();

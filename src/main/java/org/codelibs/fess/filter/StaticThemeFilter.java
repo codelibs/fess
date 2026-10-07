@@ -34,6 +34,7 @@ import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogOnce;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -127,6 +128,16 @@ public class StaticThemeFilter implements Filter {
 
     /** Overridable responder reference; production code uses the container lookup. */
     private StaticThemeResponder staticThemeResponder;
+
+    /**
+     * Latches on the first failed lookup of each of {@link ThemeRegistry}, {@link StaticThemeResponder}
+     * and {@link VirtualHostHelper} (one key per component) so the operator sees a single WARN
+     * each instead of one per request: this filter runs on every request, anonymous ones
+     * included, while the DI container is not yet ready (or has been torn down). Subsequent
+     * failures degrade to DEBUG. A reported component is not re-armed (see {@link LogOnce}).
+     * Instance field (not static) so redeploys re-emit the WARN.
+     */
+    private final LogOnce lookupFailures = new LogOnce();
 
     /**
      * Default constructor.
@@ -428,17 +439,18 @@ public class StaticThemeFilter implements Filter {
     }
 
     /**
-     * Logs a component lookup failure at WARN on every occurrence: the message and the cause's
-     * message on one line, with the stack trace only when DEBUG is enabled.
+     * Logs {@code warnMsg} at WARN with the cause the first time the lookup named by {@code key}
+     * fails, then degrades subsequent failures of that lookup to a DEBUG {@code debugMsg}. Keeps
+     * the per-component lookup failures from flooding the log one line per request.
      *
-     * @param msg the message
+     * @param key the component whose lookup failed
+     * @param warnMsg the message logged once at WARN
+     * @param debugMsg the message logged at DEBUG on later failures
      * @param e the cause
      */
-    private void warnLookupFailure(final String msg, final Exception e) {
-        if (logger.isDebugEnabled()) {
-            logger.warn(msg, e);
-        } else {
-            logger.warn("{}: {}", msg, e.getMessage());
+    private void warnOnce(final String key, final String warnMsg, final String debugMsg, final Exception e) {
+        if (!lookupFailures.warn(logger, key, warnMsg, e) && logger.isDebugEnabled()) {
+            logger.debug(debugMsg, e);
         }
     }
 
@@ -449,7 +461,7 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getThemeRegistry();
         } catch (final Exception e) {
-            warnLookupFailure("ThemeRegistry not available; static-theme routing disabled", e);
+            warnOnce("ThemeRegistry", "ThemeRegistry not available; static-theme routing disabled", "ThemeRegistry not available", e);
             return null;
         }
     }
@@ -461,7 +473,8 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getStaticThemeResponder();
         } catch (final Exception e) {
-            warnLookupFailure("StaticThemeResponder not available; static-theme routing disabled", e);
+            warnOnce("StaticThemeResponder", "StaticThemeResponder not available; static-theme routing disabled",
+                    "StaticThemeResponder not available", e);
             return null;
         }
     }
@@ -473,7 +486,8 @@ public class StaticThemeFilter implements Filter {
                 return h.getVirtualHostKey();
             }
         } catch (final Exception e) {
-            warnLookupFailure("VirtualHostHelper not available; using null host key for static-theme routing", e);
+            warnOnce("VirtualHostHelper", "VirtualHostHelper not available; using null host key for static-theme routing",
+                    "VirtualHostHelper not available; using null host key", e);
         }
         return null;
     }

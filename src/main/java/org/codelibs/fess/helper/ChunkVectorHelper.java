@@ -42,6 +42,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogOnce;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
@@ -66,6 +67,17 @@ import jakarta.annotation.PostConstruct;
 public class ChunkVectorHelper {
 
     private static final Logger logger = LogManager.getLogger(ChunkVectorHelper.class);
+
+    /**
+     * The {@code key=value} combinations {@link #getKnnConfigToken(String, String, Set)}/
+     * {@link #getKnnConfigPositiveInt(String, String, int)} have already WARNed about, so a single
+     * misconfigured value is logged once rather than once per call. Both methods are reached from
+     * the query path ({@code SemanticChunkSearcher#resolveEngineMinScore}) with no caching of
+     * their own, so an invalid value would otherwise re-WARN on every ann-mode search request,
+     * anonymous ones included. A changed bad value is a new key and is reported again; a value
+     * that is fixed and later broken again to the same text is not (see {@link LogOnce}).
+     */
+    private final LogOnce invalidConfigValues = new LogOnce();
 
     /** Sub-field of {@link Constants#CONTENT_CHUNK_VECTOR_FIELD} holding the knn_vector value. */
     public static final String VECTOR_SUBFIELD = "vector";
@@ -674,8 +686,9 @@ public class ChunkVectorHelper {
 
     /**
      * Reads a token-style knn query-time config value, rejecting anything outside the allowed set.
-     * WARNs on every call that reads an invalid value, which on the query path means every
-     * ann-mode search request until the value is fixed.
+     * WARNs at most once per distinct invalid {@code key=value} combination (see
+     * {@code invalidConfigValues}), since this is reached from the query path on every ann-mode
+     * search request with no caching of its own.
      *
      * @param key the system property key
      * @param defaultValue the fallback value
@@ -685,7 +698,8 @@ public class ChunkVectorHelper {
     protected String getKnnConfigToken(final String key, final String defaultValue, final Set<String> allowedValues) {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(key, defaultValue);
         if (value == null || !allowedValues.contains(value)) {
-            logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+            invalidConfigValues.warn(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value,
+                    defaultValue);
             return defaultValue;
         }
         return value;
@@ -718,8 +732,8 @@ public class ChunkVectorHelper {
      * "dimension": ""}, a non-numeric value, or a value the k-NN plugin itself rejects (e.g. above
      * its own {@link #MAX_KNN_DIMENSION} cap) would all 400 at {@code preparePutMapping}, which
      * {@code SearchEngineClient#addMapping} only surfaces as a single WARN, silently leaving the
-     * index with no proper mapping. WARNs on every call that reads an invalid value, matching
-     * {@link #getKnnConfigToken(String, String, Set)}.
+     * index with no proper mapping. WARNs at most once per distinct invalid {@code key=value}
+     * combination, matching {@link #getKnnConfigToken(String, String, Set)}.
      *
      * @param key the system property key
      * @param defaultValue the fallback value, itself a valid positive integer string within bounds
@@ -739,7 +753,7 @@ public class ChunkVectorHelper {
                 // fall through to the warn+default below
             }
         }
-        logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+        invalidConfigValues.warn(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
         return defaultValue;
     }
 
