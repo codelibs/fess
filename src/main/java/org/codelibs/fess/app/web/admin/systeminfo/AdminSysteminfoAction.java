@@ -208,6 +208,8 @@ public class AdminSysteminfoAction extends FessAdminAction {
     protected static boolean isMaskedValue(final String name) {
         final String key = toSettingKey(name);
         return "http.proxy.password".equals(key) //
+                || "search_engine.password".equals(key) //
+                || "index.user.initial_password".equals(key) //
                 || "ldap.admin.security.credentials".equals(key) //
                 || "spnego.preauth.password".equals(key) //
                 || "app.cipher.key".equals(key) //
