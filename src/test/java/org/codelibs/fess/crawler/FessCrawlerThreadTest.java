@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,13 +31,20 @@ import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.entity.UrlQueueImpl;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
+import org.codelibs.fess.crawler.serializer.DataSerializer;
+import org.codelibs.fess.crawler.transformer.FessXpathTransformer;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.DocumentHelper;
+import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.IndexingHelper;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.helper.SambaHelper;
@@ -623,6 +631,78 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         assertEquals(1, crawlerThread.storedChildUrls.size());
         assertEquals(List.of("expires"), env.indexingHelper.updatedFields);
         assertNull(crawlerThread.conditionalGetState);
+    }
+
+    /**
+     * Crawls a page with {@link FessXpathTransformer}, stores the result as the indexed document, and
+     * re-crawls it unchanged (the HEAD is not newer than the indexed last_modified). Returns the child
+     * URL sets the re-crawl queued.
+     */
+    private List<Set<RequestData>> recrawlUnchangedPage(final String html, final Map<String, Object> headers) {
+        final Map<String, Object> document = indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\"");
+        final CrawlEnvironment env = setUpCrawlEnvironment(document);
+        env.webConfig.setTimeToLive(60);
+        ComponentUtil.register(new DataSerializer(), "dataSerializer");
+        ComponentUtil.register(new PathMappingHelper(), "pathMappingHelper");
+        ComponentUtil.register(new FileTypeHelper(), "fileTypeHelper");
+        ComponentUtil.register(new DocumentHelper(), "documentHelper");
+        ComponentUtil.register(new LabelTypeHelper() {
+            @Override
+            public Set<String> getMatchedLabelValueSet(final String path) {
+                return Set.of();
+            }
+        }, "labelTypeHelper");
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        transformer.setChildUrlRuleMap(new LinkedHashMap<>(Map.of("//A", "href")));
+        final ResponseData firstCrawl = new ResponseData();
+        firstCrawl.setCharSet("UTF-8");
+        firstCrawl.setContentLength(html.length());
+        firstCrawl.setHttpStatusCode(200);
+        firstCrawl.setLastModified(new Date());
+        firstCrawl.setMethod("GET");
+        firstCrawl.setMimeType("text/html");
+        firstCrawl.setResponseBody(html.getBytes());
+        firstCrawl.setSessionId(env.sessionId);
+        firstCrawl.setUrl(PAGE_URL);
+        headers.forEach(firstCrawl::addMetaData);
+        final ResultData resultData = transformer.transform(firstCrawl);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> dataMap = (Map<String, Object>) resultData.getRawData();
+        document.put("anchor", dataMap.get("anchor"));
+
+        env.client.headResponse = headResponse(200, new Date(java.time.Instant.parse(INDEXED_LAST_MODIFIED).toEpochMilli()));
+        assertFalse(env.thread.isContentUpdated(env.client, urlQueue(PAGE_URL)));
+        assertEquals(1, env.thread.unchangedCalls.size());
+        return env.thread.storedChildUrls;
+    }
+
+    @Test
+    public void test_isContentUpdated_unchangedPageQueuesTheLinksItWasCrawledWith() {
+        final List<Set<RequestData>> queued = recrawlUnchangedPage(
+                "<html><head><title>Page</title></head><body><a href=\"https://example.com/child.html\">child</a></body></html>", Map.of());
+
+        assertEquals(1, queued.size());
+        assertEquals("https://example.com/child.html", queued.get(0).iterator().next().getUrl());
+    }
+
+    @Test
+    public void test_isContentUpdated_unchangedNofollowMetaPageQueuesNoLinks() {
+        final List<Set<RequestData>> queued = recrawlUnchangedPage("<html><head><title>Page</title>" //
+                + "<meta name=\"robots\" content=\"nofollow\"></head>" //
+                + "<body><a href=\"https://example.com/child.html\">child</a></body></html>", Map.of());
+
+        assertTrue(queued.isEmpty(), "a nofollow page must not queue its links when it is re-crawled unchanged: " + queued);
+    }
+
+    @Test
+    public void test_isContentUpdated_unchangedNofollowHeaderPageQueuesNoLinks() {
+        final List<Set<RequestData>> queued = recrawlUnchangedPage(
+                "<html><head><title>Page</title></head><body><a href=\"https://example.com/child.html\">child</a></body></html>",
+                Map.of("X-Robots-Tag", "nofollow"));
+
+        assertTrue(queued.isEmpty(), "a nofollow page must not queue its links when it is re-crawled unchanged: " + queued);
     }
 
     @Test

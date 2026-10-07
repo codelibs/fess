@@ -359,6 +359,83 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(dataMap.containsKey("etag"), "etag must not be stored: " + dataMap.get("etag"));
     }
 
+    private ResultData transformPageWithLinks(final String headTags, final Map<String, Object> headers) throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+        final ResponseData responseData = createHtmlResponseData(sessionId, "http://example.com/",
+                "<html><head><title>Test Page</title>" + headTags + "</head><body><p>Hello</p>" //
+                        + "<a href=\"http://example.com/page1.html\">Link1</a>" //
+                        + "<a rel=\"nofollow\" href=\"http://example.com/page2.html\">Link2</a>" //
+                        + "</body></html>");
+        headers.forEach(responseData::addMetaData);
+        return transformer.transform(responseData);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> anchorsOf(final ResultData resultData) {
+        final Object anchors = ((Map<String, Object>) resultData.getRawData()).get("anchor");
+        return anchors == null ? Collections.emptyList() : (List<String>) anchors;
+    }
+
+    private static Set<String> childUrlsOf(final ResultData resultData) {
+        return resultData.getChildUrlSet().stream().map(RequestData::getUrl).collect(Collectors.toSet());
+    }
+
+    @Test
+    public void test_transform_withoutNofollow_anchorsAreTheChildUrls() throws Exception {
+        final ResultData resultData = transformPageWithLinks("", Collections.emptyMap());
+
+        // the anchors are what a re-crawl of the unchanged page queues again (FessCrawlerThread#handleUnchangedDocument),
+        // so they have to stay the child URLs of the crawl that indexed the page - a rel="nofollow" anchor included
+        assertEquals(List.of("http://example.com/page1.html", "http://example.com/page2.html"), anchorsOf(resultData));
+        assertEquals(Set.of("http://example.com/page1.html", "http://example.com/page2.html"), childUrlsOf(resultData));
+    }
+
+    @Test
+    public void test_transform_nofollowMeta_storesNoAnchors() throws Exception {
+        final ResultData resultData = transformPageWithLinks("<meta name=\"robots\" content=\"nofollow\">", Collections.emptyMap());
+
+        assertTrue(childUrlsOf(resultData).isEmpty(), String.valueOf(childUrlsOf(resultData)));
+        // the page is still indexed, but it must not hand its links to a re-crawl of the unchanged page
+        assertEquals("http://example.com/", ((Map<?, ?>) resultData.getRawData()).get("url"));
+        assertTrue(anchorsOf(resultData).isEmpty(), String.valueOf(anchorsOf(resultData)));
+
+        // the crawler hands the result over serialized (Kryo, registered classes only)
+        final Map<?, ?> restored = (Map<?, ?>) new DataSerializer().fromBinaryToObject(resultData.getData());
+        assertEquals(Collections.emptyList(), restored.get("anchor"));
+    }
+
+    @Test
+    public void test_transform_nofollowMetaVariants_storeNoAnchors() throws Exception {
+        for (final String tag : new String[] { "<meta name=\"ROBOTS\" content=\"NoFollow\">",
+                "<meta name=\"robots\" content=\"index, nofollow\">", "<meta name=\"robots\" content=\"nofollow,noarchive\">" }) {
+            final ResultData resultData = transformPageWithLinks(tag, Collections.emptyMap());
+            assertTrue(childUrlsOf(resultData).isEmpty(), tag + ": " + childUrlsOf(resultData));
+            assertTrue(anchorsOf(resultData).isEmpty(), tag + ": " + anchorsOf(resultData));
+        }
+    }
+
+    @Test
+    public void test_transform_nofollowHeader_storesNoAnchors() throws Exception {
+        final ResultData resultData = transformPageWithLinks("", Map.of("X-Robots-Tag", "nofollow"));
+
+        assertTrue(childUrlsOf(resultData).isEmpty(), String.valueOf(childUrlsOf(resultData)));
+        assertTrue(anchorsOf(resultData).isEmpty(), String.valueOf(anchorsOf(resultData)));
+    }
+
+    @Test
+    public void test_transform_robotsWithoutNofollow_keepsAnchors() throws Exception {
+        final ResultData resultData =
+                transformPageWithLinks("<meta name=\"robots\" content=\"index,follow\">", Map.of("X-Robots-Tag", "noarchive"));
+
+        assertEquals(2, anchorsOf(resultData).size(), String.valueOf(anchorsOf(resultData)));
+        assertEquals(2, childUrlsOf(resultData).size(), String.valueOf(childUrlsOf(resultData)));
+    }
+
     @Test
     public void test_pruneNode() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
