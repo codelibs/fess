@@ -16,9 +16,16 @@
 package org.codelibs.fess.app.web.admin.docreport;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 public class AdminDocreportActionTest extends UnitFessTestCase {
+
+    @Test
+    public void test_onlineHelpName() {
+        // the name of docreport-guide.rst in fess-docs
+        assertEquals("docreport", ComponentUtil.getFessConfig().getOnlineHelpNameDocreport());
+    }
 
     @Test
     public void test_parseDays() {
