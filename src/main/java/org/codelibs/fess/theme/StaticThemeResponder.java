@@ -50,8 +50,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p>Security: {@link #resolveAsset(Theme, String)} enforces path-traversal protection by
  * rejecting absolute paths and any path containing {@code ".."}, re-checking the canonicalized
  * result is still under the theme base directory, rejecting symlinks, and applying a filename
- * denylist (see {@link #isBlockedFilename(String)}). The entry file is subjected to the same
- * filename denylist so a malicious manifest entry cannot serve internal files (e.g.
+ * and directory denylist (see {@link #isBlockedPath(String)}). The entry file is subjected to the
+ * same denylist so a malicious manifest entry cannot serve internal files (e.g.
  * {@code theme.yml} or {@code .env}) as HTML.</p>
  *
  * <p>{@link #serveErrorPage} is the counterpart used outside that filter: the container's error
@@ -485,9 +485,8 @@ public class StaticThemeResponder {
         if (!candidate.startsWith(theme.getBasePath()) || !Files.isRegularFile(candidate, LinkOption.NOFOLLOW_LINKS)) {
             return null;
         }
-        final String fname = candidate.getFileName() != null ? candidate.getFileName().toString() : "";
-        // Reject dotfiles and sensitive manifest/documentation files.
-        if (isBlockedFilename(fname)) {
+        // Reject dotfiles, files below a dot directory and sensitive manifest/documentation files.
+        if (isBlockedPath(relativePathOf(theme, candidate))) {
             return null;
         }
         return candidate;
@@ -506,6 +505,9 @@ public class StaticThemeResponder {
      *       {@code LICENSE}, {@code LICENSE.txt}).</li>
      * </ul>
      *
+     * <p>Only the file name is looked at; {@link #isBlockedPath(String)} also looks at the
+     * directories above it.</p>
+     *
      * @param filename the bare filename (not a path) to test
      * @return {@code true} if the file must not be served
      */
@@ -521,6 +523,43 @@ public class StaticThemeResponder {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} when a path inside a theme directory (or, for the request filter, inside
+     * the themes directory) should never be served.
+     *
+     * <p>Blocked: a path whose last segment {@link #isBlockedFilename} blocks, and a path with a
+     * directory segment that starts with {@code "."} at any depth. The latter keeps the
+     * {@code .attic-} and {@code .staging-} directories the theme installers create next to the
+     * themes, and a copied {@code .git} directory, from being read file by file. Segments that
+     * only contain a dot ({@code v1.2}, {@code a..b}), {@code "."} segments and empty segments
+     * (a trailing slash) are not a reason to block.</p>
+     *
+     * @param path the {@code /}-separated path to test, relative to the theme directory or to the
+     *        themes directory
+     * @return {@code true} if the path must not be served
+     */
+    public static boolean isBlockedPath(final String path) {
+        if (path == null) {
+            return true;
+        }
+        final String[] segments = path.split("/", -1);
+        for (int i = 0; i < segments.length; i++) {
+            final String segment = segments[i];
+            if (segment.isEmpty() || ".".equals(segment)) {
+                continue;
+            }
+            final boolean file = i == segments.length - 1;
+            if (file ? isBlockedFilename(segment) : segment.startsWith(".")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String relativePathOf(final Theme theme, final Path file) {
+        return theme.getBasePath().relativize(file).toString().replace('\\', '/');
     }
 
     /**
@@ -659,10 +698,10 @@ public class StaticThemeResponder {
     private byte[] readEntryBytes(final Theme theme) {
         final String entry = theme.getManifest().map(ThemeManifest::getEntry).orElse("index.html");
         final Path indexFile = theme.getBasePath().resolve(entry).normalize();
-        // Apply the same filename denylist as resolveAsset: manifest validation rejects
+        // Apply the same denylist as resolveAsset: manifest validation rejects
         // traversal but not dotfiles/theme.yml/etc., so a malicious manifest entry must
         // not be able to serve internal files (e.g. entry: theme.yml or .env) as HTML.
-        if (!indexFile.startsWith(theme.getBasePath()) || isBlockedFilename(indexFile.getFileName().toString())
+        if (!indexFile.startsWith(theme.getBasePath()) || isBlockedPath(relativePathOf(theme, indexFile))
                 || !Files.isRegularFile(indexFile)) {
             return null;
         }

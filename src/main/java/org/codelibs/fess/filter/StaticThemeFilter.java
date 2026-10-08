@@ -67,7 +67,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *   <li>A request for a JSP (or similar server-side page) under {@code /themes/} is answered
  *       with 404, whatever the method or active theme: a static theme contains plain files only.</li>
  *   <li>So is a request for a file a theme keeps private ({@code theme.yml}, {@code README.md},
- *       dotfiles, ... see {@link StaticThemeResponder#isBlockedFilename}) under {@code /themes/}:
+ *       dotfiles, anything below a dot directory such as the {@code .attic-} backups of replaced
+ *       themes, ... see {@link StaticThemeResponder#isBlockedPath}) under {@code /themes/}:
  *       whatever the method, and whether or not its theme is the active one.</li>
  *   <li>Every decision is taken on the path the container resolves ({@link #resolveRequestPath}),
  *       not on the raw request URI, so a spelling such as {@code /themes//t/x.js} or
@@ -400,8 +401,10 @@ public class StaticThemeFilter implements Filter {
 
     /**
      * Returns whether a path under {@code /themes/} names a file that is never served: one that
-     * {@link StaticThemeResponder#isBlockedFilename} blocks. Only the last segment is looked at, as
-     * the responder does, and the prefix is matched case-insensitively for a file system that is.
+     * {@link StaticThemeResponder#isBlockedPath} blocks, that is a file {@link StaticThemeResponder#isBlockedFilename}
+     * blocks, or any file below a directory whose name starts with a dot (the {@code .attic-} and
+     * {@code .staging-} directories of the theme installers sit directly under {@code /themes/}).
+     * The prefix is matched case-insensitively for a file system that is.
      *
      * @param path the resolved request path, see {@link #resolveRequestPath}
      * @return true when the request must be answered with 404 whatever theme it names
@@ -410,8 +413,7 @@ public class StaticThemeFilter implements Filter {
         if (!path.toLowerCase(Locale.ROOT).startsWith("/themes/")) {
             return false;
         }
-        final String filename = path.substring(path.lastIndexOf('/') + 1);
-        return !filename.isEmpty() && StaticThemeResponder.isBlockedFilename(filename);
+        return StaticThemeResponder.isBlockedPath(path.substring("/themes/".length()));
     }
 
     private static boolean isThemeUiPath(final String uri) {
