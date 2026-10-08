@@ -232,6 +232,7 @@
   "aria.footer": "網站頁尾",
   "aria.warning_indicators": "警告指示器",
   "aria.auth_controls": "驗證控制項",
+  "aria.close": "關閉",
   "labels.eol_error": "您使用的系統已停止支援。請參閱產品支援生命週期頁面並進行升級。",
   "labels.development_mode_warning": "Fess 正在開發模式下執行。請在生產環境中單獨安裝 OpenSearch。",
   "labels.search_result_status": "{bq} 的搜尋結果 {b0} 條中的 {b1} - {b2} 條",

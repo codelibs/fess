@@ -232,6 +232,7 @@
   "aria.footer": "Stopka witryny",
   "aria.warning_indicators": "Wskaźniki ostrzeżeń",
   "aria.auth_controls": "Kontrolki uwierzytelniania",
+  "aria.close": "Zamknij",
   "labels.eol_error": "Używany system nie jest już obsługiwany. Zapoznaj się ze stroną cyklu życia obsługi produktu i przeprowadź uaktualnienie.",
   "labels.development_mode_warning": "Fess działa w trybie programisty. Zainstaluj OpenSearch osobno w środowisku produkcyjnym.",
   "labels.search_result_status": "Wyniki wyszukiwania dla {bq} {b1} - {b2} z {b0}",

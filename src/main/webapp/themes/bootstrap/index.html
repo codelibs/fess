@@ -51,7 +51,7 @@
                 aria-controls="suggest-dropdown"
                 aria-autocomplete="list"
                 aria-haspopup="listbox">
-            <button type="submit" name="search" id="searchButton" class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i></button>
+            <button type="submit" name="search" id="searchButton" class="btn btn-primary" aria-label="Search" data-i18n-aria-label="search.button"><i class="fa fa-search" aria-hidden="true"></i></button>
             <button type="button" class="btn btn-light" id="searchOptionsButton" data-bs-toggle="collapse" data-bs-target="#searchOptions" aria-expanded="false" aria-controls="searchOptions"><i class="fa fa-cog" aria-hidden="true"></i> <span class="visually-hidden" data-i18n="search.options">Options</span></button>
             <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions" data-bs-theme="light"></ul>
           </form>
@@ -229,7 +229,7 @@
         <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="facetOffcanvas" aria-labelledby="facetOffcanvasLabel">
           <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="facetOffcanvasLabel" data-i18n="facet.title">Filter</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" data-i18n-aria-label="aria.close"></button>
           </div>
           <div class="offcanvas-body" id="facet-body-mobile"></div>
         </div>
@@ -305,7 +305,7 @@
       <form class="modal-content" id="login-form">
         <div class="modal-header">
           <h5 class="modal-title" id="login-modal-title" data-i18n="auth.login">Login</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria-label="aria.close"></button>
         </div>
         <div class="modal-body">
           <!-- Login notification banner (parity login/index.jsp:25 <div class="notification">${notification}</div>).
@@ -331,7 +331,7 @@
       <form class="modal-content d-none" id="password-change-form">
         <div class="modal-header">
           <h5 class="modal-title" data-i18n="profile.title">Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria-label="aria.close"></button>
         </div>
         <div class="modal-body">
           <p data-i18n="auth.password_change_required">You need to update your password</p>

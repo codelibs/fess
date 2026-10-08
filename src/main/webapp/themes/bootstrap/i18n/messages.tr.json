@@ -232,6 +232,7 @@
   "aria.footer": "Site altbilgisi",
   "aria.warning_indicators": "Uyarı göstergeleri",
   "aria.auth_controls": "Kimlik doğrulama denetimleri",
+  "aria.close": "Kapat",
   "labels.eol_error": "Kullandığınız sistem artık desteklenmiyor. Ürün destek yaşam döngüsü sayfasına bakın ve yükseltin.",
   "labels.development_mode_warning": "Fess geliştirici modunda çalışıyor. Üretim ortamında OpenSearch'ü ayrıca yükleyin.",
   "labels.search_result_status": "{bq} için {b1} - {b2} arası sonuçlar (toplam {b0})",

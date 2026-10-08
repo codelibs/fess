@@ -232,6 +232,7 @@
   "aria.footer": "Pie de página del sitio",
   "aria.warning_indicators": "Indicadores de advertencia",
   "aria.auth_controls": "Controles de autenticación",
+  "aria.close": "Cerrar",
   "labels.eol_error": "Su sistema ya no es compatible. Consulte la página de fin de vida útil del producto para actualizar.",
   "labels.development_mode_warning": "Se está ejecutando en modo de desarrollo. Instale OpenSearch por separado en un entorno de producción.",
   "labels.search_result_status": "Resultados de búsqueda para {bq} {b1} - {b2} de {b0}",

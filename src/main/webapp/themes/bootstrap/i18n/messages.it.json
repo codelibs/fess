@@ -232,6 +232,7 @@
   "aria.footer": "Piè di pagina del sito",
   "aria.warning_indicators": "Indicatori di avviso",
   "aria.auth_controls": "Controlli di autenticazione",
+  "aria.close": "Chiudi",
   "labels.eol_error": "Il sistema in uso non è più supportato. Consultare la pagina del ciclo di vita del supporto del prodotto ed eseguire l'aggiornamento.",
   "labels.development_mode_warning": "Fess è in esecuzione in modalità sviluppo. Installare OpenSearch separatamente in un ambiente di produzione.",
   "labels.search_result_status": "Risultati di ricerca per {bq} {b1} - {b2} di {b0}",

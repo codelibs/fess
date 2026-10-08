@@ -232,6 +232,7 @@
   "aria.footer": "साइट फुटर",
   "aria.warning_indicators": "चेतावनी संकेतक",
   "aria.auth_controls": "प्रमाणीकरण नियंत्रण",
+  "aria.close": "बंद करें",
   "labels.eol_error": "आप जिस सिस्टम का उपयोग कर रहे हैं वह अब समर्थित नहीं है। कृपया उत्पाद समर्थन जीवनचक्र पृष्ठ देखें और अपग्रेड करें।",
   "labels.development_mode_warning": "Fess विकास मोड में चल रहा है। उत्पादन वातावरण के लिए इंस्टॉलेशन गाइड देखें।",
   "labels.search_result_status": "{bq} के लिए परिणाम {b1} - {b2} में से {b0}",

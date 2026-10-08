@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -1035,6 +1036,39 @@ public class BundledBootstrapThemeTest {
                                 assertTrue(json.contains("\"" + key + "\""),
                                         "i18n bundle " + p.getFileName() + " must contain " + key + " (task 8)");
                             }
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+    }
+
+    /**
+     * The icon-only buttons of index.html are named from the bundles, not by fixed English: the header
+     * search button (search.button) and every close button of a dialog or drawer (aria.close). All 16
+     * bundles must carry aria.close.
+     */
+    @Test
+    public void test_indexHtml_namesIconOnlyButtonsFromBundles() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final Matcher search = Pattern.compile("<button[^>]*id=\"searchButton\"[^>]*>").matcher(html);
+        assertTrue(search.find(), "index.html must contain the header #searchButton");
+        assertTrue(search.group().contains("data-i18n-aria-label=\"search.button\""),
+                "the header search button has only an icon, so it must be named from search.button");
+        final Matcher close = Pattern.compile("<button[^>]*class=\"btn-close\"[^>]*>").matcher(html);
+        int found = 0;
+        while (close.find()) {
+            found++;
+            assertTrue(close.group().contains("data-i18n-aria-label=\"aria.close\""),
+                    "a close button must be named from aria.close, not by a fixed English label: " + close.group());
+        }
+        assertTrue(found >= 3, "index.html has the filter drawer and two login dialog close buttons; found " + found);
+        try (Stream<Path> files = Files.list(THEME_DIR.resolve("i18n"))) {
+            files.filter(p -> p.getFileName().toString().startsWith("messages.") && p.getFileName().toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            assertTrue(Files.readString(p, StandardCharsets.UTF_8).contains("\"aria.close\""),
+                                    "i18n bundle " + p.getFileName() + " must contain aria.close");
                         } catch (final Exception e) {
                             throw new RuntimeException(e);
                         }

@@ -79,6 +79,39 @@ describe("renderSection", () => {
   });
 });
 
+describe("renderSection: tables", () => {
+  it("puts each table in a scroll container so a wide one does not widen the page", () => {
+    const container = document.createElement("div");
+
+    renderSection(container, {
+      id: "ops",
+      title: "Operators",
+      html: '<p>before</p><table class="table table-sm"><thead><tr><th scope="col">A</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table><p>after</p>',
+    });
+
+    const sec = container.querySelector("section");
+    const table = sec.querySelector("table");
+    expect(table.className).toBe("table table-sm");
+    expect(table.parentElement.tagName).toBe("DIV");
+    expect(table.parentElement.className).toBe("table-responsive");
+    expect(table.parentElement.parentElement).toBe(sec);
+    // The surrounding content keeps its order: h2, p, scroller(table), p.
+    expect(Array.from(sec.children).map(e => e.tagName + (e.className ? "." + e.className : "")))
+      .toEqual(["H2", "P", "DIV.table-responsive", "P"]);
+    expect(table.querySelector("th").getAttribute("scope")).toBe("col");
+  });
+
+  it("wraps every table of a section, and leaves a section without one as it was", () => {
+    const container = document.createElement("div");
+
+    renderSection(container, { id: "two", title: "T", html: "<table><tr><td>a</td></tr></table><table><tr><td>b</td></tr></table>" });
+    renderSection(container, { id: "none", title: "N", html: "<p>x</p>" });
+
+    expect(container.querySelectorAll("#help-two .table-responsive > table").length).toBe(2);
+    expect(container.querySelectorAll("#help-none .table-responsive").length).toBe(0);
+  });
+});
+
 describe("attach", () => {
   it("does nothing (and does not throw) when #help-view is absent", async () => {
     await expect(attach()).resolves.toBeUndefined();

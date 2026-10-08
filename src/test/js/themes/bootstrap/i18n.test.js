@@ -143,6 +143,32 @@ describe("languageLabel", () => {
   });
 });
 
+describe("setPageTitle", () => {
+  it("titles a page '<name> - Fess' from page.search_title, or with the site title when no name is given", async () => {
+    vi.resetModules();
+    installFetch(async () => jsonResponse({ "page.title": "Fess Search", "page.search_title": "{0} - Fess" }));
+    setLanguage("en");
+    const m = await import(I18N);
+    await m.init();
+    m.setPageTitle("Help");
+    expect(document.title).toBe("Help - Fess");
+    m.setPageTitle();
+    expect(document.title).toBe("Fess Search");
+    m.setPageTitle("");
+    expect(document.title).toBe("Fess Search");
+  });
+
+  it("puts a name that contains a placeholder-like or $ sequence in as written", async () => {
+    vi.resetModules();
+    installFetch(async () => jsonResponse({ "page.title": "Fess Search", "page.search_title": "{0} - Fess" }));
+    setLanguage("en");
+    const m = await import(I18N);
+    await m.init();
+    m.setPageTitle("$& {0}");
+    expect(document.title).toBe("$& {0} - Fess");
+  });
+});
+
 describe("applyDom", () => {
   it("sets textContent / placeholder / aria-label / alt from data-i18n* keys", () => {
     const root = document.createElement("div");

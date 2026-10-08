@@ -1,6 +1,6 @@
 import * as api from "./api.js";
 import * as i18n from "./i18n.js";
-import { t } from "./i18n.js";
+import { t, setPageTitle } from "./i18n.js";
 import { sanitizeAdminHtml } from "./format.js";
 import * as auth from "./auth.js";
 import * as search from "./search.js";
@@ -505,6 +505,7 @@ export function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("home-view");
+      setPageTitle();
       // JSP parity (index.jsp): home view is re-rendered on every request in the
       // default theme, so all search state is gone.  Replicate that by doing a full
       // silent reset — clears module state, option selects, and both query inputs.
@@ -534,6 +535,7 @@ export function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("profile-view");
+      setPageTitle(t("profile.title"));
       profile.attach();
     }
   );
@@ -546,6 +548,7 @@ export function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("advance-view");
+      setPageTitle(t("advance.title"));
       advance.attach();
     }
   );
@@ -558,6 +561,7 @@ export function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(true);
       showView("help-view");
+      setPageTitle(t("help.title"));
       help.attach();
     }
   );
@@ -569,6 +573,7 @@ export function registerRoutes() {
       setSearchFormVisible(false);
       setChatNavSearchMode(true);
       showView("chat-view");
+      setPageTitle(t("labels.chat_title"));
       chat.attachStandalone();
     }
   );
@@ -582,6 +587,7 @@ export function registerRoutes() {
       setChatNavSearchMode(false);
       setSearchFormVisible(false);
       showView("cache-view");
+      setPageTitle(t("labels.cache_title"));
       cache.attach();
     }
   );
