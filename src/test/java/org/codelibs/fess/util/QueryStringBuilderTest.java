@@ -339,6 +339,84 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         }, "relatedQueryHelper");
     }
 
+    /** A question ends with a question mark, which the query syntax reads as a wildcard. */
+    @Test
+    public void test_trailingQuestionMark_endsAQuestion() {
+        assertEquals("I forgot my password", build("I forgot my password?"));
+        assertEquals("how do I reset my password", build("how do I reset my password?"));
+        assertEquals("how do I reset my password", build("  how do I reset my password?  "));
+        assertEquals("パスワード を 忘れた", build("パスワード を 忘れた?"));
+        assertEquals("パスワード を\u3000忘れた", build("パスワード を\u3000忘れた?"));
+        assertEquals("is it 2024", build("is it 2024?"));
+        assertEquals("what is a", build("what is a?"));
+        assertEquals("I forgot my password sort:score",
+                new QueryStringBuilder().params(createSimpleParams("I forgot my password?")).sortField("score").build());
+        assertEquals("I forgot my password label:\"news\"", getQuery("I forgot my password?", new String[0],
+                Collections.singletonMap("label", new String[] { "news" }), Collections.emptyMap(), false));
+    }
+
+    /** Anything that is not one question mark after a word at the end of two or more words keeps its meaning. */
+    @Test
+    public void test_trailingQuestionMark_otherWildcardsAreKept() {
+        // a single word: te? is a wildcard for tea, ten, ...
+        assertEquals("te?", build("te?"));
+        assertEquals("password?", build("password?"));
+        assertEquals("password?", build("  password?  "));
+        assertEquals("パスワードを忘れた?", build("パスワードを忘れた?"));
+        // not at the end of the query, or not after a word
+        assertEquals("te?t", build("te?t"));
+        assertEquals("pas?word reset", build("pas?word reset"));
+        assertEquals("how do I pas?word", build("how do I pas?word"));
+        assertEquals("pass*", build("pass*"));
+        assertEquals("reset pass*", build("reset pass*"));
+        assertEquals("reset password??", build("reset password??"));
+        assertEquals("reset password ?", build("reset password ?"));
+        assertEquals("reset password?!", build("reset password?!"));
+        assertEquals("\"reset password\"?", build("\"reset password\"?"));
+        assertEquals("reset (password)?", build("reset (password)?"));
+        assertEquals("reset ?", build("reset ?"));
+        assertEquals("? reset", build("? reset"));
+    }
+
+    /** Only the q of a plain search is the user's sentence. */
+    @Test
+    public void test_trailingQuestionMark_onlyThePlainQueryIsChanged() {
+        assertEquals("aaa bbb? ccc ddd?",
+                getQuery("", new String[] { "aaa bbb? ccc ddd?" }, Collections.emptyMap(), Collections.emptyMap(), false));
+        assertEquals("aaa bbb ccc ddd?",
+                getQuery("aaa bbb?", new String[] { "ccc ddd?" }, Collections.emptyMap(), Collections.emptyMap(), false));
+        // an advanced search builds q from its own conditions
+        assertEquals("aaa bbb?", getAsQuery("xxx yyy?", Collections.singletonMap("q", new String[] { "aaa bbb?" })));
+        // as SearchHelper builds the retry of a query the engine rejected
+        assertEquals("aaa bbb", getQuery("aaa bbb?", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+        assertEquals("aaa te\\?t", getQuery("aaa te?t", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
+    }
+
+    /** The related queries are registered for what was typed. */
+    @Test
+    public void test_trailingQuestionMark_relatedQueriesAreLookedUpByWhatWasTyped() {
+        registerRelatedQueries("I forgot my password?", "password reset");
+        assertEquals("(\"I forgot my password\" OR \"password reset\")", build("I forgot my password?"));
+        assertEquals("I forgot my password", build("I forgot my password"));
+    }
+
+    /** What the keyword and the vector halves parse: the question is words, the wildcards are still wildcards. */
+    @Test
+    public void test_trailingQuestionMark_parsedQuery() {
+        final org.codelibs.fess.query.parser.QueryParser parser = new org.codelibs.fess.query.parser.QueryParser();
+        parser.init();
+
+        final org.apache.lucene.search.Query question = parser.parse(build("I forgot my password?"));
+        assertTrue(question instanceof org.apache.lucene.search.BooleanQuery, question.toString());
+        for (final org.apache.lucene.search.BooleanClause clause : ((org.apache.lucene.search.BooleanQuery) question).clauses()) {
+            assertTrue(clause.query() instanceof org.apache.lucene.search.TermQuery, clause.query().toString());
+        }
+
+        assertTrue(parser.parse(build("te?")) instanceof org.apache.lucene.search.WildcardQuery);
+        assertTrue(parser.parse(build("pas?word")) instanceof org.apache.lucene.search.WildcardQuery);
+        assertTrue(parser.parse(build("pass*")) instanceof org.apache.lucene.search.PrefixQuery);
+    }
+
     @Test
     public void test_builderChaining() {
         QueryStringBuilder builder = new QueryStringBuilder();
@@ -356,6 +434,10 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
 
         assertEquals("", getQuery("", new String[] { "", "   " }, Collections.emptyMap(), Collections.emptyMap(), false));
         assertEquals("test", getQuery("", new String[] { "test", "", "   " }, Collections.emptyMap(), Collections.emptyMap(), false));
+    }
+
+    private String build(final String query) {
+        return new QueryStringBuilder().params(createSimpleParams(query)).build();
     }
 
     private SearchRequestParams createSimpleParams(final String query) {
