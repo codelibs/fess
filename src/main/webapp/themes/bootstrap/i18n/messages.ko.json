@@ -20,7 +20,7 @@
   "pagination.next": "다음",
   "pagination.prev": "이전",
   "result.favorite_add": "즐겨찾기 추가",
-  "result.favorite_remove": "즐겨찾기 해제",
+  "result.favorite_added": "즐겨찾기에 추가됨",
   "result.cache": "캐시",
   "result.ask_document": "이 문서에 대해 질문",
   "result.click_count": "{n}회 조회",

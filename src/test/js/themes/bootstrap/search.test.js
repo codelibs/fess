@@ -1307,31 +1307,85 @@ describe("runSearch — facet and pagination click handlers", () => {
 });
 
 describe("runSearch — favorites and similar docs", () => {
-  it("renders the favorite star, syncs favorited state and toggles on click", async () => {
+  // /api/v2 can only add a favorite (POST /documents/{id}/favorite answers a repeat as an
+  // idempotent success; there is no DELETE), so a favorited star is a state, not a toggle.
+  const favoriteDocs = [
+    { doc_id: "d1", title: "T1", url: "https://e.com/1", favorite_count: 2 },
+    { doc_id: "d2", title: "T2", url: "https://e.com/2", favorite_count: 0 },
+  ];
+  const favoriteBtn = (docId) => document.querySelector('li[data-doc-id="' + docId + '"] .favorite-btn');
+  const favoritePosts = () => api.post.mock.calls.filter((c) => c[0].includes("/favorite"));
+
+  async function searchWithFavorites(favorites) {
     api.getConfig.mockReturnValue({ ...FULL_CFG, features: { ...FULL_CFG.features, user_favorite: true } });
     api.isAuthenticated.mockReturnValue(true);
-    installApiDispatch({
-      search: makeSearchEnv([{ doc_id: "d1", title: "T", url: "https://e.com/1", favorite_count: 2 }]),
-      favorites: ["d1"],
-    });
-    api.post.mockResolvedValue({ favorite: false, count: 1 });
+    installApiDispatch({ search: makeSearchEnv(favoriteDocs), favorites });
     mountBody(SEARCH_FIXTURE);
     _state.q = "foo";
     await runSearch();
     await settle();
+  }
 
-    const btn = document.querySelector(".favorite-btn");
-    expect(btn).not.toBeNull();
-    // syncFavorites flipped it to favorited (solid star + pressed).
+  it("offers to add a star that is not a favorite yet", async () => {
+    await searchWithFavorites(["d1"]);
+    const btn = favoriteBtn("d2");
+    expect(btn.getAttribute("aria-pressed")).toBe("false");
+    expect(btn.getAttribute("aria-label")).toBe("result.favorite_add");
+    expect(btn.hasAttribute("aria-disabled")).toBe(false);
+    expect(btn.querySelector("i").className).toBe("far fa-star");
+  });
+
+  it("shows a star the user already favorited as added and sends nothing when it is clicked", async () => {
+    await searchWithFavorites(["d1"]);
+    const btn = favoriteBtn("d1");
+    // syncFavorites flipped it to favorited (solid star + pressed), and it no longer offers
+    // to remove what the API cannot remove.
     expect(btn.getAttribute("aria-pressed")).toBe("true");
+    expect(btn.getAttribute("aria-label")).toBe("result.favorite_added");
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
     expect(btn.querySelector("i").className).toBe("fas fa-star");
-    // Clicking posts to the favorite endpoint.
+    expect(btn.querySelector(".favorite-count").textContent).toBe("2");
     btn.click();
     await settle();
-    const call = api.post.mock.calls.find((c) => c[0].includes("/documents/d1/favorite"));
-    expect(call).toBeTruthy();
-    expect(call[1]).toMatchObject({ query_id: "qid-1" });
+    expect(favoritePosts()).toHaveLength(0);
+    expect(btn.getAttribute("aria-pressed")).toBe("true");
+    expect(btn.getAttribute("aria-label")).toBe("result.favorite_added");
+    // The other row is not affected.
+    expect(favoriteBtn("d2").getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("adds a favorite once: the click posts with the query id, then the star stays added", async () => {
+    await searchWithFavorites([]);
+    api.post.mockResolvedValue({ favorite: true, count: 1 });
+    const btn = favoriteBtn("d2");
+    btn.click();
+    await settle();
+    expect(favoritePosts()).toHaveLength(1);
+    expect(favoritePosts()[0][0]).toContain("/documents/d2/favorite");
+    expect(favoritePosts()[0][1]).toMatchObject({ query_id: "qid-1" });
+    expect(btn.getAttribute("aria-pressed")).toBe("true");
+    expect(btn.getAttribute("aria-label")).toBe("result.favorite_added");
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
+    expect(btn.querySelector("i").className).toBe("fas fa-star");
+    expect(btn.querySelector(".favorite-count").textContent).toBe("1");
+    // A second click neither posts again nor changes the state.
+    btn.click();
+    await settle();
+    expect(favoritePosts()).toHaveLength(1);
+    expect(btn.getAttribute("aria-pressed")).toBe("true");
+    expect(btn.getAttribute("aria-label")).toBe("result.favorite_added");
+  });
+
+  it("keeps offering to add when the server did not add the favorite", async () => {
+    await searchWithFavorites([]);
+    api.post.mockResolvedValue({ favorite: false, count: 0 });
+    const btn = favoriteBtn("d2");
+    btn.click();
+    await settle();
+    expect(favoritePosts()).toHaveLength(1);
     expect(btn.getAttribute("aria-pressed")).toBe("false");
+    expect(btn.getAttribute("aria-label")).toBe("result.favorite_add");
+    expect(btn.hasAttribute("aria-disabled")).toBe(false);
   });
 
   it("shows the similar-doc banner when state.sdh is set and clears it on close", async () => {

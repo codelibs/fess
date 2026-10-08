@@ -20,7 +20,7 @@
   "pagination.next": "Далее",
   "pagination.prev": "Назад",
   "result.favorite_add": "Добавить в избранное",
-  "result.favorite_remove": "Удалить из избранного",
+  "result.favorite_added": "Добавлено в избранное",
   "result.cache": "Кэш",
   "result.ask_document": "Задать вопрос по этому документу",
   "result.click_count": "{n} просмотров",

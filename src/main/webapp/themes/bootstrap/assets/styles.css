@@ -14,6 +14,7 @@ body { padding-top: 4.5rem; }
 .result-card .result-snippet { color: var(--bs-secondary-color); font-size: .95rem; margin-top: .25rem; }
 .result-card .result-meta { font-size: .8rem; color: var(--bs-tertiary-color); margin-top: .5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
 .result-card .favorite-btn[aria-pressed="true"] { color: var(--bs-warning); }
+.favorite-btn[aria-disabled="true"] { cursor: default; }
 .result-thumbnail { width: 96px; height: 96px; object-fit: contain; border: 1px solid var(--bs-border-color, #dee2e6); border-radius: 4px; background: #f8f9fa; flex-shrink: 0; }
 @media (max-width: 576px) {
   .result-thumbnail { width: 64px; height: 64px; }

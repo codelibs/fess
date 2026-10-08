@@ -20,7 +20,7 @@
   "pagination.next": "下一页",
   "pagination.prev": "上一页",
   "result.favorite_add": "添加到收藏",
-  "result.favorite_remove": "取消收藏",
+  "result.favorite_added": "已添加到收藏",
   "result.cache": "缓存",
   "result.ask_document": "就此文档提问",
   "result.click_count": "{n}次浏览",
