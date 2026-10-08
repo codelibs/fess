@@ -1215,6 +1215,30 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
+     * The tag chips must wrap and the remove button must be a tap target: a 50-character tag name
+     * pushed the chip (.badge is nowrap) and the editor past a phone's width, and the cross was
+     * 6x6 px. The rendered sizes are measured in a browser; this guards the rules behind them.
+     */
+    @Test
+    public void test_stylesCss_tagChipsWrapAndRemoveIsATapTarget() throws Exception {
+        final String css = Files.readString(THEME_DIR.resolve("assets/styles.css"), StandardCharsets.UTF_8);
+        final String chip = cssRule(css, ".tag-chip");
+        assertTrue(chip.contains("white-space: normal"), ".tag-chip must override the nowrap of .badge");
+        assertTrue(chip.contains("overflow-wrap: anywhere"), ".tag-chip must break a long name without spaces");
+        assertTrue(chip.contains("max-width: 100%"), ".tag-chip must stay inside its row");
+        assertTrue(cssRule(css, ".tag-addable").contains("overflow-wrap: anywhere"), ".tag-addable must break a long name without spaces");
+        final String remove = cssRule(css, ".tag-remove");
+        assertTrue(remove.contains("width: 24px") && remove.contains("height: 24px"), ".tag-remove must be a 24px target");
+        assertTrue(cssRule(css, ".tag-editor").contains("min-width: 0"), ".tag-editor must be able to shrink below its content");
+    }
+
+    private static String cssRule(final String css, final String selector) {
+        final java.util.regex.Matcher m = Pattern.compile("(?m)^" + Pattern.quote(selector) + " \\{([^}]*)\\}").matcher(css);
+        assertTrue(m.find(), "styles.css must have a rule for " + selector);
+        return m.group(1);
+    }
+
+    /**
      * R4-3: app.js must define syncHeaderOffset() which reads the live header
      * offsetHeight and applies it as body paddingTop (keeps content clear of
      * the fixed-top bar on all viewport sizes and orientations).
