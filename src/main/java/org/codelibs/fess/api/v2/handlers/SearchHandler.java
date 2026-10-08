@@ -116,6 +116,10 @@ public class SearchHandler {
             // Read the facet request now: once the search has started, the main searcher reports any failure,
             // a refused facet parameter included, as an empty partial result instead of an error.
             params.getFacetInfo();
+            // The page size and the start position are read inside the search too, and rank fusion treats a refused
+            // one as a searcher failure: it logs a stack trace and, with engine-side fusion, falls back to Fess.
+            params.getPageSize();
+            params.getStartPosition();
             searchHelper.search(params, data, OptionalThing.empty());
             // A search request rewriter can send the search elsewhere (e.g. a bang to another
             // search engine); the client is told where instead of being given results.
