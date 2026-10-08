@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.api.admin.log;
 
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.getLogFileItems;
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.isLogFilename;
+import static org.codelibs.fess.app.web.admin.log.AdminLogAction.sanitizeFilename;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -74,7 +75,7 @@ public class ApiAdminLogAction extends FessApiAdminAction {
     // GET /api/admin/log/file/{id}
     @Execute
     public StreamResponse get$file(final String id) {
-        final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
+        final String filename = sanitizeFilename(new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8));
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
