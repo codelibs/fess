@@ -15,8 +15,10 @@
  */
 package org.codelibs.fess.rank.fusion;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -25,12 +27,15 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.lucene.search.TotalHits.Relation;
+import org.codelibs.curl.CurlException;
 import org.codelibs.fess.embedding.EmbeddingClientManager;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchCondition;
@@ -550,6 +555,88 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
             } catch (final org.codelibs.fess.exception.InvalidAccessTokenException e) {
                 // expected
             }
+        }
+    }
+
+    @Test
+    public void test_mainSearcherFailure_isADegradedAnswer() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new FailingMainSearcher(searchEngineDown()));
+            processor.init();
+            assertDegraded(processor.search("q", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty()));
+        }
+    }
+
+    @Test
+    public void test_mainSearcherFailure_isADegradedAnswerWithAnotherSearcher() throws Exception {
+        // The shape a search takes when it is not fused in the search engine - a sort, an advanced
+        // search - and the one the engine-side fusion falls back to. It used to answer 0 hits with
+        // partial=false, a complete-looking result, where the single-searcher shape above did not.
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new FailingMainSearcher(searchEngineDown()));
+            processor.register(new TestSubSearcher(0, 0, 0));
+            processor.init();
+            assertDegraded(processor.search("q", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty()));
+        }
+    }
+
+    @Test
+    public void test_mainSearcherFailure_isADegradedAnswerWhenTheSearchIsSorted() throws Exception {
+        givenEngineFusion("");
+        final FailingFusingMainSearcher main = new FailingFusingMainSearcher(searchEngineDown());
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, new EmptyBranchSearcher())) {
+            assertDegraded(processor.search("q", sortedParams(0), OptionalThing.empty()));
+        }
+        assertEquals(0, main.fusedCount.get(), "a sorted search is not fused in the search engine");
+    }
+
+    @Test
+    public void test_mainSearcherFailure_isADegradedAnswerWhenTheFusedSearchFailsToo() throws Exception {
+        // The engine-side fused request fails, Fess falls back to fusing by itself, and the main
+        // searcher fails again there.
+        givenEngineFusion("");
+        final FailingFusingMainSearcher main = new FailingFusingMainSearcher(searchEngineDown());
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, new EmptyBranchSearcher())) {
+            assertDegraded(processor.search("q", fusionParams(0), OptionalThing.empty()));
+        }
+        assertEquals(0, main.fusedCount.get(), "the fused request must have failed");
+    }
+
+    @Test
+    public void test_mainSearcherRefusal_isStillRethrownWithAnotherSearcher() throws Exception {
+        // These say the request was refused, not that the searcher broke, and are not degraded.
+        final RuntimeException[] refusals = { engineError("bad request"), new ResultOffsetExceededException("too deep"),
+                new InvalidAccessTokenException("invalid_token", "The access token is not registered.") };
+        for (final RuntimeException refusal : refusals) {
+            try (RankFusionProcessor processor = new RankFusionProcessor()) {
+                processor.setSearcher(new FailingMainSearcher(refusal));
+                processor.register(new TestSubSearcher(0, 0, 0));
+                processor.init();
+                try {
+                    processor.search("q", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+                    fail(refusal.getClass().getSimpleName());
+                } catch (final RuntimeException e) {
+                    assertSame(refusal, e);
+                }
+            }
+        }
+    }
+
+    /** The failure of the search engine client when the search engine cannot be reached. */
+    private static RuntimeException searchEngineDown() {
+        return new CurlException("Failed to access the content.", new ConnectException("Connection refused"));
+    }
+
+    /** An answer that says the search could not be run: no hits, no exact total, and not complete. */
+    private void assertDegraded(final List<Map<String, Object>> documentItems) {
+        if (documentItems instanceof final QueryResponseList list) {
+            assertEquals(0, list.size());
+            assertEquals(0, list.getAllRecordCount());
+            assertEquals(Relation.GREATER_THAN_OR_EQUAL_TO.toString(), list.getAllRecordCountRelation());
+            assertTrue(list.isPartialResults(), "a search that did not run is not a complete result");
+            assertFalse(list.isTimedOut());
+        } else {
+            fail();
         }
     }
 
@@ -1127,6 +1214,51 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
             searchCount.incrementAndGet();
             return super.search(query, params, userBean);
+        }
+    }
+
+    /** A main searcher whose search fails with the given exception. */
+    static class FailingMainSearcher extends RankFusionSearcher {
+
+        private final RuntimeException failure;
+
+        FailingMainSearcher(final RuntimeException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
+            throw failure;
+        }
+    }
+
+    /** A main searcher that fuses without a search engine, and fails every request it is asked to run. */
+    static class FailingFusingMainSearcher extends FusingMainSearcher {
+
+        private final RuntimeException failure;
+
+        FailingFusingMainSearcher(final RuntimeException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        protected SearchResult execute(final SearchRequestParams params, final SearchCondition<SearchRequestBuilder> condition) {
+            throw failure;
+        }
+    }
+
+    /** A branch that takes part in a fused request and finds nothing. */
+    static class EmptyBranchSearcher extends TestSubSearcher {
+
+        EmptyBranchSearcher() {
+            super(0, 0, 0);
+            name = "empty_branch";
+        }
+
+        @Override
+        protected Optional<QueryBuilder> buildSubQuery(final String query, final SearchRequestParams params,
+                final OptionalThing<FessUserBean> userBean) {
+            return Optional.of(QueryBuilders.matchAllQuery());
         }
     }
 
