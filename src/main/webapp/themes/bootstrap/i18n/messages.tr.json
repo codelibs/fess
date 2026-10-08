@@ -20,7 +20,7 @@
   "pagination.next": "Sonraki",
   "pagination.prev": "Önceki",
   "result.favorite_add": "Favorilere ekle",
-  "result.favorite_remove": "Favorilerden kaldır",
+  "result.favorite_added": "Favorilere eklendi",
   "result.cache": "Önbellek",
   "result.ask_document": "Bu belge hakkında sor",
   "result.click_count": "{n} görüntüleme",

@@ -20,7 +20,7 @@
   "pagination.next": "Avanti",
   "pagination.prev": "Indietro",
   "result.favorite_add": "Aggiungi ai preferiti",
-  "result.favorite_remove": "Rimuovi dai preferiti",
+  "result.favorite_added": "Aggiunto ai preferiti",
   "result.cache": "Cache",
   "result.ask_document": "Chiedi informazioni su questo documento",
   "result.click_count": "{n} visualizzazioni",

@@ -20,7 +20,7 @@
   "pagination.next": "Berikutnya",
   "pagination.prev": "Sebelumnya",
   "result.favorite_add": "Tambah ke favorit",
-  "result.favorite_remove": "Hapus dari favorit",
+  "result.favorite_added": "Ditambahkan ke favorit",
   "result.cache": "Tembolok",
   "result.ask_document": "Tanya tentang dokumen ini",
   "result.click_count": "{n} tayangan",

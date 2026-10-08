@@ -20,7 +20,7 @@
   "pagination.next": "Volgende",
   "pagination.prev": "Vorige",
   "result.favorite_add": "Toevoegen aan favorieten",
-  "result.favorite_remove": "Verwijderen uit favorieten",
+  "result.favorite_added": "Toegevoegd aan favorieten",
   "result.cache": "Cache",
   "result.ask_document": "Vraag over dit document",
   "result.click_count": "{n} weergaven",
