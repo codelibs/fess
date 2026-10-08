@@ -232,6 +232,7 @@
   "aria.footer": "Seitenfußzeile",
   "aria.warning_indicators": "Warnhinweise",
   "aria.auth_controls": "Authentifizierungssteuerungen",
+  "aria.close": "Schließen",
   "labels.eol_error": "Das von Ihnen verwendete System wird nicht mehr unterstützt. Bitte beachten Sie die Seite zum Produkt-Support-Lebenszyklus und führen Sie ein Upgrade durch.",
   "labels.development_mode_warning": "Fess wird im Entwicklungsmodus ausgeführt. Bitte installieren Sie OpenSearch in einer Produktionsumgebung separat.",
   "labels.search_result_status": "Ergebnisse {b1} - {b2} von {b0} für {bq}",

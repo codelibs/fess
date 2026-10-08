@@ -67,6 +67,16 @@ export async function init(preferred) {
 }
 
 /**
+ * Set document.title for a page of the SPA: "<name> - Fess" (the page.search_title pattern the
+ * results page uses) or, without a name, the site title (page.title).
+ *
+ * @param {string} [name] - already translated page name, e.g. t("help.title")
+ */
+export function setPageTitle(name) {
+  document.title = name ? t("page.search_title", [name]) : t("page.title");
+}
+
+/**
  * Translate a message key with optional parameter substitution.
  *
  * Substitution supports two modes:

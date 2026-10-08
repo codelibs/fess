@@ -52,7 +52,15 @@ export function renderSection(container, section) {
   sec.appendChild(h2);
 
   // Sanitize the HTML content before appending to the live DOM.
-  sec.appendChild(sanitizeHtml(section.html));
+  const body = sanitizeHtml(section.html);
+  // A table wider than the viewport scrolls inside its own container instead of the page.
+  body.querySelectorAll("table").forEach(table => {
+    const scroller = document.createElement("div");
+    scroller.className = "table-responsive";
+    table.replaceWith(scroller);
+    scroller.appendChild(table);
+  });
+  sec.appendChild(body);
 
   container.appendChild(sec);
 }

@@ -232,6 +232,7 @@
   "aria.footer": "Sitefooter",
   "aria.warning_indicators": "Waarschuwingsindicatoren",
   "aria.auth_controls": "Authenticatiebesturingen",
+  "aria.close": "Sluiten",
   "labels.eol_error": "Het systeem dat u gebruikt, wordt niet meer ondersteund. Raadpleeg de pagina over de levenscyclus van productondersteuning en voer een upgrade uit.",
   "labels.development_mode_warning": "Fess wordt uitgevoerd in ontwikkelingsmodus. Installeer OpenSearch afzonderlijk in een productieomgeving.",
   "labels.search_result_status": "Zoekresultaten voor {bq} {b1} - {b2} van {b0}",

@@ -232,6 +232,7 @@
   "aria.footer": "Pied de page du site",
   "aria.warning_indicators": "Indicateurs d'avertissement",
   "aria.auth_controls": "Contrôles d'authentification",
+  "aria.close": "Fermer",
   "labels.eol_error": "Le système que vous utilisez n'est plus pris en charge. Veuillez vous référer à la page du cycle de vie du support produit et effectuer une mise à niveau.",
   "labels.development_mode_warning": "Fess s'exécute en mode développement. Veuillez installer OpenSearch séparément dans un environnement de production.",
   "labels.search_result_status": "Résultats {b1} - {b2} sur {b0} pour {bq}",

@@ -232,6 +232,7 @@
   "aria.footer": "사이트 푸터",
   "aria.warning_indicators": "경고 표시",
   "aria.auth_controls": "인증 컨트롤",
+  "aria.close": "닫기",
   "labels.eol_error": "사용 중인 시스템은 지원이 종료되었습니다. 제품 지원 기한 페이지를 참조하여 업그레이드하십시오.",
   "labels.development_mode_warning": "개발 모드로 실행 중입니다. 실제 운영 환경에서는 OpenSearch를 별도로 설치하십시오.",
   "labels.search_result_status": "{bq}의 검색 결과 {b0}건 중 {b1} - {b2}건째",

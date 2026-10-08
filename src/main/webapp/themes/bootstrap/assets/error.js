@@ -2,7 +2,7 @@
 // Error page renderer for the Fess bootstrap SPA.
 // All DOM construction uses createElement/textContent — no innerHTML.
 
-import { t } from "./i18n.js";
+import { t, setPageTitle } from "./i18n.js";
 
 /**
  * Maps URL path segments to HTTP-like status codes.
@@ -189,6 +189,9 @@ export function attach() {
   // code; fall back to URL-path inference when the meta is absent (e.g. during
   // local development or when served outside the theme action).
   const code = readErrorCodeMeta() || codeFromPath(location.pathname);
+
+  // The tab title names the error, like the heading does, minus the heading's closing full stop.
+  setPageTitle(t("error.title_" + code).replace(/[.。।]+$/, ""));
 
   // Read ?url parameter safely via URL API — never concatenate into markup.
   let requestedUrl = null;

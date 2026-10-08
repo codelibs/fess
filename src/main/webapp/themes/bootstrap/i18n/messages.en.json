@@ -232,6 +232,7 @@
   "aria.footer": "Site footer",
   "aria.warning_indicators": "Warning indicators",
   "aria.auth_controls": "Authentication controls",
+  "aria.close": "Close",
   "labels.eol_error": "The system you are using is no longer supported. Please refer to the product support lifecycle page and upgrade.",
   "labels.development_mode_warning": "Fess is running in development mode. See the installation guide for production setup.",
   "labels.search_result_status": "Results {b1} - {b2} of {b0} for {bq}",

@@ -31,6 +31,7 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/api.js", () => ({
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/i18n.js", () => ({
   init: vi.fn(async () => {}),
   t: (k) => k,
+  setPageTitle: vi.fn(),
   applyDom: () => {},
   languageLabel: (v) => v,
   getLocale: () => "en",
@@ -436,6 +437,40 @@ describe("registerRoutes", () => {
     // Fallback handler (last) also lands on the error view.
     calls[calls.length - 1][1]();
     expect(isHidden("error-view")).toBe(false);
+  });
+});
+
+describe("registerRoutes: page titles", () => {
+  it("titles each view with its own name, and the home view with the site title", () => {
+    mountFullDom();
+    router.register.mockClear();
+    registerRoutes();
+    const calls = router.register.mock.calls;
+    // calls[0] error meta (its latch is shared with the last test, so it is not run here), [1] home, [2] results, [3] profile, [4] advance, [5] help, [6] chat, [7] cache, [8] error, [9] fallback
+    const titleOf = (i) => {
+      i18n.setPageTitle.mockClear();
+      calls[i][1]();
+      return i18n.setPageTitle.mock.calls.map(c => c[0]);
+    };
+    expect(titleOf(1)).toEqual([undefined]); // site title
+    expect(titleOf(3)).toEqual(["profile.title"]);
+    expect(titleOf(4)).toEqual(["advance.title"]);
+    expect(titleOf(5)).toEqual(["help.title"]);
+    expect(titleOf(6)).toEqual(["labels.chat_title"]);
+    expect(titleOf(7)).toEqual(["labels.cache_title"]);
+  });
+
+  it("leaves the title of the results view to the search, and of the error views to the error page", () => {
+    mountFullDom();
+    router.register.mockClear();
+    registerRoutes();
+    const calls = router.register.mock.calls;
+    i18n.setPageTitle.mockClear();
+    calls[2][1](); // results: search.runFromUrl titles it with the query
+    calls[8][1](); // /error/*
+    calls[9][1](); // unknown path
+    expect(i18n.setPageTitle).not.toHaveBeenCalled();
+    expect(errorView.attach).toHaveBeenCalled();
   });
 });
 

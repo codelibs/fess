@@ -232,6 +232,7 @@
   "aria.footer": "网站页脚",
   "aria.warning_indicators": "警告指示器",
   "aria.auth_controls": "身份验证控件",
+  "aria.close": "关闭",
   "labels.eol_error": "您的系统已停止支持。请参阅产品支持生命周期页面进行升级。",
   "labels.development_mode_warning": "正在开发模式下运行。请在生产环境中单独安装OpenSearch。",
   "labels.search_result_status": "{bq} 的搜索结果 {b0} 条中的 {b1} - {b2} 条",

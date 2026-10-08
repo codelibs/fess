@@ -3,9 +3,10 @@
 // The real i18n.t() returns the requested key unchanged (messages are empty
 // without init), which lets us assert exactly which i18n key each element uses.
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { codeFromPath, attach } from "../../../../main/webapp/themes/bootstrap/assets/error.js";
 import { resetDom, setLocation } from "../../helpers/dom.js";
+import { installFetch, jsonResponse } from "../../helpers/net.js";
 
 beforeEach(resetDom);
 afterEach(() => setLocation("/"));
@@ -96,5 +97,53 @@ describe("attach", () => {
     document.body.innerHTML = '<div id="error-view"></div>';
     attach();
     expect(document.querySelector("#error-view .error-title").textContent).toBe("error.title_403");
+  });
+});
+
+describe("attach: document title", () => {
+  const I18N = "../../../../main/webapp/themes/bootstrap/assets/i18n.js";
+  const ERROR = "../../../../main/webapp/themes/bootstrap/assets/error.js";
+
+  /** Load a fresh i18n (with messages) and the error module that shares it. */
+  async function withMessages() {
+    vi.resetModules();
+    installFetch(async () => jsonResponse({
+      "page.title": "Fess Search",
+      "page.search_title": "{0} - Fess",
+      "error.title_404": "Page Not Found.",
+      "error.title_500": "System Error",
+      "error.title_429": "Service Temporarily Unavailable",
+      "error.title_403": "ページが見つかりません。",
+    }));
+    const i18n = await import(I18N);
+    await i18n.init("en");
+    return import(ERROR);
+  }
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("names the error, without the heading's closing full stop", async () => {
+    const error = await withMessages();
+    document.body.innerHTML = '<div id="error-view"></div>';
+    setLocation("/error/404");
+    error.attach();
+    expect(document.title).toBe("Page Not Found - Fess");
+  });
+
+  it("follows the code the server marked on the response, and keeps a title that has no full stop", async () => {
+    const error = await withMessages();
+    document.head.innerHTML = '<meta name="x-fess-error-code" content="429">';
+    document.body.innerHTML = '<div id="error-view"></div>';
+    setLocation("/anything");
+    error.attach();
+    expect(document.title).toBe("Service Temporarily Unavailable - Fess");
+  });
+
+  it("drops a closing full stop of any script (。)", async () => {
+    const error = await withMessages();
+    document.head.innerHTML = '<meta name="x-fess-error-code" content="403">';
+    document.body.innerHTML = '<div id="error-view"></div>';
+    error.attach();
+    expect(document.title).toBe("ページが見つかりません - Fess");
   });
 });

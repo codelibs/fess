@@ -232,6 +232,7 @@
   "aria.footer": "Footer situs",
   "aria.warning_indicators": "Indikator peringatan",
   "aria.auth_controls": "Kontrol autentikasi",
+  "aria.close": "Tutup",
   "labels.eol_error": "Sistem yang Anda gunakan tidak lagi didukung. Silakan lihat halaman siklus hidup dukungan produk dan lakukan pembaruan.",
   "labels.development_mode_warning": "Fess berjalan dalam mode pengembangan. Instal OpenSearch secara terpisah di lingkungan produksi.",
   "labels.search_result_status": "Hasil {b1} - {b2} dari {b0} untuk {bq}",

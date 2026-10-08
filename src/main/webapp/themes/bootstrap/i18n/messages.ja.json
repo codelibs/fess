@@ -232,6 +232,7 @@
   "aria.footer": "サイトフッター",
   "aria.warning_indicators": "警告表示",
   "aria.auth_controls": "認証コントロール",
+  "aria.close": "閉じる",
   "labels.eol_error": "ご使用のシステムは既にサポート対象外です。製品のサポートライフサイクルページを確認し、アップグレードしてください。",
   "labels.development_mode_warning": "Fess は開発モードで動作しています。本番環境については、インストールガイドを参照してください。",
   "labels.search_result_status": "{bq} の検索結果 {b0} 件中 {b1} - {b2} 件目",
