@@ -41,7 +41,6 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   clearSearchState: vi.fn(),
   attachSuggest: vi.fn(),
   attachSearchHistory: vi.fn(),
-  disableSubmitBriefly: vi.fn(),
   renderPopularWords: vi.fn(),
   initSearchOptions: vi.fn(),
   forgetNum: vi.fn(),

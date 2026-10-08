@@ -13,7 +13,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   attachSuggest: () => {},
-  disableSubmitBriefly: () => {},
 }));
 vi.mock("../../../../main/webapp/themes/bootstrap/assets/router.js", () => ({
   navigate: vi.fn(),
@@ -282,6 +281,9 @@ describe("attach: submit builds the /search URL", () => {
     expect(p.get("keepme")).toBe("1");
     // advance-owned param removed
     expect(p.has("start")).toBe(false);
+    // the submit button is left enabled: it is the form's default button, and the form is rebuilt
+    // (not reloaded) when the user comes back to it
+    expect(form.querySelector('button[type="submit"]').disabled).toBe(false);
   });
 
   it("renders owner / last-modifier inputs and composes them into q", () => {
