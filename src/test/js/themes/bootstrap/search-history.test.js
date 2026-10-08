@@ -184,6 +184,23 @@ describe("attachSearchHistory", () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it("leaves the keys of an IME composition alone", async () => {
+    const { input, dd } = mount();
+    await open(input);
+    key(input, "ArrowDown");
+    expect(input.getAttribute("aria-activedescendant")).toBe("hq-history-0");
+    for (const init of [{ isComposing: true }, { keyCode: 229 }]) {
+      for (const k of ["ArrowDown", "Enter", "Escape"]) {
+        const ev = new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true, ...init });
+        input.dispatchEvent(ev);
+        expect(ev.defaultPrevented).toBe(false);
+      }
+    }
+    expect(input.getAttribute("aria-activedescendant")).toBe("hq-history-0");
+    expect(dd.classList.contains("d-none")).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it("does not open on focus alone (autofocus, router or skip-link focus)", async () => {
     const { input, dd } = mount();
     input.focus();

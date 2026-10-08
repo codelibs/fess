@@ -1559,6 +1559,19 @@ function searchHistorySummary(entry) {
 }
 
 /**
+ * True for a key event that belongs to an input method editor: while a composition is
+ * open the arrow keys pick a candidate and Enter commits the text, so the suggest and
+ * recent-searches lists must not act on them. Safari reports isComposing=false on the
+ * Enter that ends a composition but still sets keyCode 229.
+ *
+ * @param {KeyboardEvent} ev
+ * @returns {boolean}
+ */
+function isImeKey(ev) {
+  return ev.isComposing || ev.keyCode === 229;
+}
+
+/**
  * Show the logged-in user's recent searches (GET /search-history) in a search box's suggest
  * dropdown when the user clicks the empty box or presses ArrowDown in it, and re-run the chosen
  * one with its conditions through the router. Focus alone does not open the list, so the home
@@ -1644,6 +1657,7 @@ export function attachSearchHistory(input, dropdown) {
   input.addEventListener("click", open);
   input.addEventListener("input", close);
   input.addEventListener("keydown", ev => {
+    if (isImeKey(ev)) return;
     if (!isOpen()) {
       // ArrowDown in the empty box opens the list, unless the suggest already took the key.
       if (ev.key === "ArrowDown" && !ev.defaultPrevented && input.value.trim() === "") {
@@ -2123,6 +2137,7 @@ export function attach() {
       suggestTimer = setTimeout(() => showSuggest(v), 150);
     });
     input.addEventListener("keydown", ev => {
+      if (isImeKey(ev)) return;
       const items = dropdown.querySelectorAll(".list-group-item");
       // The recent-searches list (attachSearchHistory) handles its own keys.
       if (!items.length || dropdown.classList.contains("d-none") || dropdown.querySelector(".search-history-item")) return;
