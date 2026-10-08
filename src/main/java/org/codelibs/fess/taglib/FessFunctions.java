@@ -27,8 +27,11 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
@@ -65,6 +68,12 @@ public class FessFunctions {
 
     /** Format identifier for PDF date parsing */
     private static final String PDF_DATE = "pdf_date";
+
+    /** Schemes a document link may use. The same list as safeHref in the search page's search.js. */
+    private static final Set<String> LINK_SCHEMES = Set.of("http", "https", "ftp", "ftps", "file", "smb", "smb1", "storage", "s3", "gcs");
+
+    /** The scheme at the start of a URL. */
+    private static final Pattern URL_SCHEME = Pattern.compile("^([A-Za-z][A-Za-z0-9+.-]*):");
 
     /**
      * Cache for storing resource file modification timestamps to enable cache busting.
@@ -256,6 +265,32 @@ public class FessFunctions {
             }
         }
         return LaResponseUtil.getResponse().encodeURL(sb.toString());
+    }
+
+    /**
+     * Returns the URL as it is when it can be used as the href of a document link, otherwise "#".
+     * A URL is usable when it has no scheme (a relative URL) or when its scheme is one of the
+     * schemes Fess crawls (http, https, ftp, ftps, file, smb, smb1, storage, s3, gcs). The scheme
+     * is read the way a browser reads it: tabs and line breaks inside the URL and the spaces and
+     * control characters before it are ignored. The result is not HTML-escaped; wrap it with f:h.
+     *
+     * @param url the URL of a document
+     * @return the URL, or "#" if it is blank or uses another scheme (for example javascript:)
+     */
+    public static String safeHref(final String url) {
+        if (StringUtil.isBlank(url)) {
+            return "#";
+        }
+        final String cleaned = url.replaceAll("[\\t\\n\\r]", "");
+        int start = 0;
+        while (start < cleaned.length() && cleaned.charAt(start) <= ' ') {
+            start++;
+        }
+        final Matcher matcher = URL_SCHEME.matcher(cleaned.substring(start));
+        if (matcher.find() && !LINK_SCHEMES.contains(matcher.group(1).toLowerCase(Locale.ROOT))) {
+            return "#";
+        }
+        return url;
     }
 
     /**

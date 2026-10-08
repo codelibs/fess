@@ -105,7 +105,7 @@ ${fe:html(true)}
                                             <c:forEach var="doc" varStatus="s" items="${documentItems}">
                                                 <li class="col-sm-12">
                                                     <h3 class="title">
-                                                        <a href="${doc.url_link}">${doc.content_title}</a>
+                                                        <a href="${f:h(fe:safeHref(doc.url_link))}">${doc.content_title}</a>
                                                     </h3>
                                                     <div class="body col-sm-10">
                                                             ${doc.content_description}

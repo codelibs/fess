@@ -81,6 +81,17 @@
 
   <function>
     <description>
+      Returns the URL of a document when it can be the href of a link (a relative URL, or one whose scheme
+      is http, https, ftp, ftps, file, smb, smb1, storage, s3 or gcs), otherwise "#". Not HTML-escaped.
+    </description>
+    <name>safeHref</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String safeHref(java.lang.String)</function-signature>
+    <example>&lt;a href="${f:h(fe:safeHref(doc.url_link))}" ...</example>
+  </function>
+
+  <function>
+    <description>
       Returns a string resulting from replacing in an input string all occurrences
       of a "before" string into an "after" substring.
     </description>
