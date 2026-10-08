@@ -71,4 +71,49 @@ public class FessFunctionsTest extends UnitFessTestCase {
         // Supplementary code points (here a robot emoji, U+1F916) are emitted as escaped surrogate pairs.
         assertEquals("\\uD83E\\uDD16", FessFunctions.escapeJs("🤖"));
     }
+
+    @Test
+    public void test_safeHref() {
+        // Schemes Fess crawls, and relative URLs, are kept as they are.
+        assertEquals("http://example.com/a?b=c#d", FessFunctions.safeHref("http://example.com/a?b=c#d"));
+        assertEquals("https://example.com/", FessFunctions.safeHref("https://example.com/"));
+        assertEquals("HTTP://example.com/", FessFunctions.safeHref("HTTP://example.com/"));
+        assertEquals("ftp://example.com/a.txt", FessFunctions.safeHref("ftp://example.com/a.txt"));
+        assertEquals("file:///srv/docs/a.txt", FessFunctions.safeHref("file:///srv/docs/a.txt"));
+        assertEquals("smb://host/share/a.txt", FessFunctions.safeHref("smb://host/share/a.txt"));
+        assertEquals("smb1://host/share/a.txt", FessFunctions.safeHref("smb1://host/share/a.txt"));
+        assertEquals("s3://bucket/key", FessFunctions.safeHref("s3://bucket/key"));
+        assertEquals("gcs://bucket/key", FessFunctions.safeHref("gcs://bucket/key"));
+        assertEquals("storage://bucket/key", FessFunctions.safeHref("storage://bucket/key"));
+        assertEquals("/path/to/doc.html", FessFunctions.safeHref("/path/to/doc.html"));
+        assertEquals("doc.html?a=b:c", FessFunctions.safeHref("doc.html?a=b:c"));
+        assertEquals("//example.com/doc.html", FessFunctions.safeHref("//example.com/doc.html"));
+        assertEquals("#not-found-abc", FessFunctions.safeHref("#not-found-abc"));
+
+        // Any other scheme becomes "#".
+        assertEquals("#", FessFunctions.safeHref("javascript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("JavaScript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("data:text/html,<p>a</p>"));
+        assertEquals("#", FessFunctions.safeHref("vbscript:msgbox(1)"));
+        assertEquals("#", FessFunctions.safeHref("blob:http://example.com/1"));
+        assertEquals("#", FessFunctions.safeHref("mailto:a@example.com"));
+
+        // The scheme is read the way a browser reads it.
+        assertEquals("#", FessFunctions.safeHref("java\tscript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("java\nscript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("jav\r\nascript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref(" javascript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("\u0001javascript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("\t\n javascript:window.x=1"));
+        assertEquals("#", FessFunctions.safeHref("htt\tp-x://example.com/"));
+
+        // A colon that is not the end of a scheme does not make the URL unsafe.
+        assertEquals("a b:c", FessFunctions.safeHref("a b:c"));
+        assertEquals("1http:x", FessFunctions.safeHref("1http:x"));
+
+        // Nothing to link to.
+        assertEquals("#", FessFunctions.safeHref(null));
+        assertEquals("#", FessFunctions.safeHref(""));
+        assertEquals("#", FessFunctions.safeHref("   "));
+    }
 }
