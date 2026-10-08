@@ -33,12 +33,16 @@ public class FessUrlQueueServiceTest extends UnitFessTestCase {
 
     /** Resolves the order for a fixed crawl.order value without touching a crawling config. */
     private static class TestFessUrlQueueService extends FessUrlQueueService {
-        private final String crawlOrder;
+        private String crawlOrder;
 
         TestFessUrlQueueService(final String crawlOrder) {
             // OpenSearchUrlQueueService's constructor reads getQueueIndex(), so a real config
             // is required; its default (".crawler.queue") is never queried by these tests.
             super(new OpenSearchCrawlerConfig());
+            this.crawlOrder = crawlOrder;
+        }
+
+        void setCrawlOrder(final String crawlOrder) {
             this.crawlOrder = crawlOrder;
         }
 
@@ -84,33 +88,60 @@ public class FessUrlQueueServiceTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_invalidNameIsReportedOnEveryResolution() {
+    public void test_invalidNameIsReportedOnceNotPerPoll() {
         final TestFessUrlQueueService service = new TestFessUrlQueueService("noSuchOrder");
         final LogCapturingAppender appender = LogCapturingAppender.attach(FessUrlQueueService.class.getName(), Level.INFO);
         try {
-            for (int i = 0; i < 3; i++) {
+            // getUrlQueueOrder runs once per queue poll; the warning must not.
+            for (int i = 0; i < 5; i++) {
                 assertTrue(service.getUrlQueueOrder("s1") instanceof SequentialUrlQueueOrder);
             }
             final List<LogEvent> warns = appender.eventsAt(Level.WARN);
-            assertEquals(3, warns.size());
-            for (final LogEvent event : warns) {
-                assertTrue(event.getMessage().getFormattedMessage().contains("noSuchOrder"));
-                assertNull(event.getThrown(), "the stack trace is only for DEBUG");
-            }
+            assertEquals(1, warns.size(), appender.warnings().toString());
+            assertTrue(warns.get(0).getMessage().getFormattedMessage().contains("noSuchOrder"));
+            assertNull(warns.get(0).getThrown(), "the stack trace is only for DEBUG");
         } finally {
             appender.detach();
         }
     }
 
     @Test
-    public void test_invalidNameCarriesStackTraceAtDebug() {
+    public void test_changedInvalidValueIsReportedAgain() {
+        final TestFessUrlQueueService service = new TestFessUrlQueueService("noSuchOrder");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessUrlQueueService.class.getName(), Level.INFO);
+        try {
+            service.getUrlQueueOrder("s1");
+            service.setCrawlOrder("otherOrder");
+            service.getUrlQueueOrder("s1");
+            service.getUrlQueueOrder("s1");
+            // Each distinct bad value is reported once; going back to a value already reported is not.
+            service.setCrawlOrder("noSuchOrder");
+            service.getUrlQueueOrder("s1");
+            final List<String> warnings = appender.warnings();
+            assertEquals(2, warnings.size(), warnings.toString());
+            assertTrue(warnings.get(0).contains("noSuchOrder"), warnings.get(0));
+            assertTrue(warnings.get(1).contains("otherOrder"), warnings.get(1));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_invalidNameDetailIsLoggedAtDebugWithTheWarn() {
         final TestFessUrlQueueService service = new TestFessUrlQueueService("noSuchOrder");
         final LogCapturingAppender appender = LogCapturingAppender.attach(FessUrlQueueService.class.getName(), Level.DEBUG);
         try {
-            service.getUrlQueueOrder("s1");
-            final List<LogEvent> warns = appender.eventsAt(Level.WARN);
-            assertEquals(1, warns.size());
-            assertNotNull(warns.get(0).getThrown());
+            for (int i = 0; i < 3; i++) {
+                service.getUrlQueueOrder("s1");
+            }
+            assertEquals(1, appender.eventsAt(Level.WARN).size());
+            // The detail goes out only with the WARN, never once per poll.
+            final List<LogEvent> details = appender.eventsAt(Level.DEBUG)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("Failed to resolve crawl order component"))
+                    .toList();
+            assertEquals(1, details.size());
+            assertNotNull(details.get(0).getThrown());
         } finally {
             appender.detach();
         }
@@ -121,5 +152,21 @@ public class FessUrlQueueServiceTest extends UnitFessTestCase {
         // systemProperties is a registered component (test_app.xml) that is not a UrlQueueOrder.
         final UrlQueueOrder order = new TestFessUrlQueueService("systemProperties").getUrlQueueOrder("s1");
         assertTrue(order instanceof SequentialUrlQueueOrder);
+    }
+
+    @Test
+    public void test_wrongTypeIsReportedOnceNotPerPoll() {
+        final TestFessUrlQueueService service = new TestFessUrlQueueService("systemProperties");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(FessUrlQueueService.class.getName(), Level.INFO);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertTrue(service.getUrlQueueOrder("s1") instanceof SequentialUrlQueueOrder);
+            }
+            final List<String> warnings = appender.warnings();
+            assertEquals(1, warnings.size(), warnings.toString());
+            assertTrue(warnings.get(0).contains("Component systemProperties is not a UrlQueueOrder"), warnings.get(0));
+        } finally {
+            appender.detach();
+        }
     }
 }

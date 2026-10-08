@@ -286,9 +286,12 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_substitutePlaceholders_repeatedInvalidValue_warnsOnEveryCall() {
-        // No latch: an invalid value is reported every time it is read, so a value that is fixed
-        // and later broken again is reported again without a restart.
+    public void test_substitutePlaceholders_repeatedInvalidValue_warnsOnlyOnce() {
+        // WARN-amplification guard: getKnnConfigToken/getKnnConfigPositiveInt are also reached from
+        // the query path (SemanticChunkSearcher#resolveEngineMinScore) on every ann-mode search
+        // request with no caching of their own, so the same invalid key=value combination must not
+        // re-WARN on every call -- otherwise tightening the allow-sets above would make a single
+        // stale misconfiguration far noisier than before.
         ComponentUtil.getFessConfig().setSystemProperty("content_chunker.search.knn.engine", "not-a-real-engine");
         final SearchEngineClient client = new SearchEngineClient();
         final String source = "{\"engine\":\"${fess.content_chunker.search.knn.engine}\"}";
@@ -300,7 +303,41 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
             client.substitutePlaceholders(source, "5", "0-1");
 
             final long matchingWarnings = capture.warnings().stream().filter(m -> m.contains("content_chunker.search.knn.engine")).count();
-            assertEquals(3, (int) matchingWarnings, "every read of the invalid value must WARN: " + capture.warnings());
+            assertEquals(1, (int) matchingWarnings, "the same invalid value must WARN only once: " + capture.warnings());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_substitutePlaceholders_changedInvalidValueAndOtherKeys_warnSeparately() {
+        // The guard is keyed on key=value: a different bad value for the same key is a new
+        // misconfiguration and is reported, and another key is independent of both.
+        final SearchEngineClient client = new SearchEngineClient();
+        final String engineSource = "{\"engine\":\"${fess.content_chunker.search.knn.engine}\"}";
+        final String dimensionSource = "{\"dimension\":\"${fess.content_chunker.embedding.dimension}\"}";
+        final LogCapturingAppender capture = LogCapturingAppender.attach(ChunkVectorHelper.class);
+
+        try {
+            ComponentUtil.getFessConfig().setSystemProperty("content_chunker.search.knn.engine", "not-a-real-engine");
+            client.substitutePlaceholders(engineSource, "5", "0-1");
+            client.substitutePlaceholders(engineSource, "5", "0-1");
+            ComponentUtil.getFessConfig().setSystemProperty("content_chunker.search.knn.engine", "another-bad-engine");
+            client.substitutePlaceholders(engineSource, "5", "0-1");
+            client.substitutePlaceholders(engineSource, "5", "0-1");
+            ComponentUtil.getFessConfig().setSystemProperty("content_chunker.embedding.dimension", "not-a-number");
+            client.substitutePlaceholders(dimensionSource, "5", "0-1");
+            client.substitutePlaceholders(dimensionSource, "5", "0-1");
+
+            final List<String> engineWarnings =
+                    capture.warnings().stream().filter(m -> m.contains("content_chunker.search.knn.engine")).toList();
+            assertEquals(2, engineWarnings.size(), capture.warnings().toString());
+            assertTrue(engineWarnings.get(0).contains("not-a-real-engine"), engineWarnings.get(0));
+            assertTrue(engineWarnings.get(1).contains("another-bad-engine"), engineWarnings.get(1));
+            final List<String> dimensionWarnings =
+                    capture.warnings().stream().filter(m -> m.contains("content_chunker.embedding.dimension")).toList();
+            assertEquals(1, dimensionWarnings.size(), capture.warnings().toString());
+            assertTrue(dimensionWarnings.get(0).contains("not-a-number"), dimensionWarnings.get(0));
         } finally {
             capture.detach();
         }

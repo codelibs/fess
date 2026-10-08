@@ -27,6 +27,7 @@ import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 
 /**
  * Fess-specific URL queue service that selects the fetch order named by the
@@ -69,17 +70,19 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
             return super.getUrlQueueOrder(sessionId);
         }
         final String name = LEGACY_ORDER_NAMES.getOrDefault(configured, configured);
+        // The order is resolved on every queue poll, so each bad crawl.order value is reported
+        // once (the crawler is its own process per crawl, so once per crawl) rather than per poll;
+        // a changed bad value is a different key and is reported again.
         try {
             final Object component = ComponentUtil.getComponent(name);
             if (component instanceof UrlQueueOrder) {
                 return (UrlQueueOrder) component;
             }
-            logger.warn("Component {} is not a UrlQueueOrder. Falling back to the default order.", name);
+            LogUtil.warnOnce(logger, configured, "Component {} is not a UrlQueueOrder. Falling back to the default order.", name);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.warn("Invalid crawl order specified: {}. Falling back to the default order.", configured, e);
-            } else {
-                logger.warn("Invalid crawl order specified: {}. Falling back to the default order. {}", configured, e.getMessage());
+            if (LogUtil.warnOnce(logger, configured, "Invalid crawl order specified: {}. Falling back to the default order.", configured)
+                    && logger.isDebugEnabled()) {
+                logger.debug("Failed to resolve crawl order component: {}", name, e);
             }
         }
         return super.getUrlQueueOrder(sessionId);

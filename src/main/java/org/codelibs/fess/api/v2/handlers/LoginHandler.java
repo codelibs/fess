@@ -454,11 +454,9 @@ public class LoginHandler {
         try {
             return ComponentUtil.getRateLimitHelper().getClientIp(req);
         } catch (final RuntimeException e) {
-            if (logger.isDebugEnabled()) {
-                logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr", e);
-            } else {
-                logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr: {}", e.getMessage());
-            }
+            // Only the first failure per JVM is logged: the login endpoint is anonymous and reached on
+            // every attempt, so a line per attempt would be a log a client can fill.
+            LogUtil.warnOnce(logger, "rateLimitHelper", "RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr", e);
             return req.getRemoteAddr();
         }
     }

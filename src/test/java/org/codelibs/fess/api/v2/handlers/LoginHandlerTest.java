@@ -732,7 +732,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
     // ── M-2: reverse-proxy / client IP resolution ───────────────────────────────
 
     @Test
-    public void login_clientIpResolveFailure_warnsOnEveryRequest() throws Exception {
+    public void login_clientIpResolveFailure_warnsOnlyOnce() throws Exception {
         // The component map is cleared after each test, so the stub needs no restore.
         ComponentUtil.register(new RateLimitHelper() {
             @Override
@@ -742,7 +742,7 @@ public class LoginHandlerTest extends UnitFessTestCase {
         }, "rateLimitHelper");
         final LogCapturingAppender appender = LogCapturingAppender.attach(LoginHandler.class.getName(), Level.INFO);
         try {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 3; i++) {
                 new LoginHandler(new LoginRateLimiter()).handle(
                         new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"u\",\"password\":\"p\"}"),
                         new CapturingResponse());
@@ -751,11 +751,11 @@ public class LoginHandlerTest extends UnitFessTestCase {
                     .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("RateLimitHelper.getClientIp unavailable"))
                     .toList();
-            assertEquals(2, warns.size());
-            warns.forEach(e -> {
-                assertTrue(e.getMessage().getFormattedMessage().contains("helper broken"));
-                assertNull(e.getThrown(), "the stack trace is only for DEBUG");
-            });
+            // UnitFessTestCase starts every test with the once-only state cleared, so the first
+            // failure is the one that logs, with the cause, and the other two stay silent.
+            assertEquals(1, warns.size(), "only the first failure may WARN: " + warns.size());
+            assertNotNull(warns.get(0).getThrown(), "the first failure carries the exception");
+            assertTrue(warns.get(0).getThrown().getMessage().contains("helper broken"));
         } finally {
             appender.detach();
         }

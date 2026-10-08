@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequestImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -101,8 +102,12 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
         return new MockletHttpServletRequestImpl(getMockRequest().getServletContext(), servletPath);
     }
 
-    /** Asks a new, empty factory for each of {@code servletPaths} in turn and returns the WARN lines it logged. */
+    /**
+     * Asks a new, empty factory for each of {@code servletPaths} in turn and returns the WARN lines it logged.
+     * What was reported is remembered JVM-wide, so each call starts from a clean slate to stand for a new deployment.
+     */
     private List<String> warnLinesFor(final String... servletPaths) {
+        LogUtil.resetWarnOnce();
         return warnLinesFor(new WebApiManagerFactory(), servletPaths);
     }
 

@@ -42,6 +42,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
@@ -674,8 +675,10 @@ public class ChunkVectorHelper {
 
     /**
      * Reads a token-style knn query-time config value, rejecting anything outside the allowed set.
-     * WARNs on every call that reads an invalid value, which on the query path means every
-     * ann-mode search request until the value is fixed.
+     * WARNs at most once per distinct invalid {@code key=value} combination, since this is
+     * reached from the query path on every ann-mode search request, anonymous ones included, with
+     * no caching of its own. A changed bad value is a new combination and is reported again; a
+     * value that is fixed and later broken again to the same text is not.
      *
      * @param key the system property key
      * @param defaultValue the fallback value
@@ -685,7 +688,7 @@ public class ChunkVectorHelper {
     protected String getKnnConfigToken(final String key, final String defaultValue, final Set<String> allowedValues) {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(key, defaultValue);
         if (value == null || !allowedValues.contains(value)) {
-            logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+            LogUtil.warnOnce(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
             return defaultValue;
         }
         return value;
@@ -718,8 +721,8 @@ public class ChunkVectorHelper {
      * "dimension": ""}, a non-numeric value, or a value the k-NN plugin itself rejects (e.g. above
      * its own {@link #MAX_KNN_DIMENSION} cap) would all 400 at {@code preparePutMapping}, which
      * {@code SearchEngineClient#addMapping} only surfaces as a single WARN, silently leaving the
-     * index with no proper mapping. WARNs on every call that reads an invalid value, matching
-     * {@link #getKnnConfigToken(String, String, Set)}.
+     * index with no proper mapping. WARNs at most once per distinct invalid {@code key=value}
+     * combination, matching {@link #getKnnConfigToken(String, String, Set)}.
      *
      * @param key the system property key
      * @param defaultValue the fallback value, itself a valid positive integer string within bounds
@@ -739,7 +742,7 @@ public class ChunkVectorHelper {
                 // fall through to the warn+default below
             }
         }
-        logger.warn("[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+        LogUtil.warnOnce(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
         return defaultValue;
     }
 

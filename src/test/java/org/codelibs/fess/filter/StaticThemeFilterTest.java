@@ -545,44 +545,81 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         assertFalse(stub.servedAsset);
     }
 
-    // --- E-2: a component lookup failure is reported on every request, never latched ---
+    // --- E-2: a component lookup failure is WARNed once per component, then degrades to DEBUG ---
+
+    private static List<LogEvent> eventsAbout(final LogCapturingAppender appender, final Level level, final String component) {
+        return appender.eventsAt(level).stream().filter(e -> e.getMessage().getFormattedMessage().contains(component)).toList();
+    }
 
     @Test
-    public void test_registryUnavailable_warnsOnEveryRequest() throws Exception {
+    public void test_registryUnavailable_warnsOnlyOnce() throws Exception {
         // When themeRegistry is NOT injected via setThemeRegistry() the filter falls
         // through to ComponentUtil.getThemeRegistry(), which throws in the slim test
-        // harness. Every request that hits the failure is reported, as a one-line WARN
-        // without the stack trace unless DEBUG is enabled.
+        // harness. The first failure is a WARN carrying the exception; later requests that
+        // hit the same failure add nothing at WARN no matter how many arrive.
         final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class.getName(), Level.INFO);
         try {
             final StaticThemeFilter f = new StaticThemeFilter();
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 5; i++) {
                 final StubChain chain = new StubChain();
                 f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), chain);
                 assertTrue(chain.called, "filter must pass through when registry is unavailable");
             }
-            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
-                    .stream()
-                    .filter(e -> e.getMessage().getFormattedMessage().contains("ThemeRegistry"))
-                    .toList();
-            org.junit.jupiter.api.Assertions.assertEquals(3, warns.size(), "every request must WARN; got " + warns.size());
-            warns.forEach(e -> assertNull(e.getThrown(), "the stack trace is only for DEBUG"));
+            final List<LogEvent> warns = eventsAbout(appender, Level.WARN, "ThemeRegistry");
+            org.junit.jupiter.api.Assertions.assertEquals(1, warns.size(),
+                    "exactly 1 WARN must be emitted for ThemeRegistry unavailable across 5 requests; got " + warns.size());
+            assertNotNull(warns.get(0).getThrown(), "the first failure carries the exception");
+
+            // What was reported is remembered JVM-wide (a redeploy reloads the class and starts
+            // over), so another filter instance does not report the same failure again.
+            new StaticThemeFilter().doFilter(new StubRequest("GET", "/search"), new StubResponse(), new StubChain());
+            org.junit.jupiter.api.Assertions.assertEquals(1, eventsAbout(appender, Level.WARN, "ThemeRegistry").size());
         } finally {
             appender.detach();
         }
     }
 
     @Test
-    public void test_registryUnavailable_carriesStackTraceAtDebug() throws Exception {
+    public void test_registryUnavailable_laterFailuresDegradeToDebug() throws Exception {
         final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class.getName(), Level.DEBUG);
         try {
-            new StaticThemeFilter().doFilter(new StubRequest("GET", "/search"), new StubResponse(), new StubChain());
-            final List<LogEvent> warns = appender.eventsAt(Level.WARN)
-                    .stream()
-                    .filter(e -> e.getMessage().getFormattedMessage().contains("ThemeRegistry"))
-                    .toList();
-            org.junit.jupiter.api.Assertions.assertEquals(1, warns.size());
-            assertNotNull(warns.get(0).getThrown());
+            final StaticThemeFilter f = new StaticThemeFilter();
+            for (int i = 0; i < 3; i++) {
+                f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), new StubChain());
+            }
+            org.junit.jupiter.api.Assertions.assertEquals(1, eventsAbout(appender, Level.WARN, "ThemeRegistry").size());
+            final List<LogEvent> debugs = eventsAbout(appender, Level.DEBUG, "ThemeRegistry not available");
+            org.junit.jupiter.api.Assertions.assertEquals(2, debugs.size(), "the two later failures are logged at DEBUG");
+            debugs.forEach(e -> assertNotNull(e.getThrown(), "the DEBUG line carries the exception"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_eachComponentLookupFailureIsWarnedOnceIndependently() throws Exception {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(StaticThemeFilter.class.getName(), Level.INFO);
+        try {
+            final StaticThemeFilter f = new StaticThemeFilter();
+            // Nothing injected: only the ThemeRegistry lookup is reached, and it fails.
+            for (int i = 0; i < 3; i++) {
+                f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), new StubChain());
+            }
+            // An active theme but no responder: the VirtualHostHelper and StaticThemeResponder
+            // lookups are reached, and fail in the slim test harness. The ThemeRegistry latch
+            // having been used up must not silence them.
+            f.setThemeRegistry(new StubRegistry(new Theme("t", Paths.get("/tmp/t"), null)));
+            for (int i = 0; i < 3; i++) {
+                final StubChain chain = new StubChain();
+                f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), chain);
+                assertTrue(chain.called, "filter must pass through when the responder is unavailable");
+            }
+            for (final String component : new String[] { "ThemeRegistry", "VirtualHostHelper", "StaticThemeResponder" }) {
+                final List<LogEvent> warns = eventsAbout(appender, Level.WARN, component);
+                org.junit.jupiter.api.Assertions.assertEquals(1, warns.size(),
+                        component + " must WARN exactly once: " + appender.warnings());
+                assertNotNull(warns.get(0).getThrown(), component + ": the first failure carries the exception");
+            }
         } finally {
             appender.detach();
         }

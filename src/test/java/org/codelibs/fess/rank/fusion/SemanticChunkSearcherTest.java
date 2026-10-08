@@ -271,25 +271,42 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_resolveEngineMinScore_warnsOnEveryNonCosineCall() {
-        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper() {
-            @Override
-            public String getKnnSpaceType() {
-                return "l2";
-            }
-        }, org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
+    public void test_resolveEngineMinScore_warnsOncePerSpaceType() {
+        registerSpaceType("l2");
         final LogCapturingAppender appender = LogCapturingAppender.attach(SemanticChunkSearcher.class);
         try {
+            // resolved on every ann-mode search: the same skipped cutoff is reported once, not per query
+            for (int i = 0; i < 3; i++) {
+                assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
+            }
+            List<String> warnings =
+                    appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("cannot be applied to space_type=")).toList();
+            assertEquals(1, warnings.size(), appender.messagesAt(Level.WARN).toString());
+            assertTrue(warnings.get(0).contains("space_type=l2"), warnings.get(0));
+
+            // a different space type is a new condition and is reported; one already reported is not
+            registerSpaceType("innerproduct");
             assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
             assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
-            final List<String> warnings =
-                    appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("cannot be applied to space_type=l2")).toList();
+            registerSpaceType("l2");
+            assertFalse(searcher.resolveEngineMinScore(0.4f, true).isPresent());
+            warnings = appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("cannot be applied to space_type=")).toList();
             assertEquals(2, warnings.size(), appender.messagesAt(Level.WARN).toString());
+            assertTrue(warnings.get(1).contains("space_type=innerproduct"), warnings.get(1));
         } finally {
             appender.detach();
             org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper(),
                     org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
         }
+    }
+
+    private static void registerSpaceType(final String spaceType) {
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.ChunkVectorHelper() {
+            @Override
+            public String getKnnSpaceType() {
+                return spaceType;
+            }
+        }, org.codelibs.fess.helper.ChunkVectorHelper.class.getCanonicalName());
     }
 
     @Test
@@ -716,20 +733,41 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     //                                                                      ----------------
 
     @Test
-    public void test_search_logsExactModeAtDebugOnEveryQuery() {
+    public void test_search_warnsOnceWhenExactModeIsUsed() {
         final LogCapturingAppender appender = LogCapturingAppender.attach(SemanticChunkSearcher.class);
         try {
             final GuardedSearcher guarded = new EmptyResponseSearcher();
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 3; i++) {
                 guarded.search("plain query", new StubSearchRequestParams(0, 10), OptionalThing.empty());
             }
-            assertTrue(appender.messagesAt(Level.WARN).stream().noneMatch(m -> m.contains("exact vector scan")),
-                    "the exact mode is a per-query notice, not a WARN: " + appender.messagesAt(Level.WARN));
+            final List<String> exactWarnings =
+                    appender.messagesAt(Level.WARN).stream().filter(m -> m.contains("exact vector scan")).toList();
+            assertEquals(1, exactWarnings.size(), "the exact-mode fallback must warn exactly once: " + appender.messagesAt(Level.WARN));
+            assertTrue(exactWarnings.get(0).contains("content_chunker.search.enabled"),
+                    "the warning must name the remedy: " + exactWarnings.get(0));
+            // the queries after the first stay visible at DEBUG
             final List<String> exactNotices =
-                    appender.messagesAt(Level.DEBUG).stream().filter(m -> m.contains("exact vector scan")).toList();
-            assertEquals(2, exactNotices.size(), "every exact-mode query must be logged: " + appender.messagesAt(Level.DEBUG));
-            assertTrue(exactNotices.get(0).contains("content_chunker.search.enabled"),
-                    "the notice must name the remedy: " + exactNotices.get(0));
+                    appender.messagesAt(Level.DEBUG).stream().filter(m -> m.contains("still using the exact vector scan")).toList();
+            assertEquals(2, exactNotices.size(), appender.messagesAt(Level.DEBUG).toString());
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_warnExactModeOnce_isNotRearmedWhenAnnModeReturns() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SemanticChunkSearcher.class);
+        try {
+            searcher.warnExactModeOnce(true);
+            assertTrue(appender.events().isEmpty(), "ann mode says nothing: " + appender.renderedEvents());
+            searcher.warnExactModeOnce(false);
+            assertEquals(1, appender.eventsAt(Level.WARN).size(), appender.renderedEvents().toString());
+            // warnOnce has no way to report a key again: a regression after the ann mode was
+            // available again is reported at DEBUG only
+            searcher.warnExactModeOnce(true);
+            searcher.warnExactModeOnce(false);
+            assertEquals(1, appender.eventsAt(Level.WARN).size(), appender.renderedEvents().toString());
+            assertEquals(1, appender.messagesAt(Level.DEBUG).stream().filter(m -> m.contains("still using the exact vector scan")).count());
         } finally {
             appender.detach();
         }

@@ -25,7 +25,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 
@@ -48,16 +48,6 @@ public class SsoManager {
 
     /** List of registered SSO authenticators. */
     protected final List<SsoAuthenticator> authenticatorList = new ArrayList<>();
-
-    /**
-     * The {@code sso.type} values already reported as unserved, so that each one is logged once
-     * rather than once per request.
-     *
-     * <p>{@code /sso/} is anonymous, and the same miss is hit on every visit to it, so a warning
-     * per attempt is a log an unauthenticated client can fill. What it remembers is bounded by the
-     * number of distinct values the setting has held for the life of the JVM, which is one.</p>
-     */
-    protected final LogOnce unservedSsoTypes = new LogOnce();
 
     /**
      * Default constructor for creating a new SsoManager instance.
@@ -180,6 +170,11 @@ public class SsoManager {
      * {@code none} are the states of a deployment that does not use SSO at all and say nothing --
      * {@code /sso/} is reachable whether or not it is configured.</p>
      *
+     * <p>Each {@code sso.type} value is reported once rather than once per request:
+     * {@code /sso/} is anonymous, and the same miss is hit on every visit to it, so a warning per
+     * attempt is a log an unauthenticated client can fill. What is remembered is bounded by the
+     * number of distinct values the setting has held for the life of the JVM, which is one.</p>
+     *
      * @param ssoType the configured type, after the legacy {@code aad} mapping
      * @param componentName the component name it resolved to
      */
@@ -187,7 +182,7 @@ public class SsoManager {
         if (StringUtil.isBlank(ssoType) || Constants.NONE.equals(ssoType)) {
             return;
         }
-        unservedSsoTypes.warn(logger, ssoType,
+        LogUtil.warnOnce(logger, ssoType,
                 "No SSO authenticator is registered as {} for sso.type={}. Every authenticator ships as a fess-sso-* plugin: "
                         + "install fess-sso-saml for saml, fess-sso-spnego for spnego, fess-sso-entraid for entraid "
                         + "(or the legacy aad), or fess-sso-oidc for oic. Until then every request to /sso/ is redirected "
