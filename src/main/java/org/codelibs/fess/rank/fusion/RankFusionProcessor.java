@@ -445,7 +445,10 @@ public class RankFusionProcessor implements AutoCloseable {
             throw e;
         } catch (final Exception e) {
             logger.warn("Search operation failed with exception", e);
-            results[0] = SearchResult.create().build();
+            // The search did not run, so the answer is partial, and its zero total stays a lower
+            // bound (the default relation), as createDegradedResponseList reports it. An empty
+            // result that is not flagged reads as a complete search that found nothing.
+            results[0] = SearchResult.create().partialResults(true).build();
         }
         boolean searcherTimedOut = false;
         for (int i = 1; i < searchers.length; i++) {
