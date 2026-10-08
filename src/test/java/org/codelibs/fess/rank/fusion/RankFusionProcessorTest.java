@@ -925,6 +925,85 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         assertEquals(2, semantic.embedCount.get(), "the embedding of one request is not another request's");
     }
 
+    @Test
+    public void test_capacityRejection_ofTheMainSearcher_isRethrown() throws Exception {
+        // The search engine is out of capacity, not the searcher broken: answering a degraded 200
+        // would hide it from a caller that can retry.
+        final RuntimeException rejection = capacityRejection();
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(searcherThrowing(rejection));
+            processor.init();
+            assertRejectionReachesTheCaller(processor, rejection, new TestSearchRequestParams(0, 10, 0));
+        }
+    }
+
+    @Test
+    public void test_capacityRejection_ofTheMainSearcher_isRethrownWithAnotherSearcher() throws Exception {
+        final RuntimeException rejection = capacityRejection();
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(searcherThrowing(rejection));
+            processor.register(new TestSubSearcher(0, 0, 0));
+            processor.init();
+            assertRejectionReachesTheCaller(processor, rejection, new TestSearchRequestParams(0, 10, 0));
+        }
+    }
+
+    @Test
+    public void test_capacityRejection_ofAnotherSearcher_isRethrown() throws Exception {
+        final RuntimeException rejection = capacityRejection();
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            processor.setSearcher(new TestMainSearcher(10));
+            processor.register(searcherThrowing(rejection));
+            processor.init();
+            assertRejectionReachesTheCaller(processor, rejection, new TestSearchRequestParams(0, 10, 0));
+        }
+    }
+
+    @Test
+    public void test_capacityRejection_ofTheFusedSearch_isRethrownNotRetriedByFess() throws Exception {
+        // Falling back to fusing in Fess would send the search engine the same work again.
+        givenEngineFusion("");
+        final RuntimeException rejection = capacityRejection();
+        final RefusingMainSearcher main = new RefusingMainSearcher();
+        main.refusal = rejection;
+        final CountingSubSearcher sub = new CountingSubSearcher();
+        try (RankFusionProcessor processor = newEngineFusionProcessor(main, sub)) {
+            assertRejectionReachesTheCaller(processor, rejection, fusionParams(0));
+        }
+        assertEquals(0, sub.searchCount.get(), "Fess must not have fused the search itself");
+    }
+
+    /** A search engine that refuses a search for lack of capacity, as the search engine client reports it. */
+    private static RuntimeException capacityRejection() {
+        return new org.codelibs.fess.exception.SearchEngineUnavailableException("The search engine is out of capacity.",
+                new OpenSearchStatusException("OpenSearch exception [type=circuit_breaking_exception, reason=[parent] Data too large]",
+                        RestStatus.TOO_MANY_REQUESTS, null));
+    }
+
+    private static RankFusionSearcher searcherThrowing(final RuntimeException failure) {
+        return new RankFusionSearcher() {
+            {
+                name = "throwing";
+            }
+
+            @Override
+            protected SearchResult search(final String query, final SearchRequestParams params,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw failure;
+            }
+        };
+    }
+
+    private void assertRejectionReachesTheCaller(final RankFusionProcessor processor, final RuntimeException rejection,
+            final SearchRequestParams params) {
+        try {
+            processor.search("q", params, OptionalThing.empty());
+            fail("a capacity rejection must reach the caller instead of becoming a degraded answer");
+        } catch (final RuntimeException e) {
+            assertEquals(rejection, e);
+        }
+    }
+
     /** A bad request of the search engine, as the search engine client reports it. */
     private static InvalidQueryException engineError(final String reason) {
         final OpenSearchStatusException cause =

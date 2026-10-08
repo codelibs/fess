@@ -36,6 +36,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
@@ -69,6 +70,9 @@ public class SearchHandler {
 
     private static final Logger logger = LogManager.getLogger(SearchHandler.class);
 
+    /** Seconds after which a search the search engine could not take is worth repeating. */
+    private static final String RETRY_AFTER_SECONDS = "5";
+
     /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
@@ -84,7 +88,10 @@ public class SearchHandler {
      * {@link InvalidQueryException} and {@link ResultOffsetExceededException}
      * surface as {@code invalid_request} (400) so client SDKs can distinguish
      * user errors from {@code internal_error} (500) — matching v1's split
-     * between {@code SC_BAD_REQUEST} and {@code SC_INTERNAL_SERVER_ERROR}.</p>
+     * between {@code SC_BAD_REQUEST} and {@code SC_INTERNAL_SERVER_ERROR}.
+     * A search the search engine refuses for lack of capacity
+     * ({@link SearchEngineUnavailableException}) surfaces as
+     * {@code service_unavailable} (503) with a {@code Retry-After} header.</p>
      *
      * <p><strong>Referer allowlist (MJ-21):</strong> v1's {@code SearchApiManager}
      * enforced {@code isAcceptedSearchReferer} (~line 262/860) as a browser-driven
@@ -153,6 +160,12 @@ public class SearchHandler {
             ComponentUtil.getV2EnvelopeWriter()
                     .writeUserMessageError(response, V2ErrorCode.INVALID_REQUEST, request.getLocale(),
                             messages -> messages.addErrorsResultSizeExceeded(UserMessages.GLOBAL_PROPERTY_KEY));
+        } catch (final SearchEngineUnavailableException e) {
+            // Already logged where the search engine refused the search. The request is fine and
+            // may succeed shortly, so the caller is told to retry rather than to fix the query.
+            response.setHeader("Retry-After", RETRY_AFTER_SECONDS);
+            ComponentUtil.getV2EnvelopeWriter()
+                    .writeError(response, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine is temporarily unable to process the search");
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/search");
         }
