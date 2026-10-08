@@ -209,6 +209,26 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_reindexConfigIndices_loadBulkDataIsReadFromTheResourceType() {
+        // the plugin-less types keep their definitions in _vanilla, and cloud is reported as vanilla
+        final String[][] types = { { "cloud", "vanilla" }, { "aws", "vanilla" }, { "vanilla", "vanilla" }, { "default", "default" },
+                { "opensearch", "opensearch" }, { "", "" } };
+        for (final String[] type : types) {
+            final TestFessConfig fessConfig = new TestFessConfig();
+            fessConfig.fesenType = type[0];
+            fessConfig.appExtensionNames = "ext";
+            ComponentUtil.setFessConfig(fessConfig);
+            final TestSearchEngineClient client = new TestSearchEngineClient();
+            client.addIndexConfig("fess_config.scheduled_job/scheduled_job");
+
+            assertTrue(type[0], client.reindexConfigIndices(true, allTargetPrefixes()));
+
+            // the bulk data file of the index, and the one of the app extension
+            assertEquals(type[0], List.of(type[1], type[1]), client.resourceTypes);
+        }
+    }
+
+    @Test
     public void test_reindexConfigIndices_loadBulkDataFalse() {
         testClient.existsIndexResult = true;
         testClient.createIndexResult = true;
@@ -564,6 +584,9 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         boolean switchAliasesResult = true;
         List<String[]> switchAliasesCalls = new ArrayList<>();
 
+        // The resource type of each getResourcePath call, in call order
+        List<String> resourceTypes = new ArrayList<>();
+
         // Track which indices "exist" for fine-grained control
         Set<String> existingIndices = new HashSet<>();
         boolean useExistingIndicesSet = false;
@@ -651,6 +674,12 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         }
 
         @Override
+        protected String getResourcePath(final String basePath, final String type, final String path) {
+            resourceTypes.add(type);
+            return super.getResourcePath(basePath, type, path);
+        }
+
+        @Override
         public void addMapping(final String index, final String docType, final String indexName) {
             // Delegate to 4-arg version with loadBulkData=true, same as real implementation
             addMapping(index, docType, indexName, true);
@@ -715,14 +744,18 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
             return "fess_log";
         }
 
+        String fesenType = "";
+
+        String appExtensionNames = "";
+
         @Override
         public String getFesenType() {
-            return "";
+            return fesenType;
         }
 
         @Override
         public String getAppExtensionNames() {
-            return "";
+            return appExtensionNames;
         }
 
         @Override

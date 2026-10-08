@@ -94,6 +94,77 @@ public class LogCapturingAppenderTest extends UnitFessTestCase {
         });
     }
 
+    @Test
+    public void test_overlappingCapturesOfOneLoggerBothSeeTheEvents() {
+        withAncestorAt(Level.WARN, () -> {
+            final LogCapturingAppender first = LogCapturingAppender.attach(TARGET_NAME);
+            final LogCapturingAppender second = LogCapturingAppender.attach(TARGET_NAME);
+            try {
+                LogManager.getLogger(TARGET_NAME).info("seen by both");
+                assertEquals(List.of("seen by both"), first.messagesAt(Level.INFO));
+                assertEquals(List.of("seen by both"), second.messagesAt(Level.INFO));
+            } finally {
+                second.detach();
+                first.detach();
+            }
+        });
+    }
+
+    @Test
+    public void test_detach_ofTheFirstCaptureKeepsALaterOverlappingCaptureWorking() {
+        // Two classes capture one logger under -Dparallel=classes: the second attach borrows the
+        // config of the first, so the first detach must not remove it.
+        withAncestorAt(Level.WARN, () -> {
+            final LogCapturingAppender first = LogCapturingAppender.attach(TARGET_NAME);
+            final LogCapturingAppender second = LogCapturingAppender.attach(TARGET_NAME);
+            try {
+                first.detach();
+                LogManager.getLogger(TARGET_NAME).info("after the first detach");
+                assertEquals(List.of("after the first detach"), second.messagesAt(Level.INFO));
+                assertTrue(first.messagesAt(Level.INFO).isEmpty(), "a detached appender must not capture any more");
+            } finally {
+                second.detach();
+            }
+            assertEquals("the last detach must remove the config", ANCESTOR_NAME, configuration().getLoggerConfig(TARGET_NAME).getName());
+        });
+    }
+
+    @Test
+    public void test_detach_ofALaterCaptureLeavesTheFirstWorkingAndTheConfigInPlace() {
+        withAncestorAt(Level.WARN, () -> {
+            final LogCapturingAppender first = LogCapturingAppender.attach(TARGET_NAME);
+            final LogCapturingAppender second = LogCapturingAppender.attach(TARGET_NAME);
+            try {
+                second.detach();
+                LogManager.getLogger(TARGET_NAME).info("after the second detach");
+                assertEquals(List.of("after the second detach"), first.messagesAt(Level.INFO));
+            } finally {
+                first.detach();
+            }
+            assertEquals(ANCESTOR_NAME, configuration().getLoggerConfig(TARGET_NAME).getName());
+        });
+    }
+
+    @Test
+    public void test_messagesOnThisThreadAt_ignoresEventsOfOtherThreads() {
+        withAncestorAt(Level.WARN, () -> {
+            final LogCapturingAppender appender = LogCapturingAppender.attach(TARGET_NAME);
+            try {
+                LogManager.getLogger(TARGET_NAME).warn("mine");
+                final Thread other = new Thread(() -> LogManager.getLogger(TARGET_NAME).warn("theirs"), "other-capture-thread");
+                other.start();
+                other.join();
+                assertEquals(List.of("mine", "theirs"), appender.warnings());
+                assertEquals(List.of("mine"), appender.messagesOnThisThreadAt(Level.WARN));
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                fail(e.toString());
+            } finally {
+                appender.detach();
+            }
+        });
+    }
+
     // -------------------------------------------------------------------------------------
     //                                                                                helpers
     //                                                                                -------

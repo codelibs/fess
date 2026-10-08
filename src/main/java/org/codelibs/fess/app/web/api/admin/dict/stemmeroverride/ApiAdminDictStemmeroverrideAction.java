@@ -50,6 +50,11 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
     public ApiAdminDictStemmeroverrideAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDictStemmeroverrideAction.class);
 
     @Resource

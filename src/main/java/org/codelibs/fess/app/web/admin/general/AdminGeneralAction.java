@@ -617,7 +617,7 @@ public class AdminGeneralAction extends FessAdminAction {
 
     /**
      * Checks if a submitted result collapsing value may be written back to the configuration.
-     * For cloud and aws types {@link FessConfig#isResultCollapsed()} forces false instead of
+     * For the plugin-less types (vanilla and aws) {@link FessConfig#isResultCollapsed()} forces false instead of
      * reading the stored property, so no form value derived from it can observe what is stored.
      * Writing such a value would silently discard the stored setting: the admin form omits the
      * checkbox and submits nothing, and any API request whose body comes from
@@ -628,10 +628,7 @@ public class AdminGeneralAction extends FessAdminAction {
      * @return true if the submitted value can be applied
      */
     private static boolean isResultCollapsedEditable(final FessConfig fessConfig) {
-        return switch (fessConfig.getFesenType()) {
-        case Constants.FESEN_TYPE_CLOUD, Constants.FESEN_TYPE_AWS -> false;
-        default -> true;
-        };
+        return !fessConfig.isFesenPluginless();
     }
 
 }

@@ -145,7 +145,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     /**
-     * Reloads the document index by closing and reopening it.
+     * Reloads the document index by closing and reopening it, which makes the search engine read
+     * the dictionaries again. The screen hides the button when the search engine runs without the
+     * CodeLibs plugins, as there are no dictionaries to reload; a request made anyway is ignored.
      *
      * @param form the action form (validated but not used for configuration)
      * @return HTML response redirecting to the maintenance page
@@ -153,6 +155,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse reloadDocIndex(final ActionForm form) {
+        if (fessConfig.isFesenPluginless()) {
+            return redirect(getClass());
+        }
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
         final CoordinatorHelper coordinator = ComponentUtil.getCoordinatorHelper();

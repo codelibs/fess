@@ -50,6 +50,11 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
     public ApiAdminDictSynonymAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDictSynonymAction.class);
 
     @Resource

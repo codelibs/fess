@@ -83,6 +83,11 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         return ROLE;
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

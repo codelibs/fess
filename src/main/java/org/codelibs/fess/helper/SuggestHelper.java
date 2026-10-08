@@ -57,6 +57,7 @@ import org.codelibs.fess.suggest.settings.SuggestSettingsBuilder;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fesen.opensearch.common.lucene.search.function.CombineFunction;
+import org.codelibs.fesen.opensearch.index.IndexNotFoundException;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
@@ -82,6 +83,9 @@ public class SuggestHelper {
 
     /** The separator for text content. */
     protected static final String TEXT_SEP = " ";
+
+    /** The key of the search engine type in the suggest settings document. */
+    protected static final String SEARCH_ENGINE_TYPE_KEY = "search_engine.type";
 
     /** The suggester instance for handling suggest operations. */
     protected Suggester suggester;
@@ -125,22 +129,20 @@ public class SuggestHelper {
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
 
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
-        searchEngineClient.admin()
-                .cluster()
-                .prepareHealth()
-                .setWaitForYellowStatus()
-                .execute()
-                .actionGet(fessConfig.getIndexHealthTimeout());
+        waitForYellowStatus(searchEngineClient);
 
-        final SuggestSettingsBuilder settingsBuilder = SuggestSettings.builder();
-        settingsBuilder.addInitialSettings("search_engine.type", fessConfig.getFesenType());
+        final String resourceType = fessConfig.getFesenResourceType();
+        final SuggestSettingsBuilder settingsBuilder = newSuggestSettingsBuilder();
+        settingsBuilder.addInitialSettings(SEARCH_ENGINE_TYPE_KEY, resourceType);
         settingsBuilder.bulkTimeout(fessConfig.getIndexBulkTimeout());
         settingsBuilder.clusterTimeout(fessConfig.getIndexHealthTimeout());
         settingsBuilder.indexTimeout(fessConfig.getIndexIndexTimeout());
         settingsBuilder.indicesTimeout(fessConfig.getIndexIndicesTimeout());
         settingsBuilder.searchTimeout(fessConfig.getIndexSearchTimeout());
         settingsBuilder.setSettingsIndexName(fessConfig.getIndexDocumentSuggestIndex() + "_suggest");
-        suggester = Suggester.builder().settings(settingsBuilder).build(searchEngineClient, fessConfig.getIndexDocumentSuggestIndex());
+        final SuggestSettings suggestSettings = settingsBuilder.build(searchEngineClient, fessConfig.getIndexDocumentSuggestIndex());
+        updatePersistedSearchEngineType(suggestSettings, resourceType);
+        suggester = buildSuggester(searchEngineClient, suggestSettings);
         if (ComponentUtil.hasPopularWordHelper()) {
             popularWordHelper = ComponentUtil.getPopularWordHelper();
         }
@@ -156,6 +158,76 @@ public class SuggestHelper {
             suggester.createIndexIfNothing();
         } catch (final Exception e) {
             logger.warn("Failed to initialize Suggester.", e);
+        }
+    }
+
+    /**
+     * Waits for the cluster to reach yellow status.
+     *
+     * @param searchEngineClient the search engine client
+     */
+    protected void waitForYellowStatus(final SearchEngineClient searchEngineClient) {
+        searchEngineClient.admin()
+                .cluster()
+                .prepareHealth()
+                .setWaitForYellowStatus()
+                .execute()
+                .actionGet(fessConfig.getIndexHealthTimeout());
+    }
+
+    /**
+     * Creates the builder of the suggest settings.
+     *
+     * @return the settings builder
+     */
+    protected SuggestSettingsBuilder newSuggestSettingsBuilder() {
+        return SuggestSettings.builder();
+    }
+
+    /**
+     * Builds the suggester, which creates the suggest analyzer index from the definitions of the
+     * search engine type stored in the settings if the index is missing.
+     *
+     * @param searchEngineClient the search engine client
+     * @param suggestSettings the suggest settings
+     * @return the suggester
+     */
+    protected Suggester buildSuggester(final SearchEngineClient searchEngineClient, final SuggestSettings suggestSettings) {
+        return Suggester.builder().settings(suggestSettings).build(searchEngineClient, fessConfig.getIndexDocumentSuggestIndex());
+    }
+
+    /**
+     * Brings the {@code search_engine.type} stored in an existing suggest settings document in line
+     * with the current resource type.
+     * <p>
+     * The suggest library reads {@code suggest_indices/_<type>/suggest_analyzer.json} by that stored
+     * value, and {@code addInitialSettings} seeds it only when the settings document is created.
+     * An installation created with {@code cloud} or {@code aws} therefore keeps a value that no
+     * longer names a resource directory, and the analyzer index would be rebuilt from the default
+     * file, whose tokenizers need the CodeLibs plugins. This has to run before the suggester is
+     * built, because building it creates the analyzer index if it is missing.
+     * </p>
+     *
+     * @param settings the suggest settings, not yet initialized
+     * @param type the resource type to store
+     */
+    protected void updatePersistedSearchEngineType(final SuggestSettings settings, final String type) {
+        Object persisted = null;
+        try {
+            persisted = settings.get(SEARCH_ENGINE_TYPE_KEY);
+            if (persisted != null && type != null && !type.equals(persisted.toString())) {
+                settings.set(SEARCH_ENGINE_TYPE_KEY, type);
+                logger.info("Updated the search engine type of the suggest settings: {} -> {}", persisted, type);
+            }
+        } catch (final IndexNotFoundException e) {
+            // first start: the initial settings are stored when the suggester is built
+            if (logger.isDebugEnabled()) {
+                logger.debug("The suggest settings index does not exist yet: {}", settings.getSettingsIndexName());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to update the search engine type of the suggest settings: stored={}, type={}. If the suggest analyzer index"
+                    + " must be created, it is built from the definitions of the stored type, which fails on a search engine"
+                    + " without the CodeLibs plugins.", persisted, type, e);
         }
     }
 

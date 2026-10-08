@@ -51,6 +51,11 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
     public ApiAdminDictKuromojiAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDictKuromojiAction.class);
 
     @Resource

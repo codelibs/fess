@@ -88,6 +88,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return ROLE;
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

@@ -17,11 +17,16 @@ package org.codelibs.fess.helper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
+import org.codelibs.fesen.opensearch.index.IndexNotFoundException;
+import org.codelibs.fesen.opensearch.transport.client.Client;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exbhv.BadWordBhv;
@@ -30,7 +35,12 @@ import org.codelibs.fess.opensearch.config.exentity.BadWord;
 import org.codelibs.fess.opensearch.config.exentity.ElevateWord;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
+import org.codelibs.fess.suggest.exception.SuggestSettingsException;
+import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.index.SuggestIndexResponse;
+import org.codelibs.fess.suggest.settings.SuggestSettings;
+import org.codelibs.fess.suggest.settings.SuggestSettingsBuilder;
+import org.codelibs.fess.suggest.settings.TimeoutSettings;
 import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -58,15 +68,107 @@ public class SuggestHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockPopularWordHelper(), "popularWordHelper");
     }
 
-    @Test
-    public void test_init() {
-        SuggestHelper helper = new SuggestHelper();
+    /** Stops {@code init()} when the suggester is to be built: there is no engine behind it to build one from. */
+    private static class SuggesterNotBuilt extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+    }
+
+    /** Records what {@code init()} hands to the suggest library, and in which order it does the steps. */
+    private static class InitProbe extends SuggestHelper {
+        final List<String> steps = new ArrayList<>();
+
+        final Map<String, Object> recordedInitialSettings = new LinkedHashMap<>();
+
+        final RecordingSuggestSettings settings;
+
+        InitProbe(final Object persistedType) {
+            this.settings = new RecordingSuggestSettings(persistedType);
+        }
+
+        @Override
+        protected void waitForYellowStatus(final SearchEngineClient searchEngineClient) {
+            steps.add("waitForYellowStatus");
+        }
+
+        @Override
+        protected SuggestSettingsBuilder newSuggestSettingsBuilder() {
+            return new SuggestSettingsBuilder() {
+                @Override
+                public SuggestSettingsBuilder addInitialSettings(final String key, final Object value) {
+                    recordedInitialSettings.put(key, value);
+                    return super.addInitialSettings(key, value);
+                }
+
+                @Override
+                public SuggestSettings build(final Client client, final String id) {
+                    steps.add("buildSettings");
+                    return settings;
+                }
+            };
+        }
+
+        @Override
+        protected void updatePersistedSearchEngineType(final SuggestSettings suggestSettings, final String type) {
+            steps.add("updatePersistedSearchEngineType:" + type);
+            super.updatePersistedSearchEngineType(suggestSettings, type);
+        }
+
+        @Override
+        protected Suggester buildSuggester(final SearchEngineClient searchEngineClient, final SuggestSettings suggestSettings) {
+            steps.add("buildSuggester");
+            throw new SuggesterNotBuilt();
+        }
+    }
+
+    private void runInit(final InitProbe helper, final String searchEngineType) {
+        final MockFessConfig fessConfig = new MockFessConfig();
+        fessConfig.fesenType = searchEngineType;
+        ComponentUtil.setFessConfig(fessConfig);
         try {
             helper.init();
-            assertNotNull(helper.suggester());
-        } catch (Exception e) {
-            assertTrue(true);
+            fail("the probe stops init() at the suggester");
+        } catch (final SuggesterNotBuilt expected) {
+            // reached the build of the suggester
         }
+    }
+
+    @Test
+    public void test_init_handsTheResourceTypeToTheSuggestLibrary() {
+        // the suggest library reads suggest_indices/_<type>/suggest_analyzer.json by this value: the
+        // plugin-less types share the vanilla file, and every other type is passed on as it is
+        final String[][] types = { { "vanilla", "vanilla" }, { "aws", "vanilla" }, { "cloud", "vanilla" }, { "default", "default" },
+                { "opensearch", "opensearch" } };
+        for (final String[] type : types) {
+            final InitProbe helper = new InitProbe("stale");
+
+            runInit(helper, type[0]);
+
+            assertEquals(type[0], Map.of("search_engine.type", type[1]), helper.recordedInitialSettings);
+            assertEquals(type[0], List.of("search_engine.type=" + type[1]), helper.settings.updates);
+        }
+    }
+
+    @Test
+    public void test_init_migratesThePersistedTypeOnceAndBeforeTheSuggesterIsBuilt() {
+        final InitProbe helper = new InitProbe("cloud");
+
+        runInit(helper, "aws");
+
+        // building the suggester creates the analyzer index when it is missing, from the stored type
+        assertEquals(List.of("waitForYellowStatus", "buildSettings", "updatePersistedSearchEngineType:vanilla", "buildSuggester"),
+                helper.steps);
+        assertEquals(List.of("search_engine.type=vanilla"), helper.settings.updates);
+    }
+
+    @Test
+    public void test_init_leavesAPersistedTypeThatMatchesAlone() {
+        final InitProbe helper = new InitProbe("vanilla");
+
+        runInit(helper, "cloud");
+
+        assertEquals(List.of("waitForYellowStatus", "buildSettings", "updatePersistedSearchEngineType:vanilla", "buildSuggester"),
+                helper.steps);
+        assertTrue(helper.settings.updates.isEmpty());
     }
 
     @Test
@@ -357,7 +459,127 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_updatePersistedSearchEngineType_replacesTheRemovedVariantTypes() {
+        for (final String persisted : new String[] { "cloud", "aws" }) {
+            final RecordingSuggestSettings settings = new RecordingSuggestSettings(persisted);
+            suggestHelper.updatePersistedSearchEngineType(settings, "vanilla");
+            assertEquals(persisted, List.of("search_engine.type=vanilla"), settings.updates);
+        }
+    }
+
+    @Test
+    public void test_updatePersistedSearchEngineType_replacesATypeFromAnotherMode() {
+        final RecordingSuggestSettings settings = new RecordingSuggestSettings("default");
+        suggestHelper.updatePersistedSearchEngineType(settings, "vanilla");
+        assertEquals(List.of("search_engine.type=vanilla"), settings.updates);
+
+        final RecordingSuggestSettings back = new RecordingSuggestSettings("vanilla");
+        suggestHelper.updatePersistedSearchEngineType(back, "default");
+        assertEquals(List.of("search_engine.type=default"), back.updates);
+    }
+
+    @Test
+    public void test_updatePersistedSearchEngineType_leavesAMatchingTypeAlone() {
+        for (final String type : new String[] { "vanilla", "default", "opensearch" }) {
+            final RecordingSuggestSettings settings = new RecordingSuggestSettings(type);
+            suggestHelper.updatePersistedSearchEngineType(settings, type);
+            assertTrue(type, settings.updates.isEmpty());
+        }
+    }
+
+    @Test
+    public void test_updatePersistedSearchEngineType_doesNotCreateTheDocumentOrStoreNull() {
+        // A missing value must stay missing: storing it would make the suggest library treat the
+        // settings document as existing and skip its initial settings.
+        final RecordingSuggestSettings notStored = new RecordingSuggestSettings(null);
+        suggestHelper.updatePersistedSearchEngineType(notStored, "vanilla");
+        assertTrue(notStored.updates.isEmpty());
+
+        final RecordingSuggestSettings stored = new RecordingSuggestSettings("cloud");
+        suggestHelper.updatePersistedSearchEngineType(stored, null);
+        assertTrue(stored.updates.isEmpty());
+    }
+
+    @Test
+    public void test_updatePersistedSearchEngineType_firstStartWithoutSettingsIndex() {
+        final RecordingSuggestSettings settings = new RecordingSuggestSettings("cloud");
+        settings.getFailure = new IndexNotFoundException("fess.suggest_suggest");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SuggestHelper.class);
+        try {
+            suggestHelper.updatePersistedSearchEngineType(settings, "vanilla");
+        } finally {
+            appender.detach();
+        }
+        assertTrue(settings.updates.isEmpty());
+        assertTrue(appender.warnings().isEmpty(), appender.warnings().toString());
+    }
+
+    @Test
+    public void test_updatePersistedSearchEngineType_failureIsLoggedAndDoesNotAbortStartup() {
+        final RecordingSuggestSettings settings = new RecordingSuggestSettings("cloud");
+        settings.setFailure = new SuggestSettingsException("failed");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SuggestHelper.class);
+        try {
+            suggestHelper.updatePersistedSearchEngineType(settings, "vanilla");
+        } finally {
+            appender.detach();
+        }
+        final List<String> warnings = appender.messagesOnThisThreadAt(Level.WARN);
+        assertEquals(1, warnings.size());
+        // the value that stays in the settings and what that means are in the message
+        assertEquals("Failed to update the search engine type of the suggest settings: stored=cloud, type=vanilla."
+                + " If the suggest analyzer index must be created, it is built from the definitions of the stored type,"
+                + " which fails on a search engine without the CodeLibs plugins.", warnings.get(0));
+    }
+
+    @Test
+    public void test_updatePersistedSearchEngineType_failureToReadTheStoredTypeIsLoggedWithoutIt() {
+        final RecordingSuggestSettings settings = new RecordingSuggestSettings("cloud");
+        settings.getFailure = new SuggestSettingsException("failed");
+        final LogCapturingAppender appender = LogCapturingAppender.attach(SuggestHelper.class);
+        try {
+            suggestHelper.updatePersistedSearchEngineType(settings, "vanilla");
+        } finally {
+            appender.detach();
+        }
+        final List<String> warnings = appender.messagesOnThisThreadAt(Level.WARN);
+        assertEquals(1, warnings.size());
+        assertTrue(warnings.get(0), warnings.get(0).contains("stored=null, type=vanilla"));
+    }
+
     // Mock classes
+    private static class RecordingSuggestSettings extends SuggestSettings {
+        private final Object persisted;
+
+        final List<String> updates = new ArrayList<>();
+
+        RuntimeException getFailure;
+
+        RuntimeException setFailure;
+
+        RecordingSuggestSettings(final Object persisted) {
+            super(null, "fess.suggest", new HashMap<>(), "fess.suggest_suggest", new TimeoutSettings());
+            this.persisted = persisted;
+        }
+
+        @Override
+        public Object get(final String key) {
+            if (getFailure != null) {
+                throw getFailure;
+            }
+            return "search_engine.type".equals(key) ? persisted : null;
+        }
+
+        @Override
+        public void set(final String key, final Object value) {
+            if (setFailure != null) {
+                throw setFailure;
+            }
+            updates.add(key + "=" + value);
+        }
+    }
+
     private static class MockFessConfig extends FessConfig.SimpleImpl {
         private static final long serialVersionUID = 1L;
 
@@ -381,9 +603,11 @@ public class SuggestHelperTest extends UnitFessTestCase {
             return "title,content";
         }
 
+        String fesenType = "opensearch";
+
         @Override
         public String getFesenType() {
-            return "opensearch";
+            return fesenType;
         }
 
         @Override

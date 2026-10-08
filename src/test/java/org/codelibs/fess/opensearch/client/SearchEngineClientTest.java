@@ -20,17 +20,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fesen.client.EngineInfo.EngineType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.di.exception.ContainerInitFailureException;
+import org.codelibs.fesen.opensearch.OpenSearchStatusException;
+import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.transport.client.AdminClient;
 import org.codelibs.fesen.opensearch.action.ActionRequest;
 import org.codelibs.fesen.opensearch.action.ActionType;
@@ -103,6 +107,206 @@ public class SearchEngineClientTest extends UnitFessTestCase {
             assertTrue(message, message.contains("did not become available"));
             assertTrue(message, message.contains("Check that OpenSearch is running and reachable."));
             assertTrue(message, message.contains("bin/fess-setup install opensearch"));
+        }
+    }
+
+    /** A client whose requests to the engine fail with the given failures in turn; the last one repeats. */
+    private SearchEngineClient clientFailingWith(final RuntimeException... failures) {
+        final AtomicInteger requests = new AtomicInteger();
+        return new SearchEngineClient() {
+            {
+                this.client = this;
+            }
+
+            @Override
+            public AdminClient admin() {
+                throw failures[Math.min(requests.getAndIncrement(), failures.length - 1)];
+            }
+        };
+    }
+
+    private static FessConfig fessConfigOfType(final String type) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSearchEngineType() {
+                return type;
+            }
+        };
+    }
+
+    private static final String AWS_ADVICE = "Fess cannot sign requests with IAM credentials, so use fine-grained access control with a"
+            + " user name and password, or an access policy that permits this host.";
+
+    @Test
+    public void test_isAccessDenied() {
+        assertTrue(SearchEngineClient.isAccessDenied(new OpenSearchStatusException("x", RestStatus.UNAUTHORIZED, null)));
+        assertTrue(SearchEngineClient.isAccessDenied(new OpenSearchStatusException("x", RestStatus.FORBIDDEN, null)));
+        assertFalse(SearchEngineClient.isAccessDenied(new OpenSearchStatusException("x", RestStatus.NOT_FOUND, null)));
+        assertFalse(SearchEngineClient.isAccessDenied(new OpenSearchStatusException("x", RestStatus.SERVICE_UNAVAILABLE, null)));
+        // an error body without a known status leaves it unset
+        assertFalse(SearchEngineClient.isAccessDenied(new OpenSearchStatusException("x", null, null)));
+        assertFalse(SearchEngineClient.isAccessDenied(new IllegalStateException("Connection refused")));
+        assertFalse(SearchEngineClient.isAccessDenied(null));
+    }
+
+    @Test
+    public void test_getAccessDeniedAdvice_onlyForAws() {
+        final SearchEngineClient client = new SearchEngineClient();
+
+        assertEquals(" " + AWS_ADVICE, client.getAccessDeniedAdvice(fessConfigOfType("aws")));
+        for (final String type : new String[] { "vanilla", "cloud", "default", "opensearch", "", null }) {
+            assertEquals(String.valueOf(type), "", client.getAccessDeniedAdvice(fessConfigOfType(type)));
+        }
+    }
+
+    @Test
+    public void test_buildUnavailableMessage_refusalPointsToCredentialsAndAccessPolicy() {
+        for (final RestStatus status : new RestStatus[] { RestStatus.UNAUTHORIZED, RestStatus.FORBIDDEN }) {
+            final String message = new SearchEngineClient().buildUnavailableMessage(1500L, new OpenSearchStatusException("x", status, null),
+                    fessConfigOfType("vanilla"));
+
+            assertTrue(message, message.contains("did not become available within 1500ms"));
+            assertTrue(message, message.contains("(" + status.getStatus() + ")"));
+            assertTrue(message, message.contains("search_engine.username and search_engine.password"));
+            assertTrue(message, message.contains("access policy"));
+            assertFalse(message, message.contains("is running"));
+            assertFalse(message, message.contains("fess-setup"));
+            assertFalse(message, message.contains("IAM"));
+        }
+    }
+
+    @Test
+    public void test_buildUnavailableMessage_awsRefusalAddsTheIamAdvice() {
+        for (final RestStatus status : new RestStatus[] { RestStatus.UNAUTHORIZED, RestStatus.FORBIDDEN }) {
+            final String message = new SearchEngineClient().buildUnavailableMessage(1500L, new OpenSearchStatusException("x", status, null),
+                    fessConfigOfType("aws"));
+
+            assertTrue(message, message.endsWith(" permits that user to access it from this host. " + AWS_ADVICE));
+        }
+    }
+
+    @Test
+    public void test_buildUnavailableMessage_otherFailuresKeepTheRunningHint() {
+        for (final Throwable cause : new Throwable[] { new IllegalStateException("Connection refused"),
+                new OpenSearchStatusException("x", RestStatus.SERVICE_UNAVAILABLE, null), new OpenSearchStatusException("x", null, null),
+                null }) {
+            // the aws advice is about a refusal only
+            final String message = new SearchEngineClient().buildUnavailableMessage(10L, cause, fessConfigOfType("aws"));
+
+            assertTrue(message, message.contains("Check that OpenSearch is running and reachable."));
+            assertTrue(message, message.contains("bin/fess-setup install opensearch"));
+            assertFalse(message, message.contains("search_engine.username"));
+            assertFalse(message, message.contains("IAM"));
+        }
+    }
+
+    @Test
+    public void test_waitForYellowStatus_forbiddenWarnsOnceAndPointsToCredentials() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final SearchEngineClient client = clientFailingWith(new OpenSearchStatusException("denied", RestStatus.FORBIDDEN, null));
+        client.setMaxEsStatusRetry(3);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.waitForYellowStatus(fessConfigOfType("vanilla"));
+            fail("a refused request must fail the startup");
+        } catch (final ContainerInitFailureException e) {
+            final String message = e.getMessage();
+            assertTrue(message, message.contains("search_engine.username and search_engine.password"));
+            assertTrue(message, message.contains("access policy"));
+            assertFalse(message, message.contains("fess-setup"));
+            assertFalse(message, message.contains("is running"));
+            // three attempts, one warning with the cause
+            final List<String> warnings = capture.messagesOnThisThreadAt(Level.WARN);
+            assertEquals(1, warnings.size());
+            assertTrue(warnings.get(0), warnings.get(0).contains("refused access (HTTP 403)"));
+            assertTrue(warnings.get(0), warnings.get(0).contains("search_engine.username, search_engine.password"));
+            assertFalse(warnings.get(0), warnings.get(0).contains("IAM"));
+            assertEquals(1, capture.eventsOnThisThreadAt(Level.WARN).stream().filter(event -> event.getThrown() != null).toList().size());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_waitForYellowStatus_unauthorizedWarnsAndPointsToCredentials() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final SearchEngineClient client = clientFailingWith(new OpenSearchStatusException("denied", RestStatus.UNAUTHORIZED, null));
+        client.setMaxEsStatusRetry(1);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.waitForYellowStatus(fessConfigOfType("default"));
+            fail("a refused request must fail the startup");
+        } catch (final ContainerInitFailureException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("search_engine.username and search_engine.password"));
+            final List<String> warnings = capture.messagesOnThisThreadAt(Level.WARN);
+            assertEquals(1, warnings.size());
+            assertTrue(warnings.get(0), warnings.get(0).contains("refused access (HTTP 401)"));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_waitForYellowStatus_awsRefusalAddsTheIamAdviceToTheWarningAndTheFailure() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final SearchEngineClient client = clientFailingWith(new OpenSearchStatusException("denied", RestStatus.FORBIDDEN, null));
+        client.setMaxEsStatusRetry(1);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.waitForYellowStatus(fessConfigOfType("aws"));
+            fail("a refused request must fail the startup");
+        } catch (final ContainerInitFailureException e) {
+            assertTrue(e.getMessage(), e.getMessage().endsWith(AWS_ADVICE));
+            final List<String> warnings = capture.messagesOnThisThreadAt(Level.WARN);
+            assertEquals(1, warnings.size());
+            assertTrue(warnings.get(0), warnings.get(0).endsWith(AWS_ADVICE));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_waitForYellowStatus_aFinalTimeoutDoesNotHideAnEarlierRefusal() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final IllegalStateException timeout = new IllegalStateException("timed out");
+        final SearchEngineClient client = clientFailingWith(new OpenSearchStatusException("denied", RestStatus.FORBIDDEN, null), timeout);
+        client.setMaxEsStatusRetry(2);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            client.waitForYellowStatus(fessConfigOfType("aws"));
+            fail("an engine that never answers must fail the startup");
+        } catch (final ContainerInitFailureException e) {
+            // the message tells about the refusal, the cause is what failed last
+            assertTrue(e.getMessage(), e.getMessage().contains("It refused the request (403)"));
+            assertTrue(e.getMessage(), e.getMessage().endsWith(AWS_ADVICE));
+            assertFalse(e.getMessage(), e.getMessage().contains("is running"));
+            assertSame(timeout, e.getCause());
+            assertEquals(1, capture.messagesOnThisThreadAt(Level.WARN).size());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_waitForYellowStatus_otherStatusesStayQuietAndKeepTheRunningHint() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        // the last one is an error body that carried no status
+        for (final RestStatus status : new RestStatus[] { RestStatus.SERVICE_UNAVAILABLE, null }) {
+            final SearchEngineClient client = clientFailingWith(new OpenSearchStatusException("unavailable", status, null));
+            client.setMaxEsStatusRetry(1);
+            final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+            try {
+                client.waitForYellowStatus(fessConfigOfType("aws"));
+                fail("an unavailable engine must fail the startup");
+            } catch (final ContainerInitFailureException e) {
+                assertTrue(String.valueOf(status), e.getMessage().contains("bin/fess-setup install opensearch"));
+                assertFalse(String.valueOf(status), e.getMessage().contains("IAM"));
+                assertTrue(String.valueOf(status), capture.messagesOnThisThreadAt(Level.WARN).isEmpty());
+            } finally {
+                capture.detach();
+            }
         }
     }
 

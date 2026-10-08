@@ -55,6 +55,7 @@ import org.codelibs.fess.app.web.admin.webconfig.AdminWebconfigAction;
 import org.codelibs.fess.app.web.admin.wizard.AdminWizardAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -319,6 +320,8 @@ public class AdminAction extends FessAdminAction {
 
     /**
      * Get the admin action class.
+     * The dictionary screens are skipped when the search engine runs without the CodeLibs plugins,
+     * as their actions send everyone back to the admin top.
      * @param user The user.
      * @return The admin action class.
      */
@@ -335,7 +338,7 @@ public class AdminAction extends FessAdminAction {
         if (user.hasRoles(getActionRoles(AdminSchedulerAction.ROLE))) {
             return AdminSchedulerAction.class;
         }
-        if (user.hasRoles(getActionRoles(AdminDictAction.ROLE))) {
+        if (user.hasRoles(getActionRoles(AdminDictAction.ROLE)) && !ComponentUtil.getFessConfig().isFesenPluginless()) {
             return AdminDictAction.class;
         }
         if (user.hasRoles(getActionRoles(AdminAccesstokenAction.ROLE))) {

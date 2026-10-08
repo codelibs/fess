@@ -40,6 +40,11 @@ public class ApiAdminDictAction extends FessApiAdminAction {
     public ApiAdminDictAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     /** Dictionary manager for handling dictionary file operations */
     @Resource
     protected DictionaryManager dictionaryManager;

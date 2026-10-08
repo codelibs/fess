@@ -80,14 +80,20 @@ public class AdminDocreportAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     /**
-     * Displays the duplicate tab.
+     * Displays the duplicate tab, or the dormant tab when the index cannot report duplicates
+     * and the duplicate tab is therefore hidden.
      *
      * @param form the duplicate filter form
-     * @return HTML response for the duplicate tab
+     * @return HTML response for the first tab
      */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final DuplicateForm form) {
+        if (!documentReportService.isDuplicateReportAvailable()) {
+            final DormantForm dormantForm = new DormantForm();
+            dormantForm.url = form.url;
+            return dormant(dormantForm);
+        }
         return duplicate(form);
     }
 

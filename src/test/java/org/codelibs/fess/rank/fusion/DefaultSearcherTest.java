@@ -70,6 +70,8 @@ public class DefaultSearcherTest extends UnitFessTestCase {
 
     private int maxResultWindow = DEFAULT_MAX_RESULT_WINDOW;
 
+    private String searchEngineType = "default";
+
     // -------------------------------------------------------------------------------------
     //                                                                    fusion applicability
     //                                                                    --------------------
@@ -96,6 +98,25 @@ public class DefaultSearcherTest extends UnitFessTestCase {
         // would have decided nothing
         assertFalse(
                 new DefaultSearcher().isEngineFusionApplicable(params(0, 10, "last_modified.desc"), List.of(subQuery("semantic_chunk"))));
+    }
+
+    @Test
+    public void test_isEngineFusionApplicable_aSimilarDocHashIsAHardFilterOnlyWhereTheEngineHasTheSignature() {
+        final DefaultSearcher searcher = new DefaultSearcher();
+        for (final String type : new String[] { "default", "opensearch" }) {
+            searchEngineType = type;
+            givenConfig(true, "rrf", "");
+            // the keyword branch filters on the signature, which the vector branch cannot mirror
+            assertFalse(type, searcher.isEngineFusionApplicable(params(0, 10, null, null, "0101"), List.of(subQuery("semantic_chunk"))));
+            assertTrue(type, searcher.isEngineFusionApplicable(params(0, 10, null, null, null), List.of(subQuery("semantic_chunk"))));
+            assertTrue(type, searcher.isEngineFusionApplicable(params(0, 10, null, null, " "), List.of(subQuery("semantic_chunk"))));
+        }
+        for (final String type : new String[] { "vanilla", "aws", "cloud" }) {
+            searchEngineType = type;
+            givenConfig(true, "rrf", "");
+            // the plugin-less index has no such field and the search drops the parameter: nothing narrows the results
+            assertTrue(type, searcher.isEngineFusionApplicable(params(0, 10, null, null, "0101"), List.of(subQuery("semantic_chunk"))));
+        }
     }
 
     @Test
@@ -696,6 +717,11 @@ public class DefaultSearcherTest extends UnitFessTestCase {
             private static final long serialVersionUID = 1L;
 
             @Override
+            public String getSearchEngineType() {
+                return searchEngineType;
+            }
+
+            @Override
             public boolean isRankFusionEngineEnabled() {
                 return engineEnabled;
             }
@@ -816,6 +842,11 @@ public class DefaultSearcherTest extends UnitFessTestCase {
     }
 
     private static SearchRequestParams params(final int start, final int size, final String sort, final HighlightInfo highlightInfo) {
+        return params(start, size, sort, highlightInfo, null);
+    }
+
+    private static SearchRequestParams params(final int start, final int size, final String sort, final HighlightInfo highlightInfo,
+            final String similarDocHash) {
         return new SearchRequestParams() {
             @Override
             public String getQuery() {
@@ -899,7 +930,7 @@ public class DefaultSearcherTest extends UnitFessTestCase {
 
             @Override
             public String getSimilarDocHash() {
-                return null;
+                return similarDocHash;
             }
         };
     }

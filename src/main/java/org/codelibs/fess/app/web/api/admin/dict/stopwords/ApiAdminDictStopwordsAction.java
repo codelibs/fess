@@ -50,6 +50,11 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
     public ApiAdminDictStopwordsAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDictStopwordsAction.class);
 
     @Resource

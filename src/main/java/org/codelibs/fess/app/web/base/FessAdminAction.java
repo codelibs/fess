@@ -31,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.admin.AdminAction;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -99,6 +100,7 @@ public abstract class FessAdminAction extends FessBaseAction {
         runtime.registerData("editable", editable);
         runtime.registerData("editableClass", editable ? StringUtil.EMPTY : "disabled");
         runtime.registerData("fesenType", fessConfig.getFesenType());
+        runtime.registerData("fesenPluginless", fessConfig.isFesenPluginless());
         final String forumLink = systemHelper.getForumLink();
         if (StringUtil.isNotBlank(forumLink)) {
             runtime.registerData("forumLink", forumLink);
@@ -311,9 +313,24 @@ public abstract class FessAdminAction extends FessBaseAction {
     }
 
     /**
+     * Checks whether this action works only with the CodeLibs plugins of the search engine.
+     * <p>
+     * When it does and the search engine runs without them ({@code FessConfig#isFesenPluginless()}),
+     * {@link #hookBefore(ActionRuntime)} redirects to the admin top instead of running the action.
+     * </p>
+     *
+     * @return true if the action needs the CodeLibs plugins; false by default
+     */
+    protected boolean requiresEnginePlugins() {
+        return false;
+    }
+
+    /**
      * Hook method called before action execution.
      * <p>
-     * This method logs user access activity for the current request.
+     * This method logs user access activity for the current request. It runs after
+     * {@link #godHandPrologue(ActionRuntime)}, so the role checks have already been made when an
+     * action that {@link #requiresEnginePlugins() requires the plugins} is turned away.
      * </p>
      *
      * @param runtime the action runtime context
@@ -324,6 +341,9 @@ public abstract class FessAdminAction extends FessBaseAction {
         final String requestPath = runtime.getRequestPath();
         final String executeName = runtime.getExecuteMethod().getName();
         activityHelper.access(getUserBean(), requestPath, executeName);
+        if (requiresEnginePlugins() && fessConfig.isFesenPluginless()) {
+            return redirect(AdminAction.class);
+        }
         return super.hookBefore(runtime);
     }
 

@@ -34,9 +34,11 @@ ${fe:html(true)}
         </div>
         <section class="content">
             <ul class="nav nav-tabs docreport-tabs mb-3">
+                <c:if test="${not fesenPluginless}">
                 <li class="nav-item"><a class="nav-link ${tab == 'duplicate' ? 'active' : ''}"
                                         href="${fe:url('/admin/docreport/duplicate')}${empty url ? '' : '?url='}${f:u(url)}"><la:message
                         key="labels.docreport_tab_duplicate"/></a></li>
+                </c:if>
                 <li class="nav-item"><a class="nav-link ${tab == 'dormant' ? 'active' : ''}"
                                         href="${fe:url('/admin/docreport/dormant')}${empty url ? '' : '?url='}${f:u(url)}"><la:message
                         key="labels.docreport_tab_dormant"/></a></li>

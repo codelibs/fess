@@ -49,6 +49,11 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
     public ApiAdminDictProtwordsAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDictProtwordsAction.class);
 
     @Resource

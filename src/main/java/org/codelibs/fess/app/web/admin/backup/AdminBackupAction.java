@@ -32,6 +32,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -346,14 +347,15 @@ public class AdminBackupAction extends FessAdminAction {
             logger.debug("Fess JSON import started: fileName={}", fileName);
         }
 
-        try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getFessJsonPath())) {
+        final Path target = getFessJsonPath();
+        try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(target)) {
             CopyUtil.copy(in, out);
 
             if (logger.isInfoEnabled()) {
-                logger.info("Fess JSON import completed successfully: fileName={}", fileName);
+                logger.info("Fess JSON import completed successfully: fileName={}, target={}", fileName, target);
             }
         } catch (final IOException e) {
-            logger.warn("Failed to import fess.json file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import fess.json file: fileName={}, target={}, error={}", fileName, target, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -364,14 +366,15 @@ public class AdminBackupAction extends FessAdminAction {
             logger.debug("Doc JSON import started: fileName={}", fileName);
         }
 
-        try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getDocJsonPath())) {
+        final Path target = getDocJsonPath();
+        try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(target)) {
             CopyUtil.copy(in, out);
 
             if (logger.isInfoEnabled()) {
-                logger.info("Doc JSON import completed successfully: fileName={}", fileName);
+                logger.info("Doc JSON import completed successfully: fileName={}, target={}", fileName, target);
             }
         } catch (final IOException e) {
-            logger.warn("Failed to import doc.json file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import doc.json file: fileName={}, target={}, error={}", fileName, target, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -516,7 +519,11 @@ public class AdminBackupAction extends FessAdminAction {
      * @return The path of doc.json.
      */
     public static Path getDocJsonPath() {
-        return ResourceUtil.getClassesPath("fess_indices", "fess", "doc.json");
+        return getDocJsonPath(ResourceUtil.getClassesPath());
+    }
+
+    static Path getDocJsonPath(final Path classesDir) {
+        return resolveIndexConfigPath(classesDir, ComponentUtil.getFessConfig().getFesenResourceType(), "fess", "doc.json");
     }
 
     /**
@@ -524,7 +531,27 @@ public class AdminBackupAction extends FessAdminAction {
      * @return The path of fess.json.
      */
     public static Path getFessJsonPath() {
-        return ResourceUtil.getClassesPath("fess_indices", "fess.json");
+        return getFessJsonPath(ResourceUtil.getClassesPath());
+    }
+
+    static Path getFessJsonPath(final Path classesDir) {
+        return resolveIndexConfigPath(classesDir, ComponentUtil.getFessConfig().getFesenResourceType(), "fess.json");
+    }
+
+    /**
+     * Resolves an index definition file the way the search engine client reads it: from the
+     * {@code fess_indices/_<type>} directory of the search engine type when the file exists there
+     * (the plugin-less types keep theirs in {@code _vanilla}), otherwise from {@code fess_indices}.
+     *
+     * @param classesDir The directory of the application classes.
+     * @param resourceType The resource type of the search engine type.
+     * @param names The path components of the file under the index definition directory.
+     * @return The path of the index definition file in use.
+     */
+    protected static Path resolveIndexConfigPath(final Path classesDir, final String resourceType, final String... names) {
+        final Path indicesDir = classesDir.resolve("fess_indices");
+        final Path typedFile = Paths.get(indicesDir.resolve("_" + resourceType).toString(), names);
+        return Files.exists(typedFile) ? typedFile : Paths.get(indicesDir.toString(), names);
     }
 
     private StreamResponse writeNdjsonResponse(final String id, final Consumer<Writer> writeCall) {

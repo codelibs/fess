@@ -243,6 +243,22 @@ public class SearchEngineClient implements Client {
     /** Maximum retry attempts for search engine status checks */
     protected int maxEsStatusRetry = 60;
 
+    /** The stock plugins, as {@code _cat/plugins} names them, that a plugin-less engine has to provide. */
+    protected static final List<String> REQUIRED_ENGINE_PLUGINS = List.of("analysis-kuromoji", "analysis-nori", "analysis-smartcn", "knn");
+
+    /** The search engine types that Fess itself defines; any other value is a custom type. */
+    @SuppressWarnings("deprecation")
+    protected static final Set<String> KNOWN_ENGINE_TYPES =
+            Set.of("default", Constants.FESEN_TYPE_VANILLA, Constants.FESEN_TYPE_AWS, Constants.FESEN_TYPE_CLOUD);
+
+    /**
+     * The index definition files that earlier versions shipped in {@code _aws} and {@code _cloud}
+     * directories; a copy found on the class path can only be one that a user supplied.
+     */
+    protected static final List<String> REMOVED_OVERRIDE_FILES = List.of("fess_indices/_aws/fess.json", "fess_indices/_aws/fess/doc.json",
+            "fess_indices/_cloud/fess.json", "fess_indices/_cloud/fess/doc.json", "suggest_indices/_aws/suggest_analyzer.json",
+            "suggest_indices/_cloud/suggest_analyzer.json");
+
     /** The config index whose bulk data is reloaded on startup so newly shipped jobs appear on upgraded installations. */
     protected static final String SCHEDULED_JOB_CONFIG_INDEX = "fess_config.scheduled_job";
 
@@ -348,6 +364,10 @@ public class SearchEngineClient implements Client {
 
         resolveDictionaryPath(fessConfig);
 
+        warnDeprecatedSearchEngineType(fessConfig);
+        warnUnknownSearchEngineType(fessConfig);
+        warnIgnoredIndexOverrides(fessConfig);
+
         String httpAddress = SystemUtil.getSearchEngineHttpAddress();
         if (StringUtil.isBlank(httpAddress)) {
             httpAddress = org.codelibs.fess.util.ResourceUtil.getFesenHttpUrl();
@@ -368,6 +388,8 @@ public class SearchEngineClient implements Client {
         waitForYellowStatus(fessConfig);
 
         verifyEngineVersion();
+
+        checkEnginePlugins(fessConfig);
 
         indexConfigList.forEach(configName -> {
             final String[] values = configName.split("/");
@@ -404,6 +426,179 @@ public class SearchEngineClient implements Client {
                 logger.warn("Invalid index config name: configName={}", configName);
             }
         });
+    }
+
+    /**
+     * Warns that the configured search engine type is the deprecated {@code cloud}, which is
+     * treated as {@code vanilla}.
+     *
+     * <p>The raw configured value is checked, because {@link FessConfig#getFesenType()} already
+     * reports {@code vanilla}. Only the webapp process warns: the job processes open this client
+     * too, and would repeat the message on every run.</p>
+     *
+     * @param fessConfig the Fess configuration
+     */
+    @SuppressWarnings("deprecation")
+    protected void warnDeprecatedSearchEngineType(final FessConfig fessConfig) {
+        if (Constants.FESEN_TYPE_CLOUD.equals(fessConfig.getSearchEngineType()) && isWebappProcess()) {
+            logger.warn("search_engine.type=cloud is deprecated and is treated as vanilla. Set search_engine.type={} instead.",
+                    Constants.FESEN_TYPE_VANILLA);
+        }
+    }
+
+    /**
+     * Warns that the configured search engine type is neither a type that Fess defines nor one
+     * that has index definitions of its own.
+     *
+     * <p>A custom type selects the {@code fess_indices/_<type>} directory of the class path as an
+     * override, and falls back to the default index definitions where it has none. Those need the
+     * CodeLibs plugins, so a mistyped {@code vanilla} would otherwise show up only as a failure
+     * to create the index. The raw value is compared as is: type names are case-sensitive and are
+     * neither trimmed nor lowercased. Only the webapp process warns, because the job processes
+     * open this client too and would repeat the message on every run.</p>
+     *
+     * @param fessConfig the Fess configuration
+     */
+    protected void warnUnknownSearchEngineType(final FessConfig fessConfig) {
+        final String type = fessConfig.getSearchEngineType();
+        if (type == null || KNOWN_ENGINE_TYPES.contains(type) || !isWebappProcess()) {
+            return;
+        }
+        final String typeDir = indexConfigPath + "/_" + type;
+        if (isOnClassPath(typeDir + "/fess.json") || isOnClassPath(typeDir + "/fess/doc.json")) {
+            return;
+        }
+        logger.warn("search_engine.type={} is not a known type (default, vanilla, aws), and there is no {} directory on the class path,"
+                + " so the default index definitions are used. They need the CodeLibs plugins: set search_engine.type={} for an"
+                + " OpenSearch without them. Type names are case-sensitive.", type, typeDir, Constants.FESEN_TYPE_VANILLA);
+    }
+
+    /**
+     * Checks whether a resource is on the class path.
+     *
+     * @param resource the resource path, relative to the class path root
+     * @return true if the resource exists
+     */
+    protected boolean isOnClassPath(final String resource) {
+        return ResourceUtil.getResourceNoException(resource) != null;
+    }
+
+    /**
+     * Warns that index definition files of the removed {@code _aws} and {@code _cloud} variants
+     * are on the class path.
+     *
+     * <p>Both types read the {@code _vanilla} definitions now, and the copies that earlier versions
+     * shipped are gone, so what is found here was supplied by the user and is ignored. Only the
+     * webapp process warns.</p>
+     *
+     * @param fessConfig the Fess configuration
+     */
+    @SuppressWarnings("deprecation")
+    protected void warnIgnoredIndexOverrides(final FessConfig fessConfig) {
+        final String type = fessConfig.getSearchEngineType();
+        if (!Constants.FESEN_TYPE_AWS.equals(type) && !Constants.FESEN_TYPE_CLOUD.equals(type) || !isWebappProcess()) {
+            return;
+        }
+        final List<String> found = REMOVED_OVERRIDE_FILES.stream().filter(this::isOnClassPath).toList();
+        if (!found.isEmpty()) {
+            logger.warn("search_engine.type={} reads the vanilla index definitions, so these files on the class path are ignored: {}."
+                    + " Move them to fess_indices/_vanilla and suggest_indices/_vanilla.", type, found);
+        }
+    }
+
+    /**
+     * Warns when a plugin-less engine lacks a stock plugin that the index definitions use.
+     *
+     * <p>With {@code vanilla} or {@code aws} the engine does not carry the CodeLibs plugins, so the
+     * analyzers and the vector field of the index definitions rely on the stock kuromoji, nori,
+     * smartcn and k-NN plugins. Without them the index creation fails later with an error that
+     * does not name the cause. The check reads {@code _cat/plugins} and is advisory only: a managed
+     * service may restrict that API or name its plugins differently, so a failed request or an
+     * unreadable answer is logged and ignored, and the startup continues. An empty list is
+     * not such a failure: it means that no plugin is installed. Only the webapp process checks:
+     * the job processes open this client too, and would repeat the message on every run.</p>
+     *
+     * @param fessConfig the Fess configuration
+     */
+    protected void checkEnginePlugins(final FessConfig fessConfig) {
+        if (!fessConfig.isFesenPluginless() || !isWebappProcess()) {
+            return;
+        }
+        final List<String> missing = findMissingEnginePlugins();
+        if (missing != null && !missing.isEmpty()) {
+            logger.warn(
+                    "The search engine does not report the plugins {} that search_engine.type={} relies on, and indexing or search"
+                            + " may fail without them. Install them into the search engine, or, on Amazon OpenSearch Service,"
+                            + " associate the package or use a domain version that bundles them. The startup continues.",
+                    missing, fessConfig.getFesenType());
+        }
+    }
+
+    /**
+     * Asks the search engine which of the {@link #REQUIRED_ENGINE_PLUGINS} it does not report.
+     *
+     * <p>This never throws. When the answer cannot be had (a non-200 status, an answer that is not
+     * a list of plugins, a failed request) the reason is logged at INFO together with what is
+     * lost, and {@code null} is returned: the check was skipped, which is not the same as nothing
+     * being missing.</p>
+     *
+     * @return the missing plugin names in the order they are required, empty when none is missing,
+     *         or {@code null} when the check was skipped
+     */
+    protected List<String> findMissingEnginePlugins() {
+        try (CurlResponse response =
+                ComponentUtil.getCurlHelper().get("/_cat/plugins").param("h", "component").param("format", "json").execute()) {
+            final int httpStatusCode = response.getHttpStatusCode();
+            if (httpStatusCode != 200) {
+                logSkippedEnginePluginCheck("GET /_cat/plugins returned HTTP " + httpStatusCode);
+                return null;
+            }
+            return findMissingPlugins(parseInstalledPlugins(response.getContentAsString()));
+        } catch (final Exception e) {
+            logSkippedEnginePluginCheck("GET /_cat/plugins failed: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("The search engine plugin check failed.", e);
+            }
+            return null;
+        }
+    }
+
+    private void logSkippedEnginePluginCheck(final String reason) {
+        logger.info("Skipped the search engine plugin check: {}. Index creation fails with an unspecific error if the search engine"
+                + " lacks the plugins {}.", reason, REQUIRED_ENGINE_PLUGINS);
+    }
+
+    /**
+     * Reads the plugin names out of a {@code _cat/plugins?h=component&format=json} answer.
+     *
+     * <p>The answer is a JSON array of {@code {"component": name}}. The stock k-NN plugin is
+     * reported as {@code opensearch-knn}, so a leading {@code opensearch-} is dropped to compare
+     * every plugin by the name the index definitions use. An answer that is not such an array
+     * makes the JSON parser throw its unchecked exception.</p>
+     *
+     * @param content the JSON answer
+     * @return the plugin names without the {@code opensearch-} prefix, never {@code null}
+     */
+    protected static List<String> parseInstalledPlugins(final String content) {
+        final List<Map<String, Object>> plugins = new ObjectMapper().readValue(content, new TypeReference<List<Map<String, Object>>>() {
+        });
+        final List<String> names = new ArrayList<>();
+        for (final Map<String, Object> plugin : plugins) {
+            if (plugin != null && plugin.get("component") instanceof final String name) {
+                names.add(name.startsWith("opensearch-") ? name.substring("opensearch-".length()) : name);
+            }
+        }
+        return names;
+    }
+
+    /**
+     * Picks the required plugins that the engine does not report.
+     *
+     * @param installed the plugin names from {@link #parseInstalledPlugins(String)}
+     * @return the missing plugin names in the order they are required
+     */
+    protected static List<String> findMissingPlugins(final List<String> installed) {
+        return REQUIRED_ENGINE_PLUGINS.stream().filter(name -> !installed.contains(name)).toList();
     }
 
     /**
@@ -700,20 +895,12 @@ public class SearchEngineClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final String fesenType = fessConfig.getFesenType();
-        if (uploadConfig) {
-            switch (fesenType) {
-            case Constants.FESEN_TYPE_CLOUD:
-            case Constants.FESEN_TYPE_AWS:
-                // nothing
-                break;
-            default:
-                waitForConfigSyncStatus();
-                sendConfigFiles(index);
-                break;
-            }
+        if (uploadConfig && !fessConfig.isFesenPluginless()) {
+            waitForConfigSyncStatus();
+            sendConfigFiles(index);
         }
 
-        final String indexConfigFile = getResourcePath(indexConfigPath, fesenType, "/" + index + ".json");
+        final String indexConfigFile = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + ".json");
         try {
             final String source = readIndexSetting(index, fesenType, indexConfigFile, numberOfShards, autoExpandReplicas);
             final CreateIndexRequestBuilder builder =
@@ -944,13 +1131,13 @@ public class SearchEngineClient implements Client {
 
                 // 5. Optionally load bulk data with CREATE mode
                 if (loadBulkData) {
-                    final String dataPath =
-                            getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + configIndex + "/" + configType + ".bulk");
+                    final String dataPath = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(),
+                            "/" + configIndex + "/" + configType + ".bulk");
                     if (ResourceUtil.isExist(dataPath)) {
                         insertBulkData(fessConfig, indexName, dataPath, true);
                     }
                     split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
-                        final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(),
+                        final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(),
                                 "/" + configIndex + "/" + configType + "_" + name + ".bulk");
                         if (ResourceUtil.isExist(bulkPath)) {
                             insertBulkData(fessConfig, indexName, bulkPath, true);
@@ -988,7 +1175,7 @@ public class SearchEngineClient implements Client {
      */
     protected boolean switchAliases(final String configIndex, final String oldIndexName, final String newIndexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + configIndex + "/alias");
+        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + configIndex + "/alias");
         try {
             final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
             if (aliasConfigDir.isDirectory()) {
@@ -1172,7 +1359,8 @@ public class SearchEngineClient implements Client {
         final Map<String, MappingMetadata> indexMappings = getMappingsResponse.mappings();
         if (indexMappings == null || !indexMappings.containsKey("properties")) {
             String source = null;
-            final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
+            final String mappingFile =
+                    getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + "/" + docType + ".json");
             try {
                 source = substitutePlaceholders(FileUtil.readUTF8(mappingFile), fessConfig.getIndexNumberOfShards(),
                         fessConfig.getIndexAutoExpandReplicas());
@@ -1199,12 +1387,12 @@ public class SearchEngineClient implements Client {
 
                 if (loadBulkData) {
                     final String dataPath =
-                            getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
+                            getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + "/" + docType + ".bulk");
                     if (ResourceUtil.isExist(dataPath)) {
                         insertBulkData(fessConfig, indexName, dataPath);
                     }
                     split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
-                        final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(),
+                        final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(),
                                 "/" + index + "/" + docType + "_" + name + ".bulk");
                         if (ResourceUtil.isExist(bulkPath)) {
                             insertBulkData(fessConfig, indexName, bulkPath);
@@ -1220,7 +1408,8 @@ public class SearchEngineClient implements Client {
             }
             addMissingProperties(index, docType, indexName, indexMappings.get("properties"));
             if (loadBulkData && isStartupBulkReloadTarget(index) && isWebappProcess()) {
-                final String dataPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
+                final String dataPath =
+                        getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + "/" + docType + ".bulk");
                 if (ResourceUtil.isExist(dataPath)) {
                     insertBulkData(fessConfig, indexName, dataPath, true);
                 }
@@ -1258,7 +1447,8 @@ public class SearchEngineClient implements Client {
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
+        final String mappingFile =
+                getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + "/" + docType + ".json");
         if (!ResourceUtil.isExist(mappingFile)) {
             logger.warn("{} is not found.", mappingFile);
             return;
@@ -1447,7 +1637,7 @@ public class SearchEngineClient implements Client {
     protected void createAlias(final String index, final String createdIndexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         // alias
-        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/alias");
+        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + "/alias");
         try {
             final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
             if (aliasConfigDir.isDirectory()) {
@@ -1489,7 +1679,7 @@ public class SearchEngineClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
         final Map<String, Object> aliases = new LinkedHashMap<>();
-        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/alias");
+        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenResourceType(), "/" + index + "/alias");
         try {
             final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
             if (aliasConfigDir.isDirectory()) {
@@ -1593,26 +1783,22 @@ public class SearchEngineClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final String fesenType = fessConfig.getFesenType();
-        switch (fesenType) {
-        case Constants.FESEN_TYPE_CLOUD:
-        case Constants.FESEN_TYPE_AWS:
+        if (fessConfig.isFesenPluginless()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Skipped configsync flush: {}", fesenType);
             }
             callback.run();
-            break;
-        default:
-            ComponentUtil.getCurlHelper().post("/_configsync/flush").execute(response -> {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Flushed config files: {} => {}", fesenType, response.getContentAsString());
-                }
-                callback.run();
-            }, e -> {
-                logger.warn("Failed to flush config files.", e);
-                callback.run();
-            });
-            break;
+            return;
         }
+        ComponentUtil.getCurlHelper().post("/_configsync/flush").execute(response -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Flushed config files: {} => {}", fesenType, response.getContentAsString());
+            }
+            callback.run();
+        }, e -> {
+            logger.warn("Failed to flush config files.", e);
+            callback.run();
+        });
     }
 
     /**
@@ -1725,11 +1911,17 @@ public class SearchEngineClient implements Client {
     /**
      * Waits for the search engine cluster to reach yellow or green status.
      *
+     * <p>A 401 or 403 answer is logged at WARN once, with a pointer to the credentials: the loop
+     * retries for a minute, and the same refusal on every attempt would otherwise repeat the
+     * message and its stack trace sixty times. The last refusal is remembered, so that a final
+     * failure of another kind (a timeout, say) does not hide it in the message of the failure.</p>
+     *
      * @param fessConfig the Fess configuration
      * @throws ContainerInitFailureException if the cluster doesn't become available
      */
     protected void waitForYellowStatus(final FessConfig fessConfig) {
         Exception cause = null;
+        Exception lastAccessDenied = null;
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final long startTime = systemHelper.getCurrentTimeAsLong();
         for (int i = 0; i < maxEsStatusRetry; i++) {
@@ -1747,22 +1939,81 @@ public class SearchEngineClient implements Client {
             } catch (final Exception e) {
                 cause = e;
             }
-            if (cause instanceof OpenSearchStatusException) {
-                final RestStatus status = ((OpenSearchStatusException) cause).status();
-                switch (status) {
-                case UNAUTHORIZED -> logger.warn("[{}] Unauthorized access: {}", i, SystemUtil.getSearchEngineHttpAddress(), cause);
-                default -> logger.debug("[{}][{}] Failed to access to Fesen ({})", i, status, SystemUtil.getSearchEngineHttpAddress(),
-                        cause);
+            if (isAccessDenied(cause)) {
+                if (lastAccessDenied == null) {
+                    logger.warn(
+                            "[{}] The search engine at {} refused access (HTTP {}). Check search_engine.username, search_engine.password"
+                                    + " and the access policy of the search engine.{}",
+                            i, SystemUtil.getSearchEngineHttpAddress(), ((OpenSearchStatusException) cause).status().getStatus(),
+                            getAccessDeniedAdvice(fessConfig), cause);
                 }
+                lastAccessDenied = cause;
             } else if (logger.isDebugEnabled()) {
-                logger.debug("[{}] Failed to access to Fesen ({})", i, SystemUtil.getSearchEngineHttpAddress(), cause);
+                if (cause instanceof OpenSearchStatusException) {
+                    logger.debug("[{}][{}] Failed to access to Fesen ({})", i, ((OpenSearchStatusException) cause).status(),
+                            SystemUtil.getSearchEngineHttpAddress(), cause);
+                } else {
+                    logger.debug("[{}] Failed to access to Fesen ({})", i, SystemUtil.getSearchEngineHttpAddress(), cause);
+                }
             }
             ThreadUtil.sleep(1000L);
         }
+        throw new ContainerInitFailureException(buildUnavailableMessage(systemHelper.getCurrentTimeAsLong() - startTime,
+                lastAccessDenied != null ? lastAccessDenied : cause, fessConfig), cause);
+    }
+
+    /**
+     * Checks whether the search engine refused the request for lack of credentials or permission.
+     *
+     * @param cause the failure of a request to the search engine
+     * @return {@code true} for an HTTP 401 or 403 answer; {@code false} for anything else, including an answer without a known status
+     */
+    protected static boolean isAccessDenied(final Throwable cause) {
+        if (cause instanceof final OpenSearchStatusException statusException) {
+            final RestStatus status = statusException.status();
+            return status == RestStatus.UNAUTHORIZED || status == RestStatus.FORBIDDEN;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the sentence that the messages about a refused request add for the {@code aws} type.
+     *
+     * <p>Amazon OpenSearch Service domains are often protected by IAM, and Fess cannot sign its
+     * requests with IAM credentials, so a refusal there needs another way in.</p>
+     *
+     * @param fessConfig the Fess configuration
+     * @return the sentence with a leading space, or an empty string for the other types
+     */
+    protected String getAccessDeniedAdvice(final FessConfig fessConfig) {
+        if (Constants.FESEN_TYPE_AWS.equals(fessConfig.getFesenType())) {
+            return " Fess cannot sign requests with IAM credentials, so use fine-grained access control with a user name and password,"
+                    + " or an access policy that permits this host.";
+        }
+        return StringUtil.EMPTY;
+    }
+
+    /**
+     * Builds the message of the failure to reach the search engine.
+     *
+     * <p>A refusal means the engine is running, so the remedy is the credentials and the access
+     * policy rather than starting or installing an engine.</p>
+     *
+     * @param elapsedMillis the time spent waiting
+     * @param cause         the last refusal if there was one, otherwise the last failure
+     * @param fessConfig    the Fess configuration
+     * @return the message
+     */
+    protected String buildUnavailableMessage(final long elapsedMillis, final Throwable cause, final FessConfig fessConfig) {
         final String message = "The search engine at " + SystemUtil.getSearchEngineHttpAddress() + " did not become available within "
-                + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms. Check that OpenSearch is running and reachable."
+                + elapsedMillis + "ms.";
+        if (isAccessDenied(cause)) {
+            return message + " It refused the request (" + ((OpenSearchStatusException) cause).status().getStatus()
+                    + "). Check search_engine.username and search_engine.password, and that the access policy of the search engine"
+                    + " permits that user to access it from this host." + getAccessDeniedAdvice(fessConfig);
+        }
+        return message + " Check that OpenSearch is running and reachable."
                 + " If there is none yet, run bin/fess-setup install opensearch to set one up.";
-        throw new ContainerInitFailureException(message, cause);
     }
 
     /**
@@ -1773,19 +2024,21 @@ public class SearchEngineClient implements Client {
     protected void waitForConfigSyncStatus() {
         FessSystemException cause = null;
         for (int i = 0; i < maxConfigSyncStatusRetry; i++) {
+            int lastHttpStatus = 0;
             try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/wait").param("status", "green").execute()) {
                 final int httpStatusCode = response.getHttpStatusCode();
                 if (httpStatusCode == 200) {
                     logger.info("ConfigSync is ready.");
                     return;
                 }
+                lastHttpStatus = httpStatusCode;
                 final String message = "Configsync is not available. HTTP Status is " + httpStatusCode;
                 if (response.getContentException() != null) {
                     throw new FessSystemException(message, response.getContentException());
                 }
                 throw new FessSystemException(message);
             } catch (final Exception e) {
-                cause = new FessSystemException("Configsync is not available.", e);
+                cause = new FessSystemException(buildConfigSyncUnavailableMessage(lastHttpStatus, e), e);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to access to configsync:{}", i, cause);
@@ -1793,6 +2046,24 @@ public class SearchEngineClient implements Client {
             ThreadUtil.sleep(1000L);
         }
         throw cause;
+    }
+
+    /**
+     * Builds the message of the failure to reach ConfigSync.
+     *
+     * <p>This is reached only when the search engine type expects the CodeLibs plugins. One cause
+     * is an OpenSearch that does not have them, which needs the plugin-less type instead, but a
+     * connection problem looks the same, so the hint is conditional and the message names what was
+     * seen last.</p>
+     *
+     * @param httpStatusCode the status of the last answer, or 0 if the request failed without one
+     * @param cause          the last failure
+     * @return the message
+     */
+    protected String buildConfigSyncUnavailableMessage(final int httpStatusCode, final Throwable cause) {
+        return "Configsync is not available (" + (httpStatusCode > 0 ? "HTTP " + httpStatusCode : cause.getClass().getName())
+                + "). If this search engine does not have the CodeLibs plugins, set search_engine.type=" + Constants.FESEN_TYPE_VANILLA
+                + " (" + Constants.FESEN_TYPE_AWS + " on Amazon OpenSearch Service); otherwise check the cause below.";
     }
 
     @Override
@@ -2526,13 +2797,15 @@ public class SearchEngineClient implements Client {
         }
 
         /**
-         * Sets the similar document hash for similarity search.
+         * Sets the similar document hash for similarity search. The hash is ignored when the search
+         * engine runs without the CodeLibs plugins: the filter would term-query a field that the
+         * plugin-less index does not index.
          *
          * @param similarDocHash the hash of the document to find similar documents to
          * @return this builder for method chaining
          */
         public SearchConditionBuilder similarDocHash(final String similarDocHash) {
-            if (StringUtil.isNotBlank(similarDocHash)) {
+            if (StringUtil.isNotBlank(similarDocHash) && !ComponentUtil.getFessConfig().isFesenPluginless()) {
                 this.similarDocHash = similarDocHash;
             }
             return this;

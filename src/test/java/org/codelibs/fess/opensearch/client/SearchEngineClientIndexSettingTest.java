@@ -60,11 +60,9 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
 
     private static final String SEARCH_LOG_MAPPING = "fess_indices/fess_log.search_log/search_log.json";
 
-    private static final String[] SETTINGS_JSON_PATHS =
-            { "fess_indices/fess.json", "fess_indices/_aws/fess.json", "fess_indices/_cloud/fess.json" };
+    private static final String[] SETTINGS_JSON_PATHS = { "fess_indices/fess.json", "fess_indices/_vanilla/fess.json" };
 
-    private static final String[] DOC_JSON_PATHS =
-            { "fess_indices/fess/doc.json", "fess_indices/_aws/fess/doc.json", "fess_indices/_cloud/fess/doc.json" };
+    private static final String[] DOC_JSON_PATHS = { "fess_indices/fess/doc.json", "fess_indices/_vanilla/fess/doc.json" };
 
     @Override
     protected boolean isUseOneTimeContainer() {
@@ -597,8 +595,8 @@ public class SearchEngineClientIndexSettingTest extends UnitFessTestCase {
     @Test
     public void test_indexDefinitions_areValidJson() throws Exception {
         final ObjectMapper mapper = new ObjectMapper();
-        final String[] paths = { "fess_indices/fess.json", "fess_indices/_aws/fess.json", "fess_indices/_cloud/fess.json",
-                "fess_indices/fess/doc.json", "fess_indices/_aws/fess/doc.json", "fess_indices/_cloud/fess/doc.json" };
+        final String[] paths = { "fess_indices/fess.json", "fess_indices/_vanilla/fess.json", "fess_indices/fess/doc.json",
+                "fess_indices/_vanilla/fess/doc.json" };
         for (final String path : paths) {
             try (InputStream in = getClass().getClassLoader().getResourceAsStream(path)) {
                 assertNotNull(in, path + " must exist");

@@ -17,10 +17,14 @@ package org.codelibs.fess.app.web.api.admin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.app.web.api.ApiResult.ApiErrorResponse;
+import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.FessApiAction;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Abstract base class for admin API actions in Fess.
@@ -70,12 +74,26 @@ public abstract class FessApiAdminAction extends FessApiAction {
     }
 
     /**
+     * Checks whether this action works only with the CodeLibs plugins of the search engine.
+     * <p>
+     * When it does and the search engine runs without them ({@code FessConfig#isFesenPluginless()}),
+     * {@link #hookBefore(ActionRuntime)} answers with HTTP 404 instead of running the action.
+     * </p>
+     *
+     * @return true if the action needs the CodeLibs plugins; false by default
+     */
+    protected boolean requiresEnginePlugins() {
+        return false;
+    }
+
+    /**
      * Records the request in the audit log before the action runs, as the admin screens do.
      * <p>
      * This runs only after {@link #godHandPrologue(ActionRuntime)} has accepted the access token,
      * so every administrative change made through this API leaves an {@code ACCESS} record. The
      * user is the logged-in user when the request carries a session and {@code -} otherwise; the
-     * access token itself is never written.
+     * access token itself is never written. An action that {@link #requiresEnginePlugins() requires
+     * the plugins} is then turned away with HTTP 404 when the search engine runs without them.
      * </p>
      *
      * @param runtime the action runtime context
@@ -84,6 +102,12 @@ public abstract class FessApiAdminAction extends FessApiAction {
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) {
         activityHelper.access(getUserBean(), runtime.getRequestPath(), runtime.getExecuteMethod().getName());
+        if (requiresEnginePlugins() && fessConfig.isFesenPluginless()) {
+            return asJson(
+                    new ApiErrorResponse().message("This API is not available when the search engine runs without the CodeLibs plugins.")
+                            .status(Status.FAILED)
+                            .result()).httpStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
         return super.hookBefore(runtime);
     }
 }

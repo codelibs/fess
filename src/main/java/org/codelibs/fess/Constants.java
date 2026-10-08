@@ -832,10 +832,19 @@ public class Constants extends CoreLibConstants {
     // Search Engine Type Constants
     // ============================================================
 
-    /** Cloud-based search engine type. */
+    /**
+     * Deprecated alias of {@link #FESEN_TYPE_VANILLA}.
+     *
+     * @deprecated use {@link #FESEN_TYPE_VANILLA}; the configured value {@code cloud} is still accepted
+     *             and treated as {@code vanilla}
+     */
+    @Deprecated(since = "15.9")
     public static final String FESEN_TYPE_CLOUD = "cloud";
 
-    /** AWS-based search engine type. */
+    /** Search engine type for OpenSearch without the CodeLibs plugins. */
+    public static final String FESEN_TYPE_VANILLA = "vanilla";
+
+    /** AWS-based search engine type (OpenSearch without the CodeLibs plugins, plus AWS-specific handling). */
     public static final String FESEN_TYPE_AWS = "aws";
 
     /** Search engine username configuration key. */

@@ -42,9 +42,9 @@ import tools.jackson.databind.ObjectMapper;
 /**
  * Covers the Japanese spelling normalization that the bundled document index ships with: the
  * character mappings of {@code mapping.txt} (title, content and important_content) and
- * {@code ja/mapping.txt} (the {@code *_ja} fields), their inline copies in the {@code _aws} and
- * {@code _cloud} index settings, and the {@code prolonged_sound_mark_filter} that turns dash-like
- * characters written after kana into a long vowel mark. The mappings are applied with Lucene's own
+ * {@code ja/mapping.txt} (the {@code *_ja} fields), their inline copy in the {@code _vanilla} index
+ * settings, and the {@code prolonged_sound_mark_filter} that turns dash-like characters written
+ * after kana into a long vowel mark. The mappings are applied with Lucene's own
  * {@link MappingCharFilter} and the long vowel pattern with {@link PatternReplaceCharFilter}, the
  * classes the search engine runs for those char filters.
  */
@@ -54,10 +54,9 @@ public class BundledJapaneseNormalizationTest extends UnitFessTestCase {
 
     private static final String JA_MAPPING = "fess_indices/fess/ja/mapping.txt";
 
-    private static final String[] SETTINGS_JSON_PATHS =
-            { "fess_indices/fess.json", "fess_indices/_aws/fess.json", "fess_indices/_cloud/fess.json" };
+    private static final String[] SETTINGS_JSON_PATHS = { "fess_indices/fess.json", "fess_indices/_vanilla/fess.json" };
 
-    private static final String[] INLINE_SETTINGS_JSON_PATHS = { "fess_indices/_aws/fess.json", "fess_indices/_cloud/fess.json" };
+    private static final String[] INLINE_SETTINGS_JSON_PATHS = { "fess_indices/_vanilla/fess.json" };
 
     private static final String PROLONGED_SOUND_MARK_FILTER = "prolonged_sound_mark_filter";
 

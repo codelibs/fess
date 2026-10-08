@@ -50,6 +50,11 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
     public ApiAdminDictMappingAction() {
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDictMappingAction.class);
 
     @Resource
