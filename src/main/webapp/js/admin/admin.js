@@ -7,16 +7,28 @@ $(function() {
     .next("input,select,textarea")
     .focus();
 
-  $("section.content input").keypress(function(e) {
-    if (e.which === 13) {
-      var $submitButton = $("input#submit, button#submit");
-      if ($submitButton.size() > 0) {
-        $submitButton[0].submit();
+  // Enter in a field presses the primary button of its form: Search on a list, Create or Update
+  // on an edit form. Without this the browser would press the first submit button, which is Back.
+  $("section.content input")
+    .not("[type=button],[type=submit],[type=reset],[type=image],[type=file]")
+    .keypress(function(e) {
+      if (e.which === 13) {
+        if (e.originalEvent && e.originalEvent.isComposing) {
+          // Enter that confirms an IME composition
+          return;
+        }
+        var $submitButton = $(this)
+          .closest("form")
+          .find("input#submit, button#submit, .btn-primary[type=submit]")
+          .not(":disabled")
+          .first();
+        if ($submitButton.length > 0) {
+          $submitButton[0].click();
+        }
+        // ignore enter key down
+        return false;
       }
-      // ignore enter key down
-      return false;
-    }
-  });
+    });
 
   $(".table tr[data-href]").each(function() {
     $(this)
@@ -31,6 +43,13 @@ $(function() {
       )
       .click(function() {
         document.location = $(this).attr("data-href");
+      })
+      .keydown(function(e) {
+        // A row that is announced as a button opens with Enter or Space, like a button.
+        if (e.target === this && (e.which === 13 || e.which === 32)) {
+          e.preventDefault();
+          document.location = $(this).attr("data-href");
+        }
       });
   });
 
