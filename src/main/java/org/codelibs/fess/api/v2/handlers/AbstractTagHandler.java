@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,6 +36,8 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+
+import com.google.common.util.concurrent.Striped;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -53,7 +57,19 @@ public abstract class AbstractTagHandler {
     protected static final int MAX_BODY_BYTES = 1024;
 
     /** How many times an update that lost a race with another writer is read and applied again. */
-    protected static final int MAX_UPDATE_ATTEMPTS = 3;
+    protected static final int MAX_UPDATE_ATTEMPTS = 8;
+
+    /** The wait before the first retry of an update, in milliseconds. It doubles with every retry. */
+    protected static final long RETRY_WAIT_MILLIS = 20L;
+
+    /** The longest wait before a retry of an update, in milliseconds. */
+    protected static final long RETRY_WAIT_MAX_MILLIS = 320L;
+
+    /**
+     * Serializes the updates of one tag in this JVM: a fixed set of locks, each shared by the tags whose ids hash to it,
+     * so that the number of locks does not grow with the number of tags.
+     */
+    private static final Striped<Lock> UPDATE_LOCKS = Striped.lock(64);
 
     /** A tag type id: the SHA-256 of the tag value in lowercase hex. */
     private static final Pattern TAG_ID_PATTERN = Pattern.compile("[0-9a-f]{64}");
@@ -223,8 +239,12 @@ public abstract class AbstractTagHandler {
     }
 
     /**
-     * Reads a tag type the caller owns, changes it and writes it back. A write that lost a race with another writer
-     * is retried on a fresh read, so that a concurrent change of the paths is not overwritten.
+     * Reads a tag type the caller owns, changes it and writes it back.
+     *
+     * <p>The updates of one tag run one at a time in this JVM, so that requests on the same tag do not lose a race to
+     * each other. A write that still lost a race, to another node or to the admin console, is retried on a fresh read
+     * after a wait that grows with every attempt, so that a concurrent change of the paths is not overwritten. The
+     * wait is outside the lock.</p>
      *
      * @param id the tag type id
      * @param userId the caller
@@ -233,14 +253,16 @@ public abstract class AbstractTagHandler {
      * @throws TagRequestException if the tag is not the caller's, the change is refused, or every attempt lost a race
      */
     protected TagType updateTagType(final String id, final String userId, final TagTypeModifier modifier) throws TagRequestException {
+        final Lock lock = UPDATE_LOCKS.get(String.valueOf(id));
         for (int attempt = 1;; attempt++) {
-            final TagType tagType = getOwnTagType(id, userId);
-            if (!modifier.modify(tagType)) {
-                return tagType;
-            }
-            tagType.setUpdatedBy(userId);
-            tagType.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+            lock.lock();
             try {
+                final TagType tagType = getOwnTagType(id, userId);
+                if (!modifier.modify(tagType)) {
+                    return tagType;
+                }
+                tagType.setUpdatedBy(userId);
+                tagType.setUpdatedTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
                 getTagTypeService().update(tagType);
                 return tagType;
             } catch (final TagTypeConflictException e) {
@@ -251,7 +273,36 @@ public abstract class AbstractTagHandler {
                 if (logger.isDebugEnabled()) {
                     logger.debug("The tag was changed concurrently; retrying: id={}, attempt={}", id, attempt);
                 }
+            } finally {
+                lock.unlock();
             }
+            pause(getRetryWaitMillis(attempt));
+        }
+    }
+
+    /**
+     * Returns how long to wait before the retry that follows a failed attempt: {@link #RETRY_WAIT_MILLIS} doubled for
+     * every earlier failure up to {@link #RETRY_WAIT_MAX_MILLIS}, then cut by a random share of up to half, so that
+     * writers that lost together do not retry together.
+     *
+     * @param attempt the number of the attempt that failed, starting at 1
+     * @return the wait in milliseconds
+     */
+    protected long getRetryWaitMillis(final int attempt) {
+        final long wait = Math.min(RETRY_WAIT_MAX_MILLIS, RETRY_WAIT_MILLIS * (1L << Math.min(attempt - 1, 16)));
+        return ThreadLocalRandom.current().nextLong(wait / 2, wait + 1);
+    }
+
+    /**
+     * Waits before a retry. Exposed as a seam for unit tests.
+     *
+     * @param millis the time to wait
+     */
+    protected void pause(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

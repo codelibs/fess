@@ -100,6 +100,28 @@ public class TagTypeServiceTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getTagType_readsTheTagTypeByGetNotBySearch() {
+        // A search finds a tag type only once the index is refreshed, which a request that just lost a race for it
+        // cannot wait for; selectByPK stands for the search here and finds nothing yet.
+        final TagType stored = createTagType();
+        final TagTypeBhv bhv = new TagTypeBhv() {
+            @Override
+            public org.dbflute.optional.OptionalEntity<TagType> selectByPK(final String id) {
+                return org.dbflute.optional.OptionalEntity.empty();
+            }
+
+            @Override
+            public org.dbflute.optional.OptionalEntity<TagType> selectRealtimeByPK(final String id) {
+                return stored.getId().equals(id) ? org.dbflute.optional.OptionalEntity.of(stored)
+                        : org.dbflute.optional.OptionalEntity.empty();
+            }
+        };
+
+        assertSame(stored, createService(bhv).getTagType(stored.getId()).get());
+        assertFalse(createService(bhv).getTagType("other").isPresent());
+    }
+
+    @Test
     public void test_insert_usesCreateOpType() {
         final RecordingTagTypeBhv bhv = new RecordingTagTypeBhv();
 

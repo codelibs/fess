@@ -58,6 +58,11 @@ public class TagsHandlerTest extends UnitFessTestCase {
         protected TagTypeService getTagTypeService() {
             return env.service;
         }
+
+        @Override
+        protected void pause(final long millis) {
+            env.pauses.add(millis);
+        }
     }
 
     private Response call(final StubRequest req, final String id) throws IOException {
