@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -144,7 +145,12 @@ public class RelatedContentHelper extends AbstractConfigHelper {
                 if (StringUtil.isBlank(regex)) {
                     logger.warn("Unknown regex pattern: {}", entity.getTerm());
                 } else {
-                    pair.getSecond().add(new Pair<>(Pattern.compile(regex), entity.getContent()));
+                    try {
+                        pair.getSecond().add(new Pair<>(Pattern.compile(regex), entity.getContent()));
+                    } catch (final PatternSyntaxException e) {
+                        logger.warn("Skipped the related content with an invalid regex pattern: term={}, reason={}", entity.getTerm(),
+                                e.getDescription());
+                    }
                 }
             } else {
                 pair.getFirst().put(toLowerCase(entity.getTerm()), entity.getContent());
@@ -152,6 +158,29 @@ public class RelatedContentHelper extends AbstractConfigHelper {
         });
         this.relatedContentMap = relatedContentMap;
         return relatedContentMap.size();
+    }
+
+    /**
+     * Checks the regex pattern of a term, as {@link #load()} would read it.
+     * A term without the regex prefix and a term whose pattern is blank are not checked here.
+     *
+     * @param term the term of a related content
+     * @return the description of the syntax error of the pattern, or null if there is none to report
+     */
+    public String getRegexError(final String term) {
+        if (term == null || !term.startsWith(regexPrefix)) {
+            return null;
+        }
+        final String regex = term.substring(regexPrefix.length());
+        if (StringUtil.isBlank(regex)) {
+            return null;
+        }
+        try {
+            Pattern.compile(regex);
+            return null;
+        } catch (final PatternSyntaxException e) {
+            return e.getDescription();
+        }
     }
 
     /**

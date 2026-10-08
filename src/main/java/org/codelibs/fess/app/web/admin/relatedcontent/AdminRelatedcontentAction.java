@@ -25,6 +25,7 @@ import org.codelibs.fess.app.service.RelatedContentService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -244,7 +245,7 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
-        validate(form, messages -> {}, this::asEditHtml);
+        validate(form, messages -> validateRelatedContent(form, messages), this::asEditHtml);
         verifyToken(this::asEditHtml);
         getRelatedContent(form).ifPresent(entity -> {
             try {
@@ -271,7 +272,7 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
-        validate(form, messages -> {}, this::asEditHtml);
+        validate(form, messages -> validateRelatedContent(form, messages), this::asEditHtml);
         verifyToken(this::asEditHtml);
         getRelatedContent(form).ifPresent(entity -> {
             try {
@@ -319,6 +320,20 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+
+    /**
+     * Adds an error to the term when it holds a regex pattern that cannot be compiled.
+     * A pattern that fails to compile is skipped when the related contents are loaded, so it would never be served.
+     *
+     * @param form the form
+     * @param messages the messages to add the error to
+     */
+    public static void validateRelatedContent(final CreateForm form, final FessMessages messages) {
+        final String error = ComponentUtil.getRelatedContentHelper().getRegexError(form.term);
+        if (error != null) {
+            messages.addErrorsRelatedcontentInvalidRegex("term", error);
+        }
+    }
 
     private static OptionalEntity<RelatedContent> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {

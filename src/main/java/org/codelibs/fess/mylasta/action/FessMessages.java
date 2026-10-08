@@ -503,6 +503,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The tag was changed by someone else. Reload it and try again. */
     public static final String ERRORS_tagtype_changed_concurrently = "{errors.tagtype_changed_concurrently}";
 
+    /** The key of the message: The regular expression after "regex:" is invalid: {0} */
+    public static final String ERRORS_relatedcontent_invalid_regex = "{errors.relatedcontent_invalid_regex}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -2960,6 +2963,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsTagtypeChangedConcurrently(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_tagtype_changed_concurrently));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.relatedcontent_invalid_regex' with parameters.
+     * <pre>
+     * message: The regular expression after "regex:" is invalid: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsRelatedcontentInvalidRegex(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_relatedcontent_invalid_regex, arg0));
         return this;
     }
 
