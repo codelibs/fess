@@ -56,7 +56,6 @@ vi.mock("../../../../main/webapp/themes/bootstrap/assets/search.js", () => ({
   clearSearchState: vi.fn(),
   attachSuggest: vi.fn(),
   attachSearchHistory: vi.fn(),
-  disableSubmitBriefly: vi.fn(),
   renderPopularWords: vi.fn(),
   initSearchOptions: vi.fn(),
   forgetNum: vi.fn(),
@@ -495,6 +494,19 @@ describe("home search form", () => {
     expect(qs.get("sort")).toBe("last_modified.desc");
     expect(qs.get("num")).toBe("20");
     expect(qs.getAll("fields.label")).toEqual(["lblA"]);
+  });
+
+  it("leaves the home Search button enabled after a search (it is the form's default button: disabled, Enter does nothing on coming back)", () => {
+    mountFullDom();
+    registerRoutes();
+    setLocation("/");
+    router.register.mock.calls[1][1]();
+
+    document.getElementById("contentQuery").value = "hello";
+    document.getElementById("home-search-form").dispatchEvent(new Event("submit", { cancelable: true }));
+
+    expect(router.navigate).toHaveBeenCalled();
+    expect(document.querySelector("#home-search-form button[type=submit]").disabled).toBe(false);
   });
 
   it("wires the suggest and the recent searches to the home box once", () => {

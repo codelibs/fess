@@ -216,9 +216,6 @@ function attachHomeView() {
         const labelSel = document.getElementById("labelSearchOption");
         if (labelSel) Array.from(labelSel.selectedOptions).map(o => o.value).filter(Boolean).forEach(v => params.append("fields.label", v));
         router.navigate("search?" + params.toString());
-        // JSP parity: disable the submit button for 3s after navigation has been
-        // triggered, to prevent rapid double-submits.
-        search.disableSubmitBriefly(document.querySelector("#home-search-form button[type=submit]"));
       }
     });
   }

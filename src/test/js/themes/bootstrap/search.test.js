@@ -35,7 +35,7 @@ import {
   el,
   buildResultCard,
   renderPopularWords,
-  disableSubmitBriefly,
+  isRepeatedSubmit,
   clearSearchState,
   runFromUrl,
   runSearch,
@@ -448,22 +448,47 @@ describe("renderPopularWords", () => {
   });
 });
 
-describe("disableSubmitBriefly", () => {
+describe("isRepeatedSubmit", () => {
   afterEach(() => vi.useRealTimers());
 
-  it("disables the button immediately and re-enables it after 3000ms", () => {
-    vi.useFakeTimers();
-    const btn = document.createElement("button");
-    disableSubmitBriefly(btn);
-    expect(btn.disabled).toBe(true);
+  // The guard keeps one module-level timestamp, so each case starts a long time after the last.
+  let epoch = Date.UTC(2031, 0, 1);
+  const startAt = () => { epoch += 3600_000; vi.useFakeTimers(); vi.setSystemTime(epoch); };
+
+  it("lets the first search through and ignores the same search again within 3 s", () => {
+    startAt();
+    setLocation("/search?q=foo&num=10");
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(false);
     vi.advanceTimersByTime(2999);
-    expect(btn.disabled).toBe(true);
-    vi.advanceTimersByTime(1);
-    expect(btn.disabled).toBe(false);
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(true);
   });
 
-  it("does not throw when btn is null", () => {
-    expect(() => disableSubmitBriefly(null)).not.toThrow();
+  it("lets the same search through again once 3 s have passed since the one that ran", () => {
+    startAt();
+    setLocation("/search?q=foo&num=10");
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(false);
+    vi.advanceTimersByTime(2000);
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(true); // ignored: does not restart the window
+    vi.advanceTimersByTime(1000);
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(false);
+  });
+
+  it("never ignores a different search, however soon it follows", () => {
+    startAt();
+    setLocation("/search?q=foo&num=10");
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(false);
+    vi.advanceTimersByTime(100);
+    expect(isRepeatedSubmit("?q=bar&num=10")).toBe(false); // another query
+    expect(isRepeatedSubmit("?q=foo&num=50")).toBe(false); // the same query with another option
+  });
+
+  it("does not ignore a search for a page that is no longer the one shown", () => {
+    startAt();
+    setLocation("/search?q=foo&num=10");
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(false);
+    setLocation("/search?q=foo&num=10&start=10"); // the user went to page 2 meanwhile
+    vi.advanceTimersByTime(100);
+    expect(isRepeatedSubmit("?q=foo&num=10")).toBe(false);
   });
 });
 
@@ -1703,7 +1728,7 @@ describe("attach — wiring", () => {
     // and rendered popular words.
     expect(document.getElementById("popular-words").querySelectorAll("a[data-spa]").length).toBe(4);
 
-    // 1. Header form submit → navigate to search?q=..., syncs inputs, disables the button.
+    // 1. Header form submit → navigate to search?q=..., syncs inputs.
     // The drawer's labels ride along; a legacy URL's sdh and as.* conditions do not.
     setLocation("/search?q=old&sdh=h1&as.q=legacy&fields.label=lblB");
     document.getElementById("labelSearchOption").value = "lblA";
@@ -1718,7 +1743,8 @@ describe("attach — wiring", () => {
     expect(headerParams.has("as.q")).toBe(false);
     setLocation("/");
     expect(document.getElementById("contentQuery").value).toBe("hello");
-    expect(document.getElementById("searchButton").disabled).toBe(true);
+    // The button is not disabled after a search: a disabled default button would stop Enter in the box.
+    expect(document.getElementById("searchButton").disabled).toBe(false);
 
     // 2. Drawer "Clear" button → resets the option selects (no re-search).
     const numSel = document.getElementById("numSearchOption");
@@ -1787,6 +1813,46 @@ describe("attach — wiring", () => {
     dropdown.querySelector(".list-group-item").dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
     expect(input.value).toBe("sug1");
     expect(navigate).toHaveBeenCalled(); // submit handler navigated
+  });
+
+  it("header form: a double submit of the same search runs once, another query right after it runs", async () => {
+    // attach() wires once per module instance, so this case runs against a fresh one.
+    vi.useFakeTimers();
+    vi.setSystemTime(Date.UTC(2032, 0, 1));
+    vi.resetModules();
+    const freshApi = await import("../../../../main/webapp/themes/bootstrap/assets/api.js");
+    const freshRouter = await import("../../../../main/webapp/themes/bootstrap/assets/router.js");
+    const fresh = await import("../../../../main/webapp/themes/bootstrap/assets/search.js");
+    freshApi.getConfig.mockReturnValue(null);
+    freshApi.get.mockImplementation(async () => ({}));
+    setLocation("/search?q=old");
+    mountBody(ATTACH_FIXTURE);
+    fresh.attach();
+    const form = document.getElementById("search-form");
+    const box = document.getElementById("query");
+    const submit = () => form.dispatchEvent(new Event("submit", { cancelable: true }));
+
+    box.value = "foo";
+    submit();
+    expect(freshRouter.navigate).toHaveBeenCalledTimes(1);
+    expect(freshRouter.navigate).toHaveBeenLastCalledWith("search?q=foo");
+
+    setLocation("/search?q=foo"); // the router has pushed it
+    vi.advanceTimersByTime(100);
+    submit(); // double click / held Enter
+    expect(freshRouter.navigate).toHaveBeenCalledTimes(1);
+
+    box.value = "bar"; // another query right after the first search is searched
+    submit();
+    expect(freshRouter.navigate).toHaveBeenCalledTimes(2);
+    expect(freshRouter.navigate).toHaveBeenLastCalledWith("search?q=bar");
+    expect(document.getElementById("searchButton").disabled).toBe(false);
+
+    setLocation("/search?q=bar");
+    vi.advanceTimersByTime(3000); // the same search once the window is over runs again
+    submit();
+    expect(freshRouter.navigate).toHaveBeenCalledTimes(3);
+    vi.useRealTimers();
   });
 
   it("is idempotent — a second attach() call is a quiet no-op", () => {

@@ -605,27 +605,33 @@ public class BundledBootstrapThemeTest {
                 "advance.js must prefill the must-contain-words field (fAll) from the incoming q param");
     }
 
+    /**
+     * The header search form guards against a double submit (a double click, a held Enter) for 3 s, as the JSP
+     * page did, but does not disable the submit button: a disabled default button makes the browser skip the
+     * implicit submission, so Enter in the query box did nothing for 3 s after every search because this page
+     * does not reload.
+     */
     @Test
-    public void test_searchJs_disablesSubmitTemporarily() throws Exception {
+    public void test_searchJs_guardsDoubleSubmitWithoutDisablingTheButton() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/search.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("3000"), "search.js must re-enable the submit button after a 3s disable (JSP parity)");
-        assertTrue(js.contains("disableSubmitBriefly"), "search.js must define/use the disableSubmitBriefly helper");
-        assertTrue(js.contains("getElementById(\"searchButton\")"),
-                "search.js must wire the 3s disable to the header submit button (#searchButton)");
+        assertTrue(js.contains("REPEAT_SUBMIT_MS = 3000"), "search.js must keep the 3s double-submit window (JSP parity)");
+        assertTrue(js.contains("export function isRepeatedSubmit(") && js.contains("if (isRepeatedSubmit(query)) return;"),
+                "the header search form must skip a repeat of the search it just ran");
+        assertFalse(js.contains("disableSubmitBriefly"),
+                "search.js must not disable the submit button: Enter in the box would stop working");
     }
 
     @Test
-    public void test_appJs_disablesHomeSubmitTemporarily() throws Exception {
+    public void test_appJs_doesNotDisableHomeSubmit() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/app.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("disableSubmitBriefly"),
-                "app.js must call the shared disableSubmitBriefly helper for the home form (JSP parity)");
+        assertFalse(js.contains("disableSubmitBriefly"),
+                "app.js must not disable the home Search button: the home view is only hidden, so it stayed dead for 3s after Back");
     }
 
     @Test
-    public void test_advanceJs_disablesSubmitTemporarily() throws Exception {
+    public void test_advanceJs_doesNotDisableSubmit() throws Exception {
         final String js = Files.readString(THEME_DIR.resolve("assets/advance.js"), StandardCharsets.UTF_8);
-        assertTrue(js.contains("disableSubmitBriefly"),
-                "advance.js must call the shared disableSubmitBriefly helper after navigate (JSP parity)");
+        assertFalse(js.contains("disableSubmitBriefly"), "advance.js must not disable the submit button after navigate");
     }
 
     // ── Parity Round 3 / Task #11 — error-code meta + codeFromPath default ──────
