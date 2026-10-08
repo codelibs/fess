@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -38,24 +39,32 @@ public class BaseSearchBody {
     }
 
     /**
-     * Gets the page size for search results.
+     * Gets the page size for search results. A size beyond the search engine's result window
+     * ({@code indexer.max.result.window.size}) can never be answered, so it is cut to the window.
      * @return The page size.
      */
     public int getPageSize() {
-        if (size != null) {
-            return size;
-        }
-        return ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int pageSize = size != null ? size : fessConfig.getPagingPageSizeAsInteger();
+        return Math.min(pageSize, getMaxResultWindow(fessConfig));
     }
 
     /**
-     * Gets the current page number for search results.
+     * Gets the current page number for search results. A page that would end beyond the search
+     * engine's result window is replaced by the last page inside it, like the document report
+     * screen does, instead of failing the whole request.
      * @return The current page number.
      */
     public int getCurrentPageNumber() {
-        if (page != null) {
-            return page;
-        }
-        return Constants.DEFAULT_ADMIN_PAGE_NUMBER;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int currentPage = page != null ? page : Constants.DEFAULT_ADMIN_PAGE_NUMBER;
+        // a size of 0 or less falls back to the pager's default, which is never larger than the configured paging size
+        final int pageSize = getPageSize() > 0 ? getPageSize() : fessConfig.getPagingPageSizeAsInteger();
+        final int maxPage = Math.max(1, getMaxResultWindow(fessConfig) / Math.max(1, pageSize));
+        return Math.min(currentPage, maxPage);
+    }
+
+    private int getMaxResultWindow(final FessConfig fessConfig) {
+        return Math.max(1, fessConfig.getIndexerMaxResultWindowSizeAsInteger());
     }
 }
