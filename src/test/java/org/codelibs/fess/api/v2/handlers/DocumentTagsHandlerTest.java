@@ -256,6 +256,21 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_post_doesNotReportAnAddAnotherRequestMade() throws Exception {
+        // The request loses the race to a request that put the same tag on the same URL: its retry finds the URL
+        // on the tag and changes nothing, so it adds nothing and queues nothing.
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/");
+        env.service.updateConflicts = 1;
+        env.service.onUpdateConflict = stored -> stored.setPaths(new String[] { "http://a/", URL });
+        final Response res = call(request("POST").json("{\"id\":\"" + tag.getId() + "\"}"), null);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(Boolean.FALSE, res.payload().get("added"));
+        Assertions.assertEquals(list("http://a/", URL), list(env.service.store.get(tag.getId()).getPaths()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
     public void test_postOthersTag_returnsForbiddenOrNotFound() throws Exception {
         env.user("alice");
         final TagType shared = env.put("foo", "bob", true);
@@ -294,6 +309,19 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         Assertions.assertEquals(200, again.status, again.body());
         Assertions.assertEquals(Boolean.FALSE, again.payload().get("removed"));
         Assertions.assertEquals(1, env.helper.changes.size());
+    }
+
+    @Test
+    public void test_delete_doesNotReportARemovalAnotherRequestMade() throws Exception {
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/", URL);
+        env.service.updateConflicts = 1;
+        env.service.onUpdateConflict = stored -> stored.setPaths(new String[] { "http://a/" });
+        final Response res = call(request("DELETE"), tag.getId());
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(Boolean.FALSE, res.payload().get("removed"));
+        Assertions.assertEquals(list("http://a/"), list(env.service.store.get(tag.getId()).getPaths()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
     }
 
     @Test

@@ -138,6 +138,8 @@ public class DocumentTagsHandler extends AbstractTagHandler {
         final boolean[] added = { false };
         final int maxPaths = ComponentUtil.getFessConfig().getUserTagMaxPathsAsInteger();
         final TagType tagType = updateTagType(id, userId, t -> {
+            // the modifier runs again on a fresh read when its write lost a race: only the last run counts
+            added[0] = false;
             final String[] paths = t.getPaths() == null ? new String[0] : t.getPaths();
             if (Arrays.asList(paths).contains(url)) {
                 return false;
@@ -186,6 +188,8 @@ public class DocumentTagsHandler extends AbstractTagHandler {
     private boolean removeTag(final String tagId, final String userId, final String url) throws TagRequestException {
         final boolean[] removed = { false };
         final TagType tagType = updateTagType(tagId, userId, t -> {
+            // the modifier runs again on a fresh read when its write lost a race: only the last run counts
+            removed[0] = false;
             final String[] paths = t.getPaths() == null ? new String[0] : t.getPaths();
             final String[] newPaths = Arrays.stream(paths).filter(p -> !url.equals(p)).toArray(String[]::new);
             if (newPaths.length == paths.length) {

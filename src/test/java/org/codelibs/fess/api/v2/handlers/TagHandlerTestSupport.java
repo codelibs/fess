@@ -140,6 +140,8 @@ final class TagHandlerTestSupport {
         final List<String> calls = new ArrayList<>();
         /** The number of the next updates that lose a race with another writer. */
         int updateConflicts;
+        /** The change the other writer makes to the stored tag when an update loses the race. */
+        java.util.function.Consumer<TagType> onUpdateConflict;
         /** The number of the next deletes that lose a race with another writer. */
         int deleteConflicts;
         /** The tags whose deletes lose the race; all when null. */
@@ -208,6 +210,10 @@ final class TagHandlerTestSupport {
             }
             if (updateConflicts > 0) {
                 updateConflicts--;
+                final TagType stored = store.get(id);
+                if (stored != null && onUpdateConflict != null) {
+                    onUpdateConflict.accept(stored);
+                }
                 seqNoMap.merge(id, 1L, Long::sum);
                 throw new TagTypeConflictException("changed: " + id, null);
             }
