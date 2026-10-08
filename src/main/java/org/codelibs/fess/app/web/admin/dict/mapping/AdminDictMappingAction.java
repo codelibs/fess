@@ -247,14 +247,12 @@ public class AdminDictMappingAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
+        final var optEntity = verifyFound(charMappingService.getCharMappingItem(dictId, id), dictId + ":" + id, () -> asListHtml(dictId));
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                charMappingService.getCharMappingItem(dictId, id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     form.inputs = entity.getInputsValue();
                     form.output = entity.getOutput();
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                            () -> asListHtml(dictId));
                 });
                 form.id = id;
                 form.crudMode = crudMode;

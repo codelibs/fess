@@ -215,10 +215,11 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse duplicate(final String id) {
         saveToken();
+        final var optEntity = verifyFound(dataConfigService.getDataConfig(id), id, this::asListHtml);
         return asEditHtml().useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
-                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                         copyOp.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
@@ -232,8 +233,6 @@ public class AdminDataconfigAction extends FessAdminAction {
                     form.virtualHosts = stream(entity.getVirtualHosts())
                             .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
                     form.name = null;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
                 form.crudMode = CrudMode.CREATE;
             });
@@ -289,9 +288,10 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(dataConfigService.getDataConfig(id), id, this::asListHtml);
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                         copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
@@ -304,9 +304,7 @@ public class AdminDataconfigAction extends FessAdminAction {
                     form.virtualHosts = stream(entity.getVirtualHosts())
                             .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
                     form.crudMode = crudMode;
-                })
-                        .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                this::asListHtml));
+                });
             });
         });
     }

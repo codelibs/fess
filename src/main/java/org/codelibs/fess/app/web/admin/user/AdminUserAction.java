@@ -240,15 +240,14 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(userService.getUser(id), id, this::asListHtml);
         return asHtml(path_AdminUser_AdminUserDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                userService.getUser(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
                 resetPassword(form);
             });

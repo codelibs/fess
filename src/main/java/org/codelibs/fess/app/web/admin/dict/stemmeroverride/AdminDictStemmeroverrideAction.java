@@ -255,14 +255,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
+        final var optEntity =
+                verifyFound(stemmerOverrideService.getStemmerOverrideItem(dictId, id), dictId + ":" + id, () -> asListHtml(dictId));
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                stemmerOverrideService.getStemmerOverrideItem(dictId, id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     form.input = entity.getInput();
                     form.output = entity.getOutput();
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                            () -> asListHtml(dictId));
                 });
                 form.id = id;
                 form.crudMode = crudMode;

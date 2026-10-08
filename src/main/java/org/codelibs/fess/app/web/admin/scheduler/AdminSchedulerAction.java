@@ -271,19 +271,18 @@ public class AdminSchedulerAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(scheduledJobService.getScheduledJob(id), id, this::asListHtml);
         return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
             RenderDataUtil.register(data, "systemJobId", fessConfig.isSystemJobId(id));
         }).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     loadScheduledJob(form, entity);
                     form.crudMode = crudMode;
                     LaRequestUtil.getOptionalRequest().ifPresent(request -> {
                         request.setAttribute("running", entity.isRunning());
                         request.setAttribute("enabled", entity.isEnabled());
                     });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

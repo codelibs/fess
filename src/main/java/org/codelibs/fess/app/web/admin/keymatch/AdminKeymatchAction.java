@@ -241,16 +241,15 @@ public class AdminKeymatchAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         final List<Map<String, Object>> docList = new ArrayList<>();
+        final var optEntity = verifyFound(keyMatchService.getKeyMatch(id), id, this::asListHtml);
         return asHtml(path_AdminKeymatch_AdminKeymatchDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
                     docList.addAll(keyMatchHelper.getBoostedDocumentList(entity));
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         }).renderWith(data -> {

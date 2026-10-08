@@ -240,16 +240,14 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
+        final var optEntity = verifyFound(kuromojiService.getKuromojiItem(dictId, id), dictId + ":" + id, () -> asListHtml(dictId));
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                            () -> asListHtml(dictId));
                 });
                 form.dictId = dictId;
             });

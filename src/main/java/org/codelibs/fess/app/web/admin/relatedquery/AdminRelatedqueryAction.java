@@ -236,9 +236,10 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(relatedQueryService.getRelatedQuery(id), id, this::asListHtml);
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                relatedQueryService.getRelatedQuery(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                         copyOp.exclude(Constants.QUERIES);
@@ -246,8 +247,6 @@ public class AdminRelatedqueryAction extends FessAdminAction {
                     form.queries = stream(entity.getQueries())
                             .get(stream -> stream.filter(StringUtil::isNotBlank).collect(Collectors.joining("\n")));
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

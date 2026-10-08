@@ -218,15 +218,14 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(relatedContentService.getRelatedContent(id), id, this::asListHtml);
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                relatedContentService.getRelatedContent(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

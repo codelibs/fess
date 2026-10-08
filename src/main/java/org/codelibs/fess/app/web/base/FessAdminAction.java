@@ -36,6 +36,7 @@ import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
@@ -229,6 +230,28 @@ public abstract class FessAdminAction extends FessBaseAction {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, errorHook);
         }
+    }
+
+    /**
+     * Verifies that the entity of a details, edit or duplicate page exists.
+     * <p>
+     * The check has to be made by the action method. A validation error thrown inside the setup of
+     * the form given to {@code useForm} is thrown while the response is written, where LastaFlute
+     * reports it as a failure to create the form (HTTP 500) instead of showing the error hook.
+     * </p>
+     *
+     * @param <ENTITY> the type of the entity
+     * @param entity the entity that was looked up
+     * @param id the ID of the entity as the user knows it, for the message
+     * @param errorHook the error hook to call if the entity does not exist
+     * @return the entity that was looked up
+     */
+    protected <ENTITY> OptionalEntity<ENTITY> verifyFound(final OptionalEntity<ENTITY> entity, final String id,
+            final VaErrorHook errorHook) {
+        if (!entity.isPresent()) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), errorHook);
+        }
+        return entity;
     }
 
     /**
