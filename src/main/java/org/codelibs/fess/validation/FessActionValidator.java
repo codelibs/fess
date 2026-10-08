@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.validation;
 
+import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.servlet.request.RequestManager;
@@ -39,6 +40,20 @@ public class FessActionValidator<MESSAGES extends UserMessages> extends ActionVa
     public FessActionValidator(final RequestManager requestManager, final UserMessagesCreator<MESSAGES> messagesCreator,
             final Class<?>[] runtimeGroups) {
         super(requestManager, messagesCreator, runtimeGroups);
+    }
+
+    /**
+     * Creates the message interpolator without its cache of resolved messages.
+     * The resource bundle locator of {@link ActionValidator} ignores the locale it is asked for
+     * and returns the bundle of the current request, while the cache of Hibernate Validator is
+     * keyed by the template and its own default locale. With the cache, the sentence of a
+     * constraint would stay in the language of the request that first reported it until restart.
+     *
+     * @return the message interpolator that resolves every message for the current request locale
+     */
+    @Override
+    protected ResourceBundleMessageInterpolator newResourceBundleMessageInterpolator() {
+        return new ResourceBundleMessageInterpolator(newResourceBundleLocator(), false);
     }
 
 }

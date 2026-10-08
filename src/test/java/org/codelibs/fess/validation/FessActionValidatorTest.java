@@ -15,11 +15,22 @@
  */
 package org.codelibs.fess.validation;
 
+import java.lang.reflect.Field;
+import java.util.Locale;
+
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.message.UserMessage;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.validation.ActionValidator;
+import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
+
+import jakarta.validation.groups.Default;
 
 public class FessActionValidatorTest extends UnitFessTestCase {
 
@@ -64,5 +75,56 @@ public class FessActionValidatorTest extends UnitFessTestCase {
     @Test
     public void test_isPublicClass() {
         assertTrue("FessActionValidator should be public", java.lang.reflect.Modifier.isPublic(FessActionValidator.class.getModifiers()));
+    }
+
+    public static class NameForm {
+        @Required
+        public String name;
+    }
+
+    @Override
+    protected void setUp(final TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        resetSharedValidator();
+    }
+
+    @Override
+    protected void tearDown(final TestInfo testInfo) throws Exception {
+        resetSharedValidator();
+        super.tearDown(testInfo);
+    }
+
+    // ActionValidator keeps one Hibernate Validator for every instance, bound to the first one built.
+    // Drop it so that this test builds it from the request manager of its own container.
+    private void resetSharedValidator() throws Exception {
+        final Field field = ActionValidator.class.getDeclaredField("cachedValidator");
+        field.setAccessible(true);
+        field.set(null, null);
+    }
+
+    private String validateName(final Locale locale) {
+        final RequestManager requestManager = ComponentUtil.getRequestManager();
+        requestManager.saveUserLocaleToSession(locale);
+        // a validator per request, as SystemHelper.createValidator builds it
+        final FessActionValidator<FessMessages> validator =
+                new FessActionValidator<>(requestManager, FessMessages::new, new Class<?>[] { Default.class });
+        try {
+            validator.validate(new NameForm(), messages -> {}, () -> null);
+        } catch (final ValidationErrorException e) {
+            final UserMessage message = e.getMessages().silentAccessByIteratorOf("name").next();
+            return message.getMessageKey();
+        }
+        throw new AssertionError("The blank name should be rejected: locale=" + locale);
+    }
+
+    @Test
+    public void test_validationMessage_followsRequestLocale() {
+        // Hibernate Validator caches a resolved sentence by its template and its own default locale,
+        // so the sentence a request gets must not depend on the locale that reported it first.
+        assertEquals("Nom est requis.", validateName(Locale.FRENCH));
+        assertEquals("Name is required.", validateName(Locale.ENGLISH));
+        assertEquals("名前 が必要です。", validateName(Locale.JAPANESE));
+        assertEquals("Name ist erforderlich.", validateName(Locale.GERMAN));
+        assertEquals("Nom est requis.", validateName(Locale.FRENCH));
     }
 }
