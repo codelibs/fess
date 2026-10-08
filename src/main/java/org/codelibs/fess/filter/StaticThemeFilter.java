@@ -34,7 +34,7 @@ import org.codelibs.fess.theme.StaticThemeResponder;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -128,16 +128,6 @@ public class StaticThemeFilter implements Filter {
 
     /** Overridable responder reference; production code uses the container lookup. */
     private StaticThemeResponder staticThemeResponder;
-
-    /**
-     * Latches on the first failed lookup of each of {@link ThemeRegistry}, {@link StaticThemeResponder}
-     * and {@link VirtualHostHelper} (one key per component) so the operator sees a single WARN
-     * each instead of one per request: this filter runs on every request, anonymous ones
-     * included, while the DI container is not yet ready (or has been torn down). Subsequent
-     * failures degrade to DEBUG. A reported component is not re-armed (see {@link LogOnce}).
-     * Instance field (not static) so redeploys re-emit the WARN.
-     */
-    private final LogOnce lookupFailures = new LogOnce();
 
     /**
      * Default constructor.
@@ -441,7 +431,10 @@ public class StaticThemeFilter implements Filter {
     /**
      * Logs {@code warnMsg} at WARN with the cause the first time the lookup named by {@code key}
      * fails, then degrades subsequent failures of that lookup to a DEBUG {@code debugMsg}. Keeps
-     * the per-component lookup failures from flooding the log one line per request.
+     * the per-component lookup failures from flooding the log one line per request: this filter
+     * runs on every request, anonymous ones included, while the DI container is not yet ready (or
+     * has been torn down). Each component has its own key and is not reported again once it has
+     * been.
      *
      * @param key the component whose lookup failed
      * @param warnMsg the message logged once at WARN
@@ -449,7 +442,7 @@ public class StaticThemeFilter implements Filter {
      * @param e the cause
      */
     private void warnOnce(final String key, final String warnMsg, final String debugMsg, final Exception e) {
-        if (!lookupFailures.warn(logger, key, warnMsg, e) && logger.isDebugEnabled()) {
+        if (!LogUtil.warnOnce(logger, key, warnMsg, e) && logger.isDebugEnabled()) {
             logger.debug(debugMsg, e);
         }
     }

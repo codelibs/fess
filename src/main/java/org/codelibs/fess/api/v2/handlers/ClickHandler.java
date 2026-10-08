@@ -34,7 +34,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.log.exentity.ClickLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 
@@ -71,16 +71,6 @@ public class ClickHandler {
     // Click payloads are tiny — 2 KiB is generous enough for any reasonable
     // client and small enough to make payload-bomb attacks pointless.
     private static final int MAX_BODY_BYTES = 2 * 1024;
-
-    /**
-     * One-shot warning so a missing {@code UserInfoHelper} component is logged at WARN once per
-     * JVM lifetime instead of being silently swallowed. The click endpoint is reached on every
-     * result click, anonymous ones included, so a line per click would be a log a client can
-     * fill. Static so it is once per JVM rather than once per handler instance; not re-armed
-     * when the helper recovers and fails again (see {@link LogOnce}). Mirrors
-     * {@code LoginHandler.ipResolveUnavailable}.
-     */
-    private static final LogOnce userInfoHelperUnavailable = new LogOnce();
 
     /** Allowed characters for {@code query_id}: alphanumeric, underscore, hyphen. */
     private static final Pattern QUERY_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
@@ -157,8 +147,10 @@ public class ClickHandler {
             // UserInfoHelper unavailable (e.g. unit harness): behave as anonymous.
             // Promote to WARN exactly once per JVM so an accidental misconfiguration
             // in production (e.g. component removed from DI graph) is surfaced
-            // without flooding logs on every click.
-            userInfoHelperUnavailable.warn(logger, "userInfoHelper", "UserInfoHelper unavailable; treating click as anonymous", e);
+            // without flooding logs on every click; the endpoint is reached on every
+            // result click, anonymous ones included, so a line per click would be a
+            // log a client can fill. Not reported again if the helper recovers and fails.
+            LogUtil.warnOnce(logger, "userInfoHelper", "UserInfoHelper unavailable; treating click as anonymous", e);
         }
         if (userSessionId == null) {
             // Anonymous caller: a click log without a session id is meaningless,

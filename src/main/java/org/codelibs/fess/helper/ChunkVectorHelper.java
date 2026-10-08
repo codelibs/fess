@@ -42,7 +42,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.codelibs.fesen.opensearch.cluster.metadata.MappingMetadata;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
@@ -67,17 +67,6 @@ import jakarta.annotation.PostConstruct;
 public class ChunkVectorHelper {
 
     private static final Logger logger = LogManager.getLogger(ChunkVectorHelper.class);
-
-    /**
-     * The {@code key=value} combinations {@link #getKnnConfigToken(String, String, Set)}/
-     * {@link #getKnnConfigPositiveInt(String, String, int)} have already WARNed about, so a single
-     * misconfigured value is logged once rather than once per call. Both methods are reached from
-     * the query path ({@code SemanticChunkSearcher#resolveEngineMinScore}) with no caching of
-     * their own, so an invalid value would otherwise re-WARN on every ann-mode search request,
-     * anonymous ones included. A changed bad value is a new key and is reported again; a value
-     * that is fixed and later broken again to the same text is not (see {@link LogOnce}).
-     */
-    private final LogOnce invalidConfigValues = new LogOnce();
 
     /** Sub-field of {@link Constants#CONTENT_CHUNK_VECTOR_FIELD} holding the knn_vector value. */
     public static final String VECTOR_SUBFIELD = "vector";
@@ -686,9 +675,10 @@ public class ChunkVectorHelper {
 
     /**
      * Reads a token-style knn query-time config value, rejecting anything outside the allowed set.
-     * WARNs at most once per distinct invalid {@code key=value} combination (see
-     * {@code invalidConfigValues}), since this is reached from the query path on every ann-mode
-     * search request with no caching of its own.
+     * WARNs at most once per distinct invalid {@code key=value} combination, since this is
+     * reached from the query path on every ann-mode search request, anonymous ones included, with
+     * no caching of its own. A changed bad value is a new combination and is reported again; a
+     * value that is fixed and later broken again to the same text is not.
      *
      * @param key the system property key
      * @param defaultValue the fallback value
@@ -698,8 +688,7 @@ public class ChunkVectorHelper {
     protected String getKnnConfigToken(final String key, final String defaultValue, final Set<String> allowedValues) {
         final String value = ComponentUtil.getFessConfig().getSystemProperty(key, defaultValue);
         if (value == null || !allowedValues.contains(value)) {
-            invalidConfigValues.warn(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value,
-                    defaultValue);
+            LogUtil.warnOnce(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
             return defaultValue;
         }
         return value;
@@ -753,7 +742,7 @@ public class ChunkVectorHelper {
                 // fall through to the warn+default below
             }
         }
-        invalidConfigValues.warn(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
+        LogUtil.warnOnce(logger, key + "=" + value, "[ChunkVector] Invalid value for {}: {}; using {}.", key, value, defaultValue);
         return defaultValue;
     }
 

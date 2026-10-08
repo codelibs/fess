@@ -27,7 +27,7 @@ import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 
 /**
  * Fess-specific URL queue service that selects the fetch order named by the
@@ -40,18 +40,6 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
     /** Aliases from the crawl.order values that shipped before the orders became components. */
     protected static final Map<String, String> LEGACY_ORDER_NAMES =
             Map.of("sequential", "sequentialUrlQueueOrder", "random", "randomUrlQueueOrder");
-
-    /**
-     * The crawl.order values already reported as unusable.
-     *
-     * <p>
-     * The order is resolved on every queue poll, so without this a single misconfigured
-     * crawling config fills the crawler log with the same warning. The crawler runs as its own
-     * process per crawl, so this reports each bad value once per crawl. A changed bad value is a
-     * new key and is reported again.
-     * </p>
-     */
-    protected final LogOnce reportedInvalidOrders = new LogOnce();
 
     /**
      * Constructs a new FessUrlQueueService with the specified crawler configuration.
@@ -82,15 +70,18 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
             return super.getUrlQueueOrder(sessionId);
         }
         final String name = LEGACY_ORDER_NAMES.getOrDefault(configured, configured);
+        // The order is resolved on every queue poll, so each bad crawl.order value is reported
+        // once (the crawler is its own process per crawl, so once per crawl) rather than per poll;
+        // a changed bad value is a different key and is reported again.
         try {
             final Object component = ComponentUtil.getComponent(name);
             if (component instanceof UrlQueueOrder) {
                 return (UrlQueueOrder) component;
             }
-            reportedInvalidOrders.warn(logger, configured, "Component {} is not a UrlQueueOrder. Falling back to the default order.", name);
+            LogUtil.warnOnce(logger, configured, "Component {} is not a UrlQueueOrder. Falling back to the default order.", name);
         } catch (final Exception e) {
-            if (reportedInvalidOrders.warn(logger, configured, "Invalid crawl order specified: {}. Falling back to the default order.",
-                    configured) && logger.isDebugEnabled()) {
+            if (LogUtil.warnOnce(logger, configured, "Invalid crawl order specified: {}. Falling back to the default order.", configured)
+                    && logger.isDebugEnabled()) {
                 logger.debug("Failed to resolve crawl order component: {}", name, e);
             }
         }

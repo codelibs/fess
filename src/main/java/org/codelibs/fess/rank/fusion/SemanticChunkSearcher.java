@@ -42,7 +42,7 @@ import org.codelibs.fess.opensearch.query.KnnQueryBuilder;
 import org.codelibs.fess.query.StructuredQuerySplitter;
 import org.codelibs.fess.query.StructuredQuerySplitter.Split;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
@@ -129,21 +129,6 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
 
     /** Request attribute holding the {@link QueryEmbedding} the request computed last. */
     protected static final String QUERY_EMBEDDING_ATTRIBUTE = "fess.QueryEmbedding";
-
-    /**
-     * The space types for which a min_score cutoff skipped as non-cosine has been reported. The
-     * cutoff is resolved on every ann-mode search, so without this every search, anonymous ones
-     * included, writes the same WARN. A changed space type is a new key and is reported again;
-     * a reported one is not re-armed (see {@link LogOnce}).
-     */
-    private final LogOnce minScoreSkipped = new LogOnce();
-
-    /**
-     * Records that the exact (full-scan) mode has been reported, so the WARN is written once
-     * rather than per query. Not re-armed when the ann mode becomes available again (see {@link
-     * LogOnce}).
-     */
-    private final LogOnce exactModeReported = new LogOnce();
 
     /** Timestamp of the last {@link #isKnnIndexReady()} probe. */
     private volatile long knnReadyCheckedAt;
@@ -524,7 +509,8 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
      * only remedy is recreating/reindexing the index with the feature enabled, so a silent
      * degradation would leave a permanent full scan undiagnosed. Later queries in the exact mode
      * are logged at DEBUG. The WARN is not re-armed when the ann mode becomes available again,
-     * as {@link LogOnce} has no reset, so a later regression is reported by the DEBUG line only.
+     * as {@link LogUtil#warnOnce} has no reset, so a later regression is reported by the DEBUG
+     * line only.
      *
      * @param annMode whether the ann (knn query) mode was selected for this request
      */
@@ -532,7 +518,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         if (annMode) {
             return;
         }
-        if (!exactModeReported.warn(logger, "exact", """
+        if (!LogUtil.warnOnce(logger, "exact", """
                 Semantic chunk search is falling back to the exact vector scan: the live index was not created with \
                 index.knn and an ANN method on {}. Every plain-text query now scans all stored chunk vectors. \
                 Recreate or reindex the index with {}=true so the ANN setting and method are baked in.""",
@@ -629,7 +615,9 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         final ChunkVectorHelper chunkVectorHelper = ComponentUtil.getComponent(ChunkVectorHelper.class);
         final String spaceType = chunkVectorHelper.getKnnSpaceType();
         if (!"cosinesimil".equals(spaceType)) {
-            minScoreSkipped.warn(logger, spaceType,
+            // Resolved on every ann-mode search, anonymous ones included, so each space type is
+            // reported once rather than per query; a changed space type is reported again.
+            LogUtil.warnOnce(logger, "spaceType=" + spaceType,
                     "{} is cosine-based and cannot be applied to space_type={}; the cutoff is skipped in ann mode.",
                     SEARCH_MIN_SCORE_PROPERTY, spaceType);
             return OptionalThing.empty();

@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.util.LogOnce;
+import org.codelibs.fess.util.LogUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -39,9 +39,6 @@ public class WebApiManagerFactory {
      */
     private static final String[][] LEGACY_API_PLUGINS =
             { { "/api/v1", "fess-webapp-v1-api" }, { "/json", "fess-webapp-classic-api" }, { "/suggest", "fess-webapp-classic-api" } };
-
-    /** The plugins already reported as missing, so that each one is logged once rather than once per request. */
-    private final LogOnce unservedLegacyApi = new LogOnce();
 
     /**
      * Default constructor.
@@ -131,7 +128,7 @@ public class WebApiManagerFactory {
             if (servletPath.startsWith(prefix) && (servletPath.length() == prefix.length() || servletPath.charAt(prefix.length()) == '/')) {
                 // A served prefix is checked first so that it never uses up the plugin's key.
                 if (!isServed(prefix)) {
-                    unservedLegacyApi.warn(logger, legacy[1],
+                    LogUtil.warnOnce(logger, legacy[1],
                             "No plugin serves the legacy API. pathPrefix={}, plugin={}. The legacy API ships as that plugin: "
                                     + "install it and restart Fess to serve this path. If it is already installed, check that its jar "
                                     + "is in the plugin directory and matches this Fess version. Until then every request to it is "

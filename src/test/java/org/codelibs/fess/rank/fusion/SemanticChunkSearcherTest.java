@@ -762,8 +762,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
             assertTrue(appender.events().isEmpty(), "ann mode says nothing: " + appender.renderedEvents());
             searcher.warnExactModeOnce(false);
             assertEquals(1, appender.eventsAt(Level.WARN).size(), appender.renderedEvents().toString());
-            // LogOnce has no reset: a regression after the ann mode was available again is
-            // reported at DEBUG only
+            // warnOnce has no way to report a key again: a regression after the ann mode was
+            // available again is reported at DEBUG only
             searcher.warnExactModeOnce(true);
             searcher.warnExactModeOnce(false);
             assertEquals(1, appender.eventsAt(Level.WARN).size(), appender.renderedEvents().toString());

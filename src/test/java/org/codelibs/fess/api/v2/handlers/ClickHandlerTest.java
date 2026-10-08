@@ -91,7 +91,7 @@ public class ClickHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_userInfoHelperFailure_warnsAtMostOncePerJvm() throws Exception {
+    public void test_userInfoHelperFailure_warnsOnlyOnce() throws Exception {
         final UserInfoHelper stub = new UserInfoHelper() {
             @Override
             public String getUserCode() {
@@ -110,11 +110,10 @@ public class ClickHandlerTest extends UnitFessTestCase {
                     .stream()
                     .filter(e -> e.getMessage().getFormattedMessage().contains("UserInfoHelper unavailable"))
                     .toList();
-            // The latch is static, so it is once per JVM and another test that ran earlier in the same
-            // JVM may already have used it up: "the first failure logs" cannot be asserted here. What
-            // must hold is that three failures never log more than once, and that a line carries the cause.
-            assertTrue(warns.size() <= 1, "a repeated failure must not WARN again: " + warns.size());
-            warns.forEach(e -> assertNotNull(e.getThrown(), "the first failure carries the exception"));
+            // UnitFessTestCase starts every test with the once-only state cleared, so the first
+            // failure is the one that logs, with the cause, and the other two stay silent.
+            assertEquals(1, warns.size(), "only the first failure may WARN: " + warns.size());
+            assertNotNull(warns.get(0).getThrown(), "the first failure carries the exception");
         } finally {
             appender.detach();
             ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");

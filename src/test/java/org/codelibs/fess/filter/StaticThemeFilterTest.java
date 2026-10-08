@@ -570,9 +570,10 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
                     "exactly 1 WARN must be emitted for ThemeRegistry unavailable across 5 requests; got " + warns.size());
             assertNotNull(warns.get(0).getThrown(), "the first failure carries the exception");
 
-            // The latch is an instance field, so a redeployed filter reports the failure again.
+            // What was reported is remembered JVM-wide (a redeploy reloads the class and starts
+            // over), so another filter instance does not report the same failure again.
             new StaticThemeFilter().doFilter(new StubRequest("GET", "/search"), new StubResponse(), new StubChain());
-            org.junit.jupiter.api.Assertions.assertEquals(2, eventsAbout(appender, Level.WARN, "ThemeRegistry").size());
+            org.junit.jupiter.api.Assertions.assertEquals(1, eventsAbout(appender, Level.WARN, "ThemeRegistry").size());
         } finally {
             appender.detach();
         }

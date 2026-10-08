@@ -16,6 +16,7 @@
 package org.codelibs.fess.unit;
 
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.utflute.lastaflute.WebContainerTestCase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInfo;
@@ -24,6 +25,14 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
     @Override
     protected String prepareConfigFile() {
         return "test_app.xml";
+    }
+
+    @Override
+    protected void setUp(TestInfo testInfo) throws Exception {
+        // LogUtil.warnOnce remembers what it reported for the life of the JVM, so a test that
+        // asserts a once-only WARN must not inherit the keys another test used up.
+        LogUtil.resetWarnOnce();
+        super.setUp(testInfo);
     }
 
     @Override
