@@ -75,6 +75,8 @@ final class TagHandlerTestSupport {
         final FakeTagTypeHelper helper = new FakeTagTypeHelper(this);
         /** The roles of the caller besides its own user role and the sharing role. */
         final Set<String> roles = new LinkedHashSet<>();
+        /** The waits a handler took before retrying an update, in milliseconds; the handlers record them instead of sleeping. */
+        final List<Long> pauses = new ArrayList<>();
         String virtualHostKey = "";
         OptionalThing<FessUserBean> user = OptionalThing.empty();
 
@@ -138,6 +140,8 @@ final class TagHandlerTestSupport {
         final Map<String, TagType> store = new LinkedHashMap<>();
         final Map<String, Long> seqNoMap = new HashMap<>();
         final List<String> calls = new ArrayList<>();
+        /** The number of the next reads of a tag that do not find it, as a read of an index that is not refreshed yet. */
+        int hiddenReads;
         /** The number of the next updates that lose a race with another writer. */
         int updateConflicts;
         /** The change the other writer makes to the stored tag when an update loses the race. */
@@ -155,6 +159,10 @@ final class TagHandlerTestSupport {
         public OptionalEntity<TagType> getTagType(final String id) {
             final TagType stored = store.get(id);
             if (stored == null) {
+                return OptionalEntity.empty();
+            }
+            if (hiddenReads > 0) {
+                hiddenReads--;
                 return OptionalEntity.empty();
             }
             final TagType tagType = copy(stored, true);

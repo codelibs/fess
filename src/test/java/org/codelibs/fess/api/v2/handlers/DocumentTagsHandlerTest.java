@@ -74,6 +74,11 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
+        protected void pause(final long millis) {
+            env.pauses.add(millis);
+        }
+
+        @Override
         protected Map<String, Object> getDocument(final String docId, final String[] fields) {
             documentLookups.add(docId);
             return doc;
@@ -253,6 +258,57 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         final Response res = call(request("POST").json("{\"id\":\"" + tag.getId() + "\"}"), null);
         Assertions.assertEquals(200, res.status, res.body());
         Assertions.assertEquals(list("http://a/", URL), list(env.service.store.get(tag.getId()).getPaths()));
+    }
+
+    @Test
+    public void test_post_survivesSeveralLostRaces() throws Exception {
+        // Seven lost races in a row, as when many requests write the same tag at once, are still not an error.
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/");
+        env.service.updateConflicts = 7;
+        final Response res = call(request("POST").json("{\"id\":\"" + tag.getId() + "\"}"), null);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(Boolean.TRUE, res.payload().get("added"));
+        Assertions.assertEquals(7, env.pauses.size());
+        Assertions.assertEquals(list("http://a/", URL), list(env.service.store.get(tag.getId()).getPaths()));
+        Assertions.assertEquals(List.of(TagChange.add(tag.getTagValue(), URL)), env.helper.changes);
+    }
+
+    @Test
+    public void test_post_keepsLosingTheRace_backsOffAndReturnsConflict() throws Exception {
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/");
+        env.service.updateConflicts = 100;
+        final Response res = call(request("POST").json("{\"id\":\"" + tag.getId() + "\"}"), null);
+        Assertions.assertEquals(409, res.status, res.body());
+        Assertions.assertEquals("conflict", res.errorCode());
+        Assertions.assertEquals("the tag was changed concurrently; try again", res.errorMessage());
+        // every attempt wrote once, and a wait that doubles up to a cap separates the attempts
+        Assertions.assertEquals(AbstractTagHandler.MAX_UPDATE_ATTEMPTS,
+                env.service.calls.stream().filter(c -> c.startsWith("update")).count());
+        Assertions.assertEquals(AbstractTagHandler.MAX_UPDATE_ATTEMPTS - 1, env.pauses.size());
+        long cap = AbstractTagHandler.RETRY_WAIT_MILLIS;
+        for (final long pause : env.pauses) {
+            Assertions.assertTrue(pause >= cap / 2 && pause <= cap, "wait " + pause + " is not in [" + cap / 2 + ", " + cap + "]");
+            cap = Math.min(AbstractTagHandler.RETRY_WAIT_MAX_MILLIS, cap * 2);
+        }
+        Assertions.assertEquals(list("http://a/"), list(env.service.store.get(tag.getId()).getPaths()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
+    public void test_post_newName_lostCreateAddsToTheTagTheWinnerCreated() throws Exception {
+        // Another request created the tag after this one looked for it, so the insert fails: the tag of the winner
+        // is read again and the URL is added to it, not answered with "tag not found".
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false, "http://a/");
+        env.service.hiddenReads = 1;
+        final Response res = call(request("POST").json("{\"name\":\"foo\"}"), null);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(Boolean.TRUE, res.payload().get("added"));
+        Assertions.assertEquals(List.of("insert foo/alice", "update foo/alice"), env.service.calls);
+        Assertions.assertEquals(list("http://a/", URL), list(env.service.store.get(tag.getId()).getPaths()));
+        Assertions.assertEquals(List.of(TagChange.add(tag.getTagValue(), URL)), env.helper.changes);
     }
 
     @Test

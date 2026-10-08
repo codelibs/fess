@@ -114,13 +114,14 @@ public class TagTypeService extends FessAppService {
     }
 
     /**
-     * Get a tag type with all of its fields.
+     * Get a tag type with all of its fields. The tag type is read with the real-time GET API, not
+     * a search, so that a write made a moment ago is found before the index is refreshed.
      *
      * @param id The ID of the tag type.
      * @return An optional entity of the tag type.
      */
     public OptionalEntity<TagType> getTagType(final String id) {
-        return tagTypeBhv.selectByPK(id);
+        return tagTypeBhv.selectRealtimeByPK(id);
     }
 
     /**
