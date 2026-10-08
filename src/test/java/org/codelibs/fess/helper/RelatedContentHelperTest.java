@@ -19,11 +19,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -176,6 +178,84 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
 
         String[] results = relatedContentHelper.getRelatedContents("anything");
         assertEquals(0, results.length);
+    }
+
+    @Test
+    public void test_load_unparsableRegexIsSkipped() {
+        List<RelatedContent> testData = new ArrayList<>();
+        testData.add(createRelatedContent("exact", "Exact Match", ""));
+        testData.add(createRelatedContent("regex:(", "Unclosed group", ""));
+        testData.add(createRelatedContent("regex:test.*", "Regex Match: __QUERY__", ""));
+        testData.add(createRelatedContent("regex:[a-", "Unclosed class", ""));
+        mockBhv.setTestData(testData);
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RelatedContentHelper.class);
+        try {
+            // one bad row must neither stop the load nor drop the rows around it
+            assertEquals(1, relatedContentHelper.load());
+
+            final List<String> warnings = appender.messagesAt(Level.WARN);
+            assertEquals(2, warnings.size(), warnings.toString());
+            assertTrue(warnings.get(0).contains("term=regex:("), warnings.get(0));
+            assertTrue(warnings.get(0).contains("reason=Unclosed group"), warnings.get(0));
+            assertTrue(warnings.get(1).contains("term=regex:[a-"), warnings.get(1));
+        } finally {
+            appender.detach();
+        }
+
+        String[] results = relatedContentHelper.getRelatedContents("exact");
+        assertEquals(1, results.length);
+        assertEquals("Exact Match", results[0]);
+
+        results = relatedContentHelper.getRelatedContents("testing");
+        assertEquals(1, results.length);
+        assertEquals("Regex Match: testing", results[0]);
+
+        assertEquals(0, relatedContentHelper.getRelatedContents("(").length);
+        assertEquals(0, relatedContentHelper.getRelatedContents("[a-").length);
+    }
+
+    @Test
+    public void test_load_unparsableRegexDoesNotBlockReload() {
+        List<RelatedContent> testData = new ArrayList<>();
+        testData.add(createRelatedContent("regex:(", "Unclosed group", ""));
+        mockBhv.setTestData(testData);
+        relatedContentHelper.load();
+
+        // an entry saved after the bad one is served on the next load
+        testData = new ArrayList<>(testData);
+        testData.add(createRelatedContent("later", "Saved Later", ""));
+        mockBhv.setTestData(testData);
+        relatedContentHelper.load();
+
+        final String[] results = relatedContentHelper.getRelatedContents("later");
+        assertEquals(1, results.length);
+        assertEquals("Saved Later", results[0]);
+    }
+
+    @Test
+    public void test_getRegexError() {
+        // not a regex term, or nothing to compile: load() has its own handling for these
+        assertNull(relatedContentHelper.getRegexError(null));
+        assertNull(relatedContentHelper.getRegexError("java"));
+        assertNull(relatedContentHelper.getRegexError("regex:"));
+        assertNull(relatedContentHelper.getRegexError("regex:   "));
+        assertNull(relatedContentHelper.getRegexError("a(b"));
+
+        assertNull(relatedContentHelper.getRegexError("regex:test.*"));
+        assertNull(relatedContentHelper.getRegexError("regex:.*(cancel|退会).*"));
+
+        assertEquals("Unclosed group", relatedContentHelper.getRegexError("regex:("));
+        assertEquals("Unclosed character class", relatedContentHelper.getRegexError("regex:[abc"));
+        assertEquals("Dangling meta character '*'", relatedContentHelper.getRegexError("regex:*abc"));
+    }
+
+    @Test
+    public void test_getRegexError_followsRegexPrefix() {
+        relatedContentHelper.setRegexPrefix("re:");
+
+        assertEquals("Unclosed group", relatedContentHelper.getRegexError("re:("));
+        assertNull(relatedContentHelper.getRegexError("regex:("));
     }
 
     @Test

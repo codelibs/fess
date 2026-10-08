@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.relatedcontent;
 
 import static org.codelibs.fess.app.web.admin.relatedcontent.AdminRelatedcontentAction.getRelatedContent;
+import static org.codelibs.fess.app.web.admin.relatedcontent.AdminRelatedcontentAction.validateRelatedContent;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -112,7 +113,7 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> validateRelatedContent(body, messages));
         body.crudMode = CrudMode.CREATE;
         final RelatedContent relatedContent = getRelatedContent(body).map(entity -> {
             try {
@@ -139,7 +140,7 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
      */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
-        validateApi(body, messages -> {});
+        validateApi(body, messages -> validateRelatedContent(body, messages));
         body.crudMode = CrudMode.EDIT;
         final RelatedContent relatedContent = getRelatedContent(body).map(entity -> {
             try {
