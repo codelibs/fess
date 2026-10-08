@@ -255,7 +255,7 @@ public class LoginHandler {
             // audit.log. Without this the v2 endpoint left no trace of failed authentication at
             // all, so brute-force attempts against the SPA login form were undetectable.
             if (logger.isInfoEnabled()) {
-                logger.info("[v2/login] login failed: username={}, reason={}", loggedName, e.getMessage());
+                logger.info("[v2/login] login failed: username={}, reason={}", loggedName, LogUtil.sanitize(e.getMessage()));
             }
             recordLoginFailureActivity(username, password);
             // Credential rejection consumes the USER slot exactly once, on the failure path

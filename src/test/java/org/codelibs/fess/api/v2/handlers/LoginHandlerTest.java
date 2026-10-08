@@ -1120,6 +1120,36 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void login_rejectionReasonIsSanitizedBeforeItIsLogged() throws Exception {
+        // The reason of a LoginFailureException repeats the credential, so a user name with a line
+        // break must not start a second physical line in the INFO "login failed" record.
+        ComponentUtil.register(recordingActivityHelper(new ArrayList<>()), "activityHelper");
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("frm", false) {
+            @Override
+            public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+                throw new LoginFailureException("Not found the user by the credential: {frm\nZQFORGED ERROR forged}");
+            }
+        });
+        final LogCapturingAppender appender = LogCapturingAppender.attach(LoginHandler.class.getName(), Level.INFO);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new LoginHandler(new LoginRateLimiter()).handle(new StubRequest("POST", "/api/v2/auth/login")
+                    .withJsonBody("{\"username\":\"frm\\nZQFORGED ERROR forged\",\"password\":\"wrong\"}"), res);
+            assertEquals(401, res.status, res.body());
+            final List<LogEvent> failed = appender.eventsAt(Level.INFO)
+                    .stream()
+                    .filter(e -> e.getMessage().getFormattedMessage().contains("login failed"))
+                    .toList();
+            assertEquals(1, failed.size(), "the rejection is logged once: " + failed.size());
+            final String line = failed.get(0).getMessage().getFormattedMessage();
+            assertTrue(line.contains("ZQFORGED"), line);
+            assertFalse(line.contains("\n") || line.contains("\r"), "the record must stay on one physical line: " + line);
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
     public void login_auditFailureDoesNotBreakAnAlreadySuccessfulLogin() throws Exception {
         // The credentials have already been verified when the audit record is written, so a
         // broken audit sink must not turn an authenticated session into a 500 — it is logged
