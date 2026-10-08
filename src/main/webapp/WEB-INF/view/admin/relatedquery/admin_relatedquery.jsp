@@ -44,7 +44,8 @@ ${fe:html(true)}
                                 <la:errors/>
                             </div>
                             <a role="button" data-toggle="collapse" href="#listSearchForm" aria-expanded="false"
-                               aria-controls="listSearchForm"><i class="fas fa-search" aria-hidden="true"></i></a>
+                               aria-controls="listSearchForm"
+                               aria-label="<la:message key="labels.crud_button_search"/>"><i class="fas fa-search" aria-hidden="true"></i></a>
                             <div class="collapse <c:if test="${!empty term || !empty queries}">show</c:if>" id="listSearchForm">
                                 <la:form action="/admin/relatedquery/">
                                     <div class="form-group row">
@@ -132,7 +133,7 @@ ${fe:html(true)}
                                                             <la:message key="labels.related_query_generate"/>
                                                         </h4>
                                                         <button type="button" class="close" data-dismiss="modal"
-                                                                aria-label="Close">
+                                                                aria-label="<la:message key="labels.crud_button_close"/>">
                                                             <span aria-hidden="true">×</span>
                                                         </button>
                                                     </div>

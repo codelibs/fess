@@ -44,7 +44,7 @@
             <c:forEach var="row" items="${report.tables['slowQueries']}" varStatus="st">
                 <tr>
                     <td class="searchlog-rank">${st.count}</td>
-                    <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
+                    <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}"><c:if test="${empty row.word}"><la:message key="labels.searchlog_empty_word"/></c:if>${f:h(row.word)}</a></td>
                     <td class="text-right"><fmt:formatNumber value="${row.count}"/></td>
                     <td class="text-right text-nowrap">${row.avgResponseTime == null ? '-' : ''}<c:if
                             test="${row.avgResponseTime != null}"><fmt:formatNumber value="${row.avgResponseTime}"

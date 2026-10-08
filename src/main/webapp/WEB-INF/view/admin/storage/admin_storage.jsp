@@ -42,7 +42,8 @@ ${fe:html(true)}
                                     / <span><a
                                         href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
                                 </c:forEach>
-                                / <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir" href="#"><i
+                                / <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir" href="#"
+                                    aria-label="<la:message key="labels.crud_title_create"/>"><i
                                     class="fas fa-folder fa-fw" aria-hidden="true"></i></a></c:if>
                             </h3>
                             <c:if test="${editable}">
@@ -76,7 +77,7 @@ ${fe:html(true)}
                                                         <la:message key="labels.crud_title_create"/>
                                                     </h4>
                                                     <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
+                                                            aria-label="<la:message key="labels.crud_button_close"/>">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
@@ -113,7 +114,7 @@ ${fe:html(true)}
                                                         <la:message key="labels.storage_upload_file"/>
                                                     </h4>
                                                     <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
+                                                            aria-label="<la:message key="labels.crud_button_close"/>">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
@@ -228,7 +229,7 @@ ${fe:html(true)}
                                                                             </h4>
                                                                             <button type="button" class="close"
                                                                                     data-dismiss="modal"
-                                                                                    aria-label="Close">
+                                                                                    aria-label="<la:message key="labels.crud_button_close"/>">
                                                                                 <span aria-hidden="true">×</span>
                                                                             </button>
                                                                         </div>

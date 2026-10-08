@@ -24,7 +24,7 @@
             <c:forEach var="row" items="${report.tables['queries']}" varStatus="st">
                 <tr>
                     <td class="searchlog-rank">${st.count}</td>
-                    <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
+                    <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}"><c:if test="${empty row.word}"><la:message key="labels.searchlog_empty_word"/></c:if>${f:h(row.word)}</a></td>
                     <td class="text-right"><fmt:formatNumber value="${row.count}"/></td>
                     <td class="text-right">${row.users == null ? '-' : ''}<fmt:formatNumber value="${row.users}"/></td>
                     <td class="text-right">${row.avgHits == null ? '-' : ''}<fmt:formatNumber value="${row.avgHits}"
@@ -71,7 +71,7 @@
                     <c:forEach var="row" items="${report.tables['zeroHitQueries']}" varStatus="st">
                         <tr>
                             <td class="searchlog-rank">${st.count}</td>
-                            <td class="text-break"><a href="${zeroHitWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
+                            <td class="text-break"><a href="${zeroHitWordLink}${f:u(row.word)}"><c:if test="${empty row.word}"><la:message key="labels.searchlog_empty_word"/></c:if>${f:h(row.word)}</a></td>
                             <td class="text-right"><fmt:formatNumber value="${row.count}"/></td>
                             <td class="text-right">${row.users == null ? '-' : ''}<fmt:formatNumber value="${row.users}"/></td>
                             <td class="text-right text-nowrap">${empty row.lastSearchedAt ? '-' : f:h(row.lastSearchedAt)}</td>
@@ -110,7 +110,7 @@
                     <c:forEach var="row" items="${report.tables['zeroClickQueries']}" varStatus="st">
                         <tr>
                             <td class="searchlog-rank">${st.count}</td>
-                            <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
+                            <td class="text-break"><a href="${searchWordLink}${f:u(row.word)}"><c:if test="${empty row.word}"><la:message key="labels.searchlog_empty_word"/></c:if>${f:h(row.word)}</a></td>
                             <td class="text-right"><fmt:formatNumber value="${row.count}"/></td>
                             <td class="text-right text-nowrap">${empty row.lastSearchedAt ? '-' : f:h(row.lastSearchedAt)}</td>
                         </tr>

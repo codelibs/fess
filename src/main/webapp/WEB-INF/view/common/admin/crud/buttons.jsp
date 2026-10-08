@@ -44,16 +44,16 @@
 		<la:message key="labels.crud_button_delete" />
 	</button>
 	<div class="modal fade" id="confirmToDelete" tabindex="-1"
-		role="alertdialog">
+		role="alertdialog" aria-labelledby="confirmToDeleteTitle">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header" style="border-bottom: 2px solid #dc3545;">
-					<h4 class="modal-title">
+					<h4 class="modal-title" id="confirmToDeleteTitle">
 						<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
 						<la:message key="labels.crud_title_delete" />
 					</h4>
 					<button type="button" class="close" data-dismiss="modal"
-						aria-label="Close">
+						aria-label="<la:message key="labels.crud_button_close"/>">
 						<span aria-hidden="true">×</span>
 					</button>
 				</div>

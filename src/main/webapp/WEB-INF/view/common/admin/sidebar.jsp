@@ -14,7 +14,8 @@
 						   maxlength="1000"
 						   placeholder="<la:message key="labels.sidebar.placeholder_search" />">
 					<div class="input-group-append">
-						<button class="btn btn-sidebar" type="submit" name="search" id="search-btn">
+						<button class="btn btn-sidebar" type="submit" name="search" id="search-btn"
+								aria-label="<la:message key="labels.crud_button_search" />">
 							<i class="fa fa-search" aria-hidden="true"></i>
 						</button>
 					</div>
