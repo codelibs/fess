@@ -107,7 +107,8 @@ public class LoginAction extends FessLoginAction {
             return asHtml(path_AdminLogin_NewpasswordJsp);
         } catch (final LoginFailureException lfe) {
             if (logger.isInfoEnabled()) {
-                logger.info("Login failed for user: username={}, reason={}", LogUtil.sanitize(username), lfe.getMessage());
+                logger.info("Login failed for user: username={}, reason={}", LogUtil.sanitize(username),
+                        LogUtil.sanitize(lfe.getMessage()));
             }
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
