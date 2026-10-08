@@ -1705,10 +1705,23 @@ describe("attach — wiring", () => {
     expect(dropdown.querySelectorAll(".list-group-item").length).toBe(2);
     expect(dropdown.classList.contains("d-none")).toBe(false);
 
-    // 5. ArrowDown highlights the first item; Escape collapses the dropdown.
+    // 5. ArrowDown highlights the first item; Escape collapses the dropdown. While an IME
+    // composition is open (isComposing, or keyCode 229 as Safari reports the committing Enter)
+    // the arrow keys pick a candidate and Enter commits the text: the suggest leaves them alone.
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", isComposing: true, bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", keyCode: 229, bubbles: true }));
+    expect(dropdown.querySelector(".list-group-item.active")).toBeNull();
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
     expect(dropdown.querySelector(".list-group-item.active")).not.toBeNull();
     expect(input.getAttribute("aria-activedescendant")).toBe("suggest-item-0");
+    navigate.mockClear();
+    for (const init of [{ isComposing: true }, { keyCode: 229 }]) {
+      const commit = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, ...init });
+      input.dispatchEvent(commit);
+      expect(commit.defaultPrevented).toBe(false);
+    }
+    expect(navigate).not.toHaveBeenCalled();
+    expect(input.value).toBe("he");
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     expect(dropdown.classList.contains("d-none")).toBe(true);
 
