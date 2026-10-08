@@ -15,10 +15,16 @@
  */
 package org.codelibs.fess.app.web.admin.backup;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Filter;
@@ -27,6 +33,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.codelibs.fess.app.web.base.FessBaseAction;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -111,6 +118,95 @@ public class AdminBackupActionTest extends UnitFessTestCase {
                 throw new SearchEngineClientException(message);
             }
         }, "searchEngineClient");
+    }
+
+    /**
+     * The mapping files the backup carries are the ones the search engine client creates the index
+     * from, which for the plugin-less types are the files under {@code fess_indices/_vanilla}.
+     */
+    @Test
+    public void test_resolveIndexConfigPath_usesTheDirectoryOfTheResourceType() throws Exception {
+        final Path classesDir = Files.createTempDirectory("fess_backup_classes");
+        try {
+            final Path indicesDir = Files.createDirectories(classesDir.resolve("fess_indices"));
+            Files.createDirectories(indicesDir.resolve("_vanilla").resolve("fess"));
+            Files.writeString(indicesDir.resolve("_vanilla").resolve("fess.json"), "{}");
+            Files.writeString(indicesDir.resolve("_vanilla").resolve("fess").resolve("doc.json"), "{}");
+
+            assertEquals(indicesDir.resolve("_vanilla").resolve("fess.json"),
+                    AdminBackupAction.resolveIndexConfigPath(classesDir, "vanilla", "fess.json"));
+            assertEquals(indicesDir.resolve("_vanilla").resolve("fess").resolve("doc.json"),
+                    AdminBackupAction.resolveIndexConfigPath(classesDir, "vanilla", "fess", "doc.json"));
+        } finally {
+            deleteRecursively(classesDir);
+        }
+    }
+
+    @Test
+    public void test_resolveIndexConfigPath_fallsBackToTheDefaultFiles() throws Exception {
+        final Path classesDir = Files.createTempDirectory("fess_backup_classes");
+        try {
+            final Path indicesDir = Files.createDirectories(classesDir.resolve("fess_indices"));
+            // no _default directory, as in the distribution; _vanilla holds only fess.json
+            Files.createDirectories(indicesDir.resolve("_vanilla"));
+            Files.writeString(indicesDir.resolve("_vanilla").resolve("fess.json"), "{}");
+
+            assertEquals(indicesDir.resolve("fess.json"), AdminBackupAction.resolveIndexConfigPath(classesDir, "default", "fess.json"));
+            assertEquals(indicesDir.resolve("fess").resolve("doc.json"),
+                    AdminBackupAction.resolveIndexConfigPath(classesDir, "vanilla", "fess", "doc.json"));
+            assertEquals(indicesDir.resolve("fess.json"), AdminBackupAction.resolveIndexConfigPath(classesDir, "opensearch", "fess.json"));
+        } finally {
+            deleteRecursively(classesDir);
+        }
+    }
+
+    /**
+     * The files the backup carries are the ones the index is created from, so they follow the
+     * resource type of the search engine type. The classes directory is the source tree here,
+     * which holds the shipped index definitions and cannot be stale.
+     */
+    @Test
+    public void test_getFessJsonPathAndGetDocJsonPath_followTheResourceTypeOfTheSearchEngine() {
+        final Path classesDir = Paths.get("src/main/resources");
+        for (final String type : new String[] { "vanilla", "aws", "cloud" }) {
+            useSearchEngineType(type);
+
+            final Path fessJson = AdminBackupAction.getFessJsonPath(classesDir);
+            final Path docJson = AdminBackupAction.getDocJsonPath(classesDir);
+
+            assertTrue(type + ": " + fessJson, fessJson.endsWith(Paths.get("fess_indices", "_vanilla", "fess.json")));
+            assertTrue(type + ": " + docJson, docJson.endsWith(Paths.get("fess_indices", "_vanilla", "fess", "doc.json")));
+            assertTrue(type, Files.exists(fessJson));
+            assertTrue(type, Files.exists(docJson));
+        }
+        for (final String type : new String[] { "default", "opensearch", "" }) {
+            useSearchEngineType(type);
+
+            final Path fessJson = AdminBackupAction.getFessJsonPath(classesDir);
+            final Path docJson = AdminBackupAction.getDocJsonPath(classesDir);
+
+            assertTrue(type + ": " + fessJson, fessJson.endsWith(Paths.get("fess_indices", "fess.json")));
+            assertTrue(type + ": " + docJson, docJson.endsWith(Paths.get("fess_indices", "fess", "doc.json")));
+            assertTrue(type, Files.exists(fessJson));
+            assertTrue(type, Files.exists(docJson));
+        }
+    }
+
+    private static void useSearchEngineType(final String type) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSearchEngineType() {
+                return type;
+            }
+        });
+    }
+
+    private static void deleteRecursively(final Path dir) throws IOException {
+        try (Stream<Path> paths = Files.walk(dir)) {
+            paths.sorted(Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
+        }
     }
 
     private static class CapturingAppender extends AbstractAppender {

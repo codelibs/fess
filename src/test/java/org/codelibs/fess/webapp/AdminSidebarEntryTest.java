@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -61,6 +62,55 @@ public class AdminSidebarEntryTest {
     @Test
     public void test_everyPermissionNamesAnExistingAction() throws Exception {
         assertEveryNameHasAnAction(PERMISSION_PATTERN);
+    }
+
+    /**
+     * The dictionary item and its share of the system category condition must both hide behind
+     * {@code fesenPluginless}, or a role that holds only the dictionary permission gets a system
+     * category with nothing in it.
+     */
+    @Test
+    public void test_dictionaryEntryIsHiddenWithoutThePlugins() throws Exception {
+        final String source = new String(Files.readAllBytes(SIDEBAR_JSP), StandardCharsets.UTF_8);
+        final Matcher all = Pattern.compile(Pattern.quote("fe:permission('admin-dict-view')")).matcher(source);
+        final Matcher guarded = Pattern.compile(Pattern.quote("fe:permission('admin-dict-view') and not fesenPluginless")).matcher(source);
+        int allCount = 0;
+        while (all.find()) {
+            allCount++;
+        }
+        int guardedCount = 0;
+        while (guarded.find()) {
+            guardedCount++;
+        }
+        assertEquals(2, allCount, "the category condition and the item");
+        assertEquals(allCount, guardedCount);
+    }
+
+    /**
+     * {@code fesenType} is the canonical type (cloud is reported as vanilla), so a page that compares
+     * it with a type name hides nothing for the other plugin-less types. Pages use the
+     * {@code fesenPluginless} flag instead.
+     */
+    @Test
+    public void test_noJspComparesTheSearchEngineTypeWithAPluginlessTypeName() throws Exception {
+        final List<Path> jsps;
+        try (Stream<Path> files = Files.walk(Paths.get("src/main/webapp/WEB-INF"))) {
+            jsps = files.filter(path -> path.toString().endsWith(".jsp")).toList();
+        }
+        assertTrue(jsps.size() > 100, "only " + jsps.size() + " JSPs found, the walk is broken");
+        // either quote, and anywhere in the file: a condition can be broken over several lines
+        final Pattern typeName = Pattern.compile("[\"'](cloud|aws|vanilla)[\"']");
+        final List<String> offenders = new ArrayList<>();
+        for (final Path jsp : jsps) {
+            final String source = new String(Files.readAllBytes(jsp), StandardCharsets.UTF_8);
+            if (source.contains("fesenType")) {
+                final Matcher matcher = typeName.matcher(source);
+                while (matcher.find()) {
+                    offenders.add(jsp + ": " + matcher.group());
+                }
+            }
+        }
+        assertEquals(List.of(), offenders, "JSP conditions that compare fesenType with a plugin-less type name");
     }
 
     private void assertEveryNameHasAnAction(final Pattern pattern) throws Exception {

@@ -318,8 +318,7 @@ public class DefaultSearcher extends AbstractDocumentSearcher {
         if (StringUtil.isNotBlank(params.getSort()) || params.hasConditionQuery()) {
             return false;
         }
-        if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null
-                || StringUtil.isNotBlank(params.getSimilarDocHash())) {
+        if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null || hasSimilarDocHashFilter(params)) {
             return false;
         }
         return true;

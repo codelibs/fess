@@ -35,7 +35,7 @@
 				</li>
 			</c:if>
 				
-            <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or fe:permission('admin-dict-view') or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view') or fe:permission('admin-theme-view')}">
+            <c:if test="${fe:permission('admin-wizard-view') or fe:permission('admin-general-view') or fe:permission('admin-scheduler-view') or (fe:permission('admin-dict-view') and not fesenPluginless) or fe:permission('admin-accesstoken-view') or fe:permission('admin-plugin-view') or fe:permission('admin-storage-view') or fe:permission('admin-theme-view')}">
 			<li class="nav-item has-treeview <c:if test="${param.menuCategoryType=='system'}">menu-open</c:if>">
 				<a href="#" class="nav-link <c:if test="${param.menuCategoryType=='system'}">active</c:if>">
 					<i class='nav-icon fa fa-laptop' aria-hidden="true"></i>
@@ -68,7 +68,7 @@
 							<p><la:message key="labels.menu_scheduler_config" /></p>
 						</a></li></c:if>
 						
-					<c:if test="${fe:permission('admin-dict-view') and fesenType!='cloud' and fesenType!='aws'}">
+					<c:if test="${fe:permission('admin-dict-view') and not fesenPluginless}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/dict/')}" class="nav-link <c:if test="${param.menuType=='dict'}">active</c:if>" <c:if test="${param.menuType=='dict'}">aria-current="page"</c:if>>
 							<i class='fa fa-book nav-icon' aria-hidden="true"></i>

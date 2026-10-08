@@ -197,6 +197,15 @@ If your language requires special text analysis (stemming, stop words, etc.), yo
 
 Edit `src/main/resources/fess_indices/fess.json` to add language-specific analyzers.
 
+Fess ships a separate copy of the index definition for the `vanilla` search engine type
+(OpenSearch without the CodeLibs plugins, which `aws` also uses):
+`src/main/resources/fess_indices/_vanilla/fess.json` and
+`src/main/resources/fess_indices/_vanilla/fess/doc.json`. These are not derived from the default
+files, so add the same analyzer to `_vanilla/fess.json` as well, using only analyzers and filters
+that OpenSearch provides without the CodeLibs plugins. If the language has a `lang_[lang]` dynamic
+template in `fess_indices/fess/doc.json` that refers to the analyzer, add it to
+`_vanilla/fess/doc.json` too.
+
 **Example for Swedish:**
 ```json
 {
@@ -328,7 +337,7 @@ mvn clean package
 
 - Fess Configuration: `src/main/resources/fess_config.properties`
 - DBFlute FreeGen Configuration: `dbflute_fess/dfprop/lastafluteMap.dfprop`
-- OpenSearch Analysis: `src/main/resources/fess_indices/fess.json`
+- OpenSearch Analysis: `src/main/resources/fess_indices/fess.json` and `src/main/resources/fess_indices/_vanilla/fess.json`
 - LastaFlute Documentation: https://lastaflute.org/
 
 ## Summary Checklist
@@ -339,7 +348,7 @@ mvn clean package
 - [ ] Run `mvn dbflute:freegen` to regenerate Java classes
 - [ ] Run `mvn clean package` to rebuild project
 - [ ] Test language selection in admin UI
-- [ ] (Optional) Configure OpenSearch analyzers in `fess.json`
+- [ ] (Optional) Configure OpenSearch analyzers in `fess.json` and `_vanilla/fess.json`
 - [ ] (Optional) Add custom dictionaries for search analysis
 - [ ] Verify all UI pages display correctly in new language
 - [ ] Test error messages and form validation

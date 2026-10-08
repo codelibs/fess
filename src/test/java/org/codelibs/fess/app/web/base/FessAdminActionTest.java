@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.base;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,15 +24,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -458,8 +463,180 @@ public class FessAdminActionTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                                 hookBefore Tests
+    //                                                                 ==================
+
+    @Test
+    public void test_hookBefore_sendsAnActionThatNeedsThePluginsToTheAdminTopWhenThereAreNone() {
+        for (final String type : new String[] { "vanilla", "aws", "cloud" }) {
+            final List<String> accessed = new ArrayList<>();
+            final FessAdminAction action = createHookAction(accessed, type, true);
+
+            final ActionResponse response = action.hookBefore(new HookActionRuntime("/admin/dict/", "index"));
+
+            assertTrue(type, response instanceof HtmlResponse);
+            assertTrue(type, ((HtmlResponse) response).isRedirectTo());
+            assertEquals(type, "/admin/", ((HtmlResponse) response).getRoutingPath());
+            // the request is audited before it is turned away
+            assertEquals(type, List.of("/admin/dict/#index"), accessed);
+        }
+    }
+
+    @Test
+    public void test_hookBefore_runsAnActionThatNeedsThePluginsWhenTheyAreAvailable() {
+        for (final String type : new String[] { "default", "opensearch", "" }) {
+            final List<String> accessed = new ArrayList<>();
+            final FessAdminAction action = createHookAction(accessed, type, true);
+
+            final ActionResponse response = action.hookBefore(new HookActionRuntime("/admin/dict/", "index"));
+
+            assertTrue(type, response.isUndefined());
+            assertEquals(type, List.of("/admin/dict/#index"), accessed);
+        }
+    }
+
+    @Test
+    public void test_hookBefore_runsAnActionThatDoesNotNeedThePluginsOnAnyEngine() {
+        for (final String type : new String[] { "default", "vanilla", "aws", "cloud" }) {
+            final FessAdminAction action = createHookAction(new ArrayList<>(), type, false);
+
+            assertTrue(type, action.hookBefore(new HookActionRuntime("/admin/general/", "index")).isUndefined());
+        }
+    }
+
+    @Test
+    public void test_setupHtmlData_registersTheFlagTheAdminPagesHideTheirPluginFeaturesBy() {
+        final String[][] expectations =
+                { { "default", "false" }, { "opensearch", "false" }, { "vanilla", "true" }, { "aws", "true" }, { "cloud", "true" } };
+        for (final String[] expectation : expectations) {
+            final FessConfig config = new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getSearchEngineType() {
+                    return expectation[0];
+                }
+            };
+            final FessAdminAction action = new FessAdminAction() {
+                {
+                    systemHelper = new SystemHelper() {
+                        @Override
+                        public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
+                            // storage and end-of-life data are not under test
+                        }
+                    };
+                    fessConfig = config;
+                }
+
+                @Override
+                protected String getActionRole() {
+                    return "admin-test";
+                }
+
+                @Override
+                protected OptionalThing<FessUserBean> getUserBean() {
+                    return OptionalThing.empty();
+                }
+            };
+            final TestActionRuntime runtime = new TestActionRuntime("/admin/general/");
+
+            action.setupHtmlData(runtime);
+
+            // fesenType is the canonical type, so a page cannot tell cloud from vanilla by it
+            assertEquals(expectation[0], Boolean.valueOf(expectation[1]), runtime.getDisplayDataMap().get("fesenPluginless"));
+            assertEquals(expectation[0], "cloud".equals(expectation[0]) ? "vanilla" : expectation[0],
+                    runtime.getDisplayDataMap().get("fesenType"));
+        }
+    }
+
+    @Test
+    public void test_requiresEnginePlugins_isFalseByDefault() {
+        assertFalse(createAction().requiresEnginePlugins());
+    }
+
+    @Test
+    public void test_godHandPrologue_isNotAffectedByTheEnginePluginGuard() {
+        // the guard is in hookBefore, which runs after the role checks of godHandPrologue: a user
+        // who may not see the screen is sent to the root, not to the admin top
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(new ArrayList<>());
+        final FessAdminAction action = new FessAdminAction() {
+            {
+                activityHelper = spyActivityHelper;
+                systemHelper = new SystemHelper();
+                fessConfig = createFessConfigOfType("vanilla");
+            }
+
+            @Override
+            protected String getActionRole() {
+                return "admin-dict";
+            }
+
+            @Override
+            protected boolean requiresEnginePlugins() {
+                return true;
+            }
+
+            @Override
+            protected OptionalThing<FessUserBean> getUserBean() {
+                return OptionalThing.of(new FessUserBean(new TestUser("taro", new String[0])));
+            }
+
+            @Override
+            protected ActionResponse superGodHandPrologue(final ActionRuntime runtime) {
+                throw new UserRoleLoginException();
+            }
+        };
+
+        final ActionResponse response = action.godHandPrologue(new TestActionRuntime("/admin/dict/"));
+
+        assertEquals("/", ((HtmlResponse) response).getRoutingPath());
+    }
+
+    // ===================================================================================
     //                                                                      Helper Methods
     //                                                                      ==============
+
+    private static FessConfig createFessConfigOfType(final String type) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSearchEngineType() {
+                return type;
+            }
+        };
+    }
+
+    private FessAdminAction createHookAction(final List<String> accessed, final String type, final boolean requiresEnginePlugins) {
+        final FessAdminAction action = new FessAdminAction() {
+            @Override
+            protected String getActionRole() {
+                return "admin-test";
+            }
+
+            @Override
+            protected boolean requiresEnginePlugins() {
+                return requiresEnginePlugins;
+            }
+
+            @Override
+            protected OptionalThing<FessUserBean> getUserBean() {
+                return OptionalThing.empty();
+            }
+        };
+        // wires the framework fields that resolve the redirect, without FessLoginAssist (it needs UserBhv)
+        suppressBindingOf(FessLoginAssist.class);
+        inject(action);
+        action.activityHelper = new ActivityHelper() {
+            @Override
+            public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
+                accessed.add(path + "#" + execute);
+            }
+        };
+        action.viewHelper = new ViewHelper();
+        action.fessConfig = createFessConfigOfType(type);
+        return action;
+    }
 
     private FessAdminAction createAction() {
         return new FessAdminAction() {
@@ -514,6 +691,30 @@ public class FessAdminActionTest extends UnitFessTestCase {
 
         TestActionRuntime(final String requestPath) {
             super(requestPath, null, null);
+        }
+    }
+
+    static class HookActionRuntime extends ActionRuntime {
+
+        private final Method executeMethod;
+
+        HookActionRuntime(final String requestPath, final String executeName) {
+            super(requestPath, null, null);
+            try {
+                executeMethod = DummyAction.class.getMethod(executeName);
+            } catch (final NoSuchMethodException e) {
+                throw new IllegalArgumentException(executeName, e);
+            }
+        }
+
+        @Override
+        public Method getExecuteMethod() {
+            return executeMethod;
+        }
+    }
+
+    public static class DummyAction {
+        public void index() {
         }
     }
 

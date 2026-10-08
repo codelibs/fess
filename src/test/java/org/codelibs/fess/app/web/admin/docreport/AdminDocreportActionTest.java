@@ -15,9 +15,15 @@
  */
 package org.codelibs.fess.app.web.admin.docreport;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codelibs.fess.app.service.DocumentReportService;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.response.HtmlResponse;
 
 public class AdminDocreportActionTest extends UnitFessTestCase {
 
@@ -25,6 +31,54 @@ public class AdminDocreportActionTest extends UnitFessTestCase {
     public void test_onlineHelpName() {
         // the name of docreport-guide.rst in fess-docs
         assertEquals("docreport", ComponentUtil.getFessConfig().getOnlineHelpNameDocreport());
+    }
+
+    @Test
+    public void test_index_showsTheDuplicateTabWhenDuplicatesCanBeReported() throws Exception {
+        final List<String> shown = new ArrayList<>();
+        final DuplicateForm form = new DuplicateForm();
+        form.url = "smb://server/";
+
+        createAction(true, shown).index(form);
+
+        assertEquals(List.of("duplicate:smb://server/"), shown);
+    }
+
+    @Test
+    public void test_index_landsOnTheDormantTabWhenDuplicatesCannotBeReported() throws Exception {
+        // the duplicate tab is hidden, and the index has no content signature to report from
+        final List<String> shown = new ArrayList<>();
+        final DuplicateForm form = new DuplicateForm();
+        form.url = "smb://server/";
+
+        createAction(false, shown).index(form);
+
+        assertEquals(List.of("dormant:smb://server/"), shown);
+    }
+
+    private AdminDocreportAction createAction(final boolean duplicateReportAvailable, final List<String> shown) throws Exception {
+        final AdminDocreportAction action = new AdminDocreportAction() {
+            @Override
+            public HtmlResponse duplicate(final DuplicateForm form) {
+                shown.add("duplicate:" + form.url);
+                return HtmlResponse.undefined();
+            }
+
+            @Override
+            public HtmlResponse dormant(final DormantForm form) {
+                shown.add("dormant:" + form.url);
+                return HtmlResponse.undefined();
+            }
+        };
+        final Field field = AdminDocreportAction.class.getDeclaredField("documentReportService");
+        field.setAccessible(true);
+        field.set(action, new DocumentReportService() {
+            @Override
+            public boolean isDuplicateReportAvailable() {
+                return duplicateReportAvailable;
+            }
+        });
+        return action;
     }
 
     @Test

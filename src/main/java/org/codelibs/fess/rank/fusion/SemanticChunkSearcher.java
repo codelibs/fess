@@ -225,8 +225,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         }
         // Geo and similar-document constraints are hard filters on the default path; the
         // semantic branch does not apply them, so skip it rather than fuse unfiltered hits.
-        if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null
-                || StringUtil.isNotBlank(params.getSimilarDocHash())) {
+        if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null || hasSimilarDocHashFilter(params)) {
             return OptionalThing.empty();
         }
         final EmbeddingClientManager embeddingClientManager = getEmbeddingClientManager();

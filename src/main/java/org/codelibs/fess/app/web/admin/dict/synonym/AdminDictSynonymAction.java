@@ -89,6 +89,11 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return ROLE;
     }
 
+    @Override
+    protected boolean requiresEnginePlugins() {
+        return true;
+    }
+
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============

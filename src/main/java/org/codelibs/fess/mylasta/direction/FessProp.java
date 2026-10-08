@@ -400,10 +400,10 @@ public interface FessProp {
     }
 
     default boolean isResultCollapsed() {
-        return switch (getFesenType()) {
-        case Constants.FESEN_TYPE_CLOUD, Constants.FESEN_TYPE_AWS -> false;
-        default -> getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
-        };
+        if (isFesenPluginless()) {
+            return false;
+        }
+        return getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
     }
 
     default void setLoginLinkEnabled(final boolean value) {
@@ -2469,8 +2469,47 @@ public interface FessProp {
 
     String getSearchEngineType();
 
+    /**
+     * Returns the canonical search engine type: the deprecated {@code cloud} is reported as
+     * {@code vanilla} and every other value, including a custom one, is returned as configured.
+     * Use {@link #getSearchEngineType()} for the raw configured value.
+     *
+     * @return the canonical search engine type
+     */
     default String getFesenType() {
-        return getSearchEngineType();
+        return canonicalizeFesenType(getSearchEngineType());
+    }
+
+    /**
+     * Maps the deprecated {@code cloud} search engine type to {@code vanilla}. Any other value,
+     * including {@code null} and custom types, is returned unchanged.
+     *
+     * @param type the configured search engine type
+     * @return the canonical search engine type
+     */
+    @SuppressWarnings("deprecation")
+    static String canonicalizeFesenType(final String type) {
+        return Constants.FESEN_TYPE_CLOUD.equals(type) ? Constants.FESEN_TYPE_VANILLA : type;
+    }
+
+    /**
+     * Checks whether the search engine runs without the CodeLibs plugins ({@code vanilla} or {@code aws}).
+     *
+     * @return true if the CodeLibs plugins are not available
+     */
+    default boolean isFesenPluginless() {
+        final String type = canonicalizeFesenType(getFesenType());
+        return Constants.FESEN_TYPE_VANILLA.equals(type) || Constants.FESEN_TYPE_AWS.equals(type);
+    }
+
+    /**
+     * Returns the name of the {@code _<type>} resource directory that holds the index and suggest
+     * definitions: {@code vanilla} for both plugin-less types, otherwise the canonical type.
+     *
+     * @return the resource type
+     */
+    default String getFesenResourceType() {
+        return isFesenPluginless() ? Constants.FESEN_TYPE_VANILLA : canonicalizeFesenType(getFesenType());
     }
 
     String getSearchEngineHttpUrl();

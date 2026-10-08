@@ -2323,7 +2323,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.type'. <br>
      * The value is, e.g. default <br>
-     * comment: The type of search engine backend (e.g., default, opensearch).
+     * comment: <br>
+     * The type of search engine backend.<br>
+     * Valid values: default (OpenSearch with the CodeLibs plugins), vanilla (OpenSearch without the CodeLibs plugins),<br>
+     * aws (vanilla with AWS-specific handling). cloud is a deprecated alias of vanilla.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineType();

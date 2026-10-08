@@ -465,6 +465,38 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_prepare_aSimilarDocHashIsAHardFilterOnlyWhereTheEngineHasTheSignature() {
+        final StubSearchRequestParams withHash = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getSimilarDocHash() {
+                return "0101";
+            }
+        };
+        for (final String type : new String[] { "default", "opensearch" }) {
+            useSearchEngineType(type);
+            // the semantic branch cannot apply the filter, so it steps aside rather than fuse unfiltered hits
+            assertFalse(type, new GuardedSearcher().prepare("opensearch", withHash).isPresent());
+            assertTrue(type, new GuardedSearcher().prepare("opensearch", new StubSearchRequestParams(0, 10)).isPresent());
+        }
+        for (final String type : new String[] { "vanilla", "aws", "cloud" }) {
+            useSearchEngineType(type);
+            // the plugin-less search drops the parameter, so there is no filter to honour
+            assertTrue(type, new GuardedSearcher().prepare("opensearch", withHash).isPresent());
+        }
+    }
+
+    private static void useSearchEngineType(final String type) {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSearchEngineType() {
+                return type;
+            }
+        });
+    }
+
+    @Test
     public void test_prepare_skipsWhatCannotBeSplit() {
         final GuardedSearcher searcher = new GuardedSearcher();
         // allintitle: narrows to one field, and a chunk vector covers the document rather than a

@@ -57,19 +57,21 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
+                                <c:if test="${not fesenPluginless}">
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.reset_dictionaries"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="resetDictionaries"/>
                                         <div class="form-check">
-                                            <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries" disabled="${fesenType=='cloud' or fesenType=='aws'}"/>
+                                            <la:checkbox styleId="resetDictionaries" styleClass="form-check-input" property="resetDictionaries"/>
                                             <label for="resetDictionaries" class="form-check-label">
                                                 <la:message key="labels.enabled"/>
                                             </label>
                                         </div>
                                     </div>
                                 </div>
+                                </c:if>
                                 <div class="form-group row">
                                     <label for="numberOfShardsForDoc" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.number_of_shards_for_doc"/></label>
@@ -100,6 +102,7 @@ ${fe:html(true)}
                             </div>
                         </div>
                     </div>
+                    <c:if test="${not fesenPluginless}">
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
@@ -117,6 +120,7 @@ ${fe:html(true)}
                             </div>
                         </div>
                     </div>
+                    </c:if>
                     <div class="col-md-12">
                         <div class="card card-outline card-primary">
                             <div class="card-header">

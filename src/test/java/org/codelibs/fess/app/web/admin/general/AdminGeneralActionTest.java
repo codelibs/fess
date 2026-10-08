@@ -63,6 +63,11 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_updateConfig_resultCollapsed_vanilla_keepsStoredValueWhenAbsent() {
+        assertResultCollapsedAfterUpdate(Constants.FESEN_TYPE_VANILLA, Constants.TRUE, null, Constants.TRUE);
+    }
+
+    @Test
     public void test_updateConfig_resultCollapsed_aws_keepsStoredValueWhenAbsent() {
         assertResultCollapsedAfterUpdate(Constants.FESEN_TYPE_AWS, Constants.TRUE, null, Constants.TRUE);
     }
@@ -80,6 +85,17 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
     @Test
     public void test_updateConfig_resultCollapsed_unknownType_appliesUncheckedValue() {
         assertResultCollapsedAfterUpdate("unknown", Constants.TRUE, null, Constants.FALSE);
+    }
+
+    @Test
+    public void test_updateConfig_resultCollapsed_customType_appliesUncheckedValue() {
+        // a custom type such as opensearch has the CodeLibs plugins: only the plugin-less types keep the stored value
+        assertResultCollapsedAfterUpdate("opensearch", Constants.TRUE, null, Constants.FALSE);
+    }
+
+    @Test
+    public void test_updateConfig_resultCollapsed_customType_appliesCheckedValue() {
+        assertResultCollapsedAfterUpdate("opensearch", Constants.FALSE, Constants.TRUE, Constants.TRUE);
     }
 
     @Test
@@ -329,7 +345,8 @@ public class AdminGeneralActionTest extends UnitFessTestCase {
     /**
      * Runs updateConfig for the given search engine type and asserts the stored property value.
      * The stored property is read back directly because isResultCollapsed() forces false for
-     * cloud and aws and therefore cannot observe what was actually written.
+     * the plugin-less types (vanilla, aws and the deprecated cloud) and therefore cannot observe
+     * what was actually written.
      *
      * @param fesenType the search engine type
      * @param storedValue the property value before updateConfig

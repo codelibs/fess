@@ -17,7 +17,9 @@ package org.codelibs.fess.unit;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -58,21 +60,41 @@ public final class LogCapturingAppender extends AbstractAppender {
     /** Level forced on the captured logger unless the caller asks for another one. */
     private static final Level DEFAULT_LEVEL = Level.DEBUG;
 
+    /**
+     * What {@link #attach} did to the {@link LoggerConfig} of one logger name, shared by every
+     * appender attached to that name at the same time.
+     *
+     * <p>CI runs surefire with {@code -Dparallel=classes}, so two classes can capture the same
+     * logger at once. The second {@code attach} then finds the first one's dedicated config and
+     * borrows it. Without counting, the first {@code detach} would remove that config together
+     * with the second class's appender, and the second class would read an empty capture.</p>
+     */
+    private static final class Attachment {
+
+        /** Set when the first attach created the dedicated config, which the last detach must remove. */
+        final boolean ownsLoggerConfig;
+
+        /** Level to put back when the config was not ours to create. */
+        final Level restoredLevel;
+
+        /** Appenders attached to the logger name right now. */
+        int count;
+
+        Attachment(final boolean ownsLoggerConfig, final Level restoredLevel) {
+            this.ownsLoggerConfig = ownsLoggerConfig;
+            this.restoredLevel = restoredLevel;
+        }
+    }
+
+    private static final Map<String, Attachment> ATTACHMENTS = new HashMap<>();
+
     private final List<LogEvent> events = new CopyOnWriteArrayList<>();
 
     private final String loggerName;
 
-    /** Set when this appender created the dedicated {@link LoggerConfig} and must remove it again. */
-    private final boolean ownsLoggerConfig;
-
-    /** Level to put back when the dedicated config was not ours to create. */
-    private final Level restoredLevel;
-
-    private LogCapturingAppender(final String loggerName, final boolean ownsLoggerConfig, final Level restoredLevel) {
+    private LogCapturingAppender(final String loggerName) {
         super("LogCapturingAppender-" + UUID.randomUUID(), null, null, true, Property.EMPTY_ARRAY);
         this.loggerName = loggerName;
-        this.ownsLoggerConfig = ownsLoggerConfig;
-        this.restoredLevel = restoredLevel;
     }
 
     /** Captures {@code targetClass}'s logger from {@link #DEFAULT_LEVEL} up. */
@@ -90,46 +112,64 @@ public final class LogCapturingAppender extends AbstractAppender {
      * {@code LoggerConfig} dedicated to {@code loggerName}, so no other logger is affected.
      */
     public static LogCapturingAppender attach(final String loggerName, final Level level) {
-        final LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        final Configuration configuration = context.getConfiguration();
-        final LoggerConfig resolved = configuration.getLoggerConfig(loggerName);
-        final boolean ownsLoggerConfig = !resolved.getName().equals(loggerName);
-        // Read before the setLevel below: in the borrow branch `dedicated` IS `resolved`, so
-        // reading afterwards would capture the level we just wrote and make detach() a no-op.
-        final Level restoredLevel = ownsLoggerConfig ? null : resolved.getLevel();
-        final LoggerConfig dedicated;
-        if (ownsLoggerConfig) {
-            // The ancestor's level is deliberately NOT copied: it may be mid-rewrite in another thread.
-            dedicated = new LoggerConfig(loggerName, level, resolved.isAdditive());
-            dedicated.setParent(resolved);
-            configuration.addLogger(loggerName, dedicated);
-        } else {
-            // A config declared for this exact name, or a leftover: borrow it and put its level back later.
-            dedicated = resolved;
-            dedicated.setLevel(level);
+        synchronized (ATTACHMENTS) {
+            final LoggerContext context = (LoggerContext) LogManager.getContext(false);
+            final Configuration configuration = context.getConfiguration();
+            final LoggerConfig resolved = configuration.getLoggerConfig(loggerName);
+            Attachment attachment = ATTACHMENTS.get(loggerName);
+            final LoggerConfig dedicated;
+            if (attachment != null && resolved.getName().equals(loggerName)) {
+                // Another capture of the same logger is active: share its config.
+                dedicated = resolved;
+                dedicated.setLevel(level);
+            } else if (!resolved.getName().equals(loggerName)) {
+                // The ancestor's level is deliberately NOT copied: it may be mid-rewrite in another thread.
+                dedicated = new LoggerConfig(loggerName, level, resolved.isAdditive());
+                dedicated.setParent(resolved);
+                configuration.addLogger(loggerName, dedicated);
+                attachment = new Attachment(true, null);
+                ATTACHMENTS.put(loggerName, attachment);
+            } else {
+                // A config declared for this exact name, or a leftover: borrow it and put its level back later.
+                // Read before the setLevel below, or detach() would restore the level we just wrote.
+                attachment = new Attachment(false, resolved.getLevel());
+                ATTACHMENTS.put(loggerName, attachment);
+                dedicated = resolved;
+                dedicated.setLevel(level);
+            }
+            attachment.count++;
+            final LogCapturingAppender appender = new LogCapturingAppender(loggerName);
+            appender.start();
+            dedicated.addAppender(appender, null, null);
+            context.updateLoggers();
+            return appender;
         }
-        final LogCapturingAppender appender = new LogCapturingAppender(loggerName, ownsLoggerConfig, restoredLevel);
-        appender.start();
-        dedicated.addAppender(appender, null, null);
-        context.updateLoggers();
-        return appender;
     }
 
-    /** Detaches the appender and undoes the {@link LoggerConfig} change {@link #attach} made. */
+    /**
+     * Detaches the appender and, once the last capture of the logger is gone, undoes the
+     * {@link LoggerConfig} change {@link #attach} made.
+     */
     public void detach() {
-        final LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        final Configuration configuration = context.getConfiguration();
-        final LoggerConfig dedicated = configuration.getLoggerConfig(loggerName);
-        if (dedicated.getName().equals(loggerName)) {
-            dedicated.removeAppender(getName());
-            if (ownsLoggerConfig) {
-                configuration.removeLogger(loggerName);
-            } else if (restoredLevel != null) {
-                dedicated.setLevel(restoredLevel);
+        synchronized (ATTACHMENTS) {
+            final LoggerContext context = (LoggerContext) LogManager.getContext(false);
+            final Configuration configuration = context.getConfiguration();
+            final LoggerConfig dedicated = configuration.getLoggerConfig(loggerName);
+            final Attachment attachment = ATTACHMENTS.get(loggerName);
+            if (dedicated.getName().equals(loggerName)) {
+                dedicated.removeAppender(getName());
+                if (attachment != null && --attachment.count == 0) {
+                    ATTACHMENTS.remove(loggerName);
+                    if (attachment.ownsLoggerConfig) {
+                        configuration.removeLogger(loggerName);
+                    } else if (attachment.restoredLevel != null) {
+                        dedicated.setLevel(attachment.restoredLevel);
+                    }
+                }
             }
+            context.updateLoggers();
+            stop();
         }
-        context.updateLoggers();
-        stop();
     }
 
     @Override
@@ -150,6 +190,21 @@ public final class LogCapturingAppender extends AbstractAppender {
     /** Formatted messages of the captured events at exactly {@code level}. */
     public List<String> messagesAt(final Level level) {
         return eventsAt(level).stream().map(e -> e.getMessage().getFormattedMessage()).toList();
+    }
+
+    /**
+     * Captured events at exactly {@code level} that the calling thread logged. Another test class
+     * that runs at the same time under {@code -Dparallel=classes} can log through the same logger
+     * into the same capture, and its events are not the caller's.
+     */
+    public List<LogEvent> eventsOnThisThreadAt(final Level level) {
+        final String threadName = Thread.currentThread().getName();
+        return eventsAt(level).stream().filter(e -> threadName.equals(e.getThreadName())).toList();
+    }
+
+    /** Formatted messages of {@link #eventsOnThisThreadAt(Level)}. */
+    public List<String> messagesOnThisThreadAt(final Level level) {
+        return eventsOnThisThreadAt(level).stream().map(e -> e.getMessage().getFormattedMessage()).toList();
     }
 
     /** Formatted messages captured at WARN. */

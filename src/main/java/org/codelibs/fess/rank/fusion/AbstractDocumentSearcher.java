@@ -232,6 +232,20 @@ public abstract class AbstractDocumentSearcher extends RankFusionSearcher {
     }
 
     /**
+     * Checks whether the request narrows its results to the documents similar to another one.
+     *
+     * <p>That is a hard filter on the content signature, which a search engine without the
+     * CodeLibs plugins does not index: {@code SearchConditionBuilder} drops the parameter there,
+     * so it must not make a searcher behave as if a filter was applied.</p>
+     *
+     * @param params the search request parameters
+     * @return true if the request carries a similar-document filter that the search engine applies
+     */
+    protected boolean hasSimilarDocHashFilter(final SearchRequestParams params) {
+        return StringUtil.isNotBlank(params.getSimilarDocHash()) && !ComponentUtil.getFessConfig().isFesenPluginless();
+    }
+
+    /**
      * Creates a search condition for the OpenSearch request, naming the terms to highlight.
      *
      * @param query the search query string

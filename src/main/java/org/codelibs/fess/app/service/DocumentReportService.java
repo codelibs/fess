@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.DocumentReport;
 import org.codelibs.fess.entity.DocumentReport.DuplicateGroup;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -143,13 +142,12 @@ public class DocumentReportService {
 
     /**
      * Returns whether the index has the content signature the duplicate report needs. The index
-     * mappings for the managed cloud services do not compute it.
+     * mappings for the plugin-less search engine types (vanilla and aws) do not compute it.
      *
      * @return true when duplicates can be reported
      */
     public boolean isDuplicateReportAvailable() {
-        final String type = fessConfig.getFesenType();
-        return !Constants.FESEN_TYPE_CLOUD.equals(type) && !Constants.FESEN_TYPE_AWS.equals(type);
+        return !fessConfig.isFesenPluginless();
     }
 
     /**

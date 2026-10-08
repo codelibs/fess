@@ -1332,4 +1332,95 @@ public class FessPropTest extends UnitFessTestCase {
             FessProp.propMap.clear();
         }
     }
+
+    private FessConfig fessConfigOfType(final String type) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSearchEngineType() {
+                return type;
+            }
+        };
+    }
+
+    private void assertFesenType(final String type, final String expectedType, final boolean pluginless,
+            final String expectedResourceType) {
+        final FessConfig fessConfig = fessConfigOfType(type);
+        assertEquals(type, expectedType, fessConfig.getFesenType());
+        assertEquals(type, pluginless, fessConfig.isFesenPluginless());
+        assertEquals(type, expectedResourceType, fessConfig.getFesenResourceType());
+    }
+
+    @Test
+    public void test_fesenType_default() {
+        assertFesenType("default", "default", false, "default");
+    }
+
+    @Test
+    public void test_fesenType_vanilla() {
+        assertFesenType("vanilla", "vanilla", true, "vanilla");
+    }
+
+    @Test
+    public void test_fesenType_aws_usesTheVanillaResources() {
+        assertFesenType("aws", "aws", true, "vanilla");
+    }
+
+    @Test
+    public void test_fesenType_cloudIsAnAliasOfVanilla() {
+        assertFesenType("cloud", "vanilla", true, "vanilla");
+    }
+
+    @Test
+    public void test_fesenType_customTypePassesThrough() {
+        assertFesenType("opensearch", "opensearch", false, "opensearch");
+        // the type is compared as is, so a differently spelled value is a custom type
+        assertFesenType("Vanilla", "Vanilla", false, "Vanilla");
+    }
+
+    @Test
+    public void test_fesenType_isComparedStrictly() {
+        // neither trimmed nor case-folded: a differently spelled plugin-less type is a custom type,
+        // which keeps the plugins and reads fess_indices/_<type> as an override
+        for (final String type : new String[] { " vanilla", "vanilla ", "VANILLA", "AWS", "Aws", "CLOUD", "Cloud" }) {
+            assertFesenType(type, type, false, type);
+        }
+    }
+
+    @Test
+    public void test_fesenType_nullAndEmptyAreSafe() {
+        assertFesenType(null, null, false, null);
+        assertFesenType("", "", false, "");
+        assertNull(FessProp.canonicalizeFesenType(null));
+    }
+
+    @Test
+    public void test_fesenType_predicatesCanonicalizeAStubbedFesenType() {
+        // Test doubles override getFesenType() only and cannot reach getSearchEngineType().
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getFesenType() {
+                return "cloud";
+            }
+        };
+        assertTrue(fessConfig.isFesenPluginless());
+        assertEquals("vanilla", fessConfig.getFesenResourceType());
+    }
+
+    @Test
+    public void test_isResultCollapsed_falseWhenPluginless() {
+        ComponentUtil.getSystemProperties().setProperty(Constants.RESULT_COLLAPSED_PROPERTY, Constants.TRUE);
+        try {
+            assertTrue(fessConfigOfType("default").isResultCollapsed());
+            assertTrue(fessConfigOfType("opensearch").isResultCollapsed());
+            assertFalse(fessConfigOfType("vanilla").isResultCollapsed());
+            assertFalse(fessConfigOfType("aws").isResultCollapsed());
+            assertFalse(fessConfigOfType("cloud").isResultCollapsed());
+        } finally {
+            ComponentUtil.getSystemProperties().remove(Constants.RESULT_COLLAPSED_PROPERTY);
+        }
+    }
 }

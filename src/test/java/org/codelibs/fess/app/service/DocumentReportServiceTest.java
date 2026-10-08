@@ -204,7 +204,7 @@ public class DocumentReportServiceTest extends UnitFessTestCase {
 
     @Test
     public void test_getDuplicateReport_unavailableOnManagedServices() {
-        for (final String type : new String[] { "cloud", "aws" }) {
+        for (final String type : new String[] { "vanilla", "cloud", "aws" }) {
             final TestFessConfig fessConfig = new TestFessConfig();
             fessConfig.overrides.put(FessConfig.search_engine_TYPE, type);
             final TestService service = new TestService(fessConfig);
@@ -214,6 +214,20 @@ public class DocumentReportServiceTest extends UnitFessTestCase {
             assertEquals(0, service.requestedGroupSize, type);
         }
         assertTrue(new TestService(new TestFessConfig()).isDuplicateReportAvailable());
+    }
+
+    @Test
+    public void test_getDuplicateReport_availableWithTheCodeLibsPlugins() {
+        // the controls of the test above: a type that is not plugin-less still asks the engine
+        for (final String type : new String[] { "default", "opensearch" }) {
+            final TestFessConfig fessConfig = new TestFessConfig();
+            fessConfig.overrides.put(FessConfig.search_engine_TYPE, type);
+            final TestService service = new TestService(fessConfig);
+            assertTrue(service.isDuplicateReportAvailable(), type);
+            final DocumentReport report = service.getDuplicateReport(null);
+            assertFalse(report.isUnavailable(), type);
+            assertEquals(100, service.requestedGroupSize, type);
+        }
     }
 
     @Test

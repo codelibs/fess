@@ -15,9 +15,15 @@
  */
 package org.codelibs.fess.app.web.admin.maintenance;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.response.HtmlResponse;
 
 public class AdminMaintenanceActionTest extends UnitFessTestCase {
 
@@ -46,6 +52,47 @@ public class AdminMaintenanceActionTest extends UnitFessTestCase {
         assertFalse(action.isLogFilename("fess.txt"));
         assertFalse(action.isLogFilename("fess.xml"));
         assertFalse(action.isLogFilename("fess.log.bak"));
+    }
+
+    // ===================================================================================
+    //                                                                    reloadDocIndex
+    //                                                                    ==============
+
+    @Test
+    public void test_reloadDocIndex_isIgnoredWithoutThePlugins() {
+        // the button is hidden without the plugins, so only a hand-made request gets here
+        for (final String type : new String[] { "vanilla", "aws", "cloud" }) {
+            final List<Class<?>> redirects = new ArrayList<>();
+            final AdminMaintenanceAction action = new AdminMaintenanceAction() {
+                {
+                    fessConfig = new FessConfig.SimpleImpl() {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public String getSearchEngineType() {
+                            return type;
+                        }
+                    };
+                    searchEngineClient = new SearchEngineClient() {
+                        @Override
+                        public void flushConfigFiles(final Runnable callback) {
+                            fail("the index must not be closed and reopened");
+                        }
+                    };
+                }
+
+                @Override
+                protected HtmlResponse redirect(final Class<?> actionType) {
+                    redirects.add(actionType);
+                    return HtmlResponse.undefined();
+                }
+            };
+
+            action.reloadDocIndex(new ActionForm());
+
+            assertEquals(type, 1, redirects.size());
+            assertTrue(type, AdminMaintenanceAction.class.isAssignableFrom(redirects.get(0)));
+        }
     }
 
     // ===================================================================================
