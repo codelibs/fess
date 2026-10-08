@@ -389,6 +389,44 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getRelatedContents_nullQueryWithRegexTerm() {
+        List<RelatedContent> testData = new ArrayList<>();
+        testData.add(createRelatedContent("exact", "Exact Match", ""));
+        testData.add(createRelatedContent("regex:.*(cancel|退会).*", "Regex Match: __QUERY__", ""));
+        mockBhv.setTestData(testData);
+
+        relatedContentHelper.load();
+
+        // a search without q hands the helper a null query
+        String[] results = relatedContentHelper.getRelatedContents(null);
+        assertEquals(0, results.length);
+
+        // and the terms are still served for a query
+        results = relatedContentHelper.getRelatedContents("cancel my plan");
+        assertEquals(1, results.length);
+        assertEquals("Regex Match: cancel my plan", results[0]);
+        results = relatedContentHelper.getRelatedContents("exact");
+        assertEquals(1, results.length);
+        assertEquals("Exact Match", results[0]);
+    }
+
+    @Test
+    public void test_getRelatedContents_blankQueryWithRegexTerm() {
+        List<RelatedContent> testData = new ArrayList<>();
+        testData.add(createRelatedContent("regex:.*", "Matches Everything: __QUERY__", ""));
+        mockBhv.setTestData(testData);
+
+        relatedContentHelper.load();
+
+        assertEquals(0, relatedContentHelper.getRelatedContents("").length);
+        assertEquals(0, relatedContentHelper.getRelatedContents("   ").length);
+
+        final String[] results = relatedContentHelper.getRelatedContents("anything");
+        assertEquals(1, results.length);
+        assertEquals("Matches Everything: anything", results[0]);
+    }
+
+    @Test
     public void test_setRegexPrefix() {
         assertEquals("regex:", relatedContentHelper.regexPrefix);
 

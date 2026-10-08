@@ -36,7 +36,9 @@ import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.TagTypeHelper;
+import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
 import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -644,6 +646,37 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         assertEquals(body, 200, res.status);
         assertTrue(body.contains("\"permission_state\":\"RESOLVED\""), body);
+    }
+
+    /**
+     * A search without q has no related content. The regex terms of the featured answers were matched
+     * against the null query, so the request failed with a 500 as soon as one regex term existed.
+     */
+    @Test
+    public void test_search_withoutQ_servesWhileARegexRelatedContentExists() throws Exception {
+        registerSearchStubs();
+        final VirtualHostHelper virtualHostHelper = new VirtualHostHelper();
+        inject(virtualHostHelper);
+        ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
+        final RelatedContentHelper relatedContentHelper = new RelatedContentHelper() {
+            @Override
+            public List<RelatedContent> getAvailableRelatedContentList() {
+                final RelatedContent entity = new RelatedContent();
+                entity.setTerm("regex:.*(cancel|退会).*");
+                entity.setContent("<p>Cancel</p>");
+                entity.setVirtualHost("");
+                return List.of(entity);
+            }
+        };
+        relatedContentHelper.load();
+        ComponentUtil.register(relatedContentHelper, "relatedContentHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        new SearchHandler().handle(new StubRequest("/api/v2/search", new HashMap<>()), res);
+
+        final String body = res.body();
+        assertEquals(body, 200, res.status);
+        assertTrue(body.contains("\"related_contents\":[]"), body);
     }
 
     // ===== User tags =====
