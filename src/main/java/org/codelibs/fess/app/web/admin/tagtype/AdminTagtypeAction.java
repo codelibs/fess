@@ -146,7 +146,7 @@ public class AdminTagtypeAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            tagTypePager.setCurrentPageNumber(pageNumber.get());
+            tagTypePager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), tagTypePager.getPageSize()));
         }).orElse(() -> {
             tagTypePager.setCurrentPageNumber(0);
         });
@@ -258,13 +258,12 @@ public class AdminTagtypeAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(tagTypeService.getTagType(id), id, this::asListHtml);
         return asHtml(path_AdminTagtype_AdminTagtypeDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                tagTypeService.getTagType(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyToForm(entity, form);
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         }).renderWith(data -> {

@@ -243,13 +243,11 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
+        final var optEntity = verifyFound(stopwordsService.getStopwordsItem(dictId, id), dictId + ":" + id, () -> asListHtml(dictId));
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                stopwordsService.getStopwordsItem(dictId, id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     form.input = entity.getInputValue();
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
-                            () -> asListHtml(dictId));
                 });
                 form.id = id;
                 form.crudMode = crudMode;

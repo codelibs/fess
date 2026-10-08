@@ -127,7 +127,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            labelTypePager.setCurrentPageNumber(pageNumber.get());
+            labelTypePager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), labelTypePager.getPageSize()));
         }).orElse(() -> {
             labelTypePager.setCurrentPageNumber(0);
         });
@@ -253,9 +253,10 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(labelTypeService.getLabelType(id), id, this::asListHtml);
         return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                labelTypeService.getLabelType(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                         copyOp.exclude(Constants.PERMISSIONS);
@@ -266,8 +267,6 @@ public class AdminLabeltypeAction extends FessAdminAction {
                             .distinct()
                             .collect(Collectors.joining("\n")));
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         }).renderWith(data -> {

@@ -93,7 +93,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
-        failureUrlPager.setCurrentPageNumber(pageNumber);
+        failureUrlPager.setCurrentPageNumber(limitPageNumber(pageNumber, failureUrlPager.getPageSize()));
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -170,15 +170,14 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
+        final var optEntity = verifyFound(failureUrlService.getFailureUrl(id), id, this::asListHtml);
         return asHtml(path_AdminFailureurl_AdminFailureurlDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                failureUrlService.getFailureUrl(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

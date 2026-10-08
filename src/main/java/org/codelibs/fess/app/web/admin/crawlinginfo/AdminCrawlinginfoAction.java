@@ -98,7 +98,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
-        crawlingInfoPager.setCurrentPageNumber(pageNumber);
+        crawlingInfoPager.setCurrentPageNumber(limitPageNumber(pageNumber, crawlingInfoPager.getPageSize()));
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
         });

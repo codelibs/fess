@@ -103,7 +103,7 @@ public class AdminPathmapAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            pathMapPager.setCurrentPageNumber(pageNumber.get());
+            pathMapPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), pathMapPager.getPageSize()));
         }).orElse(() -> {
             pathMapPager.setCurrentPageNumber(0);
         });
@@ -219,15 +219,14 @@ public class AdminPathmapAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(pathMappingService.getPathMapping(id), id, this::asListHtml);
         return asHtml(path_AdminPathmap_AdminPathmapDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                pathMappingService.getPathMapping(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

@@ -194,7 +194,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         validate(form, messages -> {}, this::asListHtml);
         saveToken();
-        searchLogPager.setCurrentPageNumber(pageNumber);
+        searchLogPager.setCurrentPageNumber(limitPageNumber(pageNumber, searchLogPager.getPageSize()));
         return asHtml(path_AdminSearchlog_AdminSearchlogJsp).renderWith(data -> {
             searchPaging(data, form);
         });

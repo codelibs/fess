@@ -114,7 +114,7 @@ public class AdminWebauthAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            webAuthPager.setCurrentPageNumber(pageNumber.get());
+            webAuthPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), webAuthPager.getPageSize()));
         }).orElse(() -> {
             webAuthPager.setCurrentPageNumber(0);
         });
@@ -234,15 +234,14 @@ public class AdminWebauthAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(webAuthenticationService.getWebAuthentication(id), id, this::asListHtml);
         return asHtml(path_AdminWebauth_AdminWebauthDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                webAuthenticationService.getWebAuthentication(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         }).renderWith(data -> {

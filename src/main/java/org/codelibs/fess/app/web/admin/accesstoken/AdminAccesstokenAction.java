@@ -123,7 +123,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            accessTokenPager.setCurrentPageNumber(pageNumber.get());
+            accessTokenPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), accessTokenPager.getPageSize()));
         }).orElse(() -> {
             accessTokenPager.setCurrentPageNumber(0);
         });
@@ -208,9 +208,10 @@ public class AdminAccesstokenAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(accessTokenService.getAccessToken(id), id, this::asListHtml);
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                accessTokenService.getAccessToken(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form,
                             copyOp -> copyOp.exclude(Constants.PERMISSIONS, EXPIRED_TIME)
                                     .excludeNull()
@@ -221,8 +222,6 @@ public class AdminAccesstokenAction extends FessAdminAction {
                             .distinct()
                             .collect(Collectors.joining("\n")));
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

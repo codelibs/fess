@@ -99,7 +99,7 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            boostDocPager.setCurrentPageNumber(pageNumber.get());
+            boostDocPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), boostDocPager.getPageSize()));
         }).orElse(() -> {
             boostDocPager.setCurrentPageNumber(0);
         });
@@ -209,15 +209,14 @@ public class AdminBoostdocAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(boostDocumentRuleService.getBoostDocumentRule(id), id, this::asListHtml);
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

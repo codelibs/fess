@@ -128,7 +128,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            elevateWordPager.setCurrentPageNumber(pageNumber.get());
+            elevateWordPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), elevateWordPager.getPageSize()));
         }).orElse(() -> {
             elevateWordPager.setCurrentPageNumber(0);
         });
@@ -255,8 +255,9 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+        final var optEntity = verifyFound(elevateWordService.getElevateWord(id), id, this::asListHtml);
         return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).useForm(EditForm.class, op -> op.setup(form -> {
-            elevateWordService.getElevateWord(id).ifPresent(entity -> {
+            optEntity.ifPresent(entity -> {
                 copyBeanToBean(entity, form, copyOp -> {
                     copyOp.excludeNull();
                     copyOp.exclude(Constants.PERMISSIONS);
@@ -266,7 +267,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         .distinct()
                         .collect(Collectors.joining("\n")));
                 form.crudMode = crudMode;
-            }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml));
+            });
         })).renderWith(this::registerLabels);
     }
 

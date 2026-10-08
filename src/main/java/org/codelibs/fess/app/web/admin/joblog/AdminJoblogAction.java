@@ -109,7 +109,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
-        jobLogPager.setCurrentPageNumber(pageNumber);
+        jobLogPager.setCurrentPageNumber(limitPageNumber(pageNumber, jobLogPager.getPageSize()));
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -197,15 +197,14 @@ public class AdminJoblogAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(jobLogService.getJobLog(id), id, this::asListHtml);
         return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                jobLogService.getJobLog(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });

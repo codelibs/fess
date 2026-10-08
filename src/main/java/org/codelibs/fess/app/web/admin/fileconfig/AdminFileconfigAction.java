@@ -133,7 +133,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            fileConfigPager.setCurrentPageNumber(pageNumber.get());
+            fileConfigPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), fileConfigPager.getPageSize()));
         }).orElse(() -> {
             fileConfigPager.setCurrentPageNumber(0);
         });
@@ -235,10 +235,11 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse duplicate(final String id) {
         saveToken();
+        final var optEntity = verifyFound(fileConfigService.getFileConfig(id), id, this::asListHtml);
         return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
-                fileConfigService.getFileConfig(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                         copyOp.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
@@ -252,8 +253,6 @@ public class AdminFileconfigAction extends FessAdminAction {
                     form.virtualHosts = stream(entity.getVirtualHosts())
                             .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
                     form.name = null;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
                 form.crudMode = CrudMode.CREATE;
             });
@@ -311,8 +310,9 @@ public class AdminFileconfigAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(fileConfigService.getFileConfig(id), id, this::asListHtml);
         return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp).useForm(EditForm.class, op -> op.setup(form -> {
-            fileConfigService.getFileConfig(id).ifPresent(entity -> {
+            optEntity.ifPresent(entity -> {
                 copyBeanToBean(entity, form, copyOp -> {
                     copyOp.excludeNull();
                     copyOp.exclude(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS);
@@ -325,7 +325,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                 form.virtualHosts = stream(entity.getVirtualHosts())
                         .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
                 form.crudMode = crudMode;
-            }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml));
+            });
         })).renderWith(this::registerRolesAndLabels);
     }
 

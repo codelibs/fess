@@ -102,7 +102,7 @@ public class AdminRoleAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            rolePager.setCurrentPageNumber(pageNumber.get());
+            rolePager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), rolePager.getPageSize()));
         }).orElse(() -> {
             rolePager.setCurrentPageNumber(0);
         });
@@ -192,15 +192,14 @@ public class AdminRoleAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
+        final var optEntity = verifyFound(roleService.getRole(id), id, this::asListHtml);
         return asHtml(path_AdminRole_AdminRoleDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                roleService.getRole(id).ifPresent(entity -> {
+                optEntity.ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
                     form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                 });
             });
         });
