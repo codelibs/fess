@@ -465,6 +465,54 @@ public class SearchHandlerTest extends UnitFessTestCase {
         assertFalse(searched.get(), "the search must not start");
     }
 
+    /**
+     * A page size or start position the request parameters refuse is turned down before the search
+     * starts. Raised inside the search, the refusal reached the rank fusion processor, which logged
+     * a stack trace for a client's mistake and, with engine-side fusion, fell back to Fess-side fusion.
+     */
+    @Test
+    public void test_search_invalidPaging_isRefusedBeforeSearching() throws Exception {
+        final java.util.concurrent.atomic.AtomicBoolean searched = new java.util.concurrent.atomic.AtomicBoolean();
+        registerSearchStubs();
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                searched.set(true);
+                data.setDocumentItems(List.of());
+            }
+        }, "searchHelper");
+
+        for (final String[] pagingParam : new String[][] { { "num", "0" }, { "num", "-1" }, { "start", "-1" } }) {
+            final CapturingResponse res = new CapturingResponse();
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            params.put(pagingParam[0], new String[] { pagingParam[1] });
+            new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+            final String body = res.body();
+            assertEquals(pagingParam[0] + "=" + pagingParam[1] + " " + body, 400, res.status);
+            assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+            assertTrue(body.contains(pagingParam[0] + " must be"), body);
+        }
+        assertFalse(searched.get(), "the search must not start");
+    }
+
+    /** The paging values the request parameters accept, including one they replace with the default, are searched. */
+    @Test
+    public void test_search_validPaging_isSearched() throws Exception {
+        registerSearchStubs();
+        for (final String[] pagingParam : new String[][] { { "num", "5" }, { "num", "abc" }, { "start", "10" }, { "start", "abc" } }) {
+            final CapturingResponse res = new CapturingResponse();
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            params.put(pagingParam[0], new String[] { pagingParam[1] });
+            new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+            assertEquals(pagingParam[0] + "=" + pagingParam[1] + " " + res.body(), 200, res.status);
+        }
+    }
+
     @Test
     public void test_search_validFacetNumber_isSearched() throws Exception {
         final java.util.concurrent.atomic.AtomicBoolean searched = new java.util.concurrent.atomic.AtomicBoolean();
