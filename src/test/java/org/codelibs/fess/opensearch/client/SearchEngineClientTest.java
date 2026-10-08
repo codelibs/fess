@@ -21,9 +21,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.fesen.client.EngineInfo;
 import org.codelibs.fesen.client.EngineInfo.EngineType;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.LogCapturingAppender;
@@ -33,6 +36,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.di.exception.ContainerInitFailureException;
+import org.codelibs.fesen.opensearch.OpenSearchException;
 import org.codelibs.fesen.opensearch.OpenSearchStatusException;
 import org.codelibs.fesen.opensearch.core.rest.RestStatus;
 import org.codelibs.fesen.opensearch.transport.client.AdminClient;
@@ -149,6 +153,88 @@ public class SearchEngineClientTest extends UnitFessTestCase {
         assertFalse(SearchEngineClient.isAccessDenied(new OpenSearchStatusException("x", null, null)));
         assertFalse(SearchEngineClient.isAccessDenied(new IllegalStateException("Connection refused")));
         assertFalse(SearchEngineClient.isAccessDenied(null));
+    }
+
+    @Test
+    public void test_isCapacityRejection() {
+        assertTrue(SearchEngineClient.isCapacityRejection(new OpenSearchStatusException("x", RestStatus.TOO_MANY_REQUESTS, null)));
+        assertTrue(SearchEngineClient.isCapacityRejection(new OpenSearchStatusException("x", RestStatus.SERVICE_UNAVAILABLE, null)));
+        assertFalse(SearchEngineClient.isCapacityRejection(new OpenSearchStatusException("x", RestStatus.BAD_REQUEST, null)));
+        assertFalse(SearchEngineClient.isCapacityRejection(new OpenSearchStatusException("x", RestStatus.INTERNAL_SERVER_ERROR, null)));
+        // an error body without a known status leaves it unset
+        assertFalse(SearchEngineClient.isCapacityRejection(new OpenSearchStatusException("x", null, null)));
+        assertFalse(SearchEngineClient.isCapacityRejection(new OpenSearchException("x")));
+    }
+
+    /**
+     * The search engine answers a search it has no room for with 429 (circuit breaker, full queue)
+     * or 503 (no shard to serve it). That is not a bad query: it used to be thrown as an
+     * InvalidQueryException, which the search repeated with escaped characters and the API
+     * answered as a 400.
+     */
+    @Test
+    public void test_search_capacityRejection_isNotAnInvalidQuery() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final String reason = "OpenSearch exception [type=circuit_breaking_exception, reason=[parent] Data too large, data for"
+                + " [<http_request>] would be [2053027584/1.9gb], larger than the limit of [2040109465/1.8gb]]";
+        for (final RestStatus status : new RestStatus[] { RestStatus.TOO_MANY_REQUESTS, RestStatus.SERVICE_UNAVAILABLE }) {
+            final OpenSearchStatusException rejection = new OpenSearchStatusException(reason, status, null);
+            final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+            try {
+                clientSearchFailingWith(rejection).search("fess.search", builder -> true, (builder, execTime, response) -> response);
+                fail("a capacity rejection must not be answered as a result");
+            } catch (final SearchEngineUnavailableException e) {
+                assertEquals(rejection, e.getCause());
+                // The engine's reason is logged once, at WARN and without a stack trace.
+                final List<LogEvent> warnings = capture.eventsOnThisThreadAt(Level.WARN);
+                assertEquals(1, warnings.size());
+                final String message = warnings.get(0).getMessage().getFormattedMessage();
+                assertTrue(message, message.contains("status=" + status.getStatus()));
+                assertTrue(message, message.contains("circuit_breaking_exception"));
+                assertTrue(message, message.contains("Data too large"));
+                assertNull(warnings.get(0).getThrown(), "a capacity rejection is not worth a stack trace");
+            } finally {
+                capture.detach();
+            }
+        }
+    }
+
+    @Test
+    public void test_search_otherEngineFailures_stayInvalidQueries() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final OpenSearchException[] failures = { new OpenSearchStatusException("x", RestStatus.BAD_REQUEST, null),
+                new OpenSearchStatusException("x", RestStatus.INTERNAL_SERVER_ERROR, null), new OpenSearchStatusException("x", null, null),
+                new OpenSearchException("x") };
+        for (final OpenSearchException failure : failures) {
+            try {
+                clientSearchFailingWith(failure).search("fess.search", builder -> true, (builder, execTime, response) -> response);
+                fail("an engine failure must not be answered as a result");
+            } catch (final InvalidQueryException e) {
+                assertEquals(failure, e.getCause());
+            }
+        }
+    }
+
+    /** A client whose searches fail with the given failure, as the HTTP client reports a request the engine refused. */
+    private SearchEngineClient clientSearchFailingWith(final RuntimeException failure) {
+        return new SearchEngineClient() {
+            {
+                this.client = this;
+            }
+
+            @Override
+            public SearchRequestBuilder prepareSearch(final String... indices) {
+                return new SearchRequestBuilder(this, SearchAction.INSTANCE);
+            }
+
+            @Override
+            public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(
+                    final ActionType<Response> action, final Request request) {
+                final PlainActionFuture<Response> future = PlainActionFuture.newFuture();
+                future.onFailure(failure);
+                return future;
+            }
+        };
     }
 
     @Test

@@ -35,15 +35,20 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.RequestParameter;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.MarkedQuery;
 import org.codelibs.fess.query.QueryMarker;
 import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.QueryStringBuilder;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.message.UserMessages;
 
 import jakarta.servlet.http.Cookie;
 
@@ -567,6 +572,48 @@ public class SearchHelperTest extends UnitFessTestCase {
         params.setQuery(query);
         params.enableRedirect();
         return params;
+    }
+
+    /**
+     * A query the search engine could not parse is searched again with its reserved characters
+     * escaped. A search engine that has no room for the search is not helped by a second one.
+     */
+    @Test
+    public void test_search_retriesAnInvalidQueryButNotACapacityRejection() {
+        ComponentUtil.register(new QueryStringBuilder() {
+            @Override
+            public String build() {
+                return "airplane";
+            }
+        }, "queryStringBuilder");
+        final List<String> queries = new ArrayList<>();
+        final RuntimeException[] failure = new RuntimeException[1];
+        final SearchHelper helper = new SearchHelper() {
+            @Override
+            protected List<Map<String, Object>> searchInternal(final String query, final SearchRequestParams params,
+                    final OptionalThing<FessUserBean> userBean) {
+                queries.add(query);
+                throw failure[0];
+            }
+        };
+
+        failure[0] = new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCannotProcess(UserMessages.GLOBAL_PROPERTY_KEY),
+                "Failed to process the query.");
+        try {
+            helper.search(params("airplane"), new SearchRenderData(), OptionalThing.empty());
+            fail();
+        } catch (final InvalidQueryException e) {
+            assertEquals(2, queries.size());
+        }
+
+        queries.clear();
+        failure[0] = new SearchEngineUnavailableException("The search engine is out of capacity.", null);
+        try {
+            helper.search(params("airplane"), new SearchRenderData(), OptionalThing.empty());
+            fail();
+        } catch (final SearchEngineUnavailableException e) {
+            assertEquals(1, queries.size());
+        }
     }
 
     @Test

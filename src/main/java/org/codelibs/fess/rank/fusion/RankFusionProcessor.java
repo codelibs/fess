@@ -50,6 +50,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -289,7 +290,8 @@ public class RankFusionProcessor implements AutoCloseable {
         final Optional<SearchResult> fused;
         try {
             fused = searchers[0].searchWithSubQueries(query, params, userBean, subQueries);
-        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
+        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException
+                | SearchEngineUnavailableException e) {
             throw e;
         } catch (final Exception e) {
             logger.warn("A fused search failed; falling back to rank fusion in Fess. query={}", query, e);
@@ -441,7 +443,8 @@ public class RankFusionProcessor implements AutoCloseable {
         // searchers that are still waiting on an unresponsive provider.
         try {
             results[0] = searchers[0].search(query, new SearchRequestParamsWrapper(params, 0, windowSize), userBean);
-        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
+        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException
+                | SearchEngineUnavailableException e) {
             throw e;
         } catch (final Exception e) {
             logger.warn("Search operation failed with exception", e);
@@ -475,6 +478,9 @@ public class RankFusionProcessor implements AutoCloseable {
                 }
                 if (e.getCause() instanceof final InvalidAccessTokenException iate) {
                     throw iate;
+                }
+                if (e.getCause() instanceof final SearchEngineUnavailableException seue) {
+                    throw seue;
                 }
                 logger.warn("Search operation failed with exception", e.getCause());
                 results[i] = SearchResult.create().build();
@@ -597,10 +603,12 @@ public class RankFusionProcessor implements AutoCloseable {
                     searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
                     searchResult.isTimedOut(), searchResult.isShardFailed(), searchResult.getFacetResponse(), params.getStartPosition(),
                     pageSize, 0);
-        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException e) {
+        } catch (final InvalidQueryException | ResultOffsetExceededException | InvalidAccessTokenException
+                | SearchEngineUnavailableException e) {
             // These say the request was refused, not that the searcher broke. Swallowing one and
             // returning an empty list would report a refusal as a successful search of nothing,
             // and would log a stack trace for a caller-supplied credential on every request.
+            // A search engine out of capacity refuses as well, and the caller is told to retry.
             throw e;
         } catch (final Exception e) {
             logger.warn("Main searcher failed to execute search for query: {}", query, e);

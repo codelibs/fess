@@ -169,6 +169,8 @@ public class SearchHelper {
         try {
             documentItems = searchInternal(query, params, userBean);
         } catch (final InvalidQueryException e) {
+            // A SearchEngineUnavailableException is not caught here on purpose: a search engine that
+            // has just refused the search for lack of capacity is not helped by a second one.
             if (logger.isDebugEnabled()) {
                 logger.debug("Invalid query: {}", query, e);
             }

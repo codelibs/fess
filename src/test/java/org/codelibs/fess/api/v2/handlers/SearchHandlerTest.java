@@ -31,6 +31,7 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.SearchHelper;
@@ -352,6 +353,36 @@ public class SearchHandlerTest extends UnitFessTestCase {
         assertFalse(body.contains("Rfilter-term"), body);
         assertFalse(body.contains("_source"), body);
         assertTrue(body.contains(ComponentUtil.getMessageManager().getMessage(Locale.ROOT, "errors.invalid_query_cannot_process")), body);
+    }
+
+    /**
+     * A search the engine has no room for says nothing about the query: the caller is told to try
+     * again later (503 with Retry-After), not that its request was bad (400).
+     */
+    @Test
+    public void test_search_capacityRejection_isServiceUnavailable() throws Exception {
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new SearchEngineUnavailableException("The search engine is out of capacity.", new RuntimeException(
+                        "OpenSearch exception [type=circuit_breaking_exception, reason=[parent] Data too large, role=Rfilter-term]"));
+            }
+        }, "searchHelper");
+
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        new SearchHandler().handle(new StubRequest("/api/v2/search", params), res);
+
+        final String body = res.body();
+        assertEquals(body, 503, res.status);
+        assertTrue(body.contains("\"status\":9"), body);
+        assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+        assertFalse(body.contains("query"), "the caller is not told that its query is at fault: " + body);
+        assertFalse(body.contains("circuit_breaking_exception"), body);
+        assertFalse(body.contains("Rfilter-term"), body);
+        assertEquals("5", res.getHeader("Retry-After"));
     }
 
     /**

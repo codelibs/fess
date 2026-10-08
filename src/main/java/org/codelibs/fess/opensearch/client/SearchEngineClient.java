@@ -67,6 +67,7 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.helper.ChunkVectorHelper;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.QueryHelper;
@@ -2267,6 +2268,7 @@ public class SearchEngineClient implements Client {
      * @param searchResult the result processor
      * @return the processed search result
      * @throws InvalidQueryException if the query is invalid
+     * @throws SearchEngineUnavailableException if the search engine refuses the search for lack of capacity
      */
     public <T> T search(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final SearchResult<T, SearchRequestBuilder, SearchResponse> searchResult) {
@@ -2298,6 +2300,13 @@ public class SearchEngineClient implements Client {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query.", e);
             } catch (final OpenSearchException e) {
+                if (isCapacityRejection(e)) {
+                    // Nothing is wrong with the query, and the search engine is already short of
+                    // capacity, so this is neither an invalid query nor worth a stack trace.
+                    logger.warn("The search engine rejected a search for lack of capacity: status={}, reason={}", e.status().getStatus(),
+                            e.getMessage());
+                    throw new SearchEngineUnavailableException("The search engine is out of capacity.", e);
+                }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Cannot process {}", searchRequestBuilder, e);
                 }
@@ -2308,6 +2317,19 @@ public class SearchEngineClient implements Client {
         final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
 
         return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
+    }
+
+    /**
+     * Checks whether the search engine refused a request because it cannot take it now, rather than
+     * because of the request: 429 for a tripped circuit breaker or a full search queue, 503 for an
+     * index whose shards cannot serve yet or a cluster that blocks requests.
+     *
+     * @param cause the failure of a request to the search engine
+     * @return {@code true} for an HTTP 429 or 503 answer; {@code false} for anything else, including an answer without a known status
+     */
+    protected static boolean isCapacityRejection(final OpenSearchException cause) {
+        final RestStatus status = cause.status();
+        return status == RestStatus.TOO_MANY_REQUESTS || status == RestStatus.SERVICE_UNAVAILABLE;
     }
 
     /**
