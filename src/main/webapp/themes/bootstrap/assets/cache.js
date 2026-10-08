@@ -31,6 +31,92 @@ function attachRouteListener() {
 }
 
 /**
+ * Attributes whose value is a single URL. `data` is only a URL on <object>.
+ */
+const URL_ATTRS = ["href", "src", "poster", "action", "formaction", "background"];
+
+/**
+ * Resolve a URL reference against {@code base}. Returns the value unchanged when
+ * there is nothing to resolve: empty, a fragment-only reference (an anchor inside
+ * the cached copy), an absolute URL (any scheme) or a value that cannot be
+ * resolved against {@code base}.
+ *
+ * @param {string} value
+ * @param {string|null} base - absolute URL of the original page
+ * @returns {string}
+ */
+function resolveUrl(value, base) {
+  const v = value.trim();
+  if (v === "" || v.startsWith("#") || /^[a-z][a-z0-9+.-]*:/i.test(v)) return value;
+  try {
+    return new URL(v, base).href;
+  } catch (e) {
+    return value;
+  }
+}
+
+/** Resolve the url(...) references of a CSS text. */
+function resolveCssUrls(css, base) {
+  return css.replace(/url\(\s*(["']?)([^"')]*?)\1\s*\)/gi,
+    (m, q, u) => 'url("' + resolveUrl(u, base) + '")');
+}
+
+/**
+ * Resolve the URL of each candidate of a srcset value, keeping the descriptors.
+ * A URL that ends with a comma is a candidate without descriptors.
+ */
+function resolveSrcset(srcset, base) {
+  return srcset.replace(/([^\s,]\S*)([^,]*)/g, (m, u, descriptor) => {
+    const commas = u.match(/,*$/)[0];
+    const url = resolveUrl(u.slice(0, u.length - commas.length), base);
+    return url + commas + (commas ? resolveSrcset(descriptor, base) : descriptor);
+  });
+}
+
+/** A <base> start tag, attribute values included. */
+const BASE_TAG = /<base\b(?:"[^"]*"|'[^']*'|[^>"'])*>/gi;
+
+/**
+ * Rewrite the relative URLs of a cached HTML document so that they point at the
+ * original site.
+ *
+ * The cached document starts with <base href="original address"> (cache.hbs),
+ * but it is shown in a blob: frame that inherits the page's Content-Security-
+ * Policy, whose base-uri 'self' makes the browser ignore that element, so the
+ * relative links, images and styles of the cached page resolve to nothing. They
+ * are resolved here instead, against the address the server put in that element
+ * (the first <base> wins in a browser, as it did when the cache was a page of
+ * its own). <base> elements are dropped because they can no longer take effect
+ * and the browser reports each of them as a policy violation. The policy is not
+ * relaxed, and the frame stays sandboxed without scripts.
+ *
+ * The document is parsed with DOMParser, which neither runs scripts nor loads
+ * resources, and serialised again; nothing is inserted into the viewer's DOM.
+ * A <base> must not reach that parser either: it is subject to the same policy.
+ *
+ * @param {string} html - cached document
+ * @param {string|null} pageUrl - address of the original page
+ * @returns {string} html with absolute URLs; unchanged without a page address
+ */
+function resolveRelativeUrls(html, pageUrl) {
+  if (!pageUrl) return html;
+  const doc = new DOMParser().parseFromString(html.replace(BASE_TAG, ""), "text/html");
+  doc.querySelectorAll("*").forEach(el => {
+    const attrs = el.localName === "object" ? URL_ATTRS.concat("data") : URL_ATTRS;
+    attrs.forEach(name => {
+      const value = el.getAttribute(name);
+      if (value !== null) el.setAttribute(name, resolveUrl(value, pageUrl));
+    });
+    const srcset = el.getAttribute("srcset");
+    if (srcset !== null) el.setAttribute("srcset", resolveSrcset(srcset, pageUrl));
+    const style = el.getAttribute("style");
+    if (style !== null && /url\(/i.test(style)) el.setAttribute("style", resolveCssUrls(style, pageUrl));
+    if (el.localName === "style" && /url\(/i.test(el.textContent)) el.textContent = resolveCssUrls(el.textContent, pageUrl);
+  });
+  return (doc.doctype ? "<!DOCTYPE " + doc.doctype.name + ">" : "") + doc.documentElement.outerHTML;
+}
+
+/**
  * Render an error state inside the cache-view section.
  *
  * @param {HTMLElement} host - the #cache-view section
@@ -190,23 +276,10 @@ export function attach() {
         host.appendChild(dl);
       }
 
-      // --- <base href> injection ---
-      // Inject a <base href> into the cached HTML so that relative URLs in the
-      // cached document resolve against the original page origin.  This is done
-      // only when a URL is available and the cached document has no existing
-      // <base> element.  The URL is HTML-escaped for attribute context (XSS safe).
-      let docHtml = content;
-      if (cacheUrl && !/<base\b/i.test(docHtml)) {
-        const safeBase = cacheUrl
-          .replace(/&/g, "&amp;")
-          .replace(/"/g, "&quot;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
-        const baseTag = '<base href="' + safeBase + '">';
-        docHtml = /<head\b[^>]*>/i.test(docHtml)
-          ? docHtml.replace(/<head\b[^>]*>/i, m => m + baseTag)
-          : baseTag + docHtml;
-      }
+      // --- Relative URLs ---
+      // The blob: frame below ignores <base href> (see resolveRelativeUrls), so the
+      // cached document's relative links, images and styles are resolved up front.
+      const docHtml = resolveRelativeUrls(content, cacheUrl);
 
       // --- Sandboxed iframe for cached content ---
       // SECURITY: cached HTML is untrusted, arbitrary content. We MUST use a

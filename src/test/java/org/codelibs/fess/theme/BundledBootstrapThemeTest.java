@@ -510,7 +510,10 @@ public class BundledBootstrapThemeTest {
         final String js = Files.readString(THEME_DIR.resolve("assets/cache.js"), StandardCharsets.UTF_8);
         assertTrue(js.contains("labels.search_cache_msg"));
         assertTrue(js.contains("env.charset"));
-        assertTrue(js.contains("<base href=\""));
+        // The blob: frame inherits the entry page's base-uri 'self', so a <base href> cannot take effect there:
+        // the relative URLs of the cached copy are resolved in cache.js instead of relying on one.
+        assertTrue(js.contains("new DOMParser()") && js.contains("resolveRelativeUrls(content, cacheUrl)"),
+                "cache.js must resolve the cached copy's relative URLs itself");
     }
 
     @Test
