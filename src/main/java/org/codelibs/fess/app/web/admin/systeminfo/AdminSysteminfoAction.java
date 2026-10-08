@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -52,6 +54,9 @@ public class AdminSysteminfoAction extends FessAdminAction {
     public static final String ROLE = "admin-systeminfo";
 
     private static final String MASKED_VALUE = "XXXXXXXX";
+
+    /** The start of a {@code -Dkey=} option: at the start of the text or after a space or a quote. */
+    private static final Pattern JVM_OPTION_PATTERN = Pattern.compile("(?<![^\\s\"'])([\"']?)-D([^\\s=\"']+)=");
 
     // ===================================================================================
     //                                                                           Attribute
@@ -357,14 +362,71 @@ public class AdminSysteminfoAction extends FessAdminAction {
 
     /**
      * Creates a key-value item map for display, replacing the value with the masked
-     * placeholder when the key is sensitive.
+     * placeholder when the key is sensitive, and the value of each sensitive
+     * {@code -Dkey=value} option inside a value that is an option string.
      *
      * @param label the item label, which is the key checked by {@link #isMaskedValue(String)}
      * @param value the item value
      * @return map containing the key and the possibly masked value
      */
     protected static Map<String, String> createMaskedItem(final Object label, final Object value) {
-        return createItem(label, label != null && isMaskedValue(label.toString()) ? MASKED_VALUE : value);
+        if (label != null && isMaskedValue(label.toString())) {
+            return createItem(label, MASKED_VALUE);
+        }
+        return createItem(label, value instanceof final String text ? maskJvmOptions(text) : value);
+    }
+
+    /**
+     * Masks the value of every {@code -Dkey=value} option in an option string whose key is
+     * sensitive under {@link #isMaskedValue(String)}, and keeps the rest readable. An
+     * environment variable such as {@code JAVA_TOOL_OPTIONS} or {@code FESS_JAVA_OPTS} is named
+     * by its purpose, not by what it carries, so the variable name says nothing about the
+     * secrets passed as {@code -Dfess.config.<key>=...} in it.
+     *
+     * <p>A value ends at the next white space, or at the closing quote when it starts with a
+     * quote or when the whole option is quoted. This is not a shell parser: an unterminated
+     * quote masks the rest of the text.
+     *
+     * @param text the option string, which may be null
+     * @return the text with the values of sensitive options replaced by the placeholder
+     */
+    protected static String maskJvmOptions(final String text) {
+        if (text == null) {
+            return null;
+        }
+        final Matcher matcher = JVM_OPTION_PATTERN.matcher(text);
+        final StringBuilder masked = new StringBuilder(text.length());
+        int copied = 0;
+        int from = 0;
+        while (matcher.find(from)) {
+            final int valueStart = matcher.end();
+            if (isMaskedValue(matcher.group(2))) {
+                masked.append(text, copied, valueStart).append(MASKED_VALUE);
+                copied = findOptionValueEnd(text, valueStart, matcher.group(1));
+                from = copied;
+            } else {
+                from = valueStart;
+            }
+        }
+        return masked.append(text, copied, text.length()).toString();
+    }
+
+    private static int findOptionValueEnd(final String text, final int valueStart, final String optionQuote) {
+        if (!optionQuote.isEmpty()) {
+            // "-Dkey=value": the value ends before the quote that closes the option.
+            final int close = text.indexOf(optionQuote, valueStart);
+            return close < 0 ? text.length() : close;
+        }
+        if (valueStart < text.length() && (text.charAt(valueStart) == '"' || text.charAt(valueStart) == '\'')) {
+            // -Dkey="value": the value is the quoted text, quotes included.
+            final int close = text.indexOf(text.charAt(valueStart), valueStart + 1);
+            return close < 0 ? text.length() : close + 1;
+        }
+        int end = valueStart;
+        while (end < text.length() && !Character.isWhitespace(text.charAt(end))) {
+            end++;
+        }
+        return end;
     }
 
     /**

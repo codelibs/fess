@@ -239,6 +239,120 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_maskJvmOptions_masksSensitiveOptionsAndKeepsTheRest() {
+        // The value of an environment variable such as JAVA_TOOL_OPTIONS or FESS_JAVA_OPTS is an
+        // option string, so a secret inside it is not covered by the variable name.
+        assertEquals(
+                "-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Dfess.system.content_chunker.embedding.openai.api.key="
+                        + MASKED_VALUE + " -Dfess.config.rag.llm.openai.api.key=" + MASKED_VALUE + " -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password=hunter2"
+                        + " -Dfess.system.content_chunker.embedding.openai.api.key=sk-embed-secret"
+                        + " -Dfess.config.rag.llm.openai.api.key=sk-chat-secret -Xmx2g"));
+
+        // Options that are not sensitive keep their value, whether or not they carry a prefix.
+        final String plain = "-Dfess.config.rag.llm.name=openai -Dfess.system.rag.chat.enabled=true -Dfile.encoding=UTF-8 -Xmx2g";
+        assertEquals(plain, AdminSysteminfoAction.maskJvmOptions(plain));
+
+        // Same rule as the property list: the options may also be spelled without the fess prefix.
+        assertEquals("-Dhttp.proxy.password=" + MASKED_VALUE + " -Dhttp.proxy.user=alice",
+                AdminSysteminfoAction.maskJvmOptions("-Dhttp.proxy.password=hunter2 -Dhttp.proxy.user=alice"));
+    }
+
+    @Test
+    public void test_maskJvmOptions_handlesOptionsSeparatedByNewlinesAndTabs() {
+        // jvm.*.options in fess_config.properties are newline separated.
+        assertEquals(
+                "-Xmx2g\n-Dfess.config.app.cipher.key=" + MASKED_VALUE + "\n-Dfoo=bar\t-Dfess.config.http.proxy.password=" + MASKED_VALUE,
+                AdminSysteminfoAction.maskJvmOptions(
+                        "-Xmx2g\n-Dfess.config.app.cipher.key=abc123\n-Dfoo=bar\t-Dfess.config.http.proxy.password=hunter2"));
+    }
+
+    @Test
+    public void test_maskJvmOptions_emptyAndValuelessOptions() {
+        // An empty value is masked like a set one, as in the property list.
+        assertEquals("-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password= -Xmx2g"));
+        assertEquals("-Dfess.config.http.proxy.password=" + MASKED_VALUE,
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password="));
+        // Without '=' there is no value to hide.
+        assertEquals("-Dfess.config.http.proxy.password -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password -Xmx2g"));
+        assertEquals("-Dfoo", AdminSysteminfoAction.maskJvmOptions("-Dfoo"));
+        assertEquals("-D= -D", AdminSysteminfoAction.maskJvmOptions("-D= -D"));
+    }
+
+    @Test
+    public void test_maskJvmOptions_handlesQuotedValues() {
+        // A quoted value may contain spaces; the whole quoted text is the value.
+        assertEquals("-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password=\"hunter 2\" -Xmx2g"));
+        assertEquals("-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password='hunter 2' -Xmx2g"));
+        // The whole option may be quoted instead, as in a shell command line.
+        assertEquals("\"-Dfess.config.http.proxy.password=" + MASKED_VALUE + "\" -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("\"-Dfess.config.http.proxy.password=hunter 2\" -Xmx2g"));
+        assertEquals("'-Dfess.config.http.proxy.password=" + MASKED_VALUE + "' -Xmx2g",
+                AdminSysteminfoAction.maskJvmOptions("'-Dfess.config.http.proxy.password=hunter 2' -Xmx2g"));
+        // A quoted option that is not sensitive is left alone, including the options after it.
+        assertEquals("-Dfoo=\"a b\" -Dfess.config.http.proxy.password=" + MASKED_VALUE,
+                AdminSysteminfoAction.maskJvmOptions("-Dfoo=\"a b\" -Dfess.config.http.proxy.password=hunter2"));
+        // An unterminated quote hides the rest of the string rather than leaking it.
+        assertEquals("-Xmx2g -Dfess.config.http.proxy.password=" + MASKED_VALUE,
+                AdminSysteminfoAction.maskJvmOptions("-Xmx2g -Dfess.config.http.proxy.password=\"hunter 2 -Xms1g"));
+    }
+
+    @Test
+    public void test_maskJvmOptions_leavesOtherValuesUntouched() {
+        assertNull(AdminSysteminfoAction.maskJvmOptions(null));
+        assertEquals("", AdminSysteminfoAction.maskJvmOptions(""));
+        assertEquals("/usr/local/bin:/usr/bin", AdminSysteminfoAction.maskJvmOptions("/usr/local/bin:/usr/bin"));
+        // A -D inside a word is not an option.
+        assertEquals("/opt/build-Dfess.config.http.proxy.password=x",
+                AdminSysteminfoAction.maskJvmOptions("/opt/build-Dfess.config.http.proxy.password=x"));
+        // Replacement text is literal; '$' and '\' in a secret must not break the masking.
+        assertEquals("-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Dfoo=$1\\",
+                AdminSysteminfoAction.maskJvmOptions("-Dfess.config.http.proxy.password=a$1\\b -Dfoo=$1\\"));
+    }
+
+    @Test
+    public void test_createMaskedItem_masksSensitiveOptionsInsideTheValue() {
+        final Map<String, String> item = AdminSysteminfoAction.createMaskedItem("JAVA_TOOL_OPTIONS",
+                "-Dfess.config.http.proxy.password=hunter2 -Dfess.config.rag.llm.openai.api.key=sk-chat-secret -Xmx2g");
+        assertEquals("JAVA_TOOL_OPTIONS", item.get(Constants.ITEM_LABEL));
+        assertEquals(
+                "-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Dfess.config.rag.llm.openai.api.key=" + MASKED_VALUE + " -Xmx2g",
+                item.get(Constants.ITEM_VALUE));
+
+        // The name based masking still applies to the whole value.
+        assertEquals(MASKED_VALUE, AdminSysteminfoAction.createMaskedItem("app.cipher.key", "-Xmx2g").get(Constants.ITEM_VALUE));
+        // Values that are not option strings, or not strings at all, pass through.
+        assertEquals("/usr/bin", AdminSysteminfoAction.createMaskedItem("PATH", "/usr/bin").get(Constants.ITEM_VALUE));
+        assertEquals("42", AdminSysteminfoAction.createMaskedItem("N", 42).get(Constants.ITEM_VALUE));
+        assertEquals("", AdminSysteminfoAction.createMaskedItem("JAVA_TOOL_OPTIONS", null).get(Constants.ITEM_VALUE));
+    }
+
+    @Test
+    public void test_getPropItems_masksSensitiveOptionsInsideAValue() {
+        // getPropItems and getEnvItems build their items with the same createMaskedItem, and
+        // System.getenv() cannot be set from a test, so the shared path is checked here.
+        final String key = "test.jvm.options";
+        System.setProperty(key, "-Dfess.config.http.proxy.password=hunter2 -Dfess.system.content_chunker.embedding.openai.api.key="
+                + "sk-embed-secret -Xmx2g");
+        try {
+            final List<Map<String, String>> itemList = AdminSysteminfoAction.getPropItems();
+
+            assertEquals("-Dfess.config.http.proxy.password=" + MASKED_VALUE + " -Dfess.system.content_chunker.embedding.openai.api.key="
+                    + MASKED_VALUE + " -Xmx2g", findValue(itemList, key));
+            itemList.forEach(item -> {
+                assertFalse(item.get(Constants.ITEM_VALUE).contains("hunter2"));
+                assertFalse(item.get(Constants.ITEM_VALUE).contains("sk-embed-secret"));
+            });
+        } finally {
+            System.clearProperty(key);
+        }
+    }
+
+    @Test
     public void test_getBugReportItems_masksSensitiveKeysInsteadOfLeakingCleartext() {
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.openai.api.key", "sk-super-secret");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.gemini.api.key", "gm-super-secret");
