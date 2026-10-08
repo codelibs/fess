@@ -210,6 +210,13 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
                 { "/themes/beta/CHANGELOG.md", "/themes/beta/CHANGELOG.md" }, //
                 { "/themes/beta/sub/LICENSE.txt", "/themes/beta/sub/LICENSE.txt" }, //
                 { "/themes/beta/.env", "/themes/beta/.env" }, //
+                { "/themes/.attic-alpha-1760000000000-1a2b3c4d/index.html", "/themes/.attic-alpha-1760000000000-1a2b3c4d/index.html" }, //
+                { "/themes/.attic-alpha-1760000000000-1a2b3c4d/assets/app.js",
+                        "/themes/.attic-alpha-1760000000000-1a2b3c4d/assets/app.js" }, //
+                { "/themes/.attic-alpha-1760000000000-1a2b3c4d/", "/themes/.attic-alpha-1760000000000-1a2b3c4d/" }, //
+                { "/themes/.staging-0a1b2c3d/content/index.html", "/themes/.staging-0a1b2c3d/content/index.html" }, //
+                { "/themes/%2eattic-alpha-1-1a2b3c4d/index.html", "/themes/.attic-alpha-1-1a2b3c4d/index.html" }, //
+                { "/themes/beta/.git/config", "/themes/beta/.git/config" }, //
                 { "/Themes/beta/Theme.YML", "/Themes/beta/Theme.YML" } };
         for (final Theme active : new Theme[] { staticTheme, null }) {
             for (final String method : new String[] { "GET", "HEAD", "POST" }) {
@@ -235,7 +242,8 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         // Negative control: the same file names outside /themes/, and ordinary files inside it,
         // are not refused by this check.
         final Theme staticTheme = new Theme("alpha", Paths.get("/tmp/alpha"), null);
-        for (final String path : new String[] { "/docs/README.md", "/admin/theme.yml", "/themes/beta/assets/app.js", "/themes/beta/",
+        for (final String path : new String[] { "/docs/README.md", "/admin/theme.yml", "/docs/.attic-x/index.html",
+                "/themes/beta/assets/app.js", "/themes/beta/assets/v1.2/app.min.js", "/themes/beta/dot.dir/a..b.js", "/themes/beta/",
                 "/themes/beta" }) {
             final StaticThemeFilter f = new StaticThemeFilter();
             f.setThemeRegistry(new StubRegistry(staticTheme));
@@ -265,8 +273,20 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/t/README.md"));
         assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/t/a/b/.env"));
         assertTrue(StaticThemeFilter.isPrivateThemeFile("/THEMES/t/LICENSE"));
+        // A file below a directory whose name starts with a dot is private too: the .attic- and
+        // .staging- directories the theme installers keep next to the themes.
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/.attic-t-1760000000000-1a2b3c4d/index.html"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/.attic-t-1760000000000-1a2b3c4d/"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/.attic-t-1760000000000-1a2b3c4d"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/.staging-0a1b2c3d/content/assets/app.js"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/themes/t/a/.hidden/b/app.js"));
+        assertTrue(StaticThemeFilter.isPrivateThemeFile("/THEMES/.ATTIC-t/index.html"));
         assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/t/assets/app.js"));
         assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/t/"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/t/assets/v1.2/app.min.js"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/themes/t/dot.dir/a..b.js"));
+        assertFalse(StaticThemeFilter.isPrivateThemeFile("/docs/.attic-t/index.html"));
         assertFalse(StaticThemeFilter.isPrivateThemeFile("/docs/README.md"));
         assertFalse(StaticThemeFilter.isPrivateThemeFile("/theme.yml"));
         assertFalse(StaticThemeFilter.isPrivateThemeFile(""));

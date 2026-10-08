@@ -270,6 +270,51 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_serveIndex_blockedEntryInDotDirectory_returns404() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-index-blocked-dotdir-");
+        try {
+            Files.createDirectories(tmp.resolve(".private"));
+            Files.writeString(tmp.resolve(".private/index.html"), "<html><head></head><body>private</body></html>");
+            final String ymlContent = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T", "version: 1.0.0",
+                    "entry: .private/index.html");
+            final ThemeManifest m = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
+            assertEquals(".private/index.html", m.getEntry());
+            final CapturingResponse res = new CapturingResponse();
+
+            new StaticThemeResponder().serveIndex(new StubRequest(), res, new Theme("t", tmp, m), "/");
+
+            assertEquals(404, res.status);
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_serveIndex_entryWithDotSegmentOrDottedNameIsServed() throws Exception {
+        // "./index.html" normalizes to index.html, and a directory name that merely contains a
+        // dot is not a dot directory.
+        for (final String entry : new String[] { "./index.html", "pages/v1.2/index.html" }) {
+            final Path tmp = Files.createTempDirectory("tv-index-dotentry-");
+            try {
+                Files.createDirectories(tmp.resolve(entry).getParent());
+                Files.writeString(tmp.resolve(entry), "<html><head></head><body>ok</body></html>");
+                final String ymlContent = String.join("\n", //
+                        "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T", "version: 1.0.0",
+                        "entry: " + entry);
+                final ThemeManifest m = ThemeManifest.parse(new ByteArrayInputStream(ymlContent.getBytes(StandardCharsets.UTF_8)));
+                final CapturingResponse res = new CapturingResponse();
+
+                new StaticThemeResponder().serveIndex(new StubRequest(), res, new Theme("t", tmp, m), "/");
+
+                assertEquals(entry, 200, res.status);
+            } finally {
+                deleteTree(tmp);
+            }
+        }
+    }
+
+    @Test
     public void test_serveIndex_blockedEntryReadme_returns404() throws Exception {
         final Path tmp = Files.createTempDirectory("tv-index-blocked-readme-");
         try {
@@ -617,6 +662,28 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_serveAsset_belowDotDirectory_returns404() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-asset-dotdir-");
+        try {
+            Files.createDirectories(tmp.resolve(".git"));
+            Files.writeString(tmp.resolve(".git/config"), "x");
+            Files.createDirectories(tmp.resolve(".attic-t-1760000000000-1a2b3c4d/assets"));
+            Files.writeString(tmp.resolve(".attic-t-1760000000000-1a2b3c4d/index.html"), "x");
+            Files.writeString(tmp.resolve(".attic-t-1760000000000-1a2b3c4d/assets/app.js"), "x");
+            Files.createDirectories(tmp.resolve("assets/.cache"));
+            Files.writeString(tmp.resolve("assets/.cache/app.js"), "x");
+            final Theme theme = new Theme("t", tmp, manifest());
+
+            assert404(theme, ".git/config");
+            assert404(theme, ".attic-t-1760000000000-1a2b3c4d/index.html");
+            assert404(theme, ".attic-t-1760000000000-1a2b3c4d/assets/app.js");
+            assert404(theme, "assets/.cache/app.js");
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
     public void test_serveAsset_missingFile_returns404() throws Exception {
         final Path tmp = Files.createTempDirectory("tv-asset-missing-");
         try {
@@ -651,6 +718,29 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
             assertNull(viewer.resolveAsset(theme, "/etc/passwd"));
             assertNull(viewer.resolveAsset(theme, "inside/../../outside"));
             assertNull(viewer.resolveAsset(theme, null));
+        } finally {
+            deleteTree(tmp);
+        }
+    }
+
+    @Test
+    public void test_resolveAsset_rejectsDotDirectoriesButNotDottedNames() throws Exception {
+        final Path tmp = Files.createTempDirectory("tv-resolve-dot-");
+        try {
+            Files.createDirectories(tmp.resolve(".hidden"));
+            Files.writeString(tmp.resolve(".hidden/app.js"), "x");
+            Files.createDirectories(tmp.resolve("assets/v1.2"));
+            Files.writeString(tmp.resolve("assets/v1.2/app.min.js"), "ok");
+            Files.writeString(tmp.resolve("assets/a..b.js"), "ok");
+            final Theme theme = new Theme("t", tmp, manifest());
+            final StaticThemeResponder viewer = new StaticThemeResponder();
+
+            assertNull(viewer.resolveAsset(theme, ".hidden/app.js"));
+            assertNotNull(viewer.resolveAsset(theme, "assets/v1.2/app.min.js"));
+            assertNotNull(viewer.resolveAsset(theme, "assets/a..b.js"));
+            // A "." segment is a no-op, not a dot directory.
+            assertNotNull(viewer.resolveAsset(theme, "./assets/v1.2/app.min.js"));
+            assertNotNull(viewer.resolveAsset(theme, "assets/./a..b.js"));
         } finally {
             deleteTree(tmp);
         }
@@ -780,6 +870,33 @@ public class StaticThemeResponderTest extends UnitFessTestCase {
         assertFalse(StaticThemeResponder.isBlockedFilename("app.js"));
         assertFalse(StaticThemeResponder.isBlockedFilename("index.html"));
         assertFalse(StaticThemeResponder.isBlockedFilename("styles.css"));
+    }
+
+    @Test
+    public void test_isBlockedPath() {
+        // The last segment is judged as isBlockedFilename does.
+        assertTrue(StaticThemeResponder.isBlockedPath("theme.yml"));
+        assertTrue(StaticThemeResponder.isBlockedPath("a/b/.env"));
+        assertTrue(StaticThemeResponder.isBlockedPath("a/LICENSE.txt"));
+        // So is every directory above it: one that starts with a dot hides what is below it.
+        assertTrue(StaticThemeResponder.isBlockedPath(".attic-t-1760000000000-1a2b3c4d/index.html"));
+        assertTrue(StaticThemeResponder.isBlockedPath(".staging-0a1b2c3d/content/assets/app.js"));
+        assertTrue(StaticThemeResponder.isBlockedPath("assets/.cache/app.js"));
+        assertTrue(StaticThemeResponder.isBlockedPath(".git/"));
+        assertTrue(StaticThemeResponder.isBlockedPath(".git"));
+        assertTrue(StaticThemeResponder.isBlockedPath("../index.html"));
+        assertTrue(StaticThemeResponder.isBlockedPath(null));
+        // A directory named like a blocked file is not blocked; only the file name is.
+        assertFalse(StaticThemeResponder.isBlockedPath("license/app.js"));
+        assertFalse(StaticThemeResponder.isBlockedPath("readme.md/app.js"));
+        // Dots inside a name, "." segments, empty segments and directory requests are no reason.
+        assertFalse(StaticThemeResponder.isBlockedPath("assets/v1.2/app.min.js"));
+        assertFalse(StaticThemeResponder.isBlockedPath("assets/a..b.js"));
+        assertFalse(StaticThemeResponder.isBlockedPath("./assets/app.js"));
+        assertFalse(StaticThemeResponder.isBlockedPath("assets//app.js"));
+        assertFalse(StaticThemeResponder.isBlockedPath("assets/"));
+        assertFalse(StaticThemeResponder.isBlockedPath(""));
+        assertFalse(StaticThemeResponder.isBlockedPath("index.html"));
     }
 
     @Test
