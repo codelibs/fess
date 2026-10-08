@@ -174,10 +174,15 @@ public class RelatedContentHelper extends AbstractConfigHelper {
      * each encoded for its target context (HTML / URL / JavaScript) to prevent
      * reflected XSS.
      *
+     * A null or blank query, such as a search request without {@code q}, has no related content.
+     *
      * @param query the search query to find related content for
      * @return array of related content strings, or empty array if no matches found
      */
     public String[] getRelatedContents(final String query) {
+        if (StringUtil.isBlank(query)) {
+            return StringUtil.EMPTY_STRINGS;
+        }
         final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         final Pair<Map<String, String>, List<Pair<Pattern, String>>> pair = relatedContentMap.get(key);
         if (pair != null) {
