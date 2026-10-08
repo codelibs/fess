@@ -78,7 +78,7 @@ ${fe:html(true)}
                                                                         </h4>
                                                                         <button type="button" class="close"
                                                                                 data-dismiss="modal"
-                                                                                aria-label="Close">
+                                                                                aria-label="<la:message key="labels.crud_button_close"/>">
                                                                             <span aria-hidden="true">×</span>
                                                                         </button>
                                                                     </div>
@@ -134,7 +134,7 @@ ${fe:html(true)}
                                                                         </h4>
                                                                         <button type="button" class="close"
                                                                                 data-dismiss="modal"
-                                                                                aria-label="Close">
+                                                                                aria-label="<la:message key="labels.crud_button_close"/>">
                                                                             <span aria-hidden="true">×</span>
                                                                         </button>
                                                                     </div>
@@ -188,7 +188,7 @@ ${fe:html(true)}
                                                                         </h4>
                                                                         <button type="button" class="close"
                                                                                 data-dismiss="modal"
-                                                                                aria-label="Close">
+                                                                                aria-label="<la:message key="labels.crud_button_close"/>">
                                                                             <span aria-hidden="true">×</span>
                                                                         </button>
                                                                     </div>

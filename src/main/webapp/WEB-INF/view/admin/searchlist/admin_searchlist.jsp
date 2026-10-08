@@ -190,15 +190,15 @@ ${fe:html(true)}
                             </c:choose>
                             <c:if test="${editable}">
                                 <div class="modal fade" id="confirmToDelete"
-                                     tabindex="-1" role="dialog">
+                                     tabindex="-1" role="dialog" aria-labelledby="confirmToDeleteTitle">
                                     <div class="modal-dialog">
                                         <div class="modal-content bg-danger">
                                             <div class="modal-header">
-                                                <h4 class="modal-title">
+                                                <h4 class="modal-title" id="confirmToDeleteTitle">
                                                     <la:message key="labels.search_list_button_delete"/>
                                                 </h4>
                                                 <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close">
+                                                        aria-label="<la:message key="labels.crud_button_close"/>">
                                                     <span aria-hidden="true">×</span>
                                                 </button>
                                             </div>
@@ -251,7 +251,7 @@ ${fe:html(true)}
                                                             <la:message key="labels.search_list_button_delete_all"/>
                                                         </h4>
                                                         <button type="button" class="close" data-dismiss="modal"
-                                                                aria-label="Close">
+                                                                aria-label="<la:message key="labels.crud_button_close"/>">
                                                             <span aria-hidden="true">×</span>
                                                         </button>
                                                     </div>

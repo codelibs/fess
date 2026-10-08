@@ -51,7 +51,7 @@
                         <c:forEach var="row" items="${report.tables[tableName]}" varStatus="st">
                             <tr>
                                 <td class="searchlog-rank">${st.count}</td>
-                                <td class="text-break"><a href="${tableName == 'zeroHitQueries' ? zeroHitWordLink : searchWordLink}${f:u(row.word)}">${f:h(row.word)}</a></td>
+                                <td class="text-break"><a href="${tableName == 'zeroHitQueries' ? zeroHitWordLink : searchWordLink}${f:u(row.word)}"><c:if test="${empty row.word}"><la:message key="labels.searchlog_empty_word"/></c:if>${f:h(row.word)}</a></td>
                                 <td class="searchlog-bar-cell">
                                     <div class="searchlog-bar" style="width:${row.bar}%"></div>
                                     <span><fmt:formatNumber value="${row.count}"/></span></td>
