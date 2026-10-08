@@ -19,6 +19,8 @@ import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.codelibs.core.lang.StringUtil;
@@ -39,6 +41,11 @@ public class QueryStringBuilder {
     private static final String OR = " OR ";
 
     private static final String SPACE = " ";
+
+    /** A question mark that ends the text right after a letter or a digit. */
+    private static final Pattern TRAILING_QUESTION_MARK = Pattern.compile("(?<=[\\p{L}\\p{N}])\\?\\z");
+
+    private static final Pattern WHITESPACE = Pattern.compile("(?U)\\s+");
 
     private SearchRequestParams params;
 
@@ -176,14 +183,15 @@ public class QueryStringBuilder {
         } else {
             final String query = params.getQuery();
             if (StringUtil.isNotBlank(query)) {
+                final String text = stripTrailingQuestionMark(query);
                 if (relatedQuery && ComponentUtil.hasRelatedQueryHelper()) {
                     final RelatedQueryHelper relatedQueryHelper = ComponentUtil.getRelatedQueryHelper();
                     final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
                     if (relatedQueries.length == 0) {
-                        appendQuery(queryBuf, query);
+                        appendQuery(queryBuf, text);
                     } else {
                         queryBuf.append('(');
-                        queryBuf.append(quote(query));
+                        queryBuf.append(quote(text));
                         for (final String s : relatedQueries) {
                             queryBuf.append(OR);
                             queryBuf.append(quote(s));
@@ -191,11 +199,31 @@ public class QueryStringBuilder {
                         queryBuf.append(')');
                     }
                 } else {
-                    appendQuery(queryBuf, query);
+                    appendQuery(queryBuf, text);
                 }
             }
         }
         return queryBuf.toString().trim();
+    }
+
+    /**
+     * Drops the question mark that ends a question typed as a sentence.
+     * In the query syntax a question mark is a single-character wildcard, so the last word of
+     * {@code how do I reset my password?} would be read as {@code password} plus one character and
+     * match nothing, and a vector search cannot embed it. Only one question mark right after a letter or
+     * a digit at the end of a query of two or more words is dropped, so a wildcard in a single word
+     * ({@code te?}), inside a word ({@code te?t}) or repeated ({@code te??}) keeps its meaning.
+     *
+     * @param query the query as it was typed
+     * @return the query without its closing question mark, or the query itself
+     */
+    protected String stripTrailingQuestionMark(final String query) {
+        final String text = query.strip();
+        if (WHITESPACE.split(text).length < 2) {
+            return query;
+        }
+        final Matcher matcher = TRAILING_QUESTION_MARK.matcher(text);
+        return matcher.find() ? text.substring(0, matcher.start()) : query;
     }
 
     /**

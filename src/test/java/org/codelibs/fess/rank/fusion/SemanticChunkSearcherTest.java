@@ -601,6 +601,57 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertEquals(1, searcher.embedCount, "escaping a query without reserved characters leaves the words alone");
     }
 
+    /**
+     * A question is typed with its question mark. The query syntax reads that as a wildcard, which the
+     * splitter cannot embed, so the vector branch used to be skipped for exactly the questions it is for.
+     */
+    @Test
+    public void test_prepare_aQuestionWithItsQuestionMarkRunsTheVectorBranch() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return new String[0];
+            }
+        }, "relatedQueryHelper");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "I forgot my password?";
+            }
+        };
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        assertTrue(searcher.prepare(query, params).isPresent(), query);
+        assertEquals("I forgot my password", searcher.embeddedQuery);
+    }
+
+    /** What stays a wildcard is still not embedded, as before. */
+    @Test
+    public void test_prepare_aWildcardStillSkipsTheVectorBranch() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return new String[0];
+            }
+        }, "relatedQueryHelper");
+        for (final String typed : new String[] { "password?", "pas?word", "pass*", "reset pass*", "reset pas?word" }) {
+            final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+                @Override
+                public String getQuery() {
+                    return typed;
+                }
+            };
+            final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+
+            final GuardedSearcher searcher = new GuardedSearcher();
+            assertFalse(searcher.prepare(query, params).isPresent(), query);
+            assertFalse(searcher.managerTouched, query);
+        }
+    }
+
     @Test
     public void test_prepare_escapedRetryThatChangesTheWordsEmbedsAgain() {
         ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
