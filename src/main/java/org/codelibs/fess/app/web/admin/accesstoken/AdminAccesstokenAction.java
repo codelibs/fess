@@ -123,7 +123,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            accessTokenPager.setCurrentPageNumber(pageNumber.get());
+            accessTokenPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), accessTokenPager.getPageSize()));
         }).orElse(() -> {
             accessTokenPager.setCurrentPageNumber(0);
         });

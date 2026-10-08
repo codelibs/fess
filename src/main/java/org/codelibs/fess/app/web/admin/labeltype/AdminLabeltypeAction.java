@@ -127,7 +127,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            labelTypePager.setCurrentPageNumber(pageNumber.get());
+            labelTypePager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), labelTypePager.getPageSize()));
         }).orElse(() -> {
             labelTypePager.setCurrentPageNumber(0);
         });

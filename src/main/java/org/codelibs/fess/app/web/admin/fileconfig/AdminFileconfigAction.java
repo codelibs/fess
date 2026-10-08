@@ -133,7 +133,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            fileConfigPager.setCurrentPageNumber(pageNumber.get());
+            fileConfigPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), fileConfigPager.getPageSize()));
         }).orElse(() -> {
             fileConfigPager.setCurrentPageNumber(0);
         });

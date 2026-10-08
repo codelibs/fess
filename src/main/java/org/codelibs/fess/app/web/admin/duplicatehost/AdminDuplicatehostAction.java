@@ -102,7 +102,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            duplicateHostPager.setCurrentPageNumber(pageNumber.get());
+            duplicateHostPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), duplicateHostPager.getPageSize()));
         }).orElse(() -> {
             duplicateHostPager.setCurrentPageNumber(0);
         });

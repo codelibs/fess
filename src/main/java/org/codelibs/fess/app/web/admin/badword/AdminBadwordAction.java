@@ -121,7 +121,7 @@ public class AdminBadwordAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            badWordPager.setCurrentPageNumber(pageNumber.get());
+            badWordPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), badWordPager.getPageSize()));
         }).orElse(() -> {
             badWordPager.setCurrentPageNumber(0);
         });

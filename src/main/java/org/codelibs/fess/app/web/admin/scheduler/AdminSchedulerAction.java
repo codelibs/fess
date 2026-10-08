@@ -111,7 +111,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            schedulerPager.setCurrentPageNumber(pageNumber.get());
+            schedulerPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), schedulerPager.getPageSize()));
         }).orElse(() -> {
             schedulerPager.setCurrentPageNumber(0);
         });

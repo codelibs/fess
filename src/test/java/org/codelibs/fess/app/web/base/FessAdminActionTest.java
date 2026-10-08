@@ -593,6 +593,42 @@ public class FessAdminActionTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                                limitPageNumber Tests
+    //                                                                =====================
+
+    @Test
+    public void test_limitPageNumber_keepsThePageInsideTheResultWindow() {
+        final FessAdminAction action = createPagingAction(10000);
+
+        assertEquals(1, action.limitPageNumber(1, 20));
+        assertEquals(3, action.limitPageNumber(3, 20));
+        // 10000 / 20: the last page that still ends inside the window
+        assertEquals(500, action.limitPageNumber(500, 20));
+        assertEquals(500, action.limitPageNumber(501, 20));
+        assertEquals(500, action.limitPageNumber(99999, 20));
+        assertEquals(100, action.limitPageNumber(Integer.MAX_VALUE, 100));
+        assertEquals(1, action.limitPageNumber(99999, 10000));
+        assertEquals(1, action.limitPageNumber(99999, 20000));
+    }
+
+    @Test
+    public void test_limitPageNumber_leavesAPageThatTheListFallsBackFromAlone() {
+        final FessAdminAction action = createPagingAction(10000);
+
+        // 0 and below mean the first page to the pager
+        assertEquals(0, action.limitPageNumber(0, 20));
+        assertEquals(-3, action.limitPageNumber(-3, 20));
+    }
+
+    @Test
+    public void test_limitPageNumber_followsTheConfiguredWindowAndToleratesAnUnusablePageSize() {
+        assertEquals(50, createPagingAction(1000).limitPageNumber(99999, 20));
+        assertEquals(10000, createPagingAction(10000).limitPageNumber(99999, 0));
+        assertEquals(10000, createPagingAction(10000).limitPageNumber(99999, -5));
+        assertEquals(1, createPagingAction(0).limitPageNumber(99999, 20));
+    }
+
+    // ===================================================================================
     //                                                                      Helper Methods
     //                                                                      ==============
 
@@ -685,6 +721,19 @@ public class FessAdminActionTest extends UnitFessTestCase {
                 return ActionResponse.undefined();
             }
         };
+    }
+
+    private FessAdminAction createPagingAction(final int maxResultWindow) {
+        final FessAdminAction action = createAction();
+        action.fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getIndexerMaxResultWindowSizeAsInteger() {
+                return maxResultWindow;
+            }
+        };
+        return action;
     }
 
     static class TestActionRuntime extends ActionRuntime {

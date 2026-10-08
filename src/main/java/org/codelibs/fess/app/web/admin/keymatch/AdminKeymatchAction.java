@@ -124,7 +124,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            keyMatchPager.setCurrentPageNumber(pageNumber.get());
+            keyMatchPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), keyMatchPager.getPageSize()));
         }).orElse(() -> {
             keyMatchPager.setCurrentPageNumber(0);
         });

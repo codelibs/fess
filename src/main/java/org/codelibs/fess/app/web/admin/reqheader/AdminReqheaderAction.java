@@ -111,7 +111,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            reqHeaderPager.setCurrentPageNumber(pageNumber.get());
+            reqHeaderPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), reqHeaderPager.getPageSize()));
         }).orElse(() -> {
             reqHeaderPager.setCurrentPageNumber(0);
         });

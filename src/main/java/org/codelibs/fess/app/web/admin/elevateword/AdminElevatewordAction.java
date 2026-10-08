@@ -128,7 +128,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            elevateWordPager.setCurrentPageNumber(pageNumber.get());
+            elevateWordPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), elevateWordPager.getPageSize()));
         }).orElse(() -> {
             elevateWordPager.setCurrentPageNumber(0);
         });

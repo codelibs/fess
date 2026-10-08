@@ -126,7 +126,7 @@ public class AdminFileauthAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            fileAuthenticationPager.setCurrentPageNumber(pageNumber.get());
+            fileAuthenticationPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), fileAuthenticationPager.getPageSize()));
         }).orElse(() -> {
             fileAuthenticationPager.setCurrentPageNumber(0);
         });

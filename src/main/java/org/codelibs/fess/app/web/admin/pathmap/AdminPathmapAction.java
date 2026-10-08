@@ -103,7 +103,7 @@ public class AdminPathmapAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            pathMapPager.setCurrentPageNumber(pageNumber.get());
+            pathMapPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), pathMapPager.getPageSize()));
         }).orElse(() -> {
             pathMapPager.setCurrentPageNumber(0);
         });

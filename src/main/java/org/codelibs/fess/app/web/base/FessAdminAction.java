@@ -313,6 +313,24 @@ public abstract class FessAdminAction extends FessBaseAction {
     }
 
     /**
+     * Keeps the page number of a list screen inside the search engine's result window
+     * ({@code indexer.max.result.window.size}).
+     * <p>
+     * A page that would end beyond the window can never be answered by the search engine, so
+     * asking for it fails the whole request. It is replaced by the last page inside the window,
+     * the way the document report screen and the admin API do.
+     * </p>
+     *
+     * @param pageNumber the page number as it was requested
+     * @param pageSize the number of rows on a page
+     * @return the page number, or the last page inside the window if it is beyond it
+     */
+    protected int limitPageNumber(final int pageNumber, final int pageSize) {
+        final int maxPage = Math.max(1, fessConfig.getIndexerMaxResultWindowSizeAsInteger() / Math.max(1, pageSize));
+        return Math.min(pageNumber, maxPage);
+    }
+
+    /**
      * Checks whether this action works only with the CodeLibs plugins of the search engine.
      * <p>
      * When it does and the search engine runs without them ({@code FessConfig#isFesenPluginless()}),

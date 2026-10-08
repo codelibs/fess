@@ -93,7 +93,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
-        failureUrlPager.setCurrentPageNumber(pageNumber);
+        failureUrlPager.setCurrentPageNumber(limitPageNumber(pageNumber, failureUrlPager.getPageSize()));
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });

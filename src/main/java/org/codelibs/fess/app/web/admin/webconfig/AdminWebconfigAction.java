@@ -119,7 +119,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            webConfigPager.setCurrentPageNumber(pageNumber.get());
+            webConfigPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), webConfigPager.getPageSize()));
         }).orElse(() -> {
             webConfigPager.setCurrentPageNumber(0);
         });

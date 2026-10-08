@@ -146,7 +146,7 @@ public class AdminTagtypeAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            tagTypePager.setCurrentPageNumber(pageNumber.get());
+            tagTypePager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), tagTypePager.getPageSize()));
         }).orElse(() -> {
             tagTypePager.setCurrentPageNumber(0);
         });

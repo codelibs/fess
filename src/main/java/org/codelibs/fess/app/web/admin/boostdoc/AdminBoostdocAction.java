@@ -99,7 +99,7 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            boostDocPager.setCurrentPageNumber(pageNumber.get());
+            boostDocPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), boostDocPager.getPageSize()));
         }).orElse(() -> {
             boostDocPager.setCurrentPageNumber(0);
         });

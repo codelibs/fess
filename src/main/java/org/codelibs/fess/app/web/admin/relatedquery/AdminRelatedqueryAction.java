@@ -112,7 +112,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            relatedQueryPager.setCurrentPageNumber(pageNumber.get());
+            relatedQueryPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), relatedQueryPager.getPageSize()));
         }).orElse(() -> {
             relatedQueryPager.setCurrentPageNumber(0);
         });

@@ -109,7 +109,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
-        jobLogPager.setCurrentPageNumber(pageNumber);
+        jobLogPager.setCurrentPageNumber(limitPageNumber(pageNumber, jobLogPager.getPageSize()));
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });

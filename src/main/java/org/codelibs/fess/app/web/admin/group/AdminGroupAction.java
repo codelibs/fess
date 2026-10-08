@@ -119,7 +119,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            groupPager.setCurrentPageNumber(pageNumber.get());
+            groupPager.setCurrentPageNumber(limitPageNumber(pageNumber.get(), groupPager.getPageSize()));
         }).orElse(() -> {
             groupPager.setCurrentPageNumber(0);
         });
