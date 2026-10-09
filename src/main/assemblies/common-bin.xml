@@ -111,5 +111,9 @@
 			<source>LICENSE</source>
 			<outputDirectory>fess-${project.version}</outputDirectory>
 		</file>
+		<file>
+			<source>NOTICE</source>
+			<outputDirectory>fess-${project.version}</outputDirectory>
+		</file>
 	</files>
 </component>
