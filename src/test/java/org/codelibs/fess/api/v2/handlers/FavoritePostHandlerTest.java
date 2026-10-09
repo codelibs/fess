@@ -169,6 +169,45 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_post_bodyThatIsNotAnObjectReturnsInvalidRequest() throws Exception {
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("alice"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.setFessLoginAssist(loginStub);
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "alice-code";
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+        try {
+            for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {
+                final CapturingResponse res = new CapturingResponse();
+                new FavoritePostHandler().handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody(json), res, "abc");
+                assertEquals(400, res.status, json);
+                assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+                assertTrue(res.body().contains("\"message\":\"request body must be a JSON object\""), res.body());
+            }
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void test_internalErrorMessageIsFixedString() throws Exception {
         // Information-disclosure regression for the catch (RuntimeException) path: the
         // generic INTERNAL_ERROR branch used to forward e.getMessage() verbatim. It is now

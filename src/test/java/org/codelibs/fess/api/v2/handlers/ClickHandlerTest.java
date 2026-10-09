@@ -91,6 +91,28 @@ public class ClickHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_bodyThatIsNotAnObjectReturnsInvalidRequest() throws Exception {
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {
+                final CapturingResponse res = new CapturingResponse();
+                new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody(json), res);
+                assertEquals(400, res.status, json);
+                assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+                assertTrue(res.body().contains("\"message\":\"request body must be a JSON object\""), res.body());
+            }
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
     public void test_userInfoHelperFailure_warnsOnlyOnce() throws Exception {
         final UserInfoHelper stub = new UserInfoHelper() {
             @Override

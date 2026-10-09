@@ -16,6 +16,8 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -86,6 +88,68 @@ public class V2JsonBodyTest {
     public void test_rejectsMalformedJson() {
         final HttpServletRequest req = stub("{not json", "application/json");
         assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1024));
+    }
+
+    @Test
+    public void test_rejectsMalformedJson_messageCarriesNoParserInternals() {
+        final HttpServletRequest req = stub("{not json", "application/json");
+        final V2JsonBody.MalformedJsonException e =
+                assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1024));
+        assertFalse(e.getMessage().contains("StreamReadFeature"), e.getMessage());
+        assertFalse(e.getMessage().contains("Source:"), e.getMessage());
+    }
+
+    @Test
+    public void test_rejectsTopLevelValueThatIsNotAnObject() {
+        // The literal null used to be returned as null (so every handler failed with a NullPointerException), and an
+        // array, a string, a number or a boolean was reported with the Jackson type names of the failed binding.
+        for (final String json : new String[] { "null", "[]", "[{\"a\":1}]", "\"text\"", "12", "1.5", "true", "false", "  " }) {
+            final HttpServletRequest req = stub(json, "application/json");
+            final V2JsonBody.MalformedJsonException e =
+                    assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1024), json);
+            assertEquals("request body must be a JSON object", e.getMessage(), json);
+        }
+    }
+
+    @Test
+    public void test_acceptsNullAsAValueInsideAnObject() throws Exception {
+        final Map<String, Object> body = new V2JsonBody().read(stub("{\"a\":null}", "application/json"), 1024);
+        assertTrue(body.containsKey("a"));
+        assertNull(body.get("a"));
+    }
+
+    @Test
+    public void test_rejectsInvalidUtf8() {
+        // 0xFF and 0xFE never occur in UTF-8; the body used to be decoded with U+FFFD in their place.
+        final byte[] prefix = "{\"name\":\"r".getBytes(StandardCharsets.UTF_8);
+        final byte[] suffix = "\"}".getBytes(StandardCharsets.UTF_8);
+        final byte[] bad = new byte[prefix.length + 2 + suffix.length];
+        System.arraycopy(prefix, 0, bad, 0, prefix.length);
+        bad[prefix.length] = (byte) 0xFF;
+        bad[prefix.length + 1] = (byte) 0xFE;
+        System.arraycopy(suffix, 0, bad, prefix.length + 2, suffix.length);
+        final HttpServletRequest req = stubBytes(bad, "application/json");
+        final V2JsonBody.MalformedJsonException e =
+                assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1024));
+        assertEquals("request body must be valid UTF-8", e.getMessage());
+    }
+
+    @Test
+    public void test_rejectsTruncatedUtf8Sequence() {
+        // The first two bytes of a three-byte sequence at the very end of the body.
+        final byte[] json = "{\"a\":1}".getBytes(StandardCharsets.UTF_8);
+        final byte[] bad = java.util.Arrays.copyOf(json, json.length + 2);
+        bad[json.length] = (byte) 0xE3;
+        bad[json.length + 1] = (byte) 0x81;
+        final HttpServletRequest req = stubBytes(bad, "application/json");
+        assertThrows(V2JsonBody.MalformedJsonException.class, () -> new V2JsonBody().read(req, 1024));
+    }
+
+    @Test
+    public void test_acceptsMultibyteUtf8() throws Exception {
+        final String text = "\u65e5\u672c\u8a9e \uD83D\uDE00";
+        final HttpServletRequest req = stubBytes(("{\"name\":\"" + text + "\"}").getBytes(StandardCharsets.UTF_8), "application/json");
+        assertEquals(text, new V2JsonBody().read(req, 1024).get("name"));
     }
 
     @Test
