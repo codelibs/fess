@@ -487,9 +487,8 @@ public class AdminDictMappingAction extends FessAdminAction {
     public static OptionalEntity<CharMappingItem> createCharMappingItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
-            final String[] newInputs = splitLine(form.inputs);
-            validateMappingString(action, newInputs, "inputs", hook);
-            entity.setNewInputs(newInputs);
+            verifyCharMappingInputs(form, messages -> action.throwValidationError(messages, hook));
+            entity.setNewInputs(splitLine(form.inputs));
             final String newOutput = form.output;
             entity.setNewOutput(newOutput);
             return entity;
@@ -544,21 +543,23 @@ public class AdminDictMappingAction extends FessAdminAction {
         }
     }
 
-    private static void validateMappingString(final FessBaseAction action, final String[] values, final String propertyName,
-            final VaErrorHook hook) {
-        if (values.length == 0) {
-            return;
-        }
-        for (final String value : values) {
-            if (value.indexOf(',') >= 0) {
-                action.throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
-                }, hook);
+    /**
+     * Checks the inputs of an entry against the rules of the mapping file: the inputs are given
+     * one per line, and an input may contain neither a comma nor {@code =>}, because they separate
+     * the inputs and the two sides of a rule in the file. Shared with the REST API, which has to
+     * report a violation through its own error handling rather than through the page hook the
+     * screens pass in.
+     *
+     * @param form the entry to check
+     * @param throwError callback to report a violation
+     */
+    public static void verifyCharMappingInputs(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
+        for (final String input : splitLine(form.inputs)) {
+            if (input.indexOf(',') >= 0) {
+                throwError.accept(messages -> messages.addErrorsInvalidStrIsIncluded("inputs", input, ","));
             }
-            if (value.indexOf("=>") >= 0) {
-                action.throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
-                }, hook);
+            if (input.indexOf("=>") >= 0) {
+                throwError.accept(messages -> messages.addErrorsInvalidStrIsIncluded("inputs", input, "=>"));
             }
         }
     }

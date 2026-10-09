@@ -82,6 +82,27 @@ public class AdminDictMappingActionTest extends UnitFessTestCase {
     }
 
     /**
+     * An input is written to the mapping file as {@code in1,in2=>out}, so one that contains a comma
+     * or {@code =>} would be read back as several inputs or as a different rule.
+     */
+    @Test
+    public void test_verifyCharMappingInputs_rejectsACommaOrTheRuleSeparatorInAnInput() {
+        final String comma = inputsErrorOf("a,b");
+        assertTrue(comma.contains("inputs"), comma);
+        assertTrue(comma.contains("invalid_str_is_included"), comma);
+        assertTrue(inputsErrorOf("a\nb=>c").contains("invalid_str_is_included"));
+    }
+
+    /**
+     * Inputs given one per line are accepted, blank lines included.
+     */
+    @Test
+    public void test_verifyCharMappingInputs_acceptsOneInputPerLine() {
+        assertEquals("", inputsErrorOf("one\r\ntwo\n\nthree"));
+        assertEquals("", inputsErrorOf(null));
+    }
+
+    /**
      * A service standing in for a dictionary that maps the given input.
      */
     private CharMappingService dictionaryMapping(final long id, final String input) {
@@ -107,6 +128,21 @@ public class AdminDictMappingActionTest extends UnitFessTestCase {
                 return false;
             }
         };
+    }
+
+    /**
+     * Runs the input syntax rules over one entry and returns what they reported.
+     */
+    private String inputsErrorOf(final String inputs) {
+        final CreateForm form = new CreateForm();
+        form.inputs = inputs;
+        final StringBuilder reported = new StringBuilder();
+        AdminDictMappingAction.verifyCharMappingInputs(form, messenger -> {
+            final FessMessages messages = new FessMessages();
+            messenger.message(messages);
+            reported.append(messages.toString());
+        });
+        return reported.toString();
     }
 
     /**

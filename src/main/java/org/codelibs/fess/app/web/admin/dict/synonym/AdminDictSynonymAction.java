@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +35,7 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.base.FessBaseAction;
 import org.codelibs.fess.dict.synonym.SynonymItem;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -44,6 +46,7 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.lastaflute.web.validation.VaMessenger;
 import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 import jakarta.annotation.Resource;
@@ -498,12 +501,9 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public static OptionalEntity<SynonymItem> createSynonymItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
-            final String[] newInputs = splitLine(form.inputs);
-            validateSynonymString(action, newInputs, "inputs", hook);
-            entity.setNewInputs(newInputs);
-            final String[] newOutputs = splitLine(form.outputs);
-            validateSynonymString(action, newOutputs, "outputs", hook);
-            entity.setNewOutputs(newOutputs);
+            verifySynonymEntry(form, messages -> action.throwValidationError(messages, hook));
+            entity.setNewInputs(splitLine(form.inputs));
+            entity.setNewOutputs(splitLine(form.outputs));
             return entity;
         });
     }
@@ -526,21 +526,29 @@ public class AdminDictSynonymAction extends FessAdminAction {
         }
     }
 
-    private static void validateSynonymString(final FessBaseAction action, final String[] values, final String propertyName,
-            final VaErrorHook hook) {
-        if (values.length == 0) {
-            return;
-        }
-        for (final String value : values) {
-            if (value.indexOf(',') >= 0) {
-                action.throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
-                }, hook);
+    /**
+     * Checks an entry against the rules of the synonym file: the inputs and the outputs are given
+     * one term per line, and a term may contain neither a comma nor {@code =>}, because they separate
+     * the terms and the two sides of a rule in the file. Shared with the REST API, which has to
+     * report a violation through its own error handling rather than through the page hook the
+     * screens pass in.
+     *
+     * @param form the entry to check
+     * @param throwError callback to report a violation
+     */
+    public static void verifySynonymEntry(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
+        verifySynonymTerms(splitLine(form.inputs), "inputs", throwError);
+        verifySynonymTerms(splitLine(form.outputs), "outputs", throwError);
+    }
+
+    private static void verifySynonymTerms(final String[] terms, final String propertyName,
+            final Consumer<VaMessenger<FessMessages>> throwError) {
+        for (final String term : terms) {
+            if (term.indexOf(',') >= 0) {
+                throwError.accept(messages -> messages.addErrorsInvalidStrIsIncluded(propertyName, term, ","));
             }
-            if (value.indexOf("=>") >= 0) {
-                action.throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
-                }, hook);
+            if (term.indexOf("=>") >= 0) {
+                throwError.accept(messages -> messages.addErrorsInvalidStrIsIncluded(propertyName, term, "=>"));
             }
         }
     }

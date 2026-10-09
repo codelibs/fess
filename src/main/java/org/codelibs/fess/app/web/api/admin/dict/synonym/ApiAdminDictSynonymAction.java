@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.dict.synonym;
 
 import static org.codelibs.fess.app.web.admin.dict.synonym.AdminDictSynonymAction.createSynonymItem;
+import static org.codelibs.fess.app.web.admin.dict.synonym.AdminDictSynonymAction.verifySynonymEntry;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,6 +111,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
+        verifySynonymEntry(body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
         final SynonymItem entity = createSynonymItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL));
@@ -140,6 +142,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
+        verifySynonymEntry(body, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;
         final SynonymItem entity = createSynonymItem(this, body, () -> {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, String.valueOf(body.id)));
