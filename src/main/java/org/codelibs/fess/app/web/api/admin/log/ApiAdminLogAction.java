@@ -75,7 +75,14 @@ public class ApiAdminLogAction extends FessApiAdminAction {
     // GET /api/admin/log/file/{id}
     @Execute
     public StreamResponse get$file(final String id) {
-        final String filename = sanitizeFilename(new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8));
+        final byte[] decoded;
+        try {
+            decoded = Base64.getDecoder().decode(id);
+        } catch (final IllegalArgumentException e) {
+            throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id));
+            return null; // ignore
+        }
+        final String filename = sanitizeFilename(new String(decoded, StandardCharsets.UTF_8));
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);

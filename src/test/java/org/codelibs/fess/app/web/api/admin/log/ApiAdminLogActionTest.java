@@ -25,6 +25,8 @@ import java.nio.file.Path;
 import java.util.Base64;
 
 import org.codelibs.core.io.CopyUtil;
+import org.codelibs.fess.app.service.AccessTokenService;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
@@ -95,6 +97,28 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
         for (final String name : new String[] { "../../etc/passwd", "fess.txt", "fess.log.bak", "", ".." }) {
             assertNull(action().get$file(id(name)).getStreamCall(), "no stream must be served for: " + name);
         }
+    }
+
+    /** An id that is not base64 is answered with a validation error (HTTP 400), not with the exception the decoder throws (HTTP 500). */
+    @Test
+    public void test_get$file_anIdThatIsNotBase64IsAValidationError() throws Exception {
+        final ApiAdminLogAction action = injectedAction();
+        for (final String id : new String[] { "a", "not base64!", "@@@@", "ZmVzcy5sb2c=x" }) {
+            assertValidationError(() -> action.get$file(id)).handle(data -> {
+                data.requiredMessageOf("_global", "errors.could_not_find_log_file");
+            });
+        }
+    }
+
+    private ApiAdminLogAction injectedAction() {
+        // FessApiAction declares @Resource AccessTokenService and FessBaseAction FessLoginAssist, whose own
+        // @Resource fields cannot be assembled in the unit container; only the framework fields that
+        // throwValidationErrorApi() needs are used here.
+        suppressBindingOf(AccessTokenService.class);
+        suppressBindingOf(FessLoginAssist.class);
+        final ApiAdminLogAction action = action();
+        inject(action);
+        return action;
     }
 
     private ApiAdminLogAction action() {
