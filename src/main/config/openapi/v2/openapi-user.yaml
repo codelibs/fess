@@ -51,6 +51,11 @@ info:
 
     **Method-not-allowed responses** carry an `Allow` header listing the
     supported HTTP methods for the endpoint.
+
+    **Undecodable parameters.** A request whose query string cannot be decoded
+    (for example a percent-escape that is not valid UTF-8, as in `?q=%ff`) is
+    answered `400 invalid_request` before the operation runs, so every
+    operation can return `400`.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -113,6 +118,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '503':
           description: |-
@@ -497,6 +503,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuggestWordsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
@@ -513,6 +520,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LabelsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
@@ -572,6 +580,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RelatedQueriesResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
@@ -595,6 +604,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RelatedContentResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
@@ -615,6 +625,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UiConfigResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -634,6 +645,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthMeResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -694,6 +706,15 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '403':
+          description: |-
+            The request was blocked as cross-site: its `Origin` (or
+            `Referer`) header names an origin that is not allowed. This is the
+            baseline origin check that every state-changing request passes; it
+            is separate from the CSRF token, which login does not need.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '429':
           description: |-
@@ -727,6 +748,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LogoutResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405':
           description: |-
@@ -1195,7 +1217,9 @@ paths:
       description: |-
         Deletes a tag of the caller. The documents lose its value when the tag
         queue is next processed. The shared tag of another user is `forbidden`
-        (403) and a tag the caller cannot see is `not_found` (404).
+        (403) and a tag the caller cannot see is `not_found` (404). A delete
+        that keeps losing a race with another writer is `conflict` (409) and
+        leaves the tag in place.
       operationId: tagsDeleteV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -1211,6 +1235,7 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
   /documents/{docId}/tags:
@@ -1576,7 +1601,13 @@ components:
                     lower bound is known.
                   enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL_TO]
                 page_count: { type: integer }
-                highlight_params: { type: string }
+                highlight_params:
+                  type: string
+                  nullable: true
+                  description: |-
+                    Query string fragment (`&hq=...`) that carries the query terms to
+                    highlight on a result link. `null` when there is nothing to
+                    highlight, for example when the request has no query.
                 next_page: { type: boolean }
                 prev_page: { type: boolean }
                 start_record_number: { type: integer }
@@ -1688,12 +1719,22 @@ components:
           description: |-
             Last modifier from the document metadata (for example the last
             author of an Office file), falling back to the file owner.
-        content_length: { type: integer, format: int64 }
+        content_length:
+          type: string
+          description: |-
+            Content size in bytes, as a decimal string: the crawler stores it
+            that way. A document written through the admin documents API
+            carries a JSON number instead.
         last_modified: { type: string, format: date-time }
         timestamp: { type: string, format: date-time }
         created: { type: string, format: date-time }
         score: { type: number, format: float }
-        boost: { type: number, format: float }
+        boost:
+          type: string
+          description: |-
+            Document boost as a decimal string (for example `"1.0"`): the
+            crawler stores it that way. A document written through the admin
+            documents API carries a JSON number instead.
         doc_id: { type: string }
         _id:
           type: string
@@ -2659,16 +2700,3 @@ components:
                   description: |-
                     Charset parsed from the document mimetype; defaults to
                     `UTF-8` when none is present.
-
-    # --- Generic OK --------------------------------------------------
-    OkResponse:
-      type: object
-      required: [response]
-      properties:
-        response:
-          allOf:
-            - $ref: '#/components/schemas/EnvelopeMeta'
-            - type: object
-              required: [ok]
-              properties:
-                ok: { type: boolean, enum: [true] }
