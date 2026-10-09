@@ -91,6 +91,40 @@ public class TagsHandlerTest extends UnitFessTestCase {
     //                                                                      =============
 
     @Test
+    public void test_parallelCreations_stayWithinMaxTags() throws Exception {
+        // Requests that arrive together all counted fewer tags than the limit and all stored theirs, which left the
+        // owner with more tags than the limit.
+        env.user("alice");
+        env.fessConfig.maxTags = 5;
+        final TagHandlerTestSupport.SlowCountTagTypeService service = new TagHandlerTestSupport.SlowCountTagTypeService();
+        final Response[] responses = TagHandlerTestSupport.runTogether(20, i -> {
+            final Response res = new Response();
+            try {
+                new StubHandler() {
+                    @Override
+                    protected TagTypeService getTagTypeService() {
+                        return service;
+                    }
+                }.handle(request("POST").json("{\"name\":\"tag" + i + "\"}").proxy(), res.proxy(), null);
+            } catch (final IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+            return res;
+        });
+        int created = 0;
+        for (final Response res : responses) {
+            if (res.status == 200) {
+                created++;
+            } else {
+                Assertions.assertEquals(400, res.status, res.body());
+                Assertions.assertEquals("too many tags: a user can have up to 5 tags", res.errorMessage());
+            }
+        }
+        Assertions.assertEquals(5, created);
+        Assertions.assertEquals(5, service.store.size());
+    }
+
+    @Test
     public void test_disabled_returnsInvalidRequestForEveryMethod() throws Exception {
         env.fessConfig.enabled = false;
         env.user("alice");

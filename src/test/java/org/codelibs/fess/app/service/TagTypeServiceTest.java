@@ -374,15 +374,54 @@ public class TagTypeServiceTest extends UnitFessTestCase {
 
             @Override
             public Integer getUserTagMaxTagsAsInteger() {
+                return 3;
+            }
+
+            @Override
+            public Integer getIndexerMaxResultWindowSizeAsInteger() {
                 return 7;
             }
         };
 
-        // no aggregations in the response: no counts
+        // no aggregations in the response: no counts. The buckets are not cut at user.tag.max.tags (3).
         assertTrue(service.getPathCountMapByOwner("alice").isEmpty());
         assertTrue(dsl[0].contains("\"owner\":{\"value\":\"alice\""), dsl[0]);
         assertTrue(dsl[0].contains("\"terms\":{\"field\":\"name\",\"size\":7"), dsl[0]);
         assertTrue(dsl[0].contains("\"value_count\":{\"field\":\"paths\"}"), dsl[0]);
+    }
+
+    @Test
+    public void test_getTagTypeListByOwner_isNotCutAtTheMaxTags() {
+        // An owner can have more tags than user.tag.max.tags (the limit was lowered, an administrator created
+        // tags, or two nodes raced), and a tag cut from the list can neither be seen nor deleted by its owner.
+        final org.codelibs.fess.opensearch.config.cbean.TagTypeCB[] condition = new org.codelibs.fess.opensearch.config.cbean.TagTypeCB[1];
+        final TagTypeBhv bhv = new TagTypeBhv() {
+            @Override
+            public org.dbflute.cbean.result.ListResultBean<TagType> selectList(
+                    final org.dbflute.bhv.readable.CBCall<org.codelibs.fess.opensearch.config.cbean.TagTypeCB> cbLambda) {
+                condition[0] = new org.codelibs.fess.opensearch.config.cbean.TagTypeCB();
+                cbLambda.callback(condition[0]);
+                return new org.dbflute.cbean.result.ListResultBean<>();
+            }
+        };
+        final TagTypeService service = createService(bhv);
+        service.fessConfig = new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getUserTagMaxTagsAsInteger() {
+                return 3;
+            }
+
+            @Override
+            public Integer getIndexerMaxResultWindowSizeAsInteger() {
+                return 7;
+            }
+        };
+
+        assertTrue(service.getTagTypeListByOwner("alice").isEmpty());
+        assertEquals(7, condition[0].getFetchSize());
+        assertEquals(1, condition[0].getFetchPageNumber());
     }
 
     /**

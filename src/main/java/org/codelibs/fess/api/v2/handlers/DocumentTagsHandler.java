@@ -169,7 +169,7 @@ public class DocumentTagsHandler extends AbstractTagHandler {
     private TagType createTag(final String name, final String userId, final String url) throws TagRequestException {
         final TagType tagType = newTagType(name, userId, false, new String[] { url });
         try {
-            getTagTypeService().insert(tagType);
+            insertTagType(tagType);
         } catch (final TagTypeConflictException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("The tag was created concurrently; adding the URL to it: id={}", tagType.getId());

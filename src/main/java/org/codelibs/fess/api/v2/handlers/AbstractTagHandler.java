@@ -71,6 +71,12 @@ public abstract class AbstractTagHandler {
      */
     private static final Striped<Lock> UPDATE_LOCKS = Striped.lock(64);
 
+    /**
+     * Serializes the creation of the tags of one owner in this JVM, so that the number of tags that is checked against
+     * {@code user.tag.max.tags} is still true when the tag is stored.
+     */
+    private static final Striped<Lock> CREATE_LOCKS = Striped.lock(64);
+
     /** A tag type id: the SHA-256 of the tag value in lowercase hex. */
     private static final Pattern TAG_ID_PATTERN = Pattern.compile("[0-9a-f]{64}");
 
@@ -182,21 +188,15 @@ public abstract class AbstractTagHandler {
     }
 
     /**
-     * Builds a new tag of the caller, checking {@code user.tag.max.tags}. The tag is not stored.
+     * Builds a new tag of the caller. The tag is not stored; {@link #insertTagType(TagType)} stores it.
      *
      * @param name the normalized tag name
      * @param userId the caller, who owns the tag
      * @param shared whether the tag is shared
      * @param paths the paths of the tag
      * @return the tag type with its id set
-     * @throws TagRequestException if the caller has {@code user.tag.max.tags} tags
      */
-    protected TagType newTagType(final String name, final String userId, final boolean shared, final String[] paths)
-            throws TagRequestException {
-        final int maxTags = ComponentUtil.getFessConfig().getUserTagMaxTagsAsInteger();
-        if (getTagTypeService().countByOwner(userId) >= maxTags) {
-            throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "too many tags: a user can have up to " + maxTags + " tags");
-        }
+    protected TagType newTagType(final String name, final String userId, final boolean shared, final String[] paths) {
         final TagTypeHelper helper = getTagTypeHelper();
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         final TagType tagType = new TagType();
@@ -212,6 +212,31 @@ public abstract class AbstractTagHandler {
         tagType.setUpdatedBy(userId);
         tagType.setUpdatedTime(now);
         return tagType;
+    }
+
+    /**
+     * Stores a new tag of the caller, checking {@code user.tag.max.tags}.
+     *
+     * <p>The check and the write run one after the other for the tags of one owner in this JVM. Without that, requests
+     * that arrive together all count fewer tags than the limit and all store theirs, and the owner ends up with more
+     * tags than the limit. Another node is not covered.</p>
+     *
+     * @param tagType the tag type from {@link #newTagType(String, String, boolean, String[])}
+     * @throws TagRequestException if the caller has {@code user.tag.max.tags} tags
+     * @throws TagTypeConflictException if a tag with the same id exists
+     */
+    protected void insertTagType(final TagType tagType) throws TagRequestException {
+        final int maxTags = ComponentUtil.getFessConfig().getUserTagMaxTagsAsInteger();
+        final Lock lock = CREATE_LOCKS.get(String.valueOf(tagType.getOwner()));
+        lock.lock();
+        try {
+            if (getTagTypeService().countByOwner(tagType.getOwner()) >= maxTags) {
+                throw new TagRequestException(V2ErrorCode.INVALID_REQUEST, "too many tags: a user can have up to " + maxTags + " tags");
+            }
+            getTagTypeService().insert(tagType);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

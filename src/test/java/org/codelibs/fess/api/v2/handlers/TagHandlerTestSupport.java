@@ -260,6 +260,65 @@ final class TagHandlerTestSupport {
     }
 
     /** The real helper reading {@link FakeTagTypeService}, with the change queue recorded. */
+    /**
+     * A store that answers a count a moment after it counted, as a search engine does under load, so that requests that
+     * arrive together all see the count from before the others stored their tags. Safe to use from several threads.
+     */
+    static class SlowCountTagTypeService extends FakeTagTypeService {
+        @Override
+        public long countByOwner(final String owner) {
+            final long count;
+            synchronized (this) {
+                count = super.countByOwner(owner);
+            }
+            try {
+                Thread.sleep(20L);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return count;
+        }
+
+        @Override
+        public synchronized void insert(final TagType tagType) {
+            super.insert(tagType);
+        }
+    }
+
+    /**
+     * Runs one request per thread, all started together.
+     *
+     * @param requests the number of requests
+     * @param request the request of the thread of the given number; returns the response
+     * @return the responses by thread number
+     */
+    static Response[] runTogether(final int requests, final java.util.function.IntFunction<Response> request) throws InterruptedException {
+        final Response[] responses = new Response[requests];
+        final java.util.concurrent.CyclicBarrier start = new java.util.concurrent.CyclicBarrier(requests);
+        final List<Throwable> failures = new java.util.concurrent.CopyOnWriteArrayList<>();
+        final List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i < requests; i++) {
+            final int number = i;
+            final Thread thread = new Thread(() -> {
+                try {
+                    start.await();
+                    responses[number] = request.apply(number);
+                } catch (final Throwable t) {
+                    failures.add(t);
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        }
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+        if (!failures.isEmpty()) {
+            throw new AssertionError("a request failed: " + failures.get(0), failures.get(0));
+        }
+        return responses;
+    }
+
     static class FakeTagTypeHelper extends TagTypeHelper {
         private final Env env;
         final List<TagChange> changes = new ArrayList<>();
