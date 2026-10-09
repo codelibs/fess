@@ -227,6 +227,18 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_post_bodyThatIsNotAnObject_returnsInvalidRequest() throws Exception {
+        env.user("alice");
+        for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {
+            final Response res = call(request("POST").json(json), null);
+            Assertions.assertEquals(400, res.status, json);
+            Assertions.assertEquals("invalid_request", res.errorCode(), json);
+            Assertions.assertEquals("request body must be a JSON object", res.errorMessage(), json);
+        }
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
     public void test_postByName_autoCreateRespectsMaxTags() throws Exception {
         env.user("alice");
         env.fessConfig.maxTags = 1;

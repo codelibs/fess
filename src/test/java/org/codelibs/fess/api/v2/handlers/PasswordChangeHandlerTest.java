@@ -178,6 +178,23 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_rejectsBodyThatIsNotAnObject() throws Exception {
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {
+                final CapturingResponse res = new CapturingResponse();
+                new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(json), res);
+                assertEquals(400, res.status, json);
+                assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+                assertTrue(res.body().contains("\"message\":\"request body must be a JSON object\""), res.body());
+            }
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
+    @Test
     public void passwordChange_rejectsWhenCurrentPasswordWrong() throws Exception {
         // The handler must respond 401/auth_required when current_password does not match —
         // matching the LoginHandler contract for wrong credentials.

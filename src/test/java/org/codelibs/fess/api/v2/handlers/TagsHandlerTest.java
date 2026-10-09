@@ -120,6 +120,35 @@ public class TagsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_bodyThatIsNotAnObject_returnsInvalidRequest() throws Exception {
+        // The literal null used to reach the handler as a null map and fail with a NullPointerException (HTTP 500).
+        env.user("alice");
+        final TagType tag = env.put("foo", "alice", false);
+        final String[][] requests = { { "POST", null }, { "PUT", tag.getId() } };
+        for (final String[] r : requests) {
+            for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {
+                final Response res = call(request(r[0]).json(json), r[1]);
+                Assertions.assertEquals(400, res.status, r[0] + " " + json);
+                Assertions.assertEquals("invalid_request", res.errorCode(), r[0] + " " + json);
+                Assertions.assertEquals("request body must be a JSON object", res.errorMessage(), r[0] + " " + json);
+            }
+        }
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
+    public void test_bodyThatIsNotUtf8_returnsInvalidRequest() throws Exception {
+        env.user("alice");
+        final byte[] body = { '{', '"', 'n', 'a', 'm', 'e', '"', ':', '"', 'r', (byte) 0xFF, (byte) 0xFE, '"', '}' };
+        final Response res = call(request("POST").jsonBytes(body), null);
+        Assertions.assertEquals(400, res.status);
+        Assertions.assertEquals("invalid_request", res.errorCode());
+        Assertions.assertEquals("request body must be valid UTF-8", res.errorMessage());
+        Assertions.assertEquals(List.of(), env.helper.changes);
+        Assertions.assertTrue(env.service.store.isEmpty());
+    }
+
+    @Test
     public void test_accessTokenWithoutLogin_isRefused() throws Exception {
         // An access token gives a request the token's roles, never a user; the tags need a user.
         final Response res = call(request("POST").header("Authorization", "Bearer token").json("{\"name\":\"bar\"}"), null);

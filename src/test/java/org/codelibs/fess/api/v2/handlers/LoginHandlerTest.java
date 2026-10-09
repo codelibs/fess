@@ -79,6 +79,19 @@ public class LoginHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_bodyThatIsNotAnObjectReturnsInvalidRequest() throws Exception {
+        // The literal null used to reach the handler as a null map and fail with a NullPointerException (HTTP 500),
+        // even for a caller that is not logged in.
+        for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {
+            final CapturingResponse res = new CapturingResponse();
+            new LoginHandler(new LoginRateLimiter()).handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody(json), res);
+            assertEquals(400, res.status, json);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("\"message\":\"request body must be a JSON object\""), res.body());
+        }
+    }
+
+    @Test
     public void test_rateLimitedReturns429() throws Exception {
         final LoginRateLimiter rl = new LoginRateLimiter();
         // Force a lock-out for the IP bucket so the next allow() call denies regardless of

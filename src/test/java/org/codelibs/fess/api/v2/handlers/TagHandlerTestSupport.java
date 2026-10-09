@@ -421,6 +421,12 @@ final class TagHandlerTestSupport {
             return this;
         }
 
+        StubRequest jsonBytes(final byte[] bytes) {
+            contentType = "application/json";
+            body = bytes;
+            return this;
+        }
+
         HttpServletRequest proxy() {
             final ByteArrayInputStream in = new ByteArrayInputStream(body);
             final ServletInputStream stream = new ServletInputStream() {

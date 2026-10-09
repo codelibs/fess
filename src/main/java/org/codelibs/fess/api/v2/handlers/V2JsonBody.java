@@ -16,6 +16,9 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Locale;
@@ -27,6 +30,7 @@ import tools.jackson.core.json.JsonFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +39,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * Reads a JSON-encoded request body into a Map and returns it.
  *
  * <p>Rejects payloads larger than {@code maxBytes}, content types other than
- * {@code application/json}, and malformed JSON. The empty body is treated as
- * an empty map so callers do not need to null-check before lookups.</p>
+ * {@code application/json}, bodies that are not valid UTF-8, and malformed JSON, including JSON
+ * whose top-level value is not an object (an array, a string, a number, a boolean or
+ * {@code null}). The empty body is treated as an empty map, and a returned map is never
+ * {@code null}, so callers do not need to null-check before lookups.</p>
  */
 public class V2JsonBody {
 
@@ -57,6 +63,8 @@ public class V2JsonBody {
 
     private static final TypeReference<Map<String, Object>> TYPE = new TypeReference<>() {
     };
+
+    private static final String NOT_AN_OBJECT = "request body must be a JSON object";
 
     /** UTF-8 BOM byte sequence (EF BB BF). Present in some editor-generated JSON files. */
     private static final byte[] UTF8_BOM = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
@@ -86,6 +94,9 @@ public class V2JsonBody {
      *       with {@link PayloadTooLargeException}.</li>
      *   <li><strong>BOM stripping:</strong> a leading UTF-8 BOM (0xEF 0xBB 0xBF) is silently
      *       removed before parsing so that editor-generated JSON files are accepted.</li>
+     *   <li><strong>Strict UTF-8:</strong> a byte sequence that is not valid UTF-8 is rejected
+     *       rather than replaced with U+FFFD.</li>
+     *   <li><strong>Object only:</strong> a top-level value other than a JSON object is rejected.</li>
      * </ol>
      *
      * @param req the incoming HTTP request
@@ -94,7 +105,7 @@ public class V2JsonBody {
      * @throws UnsupportedMediaTypeException if the Content-Type is absent, not application/json,
      *         or specifies a non-UTF-8 charset
      * @throws PayloadTooLargeException if the body exceeds {@code maxBytes}
-     * @throws MalformedJsonException if the body is not valid JSON
+     * @throws MalformedJsonException if the body is not valid UTF-8, not valid JSON, or not a JSON object
      * @throws IOException if reading the request stream fails
      */
     public Map<String, Object> read(final HttpServletRequest req, final int maxBytes) throws IOException {
@@ -137,11 +148,28 @@ public class V2JsonBody {
             offset = 3;
         }
         final byte[] jsonBytes = offset == 0 ? buf : java.util.Arrays.copyOfRange(buf, offset, buf.length);
+        final String json;
         try {
-            return mapper.readValue(new String(jsonBytes, StandardCharsets.UTF_8), TYPE);
-        } catch (final JacksonException e) {
-            throw new MalformedJsonException(e.getMessage());
+            json = StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(ByteBuffer.wrap(jsonBytes))
+                    .toString();
+        } catch (final CharacterCodingException e) {
+            throw new MalformedJsonException("request body must be valid UTF-8");
         }
+        final Map<String, Object> body;
+        try {
+            body = mapper.readValue(json, TYPE);
+        } catch (final MismatchedInputException e) {
+            throw new MalformedJsonException(NOT_AN_OBJECT);
+        } catch (final JacksonException e) {
+            throw new MalformedJsonException(e.getOriginalMessage());
+        }
+        if (body == null) {
+            throw new MalformedJsonException(NOT_AN_OBJECT);
+        }
+        return body;
     }
 
     /**
