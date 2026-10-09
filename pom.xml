@@ -667,6 +667,7 @@
 							<type>files</type>
 							<paths>
 								<path>${project.basedir}/LICENSE</path>
+								<path>${project.basedir}/NOTICE</path>
 								<path>${project.basedir}/README.md</path>
 							</paths>
 							<dst>${packaging.fess.home.dir}</dst>
@@ -946,6 +947,7 @@
 									<location>.</location>
 									<includes>
 										<include>LICENSE</include>
+										<include>NOTICE</include>
 										<include>README.md</include>
 									</includes>
 								</source>
