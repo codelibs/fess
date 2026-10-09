@@ -15,8 +15,11 @@
  */
 package org.codelibs.fess.query.parser;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.List;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -25,12 +28,50 @@ import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
+import org.codelibs.fess.exception.QueryParseException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
 public class QueryParserTest extends UnitFessTestCase {
+
+    @Test
+    public void test_regexThatCompiles_isARegexpQuery() {
+        final QueryParser queryParser = new QueryParser();
+        queryParser.init();
+        final Query query = queryParser.parse("title:/fe.*s/");
+        assertEquals(RegexpQuery.class, query.getClass());
+        assertEquals("title", ((RegexpQuery) query).getField());
+    }
+
+    @Test
+    public void test_regexThatDoesNotCompile_isAQueryParseException() {
+        // The Lucene parser compiles a /regular expression/ while it reads it, and a pattern that
+        // does not compile used to leave as an IllegalArgumentException, so a caller that refuses a
+        // query it cannot parse (QueryHelper) did not recognize it and the request failed with a 500.
+        final QueryParser queryParser = new QueryParser();
+        queryParser.init();
+        for (final String query : new String[] { "/[a/", "/(a/", "/a{/", "/a{2,1}/", "/a)/", "title:/[/", "fess OR /[a-/" }) {
+            final QueryParseException e = assertThrows(QueryParseException.class, () -> queryParser.parse(query), query);
+            assertTrue(e.getCause() instanceof ParseException, query);
+            assertTrue(e.getCause().getMessage().contains("Cannot parse '" + query + "'"), e.getCause().getMessage());
+            assertTrue(e.getCause().getCause() instanceof IllegalArgumentException, query);
+        }
+    }
+
+    @Test
+    public void test_aFailureOfTheParserSetupIsNotAQueryParseException() {
+        final QueryParser queryParser = new QueryParser() {
+            @Override
+            protected org.apache.lucene.queryparser.classic.QueryParser createQueryParser() {
+                throw new IllegalArgumentException("broken setup");
+            }
+        };
+        queryParser.init();
+        assertThrows(IllegalArgumentException.class, () -> queryParser.parse("fess"));
+    }
 
     @Test
     public void test_LuceneQueryParser() {

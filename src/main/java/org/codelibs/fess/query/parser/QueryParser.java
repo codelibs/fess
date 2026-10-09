@@ -264,10 +264,17 @@ public class QueryParser {
      */
     protected FilterChain createDefaultFilterChain() {
         return query -> {
+            final org.apache.lucene.queryparser.classic.QueryParser parser = createQueryParser();
             try {
-                return createQueryParser().parse(query);
+                return parser.parse(query);
             } catch (final ParseException e) {
                 throw new QueryParseException(e);
+            } catch (final IllegalArgumentException e) {
+                // The Lucene parser compiles a /regular expression/ while it reads it, and one that
+                // does not compile comes out as an IllegalArgumentException, not as a ParseException.
+                final ParseException cause = new ParseException("Cannot parse '" + query + "': " + e.getMessage());
+                cause.initCause(e);
+                throw new QueryParseException(cause);
             }
         };
     }

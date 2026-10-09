@@ -976,6 +976,30 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_buildBaseQuery_regexThatDoesNotCompile() {
+        // the same exception as for any other query the parser refuses
+        for (final String query : new String[] { "/[a/", "/(a/", "title:/[/" }) {
+            try {
+                queryHelper.buildBaseQuery(new QueryContext(query, true), ctx -> {});
+                fail(query);
+            } catch (InvalidQueryException e) {
+                assertTrue(e.getMessage().contains("Invalid query"), e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void test_buildHighlightQuery_regexThatDoesNotCompile() {
+        setQueryType("bool");
+        try {
+            queryHelper.buildHighlightQuery("/[a/");
+            fail();
+        } catch (InvalidQueryException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void test_build_invalidQuery() {
         try {
             queryHelper.build(SearchRequestType.SEARCH, "invalid:query[", ctx -> {
