@@ -439,4 +439,24 @@ public class TagsHandlerTest extends UnitFessTestCase {
         }
         Assertions.assertNotNull(env.service.store.get(hidden.getId()));
     }
+
+    @Test
+    public void test_searchEngineOutOfReach_returns503() throws Exception {
+        env.user("alice");
+        final Response res = new Response();
+        new StubHandler() {
+            @Override
+            protected TagTypeService getTagTypeService() {
+                return new TagHandlerTestSupport.FakeTagTypeService() {
+                    @Override
+                    public List<TagType> getTagTypeListByOwner(final String owner) {
+                        throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+                    }
+                };
+            }
+        }.handle(request("GET").proxy(), res.proxy(), null);
+        Assertions.assertEquals(503, res.status, res.body());
+        Assertions.assertEquals("service_unavailable", res.errorCode());
+        Assertions.assertEquals("5", res.headers.get("Retry-After"));
+    }
 }

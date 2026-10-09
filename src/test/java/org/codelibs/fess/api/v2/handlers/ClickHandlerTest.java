@@ -638,6 +638,33 @@ public class ClickHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_searchEngineOutOfReach_returns503() throws Exception {
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        ComponentUtil.register(new org.codelibs.fess.helper.SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+            }
+        }, "searchHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\"}"), res);
+            assertEquals(503, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+            assertEquals("5", res.getHeader("Retry-After"));
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
     /**
      * Minimal {@link FessConfig} stub that enables the search-log feature and supplies the
      * index-field names the click path accesses. Everything else delegates to {@code SimpleImpl}.

@@ -86,6 +86,23 @@ public class SuggestWordsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_suggestWords_searchEngineOutOfReach_returns503() throws Exception {
+        org.codelibs.fess.util.ComponentUtil.register(new org.codelibs.fess.helper.SuggestHelper() {
+            @Override
+            public org.codelibs.fess.suggest.Suggester suggester() {
+                throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+            }
+        }, "suggestHelper");
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "foo" });
+        new SuggestWordsHandler().handle(new StubRequest("/api/v2/suggest-words", params), res);
+        assertEquals(503, res.status);
+        assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+        assertEquals("5", res.getHeader("Retry-After"));
+    }
+
+    @Test
     public void test_suggestWords_defaultNumOnSuccess() throws Exception {
         final SuggestWordsHandler handler = new SuggestWordsHandler();
         final CapturingResponse res = new CapturingResponse();

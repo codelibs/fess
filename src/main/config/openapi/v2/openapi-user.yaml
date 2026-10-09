@@ -265,6 +265,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /documents/all:
     get:
@@ -359,6 +360,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /documents/export:
     get:
@@ -456,6 +458,7 @@ paths:
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /suggest-words:
     get:
@@ -500,6 +503,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /labels:
     get:
@@ -708,6 +712,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorEnvelope' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /auth/logout:
     post:
@@ -773,6 +778,7 @@ paths:
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /click:
     post:
@@ -806,6 +812,7 @@ paths:
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /chat:
     post:
@@ -1049,6 +1056,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /documents/{docId}/favorite:
     parameters:
@@ -1113,6 +1121,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
     post:
       tags: [tag]
       summary: Create a tag
@@ -1148,6 +1157,7 @@ paths:
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /tags/{tagId}:
     parameters:
@@ -1237,6 +1247,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
     post:
       tags: [tag]
       summary: Put a tag of the caller on a document
@@ -1273,6 +1284,7 @@ paths:
         '413': { $ref: '#/components/responses/PayloadTooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
   /documents/{docId}/tags/{tagId}:
     parameters:
@@ -1332,6 +1344,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '500': { $ref: '#/components/responses/InternalServerError' }
+        '503': { $ref: '#/components/responses/SearchEngineUnavailable' }
 
 components:
   parameters:
@@ -1429,6 +1442,21 @@ components:
           schema: { $ref: '#/components/schemas/ErrorEnvelope' }
     InternalServerError:
       description: Unhandled server-side error.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    SearchEngineUnavailable:
+      description: |-
+        The search engine could not take the request: it is not reachable, or
+        it refused the request for lack of capacity (it answered `429` or
+        `503`). That is not a fault of the request: `error.code` is
+        `service_unavailable`. The `Retry-After` header carries the number of
+        seconds after which the same request is worth repeating.
+      headers:
+        Retry-After:
+          description: Seconds the caller should wait before retrying.
+          required: true
+          schema: { type: integer, minimum: 0, example: 5 }
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ErrorEnvelope' }

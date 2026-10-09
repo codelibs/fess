@@ -1228,6 +1228,35 @@ public class LoginHandlerTest extends UnitFessTestCase {
                 "a request refused by a rate-limit gate must leave no activity record: " + audit);
     }
 
+    @Test
+    public void test_searchEngineOutOfReach_returns503AndKeepsTheUserSlot() throws Exception {
+        // The credentials are looked up in the search engine; when it cannot be reached nothing was
+        // checked, so the caller is told to retry and no attempt is counted against the user.
+        ComponentUtil.setFessLoginAssist(new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.empty();
+            }
+
+            @Override
+            public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+                throw new IllegalStateException("Failed to select user",
+                        new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused")));
+            }
+        });
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        for (int i = 0; i < 8; i++) {
+            final CapturingResponse res = new CapturingResponse();
+            new LoginHandler(rl)
+                    .handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}"), res);
+            assertEquals(503, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+            assertEquals("5", res.getHeader("Retry-After"));
+        }
+    }
+
     /**
      * Builds an {@link ActivityHelper} that renders real LTSV records into {@code sink} instead
      * of writing to the audit logger. {@code time}/{@code ip} are stripped so the expectation is

@@ -995,6 +995,32 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void passwordChange_searchEngineOutOfReach_returns503() throws Exception {
+        final StubFessLoginAssist stub = new StubFessLoginAssist("alice", "secret-current") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalEntity<FessUser> findLoginUser(final LoginCredential credential) {
+                throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+            }
+        };
+        ComponentUtil.register(stub, "fessLoginAssist");
+        ComponentUtil.setFessLoginAssist(stub);
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(
+                    new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"),
+                    res);
+            assertEquals(503, res.status);
+            assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.setFessLoginAssist(new FessLoginAssist());
+        }
+    }
+
     /**
      * Stub FessLoginAssist that returns a populated entity only when the supplied
      * LocalUserCredential carries {@code expectedPw}. Used by the password-change

@@ -389,4 +389,19 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
         Assertions.assertEquals(list(URL), list(env.service.store.get(shared.getId()).getPaths()));
         Assertions.assertEquals(List.of(), env.helper.changes);
     }
+
+    @Test
+    public void test_searchEngineOutOfReach_returns503() throws Exception {
+        env.user("alice");
+        final Response res = new Response();
+        new StubHandler() {
+            @Override
+            protected Map<String, Object> getDocument(final String docId, final String[] fields) {
+                throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+            }
+        }.handle(request("POST").json("{\"name\":\"foo\"}").proxy(), res.proxy(), DOC_ID, null);
+        Assertions.assertEquals(503, res.status, res.body());
+        Assertions.assertEquals("service_unavailable", res.errorCode());
+        Assertions.assertEquals("5", res.headers.get("Retry-After"));
+    }
 }

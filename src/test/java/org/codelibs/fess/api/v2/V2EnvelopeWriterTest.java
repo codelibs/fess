@@ -291,6 +291,82 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         assertFalse(body.contains("s3cr3tCredentialDetail"), body);
     }
 
+    @Test
+    public void test_writeInternalError_answersASearchEngineThatIsOutOfReachWith503() throws Exception {
+        // Handlers funnel every unexpected failure here. A search engine that cannot be reached or
+        // that is out of capacity used to leave as a 500 with a stack trace per request.
+        final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
+        final Throwable[] causes = {
+                // the failure of a request through the engine client when the connection is refused
+                new org.codelibs.curl.CurlException("Failed to access to http://10.0.0.1:9200/",
+                        new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"))),
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.UnknownHostException("search-host")),
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.NoRouteToHostException("No route to host")),
+                // the client has marked every node unavailable
+                new org.codelibs.fesen.client.node.NodeUnavailableException("All nodes are unavailable: [10.0.0.1:9200]"),
+                // the engine answered that it has no capacity
+                new org.codelibs.fesen.opensearch.OpenSearchStatusException("no_shard_available",
+                        org.codelibs.fesen.opensearch.core.rest.RestStatus.SERVICE_UNAVAILABLE, null),
+                new org.codelibs.fesen.opensearch.OpenSearchStatusException("rejected",
+                        org.codelibs.fesen.opensearch.core.rest.RestStatus.TOO_MANY_REQUESTS, null),
+                new org.codelibs.fess.exception.SearchEngineUnavailableException("The search engine is out of capacity.",
+                        new RuntimeException("circuit_breaking_exception")),
+                // below the wrappers of the data access layer
+                new IllegalStateException("Failed to select",
+                        new RuntimeException(new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException()))) };
+        for (final Throwable cause : causes) {
+            final CapturingResponse res = new CapturingResponse();
+            new V2EnvelopeWriter().writeInternalError(res, cause, noopLogger, "/api/v2/tags GET");
+            final String body = res.body();
+            assertEquals(body, 503, res.status);
+            assertEquals("5", res.headers.get("Retry-After"));
+            assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+            assertTrue(body.contains("\"status\":9"), body);
+            assertFalse(body.contains("internal error"), body);
+            assertFalse(body.contains("10.0.0.1"), "the engine address stays out of the response: " + body);
+            assertFalse(body.contains("circuit_breaking_exception"), body);
+        }
+    }
+
+    @Test
+    public void test_writeInternalError_keepsOtherFailuresAs500() throws Exception {
+        final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
+        final Throwable[] causes = {
+                // a refused connection of another client says nothing about the search engine
+                new java.net.ConnectException("Connection refused"),
+                new RuntimeException("llm", new java.net.ConnectException("Connection refused")),
+                // the engine answered, and the answer is about the request
+                new org.codelibs.fesen.opensearch.OpenSearchStatusException("bad",
+                        org.codelibs.fesen.opensearch.core.rest.RestStatus.BAD_REQUEST, null),
+                new org.codelibs.fesen.opensearch.OpenSearchStatusException("x",
+                        org.codelibs.fesen.opensearch.core.rest.RestStatus.INTERNAL_SERVER_ERROR, null),
+                new org.codelibs.curl.CurlException("Failed to read"), new IllegalStateException("boom") };
+        for (final Throwable cause : causes) {
+            final CapturingResponse res = new CapturingResponse();
+            new V2EnvelopeWriter().writeInternalError(res, cause, noopLogger, "/api/v2/tags GET");
+            assertEquals(res.body(), 500, res.status);
+            assertFalse(res.headers.containsKey("Retry-After"), res.body());
+            assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+        }
+    }
+
+    @Test
+    public void test_writeInternalError_searchEngineUnavailable_isNoopWhenCommitted() throws Exception {
+        final CapturingResponse res = new CapturingResponse() {
+            @Override
+            public boolean isCommitted() {
+                return true;
+            }
+        };
+        final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
+        new V2EnvelopeWriter().writeInternalError(res,
+                new org.codelibs.fesen.client.node.NodeUnavailableException("All nodes are unavailable"), noopLogger,
+                "/api/v2/documents/export");
+        assertEquals("", res.body());
+        assertEquals(200, res.status);
+        assertFalse(res.headers.containsKey("Retry-After"));
+    }
+
     /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
     private static class CapturingResponse implements HttpServletResponse {
         StringWriter sw = new StringWriter();

@@ -16,14 +16,22 @@
 package org.codelibs.fess.api.v2;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
+import org.codelibs.curl.CurlException;
+import org.codelibs.fesen.client.node.NodeUnavailableException;
+import org.codelibs.fesen.opensearch.OpenSearchException;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.codelibs.fess.exception.SearchEngineUnavailableException;
 import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -59,6 +67,12 @@ public class V2EnvelopeWriter {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private static final String CONTENT_TYPE = "application/json; charset=UTF-8";
+
+    /** Seconds after which a request the search engine could not take is worth repeating. */
+    private static final String RETRY_AFTER_SECONDS = "5";
+
+    /** How many levels of a cause chain are searched for the failure of the search engine. */
+    private static final int MAX_CAUSE_DEPTH = 10;
 
     /**
      * Creates the v2 envelope writer. Registered as the DI component
@@ -241,7 +255,10 @@ public class V2EnvelopeWriter {
      * caller's: the request presented an access token that is not registered or has expired.
      * Reporting that as a 500 both misleads the caller and writes a stack trace per request;
      * classifying it here rather than in each handler keeps a handler added later from
-     * reintroducing it.</p>
+     * reintroducing it. The same goes for a search engine that cannot be reached or refuses the
+     * request for lack of capacity: that is neither the caller's fault nor an unexpected failure of
+     * ours, so it is answered {@code 503 service_unavailable} with {@code Retry-After}, as
+     * {@code /api/v2/search} and {@code /api/v2/health} do.</p>
      *
      * @param res the HTTP response to write to
      * @param cause the cause to log (may be null; only logged, never written to wire)
@@ -261,6 +278,13 @@ public class V2EnvelopeWriter {
             writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid access token");
             return;
         }
+        if (isSearchEngineUnavailable(cause)) {
+            // One line per request: the cause is a refused connection or an engine that said it is
+            // busy, and a stack trace per request adds nothing to that.
+            logger.warn("v2 search engine unavailable: {}: {}", contextTag, cause);
+            writeSearchEngineUnavailable(res);
+            return;
+        }
         if (cause != null) {
             logger.warn("v2 internal error: {}", contextTag, cause);
         } else {
@@ -270,5 +294,48 @@ public class V2EnvelopeWriter {
             return;
         }
         writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+    }
+
+    /**
+     * Writes the {@code 503 service_unavailable} envelope for a request the search engine could not
+     * take, with a {@code Retry-After} header. The message says nothing about the request.
+     *
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope fails
+     */
+    public void writeSearchEngineUnavailable(final HttpServletResponse res) throws IOException {
+        if (res.isCommitted()) {
+            return;
+        }
+        res.setHeader("Retry-After", RETRY_AFTER_SECONDS);
+        writeError(res, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine is temporarily unable to process the request");
+    }
+
+    /**
+     * Tells whether a failure is the search engine being out of reach or out of capacity: all its
+     * nodes are unavailable, a request to it could not connect, or it answered 429 or 503.
+     *
+     * <p>A refused connection counts only below a {@link CurlException}, the failure of a request
+     * through the engine client; the same {@link ConnectException} from another client, such as the
+     * one of an LLM provider, says nothing about the search engine.</p>
+     */
+    private static boolean isSearchEngineUnavailable(final Throwable cause) {
+        boolean inEngineRequest = false;
+        Throwable t = cause;
+        for (int depth = 0; t != null && depth < MAX_CAUSE_DEPTH; depth++, t = t.getCause()) {
+            if (t instanceof SearchEngineUnavailableException || t instanceof NodeUnavailableException) {
+                return true;
+            }
+            if (t instanceof final OpenSearchException e && SearchEngineClient.isCapacityRejection(e)) {
+                return true;
+            }
+            if (t instanceof CurlException) {
+                inEngineRequest = true;
+            } else if (inEngineRequest
+                    && (t instanceof ConnectException || t instanceof UnknownHostException || t instanceof NoRouteToHostException)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

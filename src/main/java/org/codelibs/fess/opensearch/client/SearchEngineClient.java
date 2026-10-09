@@ -2327,7 +2327,7 @@ public class SearchEngineClient implements Client {
      * @param cause the failure of a request to the search engine
      * @return {@code true} for an HTTP 429 or 503 answer; {@code false} for anything else, including an answer without a known status
      */
-    protected static boolean isCapacityRejection(final OpenSearchException cause) {
+    public static boolean isCapacityRejection(final OpenSearchException cause) {
         final RestStatus status = cause.status();
         return status == RestStatus.TOO_MANY_REQUESTS || status == RestStatus.SERVICE_UNAVAILABLE;
     }
