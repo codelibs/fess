@@ -131,6 +131,10 @@ public class TagTypeService extends FessAppService {
      * {@code user.tag.max.paths} URLs each. Read a tag type with {@link #getTagType(String)}
      * before passing it to {@link #update(TagType)}, or its paths are cleared.</p>
      *
+     * <p>The list is not cut at {@code user.tag.max.tags}: an owner can have more tags than that, when the limit was
+     * lowered later, an administrator created tags, or requests on two nodes raced. A tag left out of the list can
+     * neither be seen nor deleted by its owner, so the list holds as many tags as the result window allows.</p>
+     *
      * @param owner The owner of the tag types.
      * @return A list of tag types without their paths.
      */
@@ -140,8 +144,17 @@ public class TagTypeService extends FessAppService {
             specifyColumnsWithoutPaths(cb);
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.paging(fessConfig.getUserTagMaxTagsAsInteger(), 1);
+            cb.paging(getOwnerListSize(), 1);
         });
+    }
+
+    /**
+     * Returns how many tag types of one owner are read at most: the result window of the search engine.
+     *
+     * @return the number of tag types
+     */
+    protected int getOwnerListSize() {
+        return Math.max(1, fessConfig.getIndexerMaxResultWindowSizeAsInteger());
     }
 
     /**
@@ -152,12 +165,12 @@ public class TagTypeService extends FessAppService {
      * @return The number of paths keyed by tag name; a tag without paths may be missing.
      */
     public Map<String, Long> getPathCountMapByOwner(final String owner) {
-        final int maxTags = fessConfig.getUserTagMaxTagsAsInteger();
+        final int size = getOwnerListSize();
         final EsPagingResultBean<TagType> result = (EsPagingResultBean<TagType>) tagTypeBhv.selectPage(cb -> {
             cb.fetchFirst(0);
             cb.query().setOwner_Term(owner);
             cb.aggregation()
-                    .setName_Terms(PATH_COUNT_AGGREGATION, op -> op.size(maxTags), ca -> ca.setPaths_Count(PATH_COUNT_AGGREGATION, null));
+                    .setName_Terms(PATH_COUNT_AGGREGATION, op -> op.size(size), ca -> ca.setPaths_Count(PATH_COUNT_AGGREGATION, null));
         });
         final Map<String, Long> pathCountMap = new HashMap<>();
         final Aggregations aggregations = result.getAggregations();

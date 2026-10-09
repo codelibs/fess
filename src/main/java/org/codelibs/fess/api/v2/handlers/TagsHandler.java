@@ -112,7 +112,7 @@ public class TagsHandler extends AbstractTagHandler {
         final Boolean shared = toShared(body);
         final TagType tagType = newTagType(name, userId, Boolean.TRUE.equals(shared), new String[0]);
         try {
-            getTagTypeService().insert(tagType);
+            insertTagType(tagType);
         } catch (final TagTypeConflictException e) {
             throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
         }
