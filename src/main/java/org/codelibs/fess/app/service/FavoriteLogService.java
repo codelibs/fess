@@ -28,6 +28,7 @@ import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
@@ -89,7 +90,7 @@ public class FavoriteLogService {
      * @return what happened: the URL was added, the user already had it, or the user was not found
      */
     public FavoriteResult addUrl(final String userCode, final BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
-        return userInfoBhv.selectByPK(userCode).map(userInfo -> {
+        return findUserInfo(userCode).map(userInfo -> {
             final FavoriteLog favoriteLog = new FavoriteLog();
             favoriteLogLambda.accept(userInfo, favoriteLog);
             if (favoriteLogBhv.selectCount(cb -> {
@@ -105,6 +106,26 @@ public class FavoriteLogService {
             }
             return FavoriteResult.ADDED;
         }).orElse(FavoriteResult.NO_SUCH_USER);
+    }
+
+    /**
+     * Looks up a user by code.
+     * <p>
+     * {@code selectByPK} is a search, and the {@code user_info} of a user is written asynchronously by
+     * {@code SearchLogHelper} on that user's first search, so the entry is not searchable until the index
+     * refreshes. The index is refreshed once and the lookup repeated before the user is reported as unknown.
+     * </p>
+     *
+     * @param userCode the unique code identifying the user
+     * @return the user, or empty if there is no such user
+     */
+    protected OptionalEntity<UserInfo> findUserInfo(final String userCode) {
+        final OptionalEntity<UserInfo> userInfo = userInfoBhv.selectByPK(userCode);
+        if (userInfo.isPresent()) {
+            return userInfo;
+        }
+        userInfoBhv.refresh();
+        return userInfoBhv.selectByPK(userCode);
     }
 
     /**
