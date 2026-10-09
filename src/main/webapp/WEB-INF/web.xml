@@ -63,7 +63,7 @@
 
   <filter>
     <filter-name>lastaPrepareFilter</filter-name>
-    <filter-class>org.lastaflute.web.servlet.filter.LastaPrepareFilter</filter-class>
+    <filter-class>org.codelibs.fess.filter.FessPrepareFilter</filter-class>
   </filter>
 
   <filter>
