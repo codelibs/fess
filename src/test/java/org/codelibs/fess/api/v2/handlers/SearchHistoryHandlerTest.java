@@ -360,6 +360,19 @@ public class SearchHistoryHandlerTest extends UnitFessTestCase {
         assertFalse(res.body().contains("boom"), res.body());
     }
 
+    @Test
+    public void test_searchEngineOutOfReach_returns503() throws Exception {
+        useConfig(true, true, 10);
+        useVirtualHostKey(null);
+        final StubHandler handler = new StubHandler("alice", null,
+                new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused")));
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(new StubRequest("/api/v2/search-history"), res);
+        assertEquals(503, res.status, res.body());
+        assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+        assertEquals("5", res.getHeader("Retry-After"));
+    }
+
     /** Minimal HttpServletResponse stub. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();

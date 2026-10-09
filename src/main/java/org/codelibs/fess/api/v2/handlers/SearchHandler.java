@@ -70,9 +70,6 @@ public class SearchHandler {
 
     private static final Logger logger = LogManager.getLogger(SearchHandler.class);
 
-    /** Seconds after which a search the search engine could not take is worth repeating. */
-    private static final String RETRY_AFTER_SECONDS = "5";
-
     /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
@@ -163,9 +160,7 @@ public class SearchHandler {
         } catch (final SearchEngineUnavailableException e) {
             // Already logged where the search engine refused the search. The request is fine and
             // may succeed shortly, so the caller is told to retry rather than to fix the query.
-            response.setHeader("Retry-After", RETRY_AFTER_SECONDS);
-            ComponentUtil.getV2EnvelopeWriter()
-                    .writeError(response, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine is temporarily unable to process the search");
+            ComponentUtil.getV2EnvelopeWriter().writeSearchEngineUnavailable(response);
         } catch (final Exception e) {
             ComponentUtil.getV2EnvelopeWriter().writeInternalError(response, e, logger, "/api/v2/search");
         }

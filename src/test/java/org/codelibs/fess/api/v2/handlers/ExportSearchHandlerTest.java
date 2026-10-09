@@ -424,6 +424,32 @@ public class ExportSearchHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_export_searchEngineOutOfReach_returns503() throws Exception {
+        configure(new Settings());
+        ComponentUtil.register(new QueryFieldConfig() {
+            @Override
+            public boolean isApiResponseField(final String field) {
+                return true;
+            }
+        }, "queryFieldConfig");
+        ComponentUtil.register(new SearchHelper() {
+            @Override
+            public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+            }
+        }, "searchHelper");
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        final CapturingResponse res = new CapturingResponse();
+        new ExportSearchHandler().handle(new StubRequest(PATH, params), res);
+        assertEquals(res.body(), 503, res.status);
+        assertTrue(res.body(), res.body().contains("\"code\":\"service_unavailable\""));
+        assertEquals("5", res.getHeader("Retry-After"));
+        assertNull(res.getHeader("Content-Disposition"));
+    }
+
+    @Test
     public void test_export_failureAfterTheFirstByte_leavesTheFileWithoutAnEnvelope() throws Exception {
         configure(new Settings());
         ComponentUtil.register(new QueryFieldConfig() {

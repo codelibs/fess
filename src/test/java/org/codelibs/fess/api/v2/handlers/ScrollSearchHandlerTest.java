@@ -282,6 +282,50 @@ public class ScrollSearchHandlerTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * A search engine that cannot be reached is not an unexpected failure of the endpoint: the
+     * caller is told to retry (503 with Retry-After) rather than that the server broke (500).
+     */
+    @Test
+    public void test_scroll_searchEngineOutOfReach_returns503() throws Exception {
+        final FessConfig originalConfig = ComponentUtil.getFessConfig();
+        try {
+            ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public boolean isApiSearchScroll() {
+                    return true;
+                }
+            });
+            ComponentUtil.register(new SearchHelper() {
+                @Override
+                public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,
+                        final OptionalThing<FessUserBean> userBean) {
+                    throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+                }
+            }, "searchHelper");
+            ComponentUtil.register(new QueryFieldConfig() {
+                @Override
+                public boolean isApiResponseField(final String field) {
+                    return true;
+                }
+            }, "queryFieldConfig");
+
+            final CapturingResponse res = new CapturingResponse();
+            final Map<String, String[]> params = new HashMap<>();
+            params.put("q", new String[] { "*" });
+            new ScrollSearchHandler().handle(new StubRequest("/api/v2/documents/all", params), res);
+
+            final String body = res.body();
+            assertEquals(body, 503, res.status);
+            assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+            assertEquals("5", res.getHeader("Retry-After"));
+        } finally {
+            ComponentUtil.setFessConfig(originalConfig);
+        }
+    }
+
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);

@@ -262,8 +262,7 @@ public class PasswordChangeHandler {
         try {
             verified = assist.findLoginUser(new LocalUserCredential(userId, currentPw));
         } catch (final RuntimeException e) {
-            logger.warn("/api/v2/auth/password: findLoginUser failed", e);
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password findLoginUser");
             return;
         }
         if (verified == null || !verified.isPresent()) {
@@ -304,8 +303,7 @@ public class PasswordChangeHandler {
         try {
             ComponentUtil.getComponent(UserService.class).changePassword(userId, newPw);
         } catch (final Exception e) {
-            logger.warn("/api/v2/auth/password: changePassword failed", e);
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/password changePassword");
             return;
         }
         // C-3: successful change resets the per-user bucket so any earlier failed attempts

@@ -280,9 +280,9 @@ public class LoginHandler {
             // Anything else (DI binding failure, transient lookup error, etc.) is a system
             // error and must NOT count against the user bucket — otherwise a misconfigured
             // server would lock real users out. We surface INTERNAL_ERROR with a generic
-            // message; the exception detail goes to the log only.
-            logger.warn("login failed unexpectedly", e);
-            ComponentUtil.getV2EnvelopeWriter().writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            // message; the exception detail goes to the log only. A search engine that is out of
+            // reach is told apart there and answered 503.
+            ComponentUtil.getV2EnvelopeWriter().writeInternalError(res, e, logger, "/api/v2/auth/login");
             return;
         }
 

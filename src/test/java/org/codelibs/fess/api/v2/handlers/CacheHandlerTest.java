@@ -147,6 +147,23 @@ public class CacheHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void cache_searchEngineOutOfReach_returns503() throws Exception {
+        ComponentUtil.register(new org.codelibs.fess.query.QueryFieldConfig(), "queryFieldConfig");
+        ComponentUtil.register(new org.codelibs.fess.helper.SearchHelper() {
+            @Override
+            public org.dbflute.optional.OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> userBean) {
+                throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
+            }
+        }, "searchHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new CacheHandler().handle(new StubRequest("GET", "/api/v2/cache/abc"), res, "abc");
+        org.junit.jupiter.api.Assertions.assertEquals(503, res.status, res.body());
+        assertTrue(res.body().contains("\"code\":\"service_unavailable\""), res.body());
+        org.junit.jupiter.api.Assertions.assertEquals("5", res.getHeader("Retry-After"));
+    }
+
+    @Test
     public void cache_anonymousUser_returns401OrBackendError() throws Exception {
         // M-17 regression: a genuine anonymous caller (no user bean) must NOT see 500 from
         // the auth path — only the configured login-required gate (401) or downstream
