@@ -34,7 +34,6 @@ import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
@@ -63,16 +62,6 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
     /** The scheduled job service for managing scheduler settings. */
     @Resource
     private ScheduledJobService scheduledJobService;
-
-    /**
-     * Index page (not supported for API).
-     *
-     * @return throws UnsupportedOperationException
-     */
-    @Execute
-    public HtmlResponse index() {
-        throw new UnsupportedOperationException("index() is not supported in API. Use the admin UI instead.");
-    }
 
     /**
      * Starts a scheduled job by ID.
