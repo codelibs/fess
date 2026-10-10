@@ -6,7 +6,7 @@ REM
 REM     bin\fess-setup install opensearch
 REM
 REM It also installs the Fess plugins into an OpenSearch you already have, Fess plugins, and
-REM Node.js for the Playwright crawler:
+REM Node.js for the Playwright plugins (crawler and thumbnail):
 REM
 REM     bin\fess-setup install opensearch-plugins --opensearch-home C:\opensearch-3.9.0
 REM     bin\fess-setup install plugin fess-script-groovy

@@ -5,7 +5,7 @@
 #
 #     bin/fess-setup install opensearch
 #
-# It also installs Fess plugins and, for the Playwright crawler, Node.js:
+# It also installs Fess plugins and, for the Playwright plugins (crawler and thumbnail), Node.js:
 #
 #     bin/fess-setup list plugins
 #     bin/fess-setup install plugin fess-script-groovy

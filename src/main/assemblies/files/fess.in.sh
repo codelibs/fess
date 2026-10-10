@@ -157,7 +157,7 @@ if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.dictionary.path=$FESS_DICTIONARY_PATH"
 fi
 
-# Node.js for the Playwright crawler, installed by: bin/fess-setup install nodejs
+# Node.js for the Playwright plugins (crawler and thumbnail), installed by: bin/fess-setup install nodejs
 # This has to be an exported environment variable rather than a -D option: the crawler runs in a
 # child process that inherits the environment but not the parent's system properties.
 if [ "x$PLAYWRIGHT_NODEJS_PATH" = "x" ]; then

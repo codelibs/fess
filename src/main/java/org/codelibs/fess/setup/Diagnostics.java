@@ -194,10 +194,10 @@ public final class Diagnostics {
     }
 
     /**
-     * Reports whether Node.js is installed, which only matters to the Playwright crawler.
+     * Reports whether Node.js is installed, which only matters to the Playwright plugins (the crawler and the thumbnail generator).
      *
      * @param fessHome the Fess installation directory
-     * @param playwrightRequired whether the caller knows a crawl uses the Playwright client
+     * @param playwrightRequired whether the caller knows this installation uses a Playwright plugin
      * @return the check
      * @throws SetupException if the Node.js directory cannot be read
      */
@@ -207,10 +207,12 @@ public final class Diagnostics {
         if (found != null) {
             return new Check(Status.OK, "Node.js", found);
         }
-        // Whether a crawl actually uses the Playwright client lives in the engine, not on disk,
-        // so this does not claim to know: it reports the fact and says who needs it.
-        // --playwright turns that into a failure for an installation that does use it.
-        final String detail = "not installed; only the Playwright crawler needs it (install with: fess-setup install nodejs)";
+        // Whether a crawl actually uses the Playwright client lives in the engine, and a thumbnail
+        // plugin is not looked for here, so this does not claim to know: it reports the fact and
+        // says who needs it. --playwright turns that into a failure for an installation that uses
+        // either.
+        final String detail =
+                "not installed; only the Playwright plugins (crawler and thumbnail) need it (install with: fess-setup install nodejs)";
         return new Check(playwrightRequired ? Status.FAIL : Status.OK, "Node.js", detail);
     }
 

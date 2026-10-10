@@ -73,7 +73,8 @@ public final class FessSetup {
                   running its bin/opensearch-plugin four times by hand.
 
               install nodejs [--dest <dir>] [--version <version>]
-                  Download Node.js, which the Playwright crawler needs.
+                  Download Node.js, which the Playwright plugins (the crawler and the
+                  thumbnail generator) need.
 
               install plugin <name>[:<version>]... [--version <version>] [--repository <url>]
                   Install Fess plugins, for example fess-script-groovy or fess-ds-git.
