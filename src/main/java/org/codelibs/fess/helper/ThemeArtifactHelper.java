@@ -25,7 +25,10 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -248,6 +251,172 @@ public class ThemeArtifactHelper {
             }
         }
         return list;
+    }
+
+    /**
+     * Returns the distinct theme names of a catalogue in ascending order.
+     *
+     * <p>Takes the artifacts rather than fetching them: {@link #getAvailableArtifacts()} does not
+     * keep a failed repository in its cache, so a caller that needs the names and the versions of
+     * one of them reads the catalogue once and derives both, instead of reading it twice.</p>
+     *
+     * @param artifacts the catalogue, as returned by {@link #getAvailableArtifacts()}
+     * @return the theme names without duplicates, never null
+     */
+    public static List<String> themeNames(final List<ThemeArtifact> artifacts) {
+        final Set<String> names = new TreeSet<>();
+        for (final ThemeArtifact artifact : artifacts) {
+            names.add(artifact.getName());
+        }
+        return new ArrayList<>(names);
+    }
+
+    /**
+     * Returns the versions a catalogue publishes for one theme, newest first.
+     *
+     * <p>A version published by more than one repository is listed once. A version that is not
+     * a {@link ThemeManifest#SEMVER_PATTERN} version is left out: {@link #install} refuses it
+     * anyway, and {@link #compareVersions} cannot order it.</p>
+     *
+     * @param artifacts the catalogue, as returned by {@link #getAvailableArtifacts()}
+     * @param name the theme name
+     * @return the versions of that theme, newest first; empty when the catalogue has none
+     */
+    public static List<String> versionsOf(final List<ThemeArtifact> artifacts, final String name) {
+        final Set<String> distinct = new LinkedHashSet<>();
+        for (final ThemeArtifact artifact : artifacts) {
+            if (artifact.getName().equals(name) && VERSION_PATTERN.matcher(artifact.getVersion()).matches()) {
+                distinct.add(artifact.getVersion());
+            }
+        }
+        final List<String> versions = new ArrayList<>(distinct);
+        // Two spellings can have equal precedence ("01.0.0" and "1.0.0"); the raw string
+        // breaks the tie so the order does not depend on the repository's.
+        versions.sort((a, b) -> {
+            final int byPrecedence = compareVersions(b, a);
+            return byPrecedence != 0 ? byPrecedence : a.compareTo(b);
+        });
+        return versions;
+    }
+
+    /**
+     * Picks the version to preselect from a list ordered newest first: the latest stable
+     * version, or when there is none, the latest prerelease.
+     *
+     * <p>A prerelease never wins over a stable version here, however new it is: the install
+     * screen preselects what an operator should take unless they say otherwise.</p>
+     *
+     * @param newestFirst the versions as returned by {@link #versionsOf}
+     * @return the version to preselect, or null when the list is null or empty
+     */
+    public static String pickDefaultVersion(final List<String> newestFirst) {
+        if (newestFirst == null || newestFirst.isEmpty()) {
+            return null;
+        }
+        for (final String version : newestFirst) {
+            if (version.indexOf('-') < 0) {
+                return version;
+            }
+        }
+        return newestFirst.get(0);
+    }
+
+    /**
+     * Compares two theme versions by Semantic Versioning 2.0.0 precedence.
+     *
+     * <p>Major, minor and patch compare as numbers, and so do the all-digit identifiers of a
+     * prerelease; neither is parsed into a fixed-width integer, so a huge number cannot
+     * overflow. A release is newer than any prerelease of the same major, minor and patch.
+     * Prerelease identifiers compare left to right: all-digit ones numerically, and below the
+     * alphanumeric ones, which compare as text; when all of them tie, the longer list is newer.
+     * Versions that differ only in a leading zero ("01.0.0" and "1.0.0") have equal
+     * precedence, so this returns 0 for two different strings.</p>
+     *
+     * @param a the first version
+     * @param b the second version
+     * @return a negative number, zero or a positive number as {@code a} is older than, equal to
+     *         or newer than {@code b}
+     * @throws IllegalArgumentException if either is not a {@link ThemeManifest#SEMVER_PATTERN} version
+     */
+    public static int compareVersions(final String a, final String b) {
+        requireVersion(a);
+        requireVersion(b);
+        final int aDash = a.indexOf('-');
+        final int bDash = b.indexOf('-');
+        final String[] aCore = (aDash < 0 ? a : a.substring(0, aDash)).split("\\.");
+        final String[] bCore = (bDash < 0 ? b : b.substring(0, bDash)).split("\\.");
+        for (int i = 0; i < aCore.length; i++) {
+            final int c = compareNumbers(aCore[i], bCore[i]);
+            if (c != 0) {
+                return c;
+            }
+        }
+        if (aDash < 0 || bDash < 0) {
+            return Boolean.compare(aDash < 0, bDash < 0);
+        }
+        return comparePreReleases(a.substring(aDash + 1), b.substring(bDash + 1));
+    }
+
+    private static void requireVersion(final String version) {
+        if (version == null || !VERSION_PATTERN.matcher(version).matches()) {
+            throw new IllegalArgumentException("Not a theme version: " + version);
+        }
+    }
+
+    private static int comparePreReleases(final String a, final String b) {
+        // -1 keeps a trailing empty identifier, which the pattern admits ("1.0.0-rc.")
+        final String[] aIds = a.split("\\.", -1);
+        final String[] bIds = b.split("\\.", -1);
+        final int common = Math.min(aIds.length, bIds.length);
+        for (int i = 0; i < common; i++) {
+            final int c = comparePreReleaseIdentifiers(aIds[i], bIds[i]);
+            if (c != 0) {
+                return c;
+            }
+        }
+        return Integer.compare(aIds.length, bIds.length);
+    }
+
+    private static int comparePreReleaseIdentifiers(final String a, final String b) {
+        final boolean aNumeric = isNumber(a);
+        final boolean bNumeric = isNumber(b);
+        if (aNumeric && bNumeric) {
+            return compareNumbers(a, b);
+        }
+        if (aNumeric || bNumeric) {
+            return aNumeric ? -1 : 1;
+        }
+        return Integer.signum(a.compareTo(b));
+    }
+
+    private static boolean isNumber(final String s) {
+        if (s.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) < '0' || s.charAt(i) > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Compares two strings of digits as numbers, whatever their length. */
+    private static int compareNumbers(final String a, final String b) {
+        final String x = stripLeadingZeros(a);
+        final String y = stripLeadingZeros(b);
+        if (x.length() != y.length()) {
+            return Integer.compare(x.length(), y.length());
+        }
+        return Integer.signum(x.compareTo(y));
+    }
+
+    private static String stripLeadingZeros(final String digits) {
+        int i = 0;
+        while (i < digits.length() && digits.charAt(i) == '0') {
+            i++;
+        }
+        return digits.substring(i);
     }
 
     /**

@@ -20,7 +20,8 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Form for the theme list page. Carries the selected default theme name when
- * the administrator submits the "set default" dropdown.
+ * the administrator submits the "set default" dropdown, and the theme name picked in
+ * the first step of the install card.
  *
  * <p>Note: {@code crudMode} is intentionally absent. Theme management is not a
  * standard CRUD flow (there is no edit page; upload replaces create), so the
@@ -41,4 +42,14 @@ public class ThemeListForm {
     @Size(max = 64)
     @Pattern(regexp = "^$|^[a-z0-9][a-z0-9_-]{0,63}$")
     public String defaultTheme;
+
+    /**
+     * Name picked in the first step of the install card ({@code ?installName=...}); the page
+     * then offers the versions of that theme. Empty or absent when no theme is picked. A name
+     * the catalogue does not list is not an error: the page renders as if none were picked.
+     * The pattern is the same as {@link #defaultTheme}'s.
+     */
+    @Size(max = 64)
+    @Pattern(regexp = "^$|^[a-z0-9][a-z0-9_-]{0,63}$")
+    public String installName;
 }

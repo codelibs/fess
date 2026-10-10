@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.ThemeArtifactHelper;
+import org.codelibs.fess.helper.ThemeArtifactHelper.ThemeArtifact;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.StaticThemeInstaller;
@@ -39,6 +40,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import jakarta.annotation.Resource;
@@ -96,7 +98,8 @@ public class AdminThemeAction extends FessAdminAction {
     /**
      * Displays the theme management index page.
      *
-     * @param form the list form (carries the pre-populated default-theme value)
+     * @param form the list form (carries the pre-populated default-theme value and, once the
+     *        install card's first step is submitted, the picked theme name)
      * @return HTML response for the index page
      */
     @Execute
@@ -232,7 +235,7 @@ public class AdminThemeAction extends FessAdminAction {
     public HtmlResponse install(final ThemeInstallForm form) {
         // Fallback renders point at asListHtml(...), not a bare asHtml(path_AdminTheme_AdminThemeJsp):
         // this action's target page is the list page itself, and only asListHtml's renderWith
-        // populates themeItems/currentDefault/availableArtifacts (see delete/reload/setdefault below,
+        // populates themeItems/currentDefault/availableThemeNames (see delete/reload/setdefault below,
         // which follow the same rule for the same reason).
         validate(form, messages -> {}, () -> asListHtml(new ThemeListForm()));
         verifyToken(() -> asListHtml(new ThemeListForm()));
@@ -382,8 +385,31 @@ public class AdminThemeAction extends FessAdminAction {
             themeRegistry.getAllThemes().forEach((name, t) -> rows.add(asThemeRow(t, def)));
             RenderDataUtil.register(data, "themeItems", rows);
             RenderDataUtil.register(data, "currentDefault", def);
-            RenderDataUtil.register(data, "availableArtifacts", themeArtifactHelper.getAvailableArtifacts());
+            registerInstallData(data, form.installName);
         }).useForm(ThemeListForm.class, op -> op.setup(f -> f.defaultTheme = currentDefault()));
+    }
+
+    /**
+     * Registers what the install card renders: the theme names of the catalogue and, once one
+     * of them is picked, its versions and the one to preselect.
+     *
+     * <p>The catalogue is read once, because a repository that cannot be read is not cached
+     * and every read would try it again. A picked name the catalogue does not list registers
+     * nothing further, so the page shows the first step only, as if none were picked.
+     * {@code pickedThemeName}, {@code availableVersions} and {@code defaultVersion} are therefore
+     * absent from the render data then, not empty.</p>
+     */
+    private void registerInstallData(final RenderData data, final String pickedName) {
+        final List<ThemeArtifact> artifacts = themeArtifactHelper.getAvailableArtifacts();
+        final List<String> names = ThemeArtifactHelper.themeNames(artifacts);
+        RenderDataUtil.register(data, "availableThemeNames", names);
+        if (pickedName == null || !names.contains(pickedName)) {
+            return;
+        }
+        final List<String> versions = ThemeArtifactHelper.versionsOf(artifacts, pickedName);
+        RenderDataUtil.register(data, "pickedThemeName", pickedName);
+        RenderDataUtil.register(data, "availableVersions", versions);
+        RenderDataUtil.register(data, "defaultVersion", ThemeArtifactHelper.pickDefaultVersion(versions));
     }
 
     private String currentDefault() {

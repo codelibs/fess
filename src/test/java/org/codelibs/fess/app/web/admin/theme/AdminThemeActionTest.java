@@ -579,8 +579,122 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         // (list may be empty in unit environment but the key must be present)
         assertNotNull(htmlData.getDataMap().get("themeItems"), "themeItems must be registered in render data");
         assertTrue(htmlData.getDataMap().containsKey("currentDefault"), "currentDefault must be registered in render data");
-        // Task 5: the "Available Themes" catalogue is registered by the same asListHtml() call.
-        assertNotNull(htmlData.getDataMap().get("availableArtifacts"), "availableArtifacts must be registered in render data");
+        // The install card's theme names are registered by the same asListHtml() call; the
+        // catalogue is empty here, which is a list, not an absent key.
+        assertNotNull(htmlData.getDataMap().get("availableThemeNames"), "availableThemeNames must be registered in render data");
+        assertTrue(((java.util.List<?>) htmlData.getDataMap().get("availableThemeNames")).isEmpty());
+        // Nothing is picked, so there is no step 2.
+        assertInstallStepTwoAbsent(htmlData);
+    }
+
+    /** The catalogue every install-card test below reads, as two repositories might publish it. */
+    private static org.codelibs.fess.helper.ThemeArtifactHelper catalogueHelper() {
+        return new org.codelibs.fess.helper.ThemeArtifactHelper() {
+            @Override
+            public java.util.List<ThemeArtifact> getAvailableArtifacts() {
+                return java.util.List.of( //
+                        new ThemeArtifact("docuforge", "1.0.0", "https://example.invalid/a/docuforge-1.0.0.zip"), //
+                        new ThemeArtifact("docuforge", "1.1.0-rc1", "https://example.invalid/a/docuforge-1.1.0-rc1.zip"), //
+                        new ThemeArtifact("code-search", "2.0.0", "https://example.invalid/a/code-search-2.0.0.zip"), //
+                        new ThemeArtifact("docuforge", "1.0.0", "https://example.invalid/b/docuforge-1.0.0.zip"));
+            }
+        };
+    }
+
+    private void assertInstallStepTwoAbsent(final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData) {
+        // RenderDataUtil.register skips a null, so "not picked" is an absent key, which the JSP
+        // reads as empty -- these are not registered as empty strings or lists.
+        assertFalse(htmlData.getDataMap().containsKey("pickedThemeName"),
+                "pickedThemeName must not be registered when nothing valid is picked");
+        assertFalse(htmlData.getDataMap().containsKey("availableVersions"));
+        assertFalse(htmlData.getDataMap().containsKey("defaultVersion"));
+    }
+
+    /**
+     * Picking a name that the catalogue lists is what makes the page offer its versions: newest
+     * first, with the newest stable one preselected although a newer prerelease exists.
+     */
+    @Test
+    public void test_index_withAListedInstallNameRegistersItsVersions() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        setThemeArtifactHelper(action, catalogueHelper());
+        final ThemeListForm form = new ThemeListForm();
+        form.installName = "docuforge";
+
+        // ## Act ##
+        final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(action.index(form));
+
+        // ## Assert ##
+        final java.util.Map<String, Object> data = htmlData.getDataMap();
+        assertEquals(java.util.List.of("code-search", "docuforge"), data.get("availableThemeNames"));
+        assertEquals("docuforge", data.get("pickedThemeName"));
+        assertEquals(java.util.List.of("1.1.0-rc1", "1.0.0"), data.get("availableVersions"));
+        assertEquals("1.0.0", data.get("defaultVersion"));
+    }
+
+    @Test
+    public void test_index_withAnInstallNameTheCatalogueDoesNotListShowsOnlyTheFirstStep() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        setThemeArtifactHelper(action, catalogueHelper());
+        final ThemeListForm form = new ThemeListForm();
+        // well-formed, so it passes the form's validation, but nobody publishes it
+        form.installName = "ghost-theme";
+
+        // ## Act ##
+        final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(action.index(form));
+
+        // ## Assert ##
+        assertEquals(java.util.List.of("code-search", "docuforge"), htmlData.getDataMap().get("availableThemeNames"));
+        assertInstallStepTwoAbsent(htmlData);
+    }
+
+    @Test
+    public void test_index_withTheEmptyPlaceholderPickedShowsOnlyTheFirstStep() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        setThemeArtifactHelper(action, catalogueHelper());
+        final ThemeListForm form = new ThemeListForm();
+        form.installName = ""; // what the "select a theme" option submits
+
+        // ## Act ##
+        final org.dbflute.utflute.lastaflute.mock.TestingHtmlData htmlData = validateHtmlData(action.index(form));
+
+        // ## Assert ##
+        assertInstallStepTwoAbsent(htmlData);
+    }
+
+    @Test
+    public void test_index_withAMalformedInstallNameIsAValidationErrorNotAStepTwo() throws Exception {
+        // ## Arrange ##
+        final AdminThemeAction action = createInjectedAction(new ThemeRegistry());
+        setThemeArtifactHelper(action, catalogueHelper());
+        final ThemeListForm form = new ThemeListForm();
+        // the query string is untrusted input: this must never reach the catalogue lookup
+        form.installName = "../etc";
+
+        // ## Act & Assert ##
+        // validate() in index() rejects it and falls back to the list page, which offers the
+        // first step only.
+        assertValidationError(() -> action.index(form)).handle(data -> data.requiredMessageOf("installName", Pattern.class));
+    }
+
+    @Test
+    public void test_themeListForm_installNameIsConstrainedLikeDefaultTheme() throws Exception {
+        // installName is a request parameter of the page that renders from it, so it carries the
+        // same constraints as the other theme-name field of this form, which the validate() call
+        // in index() enforces.
+        final Field installName = ThemeListForm.class.getDeclaredField("installName");
+        final Field defaultTheme = ThemeListForm.class.getDeclaredField("defaultTheme");
+        assertEquals(defaultTheme.getAnnotation(Pattern.class).regexp(), installName.getAnnotation(Pattern.class).regexp());
+        assertEquals(defaultTheme.getAnnotation(jakarta.validation.constraints.Size.class).max(),
+                installName.getAnnotation(jakarta.validation.constraints.Size.class).max());
+        final String regex = installName.getAnnotation(Pattern.class).regexp();
+        assertTrue("".matches(regex));
+        assertTrue("docuforge".matches(regex));
+        assertFalse("../etc".matches(regex));
+        assertFalse("Docuforge".matches(regex));
     }
 
     /**
@@ -856,28 +970,71 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         assertTokenVerified();
     }
 
-    @Test
-    public void test_adminThemeJsp_bothInstallEntryPointsPostToTheSameAction() throws Exception {
-        // Step 5's whole point: the catalogue table's per-row button and the "install by
-        // name" form are two ways into the same install action/form, not two actions.
-        final String jsp = java.nio.file.Files.readString(java.nio.file.Path.of("src/main/webapp/WEB-INF/view/admin/theme/admin_theme.jsp"),
+    private static String adminThemeJsp() throws Exception {
+        return java.nio.file.Files.readString(java.nio.file.Path.of("src/main/webapp/WEB-INF/view/admin/theme/admin_theme.jsp"),
                 java.nio.charset.StandardCharsets.UTF_8);
-        final String marker = "la:form action=\"/admin/theme/install\"";
-        int count = 0;
-        for (int i = jsp.indexOf(marker); i >= 0; i = jsp.indexOf(marker, i + marker.length())) {
-            count++;
-        }
-        assertEquals(2, count, "expected exactly two forms posting to /admin/theme/install (catalogue row + install-by-name)");
+    }
 
-        // Counting the action alone would still pass if a form lost the fields it posts, and
-        // one install action reading one ThemeInstallForm is the reason there are two forms
-        // rather than two actions. Pin both shapes of the same two fields.
-        assertTrue(jsp.contains("<input type=\"hidden\" name=\"name\""), "the catalogue row must post name");
-        assertTrue(jsp.contains("<input type=\"hidden\" name=\"version\""), "the catalogue row must post version");
-        // Plain inputs rather than la:text: see test_adminThemeJsp_everyBoundPropertyExistsOnThemeListForm.
-        assertTrue(jsp.contains("<input type=\"text\" id=\"installName\" name=\"name\""), "the install-by-name form must post name");
-        assertTrue(jsp.contains("<input type=\"text\" id=\"installVersion\" name=\"version\""),
-                "the install-by-name form must post version");
+    @Test
+    public void test_adminThemeJsp_installsThroughOneFormWithAVersionSelect() throws Exception {
+        // The install card posts one form to the one install action, with the name the first
+        // step picked and a version chosen from a list -- not typed.
+        final String jsp = adminThemeJsp();
+        final String marker = "la:form action=\"/admin/theme/install\"";
+        assertEquals(jsp.indexOf(marker), jsp.lastIndexOf(marker), "expected exactly one form posting to /admin/theme/install");
+        assertTrue(jsp.contains(marker));
+        assertTrue(jsp.contains("<input type=\"hidden\" name=\"name\" value=\"${f:h(pickedThemeName)}\""),
+                "the install form must post the picked name");
+        // The step 1 select stays editable after a pick, so the picked name is also shown as text
+        // next to the version select: the name that is posted must be the one the operator reads.
+        assertTrue(jsp.contains("<div class=\"form-control-plaintext\">${f:h(pickedThemeName)}</div>"),
+                "the install form must show the name it posts");
+        assertTrue(jsp.contains("<select id=\"installVersion\" name=\"version\""), "the install form must post the version from a select");
+        // No way to type a name or a version any more: that is the point of the two steps.
+        assertFalse(jsp.contains("type=\"text\""), "admin_theme.jsp must not offer a free-text input");
+        assertFalse(jsp.contains("<input type=\"hidden\" name=\"version\""), "the version is chosen, not pre-set per catalogue row");
+    }
+
+    @Test
+    public void test_adminThemeJsp_versionsAreOnlyOfferedOncePastTheNameStep() throws Exception {
+        final String jsp = adminThemeJsp();
+        // step 1: a plain GET form to the list page, whose select is the installName parameter
+        final int step1 = jsp.indexOf("<form method=\"get\" action=\"${fe:url('/admin/theme/')}\">");
+        assertTrue(step1 >= 0, "the name step must be a plain GET form to /admin/theme/");
+        assertTrue(jsp.indexOf("<select id=\"installName\" name=\"installName\"", step1) > step1);
+        assertTrue(jsp.contains("key=\"labels.theme_install_select_name\""), "the placeholder option needs its label");
+        assertTrue(jsp.contains("key=\"labels.theme_install_select\""), "the name step needs its submit button label");
+        // step 2 only exists behind a picked name
+        final int guard = jsp.indexOf("<c:if test=\"${not empty pickedThemeName}\">");
+        assertTrue(guard > step1, "the version step must be guarded by a picked name, after the name step");
+        assertTrue(jsp.indexOf("name=\"version\"") > guard, "the version select must sit inside that guard");
+        assertTrue(jsp.indexOf("la:form action=\"/admin/theme/install\"") > guard, "the install form must sit inside that guard");
+    }
+
+    @Test
+    public void test_adminThemeJsp_noLongerListsTheCatalogueOrTakesAFreeTextName() throws Exception {
+        final String jsp = adminThemeJsp();
+        assertFalse(jsp.contains("availableArtifacts"), "the catalogue table is gone");
+        assertFalse(jsp.contains("labels.theme_available_title"));
+        assertFalse(jsp.contains("labels.theme_install_by_name_title"));
+        assertTrue(jsp.contains("key=\"labels.theme_install_title\""), "the install card keeps its title");
+    }
+
+    @Test
+    public void test_adminThemeJsp_everySelectHasALabelWithAUniqueId() throws Exception {
+        final String jsp = adminThemeJsp();
+        final java.util.regex.Matcher matcher =
+                java.util.regex.Pattern.compile("<(?:la:)?select\\b[^>]*?\\b(?:id|styleId)=\"([^\"]+)\"").matcher(jsp);
+        final java.util.List<String> ids = new java.util.ArrayList<>();
+        while (matcher.find()) {
+            ids.add(matcher.group(1));
+        }
+        assertTrue(ids.contains("installName") && ids.contains("installVersion") && ids.contains("defaultTheme"),
+                "expected the default, name and version selects, got " + ids);
+        assertEquals(new java.util.HashSet<>(ids).size(), ids.size(), "select ids must be unique: " + ids);
+        for (final String id : ids) {
+            assertTrue(jsp.contains("<label for=\"" + id + "\""), "select '" + id + "' needs a <label for=\"" + id + "\">");
+        }
     }
 
     @Test

@@ -3762,19 +3762,19 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload */
     public static final String LABELS_theme_upload = "{labels.theme_upload}";
 
-    /** The key of the message: Available Themes */
-    public static final String LABELS_theme_available_title = "{labels.theme_available_title}";
-
     /** The key of the message: Install */
     public static final String LABELS_theme_install = "{labels.theme_install}";
 
     /** The key of the message: Install Theme */
     public static final String LABELS_theme_install_title = "{labels.theme_install_title}";
 
-    /** The key of the message: Install by Name */
-    public static final String LABELS_theme_install_by_name_title = "{labels.theme_install_by_name_title}";
+    /** The key of the message: Select a theme */
+    public static final String LABELS_theme_install_select_name = "{labels.theme_install_select_name}";
 
-    /** The key of the message: The repository did not list any themes. */
+    /** The key of the message: Select */
+    public static final String LABELS_theme_install_select = "{labels.theme_install_select}";
+
+    /** The key of the message: No installable themes were found. The theme repository may not have published its index yet, or it could not be read. You can also install a theme by uploading its ZIP file. */
     public static final String LABELS_theme_available_empty = "{labels.theme_available_empty}";
 
     /** The key of the message: Theme ZIP File */
