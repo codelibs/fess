@@ -97,8 +97,15 @@ launch_service()
 
     # Make sure we don't use any predefined locale, as we check some exception message strings and rely on english language
     # As those strings are created by the OS, they are dependent on the configured locale
-    LANG=en_US.UTF-8
-    LC_ALL=en_US.UTF-8
+    # The locale has to be exported, or the JVM (and the crawler JVMs it starts) runs in the C locale and cannot handle
+    # non-ASCII file names or installation paths. en_US.UTF-8 is not installed on minimal OS images, where C.UTF-8 is used.
+    if locale -a 2>/dev/null | grep -Eiq '^en_US\.utf-?8$'; then
+        LANG=en_US.UTF-8
+    else
+        LANG=C.UTF-8
+    fi
+    LC_ALL=$LANG
+    export LANG LC_ALL
 
     export HOSTNAME=`hostname -s`
 
