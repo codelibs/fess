@@ -3,7 +3,7 @@ Description=Fess
 Documentation=http://fess.codelibs.org/
 Wants=network-online.target
 After=network-online.target opensearch.service
-Requires=opensearch.service
+Wants=opensearch.service
 
 [Service]
 Environment=FESS_HOME=${packaging.fess.home.dir}
