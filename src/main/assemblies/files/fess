@@ -173,8 +173,8 @@ eval set -- "$args"
 while true; do
     case $1 in
         -v)
-            "$JAVA" $FESS_JAVA_OPTS $fess_parms -cp "$FESS_CLASSPATH" $props \
-                    org.codelibs.fess.Version
+            version=`sed -n 's/^fess.version=//p' "$FESS_HOME/app/WEB-INF/project.properties"` || exit 1
+            echo "$version"
             exit 0
         ;;
         -p)
