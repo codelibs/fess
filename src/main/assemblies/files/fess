@@ -54,6 +54,10 @@ fi
 
 if [ -x "$JAVA_HOME/bin/java" ]; then
     JAVA="$JAVA_HOME/bin/java"
+    # The crawler, thumbnail, suggest and chunk jobs start their own JVM as a bare "java" (java.command.path),
+    # which is looked up on the PATH. Put the JDK chosen here first, so that they run on the same Java as Fess.
+    PATH="$JAVA_HOME/bin:$PATH"
+    export PATH
 else
     JAVA=`which java`
 fi
