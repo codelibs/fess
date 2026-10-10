@@ -407,9 +407,11 @@ describe("registerRoutes", () => {
     expect(isHidden("profile-view")).toBe(false);
     expect(profile.attach).toHaveBeenCalled();
 
-    // Advance handler.
+    // Advance handler. Leaving the profile view drops its password form.
+    document.getElementById("profile-view").innerHTML = '<form><input type="password"></form>';
     calls[4][1]();
     expect(isHidden("advance-view")).toBe(false);
+    expect(document.getElementById("profile-view").childElementCount).toBe(0);
     expect(advance.attach).toHaveBeenCalled();
 
     // Help handler.

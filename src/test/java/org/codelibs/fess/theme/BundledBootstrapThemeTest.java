@@ -292,18 +292,40 @@ public class BundledBootstrapThemeTest {
     }
 
     /**
-     * The login modal holds the new-password form auth.js shows when the password just used
-     * must be changed (parity login/newpassword.jsp).
+     * The login modal holds the new-password step auth.js shows when the password just used
+     * must be changed (parity login/newpassword.jsp). It is a step of the login form, not a form
+     * of its own: a password manager takes a fetch login as successful when its form disappears
+     * and then reports a default password as weak before the user can change it.
      */
     @Test
     public void test_indexHtml_loginModalOffersPasswordChange() throws Exception {
         final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
-        for (final String id : java.util.List.of("password-change-form", "password-change-error", "password-change-new",
-                "password-change-confirm")) {
+        for (final String id : java.util.List.of("login-step", "password-change-step", "password-change-error", "password-change-new",
+                "password-change-confirm", "password-change-submit")) {
             assertTrue(html.contains("id=\"" + id + "\""), "index.html must contain #" + id);
         }
         assertTrue(html.contains("data-i18n=\"auth.password_change_required\""),
-                "the new-password form must explain why the password has to change");
+                "the new-password step must explain why the password has to change");
+        final String formTag = "<form class=\"modal-content\" id=\"login-form\">";
+        final int formStart = html.indexOf(formTag);
+        assertTrue(formStart >= 0, "index.html must contain the login form");
+        final String form = html.substring(formStart + formTag.length(), html.indexOf("</form>", formStart));
+        assertTrue(form.contains("id=\"password-change-step\""), "the new-password step must be inside the login form");
+        assertFalse(form.contains("<form"), "the new-password step must not be a form of its own");
+    }
+
+    /**
+     * Every password input of the theme is kept in a template that auth.js mounts while the login
+     * modal shows it: a page with a password field is a login page to a password manager, which
+     * then offers saved credentials in the search boxes.
+     */
+    @Test
+    public void test_indexHtml_keepsPasswordInputsInTemplates() throws Exception {
+        final String html = Files.readString(THEME_DIR.resolve("index.html"), StandardCharsets.UTF_8);
+        final String outsideTemplates = html.replaceAll("(?s)<template\\b.*?</template>", "");
+        assertFalse(outsideTemplates.contains("type=\"password\""), "index.html must not render a password input outside a template");
+        assertTrue(html.contains("<template class=\"password-field\"><input class=\"form-control\" id=\"login-password\""),
+                "the login password input must be kept in a template.password-field");
     }
 
     @Test
