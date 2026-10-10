@@ -1,3 +1,12 @@
 ${packaging.env.file}
 /etc/init.d/fess
 /usr/lib/systemd/system/fess.service
+${packaging.fess.conf.dir}/logging.properties
+${packaging.fess.conf.dir}/tomcat_config.properties
+${packaging.fess.conf.dir}/fess_config.properties
+${packaging.fess.conf.dir}/fess_env_chunk.properties
+${packaging.fess.conf.dir}/fess_env_crawler.properties
+${packaging.fess.conf.dir}/fess_env_suggest.properties
+${packaging.fess.conf.dir}/fess_env_thumbnail.properties
+${packaging.fess.conf.dir}/fess_env_web.properties
+${packaging.fess.conf.dir}/tika.xml
