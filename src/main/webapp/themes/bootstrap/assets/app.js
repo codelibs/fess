@@ -29,6 +29,10 @@ function showView(id) {
       Promise.resolve().then(() => target.focus({ preventScroll: true }));
     } else {
       el.setAttribute("hidden", "");
+      // The profile view is rebuilt on every visit. Drop its password form when leaving it,
+      // so no password field stays in the page for a password manager to treat it as a
+      // login page and offer saved credentials in the search boxes.
+      if (vid === "profile-view") el.replaceChildren();
     }
   }
   // One h1 per view: the home view's logo is its h1 (JSP parity: index.jsp h1.mainLogo);

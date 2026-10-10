@@ -311,12 +311,51 @@ function hideLoginModal() {
   }
 }
 
-/** Show the login form ("login") or the new-password form ("password") in #login-modal. */
+/**
+ * Put the password inputs kept in the <template class="password-field">s under root into the
+ * form, each right after its template. index.html keeps them out of the page until a step
+ * needs them: a page with no password field is not a login page to a password manager, so it
+ * does not offer saved credentials in the search boxes.
+ */
+function mountPasswordFields(root) {
+  if (!root) return;
+  root.querySelectorAll("template.password-field").forEach(tpl => {
+    if (tpl.nextElementSibling && tpl.nextElementSibling.matches('input[type="password"]')) return;
+    tpl.after(tpl.content.cloneNode(true));
+  });
+}
+
+/** Take the password inputs mountPasswordFields() put under root out again, with what was typed in them. */
+function unmountPasswordFields(root) {
+  if (!root) return;
+  root.querySelectorAll("template.password-field").forEach(tpl => {
+    const input = tpl.nextElementSibling;
+    if (input && input.matches('input[type="password"]')) input.remove();
+  });
+}
+
+/**
+ * Show the login step ("login") or the new-password step ("password") of #login-form.
+ * Both steps are in the same form, so it stays on screen when a login switches to the
+ * new-password step: a password manager takes a fetch login as successful only when the form
+ * disappears, and would otherwise report a default password as weak before it can be changed.
+ */
 function showModalStep(step) {
-  const loginForm = document.getElementById("login-form");
-  const changeForm = document.getElementById("password-change-form");
-  if (loginForm) loginForm.classList.toggle("d-none", step !== "login");
-  if (changeForm) changeForm.classList.toggle("d-none", step !== "password");
+  const loginStep = document.getElementById("login-step");
+  const changeStep = document.getElementById("password-change-step");
+  if (loginStep) loginStep.classList.toggle("d-none", step !== "login");
+  if (changeStep) changeStep.classList.toggle("d-none", step !== "password");
+  // Only the shown step's new-password inputs are in the form, so the hidden step's required
+  // inputs do not block the submit. The login password stays during the change: it is the
+  // current password a password manager pairs with the new one.
+  if (step === "password") mountPasswordFields(changeStep);
+  else unmountPasswordFields(changeStep);
+}
+
+/** The step #login-form shows: "password" while the new-password step is shown, else "login". */
+function currentModalStep() {
+  const changeStep = document.getElementById("password-change-step");
+  return changeStep && !changeStep.classList.contains("d-none") ? "password" : "login";
 }
 
 /** The localized message for a failed POST /auth/login. */
@@ -441,8 +480,11 @@ export function attach() {
       if (loginLocked) ev.preventDefault();
     });
   }
-  const changeForm = document.getElementById("password-change-form");
   const changeErr = document.getElementById("password-change-error");
+  const changeSubmit = document.getElementById("password-change-submit");
+  if (modal) {
+    modal.addEventListener("show.bs.modal", () => mountPasswordFields(document.getElementById("login-step")));
+  }
   if (modal && form) {
     modal.addEventListener("hidden.bs.modal", () => {
       form.reset();
@@ -452,107 +494,109 @@ export function attach() {
       }
       // Closing the modal abandons a pending password change and forgets the password.
       pendingPasswordChange = null;
-      if (changeForm) changeForm.reset();
       if (changeErr) {
         changeErr.classList.add("d-none");
         changeErr.textContent = "";
       }
       showModalStep("login");
+      unmountPasswordFields(document.getElementById("login-step"));
     });
   }
   if (form) {
-    form.addEventListener("submit", async ev => {
+    form.addEventListener("submit", ev => {
       ev.preventDefault();
-      err.classList.add("d-none");
-      err.textContent = "";
-      const username = document.getElementById("login-username").value;
-      const password = document.getElementById("login-password").value;
-      try {
-        const env = await api.post("/auth/login", { username, password });
-        // Server rotates the token on login. Echo whichever it returned.
-        if (env.csrf_token) api.setCsrfToken(env.csrf_token);
-        else await rotateCsrf();
-        setLoggedIn(env.user || { username });
-        setLoginLocked(false);
-        // JSP parity (LoginAction): a password listed in password.invalid.admin.passwords has
-        // to be changed, so switch the modal to the new-password form. As on the JSP page the
-        // user may leave it; the login itself already succeeded.
-        if (env.password_change_required === true && env.user && env.user.editable) {
-          pendingPasswordChange = { username, password };
-          showModalStep("password");
-        } else {
-          hideLoginModal();
-        }
-        document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: env.user }));
-      } catch (e) {
-        err.textContent = loginErrorMessage(e);
-        err.classList.remove("d-none");
-      }
+      if (currentModalStep() === "password") submitPasswordChange();
+      else submitLogin();
     });
   }
-  if (changeForm) {
-    const changeSubmit = changeForm.querySelector('button[type="submit"]');
-    changeForm.addEventListener("submit", async ev => {
-      ev.preventDefault();
-      if (!pendingPasswordChange) return;
-      // The change and the login after it are still in flight: do not send them again.
-      if (changeSubmit && changeSubmit.disabled) return;
-      changeErr.classList.add("d-none");
-      changeErr.textContent = "";
-      const newPassword = document.getElementById("password-change-new").value;
-      const confirmPassword = document.getElementById("password-change-confirm").value;
-      if (newPassword !== confirmPassword) {
-        changeErr.textContent = t("profile.error_mismatch");
+
+  async function submitLogin() {
+    err.classList.add("d-none");
+    err.textContent = "";
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+    try {
+      const env = await api.post("/auth/login", { username, password });
+      // Server rotates the token on login. Echo whichever it returned.
+      if (env.csrf_token) api.setCsrfToken(env.csrf_token);
+      else await rotateCsrf();
+      setLoggedIn(env.user || { username });
+      setLoginLocked(false);
+      // JSP parity (LoginAction): a password listed in password.invalid.admin.passwords has
+      // to be changed, so switch the modal to the new-password step. As on the JSP page the
+      // user may leave it; the login itself already succeeded.
+      if (env.password_change_required === true && env.user && env.user.editable) {
+        pendingPasswordChange = { username, password };
+        showModalStep("password");
+      } else {
+        hideLoginModal();
+      }
+      document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: env.user }));
+    } catch (e) {
+      err.textContent = loginErrorMessage(e);
+      err.classList.remove("d-none");
+    }
+  }
+
+  async function submitPasswordChange() {
+    if (!pendingPasswordChange) return;
+    // The change and the login after it are still in flight: do not send them again.
+    if (changeSubmit && changeSubmit.disabled) return;
+    changeErr.classList.add("d-none");
+    changeErr.textContent = "";
+    const newPassword = document.getElementById("password-change-new").value;
+    const confirmPassword = document.getElementById("password-change-confirm").value;
+    if (newPassword !== confirmPassword) {
+      changeErr.textContent = t("profile.error_mismatch");
+      changeErr.classList.remove("d-none");
+      return;
+    }
+    const { username, password } = pendingPasswordChange;
+    if (changeSubmit) changeSubmit.disabled = true;
+    try {
+      let env;
+      try {
+        env = await api.post("/auth/password", {
+          current_password: password,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        });
+      } catch (e) {
+        changeErr.textContent = localizePasswordError(e);
         changeErr.classList.remove("d-none");
         return;
       }
-      const { username, password } = pendingPasswordChange;
-      if (changeSubmit) changeSubmit.disabled = true;
-      try {
-        let env;
-        try {
-          env = await api.post("/auth/password", {
-            current_password: password,
-            new_password: newPassword,
-            confirm_password: confirmPassword
-          });
-        } catch (e) {
-          changeErr.textContent = localizePasswordError(e);
-          changeErr.classList.remove("d-none");
-          return;
-        }
-        pendingPasswordChange = null;
-        if (!env.re_login_required) {
-          hideLoginModal();
-          return;
-        }
-        // The server ended the session (M-3): take a token for the new session and log in
-        // again with the new password.
-        await rotateCsrf();
-        try {
-          const relogin = await api.post("/auth/login", { username, password: newPassword });
-          if (relogin.csrf_token) api.setCsrfToken(relogin.csrf_token);
-          else await rotateCsrf();
-          setLoggedIn(relogin.user || { username });
-          hideLoginModal();
-          document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: relogin.user }));
-        } catch (e) {
-          setLoggedOut();
-          // A guest again: while login is required the modal must stay open.
-          setLoginLocked(isLoginRequired());
-          showModalStep("login");
-          document.getElementById("login-username").value = username;
-          // Neither the old nor the new password stays in the forms.
-          document.getElementById("login-password").value = "";
-          changeForm.reset();
-          err.textContent = loginErrorMessage(e);
-          err.classList.remove("d-none");
-          document.dispatchEvent(new CustomEvent("fess:auth:logout"));
-        }
-      } finally {
-        if (changeSubmit) changeSubmit.disabled = false;
+      pendingPasswordChange = null;
+      if (!env.re_login_required) {
+        hideLoginModal();
+        return;
       }
-    });
+      // The server ended the session (M-3): take a token for the new session and log in
+      // again with the new password.
+      await rotateCsrf();
+      try {
+        const relogin = await api.post("/auth/login", { username, password: newPassword });
+        if (relogin.csrf_token) api.setCsrfToken(relogin.csrf_token);
+        else await rotateCsrf();
+        setLoggedIn(relogin.user || { username });
+        hideLoginModal();
+        document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: relogin.user }));
+      } catch (e) {
+        setLoggedOut();
+        // A guest again: while login is required the modal must stay open.
+        setLoginLocked(isLoginRequired());
+        showModalStep("login");
+        document.getElementById("login-username").value = username;
+        // Neither the old nor the new password stays in the form (showModalStep took the
+        // new-password inputs out).
+        document.getElementById("login-password").value = "";
+        err.textContent = loginErrorMessage(e);
+        err.classList.remove("d-none");
+        document.dispatchEvent(new CustomEvent("fess:auth:logout"));
+      }
+    } finally {
+      if (changeSubmit) changeSubmit.disabled = false;
+    }
   }
   return probeMe();
 }
