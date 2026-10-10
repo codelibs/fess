@@ -190,86 +190,84 @@ ${fe:html(true)}
                     <div class="card card-outline card-primary">
                         <div class="card-header">
                             <h3 class="card-title">
-                                <la:message key="labels.theme_available_title"/>
+                                <la:message key="labels.theme_install_title"/>
                             </h3>
                         </div>
                         <div class="card-body">
-                            <c:if test="${empty availableArtifacts}">
+                            <c:if test="${empty availableThemeNames}">
                                 <%-- Not labels.list_could_not_find_crud_table ("not found"):
                                      an empty catalogue means the repository's index could
                                      not be read, not that no themes are published, and the
-                                     operator can act on the difference. --%>
+                                     operator can act on the difference. A theme can still be
+                                     installed from the upload page. --%>
                                 <p><la:message key="labels.theme_available_empty"/></p>
                             </c:if>
-                            <c:if test="${not empty availableArtifacts}">
-                                <table class="table table-bordered table-striped"
-                                       aria-label="<la:message key="labels.theme_available_title"/>">
-                                    <thead>
-                                    <tr>
-                                        <th><la:message key="labels.theme_name"/></th>
-                                        <th><la:message key="labels.theme_version"/></th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <c:forEach var="a" items="${availableArtifacts}">
-                                        <tr>
-                                            <td>${f:h(a.name)}</td>
-                                            <td>${f:h(a.version)}</td>
-                                            <td>
-                                                <la:form action="/admin/theme/install">
-                                                    <input type="hidden" name="name" value="${f:h(a.name)}"/>
-                                                    <input type="hidden" name="version" value="${f:h(a.version)}"/>
-                                                    <button type="submit" class="btn btn-primary btn-xs ${f:h(editableClass)}">
-                                                        <i class="fa fa-download" aria-hidden="true"></i>
-                                                        <la:message key="labels.theme_install"/>
-                                                    </button>
-                                                </la:form>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                    </tbody>
-                                </table>
+                            <c:if test="${not empty availableThemeNames}">
+                                <%-- Step 1: pick a theme. A page transition, not script: the form
+                                     reloads this page with ?installName=, and the server renders
+                                     step 2 for that theme. A plain form rather than la:form,
+                                     which would put its double-submit token in the query string. --%>
+                                <form method="get" action="${fe:url('/admin/theme/')}">
+                                    <div class="form-group row">
+                                        <label for="installName" class="col-sm-3 col-form-label">
+                                            <la:message key="labels.theme_name"/>
+                                        </label>
+                                        <div class="col-sm-6">
+                                            <select id="installName" name="installName" class="form-control">
+                                                <option value=""><la:message key="labels.theme_install_select_name"/></option>
+                                                <c:forEach var="n" items="${availableThemeNames}">
+                                                    <option value="${f:h(n)}" ${n == pickedThemeName ? 'selected' : ''}>${f:h(n)}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <button type="submit" class="btn btn-default">
+                                                <la:message key="labels.theme_install_select"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <%-- Step 2: pick a version of the theme picked above. pickedThemeName
+                                     is registered only when the catalogue lists it, so an unknown
+                                     name stays at step 1. The picked name is shown as text, not
+                                     as a control: the step 1 select above stays editable, and the
+                                     name posted here must be the one the operator can read.
+                                     Plain inputs, not la:text/la:select: this page renders with
+                                     ThemeListForm, which has no name/version property, so a
+                                     bound tag would fail the whole page. The install action
+                                     binds them to ThemeInstallForm. --%>
+                                <c:if test="${not empty pickedThemeName}">
+                                    <la:form action="/admin/theme/install">
+                                        <input type="hidden" name="name" value="${f:h(pickedThemeName)}"/>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <la:message key="labels.theme_name"/>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="form-control-plaintext">${f:h(pickedThemeName)}</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="installVersion" class="col-sm-3 col-form-label">
+                                                <la:message key="labels.theme_version"/>
+                                            </label>
+                                            <div class="col-sm-6">
+                                                <select id="installVersion" name="version" class="form-control">
+                                                    <c:forEach var="v" items="${availableVersions}">
+                                                        <option value="${f:h(v)}" ${v == defaultVersion ? 'selected' : ''}>${f:h(v)}</option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <button type="submit" class="btn btn-primary ${f:h(editableClass)}">
+                                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                                    <la:message key="labels.theme_install"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </la:form>
+                                </c:if>
                             </c:if>
-                        </div>
-                    </div>
-
-                    <%-- The catalogue is discoverability, not the way in. A theme installs
-                         by name whether or not the repository listed it, so the operator
-                         always has a way to act -- including when the list above is
-                         empty, which is exactly when they need one. --%>
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <la:message key="labels.theme_install_by_name_title"/>
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <%-- Plain inputs, not la:text: this page renders with ThemeListForm,
-                                 which has no name/version property, so la:text would fail the
-                                 whole page. The install action binds them to ThemeInstallForm. --%>
-                            <la:form action="/admin/theme/install">
-                                <div class="form-group row">
-                                    <label for="installName" class="col-sm-3 col-form-label">
-                                        <la:message key="labels.theme_name"/>
-                                    </label>
-                                    <div class="col-sm-9">
-                                        <input type="text" id="installName" name="name" class="form-control"/>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label for="installVersion" class="col-sm-3 col-form-label">
-                                        <la:message key="labels.theme_version"/>
-                                    </label>
-                                    <div class="col-sm-9">
-                                        <input type="text" id="installVersion" name="version" class="form-control"/>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary ${f:h(editableClass)}">
-                                    <i class="fa fa-download" aria-hidden="true"></i>
-                                    <la:message key="labels.theme_install"/>
-                                </button>
-                            </la:form>
                         </div>
                     </div>
                 </div>

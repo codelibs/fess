@@ -285,4 +285,198 @@ public class ThemeArtifactHelperTest extends UnitFessTestCase {
         assertTrue(attemptedUrls.get(1).startsWith("https://example.invalid/repo2/"), "repo2 must be tried second");
         assertEquals(1, installCount.get(), "installZip must run exactly once, against the artifact from repo2");
     }
+
+    // ---- the install card's name and version lists ----
+
+    private static ThemeArtifactHelper.ThemeArtifact artifact(final String name, final String version) {
+        return new ThemeArtifactHelper.ThemeArtifact(name, version, "https://example.invalid/themes/" + name + "/" + version + ".zip");
+    }
+
+    private void assertOlder(final String older, final String newer) {
+        assertTrue(ThemeArtifactHelper.compareVersions(older, newer) < 0, older + " must be older than " + newer);
+        assertTrue(ThemeArtifactHelper.compareVersions(newer, older) > 0, newer + " must be newer than " + older);
+    }
+
+    @Test
+    public void test_compareVersions_comparesTheNumbersAsNumbersNotAsText() {
+        assertOlder("1.9.0", "1.10.0");
+        assertOlder("1.0.9", "1.0.10");
+        assertOlder("2.0.0", "10.0.0");
+        assertOlder("15.8.1", "15.9.0");
+    }
+
+    @Test
+    public void test_compareVersions_doesNotOverflowOnHugeNumbers() {
+        // wider than a long: parsing into a fixed-width integer would throw or wrap
+        assertOlder("1.0.99999999999999999999", "1.0.100000000000000000000");
+        assertOlder("99999999999999999999.0.0", "100000000000000000000.0.0");
+        assertOlder("1.0.0-rc.99999999999999999999", "1.0.0-rc.100000000000000000000");
+    }
+
+    @Test
+    public void test_compareVersions_aReleaseIsNewerThanItsPrereleases() {
+        assertOlder("1.0.0-rc1", "1.0.0");
+        assertOlder("1.0.0-alpha", "1.0.0");
+        // ... but only its own: a prerelease of the next version is newer than this release
+        assertOlder("1.0.0", "1.1.0-rc1");
+    }
+
+    @Test
+    public void test_compareVersions_followsTheSemverPrereleaseExample() {
+        // the chain in section 11 of the SemVer 2.0.0 specification
+        final String[] ascending = { "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta", "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
+                "1.0.0-rc.1", "1.0.0" };
+        for (int i = 0; i + 1 < ascending.length; i++) {
+            assertOlder(ascending[i], ascending[i + 1]);
+        }
+    }
+
+    @Test
+    public void test_compareVersions_prereleaseIdentifiers() {
+        // an all-digit identifier compares as a number: 10 is newer than 2, unlike text
+        assertOlder("1.0.0-rc.1", "1.0.0-rc.2");
+        assertOlder("1.0.0-rc.2", "1.0.0-rc.10");
+        assertOlder("1.0.0-2", "1.0.0-10");
+        // "rc10" is one alphanumeric identifier, so it compares as text, and "rc10" sorts before
+        // "rc2". That is what SemVer 2.0.0 says; a theme that wants rc10 after rc2 publishes rc.10.
+        assertOlder("1.0.0-rc10", "1.0.0-rc2");
+        // a numeric identifier is older than an alphanumeric one, whatever the digits
+        assertOlder("1.0.0-999", "1.0.0-a");
+        assertOlder("1.0.0-rc.1", "1.0.0-rc.a");
+        // alphanumeric identifiers compare as text
+        assertOlder("1.0.0-alpha", "1.0.0-beta");
+        // with every shared identifier equal, the longer list is newer
+        assertOlder("1.0.0-rc", "1.0.0-rc.1");
+        // a hyphen belongs to the identifier, not to the version
+        assertOlder("1.0.0-rc-1", "1.0.0-rc-2");
+    }
+
+    @Test
+    public void test_compareVersions_equalVersionsAreEqual() {
+        assertEquals(0, ThemeArtifactHelper.compareVersions("1.2.3", "1.2.3"));
+        assertEquals(0, ThemeArtifactHelper.compareVersions("1.2.3-rc.1", "1.2.3-rc.1"));
+        // a leading zero changes the spelling, not the number
+        assertEquals(0, ThemeArtifactHelper.compareVersions("01.2.3", "1.2.3"));
+    }
+
+    @Test
+    public void test_compareVersions_toleratesWhatThePatternAdmitsButSemverDoesNot() {
+        // SEMVER_PATTERN lets empty identifiers through ("1.0.0-.", "1.0.0-a..b"); ordering them
+        // must neither throw nor break the order, because they reach the page from a remote file.
+        assertOlder("1.0.0-.", "1.0.0-a");
+        assertOlder("1.0.0--", "1.0.0-a");
+        assertOlder("1.0.0-a", "1.0.0-a.");
+        assertOlder("1.0.0-a..b", "1.0.0-a.b");
+        assertEquals(0, ThemeArtifactHelper.compareVersions("1.0.0-a..b", "1.0.0-a..b"));
+    }
+
+    @Test
+    public void test_compareVersions_refusesWhatIsNotAVersion() {
+        assertThrows(IllegalArgumentException.class, () -> ThemeArtifactHelper.compareVersions("1.0", "1.0.0"));
+        assertThrows(IllegalArgumentException.class, () -> ThemeArtifactHelper.compareVersions("1.0.0", "latest"));
+        assertThrows(IllegalArgumentException.class, () -> ThemeArtifactHelper.compareVersions("1.0.0", "1.0.0/../x"));
+        assertThrows(IllegalArgumentException.class, () -> ThemeArtifactHelper.compareVersions(null, "1.0.0"));
+    }
+
+    @Test
+    public void test_versionsOf_newestFirstAndEachVersionOnce() {
+        final List<ThemeArtifactHelper.ThemeArtifact> catalogue = List.of( //
+                artifact("docuforge", "1.0.0"), //
+                artifact("docuforge", "1.10.0"), //
+                artifact("docuforge", "1.9.0"), //
+                artifact("docuforge", "1.1.0-rc1"), //
+                artifact("code-search", "2.0.0"), //
+                // the same version from a second repository
+                artifact("docuforge", "1.0.0"));
+        assertEquals(List.of("1.10.0", "1.9.0", "1.1.0-rc1", "1.0.0"), ThemeArtifactHelper.versionsOf(catalogue, "docuforge"));
+        assertEquals(List.of("2.0.0"), ThemeArtifactHelper.versionsOf(catalogue, "code-search"));
+    }
+
+    @Test
+    public void test_versionsOf_isIndependentOfThePublishingOrder() {
+        final List<ThemeArtifactHelper.ThemeArtifact> forward =
+                List.of(artifact("t", "1.0.0"), artifact("t", "1.0.1"), artifact("t", "01.0.0"), artifact("t", "1.0.0-rc1"));
+        final List<ThemeArtifactHelper.ThemeArtifact> backward = new ArrayList<>(forward);
+        java.util.Collections.reverse(backward);
+        // "01.0.0" and "1.0.0" have equal precedence but are two spellings; neither is dropped
+        // and their order does not depend on the order the repository listed them in
+        assertEquals(List.of("1.0.1", "01.0.0", "1.0.0", "1.0.0-rc1"), ThemeArtifactHelper.versionsOf(forward, "t"));
+        assertEquals(ThemeArtifactHelper.versionsOf(forward, "t"), ThemeArtifactHelper.versionsOf(backward, "t"));
+    }
+
+    @Test
+    public void test_versionsOf_unknownNameHasNoVersions() {
+        final List<ThemeArtifactHelper.ThemeArtifact> catalogue = List.of(artifact("docuforge", "1.0.0"));
+        assertTrue(ThemeArtifactHelper.versionsOf(catalogue, "ghost").isEmpty());
+        assertTrue(ThemeArtifactHelper.versionsOf(catalogue, null).isEmpty());
+        assertTrue(ThemeArtifactHelper.versionsOf(List.of(), "docuforge").isEmpty());
+    }
+
+    @Test
+    public void test_versionsOf_leavesOutAVersionItCannotOrder() {
+        // parseVersions never lets one through, but an artifact built elsewhere must not
+        // be able to fail the page that renders the list
+        final List<ThemeArtifactHelper.ThemeArtifact> catalogue =
+                List.of(artifact("docuforge", "1.0.0"), artifact("docuforge", "latest"), artifact("docuforge", "1.0.0/../x"));
+        assertEquals(List.of("1.0.0"), ThemeArtifactHelper.versionsOf(catalogue, "docuforge"));
+    }
+
+    @Test
+    public void test_pickDefaultVersion_prefersTheLatestStableOverANewerPrerelease() {
+        assertEquals("1.0.0", ThemeArtifactHelper.pickDefaultVersion(List.of("1.1.0-rc1", "1.0.0")));
+        assertEquals("1.0.0", ThemeArtifactHelper.pickDefaultVersion(List.of("2.0.0-beta", "1.1.0-rc1", "1.0.0", "0.9.0")));
+        // the newest stable one, not the oldest
+        assertEquals("1.1.0", ThemeArtifactHelper.pickDefaultVersion(List.of("1.1.0", "1.0.0")));
+        assertEquals("1.0.0", ThemeArtifactHelper.pickDefaultVersion(List.of("1.0.0")));
+    }
+
+    @Test
+    public void test_pickDefaultVersion_fallsBackToTheNewestPrerelease() {
+        assertEquals("1.1.0-rc1", ThemeArtifactHelper.pickDefaultVersion(List.of("1.1.0-rc1", "1.0.0-beta")));
+        assertEquals("1.0.0-rc-1", ThemeArtifactHelper.pickDefaultVersion(List.of("1.0.0-rc-1")));
+    }
+
+    @Test
+    public void test_pickDefaultVersion_hasNoDefaultForNoVersions() {
+        assertNull(ThemeArtifactHelper.pickDefaultVersion(List.of()));
+        assertNull(ThemeArtifactHelper.pickDefaultVersion(null));
+    }
+
+    @Test
+    public void test_themeNames_sortedAndDistinct() {
+        final List<ThemeArtifactHelper.ThemeArtifact> catalogue = List.of( //
+                artifact("docuforge", "1.0.0"), //
+                artifact("code-search", "1.0.0"), //
+                artifact("docuforge", "1.1.0"), //
+                // the same theme from a second repository
+                artifact("code-search", "1.0.0"), //
+                artifact("bootstrap-dark", "0.1.0"));
+        assertEquals(List.of("bootstrap-dark", "code-search", "docuforge"), ThemeArtifactHelper.themeNames(catalogue));
+        assertTrue(ThemeArtifactHelper.themeNames(List.of()).isEmpty());
+    }
+
+    @Test
+    public void test_theInstallCardReadsWhatGetAvailableArtifactsReturns() {
+        // The catalogue the card is built from is the one the helper discovered per repository:
+        // a theme and version that two repositories both publish is offered once.
+        final ThemeArtifactHelper helper = new ThemeArtifactHelper() {
+            @Override
+            protected String[] getRepositories() {
+                return new String[] { "https://example.invalid/repo1/", "https://example.invalid/repo2/" };
+            }
+
+            @Override
+            protected List<ThemeArtifact> loadFromRepository(final String repositoryUrl) {
+                final String own = repositoryUrl.contains("repo1") ? "1.1.0-rc1" : "1.2.0";
+                return List.of(new ThemeArtifact("docuforge", "1.0.0", buildArtifactUrl(repositoryUrl, "docuforge", "1.0.0")),
+                        new ThemeArtifact("docuforge", own, buildArtifactUrl(repositoryUrl, "docuforge", own)));
+            }
+        };
+        final List<ThemeArtifactHelper.ThemeArtifact> catalogue = helper.getAvailableArtifacts();
+        assertEquals(4, catalogue.size());
+        assertEquals(List.of("docuforge"), ThemeArtifactHelper.themeNames(catalogue));
+        final List<String> versions = ThemeArtifactHelper.versionsOf(catalogue, "docuforge");
+        assertEquals(List.of("1.2.0", "1.1.0-rc1", "1.0.0"), versions);
+        assertEquals("1.2.0", ThemeArtifactHelper.pickDefaultVersion(versions));
+    }
 }
