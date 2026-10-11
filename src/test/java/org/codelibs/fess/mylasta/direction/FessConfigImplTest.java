@@ -411,6 +411,22 @@ public class FessConfigImplTest extends UnitFessTestCase {
         return props;
     }
 
+    // The shipped pattern decides which data store / crawl parameters are encrypted at rest. A key such as
+    // the Box JWT "passphrase" (the password of the private key) matches none of password/key/token/secret
+    // by its name, so it has to be listed explicitly.
+    @Test
+    public void test_shippedEncryptPropertyPattern() throws Exception {
+        final String pattern = loadShippedConfig().getProperty("app.encrypt.property.pattern");
+        assertNotNull(pattern);
+        for (final String key : new String[] { "passphrase", "private_key_passphrase", "password", "proxy_password", "client_secret",
+                "private_key", "access_token", "api_key" }) {
+            assertTrue(key + " must be encrypted", key.matches(pattern.trim()));
+        }
+        for (final String key : new String[] { "uri", "base_url", "username", "number_of_threads", "passphrase_hint" }) {
+            assertFalse(key + " must stay plain", key.matches(pattern.trim()));
+        }
+    }
+
     // A key the deployed file does carry keeps its value; the bundled defaults never override it.
     @Test
     public void test_bundledDefault_deployedValueWins() {
