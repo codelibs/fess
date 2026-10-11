@@ -239,6 +239,21 @@ public class FessSetupTest {
     }
 
     @Test
+    public void test_usage_documentsDestOnTheCommandsThatReadIt() {
+        assertEquals(2, run());
+        final List<String> usageLines = err().lines().map(String::strip).toList();
+        for (final String command : List.of("install opensearch ", "install nodejs ", "install plugin ", "install theme ", "remove plugin ",
+                "remove theme ", "list plugins ", "list themes ", "list installed ", "upgrade plugins ", "check ")) {
+            final String line = usageLines.stream().filter(l -> l.startsWith(command)).findFirst().orElseThrow();
+            assertTrue(line.contains("[--dest <dir>]"), line);
+        }
+        for (final String command : List.of("install opensearch-plugins ", "list ")) {
+            final String line = usageLines.stream().filter(l -> (l + " ").startsWith(command)).findFirst().orElseThrow();
+            assertFalse(line.contains("--dest"), line);
+        }
+    }
+
+    @Test
     public void test_loadDefinitions_pluginRepository() throws Exception {
         final ComponentDefinition plugin = FessSetup.loadDefinitions().get("plugin");
         assertNotNull(plugin, "install plugin needs a repository to read");
