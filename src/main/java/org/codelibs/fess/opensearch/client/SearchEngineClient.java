@@ -929,11 +929,34 @@ public class SearchEngineClient implements Client {
                         cannot start against this cluster otherwise, and the failure this triggers next (loading this \
                         index's mapping) will not repeat this diagnosis.""", index, indexConfigFile, e);
             } else {
-                logger.warn("Failed to create index: index={}, path={}", index, indexConfigFile, e);
+                logger.warn("Failed to create index: index={}, path={}, reason={}", index, indexConfigFile, getFailureReason(e), e);
             }
         }
 
         return false;
+    }
+
+    /**
+     * Describes why a request to the search engine failed, for the first line of a log message.
+     *
+     * <p>The message of an exception raised for an error response holds the top-level reason; the reason that
+     * names the actual problem, such as the dictionary entry the engine rejected, is often in the root cause.
+     * Index definitions carry no credentials, so the messages are safe to log.</p>
+     *
+     * @param t the exception to describe
+     * @return the message of the exception, followed by the message of its root cause when that differs
+     */
+    protected String getFailureReason(final Throwable t) {
+        Throwable root = t;
+        while (root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+        }
+        final String message = t.getMessage();
+        final String rootMessage = root.getMessage();
+        if (root == t || rootMessage == null || rootMessage.equals(message)) {
+            return String.valueOf(message);
+        }
+        return message + "; root cause: " + rootMessage;
     }
 
     /**

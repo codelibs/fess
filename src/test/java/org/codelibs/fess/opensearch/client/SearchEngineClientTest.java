@@ -738,6 +738,45 @@ public class SearchEngineClientTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_createIndex_failureLogsTheReasonInTheWarning() {
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            protected String readIndexSetting(final String index, final String fesenType, final String indexConfigFile,
+                    final String numberOfShards, final String autoExpandReplicas) {
+                throw new IllegalArgumentException("failed to parse mapping",
+                        new IllegalStateException("match \"ZQEXp\" was already added"));
+            }
+        };
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            assertFalse(client.createIndex("fess", "fess.20260101", "1", "0-1", false));
+            final List<String> warnings = capture.messagesOnThisThreadAt(Level.WARN);
+            assertEquals(1, warnings.size());
+            final String warning = warnings.get(0);
+            assertTrue(warning, warning.startsWith("Failed to create index: index=fess, path="));
+            assertTrue(warning, warning.contains("fess_indices/fess.json"));
+            assertTrue(warning, warning.contains("reason=failed to parse mapping; root cause: match \"ZQEXp\" was already added"));
+            // the level and the stack trace are kept
+            assertEquals(1, capture.eventsOnThisThreadAt(Level.WARN).stream().filter(event -> event.getThrown() != null).count());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getFailureReason() {
+        final SearchEngineClient client = new SearchEngineClient();
+
+        assertEquals("boom", client.getFailureReason(new RuntimeException("boom")));
+        assertEquals("null", client.getFailureReason(new RuntimeException()));
+        assertEquals("top; root cause: bottom",
+                client.getFailureReason(new RuntimeException("top", new IllegalStateException("middle", new Exception("bottom")))));
+        // the same message is not repeated, and a root cause without a message adds nothing
+        assertEquals("same", client.getFailureReason(new RuntimeException("same", new Exception("same"))));
+        assertEquals("top", client.getFailureReason(new RuntimeException("top", new Exception())));
+    }
+
+    @Test
     public void test_isMissingKnnPluginError_detectsUnknownIndexKnnSetting() {
         final SearchEngineClient client = new SearchEngineClient();
 
