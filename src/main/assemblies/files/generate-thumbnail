@@ -1,19 +1,38 @@
-#!/bin/bash
+#!/bin/sh
+#
+# Generates a thumbnail image for a crawled document.
+#
+# Usage: generate-thumbnail <type> <url> <output_file> [mimetype]
+#   type: msoffice, pdf, ps, svg or image
+#
+# Required tools (the first available one is used):
+#   ImageMagick : magick (v7) or convert (v6)
+#   PDF         : pdftoppm (poppler) or gs (Ghostscript)
+#   PostScript  : ps2pdf or gs (Ghostscript), and a PDF tool
+#   MS Office   : unoconv or soffice/libreoffice (LibreOffice), and a PDF tool
+#   SVG         : rsvg-convert or ImageMagick
+#
+# This script is written for POSIX sh so that it works on various Unix/Linux
+# environments (e.g. Alpine Linux, *BSD and macOS) without requiring bash.
 
 cmd_type=$1
 url=$2
 output_file=$3
 mimetype=${4:-}
 image_size=100x100
-target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
+target_file=$(printf '%s\n' "$url" | sed -e "s#^file:/*#/#g")
+
+error() {
+  echo "$*" >&2
+  exit 1
+}
+
+has_command() {
+  command -v "$1" >/dev/null 2>&1
+}
 
 check_command() {
-  cmd=$1
-  cmd_path=$(command -v "${cmd}")
-  if [[ ! -e "${cmd_path}" ]] ; then
-    echo "${cmd} does not exist."
-    exit 1
-  fi
+  has_command "$1" || error "$1 does not exist."
 }
 
 # Get ImageMagick command (magick for v7, convert for v6)
@@ -27,107 +46,156 @@ get_imagemagick_cmd() {
   fi
 }
 
-if [[ x"$HOME" = "x/root" ]] || [[ x"$HOME" = "x/var/root" ]] ; then
+check_imagemagick() {
+  im_cmd=$(get_imagemagick_cmd)
+  if [ -z "${im_cmd}" ] ; then
+    error "ImageMagick (convert or magick) does not exist."
+  fi
+}
+
+# Creates a thumbnail from the first frame/page/layer of the input image.
+# The input file must come before the -thumbnail operator: ImageMagick v7
+# (magick) requires an image to be read before an operator is applied,
+# and this order also works with ImageMagick v6 (convert).
+create_thumbnail() {
+  "${im_cmd}" "$1[0]" -auto-orient -thumbnail "${image_size}" "${output_file}"
+}
+
+# Renders the first page of a PDF file to a PNG file.
+render_pdf() {
+  pdf_file=$1
+  png_file="${work_dir}/page.png"
+  if has_command pdftoppm ; then
+    pdftoppm -png -singlefile "${pdf_file}" "${work_dir}/page"
+  elif has_command gs ; then
+    gs -q -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r150 \
+      -dFirstPage=1 -dLastPage=1 -sOutputFile="${png_file}" "${pdf_file}"
+  else
+    error "pdftoppm or gs does not exist."
+  fi
+  if [ ! -f "${png_file}" ] ; then
+    error "Failed to render the PDF file."
+  fi
+}
+
+# Converts the first page of an MS Office document to a PDF file.
+convert_office_to_pdf() {
+  pdf_file="${work_dir}/thumbnail.pdf"
+  if has_command unoconv ; then
+    unoconv -e PageRange=1-1 -o "${pdf_file}" -f pdf "${target_file}"
+    if [ -f "${pdf_file}" ] ; then
+      return 0
+    fi
+    echo "unoconv does not work." >&2
+  fi
+  soffice_cmd=""
+  for c in soffice libreoffice ; do
+    if has_command "${c}" ; then
+      soffice_cmd=${c}
+      break
+    fi
+  done
+  if [ -z "${soffice_cmd}" ] ; then
+    error "unoconv or soffice does not exist."
+  fi
+  # Use a dedicated profile so that concurrent executions do not conflict.
+  out_dir="${work_dir}/soffice"
+  mkdir -p "${out_dir}"
+  "${soffice_cmd}" --headless --norestore --nologo --nolockcheck \
+    "-env:UserInstallation=file://${work_dir}/profile" \
+    --convert-to pdf --outdir "${out_dir}" "${target_file}" >/dev/null
+  for f in "${out_dir}"/*.pdf ; do
+    if [ -f "${f}" ] ; then
+      mv "${f}" "${pdf_file}"
+      return 0
+    fi
+  done
+  error "soffice does not work."
+}
+
+# Converts a PostScript file to a PDF file.
+convert_ps_to_pdf() {
+  pdf_file="${work_dir}/thumbnail.pdf"
+  if has_command ps2pdf ; then
+    ps2pdf "${target_file}" "${pdf_file}"
+  elif has_command gs ; then
+    gs -q -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pdfwrite \
+      -sOutputFile="${pdf_file}" "${target_file}"
+  else
+    error "ps2pdf or gs does not exist."
+  fi
+  if [ ! -f "${pdf_file}" ] ; then
+    error "ps2pdf does not work."
+  fi
+}
+
+create_work_dir() {
+  tmp_base=${TMPDIR:-/tmp}
+  work_dir=$(mktemp -d "${tmp_base%/}/fess-thumbnail.XXXXXXXX" 2>/dev/null)
+  if [ -z "${work_dir}" ] || [ ! -d "${work_dir}" ] ; then
+    work_dir="${tmp_base%/}/fess-thumbnail.$$"
+    (umask 077 && mkdir "${work_dir}") || error "Failed to create a work directory."
+  fi
+  trap 'rm -rf "${work_dir}"' EXIT
+  trap 'exit 1' HUP INT TERM
+}
+
+if [ x"$HOME" = "x/root" ] || [ x"$HOME" = "x/var/root" ] ; then
   HOME=/var/lib/fess
+  export HOME
 fi
 
-if [[ x"${cmd_type}" = "xmsoffice" ]] ; then
-  im_cmd=$(get_imagemagick_cmd)
-  if [[ -z "${im_cmd}" ]] ; then
-    echo "ImageMagick (convert or magick) does not exist."
-    exit 1
-  fi
-  check_command pdftoppm
-  check_command unoconv
-  tmp_pdf_file=/tmp/thumbnail.$$.pdf
-  unoconv -e PageRange=1-1 -o ${tmp_pdf_file} -f pdf "${target_file}"
-  if [[ ! -f ${tmp_pdf_file} ]] ; then
-    echo "unoconv does not work."
-    exit 1
-  fi
-  tmp_png_prefix=/tmp/thumbnail.png.$$
-  pdftoppm -png -singlefile ${tmp_pdf_file} ${tmp_png_prefix}
-  tmp_png_file="${tmp_png_prefix}.png"
-  rm -f ${tmp_pdf_file}
-  if [[ ! -f ${tmp_png_file} ]] ; then
-    echo "pdftoppm does not work."
-    exit 1
-  fi
-  ${im_cmd} -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
-  rm -f ${tmp_png_prefix}*png
-elif [[ x"${cmd_type}" = "xpdf" ]] ; then
-  im_cmd=$(get_imagemagick_cmd)
-  if [[ -z "${im_cmd}" ]] ; then
-    echo "ImageMagick (convert or magick) does not exist."
-    exit 1
-  fi
-  check_command pdftoppm
-  target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
-  tmp_png_prefix=/tmp/thumbnail.png.$$
-  pdftoppm -png -singlefile "${target_file}" ${tmp_png_prefix}
-  tmp_png_file="${tmp_png_prefix}.png"
-  if [[ ! -f ${tmp_png_file} ]] ; then
-    echo "pdftoppm does not work."
-    exit 1
-  fi
-  ${im_cmd} -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
-  rm -f ${tmp_png_prefix}*png
-elif [[ x"${cmd_type}" = "xps" ]] ; then
-  im_cmd=$(get_imagemagick_cmd)
-  if [[ -z "${im_cmd}" ]] ; then
-    echo "ImageMagick (convert or magick) does not exist."
-    exit 1
-  fi
-  check_command pdftoppm
-  check_command ps2pdf
-  target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
-  tmp_pdf_file=/tmp/thumbnail.pdf.$$
-  ps2pdf "${target_file}" ${tmp_pdf_file}
-  if [[ ! -f ${tmp_pdf_file} ]] ; then
-    echo "ps2pdf does not work."
-    exit 1
-  fi
-  tmp_png_prefix=/tmp/thumbnail.png.$$
-  pdftoppm -png -singlefile ${tmp_pdf_file} ${tmp_png_prefix}
-  tmp_png_file="${tmp_png_prefix}.png"
-  rm -f ${tmp_pdf_file}
-  if [[ ! -f ${tmp_png_file} ]] ; then
-    echo "pdftoppm does not work."
-    exit 1
-  fi
-  ${im_cmd} -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
-  rm -f ${tmp_png_prefix}*png
-elif [[ x"${cmd_type}" = "xsvg" ]] ; then
-  check_command rsvg-convert
-  target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
-  rsvg-convert -w 100 -h 100 --keep-aspect-ratio "${target_file}" -o "${output_file}"
-elif [[ x"${cmd_type}" = "ximage" ]] ; then
-  im_cmd=$(get_imagemagick_cmd)
-  if [[ -z "${im_cmd}" ]] ; then
-    echo "ImageMagick (convert or magick) does not exist."
-    exit 1
-  fi
-  target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
-  # Build format hint from MIME type for better ImageMagick compatibility
-  format_hint=""
-  case "${mimetype}" in
-    "image/gif")  format_hint="gif:" ;;
-    "image/tiff") format_hint="tiff:" ;;
-    "image/png")  format_hint="png:" ;;
-    "image/jpeg") format_hint="jpeg:" ;;
-    "image/bmp"|"image/x-windows-bmp"|"image/x-ms-bmp") format_hint="bmp:" ;;
-    "image/vnd.adobe.photoshop"|"image/photoshop"|"application/x-photoshop"|"application/photoshop") format_hint="psd:" ;;
-  esac
-  ${im_cmd} -thumbnail ${image_size} "${format_hint}${target_file}" "${output_file}"
-elif [[ x"${cmd_type}" = "x" ]] ; then
-  echo "No filetype."
-  exit 1
-else
-  echo "Unsupported type: ${cmd_type}"
-  exit 1
-fi
+case "${cmd_type}" in
+  msoffice)
+    check_imagemagick
+    create_work_dir
+    convert_office_to_pdf
+    render_pdf "${pdf_file}"
+    create_thumbnail "${png_file}"
+    ;;
+  pdf)
+    check_imagemagick
+    create_work_dir
+    render_pdf "${target_file}"
+    create_thumbnail "${png_file}"
+    ;;
+  ps)
+    check_imagemagick
+    create_work_dir
+    convert_ps_to_pdf
+    render_pdf "${pdf_file}"
+    create_thumbnail "${png_file}"
+    ;;
+  svg)
+    if has_command rsvg-convert ; then
+      rsvg-convert -w 100 -h 100 --keep-aspect-ratio "${target_file}" -o "${output_file}"
+    else
+      check_imagemagick
+      create_thumbnail "svg:${target_file}"
+    fi
+    ;;
+  image)
+    check_imagemagick
+    # Build format hint from MIME type for better ImageMagick compatibility
+    format_hint=""
+    case "${mimetype}" in
+      "image/gif")  format_hint="gif:" ;;
+      "image/tiff") format_hint="tiff:" ;;
+      "image/png")  format_hint="png:" ;;
+      "image/jpeg") format_hint="jpeg:" ;;
+      "image/bmp"|"image/x-windows-bmp"|"image/x-ms-bmp") format_hint="bmp:" ;;
+      "image/vnd.adobe.photoshop"|"image/photoshop"|"application/x-photoshop"|"application/photoshop") format_hint="psd:" ;;
+    esac
+    create_thumbnail "${format_hint}${target_file}"
+    ;;
+  "")
+    error "No filetype."
+    ;;
+  *)
+    error "Unsupported type: ${cmd_type}"
+    ;;
+esac
 
-if [[ ! -f ${output_file} ]] ; then
-  echo "Thumbnail is not created."
-  exit 1
+if [ ! -f "${output_file}" ] ; then
+  error "Thumbnail is not created."
 fi
