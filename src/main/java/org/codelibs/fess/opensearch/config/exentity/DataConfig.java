@@ -118,7 +118,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     public Map<String, String> getHandlerParameterMap() {
         if (handlerParameterMap == null) {
-            handlerParameterMap = ParameterUtil.parse(getHandlerParameter());
+            handlerParameterMap = ParameterUtil.parse(getHandlerParameter(), "data config: name=" + getName() + ", id=" + getId());
         }
         return handlerParameterMap;
     }
@@ -372,7 +372,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
         if (configParameterMap == null) {
-            configParameterMap = ParameterUtil.createConfigParameterMap(getHandlerParameter());
+            configParameterMap =
+                    ParameterUtil.createConfigParameterMap(getHandlerParameter(), "data config: name=" + getName() + ", id=" + getId());
         }
 
         final Map<String, String> configMap = configParameterMap.get(name);

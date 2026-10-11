@@ -89,7 +89,7 @@ public class WebAuthentication extends BsWebAuthentication {
         }
         case Constants.FORM:
             config.setAuthSchemeType(AuthSchemeType.FORM);
-            config.setFormParameters(ParameterUtil.parse(getParameters()));
+            config.setFormParameters(ParameterUtil.parse(getParameters(), getParameterOwner()));
             break;
         case null:
         default:
@@ -102,13 +102,17 @@ public class WebAuthentication extends BsWebAuthentication {
         credentials.setPassword(getPassword() == null ? StringUtil.EMPTY : getPassword());
         if (Constants.NTLM.equals(scheme)) {
             credentials.setType(CredentialsType.NTLM);
-            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
+            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters(), getParameterOwner());
             credentials.setDomain(parameterMap.get("domain"));
             credentials.setWorkstation(parameterMap.get("workstation"));
         }
         config.setCredentials(credentials);
 
         return config;
+    }
+
+    private String getParameterOwner() {
+        return "web authentication: id=" + getId() + ", webConfigId=" + getWebConfigId();
     }
 
     public WebConfig getWebConfig() {
