@@ -18,7 +18,10 @@ package org.codelibs.fess.helper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
@@ -65,6 +68,17 @@ public class IndexingHelper {
     public IndexingHelper() {
         // Default constructor
     }
+
+    /** The message of an OpenSearchException that is built from an error response. */
+    private static final Pattern OPENSEARCH_EXCEPTION_PATTERN =
+            Pattern.compile("OpenSearch exception \\[type=([^,\\]]+), reason=(.*)\\]", Pattern.DOTALL);
+
+    /** The preview of a field value that the search engine appends to a mapping error. */
+    private static final Pattern PREVIEW_PATTERN =
+            Pattern.compile("\\s*Preview of field's value:.*?(?=\\s*\\(caused by:|$)", Pattern.DOTALL);
+
+    /** The maximum length of the reason in the log. */
+    private static final int MAX_REASON_LENGTH = 500;
 
     /** Interval between requests in milliseconds */
     protected long requestInterval = 500;
@@ -117,19 +131,7 @@ public class IndexingHelper {
                             crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
                         });
                 if (response.hasFailures()) {
-                    if (logger.isDebugEnabled()) {
-                        final BulkItemResponse[] items = response.getItems();
-                        if (docList.size() == items.length) {
-                            for (int i = 0; i < docList.size(); i++) {
-                                final BulkItemResponse resp = items[i];
-                                if (resp.isFailed() && resp.getFailure() != null) {
-                                    final Map<String, Object> req = docList.get(i);
-                                    final Failure failure = resp.getFailure();
-                                    logger.debug("Failed Request: {}\n=>{}", req, failure.getMessage());
-                                }
-                            }
-                        }
-                    }
+                    logFailedItems(docList, response);
                     throw new SearchEngineClientException(response.buildFailureMessage());
                 }
             }
@@ -146,6 +148,63 @@ public class IndexingHelper {
         } finally {
             docList.clear();
         }
+    }
+
+    /**
+     * Logs a warning for every document that the search engine rejected in a bulk request.
+     * The log has the URL, the status, the error type and the reason of the rejection, but never the document content.
+     *
+     * @param docList the documents that were sent
+     * @param response the bulk response that has failures
+     */
+    protected void logFailedItems(final DocList docList, final BulkResponse response) {
+        final String urlField = ComponentUtil.getFessConfig().getIndexFieldUrl();
+        final BulkItemResponse[] items = response.getItems();
+        // the items are in the order of the requests
+        final boolean aligned = docList.size() == items.length;
+        for (int i = 0; i < items.length; i++) {
+            final BulkItemResponse item = items[i];
+            if (!item.isFailed() || item.getFailure() == null) {
+                continue;
+            }
+            final Failure failure = item.getFailure();
+            final Object url = aligned ? docList.get(i).get(urlField) : null;
+            final Throwable cause = failure.getCause();
+            final String type;
+            final String reason;
+            final Matcher matcher =
+                    cause != null && cause.getMessage() != null ? OPENSEARCH_EXCEPTION_PATTERN.matcher(cause.getMessage()) : null;
+            if (matcher != null && matcher.matches()) {
+                type = matcher.group(1);
+                reason = matcher.group(2);
+            } else {
+                type = cause != null ? cause.getClass().getSimpleName() : "unknown";
+                reason = failure.getMessage();
+            }
+            logger.warn("Failed to index a document: url={}, id={}, status={}, type={}, reason={}", url, failure.getId(),
+                    failure.getStatus(), type, abbreviateReason(reason, cause));
+        }
+    }
+
+    /**
+     * Builds the reason of a rejection for the log. The preview of the field value that the search engine
+     * adds to a mapping error is removed, because it is a part of the document content.
+     *
+     * @param reason the reason reported by the search engine
+     * @param cause the exception of the rejection
+     * @return the reason to log
+     */
+    protected String abbreviateReason(final String reason, final Throwable cause) {
+        final StringBuilder buf = new StringBuilder(StringUtils.defaultString(reason));
+        Throwable root = cause;
+        while (root != null && root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+        }
+        if (root != null && root != cause && root.getMessage() != null) {
+            final Matcher matcher = OPENSEARCH_EXCEPTION_PATTERN.matcher(root.getMessage());
+            buf.append(" (caused by: ").append(matcher.matches() ? matcher.group(2) : root.getMessage()).append(')');
+        }
+        return StringUtils.abbreviate(PREVIEW_PATTERN.matcher(buf).replaceAll(""), MAX_REASON_LENGTH);
     }
 
     /**

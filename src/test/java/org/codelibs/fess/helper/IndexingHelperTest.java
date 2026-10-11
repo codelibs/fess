@@ -28,14 +28,29 @@ import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClientException;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.apache.logging.log4j.Level;
+import org.codelibs.fesen.opensearch.OpenSearchException;
+import org.codelibs.fesen.opensearch.action.DocWriteRequest.OpType;
+import org.codelibs.fesen.opensearch.action.DocWriteResponse.Result;
 import org.codelibs.fesen.opensearch.action.bulk.BulkItemResponse;
+import org.codelibs.fesen.opensearch.action.bulk.BulkItemResponse.Failure;
+import org.codelibs.fesen.opensearch.action.index.IndexResponse;
+import org.codelibs.fesen.opensearch.common.xcontent.json.JsonXContent;
+import org.codelibs.fesen.opensearch.core.rest.RestStatus;
+import org.codelibs.fesen.opensearch.core.index.shard.ShardId;
+import org.codelibs.fesen.opensearch.core.xcontent.DeprecationHandler;
+import org.codelibs.fesen.opensearch.core.xcontent.NamedXContentRegistry;
+import org.codelibs.fesen.opensearch.core.xcontent.XContentParser;
 import org.codelibs.fesen.opensearch.action.bulk.BulkResponse;
 import org.codelibs.fesen.opensearch.action.index.IndexAction;
 import org.codelibs.fesen.opensearch.action.index.IndexRequestBuilder;
@@ -128,6 +143,70 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(0, docList.size());
         assertEquals(2, sentDocList.size());
         assertEquals("fess.update", sentIndex.get());
+    }
+
+    private BulkItemResponse failedItem(final int position, final String id, final String errorJson, final RestStatus status)
+            throws Exception {
+        try (XContentParser parser = JsonXContent.jsonXContent.createParser(NamedXContentRegistry.EMPTY,
+                DeprecationHandler.THROW_UNSUPPORTED_OPERATION, errorJson)) {
+            parser.nextToken();
+            final OpenSearchException cause = OpenSearchException.fromXContent(parser);
+            return new BulkItemResponse(position, OpType.INDEX, new Failure("fess.update", id, cause, status));
+        }
+    }
+
+    private SearchEngineClient clientReturning(final BulkResponse response) {
+        return new SearchEngineClient() {
+            @Override
+            public BulkResponse addAll(final String index, final List<Map<String, Object>> docList,
+                    final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
+                return response;
+            }
+
+            @Override
+            public List<Map<String, Object>> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition) {
+                return Collections.emptyList();
+            }
+        };
+    }
+
+    @Test
+    public void test_sendDocuments_warnsAboutRejectedDocuments() throws Exception {
+        documentSizeByQuery = 0L;
+        final String mappingError = "{\"type\":\"mapper_parsing_exception\",\"reason\":\"failed to parse field [content] of type [text] "
+                + "in document with id '002'. Preview of field's value: 'SECRET-BODY-TEXT'\","
+                + "\"caused_by\":{\"type\":\"illegal_state_exception\",\"reason\":\"Can't get text on a START_OBJECT at 1:20\"}}";
+        final IndexResponse.Builder indexed = new IndexResponse.Builder();
+        indexed.setShardId(new ShardId("fess.update", "uuid", 0));
+        indexed.setId("001");
+        indexed.setVersion(1L);
+        indexed.setResult(Result.CREATED);
+        final BulkItemResponse[] items = new BulkItemResponse[] { new BulkItemResponse(0, OpType.INDEX, indexed.build()),
+                failedItem(1, "002", mappingError, RestStatus.BAD_REQUEST) };
+        final SearchEngineClient client = clientReturning(new BulkResponse(items, 0L));
+        ComponentUtil.register(client, "searchEngineClient");
+        final DocList docList = new DocList();
+        docList.add(new HashMap<>(Map.of("_id", "001", "config_id", "W01", "url", "http://test.com/001")));
+        docList.add(new HashMap<>(Map.of("_id", "002", "config_id", "W01", "url", "http://test.com/002", "content", "SECRET-BODY-TEXT")));
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(IndexingHelper.class);
+        try {
+            // the rejected document keeps failing the batch, as before
+            Assertions.assertThrows(SearchEngineClientException.class, () -> indexingHelper.sendDocuments(client, docList));
+
+            final List<String> warnings = appender.messagesAt(Level.WARN);
+            assertEquals(1, warnings.size(), warnings.toString());
+            final String warning = warnings.get(0);
+            assertTrue(warning.contains("url=http://test.com/002"), warning);
+            assertTrue(warning.contains("id=002"), warning);
+            assertTrue(warning.contains("mapper_parsing_exception"), warning);
+            assertTrue(warning.contains("failed to parse field [content]"), warning);
+            assertTrue(warning.contains("Can't get text on a START_OBJECT"), warning);
+            assertFalse(warning.contains("SECRET-BODY-TEXT"), warning);
+            assertTrue(appender.messagesAt(Level.ERROR).isEmpty());
+        } finally {
+            appender.detach();
+        }
     }
 
     @Test
