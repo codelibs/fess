@@ -75,6 +75,8 @@ import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
+import org.codelibs.fesen.opensearch.action.get.GetRequest;
+import org.codelibs.fesen.opensearch.action.get.GetResponse;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
@@ -237,62 +239,146 @@ public class AdminBackupAction extends FessAdminAction {
 
         final ObjectMapper mapper = new ObjectMapper();
         final AtomicBoolean resetJobs = new AtomicBoolean(false);
-        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
-            con.setDoOutput(true);
-            try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile)));
-                    final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(), Constants.CHARSET_UTF_8))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    if (StringUtil.isNotBlank(line)) {
-                        final Map<String, Map<String, String>> dataObj;
-                        if (line.contains("\"_index\"") || line.contains("\"_type\"")) {
-                            dataObj = parseObject(mapper, line);
-                        } else {
-                            dataObj = null;
-                        }
-                        if (dataObj != null) {
-                            final Map<String, String> indexObj = dataObj.get("index");
-                            if (indexObj != null) {
-                                if (indexObj.containsKey("_type")) {
-                                    indexObj.remove("_type");
-                                }
-                                final String index = indexObj.get("_index");
-                                if (index != null) {
-                                    if (index.startsWith(".fess")) {
-                                        indexObj.put("_index", index.substring(1));
-                                    }
-                                    if (index.endsWith("scheduled_job")) {
-                                        resetJobs.set(true);
-                                    }
-                                }
-                                bw.write(mapper.writeValueAsString(dataObj));
-                            } else {
-                                bw.write(line);
-                            }
-                        } else {
-                            bw.write(line);
-                        }
-                    }
-                    bw.write("\n");
+        final File bulkFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".bulk");
+        try {
+            final int imported = writeNewerThanStored(mapper, tempFile, bulkFile, resetJobs);
+            if (imported == 0) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Bulk data import skipped, nothing is newer than the stored data: fileName={}", fileName);
                 }
-                bw.flush();
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
+                return;
             }
-        }).execute()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Bulk Response:\n{}", response.getContentAsString());
-            }
-            systemHelper.reloadConfiguration(resetJobs.get());
+            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
+                con.setDoOutput(true);
+                try (final InputStream in = new FileInputStream(bulkFile); final OutputStream out = con.getOutputStream()) {
+                    CopyUtil.copy(in, out);
+                } catch (IOException e) {
+                    throw new IORuntimeException(e);
+                }
+            }).execute()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Bulk Response:\n{}", response.getContentAsString());
+                }
+                systemHelper.reloadConfiguration(resetJobs.get());
 
-            if (logger.isInfoEnabled()) {
-                logger.info("Bulk data import completed successfully: fileName={}, resetJobs={}", fileName, resetJobs.get());
+                if (logger.isInfoEnabled()) {
+                    logger.info("Bulk data import completed successfully: fileName={}, documents={}, resetJobs={}", fileName, imported,
+                            resetJobs.get());
+                }
             }
         } catch (final Exception e) {
             logger.warn("Failed to import bulk file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
+            deleteTempFile(bulkFile);
             deleteTempFile(tempFile);
         }
+    }
+
+    /**
+     * Copies the bulk actions of a backup file to the file to post. A document that carries an
+     * updatedTime is copied only when the stored document is missing, has no updatedTime, or is
+     * older; so restoring a backup does not roll back what was changed after it was taken, and
+     * the jobs a release ships (updatedTime 0) are not replaced by an older release's copy.
+     *
+     * @param mapper The JSON mapper.
+     * @param src The backup file.
+     * @param dst The file to write.
+     * @param resetJobs Set when a scheduled job is copied.
+     * @return The number of documents copied.
+     * @throws IOException If the files cannot be accessed.
+     */
+    protected int writeNewerThanStored(final ObjectMapper mapper, final File src, final File dst, final AtomicBoolean resetJobs)
+            throws IOException {
+        int count = 0;
+        Map<String, Map<String, String>> pending = null;
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(src), Constants.CHARSET_UTF_8));
+                final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dst), Constants.CHARSET_UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (StringUtil.isBlank(line)) {
+                    continue;
+                }
+                if (pending != null) {
+                    final Map<String, String> indexObj = pending.get("index");
+                    pending = null;
+                    final String index = indexObj.get("_index");
+                    final String id = indexObj.get("_id");
+                    if (isNewerThanStored(mapper, index, id, line)) {
+                        bw.write(mapper.writeValueAsString(Map.of("index", indexObj)));
+                        bw.write("\n");
+                        bw.write(line);
+                        bw.write("\n");
+                        count++;
+                        if (index.endsWith("scheduled_job")) {
+                            resetJobs.set(true);
+                        }
+                    } else if (logger.isInfoEnabled()) {
+                        logger.info("Skipped a document that is not newer than the stored one: index={}, id={}", index, id);
+                    }
+                    continue;
+                }
+                final Map<String, Map<String, String>> dataObj;
+                if (line.contains("\"_index\"") || line.contains("\"_type\"")) {
+                    dataObj = parseObject(mapper, line);
+                } else {
+                    dataObj = null;
+                }
+                final Map<String, String> indexObj = dataObj != null ? dataObj.get("index") : null;
+                if (indexObj == null) {
+                    bw.write(line);
+                    bw.write("\n");
+                    continue;
+                }
+                indexObj.remove("_type");
+                final String index = indexObj.get("_index");
+                if (index != null && index.startsWith(".fess")) {
+                    indexObj.put("_index", index.substring(1));
+                }
+                if (indexObj.get("_index") == null || indexObj.get("_id") == null) {
+                    bw.write(mapper.writeValueAsString(dataObj));
+                    bw.write("\n");
+                } else {
+                    pending = dataObj;
+                }
+            }
+        }
+        return count;
+    }
+
+    private boolean isNewerThanStored(final ObjectMapper mapper, final String index, final String id, final String source) {
+        if (!source.contains("\"updatedTime\"")) {
+            return true;
+        }
+        try {
+            final Object backup = mapper.readValue(source, new TypeReference<Map<String, Object>>() {
+            }).get("updatedTime");
+            if (!(backup instanceof Number)) {
+                return true;
+            }
+            final Long stored = getStoredUpdatedTime(index, id);
+            return stored == null || ((Number) backup).longValue() > stored;
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to compare updatedTime: index={}, id={}", index, id, e);
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Get the updatedTime of a stored document.
+     *
+     * @param index The index name.
+     * @param id The document ID.
+     * @return The updatedTime, or null if the document or its updatedTime does not exist.
+     */
+    protected Long getStoredUpdatedTime(final String index, final String id) {
+        final GetResponse response = ComponentUtil.getSearchEngineClient().get(new GetRequest(index, id)).actionGet();
+        if (!response.isExists()) {
+            return null;
+        }
+        final Object updatedTime = response.getSourceAsMap().get("updatedTime");
+        return updatedTime instanceof Number ? ((Number) updatedTime).longValue() : null;
     }
 
     private void importGsaXml(final String fileName, final File tempFile) {
