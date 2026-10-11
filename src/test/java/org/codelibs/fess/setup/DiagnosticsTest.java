@@ -18,9 +18,14 @@ package org.codelibs.fess.setup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.codelibs.fess.setup.Diagnostics.Check;
 import org.codelibs.fess.setup.Diagnostics.Status;
@@ -31,6 +36,16 @@ public class DiagnosticsTest {
 
     @TempDir
     Path tempDir;
+
+    private Path writeJar(final String name) throws IOException {
+        final Path jar = tempDir.resolve(name);
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(jar))) {
+            zip.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
+            zip.write("Manifest-Version: 1.0\n".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+        return jar;
+    }
 
     /**
      * _cat returns one line per node, so a three-node cluster reports every plugin three
@@ -107,8 +122,8 @@ public class DiagnosticsTest {
      */
     @Test
     public void test_installedPlugins_reportsTwoVersionsOfOnePlugin() throws Exception {
-        Files.writeString(tempDir.resolve("fess-ds-git-15.9.0.jar"), "x");
-        Files.writeString(tempDir.resolve("fess-ds-git-15.9.1.jar"), "x");
+        writeJar("fess-ds-git-15.9.0.jar");
+        writeJar("fess-ds-git-15.9.1.jar");
 
         final List<Check> checks = Diagnostics.installedPlugins(tempDir, "15.9");
         assertEquals(1, checks.size());
@@ -123,8 +138,8 @@ public class DiagnosticsTest {
      */
     @Test
     public void test_installedPlugins_failsWhenAPluginIsForAnotherRelease() throws Exception {
-        Files.writeString(tempDir.resolve("fess-ds-git-15.8.0.jar"), "x");
-        Files.writeString(tempDir.resolve("fess-ds-slack-15.9.0.jar"), "x");
+        writeJar("fess-ds-git-15.8.0.jar");
+        writeJar("fess-ds-slack-15.9.0.jar");
 
         final List<Check> checks = Diagnostics.installedPlugins(tempDir, "15.9");
         assertEquals(2, checks.size());
@@ -138,11 +153,35 @@ public class DiagnosticsTest {
 
     @Test
     public void test_installedPlugins_acceptsASnapshotOfThisRelease() throws Exception {
-        Files.writeString(tempDir.resolve("fess-webapp-mcp-15.9.0-20260914.212412-2.jar"), "x");
+        writeJar("fess-webapp-mcp-15.9.0-20260914.212412-2.jar");
 
         final List<Check> checks = Diagnostics.installedPlugins(tempDir, "15.9");
         assertEquals(1, checks.size());
         assertEquals(Status.OK, checks.get(0).status(), checks.get(0).detail());
+    }
+
+    /**
+     * An empty, truncated or non-zip file named like a plugin jar is skipped by the servlet
+     * container, so the plugin does not load; the report must not call it installed.
+     */
+    @Test
+    public void test_installedPlugins_failsOnAJarThatIsNotAZipArchive() throws Exception {
+        Files.write(tempDir.resolve("fess-ds-zero-15.9.0.jar"), new byte[0]);
+        Files.writeString(tempDir.resolve("fess-ds-text-15.9.0.jar"), "this is not a jar");
+        final Path good = writeJar("fess-ds-good-15.9.0.jar");
+        final byte[] bytes = Files.readAllBytes(good);
+        Files.write(tempDir.resolve("fess-ds-trunc-15.9.0.jar"), Arrays.copyOf(bytes, bytes.length / 2));
+
+        final List<Check> checks = Diagnostics.installedPlugins(tempDir, "15.9");
+        assertEquals(4, checks.size());
+        assertEquals(Status.OK, checks.stream().filter(c -> c.name().contains("fess-ds-good")).findFirst().orElseThrow().status());
+        for (final String name : List.of("fess-ds-zero", "fess-ds-text", "fess-ds-trunc")) {
+            final Check check = checks.stream().filter(c -> c.name().contains(name)).findFirst().orElseThrow();
+            assertEquals(Status.FAIL, check.status(), check.detail());
+            assertTrue(check.detail().contains(name + "-15.9.0.jar"), "the file is named: " + check.detail());
+            assertTrue(check.detail().contains("fess-setup remove plugin " + name), "the remedy is named: " + check.detail());
+        }
+        assertEquals(Status.FAIL, Diagnostics.worst(checks));
     }
 
     @Test

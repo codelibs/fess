@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.zip.ZipFile;
 
 /**
  * The checks behind {@code fess-setup check}.
@@ -158,6 +159,13 @@ public final class Diagnostics {
                         + " (remove one with: fess-setup remove plugin " + artifactId + ", then install the version you want)"));
                 continue;
             }
+            final String unreadable = unreadableReason(jars.get(0));
+            if (unreadable != null) {
+                // Fess starts and the other plugins work, but this one does not load.
+                checks.add(new Check(Status.FAIL, "plugin " + artifactId,
+                        unreadable + " (remove it with: fess-setup remove plugin " + artifactId + ", then install it again)"));
+                continue;
+            }
             final String version = versions.get(0);
             if (productVersion != null && !version.equals(productVersion) && !version.startsWith(productVersion + ".")) {
                 // A failure, not a warning. A plugin is compiled against one Fess release, and the war
@@ -173,6 +181,24 @@ public final class Diagnostics {
             checks.add(new Check(Status.OK, "plugin " + artifactId, version));
         }
         return checks;
+    }
+
+    /**
+     * Explains why a plugin jar cannot be opened.
+     *
+     * <p>The file name alone says nothing about the content: a download that stopped half way,
+     * an empty file and a text file renamed to {@code .jar} all look like an installed plugin.
+     * The servlet container skips such a file, so Fess starts without the plugin.</p>
+     *
+     * @param jar the plugin jar
+     * @return the file name and the reason, or {@code null} when the jar opens as a zip archive
+     */
+    private static String unreadableReason(final Path jar) {
+        try (ZipFile zip = new ZipFile(jar.toFile())) {
+            return null;
+        } catch (final IOException e) {
+            return jar.getFileName() + " cannot be opened as a jar (" + e.getMessage() + ")";
+        }
     }
 
     /**
