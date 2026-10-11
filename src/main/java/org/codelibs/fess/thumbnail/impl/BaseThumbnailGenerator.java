@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -153,6 +154,31 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return pathList;
     }
 
+    /**
+     * Returns the file name suffixes appended to a {@code ${path}} generator command when it is looked for.
+     * <p>
+     * Windows cannot start the shell script {@code generate-thumbnail}, so its batch file counterpart
+     * {@code generate-thumbnail.bat} is looked for instead, and the shell script is not used there.
+     * </p>
+     *
+     * @return the suffixes to try, in order
+     */
+    protected List<String> getCommandSuffixList() {
+        if (isWindows()) {
+            return List.of(".bat", ".cmd", ".exe");
+        }
+        return List.of("");
+    }
+
+    /**
+     * Checks whether this process runs on Windows.
+     *
+     * @return true if the operating system is Windows
+     */
+    protected boolean isWindows() {
+        return System.getProperty("os.name", StringUtil.EMPTY).toLowerCase(Locale.ROOT).startsWith("windows");
+    }
+
     @Override
     public boolean isAvailable() {
         if (available != null) {
@@ -165,15 +191,18 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             }
             available = generatorList.stream().map(s -> {
                 if (s.startsWith("${path}")) {
+                    final List<String> suffixList = getCommandSuffixList();
                     for (final String p : pathList) {
-                        final File f = new File(s.replace("${path}", p));
-                        if (f.exists()) {
-                            final String filePath = f.getAbsolutePath();
-                            filePathMap.put(s, filePath);
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("generator path: {}", filePath);
+                        for (final String suffix : suffixList) {
+                            final File f = new File(s.replace("${path}", p) + suffix);
+                            if (f.isFile()) {
+                                final String filePath = f.getAbsolutePath();
+                                filePathMap.put(s, filePath);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("generator path: {}", filePath);
+                                }
+                                return filePath;
                             }
-                            return filePath;
                         }
                     }
                 }

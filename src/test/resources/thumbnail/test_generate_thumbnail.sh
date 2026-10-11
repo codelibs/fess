@@ -151,8 +151,58 @@ if command -v magick >/dev/null 2>&1 || command -v convert >/dev/null 2>&1; then
         run_file_test "Landscape JPEG (600x400)" "${OUTPUT_DIR}/landscape_thumb.png" \
             "${GENERATE_THUMBNAIL}" "image" "file:${TEST_DIR}/600x400.jpg" "${OUTPUT_DIR}/landscape_thumb.png" "image/jpeg"
     fi
+
+    # Test: Animated GIF (multiple frames must produce a single thumbnail file)
+    ANIM_GIF="${OUTPUT_DIR}/anim.gif"
+    if magick -size 300x200 xc:red xc:blue -loop 0 "${ANIM_GIF}" >/dev/null 2>&1 \
+        || convert -size 300x200 xc:red xc:blue -loop 0 "${ANIM_GIF}" >/dev/null 2>&1; then
+        run_file_test "Animated GIF thumbnail" "${OUTPUT_DIR}/anim_thumb.png" \
+            "${GENERATE_THUMBNAIL}" "image" "file:${ANIM_GIF}" "${OUTPUT_DIR}/anim_thumb.png" "image/gif"
+        rm -f "${ANIM_GIF}"
+    fi
+
+    # Test: Run with a POSIX sh (dash) instead of bash
+    if command -v dash >/dev/null 2>&1 && [[ -f "${TEST_DIR}/400x400.png" ]]; then
+        run_file_test "PNG thumbnail with dash" "${OUTPUT_DIR}/dash_thumb.png" \
+            dash "${GENERATE_THUMBNAIL}" "image" "file:${TEST_DIR}/400x400.png" "${OUTPUT_DIR}/dash_thumb.png" "image/png"
+    fi
+
+    # Test: PDF thumbnail generation (requires pdftoppm or gs)
+    if command -v pdftoppm >/dev/null 2>&1 || command -v gs >/dev/null 2>&1; then
+        PDF_TEST="${OUTPUT_DIR}/test.pdf"
+        # Minimal one-page PDF
+        printf '%s\n' '%PDF-1.4' \
+            '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj' \
+            '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj' \
+            '3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 300]>>endobj' \
+            'trailer<</Root 1 0 R>>' '%%EOF' > "${PDF_TEST}"
+        run_file_test "PDF thumbnail" "${OUTPUT_DIR}/pdf_thumb.png" \
+            "${GENERATE_THUMBNAIL}" "pdf" "file:${PDF_TEST}" "${OUTPUT_DIR}/pdf_thumb.png"
+        rm -f "${PDF_TEST}"
+    fi
 else
     echo -e "ImageMagick available: ${RED}NO${NC} (skipping image tests)"
+fi
+
+echo ""
+echo "--- ImageMagick v7 argument order tests ---"
+
+# Stub "magick" command that behaves like ImageMagick v7: an operator such as
+# -thumbnail given before any input image is an error.
+STUB_DIR="${OUTPUT_DIR}/stub_bin"
+mkdir -p "${STUB_DIR}"
+cat > "${STUB_DIR}/magick" << 'STUB'
+#!/bin/sh
+case "$1" in
+  -*) echo "magick: no images found for operation '$1'" >&2; exit 1 ;;
+esac
+for last in "$@"; do :; done
+echo "stub" > "${last}"
+STUB
+chmod +x "${STUB_DIR}/magick"
+if [[ -f "${TEST_DIR}/400x400.png" ]]; then
+    run_file_test "magick (v7) receives input before -thumbnail" "${OUTPUT_DIR}/stub_thumb.png" \
+        env PATH="${STUB_DIR}:${PATH}" "${GENERATE_THUMBNAIL}" "image" "file:${TEST_DIR}/400x400.png" "${OUTPUT_DIR}/stub_thumb.png" "image/png"
 fi
 
 echo ""
@@ -239,6 +289,15 @@ fi
 
 echo ""
 echo "--- Platform compatibility tests ---"
+
+echo -n "Testing: POSIX sh shebang... "
+if head -1 "${GENERATE_THUMBNAIL}" | grep -q '^#!/bin/sh'; then
+    echo -e "${GREEN}PASSED${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}FAILED${NC}"
+    ((TESTS_FAILED++))
+fi
 
 echo -n "Testing: Linux root HOME check... "
 if grep -q 'x"$HOME" = "x/root"' "${GENERATE_THUMBNAIL}"; then

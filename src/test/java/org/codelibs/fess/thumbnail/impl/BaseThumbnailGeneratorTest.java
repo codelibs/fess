@@ -16,10 +16,12 @@
 package org.codelibs.fess.thumbnail.impl;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -488,5 +490,67 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
                 System.setProperty(Constants.FESS_HOME, previous);
             }
         }
+    }
+
+    /**
+     * Windows cannot start the generate-thumbnail shell script, so the batch file next to it is
+     * used for the ${path}/generate-thumbnail command there.
+     */
+    @Test
+    public void test_isAvailable_usesBatchFileOnWindows() throws Exception {
+        final File binDir = Files.createTempDirectory("thumbnail_bin").toFile();
+        try {
+            final File script = new File(binDir, "generate-thumbnail");
+            final File batchFile = new File(binDir, "generate-thumbnail.bat");
+            assertTrue(script.createNewFile());
+            assertTrue(batchFile.createNewFile());
+
+            final CommandGenerator windowsGenerator = createCommandGenerator(binDir, true);
+            assertTrue(windowsGenerator.isAvailable());
+            assertEquals(batchFile.getAbsolutePath(), windowsGenerator.expandPath("${path}/generate-thumbnail"));
+
+            final CommandGenerator unixGenerator = createCommandGenerator(binDir, false);
+            assertTrue(unixGenerator.isAvailable());
+            assertEquals(script.getAbsolutePath(), unixGenerator.expandPath("${path}/generate-thumbnail"));
+        } finally {
+            FileUtils.deleteDirectory(binDir);
+        }
+    }
+
+    /**
+     * Without the batch file, the shell script is not used on Windows, so the generator is not
+     * registered instead of failing on every document.
+     */
+    @Test
+    public void test_isAvailable_ignoresShellScriptOnWindows() throws Exception {
+        final File binDir = Files.createTempDirectory("thumbnail_bin").toFile();
+        try {
+            assertTrue(new File(binDir, "generate-thumbnail").createNewFile());
+            assertFalse(createCommandGenerator(binDir, true).isAvailable());
+        } finally {
+            FileUtils.deleteDirectory(binDir);
+        }
+    }
+
+    @Test
+    public void test_getCommandSuffixList() {
+        assertEquals(List.of(".bat", ".cmd", ".exe"), createCommandGenerator(null, true).getCommandSuffixList());
+        assertEquals(List.of(""), createCommandGenerator(null, false).getCommandSuffixList());
+    }
+
+    private CommandGenerator createCommandGenerator(final File binDir, final boolean windows) {
+        final CommandGenerator commandGenerator = new CommandGenerator() {
+            @Override
+            protected List<String> getSearchPathList() {
+                return List.of(binDir.getAbsolutePath());
+            }
+
+            @Override
+            protected boolean isWindows() {
+                return windows;
+            }
+        };
+        commandGenerator.setGeneratorList(List.of("${path}/generate-thumbnail"));
+        return commandGenerator;
     }
 }
