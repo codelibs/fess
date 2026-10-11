@@ -326,13 +326,24 @@ public class DataIndexHelper {
                     dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
                 } catch (final Throwable e) {
                     logger.error("Failed to process a data crawling: {}", dataConfig.getName(), e);
-                    ComponentUtil.getComponent(FailureUrlService.class)
-                            .store(dataConfig, e.getClass().getCanonicalName(), dataConfig.getConfigId() + ":" + dataConfig.getName(), e);
+                    storeFailureUrl(e);
                 } finally {
-                    indexUpdateCallback.commit();
-                    deleteOldDocs();
+                    try {
+                        indexUpdateCallback.commit();
+                        deleteOldDocs();
+                    } catch (final Throwable e) {
+                        // The last batch was not indexed. Stale documents are not deleted in that case, because
+                        // the documents of the batch are the ones that should have replaced them.
+                        logger.error("Failed to commit the last documents of a data crawling: {}", dataConfig.getName(), e);
+                        storeFailureUrl(e);
+                    }
                 }
             }
+        }
+
+        private void storeFailureUrl(final Throwable e) {
+            ComponentUtil.getComponent(FailureUrlService.class)
+                    .store(dataConfig, e.getClass().getCanonicalName(), dataConfig.getConfigId() + ":" + dataConfig.getName(), e);
         }
 
         /**

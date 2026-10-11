@@ -325,8 +325,8 @@ public final class FessSetup {
      * say -- names the version instead, per plugin, because the plugins of one Fess line are
      * released separately and need not all be at the same one.</p>
      *
-     * <p>Every argument is parsed before the first download starts: a typo in the last of
-     * seven plugin names should not leave six of them installed.</p>
+     * <p>Every argument is parsed, and its version resolved, before the first download starts:
+     * a typo in the last of seven plugin names should not leave six of them installed.</p>
      *
      * @param args the command line
      * @param definitions the setup definition
@@ -334,7 +334,7 @@ public final class FessSetup {
      * @param out the stream for normal output
      * @param err the stream for errors
      * @return 0 on success, 2 when no plugin was named or one was named badly
-     * @throws SetupException if a download or a file operation fails
+     * @throws SetupException if a version cannot be resolved, or a download or a file operation fails
      */
     private static int installFessPlugins(final String[] args, final Map<String, ComponentDefinition> definitions,
             final Map<String, String> options, final PrintStream out, final PrintStream err) throws SetupException {
@@ -357,8 +357,12 @@ public final class FessSetup {
         final ComponentDefinition definition = definitions.get(PLUGIN_COMPONENT);
         final PluginSources sources = pluginSources(definition, options);
         final Path directory = pluginDirectory(definition, options);
+        final List<Resolved> resolved = new ArrayList<>();
         for (final PluginSpec spec : specs) {
-            installOne(sources, spec.artifactId(), resolve(sources, spec.artifactId(), spec.version()), directory, out);
+            resolved.add(resolve(sources, spec.artifactId(), spec.version()));
+        }
+        for (int i = 0; i < specs.size(); i++) {
+            installOne(sources, specs.get(i).artifactId(), resolved.get(i), directory, out);
         }
         out.println();
         out.println("Restart Fess to load " + (specs.size() == 1 ? "it." : "them."));
@@ -475,8 +479,8 @@ public final class FessSetup {
      *
      * <p>A theme's version is the Fess line it targets, so the same major.minor narrowing that
      * picks a plugin picks the theme built for this Fess, and a name with no version needs no
-     * catalogue to be consulted. Every argument is parsed before the first download starts, for
-     * the reason it is for plugins.</p>
+     * catalogue to be consulted. Every argument is parsed and resolved before the first download
+     * starts, for the reason it is for plugins.</p>
      *
      * @param args the command line
      * @param definitions the setup definition
@@ -507,8 +511,12 @@ public final class FessSetup {
         final ComponentDefinition definition = definitions.get(THEME_COMPONENT);
         final PluginSources sources = pluginSources(definition, options);
         final Path directory = themeDirectory(definition, options);
+        final List<Resolved> resolved = new ArrayList<>();
         for (final PluginSpec spec : specs) {
-            installOneTheme(sources, spec.artifactId(), resolve(sources, spec.artifactId(), spec.version()), directory, out);
+            resolved.add(resolve(sources, spec.artifactId(), spec.version()));
+        }
+        for (int i = 0; i < specs.size(); i++) {
+            installOneTheme(sources, specs.get(i).artifactId(), resolved.get(i), directory, out);
         }
         out.println();
         out.println("Restart Fess, or reload the themes from the admin screen, to pick " + (specs.size() == 1 ? "it up." : "them up."));

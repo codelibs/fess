@@ -245,18 +245,22 @@ public class QueryHelper {
 
     /**
      * Builds role-based query filters using the provided role set.
-     * This method adds should clauses for allowed roles and must-not clauses for denied roles.
+     * This method adds a should clause for the allowed roles and a must-not clause for the denied roles.
+     * Each of them is a single terms query, because OpenSearch rejects a bool query that has
+     * more than 1024 clauses and a user can have that many roles.
      *
      * @param roleSet the set of roles to use for filtering
      * @param boolQuery the boolean query builder to add role filters to
      */
     public void buildRoleQuery(final Set<String> roleSet, final BoolQueryBuilder boolQuery) {
         final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String roleField = fessConfig.getIndexFieldRole();
-        roleSet.stream().forEach(name -> roleQuery.should(QueryBuilders.termQuery(roleField, name)));
-        final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
-        roleSet.stream().forEach(name -> roleQuery.mustNot(QueryBuilders.termQuery(roleField, deniedPrefix + name)));
+        if (!roleSet.isEmpty()) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final String roleField = fessConfig.getIndexFieldRole();
+            final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
+            roleQuery.should(QueryBuilders.termsQuery(roleField, roleSet));
+            roleQuery.mustNot(QueryBuilders.termsQuery(roleField, roleSet.stream().map(name -> deniedPrefix + name).toList()));
+        }
         boolQuery.filter(roleQuery);
     }
 

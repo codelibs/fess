@@ -65,11 +65,16 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     /**
      * Lists files and directories in storage.
      * @param id The ID of the directory to list.
-     * @return A JSON response containing the list of files and directories.
+     * @return A JSON response containing the list of files and directories, or a validation error
+     *         when the storage cannot be listed.
      */
     @Execute
     public JsonResponse<ApiResult> list(final OptionalThing<String> id) {
-        final List<Map<String, Object>> list = getFileItems(id.isPresent() ? decodePath(id.get()) : null);
+        // an unreachable storage, or a storage type no plugin serves, must not answer as an empty
+        // listing: the message of the failure names the plugin to install
+        final List<Map<String, Object>> list =
+                getFileItems(id.isPresent() ? decodePath(id.get()) : null, e -> throwValidationErrorApi(messages -> messages
+                        .addErrorsStorageAccessError(GLOBAL, e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName())));
         try {
             return asJson(new ApiResult.ApiStorageResponse().items(list).status(ApiResult.Status.OK).result());
         } catch (final ResultOffsetExceededException e) {

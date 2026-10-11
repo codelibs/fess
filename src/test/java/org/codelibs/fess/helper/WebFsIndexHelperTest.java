@@ -505,4 +505,19 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
         assertFalse(WebFsIndexHelper.isUnsupportedProtocol("C:/path", FILE_PROTOCOLS_WITHOUT_S3));
         assertFalse(WebFsIndexHelper.isUnsupportedProtocol("c:\\Users\\foo\\docs", FILE_PROTOCOLS_WITHOUT_S3));
     }
+
+    @Test
+    public void test_protocolPluginHint_namesThePluginOfAStorageProtocol() {
+        assertTrue(WebFsIndexHelper.protocolPluginHint("s3://bucket/x").contains("fess-storage-s3"));
+        assertTrue(WebFsIndexHelper.protocolPluginHint("S3://bucket/x").contains("fess-storage-s3"));
+        assertTrue(WebFsIndexHelper.protocolPluginHint("gcs://bucket/x").contains("fess-storage-gcs"));
+        assertTrue(WebFsIndexHelper.protocolPluginHint("gcs://bucket/x").contains("fess-setup install plugin fess-storage-gcs"));
+    }
+
+    @Test
+    public void test_protocolPluginHint_staysGenericForOtherProtocols() {
+        final String hint = WebFsIndexHelper.protocolPluginHint("foo://host/x");
+        assertFalse(hint.contains("fess-storage"), hint);
+        assertTrue(hint.contains("may not be installed"), hint);
+    }
 }

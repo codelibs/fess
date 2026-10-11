@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.systeminfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -222,7 +223,8 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || isSsoClientCredential(key) //
                 || isPrivateKeyMaterial(key) //
                 || isEmbeddingApiKey(key) //
-                || isLlmApiKey(key);
+                || isLlmApiKey(key) //
+                || isSecretName(key);
     }
 
     private static String toSettingKey(final String name) {
@@ -307,6 +309,27 @@ public class AdminSysteminfoAction extends FessAdminAction {
      */
     protected static boolean isLlmApiKey(final String key) {
         return key != null && key.startsWith("rag.llm.") && key.endsWith(".api.key");
+    }
+
+    /**
+     * Checks if a name says that its value is a secret, e.g. the {@code storage.secretkey} setting
+     * or the {@code AWS_SECRET_ACCESS_KEY} environment variable. Matching on the word, ignoring
+     * case, instead of listing every name, means the variables other SDKs read, such as
+     * {@code AZURE_CLIENT_SECRET}, are masked by default.
+     *
+     * <p>{@code storage.secretkey} was rendered in cleartext under System Info &gt; Config Info,
+     * and so was the {@code AWS_SECRET_ACCESS_KEY} variable under Environment Variables; both were
+     * also copied verbatim into the bug report that users paste into public issues. The words
+     * {@code password}, {@code key} and {@code token} are deliberately not matched like this: many
+     * settings whose names contain them configure a rule or a flag and would be hidden from the
+     * page an administrator reads to diagnose the configuration. No Fess setting is named
+     * {@code secret} unless it holds one.
+     *
+     * @param key the property key or environment variable name to check
+     * @return true if the name contains the word secret
+     */
+    protected static boolean isSecretName(final String key) {
+        return key != null && key.toLowerCase(Locale.ROOT).contains("secret");
     }
 
     /**

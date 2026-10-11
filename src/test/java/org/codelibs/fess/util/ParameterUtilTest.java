@@ -224,6 +224,30 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals(expect, ParameterUtil.encrypt(value));
     }
 
+    // A parameter that was saved in clear text before its key joined the encrypt pattern must keep working:
+    // parse() decrypts only values carrying the cipher prefix, and the next save encrypts it.
+    @Test
+    public void test_encrypt_valueSavedInClearTextBeforeKeyJoinedPattern() {
+        FessProp.propMap.clear();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*passphrase|.*key";
+            }
+        });
+
+        final String stored = "client_id=abc\npassphrase=plain-secret";
+        assertEquals("plain-secret", ParameterUtil.parse(stored).get("passphrase"));
+        assertEquals("abc", ParameterUtil.parse(stored).get("client_id"));
+
+        final String encrypted = ParameterUtil.encrypt(stored);
+        assertTrue(encrypted, encrypted.contains("passphrase={cipher}"));
+        assertFalse(encrypted, encrypted.contains("plain-secret"));
+        assertTrue(encrypted, encrypted.contains("client_id=abc"));
+        assertEquals("plain-secret", ParameterUtil.parse(encrypted).get("passphrase"));
+        assertEquals(encrypted, ParameterUtil.encrypt(encrypted));
+    }
+
     @Test
     public void test_parse_advancedScenarios() {
         String value;
