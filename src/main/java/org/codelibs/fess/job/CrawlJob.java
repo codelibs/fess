@@ -18,11 +18,13 @@ package org.codelibs.fess.job;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -66,6 +68,11 @@ import jakarta.servlet.ServletContext;
 public class CrawlJob extends ExecJob {
 
     private static final Logger logger = LogManager.getLogger(CrawlJob.class);
+
+    private static final DateTimeFormatter SESSION_ID_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS").withZone(ZoneId.systemDefault());
+
+    private static final AtomicLong lastSessionTime = new AtomicLong();
 
     /**
      * The namespace identifier for the crawling session.
@@ -185,6 +192,21 @@ public class CrawlJob extends ExecJob {
         return this;
     }
 
+    /**
+     * Creates a session ID for a crawl started by this JVM.
+     * The ID is the current time in the form of yyyyMMddHHmmssSSS. If the clock has not advanced
+     * since the previous call, the time is advanced by one millisecond, so that IDs created
+     * in this JVM are always unique. This matters because {@link ProcessHelper#startProcess}
+     * destroys a running process that has the same session ID.
+     * The ID consists of digits only, since the crawler splits it at '-' to get the canonical session ID.
+     *
+     * @return the new session ID
+     */
+    public static String createSessionId() {
+        final long time = lastSessionTime.updateAndGet(prev -> Math.max(prev + 1, System.currentTimeMillis()));
+        return SESSION_ID_FORMATTER.format(Instant.ofEpochMilli(time));
+    }
+
     @Override
     public String execute() {
         //   check # of crawler processes
@@ -201,8 +223,7 @@ public class CrawlJob extends ExecJob {
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
 
         if (sessionId == null) { // create session id
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sessionId = sdf.format(new Date());
+            sessionId = createSessionId();
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         resultBuf.append("Web  Config Id:");

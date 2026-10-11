@@ -20,7 +20,13 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.Constants;
@@ -701,6 +707,50 @@ public class CrawlJobTest extends UnitFessTestCase {
         assertTrue(result.contains("Data Config Id: ALL"));
     }
 
+    // Session IDs created in the same JVM must be unique even within the same second,
+    // because ProcessHelper.startProcess destroys a running process with the same session ID.
+    @Test
+    public void test_createSessionId_uniqueWithinSameSecond() {
+        final int count = 2000;
+        final Set<String> ids = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            final String id = CrawlJob.createSessionId();
+            assertTrue(id.matches("\\d{17}"), id);
+            assertTrue(ids.add(id), "duplicated: " + id);
+        }
+    }
+
+    @Test
+    public void test_createSessionId_uniqueAcrossThreads() throws Exception {
+        final int threads = 8;
+        final int perThread = 500;
+        final Set<String> ids = ConcurrentHashMap.newKeySet();
+        final ExecutorService executor = Executors.newFixedThreadPool(threads);
+        try {
+            final List<Future<?>> futures = new ArrayList<>();
+            for (int t = 0; t < threads; t++) {
+                futures.add(executor.submit(() -> {
+                    for (int i = 0; i < perThread; i++) {
+                        ids.add(CrawlJob.createSessionId());
+                    }
+                }));
+            }
+            for (final Future<?> future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+        assertEquals(threads * perThread, ids.size());
+    }
+
+    @Test
+    public void test_createSessionId_keepsCanonicalForm() {
+        // CrawlingInfoHelper.getCanonicalSessionId cuts the ID at '-', and the crawler replaces '-' with '_'
+        final String id = CrawlJob.createSessionId();
+        assertFalse(id.contains("-"));
+    }
+
     // Test session ID generation
     @Test
     public void test_sessionIdGeneration() {
@@ -734,9 +784,9 @@ public class CrawlJobTest extends UnitFessTestCase {
         String result = crawlJob.execute();
 
         assertNotNull(crawlJob.sessionId);
-        // Check format: yyyyMMddHHmmss
-        assertEquals(14, crawlJob.sessionId.length());
-        assertTrue(crawlJob.sessionId.matches("\\d{14}"));
+        // Check format: yyyyMMddHHmmssSSS
+        assertEquals(17, crawlJob.sessionId.length());
+        assertTrue(crawlJob.sessionId.matches("\\d{17}"));
         assertTrue(result.contains("Session Id: " + crawlJob.sessionId));
     }
 
