@@ -33,6 +33,14 @@ case "$1" in
         if [ -n "$2" ]; then
             IS_UPGRADE=true
         fi
+
+        # Make a running systemd load the unit file this package has just
+        # installed (the rpm does this through a file trigger). Otherwise it
+        # keeps using the unit of the previous version until the next
+        # daemon-reload.
+        if [ -d /run/systemd/system ] && command -v systemctl >/dev/null; then
+            systemctl daemon-reload || true
+        fi
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
