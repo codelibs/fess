@@ -59,6 +59,7 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.LogUtil;
 
 /**
  * FessCrawlerThread is a specialized crawler thread implementation for the Fess search engine.
@@ -518,14 +519,6 @@ public class FessCrawlerThread extends CrawlerThread {
     }
 
     /**
-     * The crawling sessions and client names already reported by {@link #getNamedClient}, as
-     * {@code sessionId:clientName}. Static because a crawl runs one FessCrawlerThread instance per
-     * thread, and the report is meant once per crawling configuration: the session id is the one
-     * {@link CrawlingConfigHelper#store} gives each configuration of a crawl.
-     */
-    protected static final Set<String> missingClientReports = ConcurrentHashMap.newKeySet();
-
-    /**
      * Retrieves the appropriate crawler client for the given URL based on configured rules.
      * This method uses client rules to determine which specific client implementation
      * should be used for crawling the URL, falling back to the default client if no
@@ -574,11 +567,13 @@ public class FessCrawlerThread extends CrawlerThread {
      */
     protected CrawlerClient getNamedClient(final CrawlingConfig crawlingConfig, final String clientName, final String url) {
         final CrawlerClient client = clientFactory.getClient(clientName + ":" + url);
-        if (client == null && missingClientReports.add(crawlerContext.getSessionId() + ":" + clientName)) {
+        if (client == null) {
             final String hint = "playwright".equals(clientName)
                     ? " If the fess-crawler-playwright plugin is not installed, install it and Node.js with bin/fess-setup install plugin fess-crawler-playwright and bin/fess-setup install nodejs, then restart Fess."
                     : " The plugin that provides this client may not be installed.";
-            logger.warn(
+            // A crawl runs one FessCrawlerThread per thread, and the report is meant once per crawling
+            // configuration: the session id is the one CrawlingConfigHelper#store gives each configuration.
+            LogUtil.warnOnce(logger, crawlerContext.getSessionId() + ":" + clientName,
                     "[{}] No crawler client {} is registered for {}, which client.crawlerClients assigns to it. It is crawled with the client for its protocol instead.{} Other URLs of this crawling configuration for {} are not reported.",
                     crawlingConfig.getName(), clientName, url, hint, clientName);
         }

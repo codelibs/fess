@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.app.job;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.timer.TimeoutTask;
@@ -30,6 +27,7 @@ import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.opensearch.config.exentity.JobLog;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.LaJobRuntime;
@@ -46,9 +44,6 @@ public class ScriptExecutorJob implements LaJob {
     }
 
     private static final Logger logger = LogManager.getLogger(ScriptExecutorJob.class);
-
-    /** The ids of the jobs whose missing script engine has been reported. */
-    private static final Set<String> missingEngineReports = ConcurrentHashMap.newKeySet();
 
     @Override
     public void run(final LaJobRuntime runtime) {
@@ -185,10 +180,9 @@ public class ScriptExecutorJob implements LaJob {
      * @param t the failure
      */
     protected void reportMissingScriptEngine(final String id, final String scriptType, final Throwable t) {
-        if (missingEngineReports.add(id)) {
-            logger.warn("Failed to execute job: id={}, scriptType={}. {} This is not logged again for this job until Fess restarts.", id,
-                    scriptType, t.getMessage());
-        } else if (logger.isDebugEnabled()) {
+        if (!LogUtil.warnOnce(logger, id,
+                "Failed to execute job: id={}, scriptType={}. {} This is not logged again for this job until Fess restarts.", id,
+                scriptType, t.getMessage()) && logger.isDebugEnabled()) {
             logger.debug("Failed to execute job: id={}, scriptType={}", id, scriptType, t);
         }
     }
