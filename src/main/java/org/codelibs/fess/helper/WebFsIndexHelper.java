@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.split;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -340,8 +341,9 @@ public class WebFsIndexHelper {
                     if (!protocolHelper.isValidFileProtocol(urlValue)) {
                         if (isUnsupportedProtocol(urlValue, protocolHelper.getFileProtocols())) {
                             logger.warn(
-                                    "Unsupported protocol in a crawling path: {}. It is crawled as a local file path. Available file protocols are {} ({}). The plugin that provides this protocol may not be installed.",
-                                    urlValue, ComponentUtil.getFessConfig().getCrawlerFileProtocols(), FessConfig.CRAWLER_FILE_PROTOCOLS);
+                                    "Unsupported protocol in a crawling path: {}. It is crawled as a local file path. Available file protocols are {} ({}). {}",
+                                    urlValue, ComponentUtil.getFessConfig().getCrawlerFileProtocols(), FessConfig.CRAWLER_FILE_PROTOCOLS,
+                                    protocolPluginHint(urlValue));
                         }
                         if (urlValue.startsWith("/")) {
                             u = "file:" + urlValue;
@@ -357,9 +359,8 @@ public class WebFsIndexHelper {
                         // that upgrades keeps its own crawler.file.protocols, so this is the shape a
                         // missing protocol plugin takes for it. fess-crawler only logs the skip at
                         // info level, per URL, once the crawl is under way.
-                        logger.warn(
-                                "No crawler client is registered for a crawling path: {}. It is not crawled. The plugin that provides this protocol may not be installed.",
-                                u);
+                        logger.warn("No crawler client is registered for a crawling path: {}. It is not crawled. {}", u,
+                                protocolPluginHint(u));
                     }
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
@@ -562,6 +563,23 @@ public class WebFsIndexHelper {
             }
         }
         return SCHEME_PATTERN.matcher(path).find();
+    }
+
+    /**
+     * Tells which plugin provides the crawler client of a protocol, for the protocols that ship as a
+     * plugin and are therefore missing from an installation that has not installed it.
+     *
+     * @param path a path from a file crawling configuration
+     * @return a sentence for a log message, naming the plugin when the protocol is one that has one
+     */
+    static String protocolPluginHint(final String path) {
+        final String lower = path.toLowerCase(Locale.ROOT);
+        final String plugin = lower.startsWith("s3:") ? "fess-storage-s3" : lower.startsWith("gcs:") ? "fess-storage-gcs" : null;
+        if (plugin == null) {
+            return "The plugin that provides this protocol may not be installed.";
+        }
+        return "The " + plugin + " plugin provides this protocol; install it with bin/fess-setup install plugin " + plugin
+                + " and restart Fess.";
     }
 
     /**
