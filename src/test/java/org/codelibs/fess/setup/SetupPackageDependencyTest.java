@@ -77,6 +77,33 @@ public class SetupPackageDependencyTest {
     }
 
     /**
+     * The war leaves this package out (packagingExcludes in pom.xml), so a class outside it that
+     * imports it compiles and passes its unit tests, then fails to load when Fess starts.
+     */
+    @Test
+    public void test_nothingOutsideTheSetupPackageImportsIt() throws IOException {
+        final Path root = Path.of("src/main/java");
+        final Path setupDir = root.resolve("org/codelibs/fess/setup");
+        assertTrue(Files.isDirectory(setupDir), setupDir.toAbsolutePath() + " must exist");
+
+        final List<String> violations = new ArrayList<>();
+        try (Stream<Path> files = Files.walk(root)) {
+            for (final Path source : files.filter(path -> path.toString().endsWith(".java"))
+                    .filter(path -> !path.startsWith(setupDir))
+                    .toList()) {
+                for (final String line : Files.readAllLines(source)) {
+                    final String trimmed = line.trim();
+                    if (trimmed.startsWith("import org.codelibs.fess.setup.")
+                            || trimmed.startsWith("import static org.codelibs.fess.setup.")) {
+                        violations.add(root.relativize(source) + ": " + trimmed);
+                    }
+                }
+            }
+        }
+        assertTrue(violations.isEmpty(), "org.codelibs.fess.setup is not in the war, so nothing else may import it: " + violations);
+    }
+
+    /**
      * Guards the allowance above: were any of these to stop being JDK-supplied, the setup jar
      * would break at runtime while the import check still passed.
      */
