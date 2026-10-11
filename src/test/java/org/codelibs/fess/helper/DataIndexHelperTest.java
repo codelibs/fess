@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
@@ -29,7 +30,9 @@ import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.config.exbhv.DataConfigBhv;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
+import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -293,6 +296,45 @@ public class DataIndexHelperTest extends UnitFessTestCase {
 
         // Test should complete in under 1 second (much less than the original 25+ seconds)
         assertTrue("Test should complete quickly (duration: " + duration + "ms)", duration < 1000);
+    }
+
+    @Test
+    public void test_process_recordsAFailureWhenTheLastCommitFails() {
+        final List<String> failures = new ArrayList<>();
+        final AtomicBoolean deleted = new AtomicBoolean(false);
+        ComponentUtil.register(new FailureUrlService() {
+            @Override
+            public FailureUrl store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
+                failures.add(errorName + "|" + url + "|" + e.getMessage());
+                return null;
+            }
+        }, FailureUrlService.class.getCanonicalName());
+        ComponentUtil.register(new FastMockSearchEngineClient() {
+            @Override
+            public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
+                deleted.set(true);
+                return 0L;
+            }
+        }, "searchEngineClient");
+        final IndexUpdateCallback failingCallback = new FastMockIndexUpdateCallback() {
+            @Override
+            public void commit() {
+                throw new IllegalStateException("bulk rejected");
+            }
+        };
+        final DataConfig dataConfig = new DataConfig();
+        dataConfig.setId("config1");
+        dataConfig.setName("test");
+        final DataStoreParams params = new DataStoreParams();
+        params.put(Constants.SESSION_ID, "session1");
+
+        // an exception that escapes here ends the crawling thread without a log entry or a failure URL
+        new DataIndexHelper.DataCrawlingThread(dataConfig, failingCallback, params).process();
+
+        assertEquals(1, failures.size());
+        assertTrue(failures.get(0),
+                failures.get(0).equals("java.lang.IllegalStateException|" + dataConfig.getConfigId() + ":test|bulk rejected"));
+        assertFalse("stale documents must not be deleted after a failed commit", deleted.get());
     }
 
     // Fast mock implementations to minimize overhead
