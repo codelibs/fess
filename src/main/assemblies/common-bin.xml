@@ -20,6 +20,7 @@
 				<include>fess.bat</include>
 				<include>fess-setup.bat</include>
 				<include>service.bat</include>
+				<include>generate-thumbnail.bat</include>
 			</includes>
 		</fileSet>
 		<fileSet>
