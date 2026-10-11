@@ -17,17 +17,24 @@ package org.codelibs.fess.app.job;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.JobLog;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
+import org.codelibs.fess.script.ScriptEngine;
+import org.codelibs.fess.script.ScriptEngineFactory;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -204,6 +211,63 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
     //                                                                       Helpers
     //                                                                       ========
 
+    // ===================================================================================
+    //                                                          Missing script engine
+    //                                                          =====================
+
+    private List<LogEvent> runFailingJob(final String id, final ScriptEngineFactory scriptEngineFactory, final int times) {
+        final ScheduledJob scheduledJob = createTestScheduledJob(id, true);
+        final AtomicReference<JobLog> storedJobLog = new AtomicReference<>();
+        registerComponents(scheduledJob, storedJobLog, new JobExecutor() {
+            @Override
+            public Object execute(final String scriptType, final String script) {
+                return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(script, new HashMap<>());
+            }
+        });
+        ComponentUtil.register(scriptEngineFactory, "scriptEngineFactory");
+
+        final Map<String, Object> params = new HashMap<>();
+        params.put(Constants.SCHEDULED_JOB, scheduledJob);
+        final LogCapturingAppender appender = LogCapturingAppender.attach(ScriptExecutorJob.class);
+        try {
+            for (int i = 0; i < times; i++) {
+                final MockJobRuntime runtime = MockJobRuntime.of(ScriptExecutorJob.class, op -> op.params(() -> params));
+                new TestableScriptExecutorJob().process(runtime);
+                assertEquals(Constants.FAIL, storedJobLog.get().getJobStatus());
+            }
+            return appender.eventsAt(Level.WARN);
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_process_missingScriptEngine_warnsOnceWithoutStackTrace() {
+        final List<LogEvent> warnings = runFailingJob("missing-engine-1", new ScriptEngineFactory(), 3);
+
+        assertEquals(1, warnings.size());
+        assertNull(warnings.get(0).getThrown());
+        final String message = warnings.get(0).getMessage().getFormattedMessage();
+        assertTrue(message, message.contains("missing-engine-1"));
+        assertTrue(message, message.contains("fess-script-groovy"));
+    }
+
+    @Test
+    public void test_process_scriptFailure_keepsTheStackTrace() {
+        final ScriptEngineFactory factory = new ScriptEngineFactory();
+        factory.add("groovy", new ScriptEngine() {
+            @Override
+            public Object evaluate(final String template, final Map<String, Object> paramMap) {
+                throw new ScriptEngineException("Failed to evaluate the script");
+            }
+        });
+
+        final List<LogEvent> warnings = runFailingJob("failing-script-1", factory, 2);
+
+        assertEquals(2, warnings.size());
+        assertNotNull(warnings.get(0).getThrown());
+    }
+
     private ScheduledJob createTestScheduledJob(final String id, final boolean loggingEnabled) {
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setId(id);
@@ -221,6 +285,17 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
     }
 
     private void registerComponents(final ScheduledJob scheduledJob, final AtomicReference<JobLog> storedJobLog, final Object result) {
+        // JobExecutor that returns a simple result
+        registerComponents(scheduledJob, storedJobLog, new JobExecutor() {
+            @Override
+            public Object execute(final String scriptType, final String script) {
+                return result;
+            }
+        });
+    }
+
+    private void registerComponents(final ScheduledJob scheduledJob, final AtomicReference<JobLog> storedJobLog,
+            final JobExecutor jobExecutor) {
         // FessConfig that accepts our target
         final FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
@@ -304,13 +379,6 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
         };
         ComponentUtil.register(jobHelper, "jobHelper");
 
-        // JobExecutor that returns a simple result
-        final JobExecutor jobExecutor = new JobExecutor() {
-            @Override
-            public Object execute(final String scriptType, final String script) {
-                return result;
-            }
-        };
         ComponentUtil.register(jobExecutor, "scriptJobExecutor");
     }
 
