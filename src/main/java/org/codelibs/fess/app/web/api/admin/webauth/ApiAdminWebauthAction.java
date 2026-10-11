@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.app.service.WebConfigService;
@@ -151,6 +152,7 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
+        keepStoredPassword(body);
         body.crudMode = CrudMode.EDIT;
         final WebAuthentication webAuth = getWebAuthentication(body).map(entity -> {
             try {
@@ -201,7 +203,20 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         copyBeanToBean(entity, body, copyOp -> {
             copyOp.excludeNull();
         });
+        body.password = null; // never hand a stored credential back to the caller
         return body;
+    }
+
+    /**
+     * Keeps the stored password when an update does not carry a new one. The API never returns
+     * the password, so a client that reads a setting and sends it back has none to send.
+     *
+     * @param body the update request body
+     */
+    protected void keepStoredPassword(final EditBody body) {
+        if (StringUtil.isBlank(body.password)) {
+            webAuthService.getWebAuthentication(body.id).ifPresent(stored -> body.password = stored.getPassword());
+        }
     }
 
     /**
