@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +42,7 @@ import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.action.search.SearchResponse;
 import org.codelibs.fesen.opensearch.search.SearchHit;
@@ -92,6 +94,82 @@ public class AdminBackupActionTest extends UnitFessTestCase {
                 "the log line must name the index: " + event.getMessage().getFormattedMessage());
         assertNotNull(event.getThrown(), "the log line must carry the cause");
         assertEquals(SearchEngineClientException.class, event.getThrown().getClass());
+    }
+
+    /**
+     * Restoring a 15.8 backup onto a 15.9 install must not put the 15.8 copy of a bundled job
+     * (updatedTime 0, Groovy) over the 15.9 one, but must still bring back what was changed or
+     * created after the install, and documents that carry no updatedTime.
+     */
+    @Test
+    public void test_writeNewerThanStored_importsOnlyWhatIsNewer() throws Exception {
+        final Path dir = Files.createTempDirectory("restore_test");
+        try {
+            final Path src = dir.resolve("src.bulk");
+            Files.writeString(src, String.join("\n", "{\"index\":{\"_index\":\".fess_config.scheduled_job\",\"_id\":\"bundled\"}}",
+                    "{\"name\":\"b\",\"updatedTime\":0}", "{\"index\":{\"_index\":\"fess_config.scheduled_job\",\"_id\":\"edited\"}}",
+                    "{\"name\":\"e\",\"updatedTime\":200}", "{\"index\":{\"_index\":\"fess_config.scheduled_job\",\"_id\":\"older\"}}",
+                    "{\"name\":\"o\",\"updatedTime\":100}", "{\"index\":{\"_index\":\"fess_config.scheduled_job\",\"_id\":\"new\"}}",
+                    "{\"name\":\"n\",\"updatedTime\":50}", "{\"index\":{\"_index\":\"fess_config.label_type\",\"_id\":\"nostamp\"}}",
+                    "{\"name\":\"l\"}", ""));
+            final Path dst = dir.resolve("dst.bulk");
+            final AdminBackupAction action = new AdminBackupAction() {
+                @Override
+                protected Long getStoredUpdatedTime(final String index, final String id) {
+                    switch (id) {
+                    case "bundled":
+                        return 0L;
+                    case "edited":
+                        return 100L;
+                    case "older":
+                        return 300L;
+                    default:
+                        return null;
+                    }
+                }
+            };
+            final AtomicBoolean resetJobs = new AtomicBoolean(false);
+
+            final int count = action.writeNewerThanStored(new ObjectMapper(), src.toFile(), dst.toFile(), resetJobs);
+
+            final String out = Files.readString(dst);
+            assertEquals(3, count);
+            assertFalse(out.contains("\"bundled\""), out);
+            assertFalse(out.contains("\"older\""), out);
+            assertTrue(out.contains("\"edited\""), out);
+            assertTrue(out.contains("\"new\""), out);
+            assertTrue(out.contains("\"nostamp\""), out);
+            assertTrue(resetJobs.get());
+        } finally {
+            deleteRecursively(dir);
+        }
+    }
+
+    /**
+     * When every scheduled job in the backup is skipped, the jobs are not reset.
+     */
+    @Test
+    public void test_writeNewerThanStored_doesNotResetJobsWhenAllSkipped() throws Exception {
+        final Path dir = Files.createTempDirectory("restore_test");
+        try {
+            final Path src = dir.resolve("src.bulk");
+            Files.writeString(src, "{\"index\":{\"_index\":\"fess_config.scheduled_job\",\"_id\":\"bundled\"}}\n"
+                    + "{\"name\":\"b\",\"updatedTime\":0}\n");
+            final Path dst = dir.resolve("dst.bulk");
+            final AdminBackupAction action = new AdminBackupAction() {
+                @Override
+                protected Long getStoredUpdatedTime(final String index, final String id) {
+                    return 0L;
+                }
+            };
+            final AtomicBoolean resetJobs = new AtomicBoolean(false);
+
+            assertEquals(0, action.writeNewerThanStored(new ObjectMapper(), src.toFile(), dst.toFile(), resetJobs));
+            assertEquals("", Files.readString(dst));
+            assertFalse(resetJobs.get());
+        } finally {
+            deleteRecursively(dir);
+        }
     }
 
     // ===================================================================================
