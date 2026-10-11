@@ -101,6 +101,49 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksStorageSecretKeyAndSecretNamedVariables() {
+        // storage.secretkey is a fess_props item (General settings > Storage), and the S3 SDK
+        // reads AWS_SECRET_ACCESS_KEY from the environment; neither is covered by a name above.
+        assertTrue(AdminSysteminfoAction.isMaskedValue(Constants.STORAGE_SECRET_KEY));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("fess.system.storage.secretkey"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("AWS_SECRET_ACCESS_KEY"));
+        // Any name that says it is a secret, whatever its spelling, which also covers the
+        // variables other cloud SDKs read.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("AZURE_CLIENT_SECRET"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("my.app.Secret"));
+
+        // The access key id and the other storage settings are not secrets.
+        assertFalse(AdminSysteminfoAction.isMaskedValue(Constants.STORAGE_ACCESS_KEY));
+        assertFalse(AdminSysteminfoAction.isMaskedValue(Constants.STORAGE_ENDPOINT));
+        assertFalse(AdminSysteminfoAction.isMaskedValue(Constants.STORAGE_BUCKET));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("AWS_REGION"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("AWS_ACCESS_KEY_ID"));
+    }
+
+    @Test
+    public void test_getFessPropItems_masksTheStorageSecretKey() {
+        ComponentUtil.getSystemProperties().setProperty(Constants.STORAGE_SECRET_KEY, "s3-secret-value");
+        ComponentUtil.getSystemProperties().setProperty(Constants.STORAGE_BUCKET, "fess-bucket");
+
+        final List<Map<String, String>> itemList = AdminSysteminfoAction.getFessPropItems(ComponentUtil.getFessConfig());
+
+        assertEquals(MASKED_VALUE, findValue(itemList, Constants.STORAGE_SECRET_KEY));
+        assertEquals("fess-bucket", findValue(itemList, Constants.STORAGE_BUCKET));
+        itemList.forEach(item -> assertFalse(item.get(Constants.ITEM_VALUE).contains("s3-secret-value")));
+    }
+
+    @Test
+    public void test_createMaskedItem_masksASecretNamedVariableAndSecretOptions() {
+        // getEnvItems builds its items with createMaskedItem, and System.getenv() cannot be set
+        // from a test, so the shared path is checked here.
+        assertEquals(MASKED_VALUE, AdminSysteminfoAction.createMaskedItem("AWS_SECRET_ACCESS_KEY", "wJalr").get(Constants.ITEM_VALUE));
+        assertEquals("us-east-1", AdminSysteminfoAction.createMaskedItem("AWS_REGION", "us-east-1").get(Constants.ITEM_VALUE));
+        assertEquals("-Dfess.system.storage.secretkey=" + MASKED_VALUE + " -Xmx2g",
+                AdminSysteminfoAction.createMaskedItem("JAVA_TOOL_OPTIONS", "-Dfess.system.storage.secretkey=wJalr -Xmx2g")
+                        .get(Constants.ITEM_VALUE));
+    }
+
+    @Test
     public void test_isMaskedValue_masksSearchEngineAndInitialUserPasswords() {
         // index.user.initial_password (default "admin") and search_engine.password are
         // fess_config.properties settings like http.proxy.password, and were listed in cleartext.
@@ -361,6 +404,7 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         ComponentUtil.getSystemProperties().setProperty("entraid.client.secret", "entraid-super-secret");
         ComponentUtil.getSystemProperties().setProperty("entraid.tenant", "contoso.onmicrosoft.com");
         ComponentUtil.getSystemProperties().setProperty("saml.sp.privatekey", "MIIEvgIBADANBgkq-private-key");
+        ComponentUtil.getSystemProperties().setProperty(Constants.STORAGE_SECRET_KEY, "s3-secret-value");
         ComponentUtil.getSystemProperties().setProperty("saml.sp.x509cert", "MIIDGTCCAgGg-public-cert");
         ComponentUtil.getSystemProperties().setProperty("content_chunker.embedding.dimension", "768");
 
@@ -374,6 +418,7 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
         assertEquals(MASKED_VALUE, findValue(itemList, "rag.llm.openai.api.key"));
         assertEquals(MASKED_VALUE, findValue(itemList, "entraid.client.secret"));
         assertEquals(MASKED_VALUE, findValue(itemList, "saml.sp.privatekey"));
+        assertEquals(MASKED_VALUE, findValue(itemList, Constants.STORAGE_SECRET_KEY));
 
         // An ordinary diagnostic key is unaffected and keeps its real value.
         assertEquals("MIIDGTCCAgGg-public-cert", findValue(itemList, "saml.sp.x509cert"));
