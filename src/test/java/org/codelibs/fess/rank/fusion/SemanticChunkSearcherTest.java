@@ -354,12 +354,12 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         // user gets a near-empty page. The knn body itself has to carry the constraint.
         assertTrue(knnPart.contains("\"filter\""), "the knn query must carry the permission filter: " + json);
         final String filterPart = knnPart.substring(knnPart.indexOf("\"filter\""));
-        assertTrue(filterPart.contains("\"role\":{\"value\":\"Rguest\""), "the knn filter must carry the role terms: " + json);
+        assertTrue(filterPart.contains("\"terms\":{\"role\":[\"Rguest\"]"), "the knn filter must carry the role terms: " + json);
         assertTrue(filterPart.contains("\"virtual_host\":{\"value\":\"vhost1\""),
                 "the knn filter must carry the virtual host term: " + json);
         // ... and the outer query must keep enforcing it (the knn filter is a recall aid, not
         // the security boundary), so the role term is serialized twice.
-        assertEquals(2, countOccurrences(json, "\"role\":{\"value\":\"Rguest\""), json);
+        assertEquals(2, countOccurrences(json, "\"terms\":{\"role\":[\"Rguest\"]"), json);
         assertEquals(2, countOccurrences(json, "\"virtual_host\":{\"value\":\"vhost1\""), json);
     }
 
@@ -370,7 +370,7 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertTrue(json.contains("script_score"), json);
         assertFalse(json.contains("\"knn\""), json);
         // exact mode has no in-query top-k truncation, so a single outer permission clause is enough
-        assertEquals(1, countOccurrences(json, "\"role\":{\"value\":\"Rguest\""), json);
+        assertEquals(1, countOccurrences(json, "\"terms\":{\"role\":[\"Rguest\"]"), json);
         assertEquals(1, countOccurrences(json, "\"virtual_host\":{\"value\":\"vhost1\""), json);
     }
 
@@ -694,7 +694,7 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
                 new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, null);
         final String json = searcher.buildSemanticQuery(context, new StubSearchRequestParams(0, 10)).toString().replaceAll("\\s", "");
         assertFalse(json.contains("\"label\""), json);
-        assertEquals(2, countOccurrences(json, "\"role\":{\"value\":\"Rguest\""), json);
+        assertEquals(2, countOccurrences(json, "\"terms\":{\"role\":[\"Rguest\"]"), json);
     }
 
     @Test
@@ -712,7 +712,7 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         final String annJson = searcher.buildSemanticQuery(annContext, params).toString().replaceAll("\\s", "");
         // a hard bool filter on the outer query, plus the recall copy inside the knn query
         assertEquals(2, countOccurrences(annJson, "\"terms\":{\"label\":[\"public\"]"), annJson);
-        assertEquals(2, countOccurrences(annJson, "\"role\":{\"value\":\"Rguest\""), annJson);
+        assertEquals(2, countOccurrences(annJson, "\"terms\":{\"role\":[\"Rguest\"]"), annJson);
 
         final SemanticChunkSearcher.SemanticQueryContext exactContext =
                 new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, false, null);
@@ -727,7 +727,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         final SemanticChunkSearcher.SemanticQueryContext context =
                 new SemanticChunkSearcher.SemanticQueryContext(new float[] { 0.1f, 0.2f }, true, null);
         final String json = searcher.buildSemanticQuery(context, new StubSearchRequestParams(0, 10)).toString().replaceAll("\\s", "");
-        assertFalse(json.contains("\"terms\""), json);
+        // the role filter is a terms query as well, so look for the request's own filter field
+        assertFalse(json.contains("\"terms\":{\"label\""), json);
     }
 
     @Test

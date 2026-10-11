@@ -51,6 +51,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
+import org.codelibs.fesen.opensearch.index.query.TermsQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 
 public class QueryHelperTest extends UnitFessTestCase {
@@ -895,6 +896,53 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(queryString.contains("role1"));
         assertTrue(queryString.contains("role2"));
         assertTrue(queryString.contains("filter"));
+    }
+
+    @Test
+    public void test_buildRoleQuery_groupsRolesIntoTermsQueries() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String roleField = fessConfig.getIndexFieldRole();
+        final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
+        final Set<String> roles = Set.of("role1", "role2", "role3");
+
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        queryHelper.buildRoleQuery(roles, boolQuery);
+
+        assertEquals(1, boolQuery.filter().size());
+        final BoolQueryBuilder roleQuery = (BoolQueryBuilder) boolQuery.filter().get(0);
+        // the roles are ORed in should, and the denied roles are excluded in must_not
+        assertEquals(1, roleQuery.should().size());
+        assertTermsQuery(roleField, roles, roleQuery.should().get(0));
+        assertEquals(1, roleQuery.mustNot().size());
+        final Set<String> deniedRoles = roles.stream().map(name -> deniedPrefix + name).collect(Collectors.toSet());
+        assertTermsQuery(roleField, deniedRoles, roleQuery.mustNot().get(0));
+        assertEquals(0, roleQuery.must().size());
+        assertEquals(0, roleQuery.filter().size());
+    }
+
+    private void assertTermsQuery(final String field, final Set<String> values, final QueryBuilder query) {
+        assertTrue(query instanceof TermsQueryBuilder, query.toString());
+        final TermsQueryBuilder terms = (TermsQueryBuilder) query;
+        assertEquals(field, terms.fieldName());
+        assertEquals(values, new java.util.HashSet<Object>(terms.values()));
+    }
+
+    @Test
+    public void test_buildRoleQuery_manyRolesStayWithinBoolClauseLimit() {
+        // OpenSearch rejects a bool query that has more than 1024 clauses (indices.query.bool.max_clause_count)
+        final Set<String> roles = new java.util.HashSet<>();
+        for (int i = 0; i < 600; i++) {
+            roles.add("group" + i);
+        }
+
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        queryHelper.buildRoleQuery(roles, boolQuery);
+
+        final BoolQueryBuilder roleQuery = (BoolQueryBuilder) boolQuery.filter().get(0);
+        assertTrue(roleQuery.should().size() + roleQuery.mustNot().size() <= 2);
+        final String queryString = boolQuery.toString();
+        assertTrue(queryString.contains("group0\""));
+        assertTrue(queryString.contains("group599\""));
     }
 
     @Test
