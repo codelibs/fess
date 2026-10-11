@@ -124,7 +124,9 @@ public class ScriptExecutorJob implements LaJob {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
                     logger.info("Finished job: id={}, returnValue:\n{}", id, ret);
                 }
-                jobLog.setScriptResult(ret.toString());
+                // the result is a keyword field, which the search engine refuses at 32,766 bytes or
+                // more; the failure message below is cut the same way
+                jobLog.setScriptResult(systemHelper.abbreviateLongText(ret.toString()));
             }
             jobLog.setJobStatus(Constants.OK);
         } catch (final Throwable t) {
