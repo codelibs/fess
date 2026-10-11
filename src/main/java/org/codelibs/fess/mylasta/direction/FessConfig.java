@@ -2478,7 +2478,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'app.encrypt.property.pattern'. <br>
-     * The value is, e.g. .*password|.*key|.*token|.*secret <br>
+     * The value is, e.g. .*password|.*passphrase|.*key|.*token|.*secret <br>
      * comment: <br>
      * NOTE: app.digest.algorithm is kept for LEGACY password verification only<br>
      * (pre-upgrade hashes that have no {id} prefix). Do not use for new passwords.<br>
