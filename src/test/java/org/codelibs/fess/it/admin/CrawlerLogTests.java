@@ -169,6 +169,9 @@ public class CrawlerLogTests extends CrawlTestBase {
         requestBody.put("urls", urls);
         requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
+        // The host never resolves, so robots.txt is always unavailable and the crawler would back off
+        // 10 + 20 + 40 seconds before giving up. Skip robots.txt to get the failure URL right away.
+        requestBody.put("config_parameter", "client.robotsTxtEnabled=false");
         requestBody.put("depth", 0);
         requestBody.put("max_access_count", 2L); // Minimal: 1 success + 1 failure
         requestBody.put("num_of_thread", 1);
