@@ -15,11 +15,15 @@
  */
 package org.codelibs.fess.app.job;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.ScheduledJobException;
+import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
@@ -42,6 +46,9 @@ public class ScriptExecutorJob implements LaJob {
     }
 
     private static final Logger logger = LogManager.getLogger(ScriptExecutorJob.class);
+
+    /** The ids of the jobs whose missing script engine has been reported. */
+    private static final Set<String> missingEngineReports = ConcurrentHashMap.newKeySet();
 
     @Override
     public void run(final LaJobRuntime runtime) {
@@ -128,7 +135,11 @@ public class ScriptExecutorJob implements LaJob {
             }
             jobLog.setJobStatus(Constants.OK);
         } catch (final Throwable t) {
-            logger.warn("Failed to execute job: id={}, script={}", id, script, t);
+            if (isMissingScriptEngine(scriptType, t)) {
+                reportMissingScriptEngine(id, scriptType, t);
+            } else {
+                logger.warn("Failed to execute job: id={}, script={}", id, script, t);
+            }
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {
@@ -146,6 +157,37 @@ public class ScriptExecutorJob implements LaJob {
             if (scheduledJob.isLoggingEnabled()) {
                 jobHelper.store(jobLog);
             }
+        }
+    }
+
+    /**
+     * Tells whether a job failed only because its script engine is not registered.
+     *
+     * @param scriptType the script type of the job
+     * @param t the failure
+     * @return true if the failure is the missing engine
+     */
+    protected boolean isMissingScriptEngine(final String scriptType, final Throwable t) {
+        return t instanceof ScriptEngineException && !ComponentUtil.getScriptEngineFactory().hasScriptEngine(scriptType);
+    }
+
+    /**
+     * Reports a job whose script engine is not registered.
+     *
+     * <p>The failure repeats on every run of the job and its message already names the plugin to
+     * install, so it is logged once per job, without the stack trace of a failure inside a script.
+     * The failure is still recorded in the job log.</p>
+     *
+     * @param id the job id
+     * @param scriptType the script type of the job
+     * @param t the failure
+     */
+    protected void reportMissingScriptEngine(final String id, final String scriptType, final Throwable t) {
+        if (missingEngineReports.add(id)) {
+            logger.warn("Failed to execute job: id={}, scriptType={}. {} This is not logged again for this job until Fess restarts.", id,
+                    scriptType, t.getMessage());
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Failed to execute job: id={}, scriptType={}", id, scriptType, t);
         }
     }
 
