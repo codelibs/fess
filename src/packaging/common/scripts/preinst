@@ -29,6 +29,28 @@ case "$1" in
     # Debian ####################################################
     install|upgrade)
 
+        # The files under the configuration directory became conffiles in 15.9.
+        # When upgrading from an older version, dpkg does not know them as
+        # conffiles yet and asks about every one that differs from the new
+        # package, edited or not (the default answer, and --force-confold, keep
+        # the old file). Remove the files that still match the md5sums of the
+        # installed package, so that dpkg installs the new copy without a
+        # question. Files the operator edited stay and are handled as usual.
+        if [ "$1" = "upgrade" ] && dpkg --compare-versions "$2" lt 15.9~; then
+            OLD_MD5SUMS="$(dpkg-query --control-path fess md5sums 2>/dev/null || true)"
+            if [ -n "$OLD_MD5SUMS" ] && [ -f "$OLD_MD5SUMS" ]; then
+                while read -r OLD_MD5 OLD_FILE; do
+                    case "/$OLD_FILE" in
+                        "${packaging.fess.conf.dir}"/*)
+                            if [ -f "/$OLD_FILE" ] && [ "$(md5sum "/$OLD_FILE" | cut -d ' ' -f 1)" = "$OLD_MD5" ]; then
+                                rm -f "/$OLD_FILE"
+                            fi
+                        ;;
+                    esac
+                done < "$OLD_MD5SUMS"
+            fi
+        fi
+
         # Create fess group if not existing
         if ! getent group "$FESS_GROUP" > /dev/null 2>&1 ; then
             echo -n "Creating $FESS_GROUP group..."
