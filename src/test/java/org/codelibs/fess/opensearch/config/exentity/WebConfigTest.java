@@ -31,9 +31,12 @@ import org.codelibs.fess.crawler.client.http.config.WebAuthenticationConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.core.security.exception.CipherFailureException;
 import org.codelibs.fesen.opensearch.common.SetOnce;
 
 public class WebConfigTest extends UnitFessTestCase {
@@ -263,5 +266,28 @@ public class WebConfigTest extends UnitFessTestCase {
         assertEquals(userAgent, initParamMap.get("userAgent"));
         assertEquals(0, ((WebAuthenticationConfig[]) initParamMap.get(HcHttpClient.AUTHENTICATIONS_PROPERTY)).length);
         assertFalse(Boolean.valueOf(initParamMap.get("robotsTxtEnabled").toString()).booleanValue());
+    }
+
+    // A value encrypted with another app.cipher.key must fail naming the crawl configuration.
+    @Test
+    public void test_getConfigParameterMap_undecryptableValue_namesConfig() {
+        FessProp.propMap.clear();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*key|.*secret";
+            }
+        });
+        final WebConfig webConfig = new WebConfig();
+        webConfig.setId("abc123");
+        webConfig.setName("Intranet");
+        webConfig.setConfigParameter("client.secret={cipher}00112233445566778899aabbccddeeff");
+        final CipherFailureException e =
+                Assertions.assertThrows(CipherFailureException.class, () -> webConfig.getConfigParameterMap(ConfigName.CLIENT));
+        final String message = e.getMessage();
+        assertTrue(message, message.contains("web config: name=Intranet, id=abc123"));
+        assertTrue(message, message.contains("key=client.secret"));
+        assertTrue(message, message.contains("app.cipher.key"));
+        assertFalse(message, message.contains("00112233445566778899aabbccddeeff"));
     }
 }

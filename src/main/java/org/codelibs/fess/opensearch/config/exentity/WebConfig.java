@@ -221,7 +221,8 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     @Override
     public Map<String, String> getConfigParameterMap(final ConfigName name) {
         if (configParameterMap == null) {
-            configParameterMap = ParameterUtil.createConfigParameterMap(getConfigParameter());
+            configParameterMap =
+                    ParameterUtil.createConfigParameterMap(getConfigParameter(), "web config: name=" + getName() + ", id=" + getId());
         }
 
         final Map<String, String> configMap = configParameterMap.get(name);

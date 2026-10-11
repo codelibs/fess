@@ -24,6 +24,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.lastaflute.core.security.PrimaryCipher;
+import org.lastaflute.core.security.exception.CipherFailureException;
 
 /**
  * Utility class for parameter operations.
@@ -66,6 +67,23 @@ public class ParameterUtil {
      * @return the parameter map
      */
     public static Map<String, String> parse(final String value) {
+        return parse(value, null);
+    }
+
+    /**
+     * Parses parameter string into a map, naming the owner of the parameters when a value cannot be decrypted.
+     *
+     * <p>A value that was encrypted with another {@code app.cipher.key} cannot be decrypted. The exception then
+     * names the owner and the parameter key, and points to {@code app.cipher.key}. Neither the encrypted value
+     * nor the cipher key is part of the message, and the original exception, whose message repeats the
+     * encrypted value, is not chained.</p>
+     *
+     * @param value the parameter string
+     * @param owner a description of the setting the parameters belong to, such as its type, name and ID; may be null
+     * @return the parameter map
+     * @throws CipherFailureException if an encrypted value cannot be decrypted
+     */
+    public static Map<String, String> parse(final String value, final String owner) {
         final Map<String, String> paramMap = new LinkedHashMap<>();
         if (value != null) {
             int unknownKey = 0;
@@ -83,7 +101,14 @@ public class ParameterUtil {
                         if (pos < line.length()) {
                             String data = line.substring(pos + 1).trim();
                             if (properyPattern.matcher(key).matches() && data.startsWith(CIPHER_PREFIX)) {
-                                data = cipher.decrypt(data.substring(CIPHER_PREFIX.length()));
+                                try {
+                                    data = cipher.decrypt(data.substring(CIPHER_PREFIX.length()));
+                                } catch (final CipherFailureException e) {
+                                    throw new CipherFailureException("Failed to decrypt a parameter: "
+                                            + (owner != null ? "owner=" + owner + ", " : "") + "key=" + key
+                                            + ". The cipher key (app.cipher.key) may differ from the key used when the value was saved.",
+                                            e.getCause());
+                                }
                             }
                             paramMap.put(key, data);
                         } else {
@@ -172,6 +197,18 @@ public class ParameterUtil {
      * @return the configuration parameter map
      */
     public static Map<ConfigName, Map<String, String>> createConfigParameterMap(final String configParameters) {
+        return createConfigParameterMap(configParameters, null);
+    }
+
+    /**
+     * Creates a configuration parameter map, naming the owner of the parameters when a value cannot be decrypted.
+     *
+     * @param configParameters the configuration parameters
+     * @param owner a description of the setting the parameters belong to; may be null
+     * @return the configuration parameter map
+     * @see #parse(String, String)
+     */
+    public static Map<ConfigName, Map<String, String>> createConfigParameterMap(final String configParameters, final String owner) {
         final Map<ConfigName, Map<String, String>> map = new HashMap<>();
         final Map<String, String> configConfigMap = new LinkedHashMap<>();
         final Map<String, String> clientConfigMap = new LinkedHashMap<>();
@@ -187,7 +224,7 @@ public class ParameterUtil {
         map.put(ConfigName.VALUE, valueConfigMap);
         map.put(ConfigName.SCRIPT, scriptConfigMap);
         map.put(ConfigName.FIELD, fieldConfigMap);
-        for (final Map.Entry<String, String> entry : ParameterUtil.parse(configParameters).entrySet()) {
+        for (final Map.Entry<String, String> entry : ParameterUtil.parse(configParameters, owner).entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith(CONFIG_PREFIX)) {
                 configConfigMap.put(key.substring(CONFIG_PREFIX.length()), entry.getValue());

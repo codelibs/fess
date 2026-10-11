@@ -22,8 +22,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.security.exception.CipherFailureException;
 
 public class ParameterUtilTest extends UnitFessTestCase {
 
@@ -246,6 +248,47 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertTrue(encrypted, encrypted.contains("client_id=abc"));
         assertEquals("plain-secret", ParameterUtil.parse(encrypted).get("passphrase"));
         assertEquals(encrypted, ParameterUtil.encrypt(encrypted));
+    }
+
+    // An encrypted value that app.cipher.key cannot decrypt, such as one saved before the key was replaced.
+    private static final String UNDECRYPTABLE_VALUE = "00112233445566778899aabbccddeeff";
+
+    @Test
+    public void test_parse_undecryptableValue_namesOwnerAndKey() {
+        final CipherFailureException e = Assertions.assertThrows(CipherFailureException.class,
+                () -> ParameterUtil.parse("a=b\nclient.password={cipher}" + UNDECRYPTABLE_VALUE, "web config: name=Intranet, id=abc"));
+        final String message = e.getMessage();
+        assertTrue(message, message.contains("owner=web config: name=Intranet, id=abc"));
+        assertTrue(message, message.contains("key=client.password"));
+        assertTrue(message, message.contains("app.cipher.key"));
+        assertFalse(message, message.contains(UNDECRYPTABLE_VALUE));
+        // the original exception repeats the encrypted value, so it is not chained
+        for (Throwable t = e.getCause(); t != null; t = t.getCause()) {
+            assertFalse(String.valueOf(t.getMessage()), String.valueOf(t.getMessage()).contains(UNDECRYPTABLE_VALUE));
+        }
+    }
+
+    @Test
+    public void test_parse_undecryptableValue_withoutOwner() {
+        final CipherFailureException e = Assertions.assertThrows(CipherFailureException.class,
+                () -> ParameterUtil.parse("client.password={cipher}" + UNDECRYPTABLE_VALUE));
+        final String message = e.getMessage();
+        assertFalse(message, message.contains("owner="));
+        assertTrue(message, message.contains("key=client.password"));
+        assertTrue(message, message.contains("app.cipher.key"));
+    }
+
+    @Test
+    public void test_createConfigParameterMap_undecryptableValue_namesOwner() {
+        final CipherFailureException e = Assertions.assertThrows(CipherFailureException.class, () -> ParameterUtil
+                .createConfigParameterMap("client.password={cipher}" + UNDECRYPTABLE_VALUE, "file config: name=Share, id=xyz"));
+        assertTrue(e.getMessage(), e.getMessage().contains("owner=file config: name=Share, id=xyz"));
+    }
+
+    @Test
+    public void test_parse_decryptableValue_withOwner() {
+        final String encrypted = ParameterUtil.encrypt("client.password=secret");
+        assertEquals("secret", ParameterUtil.parse(encrypted, "web config: name=Intranet, id=abc").get("client.password"));
     }
 
     @Test
