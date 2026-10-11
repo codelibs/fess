@@ -153,6 +153,54 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                                       Script result
+    //                                                                       =============
+
+    private static final int LOG_OUTPUT_LIMIT = 4000;
+
+    private JobLog runJobReturning(final Object result) {
+        final ScheduledJob scheduledJob = createTestScheduledJob("proc-result", true);
+        final AtomicReference<JobLog> storedJobLog = new AtomicReference<>();
+        registerComponents(scheduledJob, storedJobLog, result);
+
+        final Map<String, Object> params = new HashMap<>();
+        params.put(Constants.SCHEDULED_JOB, scheduledJob);
+        final MockJobRuntime runtime = MockJobRuntime.of(ScriptExecutorJob.class, op -> op.params(() -> params));
+
+        new TestableScriptExecutorJob().process(runtime);
+        return storedJobLog.get();
+    }
+
+    /**
+     * A script result is a keyword field of the job log, and the search engine refuses a term of
+     * 32,766 bytes or more, which left the log row unfinished. The result is cut like a failure message.
+     */
+    @Test
+    public void test_process_aLongScriptResultIsAbbreviatedBeforeItIsStored() {
+        final JobLog jobLog = runJobReturning("x".repeat(40_000));
+
+        assertEquals(Constants.OK, jobLog.getJobStatus());
+        assertEquals(LOG_OUTPUT_LIMIT, jobLog.getScriptResult().length());
+        assertTrue(jobLog.getScriptResult().endsWith("..."));
+        assertTrue(jobLog.getScriptResult().getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32_766);
+    }
+
+    @Test
+    public void test_process_aMultibyteScriptResultStaysBelowTheTermLimit() {
+        final JobLog jobLog = runJobReturning("\u3042".repeat(40_000));
+
+        assertEquals(Constants.OK, jobLog.getJobStatus());
+        assertTrue(jobLog.getScriptResult().getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32_766);
+    }
+
+    @Test
+    public void test_process_aShortScriptResultIsStoredAsIs() {
+        assertEquals("result text", runJobReturning("result text").getScriptResult());
+        assertEquals("12345", runJobReturning(12345).getScriptResult());
+        assertNull(runJobReturning(null).getScriptResult());
+    }
+
+    // ===================================================================================
     //                                                                       Helpers
     //                                                                       ========
 
@@ -169,6 +217,10 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
     }
 
     private void registerComponents(final ScheduledJob scheduledJob, final AtomicReference<JobLog> storedJobLog) {
+        registerComponents(scheduledJob, storedJobLog, "OK");
+    }
+
+    private void registerComponents(final ScheduledJob scheduledJob, final AtomicReference<JobLog> storedJobLog, final Object result) {
         // FessConfig that accepts our target
         final FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
@@ -179,6 +231,11 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
             @Override
             public String getSchedulerTargetName() {
                 return Constants.DEFAULT_JOB_TARGET;
+            }
+
+            @Override
+            public Integer getMaxLogOutputLengthAsInteger() {
+                return Integer.valueOf(LOG_OUTPUT_LIMIT);
             }
         };
         ComponentUtil.setFessConfig(fessConfig);
@@ -251,7 +308,7 @@ public class ScriptExecutorJobTest extends UnitFessTestCase {
         final JobExecutor jobExecutor = new JobExecutor() {
             @Override
             public Object execute(final String scriptType, final String script) {
-                return "OK";
+                return result;
             }
         };
         ComponentUtil.register(jobExecutor, "scriptJobExecutor");
