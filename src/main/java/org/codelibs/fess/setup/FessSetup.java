@@ -76,7 +76,7 @@ public final class FessSetup {
                   Download Node.js, which the Playwright plugins (the crawler and the
                   thumbnail generator) need.
 
-              install plugin <name>[:<version>]... [--version <version>] [--repository <url>]
+              install plugin <name>[:<version>]... [--version <version>] [--repository <url>] [--dest <dir>]
                   Install Fess plugins, for example fess-script-groovy or fess-ds-git.
                   A name with no version is resolved against the repository, which picks
                   the newest one built for this Fess. Name one instead to pin it, either
@@ -90,7 +90,7 @@ public final class FessSetup {
                   GitHub included. A file:/// URL names a copy of the repository on this
                   machine, for a server with no route to the Internet.
 
-              install theme <name>[:<version>]... [--version <version>] [--repository <url>]
+              install theme <name>[:<version>]... [--version <version>] [--repository <url>] [--dest <dir>]
                   Install static themes, for example docuforge or voicebox.
                   A theme's version is the Fess line it targets, so a name with no version
                   resolves to the theme built for this Fess. The archive is checked against
@@ -98,34 +98,37 @@ public final class FessSetup {
                   directory; a theme already installed under that name is kept as a backup
                   for the same period as one replaced from the admin screen.
 
-              remove plugin <name>...
+              remove plugin <name>... [--dest <dir>]
                   Delete installed Fess plugins.
 
-              remove theme <name>...
+              remove theme <name>... [--dest <dir>]
                   Delete installed static themes, keeping each as a backup.
 
               list
                   Show the components this build knows how to install.
 
-              list plugins [--repository <url>]
+              list plugins [--repository <url>] [--dest <dir>]
                   Show the Fess plugins published for this version, and which are installed.
                   A development build lists the snapshot repository too.
 
-              list themes [--repository <url>]
+              list themes [--repository <url>] [--dest <dir>]
                   Show the static themes published for this version, and which are installed.
                   The names come from theme-index.txt, which the deploy publishes beside the
                   themes; when that cannot be read, the installed themes are still shown and a
                   theme can be installed by naming it.
 
-              list installed
+              list installed [--dest <dir>]
                   Show the installed Fess plugins, without asking the repository.
 
-              upgrade plugins [--repository <url>]
+              upgrade plugins [--repository <url>] [--dest <dir>]
                   Re-install every installed Fess plugin at the version that fits this Fess.
 
-              check [--url <engine url>] [--playwright]
+              check [--url <engine url>] [--playwright] [--dest <dir>]
                   Report on the installation: the engine, its plugins, and the installed
                   plugins. Exit 0 when everything is in order, 1 when something is wrong.
+
+            On a plugin or theme command, --dest names the plugins or themes directory to use
+            in place of the one under this Fess.
             """;
 
     private FessSetup() {
