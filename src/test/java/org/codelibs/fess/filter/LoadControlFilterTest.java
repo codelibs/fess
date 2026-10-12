@@ -15,12 +15,16 @@
  */
 package org.codelibs.fess.filter;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -466,6 +470,69 @@ public class LoadControlFilterTest extends UnitFessTestCase {
         loadControlFilter.doFilter(mockRequest, mockResponse, mockFilterChain);
 
         assertTrue(mockFilterChain.wasDoFilterCalled());
+    }
+
+    // ===================================================================================
+    //                                                                    Invalid Setting
+    //                                                                    ================
+
+    @Test
+    public void test_getThreshold_validValue() {
+        final LoadControlFilter filter = new LoadControlFilter();
+        final FessConfig config = new LoadControlConfig("60", "80");
+
+        assertEquals(60, filter.getThreshold(config, false));
+        assertEquals(80, filter.getThreshold(config, true));
+    }
+
+    @Test
+    public void test_getThreshold_invalidApiValueNamesTheKey() {
+        final LoadControlFilter filter = new LoadControlFilter();
+        final FessConfig config = new LoadControlConfig("100", "abc");
+
+        final FessSystemException e = assertThrows(FessSystemException.class, () -> filter.getThreshold(config, true));
+        assertTrue(e.getMessage(), e.getMessage().contains("key=api.load.control"));
+        assertTrue(e.getMessage(), e.getMessage().contains("value=abc"));
+        assertTrue(e.getCause() instanceof NumberFormatException);
+
+        // The web threshold is a separate setting and is still read
+        assertEquals(100, filter.getThreshold(config, false));
+    }
+
+    @Test
+    public void test_getThreshold_invalidWebValueNamesTheKey() {
+        final LoadControlFilter filter = new LoadControlFilter();
+        final FessConfig config = new LoadControlConfig("abc", "100");
+
+        final FessSystemException e = assertThrows(FessSystemException.class, () -> filter.getThreshold(config, false));
+        assertTrue(e.getMessage(), e.getMessage().contains("key=web.load.control"));
+    }
+
+    private static class LoadControlConfig extends FessConfig.SimpleImpl {
+        private static final long serialVersionUID = 1L;
+
+        private final String web;
+        private final String api;
+
+        LoadControlConfig(final String web, final String api) {
+            this.web = web;
+            this.api = api;
+        }
+
+        @Override
+        public String get(final String propertyKey) {
+            return switch (propertyKey) {
+            case FessConfig.WEB_LOAD_CONTROL -> web;
+            case FessConfig.API_LOAD_CONTROL -> api;
+            default -> super.get(propertyKey);
+            };
+        }
+
+        @Override
+        public Integer getAsInteger(final String propertyKey) {
+            // the configuration parses the value as the properties object does: Integer.valueOf fails with NumberFormatException
+            return Integer.valueOf(get(propertyKey));
+        }
     }
 
     // ===================================================================================
