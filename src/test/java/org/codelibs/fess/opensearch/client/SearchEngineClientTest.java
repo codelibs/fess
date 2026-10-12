@@ -200,6 +200,44 @@ public class SearchEngineClientTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isIndexClosed() {
+        assertTrue(SearchEngineClient.isIndexClosed(new OpenSearchStatusException(
+                "OpenSearch exception [type=index_closed_exception, reason=closed]", RestStatus.BAD_REQUEST, null)));
+        assertFalse(SearchEngineClient.isIndexClosed(
+                new OpenSearchStatusException("OpenSearch exception [type=illegal_argument_exception, reason=Result window is too large]",
+                        RestStatus.BAD_REQUEST, null)));
+        assertFalse(SearchEngineClient.isIndexClosed(new OpenSearchStatusException(null, RestStatus.BAD_REQUEST, null)));
+        assertFalse(SearchEngineClient.isIndexClosed(new OpenSearchException("x")));
+    }
+
+    /**
+     * The search engine answers a search of a closed index with a 400, but nothing is wrong with the
+     * query: it must not be thrown as an InvalidQueryException, which the search repeats with an
+     * escaped query and the API answers as an invalid request.
+     */
+    @Test
+    public void test_search_closedIndex_isNotAnInvalidQuery() {
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        final OpenSearchStatusException closed = new OpenSearchStatusException(
+                "OpenSearch exception [type=index_closed_exception, reason=closed]", RestStatus.BAD_REQUEST, null);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(SearchEngineClient.class);
+        try {
+            clientSearchFailingWith(closed).search("fess.search", builder -> true, (builder, execTime, response) -> response);
+            fail("a closed index must not be answered as a result");
+        } catch (final SearchEngineUnavailableException e) {
+            assertEquals(closed, e.getCause());
+            final List<LogEvent> warnings = capture.eventsOnThisThreadAt(Level.WARN);
+            assertEquals(1, warnings.size());
+            final String message = warnings.get(0).getMessage().getFormattedMessage();
+            assertTrue(message, message.contains("fess.search"));
+            assertTrue(message, message.contains("index_closed_exception"));
+            assertNull(warnings.get(0).getThrown(), "a closed index is not worth a stack trace");
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
     public void test_search_otherEngineFailures_stayInvalidQueries() {
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         final OpenSearchException[] failures = { new OpenSearchStatusException("x", RestStatus.BAD_REQUEST, null),
