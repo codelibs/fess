@@ -38,6 +38,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
+import org.codelibs.fess.app.web.admin.systeminfo.AdminSysteminfoAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.CoordinatorHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
@@ -323,7 +324,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     protected void writeFessConfig(final ZipOutputStream zos, final String id) {
         if (fessConfig instanceof SimpleImpl) {
             final Properties prop = new Properties();
-            ((SimpleImpl) fessConfig).keySet().stream().forEach(k -> prop.setProperty(k, fessConfig.get(k)));
+            ((SimpleImpl) fessConfig).keySet().stream().forEach(k -> prop.setProperty(k, maskIfSensitive(k, fessConfig.get(k))));
 
             final ZipEntry entry = new ZipEntry(id + "/fess_config.properties");
             try {
@@ -347,6 +348,10 @@ public class AdminMaintenanceAction extends FessAdminAction {
         try {
             zos.putNextEntry(entry);
             SearchEngineUtil.scroll(index, hit -> {
+                if (isAccessTokenIndex(hit.getIndex())) {
+                    // The diagnostic is sent to support, and a token is a credential of the admin API.
+                    return true;
+                }
                 final String data = "{\"index\":{\"_index\":\"" + index + "\",\"_id\":\"" + StringEscapeUtils.escapeJson(hit.getId())
                         + "\"}}\n" + hit.getSourceAsString() + "\n";
                 try {
@@ -371,10 +376,36 @@ public class AdminMaintenanceAction extends FessAdminAction {
         final ZipEntry entry = new ZipEntry(id + "/system.properties");
         try {
             zos.putNextEntry(entry);
-            ComponentUtil.getSystemProperties().store(zos, getHostInfo());
+            final Properties prop = new Properties();
+            ComponentUtil.getSystemProperties()
+                    .entrySet()
+                    .forEach(e -> prop.setProperty(e.getKey().toString(), maskIfSensitive(e.getKey().toString(), e.getValue().toString())));
+            prop.store(zos, getHostInfo());
         } catch (final IOException e) {
             logger.warn("Failed to access system.properties.", e);
         }
+    }
+
+    /**
+     * Replaces the value of a sensitive key with the placeholder shown on the system info screen.
+     * The key stays so that the diagnostic still tells which settings exist.
+     *
+     * @param key the property key
+     * @param value the property value
+     * @return the placeholder if the key is sensitive, otherwise the value
+     */
+    protected static String maskIfSensitive(final String key, final String value) {
+        return AdminSysteminfoAction.isMaskedValue(key) ? AdminSysteminfoAction.MASKED_VALUE : value;
+    }
+
+    /**
+     * Checks if an index of fess_basic_config holds access tokens.
+     *
+     * @param index the name of the index a document was read from
+     * @return true if the index holds access tokens
+     */
+    protected static boolean isAccessTokenIndex(final String index) {
+        return index != null && index.contains(".access_token");
     }
 
     /**

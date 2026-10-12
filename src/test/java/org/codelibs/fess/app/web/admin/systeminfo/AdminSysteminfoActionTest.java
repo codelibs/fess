@@ -54,6 +54,14 @@ public class AdminSysteminfoActionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isMaskedValue_masksNotificationWebhookUrls() {
+        // A webhook URL carries its own credential in the path.
+        assertTrue(AdminSysteminfoAction.isMaskedValue("slack.webhook.urls"));
+        assertTrue(AdminSysteminfoAction.isMaskedValue("google.chat.webhook.urls"));
+        assertFalse(AdminSysteminfoAction.isMaskedValue("slack.webhook.timeout"));
+    }
+
+    @Test
     public void test_isMaskedValue_masksEmbeddingProviderApiKeys() {
         assertTrue(AdminSysteminfoAction.isMaskedValue("content_chunker.embedding.openai.api.key"));
         assertTrue(AdminSysteminfoAction.isMaskedValue("content_chunker.embedding.gemini.api.key"));
