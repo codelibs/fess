@@ -267,7 +267,7 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
         assertEquals(List.of(), param(deleteRequest, "add"));
         assertEquals(List.of("v"), param(deleteRequest, "remove"));
         assertTrue(deleteRequest.retryOnConflict() > 0);
-        assertTrue(deleteRequest.script().getIdOrCode().contains(";ctx._source.content_ja=ctx._source.content"));
+        assertTrue(deleteRequest.script().getIdOrCode().contains(";ctx._source['content_ja']=ctx._source['content']"));
         final UpdateRequest addRequest = bulkCalls.get(1).get(0);
         assertEquals(List.of("v"), param(addRequest, "add"));
         assertEquals(List.of(), param(addRequest, "remove"));
@@ -317,7 +317,8 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
         final List<UpdateRequest> requests = bulkCalls.get(0);
         final String jaSource = requests.get(0).script().getIdOrCode();
         assertTrue(jaSource.startsWith(TagTypeHelper.buildUpdateTagScript("tag")), jaSource);
-        assertTrue(jaSource.endsWith(";ctx._source.content_ja=ctx._source.content;ctx._source.title_ja=ctx._source.title"), jaSource);
+        assertTrue(jaSource.endsWith(";ctx._source['content_ja']=ctx._source['content'];ctx._source['title_ja']=ctx._source['title']"),
+                jaSource);
         assertEquals(TagTypeHelper.buildUpdateTagScript("tag"), requests.get(1).script().getIdOrCode());
     }
 

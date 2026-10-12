@@ -48,7 +48,15 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("aaa", languageHelper.createScript(doc, "aaa").getIdOrCode());
 
         doc.put("lang", "ja");
-        assertEquals("aaa;ctx._source.title_ja=ctx._source.title;ctx._source.content_ja=ctx._source.content",
+        assertEquals("aaa;ctx._source['title_ja']=ctx._source['title'];ctx._source['content_ja']=ctx._source['content']",
+                languageHelper.createScript(doc, "aaa").getIdOrCode());
+    }
+
+    @Test
+    public void test_createScript_hyphenatedLanguage() {
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("lang", "zh-cn");
+        assertEquals("aaa;ctx._source['title_zh-cn']=ctx._source['title'];ctx._source['content_zh-cn']=ctx._source['content']",
                 languageHelper.createScript(doc, "aaa").getIdOrCode());
     }
 
@@ -296,7 +304,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
 
         Script result = languageHelper.createScript(doc, "test");
         assertEquals(
-                "test;ctx._source.title_ja=ctx._source.title;ctx._source.content_ja=ctx._source.content;ctx._source.description_ja=ctx._source.description",
+                "test;ctx._source['title_ja']=ctx._source['title'];ctx._source['content_ja']=ctx._source['content'];ctx._source['description_ja']=ctx._source['description']",
                 result.getIdOrCode());
     }
 
