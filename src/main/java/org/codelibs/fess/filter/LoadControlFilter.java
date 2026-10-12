@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -74,7 +75,7 @@ public class LoadControlFilter implements Filter {
 
         final boolean isApiPath = path.startsWith("/api/");
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int threshold = isApiPath ? fessConfig.getApiLoadControlAsInteger() : fessConfig.getWebLoadControlAsInteger();
+        final int threshold = getThreshold(fessConfig, isApiPath);
 
         if (threshold >= 100) {
             chain.doFilter(request, response);
@@ -96,6 +97,27 @@ public class LoadControlFilter implements Filter {
             sendApiResponse(httpResponse);
         } else {
             httpResponse.sendError(429);
+        }
+    }
+
+    /**
+     * Gets the CPU threshold that applies to the request.
+     *
+     * <p>A value that is not a number still fails the request, as before, but the exception now names
+     * the setting that is wrong instead of only the rejected string.</p>
+     *
+     * @param fessConfig the Fess configuration
+     * @param isApiPath true for an API request, false for a web request
+     * @return the threshold in percent; 100 or more disables load control
+     * @throws FessSystemException if the setting is not an integer
+     */
+    protected int getThreshold(final FessConfig fessConfig, final boolean isApiPath) {
+        final String key = isApiPath ? FessConfig.API_LOAD_CONTROL : FessConfig.WEB_LOAD_CONTROL;
+        try {
+            return isApiPath ? fessConfig.getApiLoadControlAsInteger() : fessConfig.getWebLoadControlAsInteger();
+        } catch (final NumberFormatException e) {
+            throw new FessSystemException("The setting must be an integer: key=" + key + ", value="
+                    + (isApiPath ? fessConfig.getApiLoadControl() : fessConfig.getWebLoadControl()), e);
         }
     }
 
