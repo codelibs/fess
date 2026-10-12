@@ -213,6 +213,62 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_load_doesNotWaitPerRecord() {
+        final StubKeyMatchHelper helper = new StubKeyMatchHelper(5);
+        helper.setReloadInterval(1000L);
+
+        final long start = System.nanoTime();
+        assertEquals(1, helper.load());
+        final long elapsedMillis = (System.nanoTime() - start) / 1_000_000L;
+
+        assertEquals(0, helper.waitCount);
+        assertTrue("load() must not sleep per record: " + elapsedMillis + "ms", elapsedMillis < 1000L);
+    }
+
+    @Test
+    public void test_backgroundLoad_waitsAfterEachRecord() {
+        final StubKeyMatchHelper helper = new StubKeyMatchHelper(5);
+
+        assertEquals(1, helper.load(true));
+
+        assertEquals(5, helper.waitCount);
+    }
+
+    private static class StubKeyMatchHelper extends KeyMatchHelper {
+        private final int size;
+        int waitCount;
+
+        StubKeyMatchHelper(final int size) {
+            this.size = size;
+        }
+
+        @Override
+        public List<KeyMatch> getAvailableKeyMatchList() {
+            final List<KeyMatch> list = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                final KeyMatch keyMatch = new KeyMatch();
+                keyMatch.setId("km" + i);
+                keyMatch.setTerm("term");
+                keyMatch.setQuery("q" + i);
+                keyMatch.setBoost(1.0f);
+                keyMatch.setMaxSize(1);
+                list.add(keyMatch);
+            }
+            return list;
+        }
+
+        @Override
+        protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
+            return Collections.singletonList(Collections.singletonMap(ComponentUtil.getFessConfig().getIndexFieldDocId(), "doc"));
+        }
+
+        @Override
+        protected void waitForNext() {
+            waitCount++;
+        }
+    }
+
+    @Test
     public void test_getQueryMap_nullKey() {
         Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> result = keyMatchHelper.getQueryMap(null);
         assertNotNull(result);
