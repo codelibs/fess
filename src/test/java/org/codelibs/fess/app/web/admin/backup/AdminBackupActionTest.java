@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.admin.backup;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -34,9 +35,12 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.codelibs.fess.app.web.base.FessBaseAction;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.opensearch.client.SearchEngineClientException;
+import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
+import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
@@ -268,6 +272,81 @@ public class AdminBackupActionTest extends UnitFessTestCase {
             assertTrue(type, Files.exists(fessJson));
             assertTrue(type, Files.exists(docJson));
         }
+    }
+
+    /**
+     * The response of a log export is committed before the rows are read, so a cut-off caused by the
+     * CPU load leaves the client a 200 with a shortened file. The warning is the only trace of it.
+     */
+    @Test
+    public void test_searchLogExport_warnsWhenCutShortByCpuLoad() throws Exception {
+        final String warnings = exportSearchLogs(false);
+
+        assertTrue(warnings.contains("search_log"), "the log line must name the export: " + warnings);
+        assertTrue(warnings.contains("after 1 rows"), "the log line must carry the number of rows written: " + warnings);
+        assertTrue(warnings.contains("adaptive.load.control"), "the log line must name the setting: " + warnings);
+        assertFalse(warnings.contains("secret-query"), "the log line must not carry the exported data: " + warnings);
+    }
+
+    @Test
+    public void test_searchLogExport_doesNotWarnWhenComplete() throws Exception {
+        assertEquals("", exportSearchLogs(true));
+    }
+
+    /**
+     * Exports three search logs through a Bhv that honors the cursor break, and returns the formatted
+     * warnings logged meanwhile.
+     */
+    private String exportSearchLogs(final boolean loadWithinLimit) throws Exception {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getIndexBackupLogLoadTimeoutAsInteger() {
+                return 100;
+            }
+        });
+        ComponentUtil.register(new SystemHelper() {
+            @Override
+            public boolean calibrateCpuLoad(final long timeoutInMillis) {
+                return loadWithinLimit;
+            }
+        }, "systemHelper");
+        ComponentUtil.register(new SearchLogBhv() {
+            @Override
+            public void selectCursor(final org.dbflute.bhv.readable.CBCall<org.codelibs.fess.opensearch.log.cbean.SearchLogCB> cbLambda,
+                    final org.dbflute.bhv.readable.EntityRowHandler<SearchLog> entityLambda) {
+                for (int i = 0; i < 3; i++) {
+                    final SearchLog log = new SearchLog();
+                    log.setSearchWord("secret-query");
+                    entityLambda.handle(log);
+                    if (entityLambda.isBreakCursor()) {
+                        break;
+                    }
+                }
+            }
+        }, SearchLogBhv.class.getCanonicalName());
+
+        final CapturingAppender appender = new CapturingAppender();
+        final org.apache.logging.log4j.core.Logger logger =
+                (org.apache.logging.log4j.core.Logger) LogManager.getLogger(AdminBackupAction.class);
+        appender.start();
+        logger.addAppender(appender);
+        final StringWriter writer = new StringWriter();
+        try {
+            AdminBackupAction.getSearchLogNdjsonWriteCall().accept(writer);
+        } finally {
+            logger.removeAppender(appender);
+            appender.stop();
+        }
+
+        final long lines = writer.toString().lines().count();
+        assertEquals(loadWithinLimit ? 3 : 1, lines);
+        final StringBuilder buf = new StringBuilder();
+        for (final LogEvent event : appender.warnings()) {
+            buf.append(event.getMessage().getFormattedMessage());
+        }
+        return buf.toString();
     }
 
     private static void useSearchEngineType(final String type) {

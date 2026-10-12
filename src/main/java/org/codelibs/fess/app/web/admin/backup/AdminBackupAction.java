@@ -706,7 +706,7 @@ public class AdminBackupAction extends FessAdminAction {
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
-            }, new LogEntityRowHandler<SearchLog>() {
+            }, new LogEntityRowHandler<SearchLog>("search_log") {
                 @Override
                 public void handle(final SearchLog entity) {
                     final StringBuilder buf = new StringBuilder();
@@ -744,9 +744,7 @@ public class AdminBackupAction extends FessAdminAction {
                     } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
-                    if (!systemHelper.calibrateCpuLoad(timeout)) {
-                        breakCursor = true;
-                    }
+                    checkLoad(systemHelper, timeout);
                 }
             });
         };
@@ -765,7 +763,7 @@ public class AdminBackupAction extends FessAdminAction {
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_CreatedAt_Asc();
-            }, new LogEntityRowHandler<UserInfo>() {
+            }, new LogEntityRowHandler<UserInfo>("user_info") {
                 @Override
                 public void handle(final UserInfo entity) {
                     final StringBuilder buf = new StringBuilder();
@@ -780,9 +778,7 @@ public class AdminBackupAction extends FessAdminAction {
                     } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
-                    if (!systemHelper.calibrateCpuLoad(timeout)) {
-                        breakCursor = true;
-                    }
+                    checkLoad(systemHelper, timeout);
                 }
             });
         };
@@ -801,7 +797,7 @@ public class AdminBackupAction extends FessAdminAction {
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_CreatedAt_Asc();
-            }, new LogEntityRowHandler<FavoriteLog>() {
+            }, new LogEntityRowHandler<FavoriteLog>("favorite_log") {
                 @Override
                 public void handle(final FavoriteLog entity) {
                     final StringBuilder buf = new StringBuilder();
@@ -819,9 +815,7 @@ public class AdminBackupAction extends FessAdminAction {
                     } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
-                    if (!systemHelper.calibrateCpuLoad(timeout)) {
-                        breakCursor = true;
-                    }
+                    checkLoad(systemHelper, timeout);
                 }
             });
         };
@@ -840,7 +834,7 @@ public class AdminBackupAction extends FessAdminAction {
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
-            }, new LogEntityRowHandler<ClickLog>() {
+            }, new LogEntityRowHandler<ClickLog>("click_log") {
                 @Override
                 public void handle(final ClickLog entity) {
                     final StringBuilder buf = new StringBuilder();
@@ -863,9 +857,7 @@ public class AdminBackupAction extends FessAdminAction {
                     } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
-                    if (!systemHelper.calibrateCpuLoad(timeout)) {
-                        breakCursor = true;
-                    }
+                    checkLoad(systemHelper, timeout);
                 }
             });
         };
@@ -884,7 +876,7 @@ public class AdminBackupAction extends FessAdminAction {
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
-            }, new LogEntityRowHandler<ChatLog>() {
+            }, new LogEntityRowHandler<ChatLog>("chat_log") {
                 @Override
                 public void handle(final ChatLog entity) {
                     final StringBuilder buf = new StringBuilder();
@@ -917,9 +909,7 @@ public class AdminBackupAction extends FessAdminAction {
                     } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
-                    if (!systemHelper.calibrateCpuLoad(timeout)) {
-                        breakCursor = true;
-                    }
+                    checkLoad(systemHelper, timeout);
                 }
             });
         };
@@ -952,6 +942,32 @@ public class AdminBackupAction extends FessAdminAction {
 
     private static abstract class LogEntityRowHandler<ENTITY> implements EntityRowHandler<ENTITY> {
         protected boolean breakCursor = false;
+
+        private final String name;
+
+        private long rows = 0;
+
+        protected LogEntityRowHandler(final String name) {
+            this.name = name;
+        }
+
+        /**
+         * Counts the row that was just written and stops the cursor if the CPU load stays too high.
+         * The response is committed by then, so the client gets a 200 with a shortened file;
+         * the warning is the only trace of it.
+         *
+         * @param systemHelper the system helper
+         * @param timeout the time to wait for the load to go down, in milliseconds
+         */
+        protected void checkLoad(final SystemHelper systemHelper, final long timeout) {
+            rows++;
+            if (!systemHelper.calibrateCpuLoad(timeout)) {
+                breakCursor = true;
+                logger.warn(
+                        "The backup of {} was cut short after {} rows because the CPU load stayed above adaptive.load.control for {} ms (index.backup.log.load.timeout). The backup is incomplete.",
+                        name, rows, timeout);
+            }
+        }
 
         @Override
         public boolean isBreakCursor() {
