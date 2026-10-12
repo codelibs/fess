@@ -44,6 +44,7 @@ import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -274,7 +275,8 @@ public class CrawlingConfigHelper {
      */
     public List<WebConfig> getAllWebConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
             final List<String> idList) {
-        return ComponentUtil.getComponent(WebConfigBhv.class).selectList(cb -> {
+        final int maxFetchSize = ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger();
+        final List<WebConfig> list = ComponentUtil.getComponent(WebConfigBhv.class).selectList(cb -> {
             if (available) {
                 cb.query().setAvailable_Equal(Constants.T);
             }
@@ -284,8 +286,10 @@ public class CrawlingConfigHelper {
             cb.query().setName_NotEqual(ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName());
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger());
+            cb.fetchFirst(maxFetchSize);
         });
+        warnIfMaxFetchSizeReached(list.size(), maxFetchSize, FessConfig.PAGE_WEB_CONFIG_MAX_FETCH_SIZE, idList);
+        return list;
     }
 
     /**
@@ -324,7 +328,8 @@ public class CrawlingConfigHelper {
      */
     public List<FileConfig> getAllFileConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
             final List<String> idList) {
-        return ComponentUtil.getComponent(FileConfigBhv.class).selectList(cb -> {
+        final int maxFetchSize = ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger();
+        final List<FileConfig> list = ComponentUtil.getComponent(FileConfigBhv.class).selectList(cb -> {
             if (available) {
                 cb.query().setAvailable_Equal(Constants.T);
             }
@@ -334,8 +339,10 @@ public class CrawlingConfigHelper {
             cb.query().setName_NotEqual(ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName());
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger());
+            cb.fetchFirst(maxFetchSize);
         });
+        warnIfMaxFetchSizeReached(list.size(), maxFetchSize, FessConfig.PAGE_FILE_CONFIG_MAX_FETCH_SIZE, idList);
+        return list;
     }
 
     /**
@@ -374,7 +381,8 @@ public class CrawlingConfigHelper {
      */
     public List<DataConfig> getAllDataConfigList(final boolean withLabelType, final boolean withRoleType, final boolean available,
             final List<String> idList) {
-        return ComponentUtil.getComponent(DataConfigBhv.class).selectList(cb -> {
+        final int maxFetchSize = ComponentUtil.getFessConfig().getPageDataConfigMaxFetchSizeAsInteger();
+        final List<DataConfig> list = ComponentUtil.getComponent(DataConfigBhv.class).selectList(cb -> {
             if (available) {
                 cb.query().setAvailable_Equal(Constants.T);
             }
@@ -384,8 +392,28 @@ public class CrawlingConfigHelper {
             cb.query().setName_NotEqual(ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName());
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-            cb.fetchFirst(ComponentUtil.getFessConfig().getPageDataConfigMaxFetchSizeAsInteger());
+            cb.fetchFirst(maxFetchSize);
         });
+        warnIfMaxFetchSizeReached(list.size(), maxFetchSize, FessConfig.PAGE_DATA_CONFIG_MAX_FETCH_SIZE, idList);
+        return list;
+    }
+
+    /**
+     * Warns once per key when a config query returned as many rows as its cap allows, which means
+     * that further configs may exist and are silently left out.
+     *
+     * @param size the number of configs loaded
+     * @param maxFetchSize the cap applied to the query
+     * @param key the name of the property that holds the cap
+     * @param idList the requested config IDs, or null if the query was not restricted by ID
+     */
+    protected void warnIfMaxFetchSizeReached(final int size, final int maxFetchSize, final String key, final List<String> idList) {
+        if (maxFetchSize <= 0 || size < maxFetchSize || idList != null && idList.size() <= maxFetchSize) {
+            return;
+        }
+        LogUtil.warnOnce(logger, key,
+                "{}={} limits how many crawling configs are loaded, and that many were found. Any further configs are ignored and are not crawled. Increase {} to load more.",
+                key, maxFetchSize, key);
     }
 
     /**

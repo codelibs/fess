@@ -7958,7 +7958,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.data.config.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
-     * comment: Maximum number of data config records to fetch per page.
+     * comment: Maximum number of data configs loaded in total for crawling (not per page). Configs beyond this number are ignored and not crawled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageDataConfigMaxFetchSize();
@@ -7966,7 +7966,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.data.config.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
-     * comment: Maximum number of data config records to fetch per page.
+     * comment: Maximum number of data configs loaded in total for crawling (not per page). Configs beyond this number are ignored and not crawled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7975,7 +7975,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.web.config.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
-     * comment: Maximum number of web config records to fetch per page.
+     * comment: Maximum number of web configs loaded in total for crawling (not per page). Configs beyond this number are ignored and not crawled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageWebConfigMaxFetchSize();
@@ -7983,7 +7983,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.web.config.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
-     * comment: Maximum number of web config records to fetch per page.
+     * comment: Maximum number of web configs loaded in total for crawling (not per page). Configs beyond this number are ignored and not crawled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7992,7 +7992,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.file.config.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
-     * comment: Maximum number of file config records to fetch per page.
+     * comment: Maximum number of file configs loaded in total for crawling (not per page). Configs beyond this number are ignored and not crawled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageFileConfigMaxFetchSize();
@@ -8000,7 +8000,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.file.config.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
-     * comment: Maximum number of file config records to fetch per page.
+     * comment: Maximum number of file configs loaded in total for crawling (not per page). Configs beyond this number are ignored and not crawled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */

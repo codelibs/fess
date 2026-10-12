@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +40,7 @@ import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
@@ -725,5 +727,177 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         }, WebConfigService.class.getCanonicalName());
 
         assertTrue(crawlingConfigHelper.getPipeline("W1").isEmpty());
+    }
+
+    // ---- the cap on the number of configs loaded ----
+
+    private void registerWebConfigBhv(final int size) {
+        ComponentUtil.register(new WebConfigBhv() {
+            @Override
+            public ListResultBean<WebConfig> selectList(final CBCall<WebConfigCB> cbLambda) {
+                cbLambda.callback(new WebConfigCB());
+                final ListResultBean<WebConfig> list = new ListResultBean<>();
+                for (int i = 0; i < size; i++) {
+                    list.add(new WebConfig());
+                }
+                return list;
+            }
+        }, WebConfigBhv.class.getCanonicalName());
+    }
+
+    private void registerFileConfigBhv(final int size) {
+        ComponentUtil.register(new FileConfigBhv() {
+            @Override
+            public ListResultBean<FileConfig> selectList(final CBCall<FileConfigCB> cbLambda) {
+                cbLambda.callback(new FileConfigCB());
+                final ListResultBean<FileConfig> list = new ListResultBean<>();
+                for (int i = 0; i < size; i++) {
+                    list.add(new FileConfig());
+                }
+                return list;
+            }
+        }, FileConfigBhv.class.getCanonicalName());
+    }
+
+    private void registerDataConfigBhv(final int size) {
+        ComponentUtil.register(new DataConfigBhv() {
+            @Override
+            public ListResultBean<DataConfig> selectList(final CBCall<DataConfigCB> cbLambda) {
+                cbLambda.callback(new DataConfigCB());
+                final ListResultBean<DataConfig> list = new ListResultBean<>();
+                for (int i = 0; i < size; i++) {
+                    list.add(new DataConfig());
+                }
+                return list;
+            }
+        }, DataConfigBhv.class.getCanonicalName());
+    }
+
+    private List<String> idList(final int size) {
+        final List<String> ids = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            ids.add("id" + i);
+        }
+        return ids;
+    }
+
+    @Test
+    public void test_getAllWebConfigList_warnsOnceWhenCapReached() {
+        final int cap = ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger();
+        registerWebConfigBhv(cap);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            assertEquals(cap, crawlingConfigHelper.getAllWebConfigList().size());
+            assertEquals(cap, crawlingConfigHelper.getAllWebConfigList().size());
+            assertEquals(1, capture.warnings().size());
+            final String warning = capture.warnings().get(0);
+            assertTrue(warning.contains("page.web.config.max.fetch.size=" + cap), warning);
+            assertTrue(warning.contains("ignored"), warning);
+            assertTrue(capture.errors().isEmpty());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getAllWebConfigList_noWarningBelowCap() {
+        final int cap = ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger();
+        registerWebConfigBhv(cap - 1);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            assertEquals(cap - 1, crawlingConfigHelper.getAllWebConfigList().size());
+            assertTrue(capture.warnings().isEmpty());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getWebConfigListByIds_warnsOnlyWhenMoreIdsThanCap() {
+        final int cap = ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger();
+        registerWebConfigBhv(cap);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            // every requested id fits under the cap, so nothing can have been left out
+            assertEquals(cap, crawlingConfigHelper.getWebConfigListByIds(idList(cap)).size());
+            assertTrue(capture.warnings().isEmpty());
+            // more ids than the cap allows: some are left out
+            assertEquals(cap, crawlingConfigHelper.getWebConfigListByIds(idList(cap + 1)).size());
+            assertEquals(1, capture.warnings().size());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getAllFileConfigList_warnsOnceWhenCapReached() {
+        final int cap = ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger();
+        registerFileConfigBhv(cap);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            assertEquals(cap, crawlingConfigHelper.getAllFileConfigList().size());
+            assertEquals(cap, crawlingConfigHelper.getAllFileConfigList().size());
+            assertEquals(1, capture.warnings().size());
+            assertTrue(capture.warnings().get(0).contains("page.file.config.max.fetch.size=" + cap), capture.warnings().get(0));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getAllFileConfigList_noWarningBelowCap() {
+        final int cap = ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger();
+        registerFileConfigBhv(cap - 1);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            assertEquals(cap - 1, crawlingConfigHelper.getAllFileConfigList().size());
+            assertTrue(capture.warnings().isEmpty());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getAllDataConfigList_warnsOnceWhenCapReached() {
+        final int cap = ComponentUtil.getFessConfig().getPageDataConfigMaxFetchSizeAsInteger();
+        registerDataConfigBhv(cap);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            assertEquals(cap, crawlingConfigHelper.getAllDataConfigList().size());
+            assertEquals(cap, crawlingConfigHelper.getAllDataConfigList().size());
+            assertEquals(1, capture.warnings().size());
+            assertTrue(capture.warnings().get(0).contains("page.data.config.max.fetch.size=" + cap), capture.warnings().get(0));
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_getAllDataConfigList_noWarningBelowCap() {
+        final int cap = ComponentUtil.getFessConfig().getPageDataConfigMaxFetchSizeAsInteger();
+        registerDataConfigBhv(cap - 1);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            assertEquals(cap - 1, crawlingConfigHelper.getAllDataConfigList().size());
+            assertTrue(capture.warnings().isEmpty());
+        } finally {
+            capture.detach();
+        }
+    }
+
+    @Test
+    public void test_eachCapIsReportedSeparately() {
+        final int webCap = ComponentUtil.getFessConfig().getPageWebConfigMaxFetchSizeAsInteger();
+        final int fileCap = ComponentUtil.getFessConfig().getPageFileConfigMaxFetchSizeAsInteger();
+        registerWebConfigBhv(webCap);
+        registerFileConfigBhv(fileCap);
+        final LogCapturingAppender capture = LogCapturingAppender.attach(CrawlingConfigHelper.class);
+        try {
+            crawlingConfigHelper.getAllWebConfigList();
+            crawlingConfigHelper.getAllFileConfigList();
+            assertEquals(2, capture.warnings().size());
+        } finally {
+            capture.detach();
+        }
     }
 }
