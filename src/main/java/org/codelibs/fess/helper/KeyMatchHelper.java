@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
@@ -89,12 +90,32 @@ public class KeyMatchHelper extends AbstractConfigHelper {
     }
 
     /**
+     * Reloads KeyMatch settings in the background, pausing for the reload interval after each record
+     * so that the reload does not put load on the search engine.
+     */
+    @Override
+    public void update() {
+        CommonPoolUtil.execute(() -> load(true));
+    }
+
+    /**
      * Loads KeyMatch settings from the database and builds a query map.
+     * This runs on the caller thread without throttling, so startup and manual updates are not delayed.
      *
      * @return The number of loaded KeyMatch settings.
      */
     @Override
     public int load() {
+        return load(false);
+    }
+
+    /**
+     * Loads KeyMatch settings from the database and builds a query map.
+     *
+     * @param throttle true to wait for the reload interval after each record.
+     * @return The number of loaded KeyMatch settings.
+     */
+    protected int load(final boolean throttle) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap = new HashMap<>();
         getAvailableKeyMatchList().stream().forEach(keyMatch -> {
@@ -137,7 +158,9 @@ public class KeyMatchHelper extends AbstractConfigHelper {
                     logger.debug("No KeyMatch boost docs");
                 }
 
-                waitForNext();
+                if (throttle) {
+                    waitForNext();
+                }
             } catch (final Exception e) {
                 logger.warn("Failed to load KeyMatch: id={}, term={}", keyMatch.getId(), keyMatch.getTerm(), e);
             }
