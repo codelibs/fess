@@ -205,7 +205,7 @@ public class AdminWebauthAction extends FessAdminAction {
         validate(form, messages -> {}, this::asListHtml);
         final String id = form.id;
         webAuthenticationService.getWebAuthentication(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
+            copyToForm(entity, form, false);
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
@@ -238,9 +238,7 @@ public class AdminWebauthAction extends FessAdminAction {
         return asHtml(path_AdminWebauth_AdminWebauthDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 optEntity.ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
+                    copyToForm(entity, form, true);
                     form.crudMode = crudMode;
                 });
             });
@@ -338,6 +336,24 @@ public class AdminWebauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Copies a stored WebAuthentication to a form. The password is stored encrypted, but the screens work with
+     * the plain text, as they did before it was encrypted, so the form gets the decrypted password.
+     * It is encrypted again when the setting is saved.
+     *
+     * @param entity the stored entity
+     * @param form the form to fill
+     * @param excludeNull whether to leave the form properties that the entity has no value for as they are
+     */
+    protected static void copyToForm(final WebAuthentication entity, final CreateForm form, final boolean excludeNull) {
+        copyBeanToBean(entity, form, op -> {
+            if (excludeNull) {
+                op.excludeNull();
+            }
+        });
+        form.password = entity.decryptPassword();
+    }
+
     /**
      * Retrieves or creates a WebAuthentication entity based on the form's CRUD mode.
      *

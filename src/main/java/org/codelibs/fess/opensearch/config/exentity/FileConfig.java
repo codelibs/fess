@@ -180,6 +180,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                         + " " + fileAuth.getUsername());
             }
             if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
+                final String password = fileAuth.decryptPassword();
                 final SmbAuthentication smbAuth = new SmbAuthentication();
                 final Map<String, String> map = ParameterUtil.parse(fileAuth.getParameters(),
                         "file authentication: id=" + fileAuth.getId() + ", fileConfigId=" + fileAuth.getFileConfigId());
@@ -188,7 +189,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 smbAuth.setServer(fileAuth.getHostname());
                 smbAuth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort());
                 smbAuth.setUsername(fileAuth.getUsername());
-                smbAuth.setPassword(fileAuth.getPassword());
+                smbAuth.setPassword(password);
                 smbAuthList.add(smbAuth);
 
                 final org.codelibs.fess.crawler.client.smb1.SmbAuthentication smb1Auth =
@@ -197,14 +198,14 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 smb1Auth.setServer(fileAuth.getHostname());
                 smb1Auth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort());
                 smb1Auth.setUsername(fileAuth.getUsername());
-                smb1Auth.setPassword(fileAuth.getPassword());
+                smb1Auth.setPassword(password);
                 smb1AuthList.add(smb1Auth);
             } else if (Constants.FTP.equals(fileAuth.getProtocolScheme())) {
                 final FtpAuthentication ftpAuth = new FtpAuthentication();
                 ftpAuth.setServer(fileAuth.getHostname());
                 ftpAuth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort());
                 ftpAuth.setUsername(fileAuth.getUsername());
-                ftpAuth.setPassword(fileAuth.getPassword());
+                ftpAuth.setPassword(fileAuth.decryptPassword());
                 ftpAuthList.add(ftpAuth);
             }
         }

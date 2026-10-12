@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.lastaflute.core.security.PrimaryCipher;
 import org.lastaflute.core.security.exception.CipherFailureException;
@@ -30,7 +31,7 @@ import org.lastaflute.core.security.exception.CipherFailureException;
  * Utility class for parameter operations.
  */
 public class ParameterUtil {
-    private static final String CIPHER_PREFIX = "{cipher}";
+    private static final String CIPHER_PREFIX = Constants.CIPHER_PREFIX;
 
     /** The XPath field prefix. */
     protected static final String XPATH_PREFIX = "field.xpath.";
@@ -175,6 +176,51 @@ public class ParameterUtil {
             buf.append(e.getSecond());
         });
         return buf.toString();
+    }
+
+    /**
+     * Encrypts a credential that is stored in a field of its own, such as the password of an authentication
+     * setting, with the same {@code {cipher}} form and key ({@code app.cipher.key}) as the encrypted parameters.
+     *
+     * <p>A null or empty value and a value that already carries the prefix are returned as they are, so a
+     * stored value that is saved again, or restored from a backup, is never encrypted twice.</p>
+     *
+     * @param value the credential
+     * @return the encrypted credential
+     */
+    public static String encryptCredential(final String value) {
+        if (StringUtil.isEmpty(value) || value.startsWith(CIPHER_PREFIX)) {
+            return value;
+        }
+        return CIPHER_PREFIX + ComponentUtil.getPrimaryCipher().encrypt(value);
+    }
+
+    /**
+     * Decrypts a credential that {@link #encryptCredential(String)} stored. A value without the
+     * {@code {cipher}} prefix, such as one stored before the credential was encrypted, is plain text and is
+     * returned as it is.
+     *
+     * <p>A value that was encrypted with another {@code app.cipher.key} cannot be decrypted. The exception then
+     * names the owner and the field, and points to {@code app.cipher.key}. Neither the encrypted value nor the
+     * cipher key is part of the message, and the original exception, whose message repeats the encrypted value,
+     * is not chained.</p>
+     *
+     * @param value the stored credential
+     * @param owner a description of the setting the credential belongs to, such as its type and ID; may be null
+     * @param field the name of the field that holds the credential
+     * @return the plain text credential
+     * @throws CipherFailureException if the credential cannot be decrypted
+     */
+    public static String decryptCredential(final String value, final String owner, final String field) {
+        if (StringUtil.isEmpty(value) || !value.startsWith(CIPHER_PREFIX)) {
+            return value;
+        }
+        try {
+            return ComponentUtil.getPrimaryCipher().decrypt(value.substring(CIPHER_PREFIX.length()));
+        } catch (final CipherFailureException e) {
+            throw new CipherFailureException("Failed to decrypt a credential: " + (owner != null ? "owner=" + owner + ", " : "") + "field="
+                    + field + ". The cipher key (app.cipher.key) may differ from the key used when the value was saved.", e.getCause());
+        }
     }
 
     /**

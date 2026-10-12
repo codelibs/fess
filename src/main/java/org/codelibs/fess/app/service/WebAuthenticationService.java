@@ -90,12 +90,13 @@ public class WebAuthenticationService {
 
     /**
      * Stores a web authentication configuration.
-     * Parameters are encrypted before storage.
+     * The password and the parameters are encrypted before storage.
      *
      * @param webAuthentication The web authentication configuration to store
      */
     public void store(final WebAuthentication webAuthentication) {
         webAuthentication.setParameters(ParameterUtil.encrypt(webAuthentication.getParameters()));
+        webAuthentication.setPassword(ParameterUtil.encryptCredential(webAuthentication.getPassword()));
         webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });

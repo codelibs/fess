@@ -72,6 +72,7 @@ import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
+import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
@@ -116,6 +117,12 @@ public class AdminBackupAction extends FessAdminAction {
     public static final String NDJSON_EXTENTION = ".ndjson";
 
     private static final DateTimeFormatter ISO_8601_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
+    /**
+     * The configuration indices, without their prefix, whose documents hold a password in the field
+     * of the same name. The services store it encrypted, and so does the export.
+     */
+    private static final List<String> PASSWORD_INDICES = List.of("web_authentication", "file_authentication");
 
     @Resource
     private AsyncManager asyncManager;
@@ -557,7 +564,7 @@ public class AdminBackupAction extends FessAdminAction {
                             try {
                                 writer.write("{\"index\":{\"_index\":\"" + hit.getIndex() + "\",\"_id\":\""
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
-                                writer.write(hit.getSourceAsString());
+                                writer.write(encryptPassword(hit.getIndex(), hit.getSourceAsString()));
                                 writer.write("\n");
                             } catch (final IOException e) {
                                 throw new IORuntimeException(e);
@@ -576,6 +583,36 @@ public class AdminBackupAction extends FessAdminAction {
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), this::asListHtml);
         return redirect(getClass()); // no-op
+    }
+
+    /**
+     * Encrypts the password of a web or file authentication for a backup file. The services store the
+     * password in the {@code {cipher}} form, so the export carries it as stored; a document saved before
+     * that, which still holds the plain text, would otherwise put the password in the file in the clear.
+     * An empty password and one that already has the prefix are left as they are, and so is every
+     * document of another index. The restore stores the text of the file as it is.
+     *
+     * @param index The index name of the document.
+     * @param source The source of the document.
+     * @return The source to write to the backup file.
+     */
+    public static String encryptPassword(final String index, final String source) {
+        if (index == null || source == null || !PASSWORD_INDICES.contains(index.substring(index.lastIndexOf('.') + 1))
+                || !source.contains("\"password\"")) {
+            return source;
+        }
+        final ObjectMapper mapper = new ObjectMapper();
+        final Map<String, Object> doc = mapper.readValue(source, new TypeReference<Map<String, Object>>() {
+        });
+        if (!(doc.get("password") instanceof final String password)) {
+            return source;
+        }
+        final String encrypted = ParameterUtil.encryptCredential(password);
+        if (encrypted.equals(password)) {
+            return source;
+        }
+        doc.put("password", encrypted);
+        return mapper.writeValueAsString(doc);
     }
 
     /**
