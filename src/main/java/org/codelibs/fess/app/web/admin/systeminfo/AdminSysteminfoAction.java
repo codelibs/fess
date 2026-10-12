@@ -54,7 +54,8 @@ public class AdminSysteminfoAction extends FessAdminAction {
     /** Role name for admin system info operations */
     public static final String ROLE = "admin-systeminfo";
 
-    private static final String MASKED_VALUE = "XXXXXXXX";
+    /** The placeholder shown in place of a sensitive value. */
+    public static final String MASKED_VALUE = "XXXXXXXX";
 
     /** The start of a {@code -Dkey=} option: at the start of the text or after a space or a quote. */
     private static final Pattern JVM_OPTION_PATTERN = Pattern.compile("(?<![^\\s\"'])([\"']?)-D([^\\s=\"']+)=");
@@ -211,7 +212,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
      * @param name the property key to check, optionally spelled as a JVM argument
      * @return true if the value should be masked, false otherwise
      */
-    protected static boolean isMaskedValue(final String name) {
+    public static boolean isMaskedValue(final String name) {
         final String key = toSettingKey(name);
         return "http.proxy.password".equals(key) //
                 || "search_engine.password".equals(key) //
@@ -224,6 +225,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || isPrivateKeyMaterial(key) //
                 || isEmbeddingApiKey(key) //
                 || isLlmApiKey(key) //
+                || isWebhookUrls(key) //
                 || isSecretName(key);
     }
 
@@ -309,6 +311,18 @@ public class AdminSysteminfoAction extends FessAdminAction {
      */
     protected static boolean isLlmApiKey(final String key) {
         return key != null && key.startsWith("rag.llm.") && key.endsWith(".api.key");
+    }
+
+    /**
+     * Checks if a key holds notification webhook URLs, e.g. {@code slack.webhook.urls} or
+     * {@code google.chat.webhook.urls}. A webhook URL carries its own credential in the path, so
+     * whoever reads it can post to the channel.
+     *
+     * @param key the property key to check
+     * @return true if the key matches the webhook URLs shape
+     */
+    protected static boolean isWebhookUrls(final String key) {
+        return key != null && key.endsWith(".webhook.urls");
     }
 
     /**

@@ -15,17 +15,116 @@
  */
 package org.codelibs.fess.app.web.admin.maintenance;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.HtmlResponse;
 
 public class AdminMaintenanceActionTest extends UnitFessTestCase {
+
+    /**
+     * The diagnostic tests write secrets into the shared system properties, so they need their own
+     * container to keep those values from leaking into other test classes.
+     *
+     * @return true to create the container for each test
+     */
+    @Override
+    protected boolean isUseOneTimeContainer() {
+        return true;
+    }
+
+    // ===================================================================================
+    //                                                                          Diagnostic
+    //                                                                          ==========
+
+    private static Properties readEntry(final byte[] zip, final String name) throws Exception {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zip))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().equals(name)) {
+                    final Properties prop = new Properties();
+                    prop.load(zis);
+                    return prop;
+                }
+            }
+        }
+        throw new AssertionError("no entry: " + name);
+    }
+
+    @Test
+    public void test_writeSystemProperties_masksSecretsAndKeepsKeys() throws Exception {
+        ComponentUtil.getSystemProperties().setProperty("storage.secretkey", "s3-secret-value");
+        ComponentUtil.getSystemProperties().setProperty("slack.webhook.urls", "https://hooks.example.com/services/T0/B0/token-value");
+        ComponentUtil.getSystemProperties().setProperty("storage.bucket", "fess-bucket");
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(out)) {
+            new AdminMaintenanceAction().writeSystemProperties(zos, "diag");
+        }
+
+        final Properties prop = readEntry(out.toByteArray(), "diag/system.properties");
+        assertEquals("XXXXXXXX", prop.getProperty("storage.secretkey"));
+        assertEquals("XXXXXXXX", prop.getProperty("slack.webhook.urls"));
+        assertEquals("fess-bucket", prop.getProperty("storage.bucket"));
+    }
+
+    @Test
+    public void test_writeFessConfig_masksTheCipherKeyAndKeepsKeys() throws Exception {
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Set<String> keySet() {
+                return Set.of("app.cipher.key", "search_engine.password", "index.backup.log.load.timeout");
+            }
+
+            @Override
+            public String get(final String propertyKey) {
+                return switch (propertyKey) {
+                case "app.cipher.key" -> "my-cipher-key";
+                case "search_engine.password" -> "hunter2";
+                default -> "60000";
+                };
+            }
+        };
+        final AdminMaintenanceAction action = new AdminMaintenanceAction() {
+            {
+                fessConfig = config;
+            }
+        };
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(out)) {
+            action.writeFessConfig(zos, "diag");
+        }
+
+        final Properties prop = readEntry(out.toByteArray(), "diag/fess_config.properties");
+        assertEquals("XXXXXXXX", prop.getProperty("app.cipher.key"));
+        assertEquals("XXXXXXXX", prop.getProperty("search_engine.password"));
+        assertEquals("60000", prop.getProperty("index.backup.log.load.timeout"));
+    }
+
+    @Test
+    public void test_isAccessTokenIndex() {
+        assertTrue(AdminMaintenanceAction.isAccessTokenIndex("fess_config.access_token"));
+        assertTrue(AdminMaintenanceAction.isAccessTokenIndex("custom_config.access_token"));
+        assertFalse(AdminMaintenanceAction.isAccessTokenIndex("fess_config.web_config"));
+        assertFalse(AdminMaintenanceAction.isAccessTokenIndex("fess_config.role_type"));
+        assertFalse(AdminMaintenanceAction.isAccessTokenIndex(null));
+    }
 
     // ===================================================================================
     //                                                                     isLogFilename
