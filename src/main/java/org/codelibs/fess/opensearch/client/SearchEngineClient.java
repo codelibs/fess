@@ -2291,7 +2291,7 @@ public class SearchEngineClient implements Client {
      * @param searchResult the result processor
      * @return the processed search result
      * @throws InvalidQueryException if the query is invalid
-     * @throws SearchEngineUnavailableException if the search engine refuses the search for lack of capacity
+     * @throws SearchEngineUnavailableException if the search engine refuses the search for lack of capacity, or the index is closed
      */
     public <T> T search(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final SearchResult<T, SearchRequestBuilder, SearchResponse> searchResult) {
@@ -2330,6 +2330,12 @@ public class SearchEngineClient implements Client {
                             e.getMessage());
                     throw new SearchEngineUnavailableException("The search engine is out of capacity.", e);
                 }
+                if (isIndexClosed(e)) {
+                    // The engine answers 400 for a closed index, but the request is fine: the index
+                    // of this installation cannot be searched until someone opens it again.
+                    logger.warn("The search engine cannot search the index {} because it is closed: reason={}", index, e.getMessage());
+                    throw new SearchEngineUnavailableException("The index to search is closed.", e);
+                }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Cannot process {}", searchRequestBuilder, e);
                 }
@@ -2353,6 +2359,21 @@ public class SearchEngineClient implements Client {
     public static boolean isCapacityRejection(final OpenSearchException cause) {
         final RestStatus status = cause.status();
         return status == RestStatus.TOO_MANY_REQUESTS || status == RestStatus.SERVICE_UNAVAILABLE;
+    }
+
+    /**
+     * Checks whether the search engine refused a request because the index it addresses is closed.
+     *
+     * <p>The engine answers HTTP 400 for this, like it does for a bad query, and the HTTP client
+     * reports the error type only in the message of an {@link OpenSearchException} of no special
+     * class, so the type is read from the message.</p>
+     *
+     * @param cause the failure of a request to the search engine
+     * @return {@code true} for an {@code index_closed_exception} answer; {@code false} for anything else
+     */
+    public static boolean isIndexClosed(final OpenSearchException cause) {
+        final String message = cause.getMessage();
+        return message != null && message.contains("type=index_closed_exception");
     }
 
     /**

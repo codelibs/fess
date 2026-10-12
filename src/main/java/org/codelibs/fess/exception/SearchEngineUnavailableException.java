@@ -16,8 +16,8 @@
 package org.codelibs.fess.exception;
 
 /**
- * Exception thrown when the search engine refuses a search for lack of capacity, for example a
- * tripped circuit breaker (HTTP 429) or shards that cannot serve it yet (HTTP 503).
+ * Exception thrown when the search engine refuses a search for a reason on its side, for example a
+ * tripped circuit breaker (HTTP 429), shards that cannot serve it yet (HTTP 503) or a closed index.
  *
  * <p>Unlike {@link InvalidQueryException} this says nothing about the query: the same search can
  * succeed a moment later. It is therefore neither retried with an escaped query nor reported to
