@@ -77,6 +77,12 @@ public class IndexingHelper {
     private static final Pattern PREVIEW_PATTERN =
             Pattern.compile("\\s*Preview of field's value:.*?(?=\\s*\\(caused by:|$)", Pattern.DOTALL);
 
+    /** The preview of a field value in the failure message of a bulk response, which ends the message of the exception that carries it. */
+    private static final Pattern BULK_PREVIEW_PATTERN = Pattern.compile("\\s*Preview of field's value: '.*?'(?=\\]\\])", Pattern.DOTALL);
+
+    /** The number parser's message, which repeats the value that could not be parsed. */
+    private static final Pattern INPUT_STRING_PATTERN = Pattern.compile("For input string: \".*?\"(?=\\)|\\]|\\s|$)", Pattern.DOTALL);
+
     /** The maximum length of the reason in the log. */
     private static final int MAX_REASON_LENGTH = 500;
 
@@ -132,7 +138,7 @@ public class IndexingHelper {
                         });
                 if (response.hasFailures()) {
                     logFailedItems(docList, response);
-                    throw new SearchEngineClientException(response.buildFailureMessage());
+                    throw new SearchEngineClientException(withoutFieldValues(response.buildFailureMessage()));
                 }
             }
             if (logger.isInfoEnabled()) {
@@ -204,7 +210,22 @@ public class IndexingHelper {
             final Matcher matcher = OPENSEARCH_EXCEPTION_PATTERN.matcher(root.getMessage());
             buf.append(" (caused by: ").append(matcher.matches() ? matcher.group(2) : root.getMessage()).append(')');
         }
-        return StringUtils.abbreviate(PREVIEW_PATTERN.matcher(buf).replaceAll(""), MAX_REASON_LENGTH);
+        return StringUtils.abbreviate(withoutInputString(PREVIEW_PATTERN.matcher(buf).replaceAll("")), MAX_REASON_LENGTH);
+    }
+
+    /**
+     * Removes the field values that the search engine repeats in the failure message of a bulk response,
+     * so that the exception, which the crawler logs and stores as a failure URL, does not carry document content.
+     *
+     * @param message the failure message of the bulk response
+     * @return the message without the field values
+     */
+    protected String withoutFieldValues(final String message) {
+        return withoutInputString(BULK_PREVIEW_PATTERN.matcher(message).replaceAll(""));
+    }
+
+    private String withoutInputString(final CharSequence message) {
+        return INPUT_STRING_PATTERN.matcher(message).replaceAll("For input string: <omitted>");
     }
 
     /**
