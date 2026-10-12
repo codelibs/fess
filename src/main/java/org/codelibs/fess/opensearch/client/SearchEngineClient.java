@@ -690,20 +690,25 @@ public class SearchEngineClient implements Client {
     /**
      * Checks if an index exists in the search engine.
      *
+     * <p>Only a definitive answer from the search engine is returned: a missing index is {@code false}
+     * (the HTTP client reports a 404 as a response, not as an exception). Any other failure, such as an
+     * unreachable engine or an invalid timeout setting, is not an answer, so it is thrown rather than
+     * reported as "does not exist"; callers that create the index when it is missing would otherwise
+     * create an empty one.</p>
+     *
      * @param indexName the name of the index to check
-     * @return true if the index exists, false otherwise
+     * @return true if the index exists, false if the search engine reports that it does not exist
+     * @throws FessSystemException if the existence of the index could not be determined
      */
     public boolean existsIndex(final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        boolean exists = false;
         try {
             final IndicesExistsResponse response =
                     client.admin().indices().prepareExists(indexName).execute().actionGet(fessConfig.getIndexSearchTimeout());
-            exists = response.isExists();
+            return response.isExists();
         } catch (final Exception e) {
-            logger.debug("Failed to check index status: indexName={}", indexName, e);
+            throw new FessSystemException("Failed to check index status: indexName=" + indexName + ", reason=" + getFailureReason(e), e);
         }
-        return exists;
     }
 
     /**
@@ -1178,8 +1183,12 @@ public class SearchEngineClient implements Client {
                 logger.info("[Rebuild] Completed rebuild for {}", indexName);
             } catch (final Exception e) {
                 logger.warn("[Rebuild] Failed to rebuild index: {}", indexName, e);
-                if (existsIndex(backupIndex)) {
-                    logger.info("[Rebuild] Backup index {} remains for recovery", backupIndex);
+                try {
+                    if (existsIndex(backupIndex)) {
+                        logger.info("[Rebuild] Backup index {} remains for recovery", backupIndex);
+                    }
+                } catch (final Exception ex) {
+                    logger.warn("[Rebuild] Failed to check the backup index: {}", backupIndex, ex);
                 }
                 success = false;
             }
