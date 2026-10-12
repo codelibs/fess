@@ -218,7 +218,7 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
         assertEquals("fess.update", d1.index());
         assertEquals(List.of("v1", "v2"), paramsOf(d1.script()).get("tag"));
         assertTrue(d1.script().getIdOrCode().startsWith("ctx._source.tag=params.tag;"));
-        assertTrue(d1.script().getIdOrCode().endsWith(";ctx._source.content_ja=ctx._source.content"));
+        assertTrue(d1.script().getIdOrCode().endsWith(";ctx._source['content_ja']=ctx._source['content']"));
         assertTrue(d1.retryOnConflict() > 0);
 
         final UpdateRequest d2 = updateOf("d2");

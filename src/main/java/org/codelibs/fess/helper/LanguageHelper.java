@@ -248,7 +248,8 @@ public class LanguageHelper {
     }
 
     /**
-     * Creates a script for updating a document with language information.
+     * Creates a script for updating a document with language information. The language fields are
+     * addressed with brackets because a language tag such as {@code zh-cn} is not a painless identifier.
      *
      * @param doc The document.
      * @param code The script code.
@@ -261,7 +262,7 @@ public class LanguageHelper {
         final String language = DocumentUtil.getValue(doc, fessConfig.getIndexFieldLang(), String.class);
         if (StringUtil.isNotBlank(language)) {
             for (final String f : langFields) {
-                buf.append(";ctx._source.").append(f).append('_').append(language).append("=ctx._source.").append(f);
+                buf.append(";ctx._source['").append(f).append('_').append(language).append("']=ctx._source['").append(f).append("']");
             }
         }
         if (logger.isDebugEnabled()) {
