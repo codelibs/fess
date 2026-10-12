@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -28,10 +29,13 @@ import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.pager.SearchLogPager;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.opensearch.log.cbean.ChatLogCB;
 import org.codelibs.fess.opensearch.log.cbean.ClickLogCB;
 import org.codelibs.fess.opensearch.log.cbean.FavoriteLogCB;
 import org.codelibs.fess.opensearch.log.cbean.SearchLogCB;
 import org.codelibs.fess.opensearch.log.cbean.UserInfoCB;
+import org.codelibs.fess.opensearch.log.exbhv.ChatLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
@@ -352,5 +356,89 @@ public class SearchLogServiceTest extends UnitFessTestCase {
         } catch (final IOException e) {
             assertEquals("closed", e.getMessage());
         }
+    }
+
+    private static SearchLogService serviceAt(final Instant now, final AtomicReference<Object> cbHolder) {
+        final SearchLogService service = new SearchLogService();
+        service.systemHelper = new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return now.toEpochMilli();
+            }
+        };
+        service.searchLogBhv = new SearchLogBhv() {
+            @Override
+            public int queryDelete(final CBCall<SearchLogCB> cbLambda) {
+                final SearchLogCB cb = new SearchLogCB();
+                cbLambda.callback(cb);
+                cbHolder.set(cb.query().getQuery());
+                return 0;
+            }
+        };
+        service.clickLogBhv = new ClickLogBhv() {
+            @Override
+            public int queryDelete(final CBCall<ClickLogCB> cbLambda) {
+                final ClickLogCB cb = new ClickLogCB();
+                cbLambda.callback(cb);
+                cbHolder.set(cb.query().getQuery());
+                return 0;
+            }
+        };
+        service.favoriteLogBhv = new FavoriteLogBhv() {
+            @Override
+            public int queryDelete(final CBCall<FavoriteLogCB> cbLambda) {
+                final FavoriteLogCB cb = new FavoriteLogCB();
+                cbLambda.callback(cb);
+                cbHolder.set(cb.query().getQuery());
+                return 0;
+            }
+        };
+        service.chatLogBhv = new ChatLogBhv() {
+            @Override
+            public int queryDelete(final CBCall<ChatLogCB> cbLambda) {
+                final ChatLogCB cb = new ChatLogCB();
+                cbLambda.callback(cb);
+                cbHolder.set(cb.query().getQuery());
+                return 0;
+            }
+        };
+        return service;
+    }
+
+    private static String deleteCutoffQuery(final java.util.function.Consumer<SearchLogService> delete) {
+        // a non-UTC default zone, as the stored dates are UTC instants and a zone-less condition is read as UTC
+        final TimeZone original = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Tokyo"));
+        try {
+            final AtomicReference<Object> query = new AtomicReference<>();
+            delete.accept(serviceAt(Instant.parse("2026-10-12T00:00:00Z"), query));
+            return query.get().toString().replaceAll("\\s+", "");
+        } finally {
+            TimeZone.setDefault(original);
+        }
+    }
+
+    @Test
+    public void test_deleteBefore_cutoffIsUtc() {
+        final String query = deleteCutoffQuery(service -> service.deleteBefore(7));
+        assertTrue(query.contains("\"requestedAt\":{\"from\":null,\"to\":\"2026-10-05T00:00:00\""), query);
+    }
+
+    @Test
+    public void test_deleteClickLogBefore_cutoffIsUtc() {
+        final String query = deleteCutoffQuery(service -> service.deleteClickLogBefore(7));
+        assertTrue(query.contains("\"requestedAt\":{\"from\":null,\"to\":\"2026-10-05T00:00:00\""), query);
+    }
+
+    @Test
+    public void test_deleteFavoriteLogBefore_cutoffIsUtc() {
+        final String query = deleteCutoffQuery(service -> service.deleteFavoriteLogBefore(7));
+        assertTrue(query.contains("\"createdAt\":{\"from\":null,\"to\":\"2026-10-05T00:00:00\""), query);
+    }
+
+    @Test
+    public void test_deleteChatLogBefore_cutoffIsUtc() {
+        final String query = deleteCutoffQuery(service -> service.deleteChatLogBefore(7));
+        assertTrue(query.contains("\"requestedAt\":{\"from\":null,\"to\":\"2026-10-05T00:00:00\""), query);
     }
 }

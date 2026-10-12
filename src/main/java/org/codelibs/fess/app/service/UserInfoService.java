@@ -27,10 +27,10 @@ import jakarta.annotation.Resource;
 public class UserInfoService {
 
     @Resource
-    private UserInfoBhv userInfoBhv;
+    protected UserInfoBhv userInfoBhv;
 
     @Resource
-    private SystemHelper systemHelper;
+    protected SystemHelper systemHelper;
 
     /**
      * Default constructor for UserInfoService.
@@ -47,7 +47,7 @@ public class UserInfoService {
      */
     public void deleteBefore(final int days) {
         userInfoBhv.queryDelete(cb -> {
-            cb.query().setUpdatedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+            cb.query().setUpdatedAt_LessEqual(systemHelper.getCurrentTimeAsUtcLocalDateTime().minusDays(days));
         });
     }
 

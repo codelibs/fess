@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -296,6 +297,18 @@ public class SystemHelper {
     public LocalDateTime getCurrentTimeAsLocalDateTime() {
         final Instant instant = Instant.ofEpochMilli(getCurrentTimeAsLong());
         return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+
+    /**
+     * Gets the current time as a LocalDateTime in UTC.
+     * Date fields of the log indices (requestedAt, createdAt, updatedAt) are stored as UTC instants,
+     * and a range condition is sent without a zone and read as UTC, so a cutoff compared with them
+     * must be expressed in UTC, not in the system default zone.
+     *
+     * @return The current time in UTC.
+     */
+    public LocalDateTime getCurrentTimeAsUtcLocalDateTime() {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(getCurrentTimeAsLong()), ZoneOffset.UTC);
     }
 
     /**
