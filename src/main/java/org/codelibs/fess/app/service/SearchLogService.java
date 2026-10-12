@@ -110,7 +110,7 @@ public class SearchLogService {
 
     /** System helper for date/time operations. */
     @Resource
-    private SystemHelper systemHelper;
+    protected SystemHelper systemHelper;
 
     /** Fess configuration settings. */
     @Resource
@@ -130,7 +130,7 @@ public class SearchLogService {
      */
     public void deleteBefore(final int days) {
         searchLogBhv.queryDelete(cb -> {
-            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsUtcLocalDateTime().minusDays(days));
         });
     }
 
@@ -141,7 +141,7 @@ public class SearchLogService {
      */
     public void deleteClickLogBefore(final int days) {
         clickLogBhv.queryDelete(cb -> {
-            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsUtcLocalDateTime().minusDays(days));
         });
     }
 
@@ -152,7 +152,7 @@ public class SearchLogService {
      */
     public void deleteFavoriteLogBefore(final int days) {
         favoriteLogBhv.queryDelete(cb -> {
-            cb.query().setCreatedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+            cb.query().setCreatedAt_LessEqual(systemHelper.getCurrentTimeAsUtcLocalDateTime().minusDays(days));
         });
     }
 
@@ -163,7 +163,7 @@ public class SearchLogService {
      */
     public void deleteChatLogBefore(final int days) {
         chatLogBhv.queryDelete(cb -> {
-            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsUtcLocalDateTime().minusDays(days));
         });
     }
 

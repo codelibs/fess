@@ -17,6 +17,8 @@ package org.codelibs.fess.helper;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
@@ -25,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1584,5 +1587,23 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.containsSpecialChar("123"));
         assertFalse(systemHelper.containsSpecialChar("abc123"));
         assertFalse(systemHelper.containsSpecialChar(""));
+    }
+
+    @Test
+    public void test_getCurrentTimeAsUtcLocalDateTime() {
+        final TimeZone original = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Tokyo"));
+        try {
+            final SystemHelper helper = new SystemHelper() {
+                @Override
+                public long getCurrentTimeAsLong() {
+                    return Instant.parse("2026-10-12T00:00:00Z").toEpochMilli();
+                }
+            };
+            assertEquals(LocalDateTime.of(2026, 10, 12, 0, 0), helper.getCurrentTimeAsUtcLocalDateTime());
+            assertEquals(LocalDateTime.of(2026, 10, 12, 9, 0), helper.getCurrentTimeAsLocalDateTime());
+        } finally {
+            TimeZone.setDefault(original);
+        }
     }
 }
