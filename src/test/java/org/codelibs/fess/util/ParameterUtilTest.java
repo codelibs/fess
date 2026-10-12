@@ -291,6 +291,53 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("secret", ParameterUtil.parse(encrypted, "web config: name=Intranet, id=abc").get("client.password"));
     }
 
+    // A credential that is stored in a field of its own is encrypted like an encrypted parameter.
+    @Test
+    public void test_encryptCredential() {
+        final String encrypted = ParameterUtil.encryptCredential("b");
+        assertEquals("{cipher}5691346cc398a4450114883140fa84a7", encrypted);
+        assertEquals("b", ParameterUtil.decryptCredential(encrypted, "owner", "password"));
+    }
+
+    // Saving a stored value again, or restoring it from a backup, must not encrypt it twice.
+    @Test
+    public void test_encryptCredential_keepsPrefixedNullAndEmptyValues() {
+        final String encrypted = ParameterUtil.encryptCredential("secret");
+        assertSame(encrypted, ParameterUtil.encryptCredential(encrypted));
+        assertNull(ParameterUtil.encryptCredential(null));
+        assertEquals("", ParameterUtil.encryptCredential(""));
+    }
+
+    // A value saved before the credential was encrypted has no prefix and is plain text.
+    @Test
+    public void test_decryptCredential_plainTextPassesThrough() {
+        assertEquals("legacy", ParameterUtil.decryptCredential("legacy", "owner", "password"));
+        assertNull(ParameterUtil.decryptCredential(null, "owner", "password"));
+        assertEquals("", ParameterUtil.decryptCredential("", "owner", "password"));
+    }
+
+    @Test
+    public void test_decryptCredential_undecryptableValue_namesOwnerFieldAndKey() {
+        final CipherFailureException e = Assertions.assertThrows(CipherFailureException.class,
+                () -> ParameterUtil.decryptCredential("{cipher}" + UNDECRYPTABLE_VALUE, "web authentication: id=a1", "password"));
+        final String message = e.getMessage();
+        assertTrue(message, message.contains("owner=web authentication: id=a1"));
+        assertTrue(message, message.contains("field=password"));
+        assertTrue(message, message.contains("app.cipher.key"));
+        assertFalse(message, message.contains(UNDECRYPTABLE_VALUE));
+        for (Throwable t = e.getCause(); t != null; t = t.getCause()) {
+            assertFalse(String.valueOf(t.getMessage()), String.valueOf(t.getMessage()).contains(UNDECRYPTABLE_VALUE));
+        }
+    }
+
+    @Test
+    public void test_decryptCredential_undecryptableValue_withoutOwner() {
+        final CipherFailureException e = Assertions.assertThrows(CipherFailureException.class,
+                () -> ParameterUtil.decryptCredential("{cipher}" + UNDECRYPTABLE_VALUE, null, "password"));
+        assertFalse(e.getMessage(), e.getMessage().contains("owner="));
+        assertTrue(e.getMessage(), e.getMessage().contains("app.cipher.key"));
+    }
+
     @Test
     public void test_parse_advancedScenarios() {
         String value;

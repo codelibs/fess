@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.opensearch.config.bsentity.BsFileAuthentication;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ParameterUtil;
 
 /**
  * @author FreeGen
@@ -46,6 +47,18 @@ public class FileAuthentication extends BsFileAuthentication {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    /**
+     * Returns the password in plain text. The password is stored encrypted, except for one saved before
+     * it was encrypted, which is returned as it is.
+     *
+     * @return the plain text password
+     * @throws org.lastaflute.core.security.exception.CipherFailureException if the stored password cannot be decrypted
+     */
+    public String decryptPassword() {
+        return ParameterUtil.decryptCredential(getPassword(), "file authentication: id=" + getId() + ", fileConfigId=" + getFileConfigId(),
+                "password");
     }
 
     public FileConfig getFileConfig() {

@@ -91,12 +91,13 @@ public class FileAuthenticationService {
 
     /**
      * Stores a file authentication configuration.
-     * The parameters are encrypted before storage for security.
+     * The password and the parameters are encrypted before storage for security.
      *
      * @param fileAuthentication the file authentication configuration to store
      */
     public void store(final FileAuthentication fileAuthentication) {
         fileAuthentication.setParameters(ParameterUtil.encrypt(fileAuthentication.getParameters()));
+        fileAuthentication.setPassword(ParameterUtil.encryptCredential(fileAuthentication.getPassword()));
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });

@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -44,8 +45,10 @@ import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ParameterUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder;
 import org.codelibs.fesen.opensearch.action.search.SearchResponse;
@@ -171,6 +174,92 @@ public class AdminBackupActionTest extends UnitFessTestCase {
             assertEquals(0, action.writeNewerThanStored(new ObjectMapper(), src.toFile(), dst.toFile(), resetJobs));
             assertEquals("", Files.readString(dst));
             assertFalse(resetJobs.get());
+        } finally {
+            deleteRecursively(dir);
+        }
+    }
+
+    // ===================================================================================
+    //                                                                           Passwords
+    //                                                                           =========
+
+    private static Map<String, Object> toMap(final String json) throws Exception {
+        return new ObjectMapper().readValue(json, new TypeReference<Map<String, Object>>() {
+        });
+    }
+
+    /**
+     * A password that is still stored in plain text, because it was saved before the passwords were
+     * encrypted, is not written to the backup file as it is.
+     */
+    @Test
+    public void test_encryptPassword_encryptsLegacyPlainText() throws Exception {
+        for (final String index : new String[] { "fess_config.web_authentication", "fess_config.file_authentication",
+                "myprefix.web_authentication" }) {
+            final String source = "{\"password\":\"s3cr\\\"et p\\u00e4ss\",\"username\":\"u\",\"port\":8080,\"updatedTime\":1}";
+
+            final String exported = AdminBackupAction.encryptPassword(index, source);
+
+            assertFalse(exported, exported.contains("s3cr"));
+            final Map<String, Object> doc = toMap(exported);
+            final String password = (String) doc.get("password");
+            assertTrue(password, password.startsWith("{cipher}"));
+            assertEquals("s3cr\"et p\u00e4ss", ParameterUtil.decryptCredential(password, null, "password"));
+            assertEquals("u", doc.get("username"));
+            assertEquals(8080, doc.get("port"));
+            assertEquals(1, doc.get("updatedTime"));
+        }
+    }
+
+    /**
+     * A stored password is exported as stored: it is not encrypted twice, and neither an empty or
+     * missing one, nor a document of another index, is touched.
+     */
+    @Test
+    public void test_encryptPassword_leavesOtherValuesAlone() throws Exception {
+        final String stored = "{\"password\":\"" + ParameterUtil.encryptCredential("abc") + "\"}";
+        assertSame(stored, AdminBackupAction.encryptPassword("fess_config.web_authentication", stored));
+
+        for (final String source : new String[] { "{\"password\":\"\"}", "{\"password\":null}", "{\"username\":\"u\"}" }) {
+            assertSame(source, AdminBackupAction.encryptPassword("fess_config.web_authentication", source));
+        }
+        final String other = "{\"password\":\"abc\"}";
+        assertSame(other, AdminBackupAction.encryptPassword("fess_user.user", other));
+        assertSame(other, AdminBackupAction.encryptPassword("fess_config.web_config", other));
+        // the token of an access token is looked up as stored, so it is not encrypted
+        final String token = "{\"token\":\"abc\"}";
+        assertSame(token, AdminBackupAction.encryptPassword("fess_config.access_token", token));
+    }
+
+    /**
+     * The restore stores the text of the file as it is: an encrypted password stays encrypted, and a
+     * plain text one from an older file stays as it is.
+     */
+    @Test
+    public void test_writeNewerThanStored_carriesPasswordsAsTheyAre() throws Exception {
+        final Path dir = Files.createTempDirectory("restore_test");
+        try {
+            final String encrypted = ParameterUtil.encryptCredential("s3cret");
+            final Path src = dir.resolve("src.bulk");
+            Files.writeString(src,
+                    "{\"index\":{\"_index\":\"fess_config.web_authentication\",\"_id\":\"a\"}}\n{\"username\":\"u\",\"password\":\""
+                            + encrypted + "\",\"updatedTime\":10}\n"
+                            + "{\"index\":{\"_index\":\"fess_config.web_authentication\",\"_id\":\"b\"}}\n"
+                            + "{\"username\":\"v\",\"password\":\"legacy\",\"updatedTime\":10}\n");
+            final Path dst = dir.resolve("dst.bulk");
+            final AdminBackupAction action = new AdminBackupAction() {
+                @Override
+                protected Long getStoredUpdatedTime(final String index, final String id) {
+                    return null;
+                }
+            };
+
+            assertEquals(2, action.writeNewerThanStored(new ObjectMapper(), src.toFile(), dst.toFile(), new AtomicBoolean()));
+
+            final String out = Files.readString(dst);
+            assertTrue(out, out.contains("\"password\":\"" + encrypted + "\""));
+            assertTrue(out, out.contains("\"password\":\"legacy\""));
+            assertFalse(out, out.contains("s3cret"));
         } finally {
             deleteRecursively(dir);
         }

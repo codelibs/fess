@@ -99,7 +99,8 @@ public class WebAuthentication extends BsWebAuthentication {
         // Credentials の設定
         final CredentialsConfig credentials = new CredentialsConfig();
         credentials.setUsername(getUsername());
-        credentials.setPassword(getPassword() == null ? StringUtil.EMPTY : getPassword());
+        final String password = decryptPassword();
+        credentials.setPassword(password == null ? StringUtil.EMPTY : password);
         if (Constants.NTLM.equals(scheme)) {
             credentials.setType(CredentialsType.NTLM);
             final Map<String, String> parameterMap = ParameterUtil.parse(getParameters(), getParameterOwner());
@@ -109,6 +110,17 @@ public class WebAuthentication extends BsWebAuthentication {
         config.setCredentials(credentials);
 
         return config;
+    }
+
+    /**
+     * Returns the password in plain text. The password is stored encrypted, except for one saved before
+     * it was encrypted, which is returned as it is.
+     *
+     * @return the plain text password
+     * @throws org.lastaflute.core.security.exception.CipherFailureException if the stored password cannot be decrypted
+     */
+    public String decryptPassword() {
+        return ParameterUtil.decryptCredential(getPassword(), getParameterOwner(), "password");
     }
 
     private String getParameterOwner() {
