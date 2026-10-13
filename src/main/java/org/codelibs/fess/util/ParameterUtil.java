@@ -182,14 +182,16 @@ public class ParameterUtil {
      * Encrypts a credential that is stored in a field of its own, such as the password of an authentication
      * setting, with the same {@code {cipher}} form and key ({@code app.cipher.key}) as the encrypted parameters.
      *
-     * <p>A null or empty value and a value that already carries the prefix are returned as they are, so a
-     * stored value that is saved again, or restored from a backup, is never encrypted twice.</p>
+     * <p>A null or empty value is returned as it is. Any other value is encrypted, whatever it starts with: a value
+     * that was submitted from a screen or the API is plain text even when it looks like an encrypted one, and
+     * decrypting the result gives back exactly what was submitted. A stored value must be decrypted with
+     * {@link #decryptCredential(String, String, String)} before it is saved again.</p>
      *
-     * @param value the credential
+     * @param value the plain text credential
      * @return the encrypted credential
      */
     public static String encryptCredential(final String value) {
-        if (StringUtil.isEmpty(value) || value.startsWith(CIPHER_PREFIX)) {
+        if (StringUtil.isEmpty(value)) {
             return value;
         }
         return CIPHER_PREFIX + ComponentUtil.getPrimaryCipher().encrypt(value);

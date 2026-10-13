@@ -299,16 +299,26 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("b", ParameterUtil.decryptCredential(encrypted, "owner", "password"));
     }
 
-    // Saving a stored value again, or restoring it from a backup, must not encrypt it twice.
     @Test
-    public void test_encryptCredential_keepsPrefixedNullAndEmptyValues() {
-        final String encrypted = ParameterUtil.encryptCredential("secret");
-        assertSame(encrypted, ParameterUtil.encryptCredential(encrypted));
+    public void test_encryptCredential_keepsNullAndEmptyValues() {
         assertNull(ParameterUtil.encryptCredential(null));
         assertEquals("", ParameterUtil.encryptCredential(""));
     }
 
-    // A value saved before the credential was encrypted has no prefix and is plain text.
+    // A submitted value that looks like an encrypted one is plain text: decrypting the result gives back
+    // the submitted text, never the secret that the submitted text encrypts.
+    @Test
+    public void test_encryptCredential_encryptsAValueThatLooksEncrypted() {
+        final String submitted = ParameterUtil.encryptCredential("secret");
+        assertTrue(submitted, submitted.startsWith("{cipher}"));
+
+        final String stored = ParameterUtil.encryptCredential(submitted);
+
+        assertFalse(submitted.equals(stored));
+        assertTrue(stored, stored.startsWith("{cipher}"));
+        assertEquals(submitted, ParameterUtil.decryptCredential(stored, "owner", "password"));
+    }
+
     @Test
     public void test_decryptCredential_plainTextPassesThrough() {
         assertEquals("legacy", ParameterUtil.decryptCredential("legacy", "owner", "password"));

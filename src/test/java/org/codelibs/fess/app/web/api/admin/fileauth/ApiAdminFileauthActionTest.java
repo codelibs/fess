@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.opensearch.config.exentity.FileAuthentication;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 
@@ -61,6 +62,18 @@ public class ApiAdminFileauthActionTest extends UnitFessTestCase {
         body.id = "1";
 
         createAction("secret").keepStoredPassword(body);
+
+        assertEquals("secret", body.password);
+    }
+
+    // The body carries plain text, which the service encrypts on save: a stored encrypted password is
+    // decrypted, so that it is encrypted once and a stored value is never taken for a submitted one.
+    @Test
+    public void test_keepStoredPassword_decryptsTheStoredPassword() throws Exception {
+        final EditBody body = new EditBody();
+        body.id = "1";
+
+        createAction(ParameterUtil.encryptCredential("secret")).keepStoredPassword(body);
 
         assertEquals("secret", body.password);
     }
