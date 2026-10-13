@@ -140,6 +140,63 @@ public class LoginRateLimiterTest extends UnitFessTestCase {
         // no exception = pass
     }
 
+    // ── release(): gives back exactly the caller's own slot ─────────────────────
+
+    @Test
+    public void test_release_freesExactlyOneSlot() {
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> 1_000_000L);
+        for (int i = 0; i < 5; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.1", 5, 60));
+        }
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.1", 5, 60), "the bucket is full");
+
+        rl.release(LoginRateLimiter.Scope.IP, "198.51.100.1");
+
+        assertTrue(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.1", 5, 60), "one slot must have been given back");
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.1", 5, 60),
+                "release() must free ONE slot only, unlike clear() which empties the bucket");
+    }
+
+    @Test
+    public void test_release_doesNotLiftALockout() {
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> 1_000_000L);
+        for (int i = 0; i < 5; i++) {
+            rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.2", 5, 60);
+        }
+        rl.lockOut(LoginRateLimiter.Scope.IP, "198.51.100.2", 900);
+
+        rl.release(LoginRateLimiter.Scope.IP, "198.51.100.2");
+
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.2", 5, 60), "release() must keep the lockout");
+        assertFalse(rl.peek(LoginRateLimiter.Scope.IP, "198.51.100.2", 5, 60), "release() must keep the lockout");
+        assertFalse(rl.lockOut(LoginRateLimiter.Scope.IP, "198.51.100.2", 900), "the lockout must still be the original, active one");
+    }
+
+    @Test
+    public void test_release_onUnknownOrEmptyKey_isNoop() {
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> 1_000_000L);
+        rl.release(LoginRateLimiter.Scope.IP, null);
+        rl.release(LoginRateLimiter.Scope.IP, "");
+        rl.release(LoginRateLimiter.Scope.IP, "198.51.100.3");
+        // The unknown key must not have been materialised as a bucket with a spare slot.
+        for (int i = 0; i < 2; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.3", 2, 60));
+        }
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "198.51.100.3", 2, 60));
+    }
+
+    @Test
+    public void test_release_isScopedToTheGivenBucket() {
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> 1_000_000L);
+        assertTrue(rl.allow(LoginRateLimiter.Scope.IP, "alice", 1, 60));
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "alice", 1, 60));
+
+        rl.release(LoginRateLimiter.Scope.USER, "alice");
+
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, "alice", 1, 60), "the same key in another scope must be untouched");
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "alice", 1, 60));
+    }
+
     // ── MJ-6: empty key returns false ───────────────────────────────────────────
 
     @Test

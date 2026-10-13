@@ -314,12 +314,16 @@ public class LoginHandler {
         csrf.rotate(session);
         final String token = csrf.issue(session);
 
-        // MJ-5: clear both USER and IP rate-limit buckets on successful login so that a
-        // legitimate user who exhausted the window (e.g. typo run) is not penalized on
-        // their next attempt after providing the correct credentials. The USER bucket is the
-        // (clientIp, username) composite.
+        // MJ-5: clear the USER rate-limit bucket on successful login so that a legitimate user
+        // who exhausted the window (e.g. typo run) is not penalized on their next attempt after
+        // providing the correct credentials. The USER bucket is the (clientIp, username)
+        // composite, so only this user's own failures are forgiven.
+        // The IP bucket is NOT cleared: it also counts the guesses other users made from the same
+        // address, and wiping it would let anyone holding one valid account reset the per-address
+        // allowance with each success and spray passwords without limit. Only the slot this
+        // very request consumed on entry is given back.
         limiter.clear(LoginRateLimiter.Scope.USER, userKey);
-        limiter.clear(LoginRateLimiter.Scope.IP, clientIp);
+        limiter.release(LoginRateLimiter.Scope.IP, clientIp);
 
         final OptionalThing<FessUserBean> userBean = assist.getSavedUserBean();
         final Map<String, Object> payload;

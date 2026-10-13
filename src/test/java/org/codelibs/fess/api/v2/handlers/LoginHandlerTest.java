@@ -742,6 +742,87 @@ public class LoginHandlerTest extends UnitFessTestCase {
         assertTrue(rl.peek(LoginRateLimiter.Scope.USER, userKey, 5, 60), "bucket must be clear after successful login");
     }
 
+    @Test
+    public void login_successfulLogin_givesBackOnlyItsOwnIpSlotAndClearsTheUserBucket() throws Exception {
+        // Regression: the success path used to clear() the whole IP bucket, erasing the hits that
+        // other users behind the same address had recorded. Now only the slot this request
+        // consumed on entry is given back, while the (clientIp, username) bucket is still cleared.
+        final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final int userLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+        final long[] now = { 1_000_000L };
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.31";
+        registerSuccessfulLoginComponents("mallory", new ArrayList<>());
+        final int others = 3;
+        for (int i = 0; i < others; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60));
+        }
+        final String userKey = handler.userScopeKey(ip, "mallory");
+        for (int i = 0; i < userLimit - 1; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60));
+        }
+
+        final CapturingResponse res = new CapturingResponse();
+        handler.handle(loginPostWithSession(ip, "mallory"), res);
+        assertEquals(200, res.status, res.body());
+
+        // IP bucket: the 3 earlier hits remain; the success itself is not held against the address.
+        for (int i = 0; i < ipLimit - others; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60), "slot " + i + " must still be free");
+        }
+        assertFalse(rl.allow(LoginRateLimiter.Scope.IP, ip, ipLimit, 60), "the earlier hits must still be counted after a success");
+        // USER bucket: wiped, so the full allowance is available again.
+        for (int i = 0; i < userLimit; i++) {
+            assertTrue(rl.allow(LoginRateLimiter.Scope.USER, userKey, userLimit, 60), "the user's own failures must be forgiven");
+        }
+    }
+
+    @Test
+    public void login_oneValidAccountCannotResetThePerIpGuessAllowance() throws Exception {
+        // Reproduction of the password-spraying hole: 9 wrong guesses at 9 different victims
+        // (each consumes one IP hit on entry), then one correct login of the attacker's own account
+        // (the 10th hit). The success used to clear() the IP bucket, so the cycle could repeat
+        // forever and every guess reached the directory. The per-address allowance must hold
+        // across successes within the window.
+        final int ipLimit = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+        final long[] now = { 1_000_000L };
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        final LoginHandler handler = new LoginHandler(rl);
+        final String ip = "198.51.100.32";
+        final List<String> audit = new ArrayList<>();
+        ComponentUtil.register(recordingActivityHelper(audit), "activityHelper");
+        ComponentUtil.register(new SessionCsrfTokenManager(), SessionCsrfTokenManager.class.getCanonicalName());
+        // Directory stand-in: only "mallory" authenticates; every other name is a rejected guess.
+        final int[] guessesThatReachedTheDirectory = { 0 };
+        ComponentUtil.setFessLoginAssist(new StubLoginAssist("mallory", false) {
+            @Override
+            public void login(final LoginCredential credential, final LoginOpCall opLambda) {
+                if (!"mallory".equals(((org.codelibs.fess.app.web.base.login.LocalUserCredential) credential).getUser())) {
+                    guessesThatReachedTheDirectory[0]++;
+                    throw new LoginFailureException("stubbed credential rejection");
+                }
+                super.login(credential, opLambda);
+            }
+        });
+
+        int refused = 0;
+        for (int round = 0; round < 3; round++) {
+            for (int victim = 0; victim < ipLimit - 1; victim++) {
+                final CapturingResponse guess = new CapturingResponse();
+                handler.handle(loginPostWithSession(ip, "victim" + round + "_" + victim), guess);
+                if (guess.status == 429) {
+                    refused++;
+                }
+            }
+            handler.handle(loginPostWithSession(ip, "mallory"), new CapturingResponse());
+        }
+
+        assertTrue(guessesThatReachedTheDirectory[0] <= ipLimit,
+                "at most " + ipLimit + " attempts per window may reach the directory, got " + guessesThatReachedTheDirectory[0]);
+        assertTrue(refused > 0, "the address must be rate limited once the allowance is spent");
+    }
+
     // ── M-2: reverse-proxy / client IP resolution ───────────────────────────────
 
     @Test
