@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
@@ -105,6 +106,7 @@ public class IndexExportJob {
      * Executes the export job, writing each matching document as a file.
      *
      * @return a string containing the execution result or error messages
+     * @throws JobProcessingException if the export directory cannot be created or written to
      */
     public String execute() {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
@@ -129,24 +131,35 @@ public class IndexExportJob {
                     excludeFields, query);
         }
 
+        checkExportPath(exportPath);
+
         final long startTime = System.currentTimeMillis();
 
         try {
             final AtomicLong processedCount = new AtomicLong(0);
-            final long count = searchEngineClient.scrollSearch(fessConfig.getIndexDocumentSearchIndex(), requestBuilder -> {
+            final AtomicLong exportedCount = new AtomicLong(0);
+            searchEngineClient.scrollSearch(fessConfig.getIndexDocumentSearchIndex(), requestBuilder -> {
                 requestBuilder.setQuery(query).setSize(scrollSize);
                 return true;
             }, source -> {
-                exportDocument(source, exportPath, excludeFields, resolvedFormatter);
+                if (exportDocument(source, exportPath, excludeFields, resolvedFormatter)) {
+                    exportedCount.incrementAndGet();
+                }
                 final long currentCount = processedCount.incrementAndGet();
                 if (logger.isDebugEnabled() && currentCount % scrollSize == 0) {
                     logger.debug("[EXPORT] Processing: count={}", currentCount);
                 }
                 return true;
             });
+            final long count = exportedCount.get();
+            final long notExported = processedCount.get() - count;
             resultBuf.append("Exported ").append(count).append(" documents.");
+            if (notExported > 0) {
+                resultBuf.append(' ').append(notExported).append(" documents were not exported; see the log for the reasons.");
+            }
             if (logger.isInfoEnabled()) {
-                logger.info("[EXPORT] Completed: exportedCount={}, elapsedTime={}ms", count, System.currentTimeMillis() - startTime);
+                logger.info("[EXPORT] Completed: exportedCount={}, notExportedCount={}, elapsedTime={}ms", count, notExported,
+                        System.currentTimeMillis() - startTime);
             }
         } catch (final Exception e) {
             logger.warn("Failed to export documents.", e);
@@ -157,19 +170,39 @@ public class IndexExportJob {
     }
 
     /**
+     * Checks that the export directory exists, or can be created, and can be written to.
+     * Without this check an unwritable directory makes every document fail on its own and the
+     * job still reports success.
+     *
+     * @param exportPath the base export directory path
+     * @throws JobProcessingException if the directory cannot be created or written to
+     */
+    protected void checkExportPath(final String exportPath) {
+        try {
+            final Path basePath = Paths.get(exportPath);
+            Files.createDirectories(basePath);
+            Files.delete(Files.createTempFile(basePath, ".fess-export-check", ".tmp"));
+        } catch (final IOException | RuntimeException e) {
+            throw new JobProcessingException("Cannot write to the index export directory: index.export.path=" + exportPath + ", cause=" + e,
+                    e);
+        }
+    }
+
+    /**
      * Exports a single document as a file.
      *
      * @param source the document source map
      * @param exportPath the base export directory path
      * @param excludeFields the set of field names to exclude from output
      * @param formatter the formatter to use for output
+     * @return true if the document was written, false if it was skipped or could not be written
      */
-    protected void exportDocument(final Map<String, Object> source, final String exportPath, final Set<String> excludeFields,
+    protected boolean exportDocument(final Map<String, Object> source, final String exportPath, final Set<String> excludeFields,
             final IndexExportFormatter formatter) {
         final Object urlObj = source.get("url");
         if (urlObj == null) {
             logger.debug("Skipping document without url field.");
-            return;
+            return false;
         }
 
         final String url = urlObj.toString();
@@ -187,15 +220,17 @@ public class IndexExportJob {
             final Path realParent = filePath.getParent().toRealPath();
             if (!realParent.startsWith(realBase)) {
                 logger.warn("Symlink traversal detected: url={}, realParent={}, realBase={}", url, realParent, realBase);
-                return;
+                return false;
             }
             final byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
             try (OutputStream out = Files.newOutputStream(filePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
                     LinkOption.NOFOLLOW_LINKS)) {
                 out.write(bytes);
             }
+            return true;
         } catch (final IOException e) {
             logger.warn("Failed to export document: url={}", url, e);
+            return false;
         }
     }
 
