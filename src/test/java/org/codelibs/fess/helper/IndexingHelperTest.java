@@ -210,6 +210,36 @@ public class IndexingHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_sendDocuments_keepsFieldValuesOutOfTheLogAndTheException() throws Exception {
+        documentSizeByQuery = 0L;
+        final String numberError =
+                "{\"type\":\"mapper_parsing_exception\",\"reason\":\"failed to parse field [content_length] of type [long] "
+                        + "in document with id '002'. Preview of field's value: 'SECRET-LENGTH'\","
+                        + "\"caused_by\":{\"type\":\"illegal_argument_exception\",\"reason\":\"For input string: \\\"SECRET-LENGTH\\\"\"}}";
+        final BulkItemResponse[] items = new BulkItemResponse[] { failedItem(0, "002", numberError, RestStatus.BAD_REQUEST) };
+        final SearchEngineClient client = clientReturning(new BulkResponse(items, 0L));
+        ComponentUtil.register(client, "searchEngineClient");
+        final DocList docList = new DocList();
+        docList.add(
+                new HashMap<>(Map.of("_id", "002", "config_id", "W01", "url", "http://test.com/002", "content_length", "SECRET-LENGTH")));
+
+        final LogCapturingAppender appender = LogCapturingAppender.attach(IndexingHelper.class);
+        try {
+            final SearchEngineClientException e =
+                    Assertions.assertThrows(SearchEngineClientException.class, () -> indexingHelper.sendDocuments(client, docList));
+            assertFalse(e.getMessage().contains("SECRET-LENGTH"), e.getMessage());
+            assertTrue(e.getMessage().contains("failed to parse field [content_length]"), e.getMessage());
+            assertTrue(e.getMessage().contains("id [002]"), e.getMessage());
+            final List<String> warnings = appender.messagesAt(Level.WARN);
+            assertEquals(1, warnings.size(), warnings.toString());
+            assertFalse(warnings.get(0).contains("SECRET-LENGTH"), warnings.get(0));
+            assertTrue(warnings.get(0).contains("failed to parse field [content_length]"), warnings.get(0));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
     public void test_sendDocuments_appliesTagsBeforeAddAll() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
