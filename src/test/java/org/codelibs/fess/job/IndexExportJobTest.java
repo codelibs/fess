@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -69,6 +70,10 @@ public class IndexExportJobTest extends UnitFessTestCase {
     }
 
     private void setupMockComponents(final List<Map<String, Object>> documents) {
+        setupMockComponents(documents, tempDir.toString());
+    }
+
+    private void setupMockComponents(final List<Map<String, Object>> documents, final String exportPath) {
         final SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override
             public long scrollSearch(final String index,
@@ -85,7 +90,7 @@ public class IndexExportJobTest extends UnitFessTestCase {
             }
         };
 
-        final FessConfig fessConfig = new TestFessConfig(tempDir.toString(), "cache", "100");
+        final FessConfig fessConfig = new TestFessConfig(exportPath, "cache", "100");
         ComponentUtil.register(searchEngineClient, "searchEngineClient");
         ComponentUtil.setFessConfig(fessConfig);
     }
@@ -202,6 +207,43 @@ public class IndexExportJobTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_execute_unwritableExportPath_failsNamingTheKey() throws IOException {
+        // a directory cannot be created below a regular file, whoever runs the test
+        final Path blocker = Files.createFile(tempDir.resolve("blocker"));
+        final String exportPath = blocker.resolve("export").toString();
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("url", "https://example.com/page.html");
+        setupMockComponents(Collections.singletonList(doc), exportPath);
+
+        try {
+            indexExportJob.execute();
+            fail("An export path that cannot be written must fail the job");
+        } catch (final JobProcessingException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("index.export.path"));
+            assertTrue(e.getMessage(), e.getMessage().contains(exportPath));
+        }
+    }
+
+    @Test
+    public void test_execute_countsOnlyDocumentsWritten() throws IOException {
+        // a directory where the file of the first document belongs makes only that document fail
+        Files.createDirectories(tempDir.resolve("example.com/page0.html"));
+        final List<Map<String, Object>> docs = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            final Map<String, Object> doc = new LinkedHashMap<>();
+            doc.put("url", "https://example.com/page" + i + ".html");
+            docs.add(doc);
+        }
+        setupMockComponents(docs);
+
+        final String result = indexExportJob.execute();
+
+        assertTrue(result, result.startsWith("Exported 1 documents."));
+        assertTrue(result, result.contains("1 documents were not exported"));
+        assertTrue(Files.isRegularFile(tempDir.resolve("example.com/page1.html")));
+    }
+
+    @Test
     public void test_execute_skipsDocumentsWithoutUrl() {
         final Map<String, Object> doc = new LinkedHashMap<>();
         doc.put("title", "No URL Doc");
@@ -210,8 +252,8 @@ public class IndexExportJobTest extends UnitFessTestCase {
 
         final String result = indexExportJob.execute();
 
-        assertEquals("Exported 1 documents.", result);
-        // No file should be created
+        // nothing was written, so nothing is counted
+        assertTrue(result, result.startsWith("Exported 0 documents."));
         assertFalse(Files.exists(tempDir.resolve("_invalid")));
     }
 
