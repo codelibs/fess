@@ -437,10 +437,15 @@ public class LoginRateLimiter {
      * Clears the rate-limit bucket for (scope, key) after a successful login so that
      * the user is not penalized for earlier failed attempts in the same window.
      *
-     * <p>MJ-5: called by LoginHandler on the successful-login path for both Scope.USER
-     * (by username) and Scope.IP (by client IP). This prevents a legitimate user who
-     * previously exceeded the window from being locked out on their next login after
-     * the correct password is supplied.</p>
+     * <p>MJ-5: called by LoginHandler on the successful-login path for Scope.USER, whose
+     * key is the (client IP, username) composite, so only that user's own failures are
+     * forgiven. This prevents a legitimate user who previously exceeded the window from
+     * being locked out on their next login after the correct password is supplied.</p>
+     *
+     * <p>Do not use this for Scope.IP on a successful login: the IP bucket also holds the
+     * attempts of other users behind the same address, and wiping it would give anyone with
+     * one valid account a fresh allowance of password guesses per success. Use
+     * {@link #release} there.</p>
      *
      * @param scope the rate-limit scope
      * @param key the bucket key (username or IP address)
@@ -452,6 +457,42 @@ public class LoginRateLimiter {
         final String mapKey = scope.name() + ":" + key;
         synchronized (entries) {
             entries.remove(mapKey);
+        }
+    }
+
+    /**
+     * Gives back the single slot that the caller's own just-completed attempt consumed from
+     * the (scope, key) bucket, by removing that bucket's most recent hit.
+     *
+     * <p>Use this instead of {@link #clear} for a bucket that is shared by clients the caller
+     * cannot tell apart, i.e. {@link Scope#IP}. Callers consume a slot on entry of every
+     * attempt, so a successful attempt leaves its own hit in the bucket; {@code clear()} would
+     * also erase every hit recorded by other attempts behind the same address, which lets
+     * anyone holding one valid account buy a fresh allowance of password guesses with each
+     * successful login. Releasing only the caller's slot keeps those earlier hits counted.</p>
+     *
+     * <p>A lockout is never touched: it is neither lifted nor shortened. The call is a no-op
+     * when {@code key} is {@code null} or empty, or when no such bucket exists. Under
+     * concurrency "the most recent hit" may belong to another request that was admitted in
+     * between; since hits are interchangeable the net effect on the bucket is the same.</p>
+     *
+     * @param scope the rate-limit scope
+     * @param key the bucket key (e.g. IP address); ignored when {@code null} or empty
+     */
+    public void release(final Scope scope, final String key) {
+        if (key == null || key.isEmpty()) {
+            return;
+        }
+        final String mapKey = scope.name() + ":" + key;
+        final Entry e;
+        synchronized (entries) {
+            e = entries.get(mapKey);
+        }
+        if (e == null) {
+            return;
+        }
+        synchronized (e) {
+            e.hits.pollLast();
         }
     }
 
