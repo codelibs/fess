@@ -16,6 +16,7 @@
 package org.codelibs.fess.script.javascript;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -34,6 +35,7 @@ import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.script.AbstractScriptEngine;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.sai.api.scripting.SaiScriptEngineFactory;
+import org.codelibs.sai.api.scripting.ScriptObjectMirror;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.job.LaJobRuntime;
 
@@ -152,7 +154,7 @@ public class JavaScriptEngine extends AbstractScriptEngine {
                 logger.debug("Evaluating JavaScript: template={}", template);
             }
 
-            final Object result = compiledScript.eval(bindings);
+            final Object result = convertResult(compiledScript.eval(bindings));
             logScriptExecution(template, "success");
             return result;
         } catch (final JobProcessingException e) {
@@ -175,6 +177,28 @@ public class JavaScriptEngine extends AbstractScriptEngine {
             // script_result, where naming the script that failed is what identifies it.
             throw new ScriptEngineException("Failed to evaluate the script: " + truncatedScript, e);
         }
+    }
+
+    /**
+     * Converts a script Date to {@link Date}.
+     *
+     * <p>The value of <code>new Date(...)</code> comes back as a script object, which the callers
+     * (a data store puts the value of a field script into the document) hand to the search engine
+     * as it is. It is indexed as an object, which a date field refuses, and the whole batch is
+     * lost. <code>new java.util.Date(...)</code> is already a {@link Date} and passes through.</p>
+     *
+     * @param result the value the script evaluated to
+     * @return a {@link Date} for a script Date, null for an invalid one, and the value itself otherwise
+     */
+    protected Object convertResult(final Object result) {
+        if (result instanceof final ScriptObjectMirror mirror && "Date".equals(mirror.getClassName())) {
+            final Object time = mirror.callMember("getTime");
+            if (time instanceof final Number number && !Double.isNaN(number.doubleValue())) {
+                return new Date(number.longValue());
+            }
+            return null;
+        }
+        return result;
     }
 
     /**
