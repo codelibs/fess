@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.unit;
 
+import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.LogUtil;
 import org.dbflute.utflute.lastaflute.WebContainerTestCase;
@@ -39,6 +40,10 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
     protected void tearDown(TestInfo testInfo) throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown(testInfo);
+        // The TimeoutManager thread is a JVM-wide singleton, so a periodic task a test leaves behind
+        // (SystemHelper.init() registers one per call) keeps calling ComponentUtil.getFessConfig() for the
+        // rest of the fork and can assemble beans while a later test is still initializing its container.
+        TimeoutManager.getInstance().clear();
     }
 
     @Override
