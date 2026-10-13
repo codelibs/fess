@@ -146,12 +146,22 @@ public class AdminFileauthActionTest extends UnitFessTestCase {
         assertEquals("s3cret", ParameterUtil.decryptCredential(saved, null, "password"));
     }
 
-    // The admin API keeps the stored value for an update without a password, and a restore carries the
-    // stored value: a value that already has the prefix is not encrypted again.
+    // A value that looks like an encrypted one, such as the ciphertext of another setting, is a submitted
+    // password like any other: it is stored as the literal text, and the details page shows that text,
+    // not the secret behind it.
     @Test
-    public void test_update_prefixedValueIsNotEncryptedTwice() {
+    public void test_update_submittedCipherValueIsStoredAsLiteralText() {
         storedValue = ParameterUtil.encryptCredential("s3cret");
-        assertEquals(storedValue, update(storedValue));
+        final String submitted = ParameterUtil.encryptCredential("other secret");
+
+        final String saved = update(submitted);
+
+        assertFalse(submitted.equals(saved));
+        assertEquals(submitted, ParameterUtil.decryptCredential(saved, null, "password"));
+        storedValue = saved;
+        final EditForm form = new EditForm();
+        AdminFileauthAction.copyToForm(stored(), form, true);
+        assertEquals(submitted, form.password);
     }
 
     // A password typed into the field is encrypted.

@@ -80,11 +80,16 @@ public class WebAuthenticationServiceTest extends UnitFessTestCase {
         assertEquals("s3cret", ParameterUtil.decryptCredential(stored, null, "password"));
     }
 
-    // A stored value that is saved again, as the edit screen and a restored backup do, is not encrypted twice.
+    // A submitted value that looks like an encrypted one is plain text: it is encrypted, and decrypting what is
+    // stored gives the submitted text back, not the secret behind it.
     @Test
-    public void test_store_doesNotEncryptTwice() throws Exception {
-        final String encrypted = ParameterUtil.encryptCredential("s3cret");
-        assertEquals(encrypted, store(encrypted));
+    public void test_store_encryptsASubmittedValueThatLooksEncrypted() throws Exception {
+        final String submitted = ParameterUtil.encryptCredential("s3cret");
+
+        final String stored = store(submitted);
+
+        assertFalse(submitted.equals(stored));
+        assertEquals(submitted, ParameterUtil.decryptCredential(stored, null, "password"));
     }
 
     @Test

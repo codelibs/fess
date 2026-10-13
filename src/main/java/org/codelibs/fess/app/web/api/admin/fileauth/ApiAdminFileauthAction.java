@@ -208,13 +208,14 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
 
     /**
      * Keeps the stored password when an update does not carry a new one. The API never returns
-     * the password, so a client that reads a setting and sends it back has none to send.
+     * the password, so a client that reads a setting and sends it back has none to send. The stored
+     * password is decrypted here, because the body carries plain text that the service encrypts on save.
      *
      * @param body the update request body
      */
     protected void keepStoredPassword(final EditBody body) {
         if (StringUtil.isBlank(body.password)) {
-            fileAuthService.getFileAuthentication(body.id).ifPresent(stored -> body.password = stored.getPassword());
+            fileAuthService.getFileAuthentication(body.id).ifPresent(stored -> body.password = stored.decryptPassword());
         }
     }
 

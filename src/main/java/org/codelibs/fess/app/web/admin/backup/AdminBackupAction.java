@@ -604,14 +604,10 @@ public class AdminBackupAction extends FessAdminAction {
         final ObjectMapper mapper = new ObjectMapper();
         final Map<String, Object> doc = mapper.readValue(source, new TypeReference<Map<String, Object>>() {
         });
-        if (!(doc.get("password") instanceof final String password)) {
+        if (!(doc.get("password") instanceof final String password) || password.isEmpty() || password.startsWith(Constants.CIPHER_PREFIX)) {
             return source;
         }
-        final String encrypted = ParameterUtil.encryptCredential(password);
-        if (encrypted.equals(password)) {
-            return source;
-        }
-        doc.put("password", encrypted);
+        doc.put("password", ParameterUtil.encryptCredential(password));
         return mapper.writeValueAsString(doc);
     }
 
