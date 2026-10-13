@@ -97,6 +97,43 @@ public class JavaScriptEngineTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_evaluate_scriptDateBecomesJavaDate() {
+        // A data store puts the result into the document as is, and the search engine cannot index
+        // the script object of a JavaScript Date in a date field.
+        final Map<String, Object> params = new HashMap<>();
+        params.put("timestamp", Long.valueOf(1735700000L));
+
+        final Object expression = javaScriptEngine.evaluate("new Date(timestamp * 1000)", params);
+        assertTrue(String.valueOf(expression.getClass()), expression instanceof java.util.Date);
+        assertEquals(1735700000000L, ((java.util.Date) expression).getTime());
+
+        final Object statements = javaScriptEngine.evaluate("var d = new Date(timestamp * 1000); return d;", params);
+        assertTrue(String.valueOf(statements.getClass()), statements instanceof java.util.Date);
+        assertEquals(1735700000000L, ((java.util.Date) statements).getTime());
+
+        final Object parsed = javaScriptEngine.evaluate("new Date('2025-01-01T02:53:20Z')", params);
+        assertTrue(String.valueOf(parsed.getClass()), parsed instanceof java.util.Date);
+        assertEquals(1735700000000L, ((java.util.Date) parsed).getTime());
+    }
+
+    @Test
+    public void test_evaluate_javaDateIsReturnedAsIs() {
+        final Object date = javaScriptEngine.evaluate("new java.util.Date(1735700000000)", new HashMap<>());
+        assertTrue(String.valueOf(date.getClass()), date instanceof java.util.Date);
+        assertEquals(1735700000000L, ((java.util.Date) date).getTime());
+    }
+
+    @Test
+    public void test_evaluate_otherScriptObjectsAreNotConverted() {
+        // only a Date is converted; an invalid Date becomes null rather than the epoch
+        assertFalse(javaScriptEngine.evaluate("({a: 1})", new HashMap<>()) instanceof java.util.Date);
+        assertEquals("abc", javaScriptEngine.evaluate("'abc'", new HashMap<>()));
+        assertEquals(5, javaScriptEngine.evaluate("5", new HashMap<>()));
+        // an invalid Date has no time to convert
+        assertNull(javaScriptEngine.evaluate("new Date('not a date')", new HashMap<>()));
+    }
+
+    @Test
     public void test_evaluate_nullParamMap() {
         assertEquals(2, javaScriptEngine.evaluate("1 + 1", null));
     }
