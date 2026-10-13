@@ -264,7 +264,7 @@ ${fe:html(true)}
                                         <la:errors property="dayForCleanup"/>
                                         <input type="number" name="dayForCleanup" id="dayForCleanup"
                                                value="${f:h(dayForCleanup)}" class="form-control"
-                                               min="-1" max="3650">
+                                               min="-1" max="1000">
                                         <la:message key="labels.day"/>
                                     </div>
                                 </div>
