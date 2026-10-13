@@ -13,6 +13,17 @@ let loginLocked = false;
 // Username and password of a login whose password must be changed
 // (password_change_required). Held in memory only, until the change ends or the modal closes.
 let pendingPasswordChange = null;
+// { user } of a login whose fess:auth:login is held back while the new-password step is shown.
+// The event makes the page reload its config and re-run the route; a browser's password manager
+// then takes the login as finished and reports the password, which has to be changed, as weak
+// before the user can change it. Sent when the step ends (change done, or the modal closed).
+let pendingLoginAnnounce = null;
+
+/** Tell the page a login finished (fess:auth:login). */
+function announceLogin(user) {
+  pendingLoginAnnounce = null;
+  document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: user }));
+}
 
 /**
  * Returns true when the login link should be shown.
@@ -500,6 +511,8 @@ export function attach() {
       }
       showModalStep("login");
       unmountPasswordFields(document.getElementById("login-step"));
+      // The user left the new-password step without changing the password.
+      if (pendingLoginAnnounce) announceLogin(pendingLoginAnnounce.user);
     });
   }
   if (form) {
@@ -527,11 +540,12 @@ export function attach() {
       // user may leave it; the login itself already succeeded.
       if (env.password_change_required === true && env.user && env.user.editable) {
         pendingPasswordChange = { username, password };
+        pendingLoginAnnounce = { user: env.user };
         showModalStep("password");
       } else {
         hideLoginModal();
+        announceLogin(env.user);
       }
-      document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: env.user }));
     } catch (e) {
       err.textContent = loginErrorMessage(e);
       err.classList.remove("d-none");
@@ -567,8 +581,11 @@ export function attach() {
         return;
       }
       pendingPasswordChange = null;
+      const held = pendingLoginAnnounce;
+      pendingLoginAnnounce = null;
       if (!env.re_login_required) {
         hideLoginModal();
+        announceLogin(held ? held.user : undefined);
         return;
       }
       // The server ended the session (M-3): take a token for the new session and log in
@@ -580,7 +597,7 @@ export function attach() {
         else await rotateCsrf();
         setLoggedIn(relogin.user || { username });
         hideLoginModal();
-        document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: relogin.user }));
+        announceLogin(relogin.user);
       } catch (e) {
         setLoggedOut();
         // A guest again: while login is required the modal must stay open.
