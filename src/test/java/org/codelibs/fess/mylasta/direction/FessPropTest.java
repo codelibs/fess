@@ -18,10 +18,15 @@ package org.codelibs.fess.mylasta.direction;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -399,6 +404,33 @@ public class FessPropTest extends UnitFessTestCase {
 
         assertTrue(fessConfig.endsWithFullstop("abc\uD83D\uDE00"));
         assertFalse(fessConfig.endsWithFullstop("abc."));
+    }
+
+    // A 401 after the web authentication credential was sent means the credential was refused (or
+    // withdrawn on a recrawl); like 403 it has to leave a failure URL, or the crawl ends with no trace.
+    @Test
+    public void test_isCrawlerFailureUrlStatusCodes_shippedDefault() throws IOException {
+        FessProp.propMap.clear();
+        final Properties props = new Properties();
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("fess_config.properties");
+                Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+            props.load(reader);
+        }
+        final String codes = props.getProperty("crawler.failure.url.status.codes");
+        assertNotNull(codes);
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerFailureUrlStatusCodes() {
+                return codes.trim();
+            }
+        };
+
+        for (final int code : new int[] { 401, 403, 404, 410 }) {
+            assertTrue("HTTP " + code + " must be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
+        }
+        for (final int code : new int[] { 200, 301, 304, 500, 503 }) {
+            assertFalse("HTTP " + code + " must not be a failure URL", fessConfig.isCrawlerFailureUrlStatusCodes(code));
+        }
     }
 
     @Test
