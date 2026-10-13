@@ -671,7 +671,9 @@ describe("attach — forced password change", () => {
     // The current password stays, for a password manager to pair it with the new one.
     expect(document.getElementById("login-password").value).toBe("admin");
     expect(hide).not.toHaveBeenCalled();
-    expect(logins).toBe(1);
+    // The page is not told about the login yet: reloading its config and re-running the route
+    // would make a password manager take the login as finished and report the default password.
+    expect(logins).toBe(0);
     expect(getCurrentUser()).toEqual(ADMIN);
   });
 
@@ -681,6 +683,7 @@ describe("attach — forced password change", () => {
     await flush();
     expect(isShown("password-change-step")).toBe(false);
     expect(hide).toHaveBeenCalled();
+    expect(logins).toBe(1);
   });
 
   it("changes the password with the one just entered, then logs in with the new one", async () => {
@@ -704,7 +707,8 @@ describe("attach — forced password change", () => {
     expect(api.post).toHaveBeenNthCalledWith(3, "/auth/login", { username: "admin", password: "N3w-password!" });
     expect(api.setCsrfToken).toHaveBeenLastCalledWith("B");
     expect(hide).toHaveBeenCalled();
-    expect(logins).toBe(2);
+    // Announced once, by the login with the new password.
+    expect(logins).toBe(1);
   });
 
   it("closes the modal when the change does not end the session", async () => {
@@ -718,6 +722,8 @@ describe("attach — forced password change", () => {
     await flush();
     expect(api.post).toHaveBeenCalledTimes(2);
     expect(hide).toHaveBeenCalled();
+    // The held login is announced once the change is done.
+    expect(logins).toBe(1);
   });
 
   it("does not send the new password again while the change is in flight", async () => {
@@ -795,6 +801,8 @@ describe("attach — forced password change", () => {
     expect(document.getElementById("login-error").textContent).toBe("auth.error_rate_limited");
     expect(api.setAuthenticated).toHaveBeenLastCalledWith(false);
     expect(loggedOut).toBe(true);
+    // The first login was never announced and no login followed it.
+    expect(logins).toBe(0);
   });
 
   it("re-locks the modal when the re-login fails on a login-required site", async () => {
@@ -820,7 +828,10 @@ describe("attach — forced password change", () => {
     api.post.mockResolvedValueOnce({ user: ADMIN, csrf_token: "A", password_change_required: true });
     submit("login-form");
     await flush();
+    expect(logins).toBe(0);
     document.getElementById("login-modal").dispatchEvent(new Event("hidden.bs.modal"));
+    // Leaving the step without a change announces the held login, once.
+    expect(logins).toBe(1);
     expect(isShown("login-step")).toBe(true);
     expect(isShown("password-change-step")).toBe(false);
     expect(document.querySelectorAll('input[type="password"]')).toHaveLength(0);
