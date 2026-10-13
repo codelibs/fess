@@ -3756,7 +3756,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.failure.url.status.codes'. <br>
-     * The value is, e.g. 404,403,410 <br>
+     * The value is, e.g. 404,403,410,401 <br>
      * comment: HTTP status codes considered as failure URLs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -3764,7 +3764,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.failure.url.status.codes' as {@link Integer}. <br>
-     * The value is, e.g. 404,403,410 <br>
+     * The value is, e.g. 404,403,410,401 <br>
      * comment: HTTP status codes considered as failure URLs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
