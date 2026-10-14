@@ -474,6 +474,31 @@ describe("My tags panel", () => {
     expect(rows().map((r) => r.querySelector("input.my-tag-shared").checked)).toEqual([false, true]);
   });
 
+  it("counts the tags in the header and labels the icon-only buttons with the tag's name", async () => {
+    await openPanel();
+    const count = panel().querySelector(".my-tags-count");
+    expect(count.textContent).toBe("2");
+    expect(count.classList.contains("d-none")).toBe(false);
+    rows().forEach((row) => {
+      expect(row.querySelector(".my-tag-count").textContent).toBe("tag.path_count");
+      for (const [selector, key] of [[".my-tag-rename", "tag.rename_label"], [".my-tag-delete", "tag.delete_label"]]) {
+        const button = row.querySelector(selector);
+        expect(button.textContent).toBe("");
+        expect(button.getAttribute("aria-label")).toBe(key);
+        expect(button.querySelector("i[aria-hidden='true']")).not.toBeNull();
+      }
+    });
+  });
+
+  it("hides the count when the user has no tags", async () => {
+    api.isAuthenticated.mockReturnValue(true);
+    myTagsAnswer = { status: 0, tags: [] };
+    await search([{ doc_id: "d1", title: "T" }]);
+    document.getElementById("my-tags-toggle").click();
+    await settle();
+    expect(panel().querySelector(".my-tags-count").classList.contains("d-none")).toBe(true);
+  });
+
   it("says so when the user has no tags", async () => {
     api.isAuthenticated.mockReturnValue(true);
     myTagsAnswer = { status: 0, tags: [] };
