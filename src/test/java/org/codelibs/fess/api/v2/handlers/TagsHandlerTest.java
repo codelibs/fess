@@ -245,6 +245,42 @@ public class TagsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    public void test_get_listsTheTagsOfTheVirtualHostOfTheRequest() throws Exception {
+        env.user("alice");
+        env.putOnHost("one", "alice", "host1", "http://a/");
+        env.putOnHost("two", "alice", "host2", "http://b/");
+        env.put("none", "alice", false);
+
+        env.virtualHostKey = "host1";
+        Assertions.assertEquals(List.of("one"), names((List<Map<String, Object>>) call(request("GET"), null).payload().get("tags")));
+        env.virtualHostKey = "host2";
+        Assertions.assertEquals(List.of("two"), names((List<Map<String, Object>>) call(request("GET"), null).payload().get("tags")));
+        // a request of no virtual host lists every tag, as the facet does
+        env.virtualHostKey = "";
+        Assertions.assertEquals(List.of("none", "one", "two"),
+                names((List<Map<String, Object>>) call(request("GET"), null).payload().get("tags")));
+    }
+
+    @Test
+    public void test_putAndDelete_tagOfAnotherVirtualHost_returnsNotFound() throws Exception {
+        env.user("alice");
+        final TagType other = env.putOnHost("two", "alice", "host2", "http://b/");
+        env.virtualHostKey = "host1";
+        for (final String method : new String[] { "PUT", "DELETE" }) {
+            final Response res = call(request(method).json("{\"name\":\"x\"}"), other.getId());
+            Assertions.assertEquals(404, res.status, method + " " + res.body());
+            Assertions.assertEquals("not_found", res.errorCode());
+        }
+        Assertions.assertNotNull(env.service.store.get(other.getId()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    private static List<String> names(final List<Map<String, Object>> tags) {
+        return tags.stream().map(t -> (String) t.get("name")).toList();
+    }
+
+    @Test
     public void test_post_takesTheVirtualHostOfTheRequest() throws Exception {
         env.user("alice");
         env.virtualHostKey = "site1";
@@ -512,7 +548,7 @@ public class TagsHandlerTest extends UnitFessTestCase {
             protected TagTypeService getTagTypeService() {
                 return new TagHandlerTestSupport.FakeTagTypeService() {
                     @Override
-                    public List<TagType> getTagTypeListByOwner(final String owner) {
+                    public List<TagType> getTagTypeListByOwner(final String owner, final String virtualHostKey) {
                         throw new org.codelibs.curl.CurlException("Failed to access", new java.net.ConnectException("Connection refused"));
                     }
                 };

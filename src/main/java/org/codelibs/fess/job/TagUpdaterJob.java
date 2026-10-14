@@ -30,6 +30,7 @@ import org.codelibs.fesen.opensearch.action.update.UpdateRequest;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.script.Script;
 import org.codelibs.fesen.opensearch.script.ScriptType;
+import org.codelibs.fess.helper.TagTypeHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -84,7 +85,7 @@ public class TagUpdaterJob {
             ComponentUtil.getSearchEngineClient().scrollSearch(index, builder -> {
                 builder.setQuery(QueryBuilders.matchAllQuery())
                         .setFetchSource(new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang(),
-                                fessConfig.getIndexFieldTag() }, null)
+                                fessConfig.getIndexFieldTag(), fessConfig.getIndexFieldVirtualHost() }, null)
                         .setSize(batchSize);
                 return true;
             }, doc -> {
@@ -132,15 +133,15 @@ public class TagUpdaterJob {
         }
         final List<UpdateRequest> requestList = new ArrayList<>();
         try {
-            final Map<String, Set<String>> tagMap = ComponentUtil.getTagTypeHelper().findTagValuesByUrls(urlSet);
+            final TagTypeHelper helper = ComponentUtil.getTagTypeHelper();
+            final Map<String, Map<String, String>> tagMap = helper.findTagsByUrls(urlSet);
             for (final Map<String, Object> doc : docList) {
                 final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                 if (id == null) {
                     continue;
                 }
                 final String url = DocumentUtil.getValue(doc, urlField, String.class);
-                final Set<String> values = url == null ? null : tagMap.get(url);
-                final Set<String> expected = values == null ? Collections.emptySet() : values;
+                final Set<String> expected = url == null ? Collections.emptySet() : helper.getTagValues(tagMap.get(url), doc);
                 if (expected.equals(toValueSet(doc.get(tagField)))) {
                     continue;
                 }

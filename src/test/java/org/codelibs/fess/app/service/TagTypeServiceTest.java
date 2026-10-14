@@ -424,6 +424,45 @@ public class TagTypeServiceTest extends UnitFessTestCase {
         assertEquals(1, condition[0].getFetchPageNumber());
     }
 
+    @Test
+    public void test_getTagTypeListByOwner_limitsToTheVirtualHostOfTheRequest() {
+        final String[] dsl = new String[1];
+        final TagTypeBhv bhv = new TagTypeBhv() {
+            @Override
+            public org.dbflute.cbean.result.ListResultBean<TagType> selectList(
+                    final org.dbflute.bhv.readable.CBCall<org.codelibs.fess.opensearch.config.cbean.TagTypeCB> cbLambda) {
+                final org.codelibs.fess.opensearch.config.cbean.TagTypeCB cb = new org.codelibs.fess.opensearch.config.cbean.TagTypeCB();
+                cbLambda.callback(cb);
+                final org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder builder =
+                        new org.codelibs.fesen.opensearch.action.search.SearchRequestBuilder(null,
+                                org.codelibs.fesen.opensearch.action.search.SearchAction.INSTANCE);
+                cb.build(builder);
+                dsl[0] = builder.toString().replaceAll("\\s+", "");
+                return new org.dbflute.cbean.result.ListResultBean<>();
+            }
+        };
+        final TagTypeService service = createService(bhv);
+        service.fessConfig = new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getIndexerMaxResultWindowSizeAsInteger() {
+                return 7;
+            }
+        };
+
+        service.getTagTypeListByOwner("alice", "host1");
+        assertTrue(dsl[0].contains("\"owner\":{\"value\":\"alice\""), dsl[0]);
+        assertTrue(dsl[0].contains("\"virtualHost\":{\"value\":\"host1\""), dsl[0]);
+
+        // a request of no virtual host lists the tags of every virtual host
+        for (final String key : new String[] { null, "" }) {
+            service.getTagTypeListByOwner("alice", key);
+            assertTrue(dsl[0].contains("\"owner\":{\"value\":\"alice\""), dsl[0]);
+            assertFalse(dsl[0].contains("\"virtualHost\":{"), dsl[0]);
+        }
+    }
+
     /**
      * Stand-in for {@code org.codelibs.fesen.opensearch.index.engine.VersionConflictEngineException},
      * recognized by its class name.

@@ -124,7 +124,12 @@ public class DocumentTagsHandler extends AbstractTagHandler {
         } else if (body.get("name") != null) {
             final String name = toTagName(body.get("name"));
             id = getTagTypeHelper().toId(getTagTypeHelper().toTagValue(name, userId));
-            if (!getTagTypeService().getTagType(id).isPresent()) {
+            final TagType existing = getTagTypeService().getTagType(id).orElse(null);
+            if (existing != null && !isInRequestVirtualHost(existing)) {
+                // the name is taken by a tag of another virtual host: one owner has one tag of a name
+                throw new TagRequestException(V2ErrorCode.CONFLICT, "a tag with the name already exists");
+            }
+            if (existing == null) {
                 final TagType created = createTag(name, userId, url);
                 if (created != null) {
                     payload.put("added", true);
@@ -215,7 +220,8 @@ public class DocumentTagsHandler extends AbstractTagHandler {
         final List<Map<String, Object>> tags = new ArrayList<>();
         helper.getVisibleTagTypes(values, SearchRequestType.JSON).values().forEach(tagType -> tags.add(toDocumentTag(tagType, userId)));
         final List<Map<String, Object>> addable = new ArrayList<>();
-        for (final TagType tagType : getTagTypeService().getTagTypeListByOwner(userId)) {
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        for (final TagType tagType : getTagTypeService().getTagTypeListByOwner(userId, virtualHostKey)) {
             if (!values.contains(tagType.getTagValue())) {
                 addable.add(toDocumentTag(tagType, userId));
             }

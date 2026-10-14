@@ -23,6 +23,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -373,6 +374,21 @@ public class TagTypeHelper {
      * @return the tag values of each URL that has a tag
      */
     public Map<String, Set<String>> findTagValuesByUrls(final Collection<String> urls) {
+        final Map<String, Set<String>> result = new HashMap<>();
+        findTagsByUrls(urls).forEach((url, tags) -> result.put(url, new LinkedHashSet<>(tags.keySet())));
+        return result;
+    }
+
+    /**
+     * Finds the tags put on each of the given URLs, with the virtual host of each tag. A URL matches a
+     * tag only when it equals one of the tag's paths. Every matching tag is returned, however many
+     * there are. One URL can be several documents, one for each set of virtual hosts it is crawled
+     * for; {@link #getTagValues(Map, Map)} picks the tags of one of them.
+     *
+     * @param urls the URLs of documents
+     * @return the virtual host of each tag value ({@code ""} for a tag of no virtual host), of each URL that has a tag
+     */
+    public Map<String, Map<String, String>> findTagsByUrls(final Collection<String> urls) {
         final Set<String> urlSet = new LinkedHashSet<>();
         if (urls != null) {
             for (final String url : urls) {
@@ -384,12 +400,13 @@ public class TagTypeHelper {
         if (urlSet.isEmpty()) {
             return Collections.emptyMap();
         }
-        final Map<String, Set<String>> result = new HashMap<>();
+        final Map<String, Map<String, String>> result = new HashMap<>();
         tagTypeBhv.selectBulk(cb -> {
             cb.query().setPaths_InScope(urlSet);
             cb.specify().columnName();
             cb.specify().columnOwner();
             cb.specify().columnPaths();
+            cb.specify().columnVirtualHost();
         }, list -> {
             for (final TagType tagType : list) {
                 final String value = tagType.getTagValue();
@@ -399,7 +416,8 @@ public class TagTypeHelper {
                 }
                 for (final String path : paths) {
                     if (urlSet.contains(path)) {
-                        result.computeIfAbsent(path, k -> new LinkedHashSet<>()).add(value);
+                        result.computeIfAbsent(path, k -> new LinkedHashMap<>())
+                                .put(value, tagType.getVirtualHost() == null ? StringUtil.EMPTY : tagType.getVirtualHost());
                     }
                 }
             }
@@ -408,8 +426,42 @@ public class TagTypeHelper {
     }
 
     /**
+     * Picks the tags that belong on a document from the tags of its URL. A tag of a virtual host
+     * belongs on a document of that virtual host, which is a crawl setting with the virtual host.
+     * A tag of no virtual host belongs on every document, and so does any tag on a document that
+     * has no virtual host field.
+     *
+     * @param tags the virtual host of each tag value of the URL of the document
+     * @param doc the document
+     * @return the tag values of the document
+     */
+    public Set<String> getTagValues(final Map<String, String> tags, final Map<String, Object> doc) {
+        if (tags == null || tags.isEmpty()) {
+            return Collections.emptySet();
+        }
+        final Object field = doc == null ? null : doc.get(ComponentUtil.getFessConfig().getIndexFieldVirtualHost());
+        final Set<String> virtualHosts = new HashSet<>();
+        if (field instanceof final Collection<?> collection) {
+            collection.stream().filter(v -> v != null).forEach(v -> virtualHosts.add(v.toString()));
+        } else if (field instanceof final Object[] array) {
+            Arrays.stream(array).filter(v -> v != null).forEach(v -> virtualHosts.add(v.toString()));
+        } else if (field != null) {
+            virtualHosts.add(field.toString());
+        }
+        virtualHosts.remove(StringUtil.EMPTY);
+        final Set<String> values = new LinkedHashSet<>();
+        tags.forEach((value, virtualHost) -> {
+            if (StringUtil.isEmpty(virtualHost) || virtualHosts.isEmpty() || virtualHosts.contains(virtualHost)) {
+                values.add(value);
+            }
+        });
+        return values;
+    }
+
+    /**
      * Sets the tag field of documents about to be indexed from the tags put on their URLs, and
-     * removes it from a document whose URL has no tag. Does nothing unless
+     * removes it from a document whose URL has no tag. A tag of a virtual host is set only on a
+     * document of that virtual host (see {@link #getTagValues(Map, Map)}). Does nothing unless
      * {@code user.tag.enabled} is true. When the tags cannot be read, the documents are left as
      * they are.
      *
@@ -428,15 +480,15 @@ public class TagTypeHelper {
                 urlSet.add(url);
             }
         }
-        final Map<String, Set<String>> tagMap;
+        final Map<String, Map<String, String>> tagMap;
         try {
-            tagMap = findTagValuesByUrls(urlSet);
+            tagMap = findTagsByUrls(urlSet);
         } catch (final RuntimeException e) {
             logger.error("Failed to read the user tags of documents. Run tag_updater to restore them: documents={}", docList.size(), e);
             return;
         }
         for (final Map<String, Object> doc : docList) {
-            final Set<String> values = doc.get(urlField) instanceof final String url ? tagMap.get(url) : null;
+            final Set<String> values = doc.get(urlField) instanceof final String url ? getTagValues(tagMap.get(url), doc) : null;
             if (values == null || values.isEmpty()) {
                 doc.remove(tagField);
             } else {
@@ -531,9 +583,20 @@ public class TagTypeHelper {
             try {
                 final List<UpdateRequest> requestList = new ArrayList<>();
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
+                // a URL can be several documents of different virtual hosts: a tag is added to those of its own
+                final Set<String> addValues = new LinkedHashSet<>();
+                for (final String url : urls) {
+                    pendingMap.get(url).forEach((value, add) -> {
+                        if (add) {
+                            addValues.add(value);
+                        }
+                    });
+                }
+                final Map<String, TagType> addTagTypes = fetchTagTypes(addValues);
                 ComponentUtil.getSearchEngineClient().scrollSearch(index, builder -> {
                     builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldUrl(), urls))
-                            .setFetchSource(new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() }, null)
+                            .setFetchSource(new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang(),
+                                    fessConfig.getIndexFieldVirtualHost() }, null)
                             .setSize(batchSize);
                     return true;
                 }, doc -> {
@@ -541,9 +604,21 @@ public class TagTypeHelper {
                     final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                     final Map<String, Boolean> valueMap = url == null ? null : pendingMap.get(url);
                     if (id != null && valueMap != null) {
-                        final List<String> addList = new ArrayList<>();
+                        final Map<String, String> addTags = new LinkedHashMap<>();
+                        valueMap.forEach((value, add) -> {
+                            if (add) {
+                                final TagType tagType = addTagTypes.get(value);
+                                addTags.put(value,
+                                        tagType == null || tagType.getVirtualHost() == null ? StringUtil.EMPTY : tagType.getVirtualHost());
+                            }
+                        });
+                        final List<String> addList = new ArrayList<>(getTagValues(addTags, doc));
                         final List<String> removeList = new ArrayList<>();
-                        valueMap.forEach((value, add) -> (add ? addList : removeList).add(value));
+                        valueMap.forEach((value, add) -> {
+                            if (!add) {
+                                removeList.add(value);
+                            }
+                        });
                         requestList.add(new UpdateRequest(index, id).script(createUpdateTagScript(doc, addList, removeList))
                                 .retryOnConflict(RETRY_ON_CONFLICT));
                     }

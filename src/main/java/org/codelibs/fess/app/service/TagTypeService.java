@@ -139,8 +139,24 @@ public class TagTypeService extends FessAppService {
      * @return A list of tag types without their paths.
      */
     public List<TagType> getTagTypeListByOwner(final String owner) {
+        return getTagTypeListByOwner(owner, null);
+    }
+
+    /**
+     * Get the tag types of one owner that belong to a virtual host, sorted by sort order and name.
+     * See {@link #getTagTypeListByOwner(String)} for what the entities carry.
+     *
+     * @param owner The owner of the tag types.
+     * @param virtualHostKey The virtual host key of the request. The tag types of every virtual host are
+     *        returned when it is blank, as the tag facet does.
+     * @return A list of tag types without their paths.
+     */
+    public List<TagType> getTagTypeListByOwner(final String owner, final String virtualHostKey) {
         return tagTypeBhv.selectList(cb -> {
             cb.query().setOwner_Term(owner);
+            if (StringUtil.isNotBlank(virtualHostKey)) {
+                cb.query().setVirtualHost_Term(virtualHostKey);
+            }
             specifyColumnsWithoutPaths(cb);
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();

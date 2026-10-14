@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.codelibs.fesen.opensearch.script.Script;
 import org.codelibs.fesen.opensearch.search.SearchHit;
 import org.codelibs.fess.entity.TagChange;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.exentity.TagType;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -76,6 +78,9 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
 
     private int batchSize;
 
+    /** The virtual host of the tag values that have one. */
+    private Map<String, String> tagHostMap;
+
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -88,6 +93,7 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
         unusedValues = new ArrayList<>();
         failRefresh = false;
         batchSize = 100;
+        tagHostMap = new HashMap<>();
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
@@ -124,6 +130,11 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
             @Override
             public String getIndexFieldId() {
                 return "_id";
+            }
+
+            @Override
+            public String getIndexFieldVirtualHost() {
+                return "virtual_host";
             }
 
             @Override
@@ -189,6 +200,19 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
             }
         }, "searchHelper");
         tagTypeHelper = new TagTypeHelper() {
+            @Override
+            protected Map<String, TagType> fetchTagTypes(final Collection<String> values) {
+                final Map<String, TagType> map = new HashMap<>();
+                tagHostMap.forEach((value, virtualHost) -> {
+                    if (values.contains(value)) {
+                        final TagType tagType = new TagType();
+                        tagType.setVirtualHost(virtualHost);
+                        map.put(value, tagType);
+                    }
+                });
+                return map;
+            }
+
             @Override
             protected void refreshUpdateIndex(final String index) {
                 events.add("refresh:" + index);
@@ -303,6 +327,30 @@ public class TagTypeHelperQueueTest extends UnitFessTestCase {
             assertEquals(List.of("v"), param(request, "add"));
             assertEquals(List.of(), param(request, "remove"));
         }
+    }
+
+    @Test
+    public void test_flush_addsATagOfAVirtualHostToTheDocumentsOfThatVirtualHost() {
+        final String url = "http://example.com/a";
+        addDoc("d1", url, null);
+        addDoc("d2", url, null);
+        addDoc("d3", url, null);
+        docMap.get(url).get(0).put("virtual_host", List.of("host1"));
+        docMap.get(url).get(1).put("virtual_host", List.of("host2"));
+        tagHostMap.put("v", "host2");
+        assertTrue(tagTypeHelper.enqueue(TagChange.add("v", url)));
+        assertTrue(tagTypeHelper.enqueue(TagChange.remove("w", url)));
+
+        tagTypeHelper.processQueue();
+
+        final List<UpdateRequest> requests = bulkCalls.get(0);
+        assertEquals(3, requests.size());
+        // d1 is of another virtual host; the removal still reaches it
+        assertEquals(List.of(), param(requests.get(0), "add"));
+        assertEquals(List.of("w"), param(requests.get(0), "remove"));
+        assertEquals(List.of("v"), param(requests.get(1), "add"));
+        // d3 has no virtual host
+        assertEquals(List.of("v"), param(requests.get(2), "add"));
     }
 
     @Test
