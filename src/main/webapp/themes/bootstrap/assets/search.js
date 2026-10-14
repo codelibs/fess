@@ -520,7 +520,7 @@ function myTagsPanel(bar) {
     });
     main.appendChild(name);
     main.appendChild(el("span", {
-      className: "badge rounded-pill text-bg-light border fw-normal my-tag-count",
+      className: "badge rounded-pill bg-body-tertiary text-body-secondary border fw-normal my-tag-count",
       text: t("tag.path_count", { n: Number(tag.path_count) || 0 })
     }));
     li.appendChild(main);
