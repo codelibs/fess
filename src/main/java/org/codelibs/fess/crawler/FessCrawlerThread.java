@@ -194,6 +194,18 @@ public class FessCrawlerThread extends CrawlerThread {
                     }
                 }
                 dataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
+                // the id of an indexed document includes its virtual hosts: without them a config with a virtual host
+                // finds the document of a config without one ("not modified") and never indexes its own
+                final List<String> virtualHostList = new ArrayList<>();
+                final String[] virtualHosts = crawlingConfig.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (final String virtualHost : virtualHosts) {
+                        if (StringUtil.isNotBlank(virtualHost)) {
+                            virtualHostList.add(virtualHost);
+                        }
+                    }
+                }
+                dataMap.put(fessConfig.getIndexFieldVirtualHost(), virtualHostList);
                 final String id = crawlingInfoHelper.generateId(dataMap);
 
                 if (logger.isDebugEnabled()) {

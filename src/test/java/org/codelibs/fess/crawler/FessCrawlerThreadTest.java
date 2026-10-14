@@ -611,6 +611,24 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isContentUpdated_looksTheDocumentUpByAnIdThatIncludesTheVirtualHosts() {
+        final CrawlEnvironment env = setUpCrawlEnvironment(indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\""));
+        env.webConfig.setPermissions(new String[] { "{role}guest" });
+        env.webConfig.setVirtualHosts(new String[] { "vhb", "", "vha" });
+        env.client.headResponse = headResponse(200, new Date(java.time.Instant.parse(INDEXED_LAST_MODIFIED).toEpochMilli()));
+
+        env.thread.isContentUpdated(env.client, urlQueue(PAGE_URL));
+
+        final Map<String, Object> indexedDocument = new HashMap<>();
+        indexedDocument.put(ComponentUtil.getFessConfig().getIndexFieldUrl(), PAGE_URL);
+        indexedDocument.put(ComponentUtil.getFessConfig().getIndexFieldRole(), List.of("{role}guest"));
+        indexedDocument.put(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), List.of("vha", "vhb"));
+        assertEquals(ComponentUtil.getCrawlingInfoHelper().generateId(indexedDocument), env.indexingHelper.id);
+        indexedDocument.remove(ComponentUtil.getFessConfig().getIndexFieldVirtualHost());
+        assertFalse(ComponentUtil.getCrawlingInfoHelper().generateId(indexedDocument).equals(env.indexingHelper.id));
+    }
+
+    @Test
     public void test_isContentUpdated_unchangedHeadHandlesUnchangedDocument() {
         final Map<String, Object> document = indexedDocument(INDEXED_LAST_MODIFIED, "\"v1\"");
         final CrawlEnvironment env = setUpCrawlEnvironment(document);
@@ -936,6 +954,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     private static class RecordingIndexingHelper extends IndexingHelper {
         final Map<String, Object> document;
         String[] fields;
+        String id;
         final List<String> updatedFields = new ArrayList<>();
 
         RecordingIndexingHelper(final Map<String, Object> document) {
@@ -945,6 +964,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         @Override
         public Map<String, Object> getDocument(final SearchEngineClient searchEngineClient, final String id, final String[] fields) {
             this.fields = fields;
+            this.id = id;
             return document;
         }
 
