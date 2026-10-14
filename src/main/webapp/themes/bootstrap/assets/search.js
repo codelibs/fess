@@ -485,18 +485,21 @@ function myTagsPanel(bar) {
     const rowId = MY_TAGS_PANEL_ID + "-" + i;
 
     if (mode === "rename") {
-      const form = el("form", { className: "input-group input-group-sm my-tag-rename-form", attrs: { novalidate: "" } });
+      const form = el("form", { className: "my-tag-rename-form", attrs: { novalidate: "" } });
       form.appendChild(el("label", { className: "visually-hidden", text: t("tag.name"), attrs: { for: rowId + "-name" } }));
+      // The label stays outside the group: a hidden first child would square the input's corners.
+      const group = el("div", { className: "input-group input-group-sm" });
+      form.appendChild(group);
       const input = el("input", {
         className: "form-control my-tag-name-input",
         attrs: { id: rowId + "-name", type: "text", maxlength: "50", autocomplete: "off" }
       });
       input.value = String(tag.name || "");
-      form.appendChild(input);
-      form.appendChild(el("button", { className: "btn btn-sm btn-primary", text: t("tag.save"), attrs: { type: "submit" } }));
+      group.appendChild(input);
+      group.appendChild(el("button", { className: "btn btn-sm btn-primary", text: t("tag.save"), attrs: { type: "submit" } }));
       const cancel = el("button", { className: "btn btn-sm btn-outline-secondary my-tag-cancel", text: t("tag.cancel"), attrs: { type: "button" } });
       cancel.addEventListener("click", () => swap(li, tag, i, "view").querySelector(".my-tag-rename").focus());
-      form.appendChild(cancel);
+      group.appendChild(cancel);
       form.addEventListener("submit", ev => {
         ev.preventDefault();
         const name = input.value.trim();
