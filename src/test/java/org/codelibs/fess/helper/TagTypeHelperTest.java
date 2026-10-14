@@ -106,6 +106,11 @@ public class TagTypeHelperTest extends UnitFessTestCase {
             }
 
             @Override
+            public String getIndexFieldVirtualHost() {
+                return "virtual_host";
+            }
+
+            @Override
             public String getRoleSearchUserPrefix() {
                 return "1";
             }
@@ -459,6 +464,33 @@ public class TagTypeHelperTest extends UnitFessTestCase {
     public void test_findTagValuesByUrls_empty() {
         assertTrue(tagTypeHelper.findTagValuesByUrls(List.of()).isEmpty());
         assertEquals(0, tagTypeBhv.selectBulkPages);
+    }
+
+    @Test
+    public void test_applyTags_setsATagOfAVirtualHostOnlyOnDocumentsOfThatVirtualHost() {
+        final String url = "http://a/1";
+        store(createTagType("none", "alice", "1alice")).setPaths(new String[] { url });
+        final TagType host1 = createTagType("one", "alice", "1alice");
+        host1.setVirtualHost("host1");
+        store(host1).setPaths(new String[] { url });
+        final TagType host2 = createTagType("two", "alice", "1alice");
+        host2.setVirtualHost("host2");
+        store(host2).setPaths(new String[] { url });
+
+        final Map<String, Object> inHost1 = new HashMap<>(Map.of("url", url, "virtual_host", List.of("host1")));
+        final Map<String, Object> inBoth = new HashMap<>(Map.of("url", url, "virtual_host", new String[] { "host1", "host2" }));
+        final Map<String, Object> noVirtualHost = new HashMap<>(Map.of("url", url, "virtual_host", List.of()));
+        final Map<String, Object> noField = new HashMap<>(Map.of("url", url));
+        tagTypeHelper.applyTags(List.of(inHost1, inBoth, noVirtualHost, noField));
+
+        final String none = tagTypeHelper.toTagValue("none", "alice");
+        final String one = tagTypeHelper.toTagValue("one", "alice");
+        final String two = tagTypeHelper.toTagValue("two", "alice");
+        assertEquals(Set.of(none, one), Set.of((String[]) inHost1.get("tag")));
+        assertEquals(Set.of(none, one, two), Set.of((String[]) inBoth.get("tag")));
+        // a document of no virtual host keeps every tag of its URL
+        assertEquals(Set.of(none, one, two), Set.of((String[]) noVirtualHost.get("tag")));
+        assertEquals(Set.of(none, one, two), Set.of((String[]) noField.get("tag")));
     }
 
     @Test

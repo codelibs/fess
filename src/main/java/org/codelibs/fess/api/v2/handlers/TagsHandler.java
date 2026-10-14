@@ -41,7 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Handles the tags of the logged-in user: {@code GET/POST /api/v2/tags} and {@code PUT/DELETE /api/v2/tags/{id}}.
  *
  * <ul>
- *   <li>{@code GET /tags} lists the caller's tags as {@code {id, value, name, shared, sort_order, path_count}}.</li>
+ *   <li>{@code GET /tags} lists the caller's tags of the virtual host of the request as {@code {id, value, name, shared, sort_order, path_count}}.</li>
  *   <li>{@code POST /tags} with {@code {"name": "...", "shared": false}} creates a tag. A tag of the same name of the
  *       caller is a {@link V2ErrorCode#CONFLICT}; a caller has at most {@code user.tag.max.tags} tags.</li>
  *   <li>{@code PUT /tags/{id}} with {@code {"name"?, "shared"?}} renames the tag, which gives it a new id and value
@@ -97,7 +97,8 @@ public class TagsHandler extends AbstractTagHandler {
         final TagTypeService service = getTagTypeService();
         final Map<String, Long> pathCountMap = service.getPathCountMapByOwner(userId);
         final List<Map<String, Object>> tags = new ArrayList<>();
-        for (final TagType tagType : service.getTagTypeListByOwner(userId)) {
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        for (final TagType tagType : service.getTagTypeListByOwner(userId, virtualHostKey)) {
             final Long pathCount = pathCountMap.get(tagType.getName());
             tags.add(toTag(tagType, pathCount == null ? 0L : pathCount));
         }

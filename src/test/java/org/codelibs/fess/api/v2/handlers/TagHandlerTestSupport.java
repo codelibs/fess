@@ -112,6 +112,14 @@ final class TagHandlerTestSupport {
             return tagType;
         }
 
+        /** Stores a private tag of a virtual host and returns it. */
+        TagType putOnHost(final String name, final String owner, final String virtualHost, final String... paths) {
+            final TagType tagType = put(name, owner, false, paths);
+            tagType.setVirtualHost(virtualHost);
+            service.store.get(tagType.getId()).setVirtualHost(virtualHost);
+            return tagType;
+        }
+
         TagType stored(final String name, final String owner) {
             return service.store.get(helper.toId(TagType.toTagValue(name, owner)));
         }
@@ -172,10 +180,11 @@ final class TagHandlerTestSupport {
         }
 
         @Override
-        public List<TagType> getTagTypeListByOwner(final String owner) {
+        public List<TagType> getTagTypeListByOwner(final String owner, final String virtualHostKey) {
             return store.values()
                     .stream()
                     .filter(t -> owner.equals(t.getOwner()))
+                    .filter(t -> virtualHostKey == null || virtualHostKey.isEmpty() || virtualHostKey.equals(t.getVirtualHost()))
                     .sorted(Comparator.comparing(TagType::getSortOrder).thenComparing(TagType::getName))
                     .map(t -> copy(t, false))
                     .toList();
@@ -346,13 +355,14 @@ final class TagHandlerTestSupport {
         }
 
         @Override
-        public Map<String, Set<String>> findTagValuesByUrls(final Collection<String> urls) {
-            final Map<String, Set<String>> map = new HashMap<>();
+        public Map<String, Map<String, String>> findTagsByUrls(final Collection<String> urls) {
+            final Map<String, Map<String, String>> map = new HashMap<>();
             for (final TagType tagType : env.service.store.values()) {
                 if (tagType.getPaths() != null) {
                     for (final String path : tagType.getPaths()) {
                         if (urls.contains(path)) {
-                            map.computeIfAbsent(path, k -> new LinkedHashSet<>()).add(tagType.getTagValue());
+                            map.computeIfAbsent(path, k -> new LinkedHashMap<>())
+                                    .put(tagType.getTagValue(), tagType.getVirtualHost() == null ? "" : tagType.getVirtualHost());
                         }
                     }
                 }

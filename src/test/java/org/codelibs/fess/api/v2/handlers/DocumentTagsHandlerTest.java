@@ -227,6 +227,40 @@ public class DocumentTagsHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_postByName_nameOfATagOfAnotherVirtualHost_returnsConflict() throws Exception {
+        env.user("alice");
+        final TagType other = env.putOnHost("foo", "alice", "host2", "http://other/");
+        env.virtualHostKey = "host1";
+        final Response res = call(request("POST").json("{\"name\":\"foo\"}"), null);
+        Assertions.assertEquals(409, res.status, res.body());
+        Assertions.assertEquals("conflict", res.errorCode());
+        // the tag of the other virtual host is left as it was
+        Assertions.assertEquals(list("http://other/"), list(env.service.store.get(other.getId()).getPaths()));
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
+    public void test_postById_tagOfAnotherVirtualHost_returnsNotFound() throws Exception {
+        env.user("alice");
+        final TagType other = env.putOnHost("foo", "alice", "host2", "http://other/");
+        env.virtualHostKey = "host1";
+        final Response res = call(request("POST").json("{\"id\":\"" + other.getId() + "\"}"), null);
+        Assertions.assertEquals(404, res.status, res.body());
+        Assertions.assertEquals(List.of(), env.helper.changes);
+    }
+
+    @Test
+    public void test_get_addableTagsAreTheOnesOfTheVirtualHost() throws Exception {
+        env.user("alice");
+        final TagType mine = env.putOnHost("one", "alice", "host1", "http://other/");
+        env.putOnHost("two", "alice", "host2", "http://other/");
+        env.virtualHostKey = "host1";
+        final Response res = call(request("GET"), null);
+        Assertions.assertEquals(200, res.status, res.body());
+        Assertions.assertEquals(List.of(docTag(mine, true, false)), res.payload().get("addable"));
+    }
+
+    @Test
     public void test_post_bodyThatIsNotAnObject_returnsInvalidRequest() throws Exception {
         env.user("alice");
         for (final String json : new String[] { "null", "[]", "\"text\"", "12", "true" }) {

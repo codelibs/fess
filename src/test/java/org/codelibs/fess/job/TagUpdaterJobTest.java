@@ -51,7 +51,10 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
     /** The tags of each URL. */
     private Map<String, Set<String>> tagMap;
 
-    /** The URLs of each findTagValuesByUrls call. */
+    /** The virtual host of the tag values; a value that is not here has none. */
+    private Map<String, String> tagHostMap;
+
+    /** The URLs of each findTagsByUrls call. */
     private List<List<String>> lookups;
 
     private List<UpdateRequest> updates;
@@ -67,6 +70,7 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
         super.setUp(testInfo);
         docList = new ArrayList<>();
         tagMap = new HashMap<>();
+        tagHostMap = new HashMap<>();
         lookups = new ArrayList<>();
         updates = new ArrayList<>();
         searchedIndices = new ArrayList<>();
@@ -106,6 +110,11 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
             }
 
             @Override
+            public String getIndexFieldVirtualHost() {
+                return "virtual_host";
+            }
+
+            @Override
             public String getIndexDocumentUpdateIndex() {
                 return "fess.update";
             }
@@ -123,7 +132,7 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
                 final SearchRequestBuilder builder = new SearchRequestBuilder(null, SearchAction.INSTANCE);
                 condition.build(builder);
                 final String[] includes = builder.request().source().fetchSource().includes();
-                assertEquals(Set.of("url", "lang", "tag"), Set.of(includes));
+                assertEquals(Set.of("url", "lang", "tag", "virtual_host"), Set.of(includes));
                 searchedIndices.add(index);
                 for (final Map<String, Object> doc : docList) {
                     if (!cursor.apply(new HashMap<>(doc))) {
@@ -149,12 +158,14 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
         }, "searchHelper");
         ComponentUtil.register(new TagTypeHelper() {
             @Override
-            public Map<String, Set<String>> findTagValuesByUrls(final Collection<String> urls) {
+            public Map<String, Map<String, String>> findTagsByUrls(final Collection<String> urls) {
                 lookups.add(new ArrayList<>(urls));
-                final Map<String, Set<String>> result = new HashMap<>();
+                final Map<String, Map<String, String>> result = new HashMap<>();
                 for (final String url : urls) {
                     if (tagMap.containsKey(url)) {
-                        result.put(url, tagMap.get(url));
+                        final Map<String, String> tags = new java.util.LinkedHashMap<>();
+                        tagMap.get(url).forEach(value -> tags.put(value, tagHostMap.getOrDefault(value, "")));
+                        result.put(url, tags);
                     }
                 }
                 return result;
@@ -232,6 +243,26 @@ public class TagUpdaterJobTest extends UnitFessTestCase {
 
         assertTrue(result.contains("3 documents updated"), result);
         assertTrue(result.contains("6 documents checked"), result);
+    }
+
+    @Test
+    public void test_execute_keepsTagsOfAVirtualHostOnItsDocuments() {
+        // the same URL is crawled for two virtual hosts, which makes two documents
+        tagMap.put("http://a/", new LinkedHashSet<>(List.of("host1tag", "host2tag", "plain")));
+        tagHostMap.put("host1tag", "host1");
+        tagHostMap.put("host2tag", "host2");
+        addDoc("d1", "http://a/", null, null);
+        addDoc("d2", "http://a/", null, null);
+        addDoc("d3", "http://a/", null, null);
+        docList.get(0).put("virtual_host", List.of("host1"));
+        docList.get(1).put("virtual_host", List.of("host1", "host2"));
+        // a document of no virtual host gets every tag of its URL
+
+        new TagUpdaterJob().execute();
+
+        assertEquals(List.of("host1tag", "plain"), paramsOf(updateOf("d1").script()).get("tag"));
+        assertEquals(List.of("host1tag", "host2tag", "plain"), paramsOf(updateOf("d2").script()).get("tag"));
+        assertEquals(List.of("host1tag", "host2tag", "plain"), paramsOf(updateOf("d3").script()).get("tag"));
     }
 
     @Test

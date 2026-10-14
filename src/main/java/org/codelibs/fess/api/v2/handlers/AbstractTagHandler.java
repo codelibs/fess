@@ -240,17 +240,29 @@ public abstract class AbstractTagHandler {
     }
 
     /**
+     * Tests whether a tag belongs to the virtual host of the request. A request that matches no virtual host sees
+     * the tags of every virtual host, as the tag facet does.
+     *
+     * @param tagType the tag type
+     * @return true if the tag may be shown and changed on this request
+     */
+    protected boolean isInRequestVirtualHost(final TagType tagType) {
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+        return StringUtil.isBlank(virtualHostKey) || virtualHostKey.equals(tagType.getVirtualHost());
+    }
+
+    /**
      * Reads a tag type that the caller owns, with its paths.
      *
      * @param id the tag type id
      * @param userId the caller
      * @return the tag type
-     * @throws TagRequestException NOT_FOUND if there is no such tag or the caller cannot see it, FORBIDDEN if the
-     *         caller can see it but does not own it
+     * @throws TagRequestException NOT_FOUND if there is no such tag, it belongs to another virtual host than the
+     *         request's, or the caller cannot see it, FORBIDDEN if the caller can see it but does not own it
      */
     protected TagType getOwnTagType(final String id, final String userId) throws TagRequestException {
         final TagType tagType = id != null && TAG_ID_PATTERN.matcher(id).matches() ? getTagTypeService().getTagType(id).orElse(null) : null;
-        if (tagType == null) {
+        if (tagType == null || !isInRequestVirtualHost(tagType)) {
             throw new TagRequestException(V2ErrorCode.NOT_FOUND, "tag not found");
         }
         if (!userId.equals(tagType.getOwner())) {
