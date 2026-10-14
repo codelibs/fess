@@ -104,7 +104,11 @@ button.tag-chip:hover { background: var(--bs-secondary-bg); }
 .tag-editor-item { padding-top: 0; padding-bottom: 0; }
 .tag-remove { box-sizing: border-box; width: 24px; height: 24px; margin: 0; padding: 0; background-size: .65em; flex-shrink: 0; }
 .tag-editor { flex-basis: 100%; max-width: 36rem; min-width: 0; }
-.my-tag-name { overflow-wrap: anywhere; text-align: start; }
+.my-tag-name { overflow-wrap: anywhere; text-align: start; text-decoration: none; }
+.my-tag-name:hover { text-decoration: underline; }
+/* A row keeps the tag name and its count together; the switch and the buttons wrap under them on a phone. */
+.my-tag-main { min-width: 0; flex-basis: 12rem; }
+.my-tag-rename-form { max-width: 24rem; }
 /* Brand logo (D.1) */
 .brand-logo { height: 24px; }
 /* Facet item keyboard accessibility (C.13) */

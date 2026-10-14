@@ -414,15 +414,24 @@ let myTags = null;
 function myTagsPanel(bar) {
   if (myTags && document.body.contains(myTags.node)) return myTags;
   const node = el("section", {
-    className: "my-tags-panel border rounded p-2 mb-2 d-none",
+    className: "my-tags-panel card shadow-sm mb-3 d-none",
     attrs: { id: MY_TAGS_PANEL_ID, "aria-labelledby": MY_TAGS_PANEL_ID + "-title" }
   });
-  const title = el("h2", { className: "h6", text: t("tag.my_tags"), attrs: { id: MY_TAGS_PANEL_ID + "-title", tabindex: "-1" } });
-  node.appendChild(title);
-  const list = el("ul", { className: "list-unstyled mb-0 my-tags-list" });
-  const empty = el("p", { className: "small text-body-secondary mb-0 my-tags-empty d-none", text: t("tag.my_empty") });
+  const header = el("div", { className: "card-header d-flex align-items-center gap-2 py-2" });
+  header.appendChild(el("i", { className: "fa fa-tags text-body-secondary", attrs: { "aria-hidden": "true" } }));
+  const title = el("h2", { className: "h6 mb-0", text: t("tag.my_tags"), attrs: { id: MY_TAGS_PANEL_ID + "-title", tabindex: "-1" } });
+  header.appendChild(title);
+  const count = el("span", { className: "badge rounded-pill text-bg-secondary my-tags-count d-none" });
+  header.appendChild(count);
+  node.appendChild(header);
+  const list = el("ul", { className: "list-group list-group-flush my-tags-list" });
+  const empty = el("p", { className: "text-body-secondary text-center mb-0 px-3 py-4 my-tags-empty d-none" });
+  empty.appendChild(el("i", { className: "fa fa-tag d-block fs-3 mb-2 opacity-50", attrs: { "aria-hidden": "true" } }));
+  empty.appendChild(document.createTextNode(t("tag.my_empty")));
   const error = buildTagError("my-tags-error");
+  error.node.classList.add("px-3", "py-2");
   const pending = buildPendingNote();
+  pending.classList.add("px-3", "py-2");
   [list, empty, error.node, pending].forEach(n => node.appendChild(n));
   bar.after(node);
 
@@ -461,6 +470,8 @@ function myTagsPanel(bar) {
     while (list.firstChild) list.removeChild(list.firstChild);
     tags.forEach((tag, i) => { if (tag && tag.id) list.appendChild(buildRow(tag, i, "view")); });
     empty.classList.toggle("d-none", list.childElementCount > 0);
+    count.textContent = String(list.childElementCount);
+    count.classList.toggle("d-none", list.childElementCount === 0);
   };
   const swap = (li, tag, i, mode) => {
     const next = buildRow(tag, i, mode);
@@ -470,14 +481,14 @@ function myTagsPanel(bar) {
 
   const buildRow = (tag, i, mode) => {
     const own = { ...tag, mine: true };
-    const li = el("li", { className: "my-tag d-flex flex-wrap align-items-center gap-2 py-1" });
+    const li = el("li", { className: "my-tag list-group-item d-flex flex-wrap align-items-center gap-2" });
     const rowId = MY_TAGS_PANEL_ID + "-" + i;
 
     if (mode === "rename") {
-      const form = el("form", { className: "d-flex flex-wrap align-items-center gap-1", attrs: { novalidate: "" } });
+      const form = el("form", { className: "input-group input-group-sm my-tag-rename-form", attrs: { novalidate: "" } });
       form.appendChild(el("label", { className: "visually-hidden", text: t("tag.name"), attrs: { for: rowId + "-name" } }));
       const input = el("input", {
-        className: "form-control form-control-sm w-auto my-tag-name-input",
+        className: "form-control my-tag-name-input",
         attrs: { id: rowId + "-name", type: "text", maxlength: "50", autocomplete: "off" }
       });
       input.value = String(tag.name || "");
@@ -500,17 +511,26 @@ function myTagsPanel(bar) {
       return li;
     }
 
-    const name = el("button", { className: "btn btn-link btn-sm p-0 my-tag-name", text: tagLabel(own), attrs: { type: "button" } });
+    const main = el("div", { className: "my-tag-main d-flex flex-wrap align-items-center column-gap-2 flex-grow-1" });
+    main.appendChild(el("i", { className: "fa fa-tag text-body-secondary", attrs: { "aria-hidden": "true" } }));
+    const name = el("button", { className: "btn btn-link p-0 my-tag-name fw-medium", text: tagLabel(own), attrs: { type: "button" } });
     name.addEventListener("click", () => {
       rememberTag(own);
       filterByTag(tag.value);
     });
-    li.appendChild(name);
-    li.appendChild(el("span", { className: "small text-body-secondary", text: t("tag.path_count", { n: Number(tag.path_count) || 0 }) }));
+    main.appendChild(name);
+    main.appendChild(el("span", {
+      className: "badge rounded-pill text-bg-light border fw-normal my-tag-count",
+      text: t("tag.path_count", { n: Number(tag.path_count) || 0 })
+    }));
+    li.appendChild(main);
 
     if (mode === "confirm") {
-      const box = el("div", { className: "my-tag-confirm d-flex flex-wrap align-items-center gap-1", attrs: { role: "group" } });
-      box.appendChild(el("span", { className: "small", text: t("tag.delete_confirm", { name: tagLabel(own) }) }));
+      const box = el("div", {
+        className: "my-tag-confirm d-flex flex-wrap align-items-center gap-2 rounded px-2 py-1 bg-danger-subtle text-danger-emphasis",
+        attrs: { role: "group" }
+      });
+      box.appendChild(el("span", { className: "small flex-grow-1", text: t("tag.delete_confirm", { name: tagLabel(own) }) }));
       const yes = el("button", { className: "btn btn-sm btn-danger my-tag-confirm-delete", text: t("tag.delete"), attrs: { type: "button" } });
       yes.addEventListener("click", () => write(() => api.del("/tags/" + encodeURIComponent(tag.id)), true).then(ok => ok && title.focus()));
       const no = el("button", { className: "btn btn-sm btn-outline-secondary my-tag-cancel", text: t("tag.cancel"), attrs: { type: "button" } });
@@ -543,20 +563,23 @@ function myTagsPanel(bar) {
     sw.appendChild(el("label", { className: "form-check-label small", text: t("tag.shared"), attrs: { for: rowId + "-shared" } }));
     li.appendChild(sw);
 
+    // Icon buttons: the accessible name and the tooltip carry the tag's name.
+    const actions = el("div", { className: "btn-group btn-group-sm my-tag-actions", attrs: { role: "group" } });
     const rename = el("button", {
-      className: "btn btn-sm btn-outline-secondary my-tag-rename",
-      text: t("tag.rename"),
-      attrs: { type: "button", "aria-label": t("tag.rename_label", { name: tagLabel(own) }) }
+      className: "btn btn-outline-secondary my-tag-rename",
+      attrs: { type: "button", "aria-label": t("tag.rename_label", { name: tagLabel(own) }), title: t("tag.rename") }
     });
+    rename.appendChild(el("i", { className: "fa fa-pencil-alt", attrs: { "aria-hidden": "true" } }));
     rename.addEventListener("click", () => swap(li, tag, i, "rename").querySelector(".my-tag-name-input").focus());
-    li.appendChild(rename);
+    actions.appendChild(rename);
     const del = el("button", {
-      className: "btn btn-sm btn-outline-danger my-tag-delete",
-      text: t("tag.delete"),
-      attrs: { type: "button", "aria-label": t("tag.delete_label", { name: tagLabel(own) }) }
+      className: "btn btn-outline-danger my-tag-delete",
+      attrs: { type: "button", "aria-label": t("tag.delete_label", { name: tagLabel(own) }), title: t("tag.delete") }
     });
+    del.appendChild(el("i", { className: "fa fa-trash", attrs: { "aria-hidden": "true" } }));
     del.addEventListener("click", () => swap(li, tag, i, "confirm").querySelector(".my-tag-cancel").focus());
-    li.appendChild(del);
+    actions.appendChild(del);
+    li.appendChild(actions);
     return li;
   };
 
