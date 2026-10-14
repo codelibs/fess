@@ -481,7 +481,8 @@ public class TagTypeHelperTest extends UnitFessTestCase {
         final Map<String, Object> inBoth = new HashMap<>(Map.of("url", url, "virtual_host", new String[] { "host1", "host2" }));
         final Map<String, Object> noVirtualHost = new HashMap<>(Map.of("url", url, "virtual_host", List.of()));
         final Map<String, Object> noField = new HashMap<>(Map.of("url", url));
-        tagTypeHelper.applyTags(List.of(inHost1, inBoth, noVirtualHost, noField));
+        final Map<String, Object> single = new HashMap<>(Map.of("url", url, "virtual_host", "host2"));
+        tagTypeHelper.applyTags(List.of(inHost1, inBoth, noVirtualHost, noField, single));
 
         final String none = tagTypeHelper.toTagValue("none", "alice");
         final String one = tagTypeHelper.toTagValue("one", "alice");
@@ -491,6 +492,8 @@ public class TagTypeHelperTest extends UnitFessTestCase {
         // a document of no virtual host keeps every tag of its URL
         assertEquals(Set.of(none, one, two), Set.of((String[]) noVirtualHost.get("tag")));
         assertEquals(Set.of(none, one, two), Set.of((String[]) noField.get("tag")));
+        // the field can also be a single string
+        assertEquals(Set.of(none, two), Set.of((String[]) single.get("tag")));
     }
 
     @Test
