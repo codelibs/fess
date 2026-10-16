@@ -104,6 +104,9 @@ public class SystemHelper {
 
     private static final Logger logger = LogManager.getLogger(SystemHelper.class);
 
+    /** The value of {@code app.cipher.key} shipped in {@code fess_config.properties}. */
+    protected static final String DEFAULT_APP_CIPHER_KEY = "___change__me___";
+
     /** The logger of the per-request dump of LastaFlute (headers, cookies, parameters and session attributes). */
     protected static final String REQUEST_LOGGING_FILTER_LOGGER = "org.lastaflute.web.servlet.filter.RequestLoggingFilter";
 
@@ -200,6 +203,7 @@ public class SystemHelper {
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         reportSearchRolePrefixProblems(fessConfig);
+        reportDefaultCipherKey(fessConfig);
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
 
@@ -712,6 +716,38 @@ public class SystemHelper {
     protected void reportSearchRolePrefixProblems(final FessConfig fessConfig) {
         validateSearchRolePrefixes(fessConfig).forEach(problem -> logger
                 .error("{} Group and role permissions will not be applied as configured until this is corrected.", problem));
+    }
+
+    /**
+     * Checks whether {@code app.cipher.key} still has the value shipped in {@code fess_config.properties}.
+     *
+     * <p>The key encrypts the passwords stored in the web, file and data store configurations and the
+     * user code. The shipped value is public, so anyone who can read the index or a backup can
+     * decrypt them.
+     *
+     * @param fessConfig The configuration to check.
+     * @return true if the key is the shipped value or blank.
+     */
+    protected boolean isDefaultCipherKey(final FessConfig fessConfig) {
+        final String key = fessConfig.getAppCipherKey();
+        return StringUtil.isBlank(key) || DEFAULT_APP_CIPHER_KEY.equals(key);
+    }
+
+    /**
+     * Warns when {@code app.cipher.key} has not been changed from the shipped value.
+     *
+     * <p>Only warns: changing the key makes the values already encrypted with the old one
+     * undecryptable, so Fess does not replace it. The key itself is not logged.
+     *
+     * @param fessConfig The configuration to check.
+     */
+    protected void reportDefaultCipherKey(final FessConfig fessConfig) {
+        if (isDefaultCipherKey(fessConfig)) {
+            logger.warn("app.cipher.key is still the default value. It encrypts the passwords stored in the crawl and data store"
+                    + " configurations, so anyone who can read the index or a backup can decrypt them. Set your own value in"
+                    + " fess_config.properties before you start using Fess. Changing it later makes the values encrypted with the old key"
+                    + " undecryptable.");
+        }
     }
 
     /**
