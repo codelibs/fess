@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -153,6 +152,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     private final ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 
     /**
+     * Thread-local flag set when the page being transformed carries a noindex robots directive
+     * (meta tag or X-Robots-Tag header). The page is still stored as an access result, with
+     * {@link Constants#INDEXING_TARGET} set to false, so that it is recorded as visited and is not indexed.
+     */
+    private final ThreadLocal<Boolean> robotsNoIndex = new ThreadLocal<>();
+
+    /**
      * Default constructor.
      */
     public FessXpathTransformer() {
@@ -210,6 +216,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             return super.transform(responseData);
         } finally {
             currentDocument.remove();
+            robotsNoIndex.remove();
         }
     }
 
@@ -240,8 +247,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         final Document document = parser.getDocument();
-        // Stash the parsed document so storeChildUrls (called later, possibly from
-        // applyRobotsDirective for the noindex case) can reuse it instead of re-parsing.
+        // Stash the parsed document so storeChildUrls (called later by transform) can reuse it
+        // instead of re-parsing.
         currentDocument.set(document);
 
         processMetaRobots(responseData, resultData, document);
@@ -324,7 +331,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         try {
             final Node value = getXPathAPI().selectSingleNode(document, META_NAME_ROBOTS_CONTENT);
             if (value != null) {
-                applyRobotsDirective(value.getTextContent(), "META", "#processMetaRobots", responseData, resultData);
+                applyRobotsDirective(value.getTextContent(), "META", responseData);
             }
         } catch (final XPathExpressionException e) {
             logger.warn("Could not parse a value of {}", META_NAME_ROBOTS_CONTENT, e);
@@ -347,7 +354,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 .entrySet()
                 .stream()
                 .filter(e -> X_ROBOTS_TAG.equalsIgnoreCase(e.getKey()) && e.getValue() != null)
-                .forEach(e -> applyRobotsDirective(e.getValue().toString(), "HEADER", "#processXRobotsTag", responseData, resultData));
+                .forEach(e -> applyRobotsDirective(e.getValue().toString(), "HEADER", responseData));
     }
 
     private boolean isRobotsTagsIgnored(final ResponseData responseData) {
@@ -359,8 +366,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return Boolean.parseBoolean(ignore);
     }
 
-    private void applyRobotsDirective(final String rawValue, final String label, final String source, final ResponseData responseData,
-            final ResultData resultData) {
+    private void applyRobotsDirective(final String rawValue, final String label, final ResponseData responseData) {
         final String content = rawValue.toLowerCase(Locale.ROOT);
         boolean noindex = false;
         boolean nofollow = false;
@@ -375,17 +381,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 nofollow = true;
             }
         }
-        if (noindex && nofollow) {
-            logger.info("{}(robots=noindex,nofollow): {}", label, responseData.getUrl());
-            throw new ChildUrlsException(Collections.emptySet(), source);
-        }
         if (noindex) {
-            logger.info("{}(robots=noindex): {}", label, responseData.getUrl());
-            storeChildUrls(responseData, resultData);
-            throw new ChildUrlsException(resultData.getChildUrlSet(), source);
+            logger.info("{}(robots=noindex{}): {}", label, nofollow ? ",nofollow" : "", responseData.getUrl());
+            robotsNoIndex.set(Boolean.TRUE);
+        } else if (nofollow) {
+            logger.info("{}(robots=nofollow): {}", label, responseData.getUrl());
         }
         if (nofollow) {
-            logger.info("{}(robots=nofollow): {}", label, responseData.getUrl());
             responseData.setNoFollow(true);
         }
     }
@@ -482,7 +484,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         String url = responseData.getUrl();
-        final String indexingTarget = crawlingConfig.getIndexingTarget(url);
+        final String indexingTarget = Boolean.TRUE.equals(robotsNoIndex.get()) ? Constants.FALSE : crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
         final String mimeType = responseData.getMimeType();
 

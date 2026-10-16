@@ -41,6 +41,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ClassUtil;
 import org.codelibs.core.lang.FieldUtil;
 import org.codelibs.core.misc.ValueHolder;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
@@ -420,6 +421,52 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_transform_noindexMeta_isStoredAsNonIndexingTargetAndFollowed() throws Exception {
+        final ResultData resultData = transformPageWithLinks("<meta name=\"robots\" content=\"noindex\">", Collections.emptyMap());
+
+        // stored (not abandoned by an exception) so that the page is recorded as visited, but never indexed
+        final Map<?, ?> dataMap = (Map<?, ?>) resultData.getRawData();
+        assertEquals("http://example.com/", dataMap.get("url"));
+        assertEquals("false", dataMap.get(Constants.INDEXING_TARGET));
+        // noindex alone still follows the links
+        assertEquals(Set.of("http://example.com/page1.html", "http://example.com/page2.html"), childUrlsOf(resultData));
+    }
+
+    @Test
+    public void test_transform_noindexNofollowAndNone_areStoredWithoutLinks() throws Exception {
+        for (final String tag : new String[] { "<meta name=\"robots\" content=\"noindex,nofollow\">",
+                "<meta name=\"robots\" content=\"none\">" }) {
+            final ResultData resultData = transformPageWithLinks(tag, Collections.emptyMap());
+            final Map<?, ?> dataMap = (Map<?, ?>) resultData.getRawData();
+            assertEquals("false", dataMap.get(Constants.INDEXING_TARGET));
+            assertTrue(childUrlsOf(resultData).isEmpty(), tag + ": " + childUrlsOf(resultData));
+            assertTrue(anchorsOf(resultData).isEmpty(), tag + ": " + anchorsOf(resultData));
+        }
+    }
+
+    @Test
+    public void test_transform_noindexHeader_isStoredAsNonIndexingTargetAndFollowed() throws Exception {
+        final ResultData resultData = transformPageWithLinks("", Map.of("X-Robots-Tag", "noindex"));
+
+        final Map<?, ?> dataMap = (Map<?, ?>) resultData.getRawData();
+        assertEquals("false", dataMap.get(Constants.INDEXING_TARGET));
+        assertEquals(Set.of("http://example.com/page1.html", "http://example.com/page2.html"), childUrlsOf(resultData));
+    }
+
+    @Test
+    public void test_transform_noindexDoesNotLeakToTheNextPage() throws Exception {
+        final String sessionId = registerCrawlingHelpers();
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+        final ResponseData noindex = createHtmlResponseData(sessionId, "http://example.com/a",
+                "<html><head><meta name=\"robots\" content=\"noindex\"></head><body>a</body></html>");
+        final ResponseData plain = createHtmlResponseData(sessionId, "http://example.com/b", "<html><body>b</body></html>");
+
+        assertEquals("false", ((Map<?, ?>) transformer.transform(noindex).getRawData()).get(Constants.INDEXING_TARGET));
+        assertFalse("false".equals(((Map<?, ?>) transformer.transform(plain).getRawData()).get(Constants.INDEXING_TARGET)));
+    }
+
+    @Test
     public void test_transform_nofollowHeader_storesNoAnchors() throws Exception {
         final ResultData resultData = transformPageWithLinks("", Map.of("X-Robots-Tag", "nofollow"));
 
@@ -634,14 +681,9 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         responseData.setUrl("http://example.com/");
         responseData.addMetaData("X-Robots-Tag", "noindex,nofollow");
 
-        try {
-            transformer.processXRobotsTag(responseData, new ResultData());
-            fail();
-        } catch (ChildUrlsException e) {
-            assertTrue(e.getChildUrlList().isEmpty());
-        } catch (Exception e) {
-            fail();
-        }
+        // a noindex page is no longer abandoned by an exception: it is stored as a visited, non-indexed page
+        transformer.processXRobotsTag(responseData, new ResultData());
+        assertTrue(responseData.isNoFollow());
     }
 
     @Test
@@ -667,14 +709,9 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         responseData.setResponseBody(data.getBytes());
         responseData.addMetaData("X-Robots-Tag", "noindex");
 
-        try {
-            transformer.processXRobotsTag(responseData, new ResultData());
-            fail();
-        } catch (ChildUrlsException e) {
-            assertTrue(e.getChildUrlList().isEmpty());
-        } catch (Exception e) {
-            fail();
-        }
+        // a noindex page is no longer abandoned by an exception: it is stored as a visited, non-indexed page
+        transformer.processXRobotsTag(responseData, new ResultData());
+        assertFalse(responseData.isNoFollow());
     }
 
     @Test
@@ -749,14 +786,9 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
 
-        try {
-            transformer.processMetaRobots(responseData, new ResultData(), document);
-            fail();
-        } catch (ChildUrlsException e) {
-            assertTrue(e.getChildUrlList().isEmpty());
-        } catch (Exception e) {
-            fail();
-        }
+        // a noindex page is no longer abandoned by an exception: it is stored as a visited, non-indexed page
+        transformer.processMetaRobots(responseData, new ResultData(), document);
+        assertTrue(responseData.isNoFollow());
     }
 
     @Test
@@ -781,14 +813,9 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final ResponseData responseData = new ResponseData();
         responseData.setUrl("http://example.com/");
 
-        try {
-            transformer.processMetaRobots(responseData, new ResultData(), document);
-            fail();
-        } catch (ChildUrlsException e) {
-            assertTrue(e.getChildUrlList().isEmpty());
-        } catch (Exception e) {
-            fail();
-        }
+        // a noindex page is no longer abandoned by an exception: it is stored as a visited, non-indexed page
+        transformer.processMetaRobots(responseData, new ResultData(), document);
+        assertTrue(responseData.isNoFollow());
     }
 
     @Test
@@ -818,14 +845,9 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         responseData.setUrl("http://example.com/");
         responseData.setResponseBody(data.getBytes());
 
-        try {
-            transformer.processMetaRobots(responseData, new ResultData(), document);
-            fail();
-        } catch (ChildUrlsException e) {
-            assertTrue(e.getChildUrlList().isEmpty());
-        } catch (Exception e) {
-            fail();
-        }
+        // a noindex page is no longer abandoned by an exception: it is stored as a visited, non-indexed page
+        transformer.processMetaRobots(responseData, new ResultData(), document);
+        assertFalse(responseData.isNoFollow());
     }
 
     @Test
