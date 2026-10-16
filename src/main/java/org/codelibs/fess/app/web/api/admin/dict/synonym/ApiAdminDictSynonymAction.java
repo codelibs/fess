@@ -76,7 +76,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         final SynonymPager pager = copyBeanToNewBean(body, SynonymPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(synonymService.getSynonymList(body.dictId, pager)
                 .stream()
-                .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                .map(synonymItem -> createEditBody(synonymItem, dictId))
                 .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
@@ -193,14 +193,14 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         form.dictId = dictId;
         validateApi(form, messages -> {});
         final SynonymFile file = synonymService.getSynonymFile(form.dictId).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL));
             return null;
         });
         try (InputStream inputStream = form.synonymFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
             logger.warn("Failed to process a request.", e);
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
@@ -238,7 +238,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                     file.writeOut(out);
                 }))
                 .orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
+                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadSynonymFile(GLOBAL));
                     return null;
                 });
     }
