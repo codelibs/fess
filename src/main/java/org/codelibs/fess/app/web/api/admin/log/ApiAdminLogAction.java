@@ -15,16 +15,15 @@
  */
 package org.codelibs.fess.app.web.api.admin.log;
 
+import static org.codelibs.fess.app.web.admin.log.AdminLogAction.decodeLogFileId;
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.getLogFileItems;
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.isLogFilename;
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.sanitizeFilename;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -75,14 +74,14 @@ public class ApiAdminLogAction extends FessApiAdminAction {
     // GET /api/admin/log/file/{id}
     @Execute
     public StreamResponse get$file(final String id) {
-        final byte[] decoded;
+        final String decoded;
         try {
-            decoded = Base64.getDecoder().decode(id);
+            decoded = decodeLogFileId(id);
         } catch (final IllegalArgumentException e) {
             throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id));
             return null; // ignore
         }
-        final String filename = sanitizeFilename(new String(decoded, StandardCharsets.UTF_8));
+        final String filename = sanitizeFilename(decoded);
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);

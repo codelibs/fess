@@ -15,7 +15,11 @@
  */
 package org.codelibs.fess.app.web.admin.log;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -227,5 +231,36 @@ public class AdminLogActionTest extends UnitFessTestCase {
     public void test_security_unicodeCharacters() {
         // Full-width dots and other Unicode characters
         assertEquals("\uff0e\uff0e/test.log", AdminLogAction.sanitizeFilename("\uff0e\uff0e/test.log"));
+    }
+
+    //                                                                    decodeLogFileId
+    //                                                                    ===============
+
+    @Test
+    public void test_decodeLogFileId_decodesTheIdsOfTheLogList() {
+        for (final String name : new String[] { "fess.log", "ab?.log", "fess~~.log", "fess>>>.log", "fess-\u00e9?.log.gz" }) {
+            final String id = Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8));
+            assertEquals(name, AdminLogAction.decodeLogFileId(id));
+        }
+    }
+
+    @Test
+    public void test_decodeLogFileId_urlSafeCharacters() {
+        // "ab?.log" -> "YWI_LmxvZw==" and "fess~~.log" -> "ZmVzc35-LmxvZw==" use "_" and "-"
+        assertEquals("ab?.log", AdminLogAction.decodeLogFileId("YWI_LmxvZw=="));
+        assertEquals("fess~~.log", AdminLogAction.decodeLogFileId("ZmVzc35-LmxvZw=="));
+    }
+
+    @Test
+    public void test_decodeLogFileId_standardAlphabetIsStillAccepted() {
+        assertEquals("ab?.log", AdminLogAction.decodeLogFileId("YWI/LmxvZw=="));
+        assertEquals("fess~~.log", AdminLogAction.decodeLogFileId("ZmVzc35+LmxvZw=="));
+    }
+
+    @Test
+    public void test_decodeLogFileId_invalidIdThrows() {
+        for (final String id : new String[] { "a", "not base64!", "@@@@" }) {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> AdminLogAction.decodeLogFileId(id), id);
+        }
     }
 }

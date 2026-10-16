@@ -92,6 +92,35 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
         assertEquals("inside", drain(action().get$file(id("/etc/hosts.log"))));
     }
 
+    /** The ids of these names contain the URL-safe characters "_" and "-" that the list hands out. */
+    @Test
+    public void test_get$file_servesLogFilesWhoseIdContainsUrlSafeCharacters() throws Exception {
+        final String underscore = "ab?.log";
+        final String hyphen = "fess~~.log";
+        assertTrue(id(underscore).contains("_"), id(underscore));
+        assertTrue(id(hyphen).contains("-"), id(hyphen));
+        Files.write(logDir.resolve(underscore), "underscore".getBytes(StandardCharsets.UTF_8));
+        Files.write(logDir.resolve(hyphen), "hyphen".getBytes(StandardCharsets.UTF_8));
+
+        final StreamResponse first = action().get$file(id(underscore));
+        assertEquals(underscore, first.getFileName());
+        assertEquals("underscore", drain(first));
+        final StreamResponse second = action().get$file(id(hyphen));
+        assertEquals(hyphen, second.getFileName());
+        assertEquals("hyphen", drain(second));
+    }
+
+    /** An id spelled with the standard Base64 alphabet is still accepted. */
+    @Test
+    public void test_get$file_acceptsAnIdOfTheStandardAlphabet() throws Exception {
+        final String name = "ab?.log";
+        final String standardId = Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8));
+        assertTrue(standardId.contains("/"), standardId);
+        Files.write(logDir.resolve(name), "standard".getBytes(StandardCharsets.UTF_8));
+
+        assertEquals("standard", drain(action().get$file(standardId)));
+    }
+
     @Test
     public void test_get$file_nonLogNamesAnswerAnEmptyBody() throws Exception {
         for (final String name : new String[] { "../../etc/passwd", "fess.txt", "fess.log.bak", "", ".." }) {

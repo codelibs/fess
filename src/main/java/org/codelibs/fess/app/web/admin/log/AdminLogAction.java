@@ -87,7 +87,7 @@ public class AdminLogAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
-        final String filename = sanitizeFilename(new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8));
+        final String filename = sanitizeFilename(decodeLogFileId(id));
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
@@ -99,6 +99,19 @@ public class AdminLogAction extends FessAdminAction {
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), this::asIndexHtml);
         return redirect(getClass()); // no-op
+    }
+
+    /**
+     * Decodes a log file ID, as handed out by {@link #getLogFileItems()}, back into the file name.
+     * The ID is URL-safe Base64 ({@code -} and {@code _}); the standard alphabet ({@code +} and {@code /})
+     * is accepted as well.
+     *
+     * @param id the Base64 encoded filename of the log file
+     * @return the decoded filename
+     * @throws IllegalArgumentException if the ID is not valid Base64
+     */
+    public static String decodeLogFileId(final String id) {
+        return new String(Base64.getUrlDecoder().decode(id.replace('+', '-').replace('/', '_')), StandardCharsets.UTF_8);
     }
 
     /**
