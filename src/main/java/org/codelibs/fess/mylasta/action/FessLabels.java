@@ -974,16 +974,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: File Crawling Config */
     public static final String LABELS_file_crawling_title_details = "{labels.file_crawling_title_details}";
 
-    /** The key of the message: Included Paths */
+    /** The key of the message: Included Paths for Crawling */
     public static final String LABELS_included_paths = "{labels.included_paths}";
 
-    /** The key of the message: Excluded Paths */
+    /** The key of the message: Excluded Paths for Crawling */
     public static final String LABELS_excluded_paths = "{labels.excluded_paths}";
 
-    /** The key of the message: Included Doc Paths */
+    /** The key of the message: Included Paths for Indexing */
     public static final String LABELS_included_doc_paths = "{labels.included_doc_paths}";
 
-    /** The key of the message: Excluded Doc Paths */
+    /** The key of the message: Excluded Paths for Indexing */
     public static final String LABELS_excluded_doc_paths = "{labels.excluded_doc_paths}";
 
     /** The key of the message: Config Parameters */
@@ -1025,16 +1025,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Web Crawling Config */
     public static final String LABELS_web_crawling_title_details = "{labels.web_crawling_title_details}";
 
-    /** The key of the message: Included URLs */
+    /** The key of the message: Included URLs for Crawling */
     public static final String LABELS_included_urls = "{labels.included_urls}";
 
-    /** The key of the message: Excluded URLs */
+    /** The key of the message: Excluded URLs for Crawling */
     public static final String LABELS_excluded_urls = "{labels.excluded_urls}";
 
-    /** The key of the message: Included Doc URLs */
+    /** The key of the message: Included URLs for Indexing */
     public static final String LABELS_included_doc_urls = "{labels.included_doc_urls}";
 
-    /** The key of the message: Excluded Doc URLs */
+    /** The key of the message: Excluded URLs for Indexing */
     public static final String LABELS_excluded_doc_urls = "{labels.excluded_doc_urls}";
 
     /** The key of the message: User Agent */
