@@ -168,6 +168,23 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isDefaultCipherKey() {
+        assertTrue(systemHelper.isDefaultCipherKey(cipherKeyConfig("___change__me___")));
+        assertTrue(systemHelper.isDefaultCipherKey(cipherKeyConfig("")));
+        assertTrue(systemHelper.isDefaultCipherKey(cipherKeyConfig(null)));
+        assertFalse(systemHelper.isDefaultCipherKey(cipherKeyConfig("my-own-secret")));
+    }
+
+    private FessConfig cipherKeyConfig(final String key) {
+        return new FessConfig.SimpleImpl() {
+            @Override
+            public String getAppCipherKey() {
+                return key;
+            }
+        };
+    }
+
+    @Test
     public void test_getUsername() {
         assertEquals("guest", systemHelper.getUsername());
     }
