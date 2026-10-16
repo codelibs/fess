@@ -119,7 +119,7 @@ public class ApiAdminUploadTest extends UnitFessTestCase {
         form.synonymFile = new BytesFormFile("a,b\n".getBytes(StandardCharsets.UTF_8));
 
         assertValidationError(() -> action.post$upload("missing-id", form)).handle(data -> {
-            data.requiredMessageOf("_global", "errors.failed_to_upload_protwords_file");
+            data.requiredMessageOf("_global", "errors.failed_to_upload_synonym_file");
         });
     }
 

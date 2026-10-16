@@ -76,7 +76,7 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(stemmerOverrideService.getStemmerOverrideList(body.dictId, pager)
                         .stream()
-                        .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                        .map(stemmeroverrideItem -> createEditBody(stemmeroverrideItem, dictId))
                         .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
@@ -189,14 +189,14 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         form.dictId = dictId;
         validateApi(form, messages -> {});
         final StemmerOverrideFile file = stemmerOverrideService.getStemmerOverrideFile(form.dictId).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL));
             return null;
         });
         try (InputStream inputStream = form.stemmerOverrideFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
             logger.warn("Failed to process a request.", e);
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadStemmeroverrideFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
@@ -234,7 +234,7 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                     file.writeOut(out);
                 }))
                 .orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
+                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadStemmeroverrideFile(GLOBAL));
                     return null;
                 });
     }

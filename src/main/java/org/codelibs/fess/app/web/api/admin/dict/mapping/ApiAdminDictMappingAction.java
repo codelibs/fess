@@ -76,7 +76,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         final CharMappingPager pager = copyBeanToNewBean(body, CharMappingPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(charMappingService.getCharMappingList(body.dictId, pager)
                 .stream()
-                .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                .map(mappingItem -> createEditBody(mappingItem, dictId))
                 .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
@@ -195,14 +195,14 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         form.dictId = dictId;
         validateApi(form, messages -> {});
         final CharMappingFile file = charMappingService.getCharMappingFile(form.dictId).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL));
             return null;
         });
         try (InputStream inputStream = form.charMappingFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
             logger.warn("Failed to process a request.", e);
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
@@ -240,7 +240,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
                     file.writeOut(out);
                 }))
                 .orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
+                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL));
                     return null;
                 });
     }

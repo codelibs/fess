@@ -76,7 +76,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         final KuromojiPager pager = copyBeanToNewBean(body, KuromojiPager.class);
         return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(kuromojiService.getKuromojiList(body.dictId, pager)
                 .stream()
-                .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                .map(kuromojiItem -> createEditBody(kuromojiItem, dictId))
                 .collect(Collectors.toList())).total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
@@ -193,14 +193,14 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         form.dictId = dictId;
         validateApi(form, messages -> {});
         final KuromojiFile file = kuromojiService.getKuromojiFile(form.dictId).orElseGet(() -> {
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL));
             return null;
         });
         try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
             logger.warn("Failed to process a request.", e);
-            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
+            throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
@@ -238,7 +238,7 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
                     file.writeOut(out);
                 }))
                 .orElseGet(() -> {
-                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
+                    throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL));
                     return null;
                 });
     }
