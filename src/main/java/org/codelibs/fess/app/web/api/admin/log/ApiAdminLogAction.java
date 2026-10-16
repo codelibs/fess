@@ -85,12 +85,15 @@ public class ApiAdminLogAction extends FessApiAdminAction {
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
-            return asStream(filename).contentTypeOctetStream().stream(out -> {
-                try (InputStream in = Files.newInputStream(path)) {
-                    out.write(in);
-                }
-            });
+            if (Files.isRegularFile(path)) {
+                return asStream(filename).contentTypeOctetStream().stream(out -> {
+                    try (InputStream in = Files.newInputStream(path)) {
+                        out.write(in);
+                    }
+                });
+            }
         }
-        return StreamResponse.asEmptyBody();
+        throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id));
+        return null; // ignore
     }
 }

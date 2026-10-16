@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
+import org.lastaflute.web.validation.exception.ValidationErrorException;
 
 /**
  * Tests for the log file download of {@link ApiAdminLogAction}: a log file in the log directory is
@@ -68,10 +69,7 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
     /** Whitespace between the dots must not turn into ".." after the ".." removal. */
     @Test
     public void test_get$file_whitespaceBetweenDotsDoesNotEscapeTheLogDirectory() throws Exception {
-        final StreamResponse response = action().get$file(id(". ./. ./etc/hosts.log"));
-
-        assertFalse(response.getFileName().contains(".."), "the file name must not climb: " + response.getFileName());
-        assertFalse(served(response).contains(OUTSIDE), "a file outside of the log directory was served");
+        assertFalse(served(". ./. ./etc/hosts.log").contains(OUTSIDE), "a file outside of the log directory was served");
     }
 
     @Test
@@ -79,8 +77,7 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
         final String[] ids = { "../../etc/hosts.log", ". ./. ./etc/hosts.log", ".\t./.\t./etc/hosts.log", ".\n./.\n./etc/hosts.log",
                 "..\\..\\etc\\hosts.log", ". .\\. .\\etc\\hosts.log", "....//....//etc/hosts.log", "/../../etc/hosts.log" };
         for (final String id : ids) {
-            final StreamResponse response = action().get$file(id(id));
-            assertFalse(served(response).contains(OUTSIDE), "a file outside of the log directory was served for: " + id);
+            assertFalse(served(id).contains(OUTSIDE), "a file outside of the log directory was served for: " + id);
         }
     }
 
@@ -121,10 +118,17 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
         assertEquals("standard", drain(action().get$file(standardId)));
     }
 
+    /** A name that is not a log file, or a log file that does not exist, is answered like an id that is not in the list. */
     @Test
-    public void test_get$file_nonLogNamesAnswerAnEmptyBody() throws Exception {
-        for (final String name : new String[] { "../../etc/passwd", "fess.txt", "fess.log.bak", "", ".." }) {
-            assertNull(action().get$file(id(name)).getStreamCall(), "no stream must be served for: " + name);
+    public void test_get$file_anUnknownFileIsAValidationError() throws Exception {
+        Files.write(logDir.resolve("fess.txt"), "text".getBytes(StandardCharsets.UTF_8));
+        Files.createDirectories(logDir.resolve("dir.log"));
+        final ApiAdminLogAction action = injectedAction();
+        for (final String name : new String[] { "../../etc/passwd", "fess.txt", "fess.log.bak", "", "..", "missing.log", "missing.log.gz",
+                "dir.log" }) {
+            assertValidationError(() -> action.get$file(id(name))).handle(data -> {
+                data.requiredMessageOf("_global", "errors.could_not_find_log_file");
+            });
         }
     }
 
@@ -169,8 +173,14 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
         return Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8));
     }
 
-    /** What the client receives: the streamed text, or the failure that reached it instead. */
-    private String served(final StreamResponse response) {
+    /** What the client receives: the streamed text, nothing for a validation error, or the failure that reached it instead. */
+    private String served(final String name) {
+        final StreamResponse response;
+        try {
+            response = injectedAction().get$file(id(name));
+        } catch (final ValidationErrorException e) {
+            return "";
+        }
         if (response.getStreamCall() == null) {
             return "";
         }
