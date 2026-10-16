@@ -102,6 +102,42 @@ public class ApiAdminDictEntryValidationTest extends UnitFessTestCase {
         assertApiHook(action, e);
     }
 
+    /** Without an output the entry would be dropped silently by the store, so the request must be refused. */
+    @Test
+    public void test_mapping_post$setting_refusesAMissingOutput() throws Exception {
+        final ApiAdminDictMappingAction action = createMappingAction();
+        for (final String output : new String[] { null, "" }) {
+            final org.codelibs.fess.app.web.api.admin.dict.mapping.CreateBody body =
+                    new org.codelibs.fess.app.web.api.admin.dict.mapping.CreateBody();
+            body.crudMode = CrudMode.CREATE;
+            body.inputs = "a";
+            body.output = output;
+
+            final ValidationErrorException e = catchValidationError(() -> action.post$setting("mapping-id", body));
+
+            assertTrue(e.getMessages().hasMessageOf("output"), "the error must name the missing property for: " + output);
+            assertApiHook(action, e);
+        }
+    }
+
+    @Test
+    public void test_mapping_put$setting_refusesAMissingOutput() throws Exception {
+        final ApiAdminDictMappingAction action = createMappingAction();
+        for (final String output : new String[] { null, "" }) {
+            final org.codelibs.fess.app.web.api.admin.dict.mapping.EditBody body =
+                    new org.codelibs.fess.app.web.api.admin.dict.mapping.EditBody();
+            body.id = 1L;
+            body.crudMode = CrudMode.EDIT;
+            body.inputs = "a";
+            body.output = output;
+
+            final ValidationErrorException e = catchValidationError(() -> action.put$setting("mapping-id", body));
+
+            assertTrue(e.getMessages().hasMessageOf("output"), "the error must name the missing property for: " + output);
+            assertApiHook(action, e);
+        }
+    }
+
     // ===================================================================================
     //                                                                             Helpers
     //                                                                             =======

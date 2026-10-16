@@ -50,6 +50,7 @@ public class CreateForm {
     public String inputs;
 
     /** Output term that input terms will be mapped to */
+    @Required
     @Size(min = 1, max = 1000)
     public String output;
 
