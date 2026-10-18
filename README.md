@@ -61,6 +61,10 @@ Docker images are published on [ghcr.io](https://github.com/orgs/codelibs/packag
 
 Register crawling targets on the Web, File, or Data Store configuration pages in the Admin UI, then start the crawler from the [Scheduler page](https://fess.codelibs.org/stable/admin/scheduler-guide.html).
 
+## One-Click Deploy
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/Fess/)
+
 ## Migration from Another Search Provider
 
 See [MIGRATION.md](MIGRATION.md).
