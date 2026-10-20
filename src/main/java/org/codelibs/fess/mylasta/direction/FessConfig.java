@@ -476,6 +476,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,tk:.*,X-FESS.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
+    /** The key of the configuration. e.g. dc:title,dc:description,dc:creator,dc:subject,dc:rights,w:Comments,Exif IFD0:Image Description,Exif IFD0:Artist,Exif IFD0:Copyright,Exif IFD0:Windows XP .*,Exif SubIFD:User Comment,Object Name,Headline,Caption/Abstract,By-line,By-line Title,Credit,Source,Copyright Notice,Sub-location,City,Province/State,Country/Primary Location Name,Special Instructions,tEXt tEXtEntry,iTXt iTXtEntry,zTXt zTXtEntry */
+    String CRAWLER_METADATA_CONTENT_IMAGE_INCLUDES = "crawler.metadata.content.image.includes";
+
     /** The key of the configuration. e.g. title=title:string<br>
      * Title=title:string<br>
      * dc:title=title:string<br>
@@ -3869,6 +3872,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataContentExcludes();
+
+    /**
+     * Get the value for the key 'crawler.metadata.content.image.includes'. <br>
+     * The value is, e.g. dc:title,dc:description,dc:creator,dc:subject,dc:rights,w:Comments,Exif IFD0:Image Description,Exif IFD0:Artist,Exif IFD0:Copyright,Exif IFD0:Windows XP .*,Exif SubIFD:User Comment,Object Name,Headline,Caption/Abstract,By-line,By-line Title,Credit,Source,Copyright Notice,Sub-location,City,Province/State,Country/Primary Location Name,Special Instructions,tEXt tEXtEntry,iTXt iTXtEntry,zTXt zTXtEntry <br>
+     * comment: Metadata fields to add to the content of an image document (image/*). Other metadata of an image, such as its size and camera settings, is not added.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerMetadataContentImageIncludes();
 
     /**
      * Get the value for the key 'crawler.metadata.name.mapping'. <br>
@@ -11988,6 +11999,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES);
         }
 
+        public String getCrawlerMetadataContentImageIncludes() {
+            return get(FessConfig.CRAWLER_METADATA_CONTENT_IMAGE_INCLUDES);
+        }
+
         public String getCrawlerMetadataNameMapping() {
             return get(FessConfig.CRAWLER_METADATA_NAME_MAPPING);
         }
@@ -15594,6 +15609,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_TYPE, "cpu");
             defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES,
                     "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,tk:.*,X-FESS.*");
+            defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_IMAGE_INCLUDES,
+                    "dc:title,dc:description,dc:creator,dc:subject,dc:rights,w:Comments,Exif IFD0:Image Description,Exif IFD0:Artist,Exif IFD0:Copyright,Exif IFD0:Windows XP .*,Exif SubIFD:User Comment,Object Name,Headline,Caption/Abstract,By-line,By-line Title,Credit,Source,Copyright Notice,Sub-location,City,Province/State,Country/Primary Location Name,Special Instructions,tEXt tEXtEntry,iTXt iTXtEntry,zTXt zTXtEntry");
             defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING,
                     "title=title:string\nTitle=title:string\ndc:title=title:string\nfrontmatter.title=title:string\n");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH, "//BODY");

@@ -162,6 +162,8 @@ public interface FessProp {
 
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawlerMetadataContentExcludes";
 
+    String CRAWLER_METADATA_CONTENT_IMAGE_INCLUDES = "crawlerMetadataContentImageIncludes";
+
     Map<String, Object> propMap = new ConcurrentHashMap<>();
 
     String getOrDefault(String propertyKey, String defaultValue);
@@ -1182,6 +1184,33 @@ public interface FessProp {
             propMap.put(CRAWLER_METADATA_CONTENT_EXCLUDES, patterns);
         }
         return !stream(patterns).get(stream -> stream.anyMatch(p -> p.matcher(name).matches()));
+    }
+
+    String getCrawlerMetadataContentImageIncludes();
+
+    /**
+     * Checks if a metadata field is added to the content of a document. The metadata of an image document (image/*)
+     * is added only if it is in crawler.metadata.content.image.includes, as the other metadata of an image is
+     * a long list of values about its pixels, its color profile and its camera settings, which is of no use for a search.
+     *
+     * @param mimeType the MIME type of the document
+     * @param name the name of the metadata field
+     * @return true if the metadata field is added to the content
+     */
+    default boolean isCrawlerMetadataContentIncluded(final String mimeType, final String name) {
+        if (!isCrawlerMetadataContentIncluded(name)) {
+            return false;
+        }
+        if (mimeType == null || !mimeType.toLowerCase(Locale.ROOT).startsWith("image/")) {
+            return true;
+        }
+        Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_IMAGE_INCLUDES);
+        if (patterns == null) {
+            patterns = split(getCrawlerMetadataContentImageIncludes(), ",")
+                    .get(stream -> stream.filter(StringUtil::isNotBlank).map(Pattern::compile).toArray(n -> new Pattern[n]));
+            propMap.put(CRAWLER_METADATA_CONTENT_IMAGE_INCLUDES, patterns);
+        }
+        return stream(patterns).get(stream -> stream.anyMatch(p -> p.matcher(name).matches()));
     }
 
     String getCrawlerMetadataNameMapping();
