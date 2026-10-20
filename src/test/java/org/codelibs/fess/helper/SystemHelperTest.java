@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -44,6 +46,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -173,6 +176,23 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(systemHelper.isDefaultCipherKey(cipherKeyConfig("")));
         assertTrue(systemHelper.isDefaultCipherKey(cipherKeyConfig(null)));
         assertFalse(systemHelper.isDefaultCipherKey(cipherKeyConfig("my-own-secret")));
+    }
+
+    @Test
+    public void test_reportRetiredTikaConfig() throws Exception {
+        // setUp() may have used up the once-only key when it initialized the container
+        LogUtil.resetWarnOnce();
+        final Path dir = Files.createTempDirectory("fess_conf");
+        try {
+            final Path tikaXml = dir.resolve("tika.xml");
+            assertFalse(systemHelper.reportRetiredTikaConfig(tikaXml));
+            Files.writeString(tikaXml, "<properties/>");
+            assertTrue(systemHelper.reportRetiredTikaConfig(tikaXml));
+            // reported once
+            assertFalse(systemHelper.reportRetiredTikaConfig(tikaXml));
+        } finally {
+            FileUtils.deleteQuietly(dir.toFile());
+        }
     }
 
     private FessConfig cipherKeyConfig(final String key) {

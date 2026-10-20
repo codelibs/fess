@@ -74,6 +74,7 @@ import org.codelibs.fess.timer.LoadControlMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.IpAddressUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
@@ -204,6 +205,7 @@ public class SystemHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         reportSearchRolePrefixProblems(fessConfig);
         reportDefaultCipherKey(fessConfig);
+        reportRetiredTikaConfig(ResourceUtil.getConfPath("tika.xml"));
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
 
@@ -731,6 +733,19 @@ public class SystemHelper {
     protected boolean isDefaultCipherKey(final FessConfig fessConfig) {
         final String key = fessConfig.getAppCipherKey();
         return StringUtil.isBlank(key) || DEFAULT_APP_CIPHER_KEY.equals(key);
+    }
+
+    /**
+     * Warns when the {@code tika.xml} of an earlier version is still in the configuration directory.
+     * Tika is configured in the code now, so the file is not read and the parsers it excludes are used.
+     *
+     * @param tikaXml The path of {@code tika.xml} in the configuration directory.
+     * @return true if the warning was written.
+     */
+    protected boolean reportRetiredTikaConfig(final Path tikaXml) {
+        return Files.exists(tikaXml) && LogUtil.warnOnce(logger, "tika.xml",
+                "{} is not read any more because Tika is configured in the code, so the parsers it excludes are no longer excluded. Remove the file.",
+                tikaXml);
     }
 
     /**

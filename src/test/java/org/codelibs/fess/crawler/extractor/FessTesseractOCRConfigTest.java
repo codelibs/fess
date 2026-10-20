@@ -70,7 +70,7 @@ public class FessTesseractOCRConfigTest extends UnitFessTestCase {
         config.apply(createFessConfig(true, "jpn+eng", "60"));
         assertFalse(config.isSkipOcr());
         assertEquals("jpn+eng", config.getLanguage());
-        assertEquals(60, config.getTimeoutSeconds());
+        assertEquals(60_000L, config.getTimeoutMillis());
         assertTrue(config.isPreserveInterwordSpacing());
     }
 
@@ -80,7 +80,7 @@ public class FessTesseractOCRConfigTest extends UnitFessTestCase {
         config.apply(createFessConfig(true, "jpn", ""));
         assertFalse(config.isSkipOcr());
         assertEquals("jpn", config.getLanguage());
-        assertEquals(new TesseractOCRConfig().getTimeoutSeconds(), config.getTimeoutSeconds());
+        assertEquals(new TesseractOCRConfig().getTimeoutMillis(), config.getTimeoutMillis());
     }
 
     @Test

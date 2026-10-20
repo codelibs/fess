@@ -66,7 +66,7 @@ public class FessTesseractOCRConfig extends TesseractOCRConfig {
             setLanguage(fessConfig.getCrawlerDocumentOcrLanguage());
             final Integer timeout = fessConfig.getCrawlerDocumentOcrTimeoutAsInteger();
             if (timeout != null) {
-                setTimeoutSeconds(timeout);
+                setTimeoutMillis(timeout * 1000L);
             }
         } catch (final IllegalArgumentException e) {
             logger.warn("Invalid OCR settings, so OCR is disabled: language={}, timeout={}", fessConfig.getCrawlerDocumentOcrLanguage(),
