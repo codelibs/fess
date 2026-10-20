@@ -282,7 +282,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         final BiFunction<String, Matcher, String> pathMatcher = pathMappingHelper.createPathMatcher(matcher, "function:encodeUrl");
 
         String result = pathMatcher.apply("http://example.com/test path", matcher);
-        assertEquals("http://example.com/test+path", result);
+        assertEquals("http://example.com/test%20path", result);
     }
 
     @Test
