@@ -219,7 +219,8 @@ public final class DocumentUtil {
                 buf.append(c);
             } else {
                 try {
-                    buf.append(URLEncoder.encode(String.valueOf(c), enc));
+                    // URLEncoder writes a space as "+", which a path treats as a literal plus sign
+                    buf.append(URLEncoder.encode(String.valueOf(c), enc).replace("+", "%20"));
                 } catch (final UnsupportedEncodingException e) {
                     buf.append(c);
                 }

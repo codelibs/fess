@@ -281,8 +281,15 @@ public class DocumentUtilTest extends UnitFessTestCase {
     @Test
     public void test_encodeUrl_basic() {
         assertEquals("hello", DocumentUtil.encodeUrl("hello"));
-        assertEquals("hello+world", DocumentUtil.encodeUrl("hello world"));
+        assertEquals("hello%20world", DocumentUtil.encodeUrl("hello world"));
         assertEquals("test+value", DocumentUtil.encodeUrl("test+value"));
+    }
+
+    @Test
+    public void test_encodeUrl_space_in_path() {
+        assertEquals("http://example.com/sites/test1/Lists/Blank%20list/DispForm.aspx?ID=2",
+                DocumentUtil.encodeUrl("http://example.com/sites/test1/Lists/Blank list/DispForm.aspx?ID=2"));
+        assertEquals("http://example.com/a%20b+c/d%20e", DocumentUtil.encodeUrl("http://example.com/a b+c/d e"));
     }
 
     @Test
