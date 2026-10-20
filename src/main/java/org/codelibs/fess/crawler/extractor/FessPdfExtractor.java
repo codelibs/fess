@@ -17,11 +17,14 @@ package org.codelibs.fess.crawler.extractor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tika.config.TikaConfig;
+import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.parser.enricher.ContentEnrichers;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.codelibs.fess.crawler.extractor.impl.PdfExtractor;
+import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
@@ -52,26 +55,32 @@ public class FessPdfExtractor extends PdfExtractor {
             return;
         }
         final TesseractOCRConfig config = crawlerContainer.getComponent("tesseractOCRConfig");
-        if (isOcrAvailable(crawlerContainer.getComponent("tikaConfig"), config)) {
-            setFallbackExtractor(crawlerContainer.getComponent("tikaExtractor"));
-            logger.info("OCR is enabled: language={}, timeout={}s", config.getLanguage(), config.getTimeoutSeconds());
+        final TikaExtractor tikaExtractor = crawlerContainer.getComponent("tikaExtractor");
+        if (isOcrAvailable(tikaExtractor.getParser(), config)) {
+            setFallbackExtractor(tikaExtractor);
+            logger.info("OCR is enabled: language={}, timeout={}s", config.getLanguage(), config.getTimeoutMillis() / 1000);
         } else {
             logger.warn("OCR is enabled, but Tesseract OCR is not available. "
-                    + "Check that the tesseract command is installed, that the OCR settings are valid, "
-                    + "and that tika.xml does not exclude TesseractOCRParser.");
+                    + "Check that the tesseract command is installed and that the OCR settings are valid.");
         }
     }
 
     /**
-     * Checks if Tika runs Tesseract OCR with the given config.
+     * Checks if the Tika parser runs Tesseract OCR on the images of a PDF with the given config.
+     * Tika 4 no longer lists the OCR in the supported types of the parser, so this asks whether
+     * a text recognizer in the parser tree takes the image type.
      *
-     * @param tikaConfig the Tika config
+     * @param parser the Tika parser of tikaExtractor, which holds the OCR parser; OCR is not available if null
      * @param config the Tesseract OCR config
      * @return true if OCR is available
      */
-    protected boolean isOcrAvailable(final TikaConfig tikaConfig, final TesseractOCRConfig config) {
+    protected boolean isOcrAvailable(final Parser parser, final TesseractOCRConfig config) {
+        if (parser == null) {
+            return false;
+        }
         final ParseContext context = new ParseContext();
+        context.set(Parser.class, parser);
         context.set(TesseractOCRConfig.class, config);
-        return tikaConfig.getParser().getSupportedTypes(context).contains(MediaType.image("ocr-png"));
+        return ContentEnrichers.hasTextRecognizer(null, MediaType.image("png"), new Metadata(), context);
     }
 }

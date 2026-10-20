@@ -9,4 +9,3 @@ ${packaging.fess.conf.dir}/fess_env_crawler.properties
 ${packaging.fess.conf.dir}/fess_env_suggest.properties
 ${packaging.fess.conf.dir}/fess_env_thumbnail.properties
 ${packaging.fess.conf.dir}/fess_env_web.properties
-${packaging.fess.conf.dir}/tika.xml

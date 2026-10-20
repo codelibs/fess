@@ -1170,6 +1170,11 @@ public interface FessProp {
     String getCrawlerMetadataContentExcludes();
 
     default boolean isCrawlerMetadataContentIncluded(final String name) {
+        // Tika 4 keeps its own bookkeeping under tk: (X-TIKA: in Tika 3). Never fold it into the content, even when the
+        // crawler.metadata.content.excludes of an upgraded installation does not list it.
+        if (name.startsWith("tk:") || name.startsWith("X-TIKA:")) {
+            return false;
+        }
         Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_EXCLUDES);
         if (patterns == null) {
             patterns = split(getCrawlerMetadataContentExcludes(), ",")

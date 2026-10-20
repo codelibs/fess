@@ -1000,6 +1000,36 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isCrawlerMetadataContentIncluded_tikaBookkeeping() {
+        FessProp.propMap.clear();
+        // An upgraded installation keeps the crawler.metadata.content.excludes of the earlier version,
+        // which does not list the tk: names of Tika 4.
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerMetadataContentExcludes() {
+                return "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,X-FESS.*";
+            }
+        };
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("tk:parsed-by"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("tk:resource-name"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("X-TIKA:Parsed-By"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("X-Parsed-By"));
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("dc:creator"));
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("meta:last-author"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isCrawlerMetadataContentIncluded_shippedExcludes() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        assertTrue(fessConfig.getCrawlerMetadataContentExcludes().contains("tk:.*"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("tk:parsed-by"));
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("dc:creator"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
     public void test_getChatRateLimitPerMinute_defaultValue() {
         // When the system property is not set, default is 30
         final FessConfig fessConfig = new FessConfig.SimpleImpl();
