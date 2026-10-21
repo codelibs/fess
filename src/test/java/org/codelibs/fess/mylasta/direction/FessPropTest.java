@@ -1030,6 +1030,90 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isCrawlerMetadataContentIncluded_imageKeepsDescriptiveMetadata() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        // The names are the ones Tika reports for JPEG, TIFF, PNG and GIF files.
+        for (final String name : new String[] { "dc:title", "dc:description", "dc:creator", "dc:subject", "w:Comments",
+                "Exif IFD0:Image Description", "Exif IFD0:Artist", "Exif IFD0:Copyright", "Exif IFD0:Windows XP Title",
+                "Exif IFD0:Windows XP Keywords", "Exif SubIFD:User Comment", "Object Name", "Caption/Abstract", "By-line",
+                "Copyright Notice", "City", "Country/Primary Location Name", "tEXt tEXtEntry", "iTXt iTXtEntry" }) {
+            assertTrue(name, fessConfig.isCrawlerMetadataContentIncluded("image/jpeg", name));
+        }
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("IMAGE/TIFF", "dc:subject"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isCrawlerMetadataContentIncluded_imageDropsTechnicalMetadata() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        for (final String name : new String[] { "Image Width", "Image Height", "Component 1", "Number of Tables", "Version", "X Resolution",
+                "Thumbnail Width Pixels", "Compression Type", "Data Precision", "File Name", "File Size", "File Modified Date",
+                "Chroma ColorSpaceType", "Compression CompressionTypeName", "Data BitsPerSample", "Dimension PixelAspectRatio", "IHDR",
+                "GraphicControlExtension", "imagereader:NumImages", "width", "height", "tiff:ImageWidth", "tiff:Make", "tiff:BitsPerSample",
+                "Exif IFD0:Make", "Exif IFD0:X Resolution", "Exif IFD0:Strip Offsets", "Exif SubIFD:Exposure Time",
+                "Exif SubIFD:ISO Speed Ratings", "Exif Thumbnail:Compression", "GPS:GPS Latitude", "geo:lat", "ICC:Profile Size",
+                "ICC:Blue Colorant", "Interoperability:Interoperability Index", "exif:FNumber", "xmp-raw:crs:Exposure", "xmpMM:DocumentID",
+                "xmp:CreatorTool", "xmp:dc:title", "dc:title:x-default", "dcterms:created", "Brightness", "Unknown tag (0x000a)",
+                "Application Record Version", "Coded Character Set", "Content-Length", "Text TextEntry", "pHYs" }) {
+            assertFalse(name, fessConfig.isCrawlerMetadataContentIncluded("image/jpeg", name));
+        }
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isCrawlerMetadataContentIncluded_imageStillHonorsExcludes() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerMetadataContentExcludes() {
+                return "dc:creator";
+            }
+
+            @Override
+            public String getCrawlerMetadataContentImageIncludes() {
+                return "dc:.*";
+            }
+        };
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("image/png", "dc:title"));
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("image/png", "dc:creator"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isCrawlerMetadataContentIncluded_imageEmptyIncludes() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerMetadataContentExcludes() {
+                return "";
+            }
+
+            @Override
+            public String getCrawlerMetadataContentImageIncludes() {
+                return "";
+            }
+        };
+        assertFalse(fessConfig.isCrawlerMetadataContentIncluded("image/jpeg", "dc:title"));
+        assertTrue(fessConfig.isCrawlerMetadataContentIncluded("application/pdf", "dc:title"));
+        FessProp.propMap.clear();
+    }
+
+    @Test
+    public void test_isCrawlerMetadataContentIncluded_nonImageIsNotRestricted() {
+        FessProp.propMap.clear();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        for (final String mimeType : new String[] { null, "", "application/pdf", "text/html", "audio/mpeg",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }) {
+            assertTrue(mimeType, fessConfig.isCrawlerMetadataContentIncluded(mimeType, "Image Width"));
+            assertTrue(mimeType, fessConfig.isCrawlerMetadataContentIncluded(mimeType, "meta:last-author"));
+            assertFalse(mimeType, fessConfig.isCrawlerMetadataContentIncluded(mimeType, "tk:parsed-by"));
+        }
+        FessProp.propMap.clear();
+    }
+
+    @Test
     public void test_getChatRateLimitPerMinute_defaultValue() {
         // When the system property is not set, default is 30
         final FessConfig fessConfig = new FessConfig.SimpleImpl();

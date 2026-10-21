@@ -158,7 +158,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 metaDataMap.put(key, values);
 
                 // meta -> content
-                if (fessConfig.isCrawlerMetadataContentIncluded(key)) {
+                if (fessConfig.isCrawlerMetadataContentIncluded(mimeType, key)) {
                     final String joinedValue = StringUtils.join(values, ' ');
                     if (StringUtil.isNotBlank(joinedValue)) {
                         if (contentMetaBuf.length() > 0) {
