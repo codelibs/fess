@@ -343,7 +343,7 @@ public class QueryParser {
             final org.apache.lucene.search.Query query = super.getFieldQuery(field, queryText, quoted);
             if (quoted && query instanceof final TermQuery termQuery) {
                 final Pair<String, String> splitField = splitField(defaultField, field);
-                if (defaultField.equals(splitField.cud())) {
+                if (defaultField.equals(splitField.cur())) {
                     final PhraseQuery.Builder builder = new PhraseQuery.Builder();
                     builder.add(termQuery.getTerm());
                     return builder.build();
