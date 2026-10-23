@@ -102,9 +102,10 @@ public class QueryParserTest extends UnitFessTestCase {
         assertEquals("_default:fess", ((BoostQuery) query).getQuery().toString());
         assertEquals(10.0f, ((BoostQuery) query).getBoost());
 
+        // a quoted single word is a one-term phrase, so no implicit fuzzy clause is added for it
         query = queryParser.createDefaultFilterChain().parse("\"fess\"");
-        assertEquals(TermQuery.class, query.getClass());
-        assertEquals("_default:fess", ((TermQuery) query).toString());
+        assertEquals(PhraseQuery.class, query.getClass());
+        assertEquals("_default:fess", ((PhraseQuery) query).getTerms()[0].toString());
 
         query = queryParser.createDefaultFilterChain().parse("\"fess codelibs\"");
         assertEquals(PhraseQuery.class, query.getClass());
@@ -151,8 +152,8 @@ public class QueryParserTest extends UnitFessTestCase {
         query = queryParser.createDefaultFilterChain().parse("\"fess\" codelibs");
         assertEquals(BooleanQuery.class, query.getClass());
         clauses = ((BooleanQuery) query).clauses();
-        assertEquals(TermQuery.class, clauses.get(0).query().getClass());
-        assertEquals("_default:fess", ((TermQuery) clauses.get(0).query()).toString());
+        assertEquals(PhraseQuery.class, clauses.get(0).query().getClass());
+        assertEquals("_default:fess", ((PhraseQuery) clauses.get(0).query()).getTerms()[0].toString());
         assertEquals(Occur.MUST, clauses.get(0).occur());
         assertEquals(TermQuery.class, clauses.get(1).query().getClass());
         assertEquals("_default:codelibs", clauses.get(1).query().toString());

@@ -333,7 +333,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 Set.of("aaa:bbb"), //
                 buildQuery("aaa\\:bbb"));
         assertQueryContext(
-                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"aaa:bbb\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"aaa:bbb\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
+                "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 buildQuery("\"aaa\\:bbb\""));
 
         assertQueryContext(
@@ -341,6 +341,18 @@ public class QueryHelperTest extends UnitFessTestCase {
                 Map.of("title", List.of("aaa:bbb")), //
                 Set.of("aaa:bbb"), //
                 buildQuery("title:aaa\\:bbb"));
+    }
+
+    @Test
+    public void test_build_quoted_single_word_is_not_fuzzy() {
+        setQueryType("bool");
+        // an unquoted word of fuzzy.min.length or more gets the implicit fuzzy clauses ...
+        final String unquoted = buildQuery("fessword").getQueryBuilder().toString();
+        assertTrue(unquoted.contains("\"fuzzy\""));
+        // ... a quoted one is an exact phrase, with the same match_phrase clauses and no fuzzy clause
+        final String quoted = buildQuery("\"fessword\"").getQueryBuilder().toString();
+        assertFalse(quoted.contains("\"fuzzy\""));
+        assertTrue(quoted.contains("\"match_phrase\""));
     }
 
     @Test
