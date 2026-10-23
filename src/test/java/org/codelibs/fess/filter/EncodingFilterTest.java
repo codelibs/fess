@@ -17,11 +17,84 @@ package org.codelibs.fess.filter;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+
 public class EncodingFilterTest extends UnitFessTestCase {
+
+    /** A request that reports a fixed character encoding and records the one it is given. */
+    private static class EncodedRequest extends HttpServletRequestWrapper {
+        private String encoding;
+
+        EncodedRequest(final HttpServletRequest request, final String encoding) {
+            super(request);
+            this.encoding = encoding;
+        }
+
+        @Override
+        public String getCharacterEncoding() {
+            return encoding;
+        }
+
+        @Override
+        public void setCharacterEncoding(final String enc) {
+            encoding = enc;
+        }
+    }
+
+    @Override
+    protected String prepareMockServletPath() {
+        return "/api/v2/search";
+    }
+
+    private EncodingFilter createFilter() {
+        final EncodingFilter filter = new EncodingFilter();
+        filter.encoding = "UTF-8";
+        return filter;
+    }
+
+    private String encodingSeenByChain(final String requestEncoding) throws Exception {
+        final EncodedRequest request = new EncodedRequest(getMockRequest(), requestEncoding);
+        final AtomicReference<String> seen = new AtomicReference<>();
+        createFilter().doFilter(request, getMockResponse(), (req, res) -> seen.set(req.getCharacterEncoding()));
+        return seen.get();
+    }
+
+    @Test
+    public void test_unknownRequestEncoding_fallsBackToDefault() throws Exception {
+        for (final String unknown : new String[] { "nope", "x", "", " ", "utf 8", "UTF-8;" }) {
+            assertEquals("[" + unknown + "]", "UTF-8", encodingSeenByChain(unknown));
+        }
+    }
+
+    @Test
+    public void test_unknownRequestEncoding_usesConfiguredDefault() throws Exception {
+        final EncodingFilter filter = createFilter();
+        filter.encoding = "Shift_JIS";
+        final EncodedRequest request = new EncodedRequest(getMockRequest(), "nope");
+        final AtomicReference<String> seen = new AtomicReference<>();
+        filter.doFilter(request, getMockResponse(), (req, res) -> seen.set(req.getCharacterEncoding()));
+        assertEquals("Shift_JIS", seen.get());
+    }
+
+    @Test
+    public void test_knownRequestEncoding_isKept() throws Exception {
+        for (final String known : new String[] { "UTF-8", "utf-8", "Shift_JIS", "EUC-JP", "ISO-8859-1" }) {
+            assertEquals(known, encodingSeenByChain(known));
+        }
+    }
+
+    @Test
+    public void test_missingRequestEncoding_isLeftToLastaFlute() throws Exception {
+        // LastaPrepareFilter applies the default when none is given.
+        assertNull(encodingSeenByChain(null));
+    }
+
     @Test
     public void test_normal() throws IOException {
         final EncodingFilter filter = new EncodingFilter();

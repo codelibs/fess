@@ -16,6 +16,7 @@
 package org.codelibs.fess.filter;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -113,6 +114,12 @@ public class EncodingFilter implements Filter {
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
+        // A Content-Type such as "text/plain; charset=nope" makes the container report an encoding the
+        // JVM does not know, and every later encode with it fails with a 500. Treat it like no
+        // encoding at all: use the default.
+        if (!isSupportedEncoding(req.getCharacterEncoding())) {
+            req.setCharacterEncoding(encoding);
+        }
         final String servletPath = req.getServletPath();
         for (final Map.Entry<String, String> entry : encodingMap.entrySet()) {
             final String path = entry.getKey();
@@ -154,6 +161,24 @@ public class EncodingFilter implements Filter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    /**
+     * Checks whether the request encoding can be used.
+     * A missing encoding is acceptable: LastaFlute applies the default later.
+     *
+     * @param enc the character encoding reported by the request, or null
+     * @return false if the encoding is given but the JVM does not support it
+     */
+    protected boolean isSupportedEncoding(final String enc) {
+        if (enc == null) {
+            return true;
+        }
+        try {
+            return Charset.isSupported(enc);
+        } catch (final IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**
