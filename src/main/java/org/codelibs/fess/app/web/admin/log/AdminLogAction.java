@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -89,21 +90,20 @@ public class AdminLogAction extends FessAdminAction {
     public ActionResponse download(final String id) {
         final String filename;
         try {
-            filename = sanitizeFilename(decodeLogFileId(id));
+            filename = decodeLogFileId(id);
         } catch (final IllegalArgumentException e) {
             throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id), this::asIndexHtml);
             return redirect(getClass()); // no-op
         }
-        final String logFilePath = systemHelper.getLogFilePath();
-        if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
-            final Path path = Paths.get(logFilePath, filename);
-            return asStream(filename).contentTypeOctetStream().stream(out -> {
+        final Path path = findLogFile(systemHelper.getLogFilePath(), filename);
+        if (path != null) {
+            return asStream(path.getFileName().toString()).contentTypeOctetStream().stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
                     out.write(in);
                 }
             });
         }
-        throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), this::asIndexHtml);
+        throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id), this::asIndexHtml);
         return redirect(getClass()); // no-op
     }
 
@@ -118,6 +118,37 @@ public class AdminLogAction extends FessAdminAction {
      */
     public static String decodeLogFileId(final String id) {
         return new String(Base64.getUrlDecoder().decode(id.replace('+', '-').replace('/', '_')), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Finds the log file that a decoded log file ID names. The name is looked up as it is, so any
+     * file the log list shows is found by its own ID, white space and dots included. As before, a name
+     * may also name a file below the log directory ({@code sub/x.log}, or {@code /sub/x.log}, which
+     * stays inside it). What a name must not do is leave the log directory, so one that has a
+     * {@code ..} path element, that is not a log file name, or that is not a regular file finds nothing.
+     *
+     * @param logFilePath the log directory
+     * @param name the decoded log file ID
+     * @return the log file, or null if the name does not name one
+     */
+    public static Path findLogFile(final String logFilePath, final String name) {
+        if (StringUtil.isBlank(logFilePath) || name == null || !isLogFilename(name)) {
+            return null;
+        }
+        final Path logDir;
+        final Path path;
+        try {
+            logDir = Paths.get(logFilePath);
+            path = Paths.get(logFilePath, name);
+        } catch (final InvalidPathException e) {
+            return null;
+        }
+        for (final Path element : logDir.relativize(path)) {
+            if ("..".equals(element.toString())) {
+                return null;
+            }
+        }
+        return Files.isRegularFile(path) ? path : null;
     }
 
     /**
