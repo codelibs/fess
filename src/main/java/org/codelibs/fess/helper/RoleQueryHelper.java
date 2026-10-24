@@ -360,7 +360,14 @@ public class RoleQueryHelper {
      */
     protected void parseRoleSet(final String value, final boolean encrypted, final Set<String> roleSet) {
         String rolesStr = value;
-        if (encrypted && cipher != null) {
+        if (encrypted) {
+            if (cipher == null) {
+                // Without a cipher the value cannot be told from one a client made up, so it is not read.
+                LogUtil.warnOnce(logger, "cipher-missing",
+                        "Ignoring role info from the request: it is configured as encrypted but no cipher is set. "
+                                + "Set a cipher, or set the encrypted flag to false for a value that is not encrypted.");
+                return;
+            }
             try {
                 rolesStr = cipher.decryptoText(rolesStr);
             } catch (final Exception e) {
@@ -387,7 +394,7 @@ public class RoleQueryHelper {
                         return;
                     }
                 } catch (final NumberFormatException e) {
-                    logger.warn("Invalid role info: failed to parse timestamp from '{}'", rolesStr, e);
+                    logger.warn("Invalid role info: failed to parse timestamp from '{}'", LogUtil.sanitize(rolesStr));
                     return;
                 }
             }

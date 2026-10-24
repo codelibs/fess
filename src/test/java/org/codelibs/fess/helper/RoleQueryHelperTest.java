@@ -1084,4 +1084,100 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
             appender.detach();
         }
     }
+
+    private RoleQueryHelper newRoleQueryHelper() {
+        return new RoleQueryHelper() {
+            @Override
+            protected long getCurrentTime() {
+                return System.currentTimeMillis();
+            }
+        };
+    }
+
+    @Test
+    public void test_parseRoleSet_encryptedWithoutCipher_isIgnored() {
+        final RoleQueryHelper roleQueryHelper = newRoleQueryHelper();
+        // encrypted is true by default and no cipher is set: a plaintext value is not trusted
+        final String forged = System.currentTimeMillis() / 1000 + "\nRadmin";
+
+        assertEquals(0, decodedRoleList(roleQueryHelper, forged, true).size());
+
+        roleQueryHelper.valueSeparator = "";
+        assertEquals(0, decodedRoleList(roleQueryHelper, "Radmin", true).size());
+    }
+
+    @Test
+    public void test_buildByRequest_encryptedWithoutCipher_isIgnored() {
+        final RoleQueryHelper roleQueryHelper = newRoleQueryHelper();
+        roleQueryHelper.parameterKey = "fessp";
+        roleQueryHelper.headerKey = "fessh";
+        roleQueryHelper.cookieKey = "fessc";
+        final String forged = System.currentTimeMillis() / 1000 + "\nRadmin";
+        getMockRequest().setParameter("fessp", forged);
+        getMockRequest().addHeader("fessh", forged);
+        getMockRequest().addCookie(new Cookie("fessc", forged));
+
+        assertTrue(buildByParameter(roleQueryHelper, getMockRequest()).isEmpty());
+        assertTrue(buildByHeader(roleQueryHelper, getMockRequest()).isEmpty());
+        assertTrue(buildByCookie(roleQueryHelper, getMockRequest()).isEmpty());
+    }
+
+    @Test
+    public void test_parseRoleSet_encryptedWithoutCipher_warnsOnce() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RoleQueryHelper.class);
+        try {
+            final RoleQueryHelper roleQueryHelper = newRoleQueryHelper();
+            decodedRoleList(roleQueryHelper, "1\nRadmin", true);
+            decodedRoleList(roleQueryHelper, "2\nRadmin", true);
+            assertEquals(1, appender.eventsOnThisThreadAt(org.apache.logging.log4j.Level.WARN).size());
+            final String rendered = String.join("\n", appender.renderedEvents());
+            assertFalse(rendered, rendered.contains("Radmin"));
+        } finally {
+            appender.detach();
+        }
+    }
+
+    @Test
+    public void test_parseRoleSet_notEncryptedWithoutCipher_isRead() {
+        final RoleQueryHelper roleQueryHelper = newRoleQueryHelper();
+
+        final Set<String> roleSet = decodedRoleList(roleQueryHelper, System.currentTimeMillis() / 1000 + "\nrole1,role2", false);
+
+        assertEquals(2, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+    }
+
+    @Test
+    public void test_parseRoleSet_encryptedWithCipher_isRead() {
+        final RoleQueryHelper roleQueryHelper = newRoleQueryHelper();
+        roleQueryHelper.cipher = cipher;
+
+        final Set<String> roleSet =
+                decodedRoleList(roleQueryHelper, cipher.encryptoText(System.currentTimeMillis() / 1000 + "\nrole1,role2"), true);
+
+        assertEquals(2, roleSet.size());
+        assertTrue(roleSet.contains("role1"));
+        assertTrue(roleSet.contains("role2"));
+    }
+
+    @Test
+    public void test_parseRoleSet_invalidTimestamp_logsSanitizedValueWithoutStackTrace() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RoleQueryHelper.class);
+        try {
+            final RoleQueryHelper roleQueryHelper = newRoleQueryHelper();
+
+            final Set<String> roleSet = decodedRoleList(roleQueryHelper, "x\r\n2026-01-01 00:00:00,000 [main] ERROR FORGED\nrole1", false);
+
+            assertTrue(roleSet.isEmpty());
+            final var events = appender.eventsOnThisThreadAt(org.apache.logging.log4j.Level.WARN);
+            assertEquals(1, events.size());
+            assertNull(events.get(0).getThrown());
+            final String message = events.get(0).getMessage().getFormattedMessage();
+            assertTrue(message, message.contains("failed to parse timestamp"));
+            assertFalse(message, message.contains("\r") || message.contains("\n"));
+        } finally {
+            appender.detach();
+        }
+    }
 }
