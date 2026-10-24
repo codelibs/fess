@@ -219,11 +219,23 @@ public class QueryHelper {
         default:
             final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
             if (StringUtil.isNotBlank(key)) {
-                queryContext.addQuery(boolQuery -> {
-                    boolQuery.filter(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), key));
-                });
+                queryContext.addQuery(boolQuery -> buildVirtualHostQuery(key, boolQuery));
             }
             break;
+        }
+    }
+
+    /**
+     * Adds the virtual host filter to the given boolean query. A blank virtual host key means that
+     * no virtual host is resolved for the request, and then nothing is added. Documents that do not
+     * have the given virtual host key are filtered out.
+     *
+     * @param virtualHostKey the virtual host key of the current request
+     * @param boolQuery the boolean query builder to add the virtual host filter to
+     */
+    public void buildVirtualHostQuery(final String virtualHostKey, final BoolQueryBuilder boolQuery) {
+        if (StringUtil.isNotBlank(virtualHostKey)) {
+            boolQuery.filter(QueryBuilders.termQuery(ComponentUtil.getFessConfig().getIndexFieldVirtualHost(), virtualHostKey));
         }
     }
 

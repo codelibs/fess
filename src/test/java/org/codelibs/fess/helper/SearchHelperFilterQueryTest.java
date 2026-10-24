@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -36,8 +37,8 @@ import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 
 /**
- * Tests that the doc-id lookups of {@link SearchHelper} apply extra filter clauses next to the role
- * filter, and are unchanged without them.
+ * Tests that the doc-id lookups of {@link SearchHelper} apply extra filter clauses and the virtual host
+ * filter next to the role filter, and are unchanged without them.
  */
 public class SearchHelperFilterQueryTest extends UnitFessTestCase {
 
@@ -53,6 +54,7 @@ public class SearchHelperFilterQueryTest extends UnitFessTestCase {
                 // no preference in this test
             }
         }, "queryHelper");
+        ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
         ComponentUtil.register(new RoleQueryHelper() {
             @Override
             public Set<String> build(final SearchRequestType searchRequestType) {
@@ -121,5 +123,55 @@ public class SearchHelperFilterQueryTest extends UnitFessTestCase {
                 SearchRequestType.JSON);
         assertEquals(1, capturedQueries.size());
         assertFalse(capturedQueries.get(0).contains("\"terms\":{\"label\""), capturedQueries.get(0));
+    }
+
+    private static final String VHOST_FILTER = "\"term\":{\"virtual_host\":{\"value\":\"vhostA\"";
+
+    @Test
+    public void test_getDocumentByDocId_filtersByVirtualHost() {
+        getMockRequest().setAttribute(FessConfig.VIRTUAL_HOST_VALUE, "vhostA");
+        new SearchHelper().getDocumentByDocId("doc1", new String[] { "doc_id" }, OptionalThing.empty());
+        assertEquals(1, capturedQueries.size());
+        final String json = capturedQueries.get(0);
+        assertTrue(json.contains(VHOST_FILTER), json);
+        assertFalse(json.contains("vhostB"), json);
+        assertTrue(json.contains("Rguest"), "the role filter must stay: " + json);
+    }
+
+    @Test
+    public void test_getDocumentByDocId_withoutVirtualHost_unchanged() {
+        new SearchHelper().getDocumentByDocId("doc1", new String[] { "doc_id" }, OptionalThing.empty());
+        assertEquals(1, capturedQueries.size());
+        assertFalse(capturedQueries.get(0).contains("virtual_host"), capturedQueries.get(0));
+    }
+
+    @Test
+    public void test_getDocumentListByDocIds_filtersByVirtualHost() {
+        getMockRequest().setAttribute(FessConfig.VIRTUAL_HOST_VALUE, "vhostA");
+        new SearchHelper().getDocumentListByDocIds(new String[] { "doc1", "doc2" }, new String[] { "doc_id" }, OptionalThing.empty(),
+                SearchRequestType.JSON);
+        assertEquals(1, capturedQueries.size());
+        final String json = capturedQueries.get(0);
+        assertTrue(json.contains(VHOST_FILTER), json);
+        assertTrue(json.contains("Rguest"), json);
+    }
+
+    @Test
+    public void test_getDocumentListByDocIds_withoutVirtualHost_unchanged() {
+        new SearchHelper().getDocumentListByDocIds(new String[] { "doc1" }, new String[] { "doc_id" }, OptionalThing.empty(),
+                SearchRequestType.JSON);
+        assertEquals(1, capturedQueries.size());
+        assertFalse(capturedQueries.get(0).contains("virtual_host"), capturedQueries.get(0));
+    }
+
+    @Test
+    public void test_getDocumentListByDocIds_adminSearchSkipsVirtualHost() {
+        getMockRequest().setAttribute(FessConfig.VIRTUAL_HOST_VALUE, "vhostA");
+        new SearchHelper().getDocumentListByDocIds(new String[] { "doc1" }, new String[] { "doc_id" }, OptionalThing.empty(),
+                SearchRequestType.ADMIN_SEARCH);
+        assertEquals(1, capturedQueries.size());
+        final String json = capturedQueries.get(0);
+        assertFalse(json.contains("virtual_host"), json);
+        assertFalse(json.contains("Rguest"), json);
     }
 }
