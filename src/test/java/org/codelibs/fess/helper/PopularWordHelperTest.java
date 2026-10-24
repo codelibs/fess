@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import java.util.concurrent.TimeUnit;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -101,10 +103,10 @@ public class PopularWordHelperTest extends UnitFessTestCase {
 
         assertNotNull(result);
         assertTrue(result.contains("test_seed"));
-        assertTrue(result.contains("tag1tag2"));
-        assertTrue(result.contains("role1role2"));
-        assertTrue(result.contains("field1field2"));
-        assertTrue(result.contains("exclude1exclude2"));
+        assertTrue(result.contains("tag1\u001ftag2"));
+        assertTrue(result.contains("role1\u001frole2"));
+        assertTrue(result.contains("field1\u001ffield2"));
+        assertTrue(result.contains("exclude1\u001fexclude2"));
 
         // Count separators
         long separatorCount = result.chars().filter(ch -> ch == '\n').count();
@@ -177,10 +179,33 @@ public class PopularWordHelperTest extends UnitFessTestCase {
 
         assertNotNull(result);
         // Check for sorted concatenated strings
-        assertTrue("Result should contain sorted tags", result.contains("aaammmzzz"));
-        assertTrue("Result should contain sorted roles", result.contains("role1role2role3"));
-        assertTrue("Result should contain sorted fields", result.contains("field1field2field3"));
-        assertTrue("Result should contain sorted excludes", result.contains("exclude1exclude2exclude3"));
+        assertTrue("Result should contain sorted tags", result.contains("aaa\u001fmmm\u001fzzz"));
+        assertTrue("Result should contain sorted roles", result.contains("role1\u001frole2\u001frole3"));
+        assertTrue("Result should contain sorted fields", result.contains("field1\u001ffield2\u001ffield3"));
+        assertTrue("Result should contain sorted excludes", result.contains("exclude1\u001fexclude2\u001fexclude3"));
+    }
+
+    @Test
+    public void test_getCacheKey_elementsDoNotRunTogether() {
+        final String[] none = new String[0];
+
+        // {Ra, Rb} and {RaRb} are different role sets and must not share a cache entry
+        assertNotEquals(popularWordHelper.getCacheKey("s", none, new String[] { "Ra", "Rb" }, none, none),
+                popularWordHelper.getCacheKey("s", none, new String[] { "RaRb" }, none, none));
+        assertNotEquals(popularWordHelper.getCacheKey("s", new String[] { "a", "b" }, none, none, none),
+                popularWordHelper.getCacheKey("s", new String[] { "ab" }, none, none, none));
+        assertNotEquals(popularWordHelper.getCacheKey("s", none, none, new String[] { "a", "b" }, none),
+                popularWordHelper.getCacheKey("s", none, none, new String[] { "ab" }, none));
+        assertNotEquals(popularWordHelper.getCacheKey("s", none, none, none, new String[] { "a", "b" }),
+                popularWordHelper.getCacheKey("s", none, none, none, new String[] { "ab" }));
+    }
+
+    @Test
+    public void test_getCacheKey_orderIndependent() {
+        final String[] none = new String[0];
+
+        assertEquals(popularWordHelper.getCacheKey("s", none, new String[] { "Rb", "Ra", "Rc" }, none, none),
+                popularWordHelper.getCacheKey("s", none, new String[] { "Rc", "Ra", "Rb" }, none, none));
     }
 
     @Test
