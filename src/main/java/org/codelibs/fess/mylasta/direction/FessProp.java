@@ -1177,6 +1177,11 @@ public interface FessProp {
         if (name.startsWith("tk:") || name.startsWith("X-TIKA:")) {
             return false;
         }
+        // Content-Length is the size of the file in bytes. As a number in the content it makes a document match a search for
+        // that number, so it stays out of the content whatever crawler.metadata.content.excludes says.
+        if ("Content-Length".equals(name)) {
+            return false;
+        }
         Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_EXCLUDES);
         if (patterns == null) {
             patterns = split(getCrawlerMetadataContentExcludes(), ",")
