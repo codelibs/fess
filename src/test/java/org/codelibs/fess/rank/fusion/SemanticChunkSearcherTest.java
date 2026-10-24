@@ -76,6 +76,8 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         // resolveEngineMinScore/hasAnnChunkVectorMapping resolve it by class from the container,
         // which test_app.xml does not define
         ComponentUtil.register(new ChunkVectorHelper(), ChunkVectorHelper.class.getCanonicalName());
+        // prepare reads the additional query from it
+        ComponentUtil.register(new QueryHelper(), "queryHelper");
         searcher = new SemanticChunkSearcher();
     }
 
@@ -684,6 +686,147 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertTrue(context.isPresent(), query);
         assertEquals("Q:how do I reset my password", searcher.embeddedQuery);
         assertNull(context.get().getConditionFilter(), "no document has a field called Q to filter on");
+    }
+
+    private void givenAdditionalQuery(final String additionalQuery) {
+        givenPermissionContext();
+        final QueryHelper queryHelper = new QueryHelper();
+        queryHelper.setAdditionalQuery(additionalQuery);
+        ComponentUtil.register(queryHelper, "queryHelper");
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+    }
+
+    private static StubSearchRequestParams paramsOfQuery(final String userQuery, final String label) {
+        return new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return userQuery;
+            }
+
+            @Override
+            public Map<String, String[]> getFields() {
+                return label == null ? super.getFields() : Map.of("label", new String[] { label });
+            }
+        };
+    }
+
+    /** The condition the stub processor makes of one clause of the query. */
+    private static QueryBuilder converted(final String clause) {
+        return QueryBuilders.termQuery("converted", clause);
+    }
+
+    /** The keyword branch appends it to every search, so what it excludes must not come back through this branch. */
+    @Test
+    public void test_prepare_theAdditionalQueryIsAConditionOfTheBranch() {
+        givenAdditionalQuery("-label:internal");
+        final StubSearchRequestParams params = paramsOfQuery("how do I reset my password", null);
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(false).build();
+        final QueryBuilder excluded = QueryBuilders.boolQuery().filter(converted("-label:internal"));
+        for (final boolean ann : new boolean[] { true, false }) {
+            final GuardedSearcher searcher = new GuardedSearcher();
+            searcher.ann = ann;
+            final BoolQueryBuilder outer = (BoolQueryBuilder) searcher.buildSubQuery(query, params, OptionalThing.empty()).get();
+            final String label = "ann=" + ann;
+            if (ann) {
+                // the request keeps the embedding of the words, so only the first run asks the provider
+                assertEquals(label, "how do I reset my password", searcher.embeddedQuery);
+            }
+            // enforced outside, beside the permission ...
+            same(List.of(expectedPermission(false, true), excluded), outer.filter(), label);
+            // ... and handed to the knn search, so it does not spend k on what is excluded
+            if (ann) {
+                same(toMap(QueryBuilders.boolQuery().filter(expectedPermission(false, true)).filter(excluded)),
+                        knnBodyOf(outer).get("filter"), label);
+            }
+        }
+    }
+
+    /** The user's own facet and the configured exclusion both narrow the search. */
+    @Test
+    public void test_prepare_theAdditionalQueryComesBesideTheUsersOwnConditions() {
+        givenAdditionalQuery("-label:internal");
+        final StubSearchRequestParams params = paramsOfQuery("how do I reset my password", "news");
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(false).build();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final QueryBuilder filter = searcher.prepare(query, params).get().getConditionFilter();
+        final BoolQueryBuilder users = (BoolQueryBuilder) ((BoolQueryBuilder) filter).filter().get(0);
+        same(List.of(converted("label:news")), users.filter());
+        same(QueryBuilders.boolQuery().filter(converted("-label:internal")), ((BoolQueryBuilder) filter).filter().get(1));
+    }
+
+    /** The additional query is appended raw on both runs, so the escaped retry applies it just the same. */
+    @Test
+    public void test_prepare_theEscapedRetryAppliesTheAdditionalQueryToo() {
+        givenAdditionalQuery("-label:internal");
+        final StubSearchRequestParams params = paramsOfQuery("how do I reset [my password", null);
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(true).build();
+        assertTrue(query.contains("\\["), query);
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(query, params);
+        assertTrue(context.isPresent(), query);
+        same(QueryBuilders.boolQuery().filter(converted("-label:internal")), context.get().getConditionFilter());
+    }
+
+    /** Rebuilding the query without its related queries must not rebuild the additional query away. */
+    @Test
+    public void test_prepare_theAdditionalQuerySurvivesTheRelatedQueryRebuild() {
+        givenAdditionalQuery("-label:internal");
+        ComponentUtil.register(new RelatedQueryHelper() {
+            @Override
+            public String[] getRelatedQueries(final String query) {
+                return new String[] { "password reset" };
+            }
+        }, "relatedQueryHelper");
+        final StubSearchRequestParams params = paramsOfQuery("password", null);
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(false).build();
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(query, params);
+        assertTrue(context.isPresent(), query);
+        assertEquals("password", searcher.embeddedQuery);
+        same(QueryBuilders.boolQuery().filter(converted("-label:internal")), context.get().getConditionFilter());
+    }
+
+    /** Several exclusions are converted together, as the keyword branch converts them. */
+    @Test
+    public void test_prepare_severalConditionsInTheAdditionalQuery() {
+        givenAdditionalQuery("-label:internal -filetype:tmp");
+        final StubSearchRequestParams params = paramsOfQuery("how do I reset my password", null);
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(false).build();
+        final BoolQueryBuilder filter = (BoolQueryBuilder) new GuardedSearcher().prepare(query, params).get().getConditionFilter();
+        // one boolean of both exclusions, converted as a whole
+        assertEquals(1, filter.filter().size());
+        final String conversion = filter.filter().get(0).toString();
+        assertTrue(conversion.contains("-label:internal") && conversion.contains("-filetype:tmp"), conversion);
+    }
+
+    /** Nothing configured, nothing added: the common case is unchanged. */
+    @Test
+    public void test_prepare_withoutAnAdditionalQueryTheFilterIsUnchanged() {
+        for (final String blank : new String[] { null, "", "  " }) {
+            givenAdditionalQuery(blank);
+            final StubSearchRequestParams params = paramsOfQuery("how do I reset my password", null);
+            final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(false).build();
+            final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = new GuardedSearcher().prepare(query, params);
+            assertTrue(context.isPresent(), String.valueOf(blank));
+            assertNull(context.get().getConditionFilter(), String.valueOf(blank));
+        }
+    }
+
+    /**
+     * What cannot be applied as a condition cannot be left out either: the keyword branch applies
+     * it, so the branch is skipped rather than returning what it would have excluded.
+     */
+    @Test
+    public void test_prepare_anAdditionalQueryThatIsNotOnlyConditionsSkipsTheBranch() {
+        for (final String additional : new String[] { "secret", "\"top secret\"", "label:a OR secret", "allintitle:x",
+                "sort:last_modified.desc", "(" }) {
+            givenAdditionalQuery(additional);
+            final StubSearchRequestParams params = paramsOfQuery("how do I reset my password", null);
+            final String query = ComponentUtil.getQueryStringBuilder().params(params).escape(false).build();
+            final GuardedSearcher searcher = new GuardedSearcher();
+            assertFalse(searcher.prepare(query, params).isPresent(), additional);
+            assertEquals(0, searcher.embedCount, additional);
+        }
     }
 
     /** What the keyword branch is asked to keep, the vector branch keeps: a wildcard beside a facet is still words beside a filter. */

@@ -1068,6 +1068,8 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
 
     private void givenEngineFusion(final String weights, final int paginationDepth, final int maxResultWindow,
             final boolean engineEnabled) {
+        // the semantic branch reads the additional query from it
+        ComponentUtil.register(new org.codelibs.fess.helper.QueryHelper(), "queryHelper");
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 

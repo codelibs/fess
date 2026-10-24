@@ -229,6 +229,22 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         if (params.getGeoInfo() != null && params.getGeoInfo().toQueryBuilder() != null || hasSimilarDocHashFilter(params)) {
             return OptionalThing.empty();
         }
+        // The keyword branch appends the configured additional query to every search, usually to
+        // exclude documents (`-label:internal`). Apply it here as a condition as well, or those
+        // documents come back through this branch. What cannot be applied as a condition cannot
+        // be left out either, so the branch is skipped.
+        QueryBuilder conditionFilter = split.conditionFilter;
+        final String additionalQuery = ComponentUtil.getQueryHelper().getAdditionalQuery();
+        if (StringUtil.isNotBlank(additionalQuery)) {
+            final QueryBuilder additional = getQuerySplitter().conditionsOf(additionalQuery, params.getType());
+            if (additional == null) {
+                LogUtil.warnOnce(logger, "additionalQuery",
+                        "The additional query of the query helper holds more than conditions, so semantic chunk search is skipped: {}",
+                        additionalQuery);
+                return OptionalThing.empty();
+            }
+            conditionFilter = conditionFilter == null ? additional : QueryBuilders.boolQuery().filter(conditionFilter).filter(additional);
+        }
         final EmbeddingClientManager embeddingClientManager = getEmbeddingClientManager();
         if (!embeddingClientManager.available()) {
             logger.warn("Embedding provider is unavailable; semantic chunk search falls back to keyword-only results.");
@@ -246,7 +262,7 @@ public class SemanticChunkSearcher extends AbstractDocumentSearcher {
         }
         final boolean annMode = isKnnIndexReady();
         warnExactModeOnce(annMode);
-        return OptionalThing.of(new SemanticQueryContext(queryVector, annMode, split.conditionFilter));
+        return OptionalThing.of(new SemanticQueryContext(queryVector, annMode, conditionFilter));
     }
 
     /**
