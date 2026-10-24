@@ -980,6 +980,54 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertTrue(roleSet.toString(), roleSet.contains("2group2sam"));
     }
 
+    /** Runs processSubRoles for the given DNs and returns the filter handed to the directory search. */
+    private String captureSubRoleFilter(final java.util.Set<String> subRoleSet) {
+        registerGroupResolvingConfig();
+        final AtomicReference<String> captured = new AtomicReference<>();
+        final LdapManager ldapManager = new LdapManager() {
+            @Override
+            protected void search(final String baseDn, final String filter, final String[] returningAttrs,
+                    final java.util.function.Supplier<Hashtable<String, String>> envSupplier, final SearchConsumer consumer) {
+                captured.set(filter);
+            }
+        };
+        ldapManager.fessConfig = ComponentUtil.getFessConfig();
+        ldapManager.processSubRoles(new LdapUser(new Hashtable<>(), "testuser"), "dc=example,dc=com", subRoleSet,
+                "(member:1.2.840.113556.1.4.1941:=%s)", new java.util.HashSet<>());
+        return captured.get();
+    }
+
+    @Test
+    public void test_processSubRoles_filterOfPlainDn() {
+        assertEquals("(member:1.2.840.113556.1.4.1941:=CN=Sales,OU=Groups,DC=example,DC=com)",
+                captureSubRoleFilter(java.util.Set.of("CN=Sales,OU=Groups,DC=example,DC=com")));
+    }
+
+    @Test
+    public void test_processSubRoles_filterEscapesBackslashInDn() {
+        // A DN writes the comma inside a CN as "\,"; the filter must carry that backslash as \5c,
+        // otherwise the directory reads "\," as an escape of its own and never matches the entry.
+        assertEquals("(member:1.2.840.113556.1.4.1941:=CN=Sales\\5c, EMEA,OU=Groups,DC=example,DC=com)",
+                captureSubRoleFilter(java.util.Set.of("CN=Sales\\, EMEA,OU=Groups,DC=example,DC=com")));
+    }
+
+    @Test
+    public void test_processSubRoles_filterCannotBeInjectedThroughDn() {
+        final String filter = captureSubRoleFilter(java.util.Set.of("CN=x)(objectClass=*)(cn=z,DC=example,DC=com"));
+        assertEquals("(member:1.2.840.113556.1.4.1941:=CN=x\\29\\28objectClass=\\2a\\29\\28cn=z,DC=example,DC=com)", filter);
+    }
+
+    @Test
+    public void test_processSubRoles_filterKeepsTheOrWrapperForSeveralDns() {
+        final java.util.Set<String> subRoleSet = new java.util.LinkedHashSet<>();
+        subRoleSet.add("CN=a,DC=example,DC=com");
+        subRoleSet.add("CN=b\\, c,DC=example,DC=com");
+        subRoleSet.add("CN=d)(cn=*,DC=example,DC=com");
+        assertEquals("(|(member:1.2.840.113556.1.4.1941:=CN=a,DC=example,DC=com)"
+                + "(member:1.2.840.113556.1.4.1941:=CN=b\\5c, c,DC=example,DC=com)"
+                + "(member:1.2.840.113556.1.4.1941:=CN=d\\29\\28cn=\\2a,DC=example,DC=com))", captureSubRoleFilter(subRoleSet));
+    }
+
     @Test
     public void test_updateSubRoles_marksTheUserFailedWhenTheWalkThrowsAnError() {
         // The state write is in a finally, not only in the catch, so that a Throwable that is not an

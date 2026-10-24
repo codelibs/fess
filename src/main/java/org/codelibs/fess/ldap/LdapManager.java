@@ -598,7 +598,9 @@ public class LdapManager {
         if (subRoleSet.isEmpty()) {
             return;
         }
-        String filter = subRoleSet.stream().map(s -> String.format(groupFilter, s)).collect(Collectors.joining());
+        // The DNs come from the directory's own memberOf values and may carry filter metacharacters
+        // (a DN escapes a comma as "\,"), so each one is escaped as a filter assertion value.
+        String filter = subRoleSet.stream().map(s -> String.format(groupFilter, LdapUtil.escapeValue(s))).collect(Collectors.joining());
         if (subRoleSet.size() > 1) {
             filter = "(|" + filter + ")";
         }
