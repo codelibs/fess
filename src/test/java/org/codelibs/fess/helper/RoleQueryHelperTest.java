@@ -26,6 +26,7 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.unit.LogCapturingAppender;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -1050,4 +1051,37 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_build_debugLogKeepsAPermissionNameOnOneLine() {
+        final LogCapturingAppender appender = LogCapturingAppender.attach(RoleQueryHelper.class);
+        try {
+            final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
+                @Override
+                protected long getCurrentTime() {
+                    return System.currentTimeMillis();
+                }
+
+                @Override
+                protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet,
+                        final boolean isApiRequest) {
+                    return false;
+                }
+
+                @Override
+                protected org.dbflute.optional.OptionalThing<org.codelibs.fess.mylasta.action.FessUserBean> findUserBean(
+                        final org.lastaflute.web.servlet.request.RequestManager requestManager) {
+                    return org.dbflute.optional.OptionalThing.empty();
+                }
+            };
+            // A permission name can be a group name released by an SSO identity provider.
+            roleQueryHelper.defaultRoleList.add("2evil\r\n2026-01-01 00:00:00,000 [main] ERROR  FORGED");
+            getMockRequest();
+            roleQueryHelper.build(SearchRequestType.JSON);
+            final String rendered = String.join("\n", appender.renderedEvents());
+            assertTrue(rendered, rendered.contains("roleSet:"));
+            assertFalse(rendered, rendered.contains("\r") || rendered.contains("\n2026-01-01"));
+        } finally {
+            appender.detach();
+        }
+    }
 }

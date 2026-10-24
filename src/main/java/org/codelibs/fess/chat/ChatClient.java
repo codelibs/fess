@@ -51,6 +51,7 @@ import org.codelibs.fess.llm.LlmStreamCallback;
 import org.codelibs.fess.llm.RelevanceEvaluationResult;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
@@ -147,7 +148,8 @@ public class ChatClient {
         final long startTime = System.currentTimeMillis();
         final String contextPath = resolveContextPath();
         if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
+            logger.debug("[RAG] Starting chat request. sessionId={}, userId={}, userMessage={}", sessionId, LogUtil.sanitize(userId),
+                    userMessage);
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
@@ -277,8 +279,8 @@ public class ChatClient {
         // Note: Locale is resolved via LaRequestUtil in LlmClient. During long SSE processing,
         // the request context may become unavailable, falling back to Locale.getDefault().
         if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting enhanced streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId,
-                    userMessage);
+            logger.debug("[RAG] Starting enhanced streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId,
+                    LogUtil.sanitize(userId), userMessage);
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
@@ -527,7 +529,7 @@ public class ChatClient {
 
             logger.info(
                     "[RAG] Enhanced chat completed. sessionId={}, userId={}, intent={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
-                    session.getSessionId(), userId, intentResult.getIntent(), sources.size(), fullResponse.length(),
+                    session.getSessionId(), LogUtil.sanitize(userId), intentResult.getIntent(), sources.size(), fullResponse.length(),
                     System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, sources);
@@ -589,8 +591,8 @@ public class ChatClient {
         // Capture context path early before request context may become unavailable during SSE processing
         final String contextPath = resolveContextPath();
         if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting document chat request. sessionId={}, userId={}, docId={}, userMessage={}", sessionId, userId,
-                    docId, userMessage);
+            logger.debug("[RAG] Starting document chat request. sessionId={}, userId={}, docId={}, userMessage={}", sessionId,
+                    LogUtil.sanitize(userId), docId, userMessage);
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
@@ -631,7 +633,7 @@ public class ChatClient {
             session.addMessage(assistantMessage);
 
             logger.info("[RAG] Document chat completed. sessionId={}, userId={}, docId={}, responseLength={}, elapsedTime={}ms",
-                    session.getSessionId(), userId, docId, fullResponse.length(), System.currentTimeMillis() - startTime);
+                    session.getSessionId(), LogUtil.sanitize(userId), docId, fullResponse.length(), System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, sources);
         } catch (final LlmException e) {
