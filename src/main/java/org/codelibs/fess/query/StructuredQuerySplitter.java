@@ -17,6 +17,7 @@ package org.codelibs.fess.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,10 +26,13 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.WildcardQuery;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
@@ -58,6 +62,12 @@ import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
  * Pattern-matching the string instead would have to re-implement all of that, and would drift
  * the moment either side changed.</p>
  *
+ * <p>Free text is a bare term, and also a wildcard, prefix or fuzzy term on the default field:
+ * the question mark that closes a question, or an asterisk typed in a sentence, is read as query
+ * syntax by the keyword branch, but a vector has no syntax to misread it with, so the characters
+ * are embedded as typed. Syntax that restricts - a phrase, an excluded word, a boosted word, a
+ * range - is not text.</p>
+ *
  * <p>Whatever cannot be split this way yields {@code null}, which means the caller should leave
  * the query alone - for the vector branch that means skipping it. A condition this class can see
  * is never dropped to make a query splittable: searching without it would return documents the
@@ -71,6 +81,12 @@ public class StructuredQuerySplitter {
 
     /** The pseudo-field that carries an ordering, as {@code TermQueryCommand} spells it. */
     protected static final String SORT_FIELD = "sort";
+
+    /** A letter or a digit: what a text needs to have something to embed. */
+    private static final Pattern WORD_CHAR = Pattern.compile("[\\p{L}\\p{N}]");
+
+    /** A backslash and the character it escapes. */
+    private static final Pattern ESCAPE = Pattern.compile("\\\\(.)");
 
     /** How a parse-tree node relates to the text/condition split. */
     protected enum Kind {
@@ -242,9 +258,12 @@ public class StructuredQuerySplitter {
             return Kind.REJECT;
         }
         if (Constants.DEFAULT_FIELD.equals(field)) {
-            // Only a bare term is text. A phrase, a wildcard or a range on the default field is
-            // query syntax, and dropping it would search for something the user did not ask for.
-            return query instanceof TermQuery ? Kind.TEXT : Kind.REJECT;
+            // A bare term is text, and so is a wildcard, prefix or fuzzy term: the characters that
+            // make it one -- the question mark ending a question, an asterisk -- are what a person
+            // types in a sentence, and a vector has no syntax to misread them with. A phrase or a
+            // range is query syntax, and dropping it would search for something the user did not
+            // ask for.
+            return wordsOf(query) != null ? Kind.TEXT : Kind.REJECT;
         }
         if (SORT_FIELD.equals(field)) {
             // The vector branch cannot apply an ordering, and interleaving score-ordered hits
@@ -255,7 +274,34 @@ public class StructuredQuerySplitter {
             // deployment with a default sort configured.
             return Kind.REJECT;
         }
+        if (!isSearchField(field)) {
+            // Core's commands read a clause on a field outside the search fields as words of the
+            // default field, `field:text` and all -- `Q: how do I reset` is a question, and `Q:how`
+            // is its first word. Treating it as a condition would drop that word from the
+            // embedding and make the vector branch demand the literal as a filter.
+            return wordsOf(query) != null ? Kind.TEXT : Kind.REJECT;
+        }
         return Kind.CONDITION;
+    }
+
+    /**
+     * Returns whether core's commands treat the field as a field of its own, as they decide it.
+     *
+     * <p>The commands single out three fields before they look at the search fields: the tag field
+     * (restricted to the tags the caller can see), {@code site} and {@code inurl}. They stay
+     * conditions here whatever the configured search fields are, so that a configuration which
+     * leaves one out cannot turn a restriction the keyword branch applies into words.</p>
+     *
+     * @param field the field name
+     * @return true when the field is one of the search fields, or one the commands handle first
+     */
+    protected boolean isSearchField(final String field) {
+        if (QueryFieldConfig.SITE_FIELD.equals(field) || QueryFieldConfig.INURL_FIELD.equals(field)
+                || ComponentUtil.getFessConfig().getIndexFieldTag().equals(field)) {
+            return true;
+        }
+        final QueryFieldConfig config = getQueryFieldConfig();
+        return config.searchFieldSet != null && config.searchFieldSet.contains(field);
     }
 
     /**
@@ -301,16 +347,59 @@ public class StructuredQuerySplitter {
             }
             return true;
         }
-        if (query instanceof final TermQuery termQuery) {
-            final String text = termQuery.getTerm().text();
-            if (StringUtil.isNotBlank(text)) {
-                texts.add(text);
-            }
-            return true;
+        final String words = wordsOf(query);
+        if (words == null) {
+            // Restates the rule classify() applies to a leaf on the default field, for the node
+            // shapes it would already have refused. Nothing else can become text.
+            return false;
         }
-        // Restates the rule classify() applies to a leaf on the default field, for the node
-        // shapes it would already have refused. Nothing else can become text.
-        return false;
+        if (StringUtil.isNotBlank(words)) {
+            texts.add(words);
+        }
+        return true;
+    }
+
+    /**
+     * Reads the words a leaf node on the default field was typed as.
+     *
+     * <p>A term is its text. A wildcard keeps the characters that made it one, minus the
+     * backslashes that spelled an escape; a prefix gets its asterisk back, and a fuzzy term its
+     * tilde. A wildcard, prefix or fuzzy term with no letter or digit in it -- {@code ?},
+     * {@code *} -- says nothing a vector could be asked about.</p>
+     *
+     * @param query the leaf node
+     * @return the words, or {@code null} when the node is not text
+     */
+    protected String wordsOf(final Query query) {
+        if (query instanceof final TermQuery termQuery) {
+            return qualified(termQuery.getTerm(), termQuery.getTerm().text());
+        }
+        final Term term;
+        final String words;
+        if (query instanceof final WildcardQuery wildcardQuery) {
+            term = wildcardQuery.getTerm();
+            words = ESCAPE.matcher(term.text()).replaceAll("$1");
+        } else if (query instanceof final PrefixQuery prefixQuery) {
+            term = prefixQuery.getPrefix();
+            words = term.text() + "*";
+        } else if (query instanceof final FuzzyQuery fuzzyQuery) {
+            term = fuzzyQuery.getTerm();
+            words = term.text() + "~";
+        } else {
+            return null;
+        }
+        return WORD_CHAR.matcher(words).find() ? qualified(term, words) : null;
+    }
+
+    /**
+     * Puts back the field name core's commands keep in the words of a field they do not know.
+     *
+     * @param term the term the words belong to
+     * @param words the words
+     * @return the words, as {@code field:words} for a field other than the default one
+     */
+    private String qualified(final Term term, final String words) {
+        return Constants.DEFAULT_FIELD.equals(term.field()) ? words : term.field() + ":" + words;
     }
 
     /**
@@ -376,6 +465,15 @@ public class StructuredQuerySplitter {
      */
     protected QueryParser getQueryParser() {
         return ComponentUtil.getQueryParser();
+    }
+
+    /**
+     * Returns the field configuration.
+     *
+     * @return the configuration
+     */
+    protected QueryFieldConfig getQueryFieldConfig() {
+        return ComponentUtil.getQueryFieldConfig();
     }
 
     /**

@@ -82,9 +82,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * <p>Activation requires {@code content_chunker.search.enabled=true} (system
  * property channel) at startup in addition to the chunking pipeline being enabled.
  * The searcher degrades to a no-op (BM25-only fusion result) when the embedding
- * provider is unavailable, when the query is blank, or when the query uses Fess
- * query syntax (field filters, boolean operators, wildcards) — only plain keyword
- * or natural-language queries take the semantic branch.</p>
+ * provider is unavailable, when the query is blank, or when the query carries syntax a
+ * vector cannot keep (see {@link StructuredQuerySplitter}) — plain keyword or
+ * natural-language queries take the semantic branch, field conditions become filters, and
+ * a wildcard, prefix or fuzzy term is embedded as it was typed.</p>
  */
 public class SemanticChunkSearcher extends AbstractDocumentSearcher {
 
