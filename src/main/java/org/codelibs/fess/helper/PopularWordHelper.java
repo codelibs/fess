@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +49,9 @@ public class PopularWordHelper {
 
     /** Character used to separate cache key components */
     protected static final char CACHE_KEY_SPLITTER = '\n';
+
+    /** Character used to separate the elements of a cache key component, so that {a, b} and {ab} do not share a key */
+    protected static final char CACHE_KEY_ELEMENT_SPLITTER = '\u001f';
 
     /** Cache for storing popular word lists */
     protected Cache<String, List<String>> cache;
@@ -151,14 +155,18 @@ public class PopularWordHelper {
             final String[] excludes) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(seed).append(CACHE_KEY_SPLITTER);
-        stream(tags).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
+        buf.append(joinSorted(tags));
         buf.append(CACHE_KEY_SPLITTER);
-        stream(roles).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
+        buf.append(joinSorted(roles));
         buf.append(CACHE_KEY_SPLITTER);
-        stream(fields).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
+        buf.append(joinSorted(fields));
         buf.append(CACHE_KEY_SPLITTER);
-        stream(excludes).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
+        buf.append(joinSorted(excludes));
         return buf.toString();
+    }
+
+    private String joinSorted(final String[] values) {
+        return stream(values).get(stream -> stream.sorted().collect(Collectors.joining(String.valueOf(CACHE_KEY_ELEMENT_SPLITTER))));
     }
 
 }
