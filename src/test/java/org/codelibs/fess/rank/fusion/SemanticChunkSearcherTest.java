@@ -663,6 +663,29 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * Core reads a clause on a field it does not know as words of the default field, so a question
+     * that starts with a label such as "Q:" is a question: its first word is "Q:how", not a
+     * condition on a field called Q that no document has.
+     */
+    @Test
+    public void test_prepare_anUnknownFieldIsWordsToEmbedNotACondition() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "Q: how do I reset my password";
+            }
+        };
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(query, params);
+        assertTrue(context.isPresent(), query);
+        assertEquals("Q:how do I reset my password", searcher.embeddedQuery);
+        assertNull(context.get().getConditionFilter(), "no document has a field called Q to filter on");
+    }
+
     /** What the keyword branch is asked to keep, the vector branch keeps: a wildcard beside a facet is still words beside a filter. */
     @Test
     public void test_prepare_aWildcardBesideAFacetKeepsTheFacetAsAFilter() {

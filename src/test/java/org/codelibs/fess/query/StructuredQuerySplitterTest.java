@@ -227,6 +227,149 @@ public class StructuredQuerySplitterTest extends UnitFessTestCase {
         assertEquals(2, filterClauses(split).size());
     }
 
+    // ---- A field core does not know is words of the default field. Every command of core turns a
+    // clause on a field outside the search fields into a search of the literal `field:text` on the
+    // default field, so `Q: how do I reset` is a question that begins with "Q:how", not a condition
+    // on a field called Q. Splitting it as a condition would drop "how" from the embedding and make
+    // the vector branch require the literal as a filter.
+
+    @Test
+    public void test_unknownField_isWordsOfTheDefaultField() {
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        final Split split = splitter.split("Q: how do I reset");
+        assertNotNull(split);
+        assertEquals("Q:how do I reset", split.text);
+        assertNull(split.conditionFilter);
+        assertTrue(splitter.converted.isEmpty(), splitter.converted.toString());
+    }
+
+    @Test
+    public void test_unknownField_cjk() {
+        final Split split = new StubProcessorSplitter().split("重要:パスワードを忘れた場合は");
+        assertNotNull(split);
+        assertEquals("重要:パスワードを忘れた場合は", split.text);
+        assertNull(split.conditionFilter);
+    }
+
+    @Test
+    public void test_unknownField_besideAKnownCondition() {
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        final Split split = splitter.split("Q: how do I reset label:\"docs\"");
+        assertNotNull(split);
+        assertEquals("Q:how do I reset", split.text);
+        assertEquals(1, filterClauses(split).size());
+        assertEquals(List.of("label:docs"), splitter.converted);
+    }
+
+    @Test
+    public void test_unknownField_wildcardPrefixAndFuzzyAreTextAsTyped() {
+        assertEquals("Q:ba*", new StubProcessorSplitter().split("Q:ba*").text);
+        assertEquals("Q:b?d", new StubProcessorSplitter().split("Q:b?d").text);
+        assertEquals("Q:reset~ now", new StubProcessorSplitter().split("Q:reset~ now").text);
+    }
+
+    /** What restricts is refused on an unknown field as on the default one. */
+    @Test
+    public void test_unknownField_restrictiveSyntaxIsRefused() {
+        assertNull(new StubProcessorSplitter().split("Q:\"how do\""));
+        assertNull(new StubProcessorSplitter().split("foo:[a TO c]"));
+        assertNull(new StubProcessorSplitter().split("Q:how^2"));
+        assertNull(new StubProcessorSplitter().split("cat -Q:how"));
+        assertNull(new StubProcessorSplitter().split("Q:?"));
+    }
+
+    /** The fields core searches keep being conditions, including the ones its commands single out. */
+    @Test
+    public void test_knownFieldsStayConditions() {
+        for (final String field : new String[] { "label", "site", "filetype", "inurl", "title", "url", "tag", "timestamp" }) {
+            final StubProcessorSplitter splitter = new StubProcessorSplitter();
+            final Split split = splitter.split("cat " + field + ":\"x\"");
+            assertNotNull(split, field);
+            assertEquals(field, "cat", split.text);
+            assertEquals(1, filterClauses(split).size(), field);
+        }
+    }
+
+    /**
+     * The set of fields the splitter treats as conditions is core's own, not a copy: every field of
+     * the search fields a real configuration declares is split off as a filter, and a field it does
+     * not declare is words. The configuration is the real one, initialised from the unit test's
+     * FessConfig, so a field added to core's list is covered without touching this test.
+     */
+    @Test
+    public void test_everySearchFieldOfTheRealConfigIsACondition() {
+        final QueryFieldConfig realConfig = new QueryFieldConfig();
+        realConfig.init();
+        assertTrue(realConfig.getSearchFields().length > 10);
+        final StubProcessorSplitter splitter = new StubProcessorSplitter() {
+            @Override
+            protected QueryFieldConfig getQueryFieldConfig() {
+                return realConfig;
+            }
+        };
+        for (final String field : realConfig.getSearchFields()) {
+            final Split split = splitter.split("cat " + field + ":\"x\"");
+            assertNotNull(split, field);
+            assertEquals(field, "cat", split.text);
+            assertEquals(1, filterClauses(split).size(), field);
+        }
+        final Split unknown = splitter.split("cat nosuchfield:\"x\"");
+        assertNotNull(unknown);
+        assertEquals("cat nosuchfield:x", unknown.text);
+        assertNull(unknown.conditionFilter);
+    }
+
+    /**
+     * The commands handle the tag field, {@code site} and {@code inurl} before they look at the
+     * search fields, so a configuration that leaves them out of the search fields still has them
+     * restrict the keyword branch. The vector branch must restrict by them as well.
+     */
+    @Test
+    public void test_tagSiteAndInurlStayConditionsWhateverTheSearchFields() {
+        final QueryFieldConfig bare = new QueryFieldConfig();
+        bare.setSearchFields(new String[] { "title", "content" });
+        for (final String field : new String[] { "site", "inurl", "tag" }) {
+            final StubProcessorSplitter splitter = new StubProcessorSplitter() {
+                @Override
+                protected QueryFieldConfig getQueryFieldConfig() {
+                    return bare;
+                }
+            };
+            final Split split = splitter.split("cat " + field + ":\"x\"");
+            assertNotNull(split, field);
+            assertEquals(field, "cat", split.text);
+            assertEquals(1, filterClauses(split).size(), field);
+            // and as a prefix or a wildcard of that field
+            final Split prefix = new StubProcessorSplitter() {
+                @Override
+                protected QueryFieldConfig getQueryFieldConfig() {
+                    return bare;
+                }
+            }.split("cat " + field + ":ab*");
+            assertNotNull(prefix, field);
+            assertEquals(field, "cat", prefix.text);
+            assertEquals(1, filterClauses(prefix).size(), field);
+        }
+        // a field the configuration does not name and the commands do not single out is words
+        final Split other = new StubProcessorSplitter() {
+            @Override
+            protected QueryFieldConfig getQueryFieldConfig() {
+                return bare;
+            }
+        }.split("cat label:\"x\"");
+        assertNotNull(other);
+        assertEquals("cat label:x", other.text);
+    }
+
+    /** A field name is matched as it is spelled: `Label:` is not the field `label` for core's commands either. */
+    @Test
+    public void test_fieldNamesAreCaseSensitive() {
+        final Split split = new StubProcessorSplitter().split("cat Label:docs");
+        assertNotNull(split);
+        assertEquals("cat Label:docs", split.text);
+        assertNull(split.conditionFilter);
+    }
+
     /** Wildcard characters alone say nothing to embed. */
     @Test
     public void test_wildcardWithoutAWord_isRefused() {

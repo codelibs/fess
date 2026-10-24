@@ -54,6 +54,9 @@ public class StubProcessorSplitter extends StructuredQuerySplitter {
 
     private final QueryParser queryParser = new QueryParser();
 
+    /** The fields core's commands know: a clause on any other field is words of the default field. */
+    private final QueryFieldConfig queryFieldConfig = new QueryFieldConfig();
+
     private final QueryProcessor queryProcessor = new QueryProcessor() {
         @Override
         public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
@@ -74,6 +77,9 @@ public class StubProcessorSplitter extends StructuredQuerySplitter {
      */
     public StubProcessorSplitter() {
         queryParser.init();
+        queryFieldConfig.setSearchFields(new String[] { "inurl", "url", "doc_id", "host", "site", "title", "content", "content_length",
+                "last_modified", "timestamp", "mimetype", "filetype", "filename", "owner", "last_modifier", "label", "segment", "anchor",
+                "click_count", "favorite_count", "tag", "lang" });
     }
 
     /**
@@ -89,6 +95,11 @@ public class StubProcessorSplitter extends StructuredQuerySplitter {
     @Override
     protected QueryParser getQueryParser() {
         return queryParser;
+    }
+
+    @Override
+    protected QueryFieldConfig getQueryFieldConfig() {
+        return queryFieldConfig;
     }
 
     @Override

@@ -274,7 +274,34 @@ public class StructuredQuerySplitter {
             // deployment with a default sort configured.
             return Kind.REJECT;
         }
+        if (!isSearchField(field)) {
+            // Core's commands read a clause on a field outside the search fields as words of the
+            // default field, `field:text` and all -- `Q: how do I reset` is a question, and `Q:how`
+            // is its first word. Treating it as a condition would drop that word from the
+            // embedding and make the vector branch demand the literal as a filter.
+            return wordsOf(query) != null ? Kind.TEXT : Kind.REJECT;
+        }
         return Kind.CONDITION;
+    }
+
+    /**
+     * Returns whether core's commands treat the field as a field of its own, as they decide it.
+     *
+     * <p>The commands single out three fields before they look at the search fields: the tag field
+     * (restricted to the tags the caller can see), {@code site} and {@code inurl}. They stay
+     * conditions here whatever the configured search fields are, so that a configuration which
+     * leaves one out cannot turn a restriction the keyword branch applies into words.</p>
+     *
+     * @param field the field name
+     * @return true when the field is one of the search fields, or one the commands handle first
+     */
+    protected boolean isSearchField(final String field) {
+        if (QueryFieldConfig.SITE_FIELD.equals(field) || QueryFieldConfig.INURL_FIELD.equals(field)
+                || ComponentUtil.getFessConfig().getIndexFieldTag().equals(field)) {
+            return true;
+        }
+        final QueryFieldConfig config = getQueryFieldConfig();
+        return config.searchFieldSet != null && config.searchFieldSet.contains(field);
     }
 
     /**
@@ -345,19 +372,34 @@ public class StructuredQuerySplitter {
      */
     protected String wordsOf(final Query query) {
         if (query instanceof final TermQuery termQuery) {
-            return termQuery.getTerm().text();
+            return qualified(termQuery.getTerm(), termQuery.getTerm().text());
         }
+        final Term term;
         final String words;
         if (query instanceof final WildcardQuery wildcardQuery) {
-            words = ESCAPE.matcher(wildcardQuery.getTerm().text()).replaceAll("$1");
+            term = wildcardQuery.getTerm();
+            words = ESCAPE.matcher(term.text()).replaceAll("$1");
         } else if (query instanceof final PrefixQuery prefixQuery) {
-            words = prefixQuery.getPrefix().text() + "*";
+            term = prefixQuery.getPrefix();
+            words = term.text() + "*";
         } else if (query instanceof final FuzzyQuery fuzzyQuery) {
-            words = fuzzyQuery.getTerm().text() + "~";
+            term = fuzzyQuery.getTerm();
+            words = term.text() + "~";
         } else {
             return null;
         }
-        return WORD_CHAR.matcher(words).find() ? words : null;
+        return WORD_CHAR.matcher(words).find() ? qualified(term, words) : null;
+    }
+
+    /**
+     * Puts back the field name core's commands keep in the words of a field they do not know.
+     *
+     * @param term the term the words belong to
+     * @param words the words
+     * @return the words, as {@code field:words} for a field other than the default one
+     */
+    private String qualified(final Term term, final String words) {
+        return Constants.DEFAULT_FIELD.equals(term.field()) ? words : term.field() + ":" + words;
     }
 
     /**
@@ -423,6 +465,15 @@ public class StructuredQuerySplitter {
      */
     protected QueryParser getQueryParser() {
         return ComponentUtil.getQueryParser();
+    }
+
+    /**
+     * Returns the field configuration.
+     *
+     * @return the configuration
+     */
+    protected QueryFieldConfig getQueryFieldConfig() {
+        return ComponentUtil.getQueryFieldConfig();
     }
 
     /**
