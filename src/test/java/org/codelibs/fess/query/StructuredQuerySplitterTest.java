@@ -172,9 +172,92 @@ public class StructuredQuerySplitterTest extends UnitFessTestCase {
         assertNull(new StubProcessorSplitter().split("\"mountain sunset\""));
     }
 
+    /**
+     * A wildcard, prefix or fuzzy term on the default field is words the user typed, not a
+     * restriction a vector could not keep: a sentence ending in a question mark reads as one in
+     * the query syntax, and refusing it skipped the vector branch for exactly the questions it is
+     * for. The characters are embedded as typed.
+     */
     @Test
-    public void test_prefixOnDefaultField() {
-        assertNull(new StubProcessorSplitter().split("cat*"));
+    public void test_wildcardOnDefaultField_isTextAsTyped() {
+        final Split trailing = new StubProcessorSplitter().split("パスワードを忘れた場合はどうすればいいですか?");
+        assertNotNull(trailing);
+        assertEquals("パスワードを忘れた場合はどうすればいいですか?", trailing.text);
+        assertNull(trailing.conditionFilter);
+
+        final Split inside = new StubProcessorSplitter().split("reset pas?word");
+        assertNotNull(inside);
+        assertEquals("reset pas?word", inside.text);
+
+        final Split single = new StubProcessorSplitter().split("password?");
+        assertNotNull(single);
+        assertEquals("password?", single.text);
+    }
+
+    @Test
+    public void test_prefixOnDefaultField_isTextAsTyped() {
+        final Split split = new StubProcessorSplitter().split("reset cat*");
+        assertNotNull(split);
+        assertEquals("reset cat*", split.text);
+        assertNull(split.conditionFilter);
+    }
+
+    @Test
+    public void test_fuzzyOnDefaultField_isTextAsTyped() {
+        final Split split = new StubProcessorSplitter().split("reset~ password");
+        assertNotNull(split);
+        assertEquals("reset~ password", split.text);
+    }
+
+    /** The wildcard characters are kept, and the escape that spelled them is not. */
+    @Test
+    public void test_wildcardOnDefaultField_dropsTheEscapeBackslash() {
+        final Split split = new StubProcessorSplitter().split("a\\*b* c");
+        assertNotNull(split);
+        assertEquals("a*b* c", split.text);
+    }
+
+    /** A wildcard beside a condition: the condition still becomes a filter, the wildcard words are embedded. */
+    @Test
+    public void test_wildcardAlongsideACondition() {
+        final StubProcessorSplitter splitter = new StubProcessorSplitter();
+        final Split split = splitter.split("how do I reset it? label:\"docs\" site:example.com");
+        assertNotNull(split);
+        assertEquals("how do I reset it?", split.text);
+        assertEquals(2, filterClauses(split).size());
+    }
+
+    /** Wildcard characters alone say nothing to embed. */
+    @Test
+    public void test_wildcardWithoutAWord_isRefused() {
+        assertNull(new StubProcessorSplitter().split("?"));
+        assertNull(new StubProcessorSplitter().split("*"));
+        assertNull(new StubProcessorSplitter().split("??? label:\"x\""));
+    }
+
+    /** An excluded wildcard term is as inexpressible as an excluded plain term. */
+    @Test
+    public void test_negatedWildcard_isRefused() {
+        assertNull(new StubProcessorSplitter().split("cat -do?"));
+        assertNull(new StubProcessorSplitter().split("cat -do*"));
+    }
+
+    /** A boost is syntax on the term, wildcard or not. */
+    @Test
+    public void test_boostedWildcard_isRefused() {
+        assertNull(new StubProcessorSplitter().split("cat*^2"));
+    }
+
+    /** A regular expression is not a sentence. */
+    @Test
+    public void test_regexpOnDefaultField_isRefused() {
+        assertNull(new StubProcessorSplitter().split("/ca[tr]/"));
+    }
+
+    /** A range on the default field is syntax on the text, as before. */
+    @Test
+    public void test_rangeOnDefaultField_isRefused() {
+        assertNull(new StubProcessorSplitter().split("[a TO c]"));
     }
 
     @Test

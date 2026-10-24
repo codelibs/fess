@@ -630,9 +630,14 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
         assertEquals("I forgot my password", searcher.embeddedQuery);
     }
 
-    /** What stays a wildcard is still not embedded, as before. */
+    /**
+     * What reads as a wildcard, prefix or fuzzy term is still words the user typed, so the vector
+     * branch embeds them as typed. A question in a language written without spaces cannot even be
+     * told from a wildcard: the whole sentence is one word, and its closing question mark is the
+     * only syntax in it.
+     */
     @Test
-    public void test_prepare_aWildcardStillSkipsTheVectorBranch() {
+    public void test_prepare_aWildcardIsEmbeddedAsTyped() {
         ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
         ComponentUtil.register(new RelatedQueryHelper() {
             @Override
@@ -640,18 +645,103 @@ public class SemanticChunkSearcherTest extends UnitFessTestCase {
                 return new String[0];
             }
         }, "relatedQueryHelper");
-        for (final String typed : new String[] { "password?", "pas?word", "pass*", "reset pass*", "reset pas?word" }) {
+        final String[][] cases = { { "password?", "password?" }, { "pas?word", "pas?word" }, { "pass*", "pass*" },
+                { "reset pass*", "reset pass*" }, { "reset pas?word", "reset pas?word" }, { "reset~ password", "reset~ password" },
+                { "パスワードを忘れた場合はどうすればいいですか?", "パスワードを忘れた場合はどうすればいいですか?" }, { "密码忘记了怎么办?", "密码忘记了怎么办?" } };
+        for (final String[] typedAndEmbedded : cases) {
+            final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+                @Override
+                public String getQuery() {
+                    return typedAndEmbedded[0];
+                }
+            };
+            final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+
+            final GuardedSearcher searcher = new GuardedSearcher();
+            assertTrue(searcher.prepare(query, params).isPresent(), query);
+            assertEquals(typedAndEmbedded[1], searcher.embeddedQuery);
+        }
+    }
+
+    /** What the keyword branch is asked to keep, the vector branch keeps: a wildcard beside a facet is still words beside a filter. */
+    @Test
+    public void test_prepare_aWildcardBesideAFacetKeepsTheFacetAsAFilter() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "forgot my pass*";
+            }
+
+            @Override
+            public java.util.Map<String, String[]> getFields() {
+                return java.util.Collections.singletonMap("label", new String[] { "news" });
+            }
+        };
+        final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
+
+        final GuardedSearcher searcher = new GuardedSearcher();
+        final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(query, params);
+        assertTrue(context.isPresent(), query);
+        assertEquals("forgot my pass*", searcher.embeddedQuery);
+        assertNotNull(context.get().getConditionFilter());
+    }
+
+    /**
+     * SearchHelper runs a query the engine rejected again with its reserved characters escaped,
+     * and both branches of that second run see the escaped words: the same words the keyword
+     * branch looks for, the conditions typed into the query among them, since escaped they are
+     * words. The first run is not embedded when the query cannot be parsed.
+     */
+    @Test
+    public void test_prepare_theEscapedRetryEmbedsTheWordsTheKeywordBranchSearchesFor() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        final String[][] cases = { { "really?!", "really?!" }, { "site:example.com reset (password", "site:example.com reset (password" },
+                { "and/or [2026]", "and/or [2026]" }, { "C++ (Docker)", "C++ (Docker)" } };
+        for (final String[] typedAndEmbedded : cases) {
+            final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
+                @Override
+                public String getQuery() {
+                    return typedAndEmbedded[0];
+                }
+            };
+            final String escaped = ComponentUtil.getQueryStringBuilder().params(params).escape(true).build();
+
+            final GuardedSearcher searcher = new GuardedSearcher();
+            final OptionalThing<SemanticChunkSearcher.SemanticQueryContext> context = searcher.prepare(escaped, params);
+            assertTrue(context.isPresent(), escaped);
+            assertEquals(typedAndEmbedded[1], searcher.embeddedQuery);
+            assertNull(context.get().getConditionFilter(), escaped);
+        }
+        // the query itself does not parse, so the vector branch has nothing to embed on the first run
+        final StubSearchRequestParams unbalanced = new StubSearchRequestParams(0, 10) {
+            @Override
+            public String getQuery() {
+                return "site:example.com reset (password";
+            }
+        };
+        final GuardedSearcher searcher = new GuardedSearcher();
+        // the registered builder is one shared instance, which remembers the escape(true) above
+        final String raw = ComponentUtil.getQueryStringBuilder().params(unbalanced).escape(false).build();
+        assertFalse(searcher.prepare(raw, unbalanced).isPresent(), raw + " -> " + searcher.embeddedQuery);
+        assertFalse(searcher.managerTouched);
+    }
+
+    /** What the vector branch cannot keep still skips it: it would search for something the user excluded or required. */
+    @Test
+    public void test_prepare_restrictiveSyntaxStillSkipsTheVectorBranch() {
+        ComponentUtil.register(new QueryStringBuilder(), "queryStringBuilder");
+        for (final String typed : new String[] { "reset -password", "\"reset password\"", "reset NOT password", "cat^2 dog", "[a TO c]",
+                "allintitle:reset password", "reset password sort:filename.asc" }) {
             final StubSearchRequestParams params = new StubSearchRequestParams(0, 10) {
                 @Override
                 public String getQuery() {
                     return typed;
                 }
             };
-            final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
-
             final GuardedSearcher searcher = new GuardedSearcher();
-            assertFalse(searcher.prepare(query, params).isPresent(), query);
-            assertFalse(searcher.managerTouched, query);
+            assertFalse(searcher.prepare(ComponentUtil.getQueryStringBuilder().params(params).build(), params).isPresent(), typed);
+            assertFalse(searcher.managerTouched, typed);
         }
     }
 
