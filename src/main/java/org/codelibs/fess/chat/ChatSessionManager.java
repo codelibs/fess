@@ -28,6 +28,7 @@ import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.entity.ChatMessage;
 import org.codelibs.fess.entity.ChatSession;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.LogUtil;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -89,7 +90,7 @@ public class ChatSessionManager {
         final ChatSession session = new ChatSession(userId);
         sessionCache.put(session.getSessionId(), session);
         if (logger.isDebugEnabled()) {
-            logger.debug("Created chat session: sessionId={}, userId={}", session.getSessionId(), userId);
+            logger.debug("Created chat session: sessionId={}, userId={}", session.getSessionId(), LogUtil.sanitize(userId));
         }
         enforceMaxSize();
         return session;
@@ -151,7 +152,7 @@ public class ChatSessionManager {
                 final String sessionUserId = session.getUserId();
                 // Validate userId matches - prevent cross-user session access
                 if (userId != null && !userId.equals(sessionUserId)) {
-                    logger.warn("Session userId mismatch. sessionId={}, requestUserId={}", sessionId, userId);
+                    logger.warn("Session userId mismatch. sessionId={}, requestUserId={}", sessionId, LogUtil.sanitize(userId));
                 } else if (userId == null && sessionUserId == null) {
                     // Both null (unauthenticated + no userCode) - allow by sessionId only
                     session.touch();
@@ -162,17 +163,18 @@ public class ChatSessionManager {
                 } else if (userId != null && userId.equals(sessionUserId)) {
                     session.touch();
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Reusing existing session. sessionId={}, userId={}", sessionId, userId);
+                        logger.debug("Reusing existing session. sessionId={}, userId={}", sessionId, LogUtil.sanitize(userId));
                     }
                     return session;
                 } else {
                     // userId is null but sessionUserId is not - create new session
-                    logger.warn("Session userId mismatch (null vs non-null). sessionId={}, sessionUserId={}", sessionId, sessionUserId);
+                    logger.warn("Session userId mismatch (null vs non-null). sessionId={}, sessionUserId={}", sessionId,
+                            LogUtil.sanitize(sessionUserId));
                 }
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Creating new session. requestedSessionId={}, userId={}", sessionId, userId);
+            logger.debug("Creating new session. requestedSessionId={}, userId={}", sessionId, LogUtil.sanitize(userId));
         }
         return createSession(userId);
     }
@@ -223,18 +225,18 @@ public class ChatSessionManager {
         // Verify ownership
         final String sessionUserId = session.getUserId();
         if (userId != null && !userId.equals(sessionUserId)) {
-            logger.warn("Cannot clear session, userId mismatch. sessionId={}, requestUserId={}", sessionId, userId);
+            logger.warn("Cannot clear session, userId mismatch. sessionId={}, requestUserId={}", sessionId, LogUtil.sanitize(userId));
             return false;
         }
         if (userId == null && sessionUserId != null) {
             logger.warn("Cannot clear session, userId mismatch (null vs non-null). sessionId={}, sessionUserId={}", sessionId,
-                    sessionUserId);
+                    LogUtil.sanitize(sessionUserId));
             return false;
         }
         session.touch();
         session.clearMessages();
         if (logger.isDebugEnabled()) {
-            logger.debug("Session cleared. sessionId={}, userId={}", sessionId, userId);
+            logger.debug("Session cleared. sessionId={}, userId={}", sessionId, LogUtil.sanitize(userId));
         }
         return true;
     }
