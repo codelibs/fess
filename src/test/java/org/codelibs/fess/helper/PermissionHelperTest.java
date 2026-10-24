@@ -325,4 +325,67 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("special@chars", permissionHelper.decode("special@chars"));
     }
 
+    @Test
+    public void test_encode_trimsAfterAclPrefix() {
+        assertEquals("D1bob", permissionHelper.encode("(deny) {user}bob"));
+        assertEquals("D2staff", permissionHelper.encode("(DENY)\t{group}staff"));
+        assertEquals("DRadmin", permissionHelper.encode("(deny)  {role}admin"));
+        assertEquals("1bob", permissionHelper.encode("(allow) {user}bob"));
+        assertEquals("2staff", permissionHelper.encode("(Allow)  {group}staff"));
+        assertEquals("Radmin", permissionHelper.encode("(allow) {role}admin"));
+        assertNull(permissionHelper.encode("(deny) "));
+        assertNull(permissionHelper.encode("(allow)   {user}"));
+    }
+
+    @Test
+    public void test_encode_denyWithoutTypeIsRejected() {
+        assertNull(permissionHelper.encode("(deny)foo"));
+        assertNull(permissionHelper.encode("(deny) foo"));
+        assertNull(permissionHelper.encode("(DENY)foo"));
+        assertNull(permissionHelper.encode("(deny)(allow){user}bob"));
+        assertNull(permissionHelper.encode("(deny)(deny){user}bob"));
+        // allow keeps its raw pass-through, now without the leading blank
+        assertEquals("foo", permissionHelper.encode("(allow)foo"));
+        assertEquals("foo", permissionHelper.encode("(allow) foo"));
+    }
+
+    @Test
+    public void test_decode_deniedPrefixNeedsTypedName() {
+        assertEquals("Developers", permissionHelper.decode("Developers"));
+        assertEquals("Dev", permissionHelper.decode("Dev"));
+        assertEquals("D", permissionHelper.decode("D"));
+        assertEquals("D1", permissionHelper.decode("D1"));
+        assertEquals("D2", permissionHelper.decode("D2"));
+        assertEquals("DR", permissionHelper.decode("DR"));
+        assertEquals("(deny){user}Dave", permissionHelper.decode("D1Dave"));
+        assertEquals("(deny){role}Rick", permissionHelper.decode("DRRick"));
+        assertEquals("{user}Dave", permissionHelper.decode("1Dave"));
+    }
+
+    @Test
+    public void test_encode_decode_roundTrip() {
+        final String[] inputs =
+                { "{user}bob", "{group}staff", "{role}admin", "{USER}bob", "{Group}staff", "{ROLE}admin", "(allow){user}bob",
+                        "(allow){group}staff", "(allow){role}admin", "(Allow){User}bob", "(deny){user}bob", "(deny){group}staff",
+                        "(deny){role}admin", "(DENY){USER}bob", "(Deny){Group}staff", "(deny) {user}bob", "(allow) {role}admin",
+                        // names that start like a type or denied prefix
+                        "{user}Dave", "{group}Developers", "{role}Dev", "{user}1abc", "{group}2abc", "{role}Rick", "(deny){user}Dave",
+                        "(deny){group}Developers", "(deny){role}Rick", "(deny){user}1abc", "(deny){group}2abc", "(deny){role}Dev",
+                        // raw values
+                        "guest", "Developers", "D", "Dev", "Rick", "1", "2", "R", "D1", "special@chars" };
+        for (final String input : inputs) {
+            final String encoded = permissionHelper.encode(input);
+            assertNotNull("encode should accept: " + input, encoded);
+            final String decoded = permissionHelper.decode(encoded);
+            assertNotNull("decode should accept: " + encoded, decoded);
+            assertEquals("round trip of " + input + " via " + encoded + " -> " + decoded, encoded, permissionHelper.encode(decoded));
+        }
+    }
+
+    @Test
+    public void test_decode_encode_keepsDeny() {
+        assertEquals("D1bob", permissionHelper.encode(permissionHelper.decode("D1bob")));
+        assertEquals("(deny){user}bob", permissionHelper.decode(permissionHelper.encode("(deny) {user}bob")));
+    }
+
 }
