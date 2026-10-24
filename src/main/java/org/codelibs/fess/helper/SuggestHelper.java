@@ -59,6 +59,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fesen.opensearch.common.lucene.search.function.CombineFunction;
 import org.codelibs.fesen.opensearch.index.IndexNotFoundException;
 import org.codelibs.fesen.opensearch.index.query.BoolQueryBuilder;
+import org.codelibs.fesen.opensearch.index.query.QueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.QueryBuilders;
 import org.codelibs.fesen.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.codelibs.fesen.opensearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -371,14 +372,7 @@ public class SuggestHelper {
             reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
             reader.setLimitOfDocumentSize(fessConfig.getSuggestUpdateContentsLimitDocSizeAsInteger());
 
-            final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
-            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
-                    .seed(ComponentUtil.getSystemHelper().getCurrentTimeAsLong())
-                    .setField(fessConfig.getIndexFieldDocId())));
-            reader.setQuery(QueryBuilders
-                    .functionScoreQuery(QueryBuilders.matchAllQuery(),
-                            flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()]))
-                    .boostMode(CombineFunction.MULTIPLY));
+            reader.setQuery(buildDocumentSourceQuery(fessConfig));
             reader.addSort(SortBuilders.fieldSort(fessConfig.getIndexFieldClickCount()));
             reader.addSort(SortBuilders.scoreSort());
             return reader;
@@ -389,6 +383,34 @@ public class SuggestHelper {
             refresh();
             success.accept(true);
         }).error(t -> error.accept(t));
+    }
+
+    /**
+     * Builds the query that selects the documents suggest words are read from.
+     * A document is read only if it has a role value and carries no denied entry, because search
+     * hides a document without a role from everyone and a document with a denied entry from the
+     * denied user, while suggest words are offered through any of the roles that were copied from the document.
+     * The documents are read in random order.
+     *
+     * @param fessConfig The Fess configuration.
+     * @return The query for the document reader.
+     */
+    protected QueryBuilder buildDocumentSourceQuery(final FessConfig fessConfig) {
+        final String roleField = fessConfig.getIndexFieldRole();
+        final String deniedPrefix = fessConfig.getRoleSearchDeniedPrefix();
+        final BoolQueryBuilder query = QueryBuilders.boolQuery().filter(QueryBuilders.existsQuery(roleField));
+        for (final String prefix : new String[] { fessConfig.getRoleSearchUserPrefix(), fessConfig.getRoleSearchGroupPrefix(),
+                fessConfig.getRoleSearchRolePrefix() }) {
+            query.mustNot(QueryBuilders.prefixQuery(roleField, deniedPrefix + prefix));
+        }
+        return query
+                .must(QueryBuilders
+                        .functionScoreQuery(QueryBuilders.matchAllQuery(),
+                                new FunctionScoreQueryBuilder.FilterFunctionBuilder[] {
+                                        new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
+                                                .seed(ComponentUtil.getSystemHelper().getCurrentTimeAsLong())
+                                                .setField(fessConfig.getIndexFieldDocId())) })
+                        .boostMode(CombineFunction.MULTIPLY));
     }
 
     /**
