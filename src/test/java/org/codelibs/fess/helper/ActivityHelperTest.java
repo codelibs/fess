@@ -72,6 +72,29 @@ public class ActivityHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_toLtsvField_replacesEveryControlCharacter() {
+        // the characters that str.splitlines() and similar readers also take for the end of a line
+        assertEquals("a b c d e f", activityHelper.toLtsvField("a\u000bb\fc\u001cd\u001de\u001ef"));
+        assertEquals("a b c", activityHelper.toLtsvField("a\u0000b\u007fc"));
+        // the controls of the C1 block are replaced as well, NEL among them
+        assertEquals("a b c", activityHelper.toLtsvField("a\u0085b\u009fc"));
+        // the separators of LTSV, and an ordinary value, are not touched
+        assertEquals("a:b c_d", activityHelper.toLtsvField("a:b c\td"));
+        assertEquals("山田 太郎@EXAMPLE.COM", activityHelper.toLtsvField("山田 太郎@EXAMPLE.COM"));
+        assertNull(activityHelper.toLtsvField(null));
+    }
+
+    @Test
+    public void test_loginFailure_userNameWithControlCharactersCannotForgeALine() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential("x\u000baction:LOGIN\fy\u001cz\u001d\u001e\u0085w", "pw")));
+        final String msg = localLogMsg.get();
+        assertEquals("action:LOGIN_FAILURE\tclass:LocalUserCredential\tuser:x action:LOGIN y z   w", msg);
+        assertEquals(1, msg.lines().count());
+        assertEquals(1, msg.split("[\\n\\u000b\\f\\r\\u001c-\\u001e\\u0085\\u2028\\u2029]").length);
+    }
+
+    @Test
     public void test_login() {
         activityHelper.useEcsFormat = false;
         activityHelper.login(OptionalThing.empty());

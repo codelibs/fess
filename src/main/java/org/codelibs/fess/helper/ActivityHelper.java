@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -45,6 +46,9 @@ import jakarta.annotation.PostConstruct;
  *
  */
 public class ActivityHelper {
+
+    /** The control characters, and the Unicode line and paragraph separators, that must not reach an LTSV record. */
+    private static final Pattern LTSV_UNSAFE_PATTERN = Pattern.compile("[\\p{Cc}\\u2028\\u2029]");
 
     /**
      * Default constructor.
@@ -301,23 +305,20 @@ public class ActivityHelper {
      * Makes a value safe to write as one LTSV field.
      *
      * The audit pattern is {@code %msg%n}, so a line break inside a value ends the record and a tab
-     * starts a new field. User names reach this from unauthenticated requests -- a failed login
-     * records the name that was typed -- so without this a login attempt could append a forged
-     * record such as {@code action:LOGIN}. The ECS format escapes its values as JSON instead.
+     * starts a new field. VT, FF, FS, GS, RS, NEL, LS and PS end a line for other readers, so they are
+     * replaced too, as are the rest of the control characters. User names reach this from
+     * unauthenticated requests -- a failed login records the name that was typed -- so without this a
+     * login attempt could append a forged record such as {@code action:LOGIN}. The ECS format escapes
+     * its values as JSON instead.
      *
      * @param value the key or value (may be null)
-     * @return the value with the line breaks (CR, LF, NEL, LS and PS) replaced by a space and a tab by an underscore
+     * @return the value with every control character, and NEL, LS and PS, replaced by a space and a tab by an underscore
      */
     protected String toLtsvField(final String value) {
         if (value == null) {
             return null;
         }
-        return value.replace('\r', ' ')
-                .replace('\n', ' ')
-                .replace('\u0085', ' ')
-                .replace('\u2028', ' ')
-                .replace('\u2029', ' ')
-                .replace('\t', '_');
+        return LTSV_UNSAFE_PATTERN.matcher(value.replace('\t', '_')).replaceAll(" ");
     }
 
     /**
