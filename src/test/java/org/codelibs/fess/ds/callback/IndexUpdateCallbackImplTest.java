@@ -16,8 +16,10 @@
 package org.codelibs.fess.ds.callback;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -117,6 +119,21 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
             }
 
             @Override
+            public String getIndexFieldRole() {
+                return "role";
+            }
+
+            @Override
+            public String getIndexFieldVirtualHost() {
+                return "virtual_host";
+            }
+
+            @Override
+            public String getIndexIdDigestAlgorithm() {
+                return "SHA-512";
+            }
+
+            @Override
             public String getIndexFieldLabel() {
                 return "label";
             }
@@ -152,6 +169,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         ComponentUtil.register(searchEngineClient, "searchEngineClient");
         ComponentUtil.register(ingestFactory, "ingestFactory");
         ComponentUtil.register(fessConfig, "fessConfig");
+        ComponentUtil.setFessConfig(fessConfig);
 
         // Create test implementation of IndexUpdateCallbackImpl
         indexUpdateCallback = new TestableIndexUpdateCallbackImpl();
@@ -160,6 +178,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
+        ComponentUtil.setFessConfig(null);
         super.tearDown(testInfo);
     }
 
@@ -269,6 +288,125 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
 
         // Verify indexing was triggered
         assertEquals(1, indexingHelper.sendDocumentsCalled);
+    }
+
+    private IndexUpdateCallbackImpl realStoreCallback() {
+        final IndexUpdateCallbackImpl callback = new IndexUpdateCallbackImpl() {
+            @Override
+            public void init() {
+                maxDocumentRequestSize = 1048576L;
+                maxDocumentCacheSize = 10000;
+            }
+        };
+        callback.init();
+        return callback;
+    }
+
+    @Test
+    public void test_store_roleAndVirtualHost_string() {
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("url", "http://example.com/test");
+        dataMap.put("role", "Rbox-users;Rother");
+        dataMap.put("virtual_host", "site1");
+
+        realStoreCallback().store(new DataStoreParams(), dataMap);
+
+        assertEquals(List.of("Rbox-users;Rother"), dataMap.get("role"));
+        assertEquals(List.of("site1"), dataMap.get("virtual_host"));
+    }
+
+    @Test
+    public void test_store_roleAndVirtualHost_list() {
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("url", "http://example.com/test");
+        dataMap.put("role", new ArrayList<>(List.of("Ra", "Rb")));
+        dataMap.put("virtual_host", new ArrayList<>(List.of("site1")));
+
+        realStoreCallback().store(new DataStoreParams(), dataMap);
+
+        assertEquals(List.of("Ra", "Rb"), dataMap.get("role"));
+        assertEquals(List.of("site1"), dataMap.get("virtual_host"));
+    }
+
+    @Test
+    public void test_store_roleAndVirtualHost_arrayAndMirror() {
+        final Map<String, Object> mirror = new LinkedHashMap<>();
+        mirror.put("0", "Rrl-ops");
+        mirror.put("1", "Rrl-dev");
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("url", "http://example.com/test");
+        dataMap.put("role", mirror);
+        dataMap.put("virtual_host", new String[] { "site1", "site2" });
+
+        realStoreCallback().store(new DataStoreParams(), dataMap);
+
+        assertEquals(List.of("Rrl-ops", "Rrl-dev"), dataMap.get("role"));
+        assertEquals(List.of("site1", "site2"), dataMap.get("virtual_host"));
+    }
+
+    @Test
+    public void test_store_roleAndVirtualHost_null() {
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("url", "http://example.com/test");
+        dataMap.put("role", null);
+
+        final IndexUpdateCallbackImpl callback = realStoreCallback();
+        callback.store(new DataStoreParams(), dataMap);
+
+        assertNull(dataMap.get("role"));
+        assertFalse(dataMap.containsKey("virtual_host"));
+        assertEquals(1, callback.getDocumentSize());
+    }
+
+    @Test
+    public void test_store_role_unsupportedType() {
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("url", "http://example.com/test");
+        dataMap.put("role", 1);
+
+        final IndexUpdateCallbackImpl callback = realStoreCallback();
+        try {
+            callback.store(new DataStoreParams(), dataMap);
+            fail("Should throw DataStoreException");
+        } catch (final DataStoreException e) {
+            assertTrue(e.getMessage().contains("role"));
+            assertTrue(e.getMessage().contains("java.lang.Integer"));
+        }
+        assertEquals(0, callback.getDocumentSize());
+    }
+
+    @Test
+    public void test_store_role_idMatchesListForm() {
+        ComponentUtil.register(new CrawlingInfoHelper(), "crawlingInfoHelper");
+        final Map<String, Object> asList = new HashMap<>();
+        asList.put("url", "http://example.com/test");
+        asList.put("role", new ArrayList<>(List.of("Rbox-users")));
+        final Map<String, Object> asString = new HashMap<>();
+        asString.put("url", "http://example.com/test");
+        asString.put("role", "Rbox-users");
+
+        realStoreCallback().store(new DataStoreParams(), asList);
+        realStoreCallback().store(new DataStoreParams(), asString);
+
+        assertNotNull(asString.get("id"));
+        assertEquals(asList.get("id"), asString.get("id"));
+    }
+
+    @Test
+    public void test_toStringList() {
+        assertNull(IndexUpdateCallbackImpl.toStringList("role", null));
+        assertEquals(List.of("a;b"), IndexUpdateCallbackImpl.toStringList("role", "a;b"));
+        assertEquals(List.of(""), IndexUpdateCallbackImpl.toStringList("role", ""));
+        assertEquals(List.of("a", "b"), IndexUpdateCallbackImpl.toStringList("role", new String[] { "a", "b" }));
+        assertEquals(List.of("a", "b"), IndexUpdateCallbackImpl.toStringList("role", new ArrayList<>(Arrays.asList("a", null, "b"))));
+        assertEquals(List.of("1"), IndexUpdateCallbackImpl.toStringList("role", List.of(1)));
+        assertEquals(List.of(), IndexUpdateCallbackImpl.toStringList("role", new HashMap<>()));
+        try {
+            IndexUpdateCallbackImpl.toStringList("virtual_host", new Object());
+            fail("Should throw DataStoreException");
+        } catch (final DataStoreException e) {
+            assertTrue(e.getMessage().contains("virtual_host"));
+        }
     }
 
     @Test
