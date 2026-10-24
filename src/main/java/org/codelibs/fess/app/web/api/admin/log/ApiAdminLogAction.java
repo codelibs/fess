@@ -16,18 +16,15 @@
 package org.codelibs.fess.app.web.api.admin.log;
 
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.decodeLogFileId;
+import static org.codelibs.fess.app.web.admin.log.AdminLogAction.findLogFile;
 import static org.codelibs.fess.app.web.admin.log.AdminLogAction.getLogFileItems;
-import static org.codelibs.fess.app.web.admin.log.AdminLogAction.isLogFilename;
-import static org.codelibs.fess.app.web.admin.log.AdminLogAction.sanitizeFilename;
 
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.lastaflute.web.Execute;
@@ -81,17 +78,13 @@ public class ApiAdminLogAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id));
             return null; // ignore
         }
-        final String filename = sanitizeFilename(decoded);
-        final String logFilePath = systemHelper.getLogFilePath();
-        if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
-            final Path path = Paths.get(logFilePath, filename);
-            if (Files.isRegularFile(path)) {
-                return asStream(filename).contentTypeOctetStream().stream(out -> {
-                    try (InputStream in = Files.newInputStream(path)) {
-                        out.write(in);
-                    }
-                });
-            }
+        final Path path = findLogFile(systemHelper.getLogFilePath(), decoded);
+        if (path != null) {
+            return asStream(path.getFileName().toString()).contentTypeOctetStream().stream(out -> {
+                try (InputStream in = Files.newInputStream(path)) {
+                    out.write(in);
+                }
+            });
         }
         throwValidationErrorApi(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, id));
         return null; // ignore

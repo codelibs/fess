@@ -107,6 +107,30 @@ public class ApiAdminLogActionTest extends UnitFessTestCase {
         assertEquals("hyphen", drain(second));
     }
 
+    /** The log list shows these names, so the id it hands out has to download them: the name is looked up as it is. */
+    @Test
+    public void test_get$file_servesLogFilesWhoseNameHoldsWhiteSpaceOrDots() throws Exception {
+        final String[] names = { "r13 sp ace.log", " lead.log", "trail .log", "tab\there.log", "a..b.log", "fess..log.gz", "..hidden.log",
+                "dot . dot.log", "ログ 2026.log.gz" };
+        for (final String name : names) {
+            Files.write(logDir.resolve(name), ("content of " + name).getBytes(StandardCharsets.UTF_8));
+            final StreamResponse log = injectedAction().get$file(id(name));
+            assertEquals(name, log.getFileName());
+            assertEquals("content of " + name, drain(log));
+        }
+    }
+
+    /** Looking the name up as it is must not make the name of one file reach another one. */
+    @Test
+    public void test_get$file_aNameWithWhiteSpaceDoesNotReachTheFileWithoutIt() throws Exception {
+        Files.write(logDir.resolve("fess.log"), "plain".getBytes(StandardCharsets.UTF_8));
+        Files.write(logDir.resolve("ab.log"), "dots".getBytes(StandardCharsets.UTF_8));
+
+        for (final String name : new String[] { "fe ss.log", " fess.log", "fess.log ", "fess\t.log", "a..b.log", "f.. ess.log" }) {
+            assertEquals("served for: " + name, "", served(name));
+        }
+    }
+
     /** An id spelled with the standard Base64 alphabet is still accepted. */
     @Test
     public void test_get$file_acceptsAnIdOfTheStandardAlphabet() throws Exception {

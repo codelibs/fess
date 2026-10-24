@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.admin.log;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -262,5 +264,70 @@ public class AdminLogActionTest extends UnitFessTestCase {
         for (final String id : new String[] { "a", "not base64!", "@@@@" }) {
             Assertions.assertThrows(IllegalArgumentException.class, () -> AdminLogAction.decodeLogFileId(id), id);
         }
+    }
+
+    // ==================================================================================
+    //                                                                       findLogFile
+    //                                                                       ===========
+
+    private Path newLogDir() throws Exception {
+        // <root>/etc/hosts.log and <root>/secret.log are outside of the log directory <root>/a/b
+        final Path root = Files.createTempDirectory("fess_admin_log");
+        final Path logDir = Files.createDirectories(root.resolve("a").resolve("b"));
+        Files.createDirectories(root.resolve("etc"));
+        Files.write(root.resolve("etc").resolve("hosts.log"), "outside".getBytes(StandardCharsets.UTF_8));
+        Files.write(root.resolve("secret.log"), "outside".getBytes(StandardCharsets.UTF_8));
+        return logDir;
+    }
+
+    @Test
+    public void test_findLogFile_findsTheFileByTheNameTheListShows() throws Exception {
+        final Path logDir = newLogDir();
+        for (final String name : new String[] { "fess.log", "fess.log.gz", "r13 sp ace.log", " lead.log", "trail .log", "tab\there.log",
+                "a..b.log", "..hidden.log", "ログ 2026.log.gz" }) {
+            Files.write(logDir.resolve(name), name.getBytes(StandardCharsets.UTF_8));
+            assertEquals(name, logDir.resolve(name), AdminLogAction.findLogFile(logDir.toString(), name));
+        }
+    }
+
+    @Test
+    public void test_findLogFile_neverRewritesTheName() throws Exception {
+        final Path logDir = newLogDir();
+        Files.write(logDir.resolve("fess.log"), "plain".getBytes(StandardCharsets.UTF_8));
+        Files.write(logDir.resolve("ab.log"), "dots".getBytes(StandardCharsets.UTF_8));
+        for (final String name : new String[] { "fe ss.log", " fess.log", "fess.log ", "fess\t.log", "a..b.log", "f.. ess.log" }) {
+            assertNull(AdminLogAction.findLogFile(logDir.toString(), name), name);
+        }
+    }
+
+    @Test
+    public void test_findLogFile_refusesWhatIsNotARegularLogFileOfTheLogDirectory() throws Exception {
+        final Path logDir = newLogDir();
+        Files.write(logDir.resolve("fess.txt"), "text".getBytes(StandardCharsets.UTF_8));
+        Files.createDirectories(logDir.resolve("dir.log"));
+        for (final String name : new String[] { null, "", "..", ".", "missing.log", "fess.txt", "dir.log" }) {
+            assertNull(AdminLogAction.findLogFile(logDir.toString(), name), String.valueOf(name));
+        }
+        assertNull(AdminLogAction.findLogFile(null, "fess.log"), "no log directory");
+        assertNull(AdminLogAction.findLogFile("", "fess.log"), "no log directory");
+    }
+
+    @Test
+    public void test_findLogFile_noSpellingReachesAFileOutsideTheLogDirectory() throws Exception {
+        final Path logDir = newLogDir();
+        for (final String name : new String[] { "../../etc/hosts.log", "../../../b/../../etc/hosts.log", "../secret.log",
+                "../../secret.log", "a/../../../secret.log", "/../../secret.log", "..\\..\\etc\\hosts.log", "..\\..\\secret.log",
+                ". ./. ./etc/hosts.log", ".\t./.\t./etc/hosts.log", ".\n./.\n./etc/hosts.log", "....//....//etc/hosts.log",
+                "%2e%2e/%2e%2e/secret.log", "\uff0e\uff0e/\uff0e\uff0e/secret.log", "fess.log\0.txt", "x\0../../secret.log",
+                "/etc/passwd.log" }) {
+            assertNull(AdminLogAction.findLogFile(logDir.toString(), name), name);
+        }
+    }
+
+    @Test
+    public void test_findLogFile_aLeadingSlashStaysInTheLogDirectory() throws Exception {
+        final Path logDir = newLogDir();
+        Files.write(Files.createDirectories(logDir.resolve("etc")).resolve("hosts.log"), "inside".getBytes(StandardCharsets.UTF_8));
+        assertEquals(logDir.resolve("etc").resolve("hosts.log"), AdminLogAction.findLogFile(logDir.toString(), "/etc/hosts.log"));
     }
 }
